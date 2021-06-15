@@ -3,32 +3,52 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local speck = asset.syncedResource({
-    Name = "Voids Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_voids_speck",
-    Version = 2
+  Name = "Voids Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_voids_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "Voids",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        DrawElements = false,
-        DrawLabels = true,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.65,
-        LabelFile = speck .. "/voids.label",
-        TextColor = { 0.296, 0.629, 1.0, 1.0 },
-        TextSize = 20.9,
-        TextMinSize = 8.0,
-        Unit = "Mpc"
-    },
-    GUI = {
-        Path = "/Universe/Galaxies"
-    }
+  Identifier = "Voids",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    DrawElements = false,
+    DrawLabels = true,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.65,
+    LabelFile = speck .. "/voids.label",
+    Unit = "Mpc",
+    TextColor = { 0.296, 0.629, 1.0 },
+    TextSize = 20.9,
+    TextMinMaxSize = { 8, 20 }
+  },
+  GUI = {
+    Name = "Voids",
+    Path = "/Universe/Galaxies",
+    Description = [[ Census: 24 cosmic voids. DU Version 1.2. <br>Cosmic voids are
+      vast, empty spaces where there are either no galaxies, or very few galaxies.
+      They are associated with cold spots in the cosmic microwave background (CMB)
+      light, the earliest picture we have of the universe (see page 58). Those cold
+      spots in the CMB evolved into large voids, some as much as 300 million light
+      years in diameter. Labels roughly denote the location of cosmic voids in the
+      Tully galaxies. Voids are only visible with motion cuing as you spin around
+      these data. The labels help to guide the eye and provide sign posts for the
+      largest voids in our cosmic neighborhood. (Description from URL) <br><br> Data
+      Reference: various sources]]
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Voids",
+  Version = "2.0",
+  Author = "Brian Abbott (AMNH)",
+  Description = [[Digital Universe asset for Cosmic voids.]],
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"Voids"}
+}

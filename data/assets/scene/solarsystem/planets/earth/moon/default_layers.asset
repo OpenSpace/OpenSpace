@@ -1,0 +1,29 @@
+local colorLayersPath = "./layers/colorlayers"
+local heightLayersPath = "./layers/heightlayers"
+
+-- Color layers
+local colorLayer = asset.require(colorLayersPath .. "/wac_utah")
+asset.require(colorLayersPath .. "/wac_sweden")
+asset.require(colorLayersPath .. "/clemuvvis_utah")
+asset.require(colorLayersPath .. "/clemuvvis_sweden")
+asset.require(colorLayersPath .. "/uvvishybrid_utah")
+asset.require(colorLayersPath .. "/uvvishybrid_sweden")
+asset.require(colorLayersPath .. "/kaguya_utah")
+asset.require(colorLayersPath .. "/kaguya_sweden")
+asset.require(colorLayersPath .. "/lola_clr_shade_utah")
+asset.require(colorLayersPath .. "/lola_clr_shade_sweden")
+asset.require(colorLayersPath .. "/lola_shade_utah")
+asset.require(colorLayersPath .. "/lola_shade_sweden")
+
+-- Height layers
+local heightLayer = asset.require(heightLayersPath .. "/loladem_utah")
+asset.require(heightLayersPath .. "/loladem_sweden")
+
+-- Set enabled layers (temporary solution)
+-- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
+asset.onInitialize(function () 
+  openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers." ..
+    colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers." ..
+    heightLayer.layer.Identifier .. ".Enabled", true)
+end)

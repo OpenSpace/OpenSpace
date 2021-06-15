@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 
 namespace {
     constexpr const std::array<const char*, 4> UniformNames = {
-        "radius", "transparency", "thickness", "color"
+        "radius", "opacity", "thickness", "color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
@@ -47,9 +47,9 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Marker transparency",
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Marker opacity",
         "" // @TODO Missing documentation
     };
 
@@ -71,13 +71,13 @@ TouchMarker::TouchMarker()
     : properties::PropertyOwner({ "TouchMarker" })
     , _visible(VisibilityInfo, true)
     , _radiusSize(RadiusInfo, 30.f, 0.f, 100.f)
-    , _transparency(TransparencyInfo, 0.8f, 0.f, 1.f)
+    , _opacity(OpacityInfo, 0.8f, 0.f, 1.f)
     , _thickness(ThicknessInfo, 2.f, 0.f, 4.f )
     , _color(ColorInfo, glm::vec3(0.96f, 0.2f, 0.2f), glm::vec3(0.f), glm::vec3(1.f))
 {
     addProperty(_visible);
     addProperty(_radiusSize);
-    addProperty(_transparency);
+    addProperty(_opacity);
     addProperty(_thickness);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
@@ -89,7 +89,7 @@ void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "MarkerProgram",
         absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
@@ -106,7 +106,7 @@ void TouchMarker::deinitialize() {
     _vertexPositionBuffer = 0;
 
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }
@@ -117,7 +117,7 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
         _shader->activate();
 
         _shader->setUniform(_uniformCache.radius, _radiusSize);
-        _shader->setUniform(_uniformCache.transparency, _transparency);
+        _shader->setUniform(_uniformCache.opacity, _opacity);
         _shader->setUniform(_uniformCache.thickness, _thickness);
         _shader->setUniform(_uniformCache.color, _color.value());
 

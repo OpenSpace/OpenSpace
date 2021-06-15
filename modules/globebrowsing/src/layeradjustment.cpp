@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyChromaKeyColor = "ChromaKeyColor";
-    constexpr const char* KeyChromaKeyTolerance = "ChromaKeyTolerance";
-
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
@@ -50,37 +47,30 @@ namespace {
         "Type",
         "The type of layer adjustment that is applied to the underlying layer."
     };
+
+    struct [[codegen::Dictionary(LayerAdjustment)]] Parameters {
+        enum class Type {
+            None,
+            ChromaKey,
+            TransferFunction
+        };
+        // Specifies the type of the adjustment that is applied
+        std::optional<Type> type;
+
+        // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
+        std::optional<glm::vec3> chromaKeyColor [[codegen::color()]];
+
+        // Specifies the tolerance to match the color to the chroma key when the
+        // 'ChromaKey' type is selected for the 'Type'
+        std::optional<float> chromaKeyTolerance;
+    };
+#include "layeradjustment_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 documentation::Documentation LayerAdjustment::Documentation() {
-    using namespace documentation;
-    return {
-        "LayerAdjustment",
-        "globebrowsing_layeradjustment",
-        {
-            {
-                KeyType,
-                new StringInListVerifier({ "None", "ChromaKey", "TransferFunction" }),
-                Optional::Yes,
-                "Specifies the type of the adjustment that is applied"
-            },
-            {
-                KeyChromaKeyColor,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'."
-            },
-            {
-                KeyChromaKeyTolerance,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the tolerance to match the color to the chroma key when the "
-                "'ChromaKey' type is selected for the 'Type'."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("globebrowsing_layeradjustment");
 }
 
 LayerAdjustment::LayerAdjustment()
@@ -121,28 +111,27 @@ LayerAdjustment::LayerAdjustment()
 }
 
 void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        adjustmentDict,
-        "LayerAdjustment"
-    );
+    const Parameters p = codegen::bake<Parameters>(adjustmentDict);
 
-    if (adjustmentDict.hasKeyAndValue<std::string>(KeyType)) {
-        std::string dictType = adjustmentDict.value<std::string>(KeyType);
-        _typeOption = static_cast<int>(
-            ghoul::from_string<layergroupid::AdjustmentTypeID>(dictType)
-        );
+    if (p.type.has_value()) {
+        switch (*p.type) {
+            case Parameters::Type::None:
+                _typeOption = static_cast<int>(layergroupid::AdjustmentTypeID::None);
+                break;
+            case Parameters::Type::ChromaKey:
+                _typeOption = static_cast<int>(layergroupid::AdjustmentTypeID::ChromaKey);
+                break;
+            case Parameters::Type::TransferFunction:
+                _typeOption =
+                    static_cast<int>(layergroupid::AdjustmentTypeID::TransferFunction);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
     }
 
-    if (adjustmentDict.hasKeyAndValue<glm::vec3>(KeyChromaKeyColor)) {
-        glm::vec3 dictChromaKeyColor = adjustmentDict.value<glm::vec3>(KeyChromaKeyColor);
-        _chromaKeyColor = std::move(dictChromaKeyColor);
-    }
-
-    if (adjustmentDict.hasKeyAndValue<float>(KeyChromaKeyTolerance)) {
-        float dictChromaKeyTolerance = adjustmentDict.value<float>(KeyChromaKeyTolerance);
-        _chromaKeyTolerance = dictChromaKeyTolerance;
-    }
+    _chromaKeyColor = p.chromaKeyColor.value_or(_chromaKeyColor);
+    _chromaKeyTolerance = p.chromaKeyTolerance.value_or(_chromaKeyTolerance);
 }
 
 layergroupid::AdjustmentTypeID LayerAdjustment::type() const {

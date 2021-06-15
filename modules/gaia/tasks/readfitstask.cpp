@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,67 +30,72 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
-
+#include <filesystem>
 #include <fstream>
 #include <set>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyInFileOrFolderPath = "InFileOrFolderPath";
-    constexpr const char* KeyOutFileOrFolderPath = "OutFileOrFolderPath";
-    constexpr const char* KeySingleFileProcess = "SingleFileProcess";
-    constexpr const char* KeyThreadsToUse = "ThreadsToUse";
-    constexpr const char* KeyFirstRow = "FirstRow";
-    constexpr const char* KeyLastRow = "LastRow";
     constexpr const char* KeyFilterColumnNames = "FilterColumnNames";
 
     constexpr const char* _loggerCat = "ReadFitsTask";
+
+    struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
+        // If SingleFileProcess is set to true then this specifies the path to a single
+        // FITS file that will be read. Otherwise it specifies the path to a folder with
+        // multiple FITS files that are to be read
+        std::string inFileOrFolderPath;
+
+        // If SingleFileProcess is set to true then this specifies the name (including
+        // entire path) to the output file. Otherwise it specifies the path to the output
+        // folder which to export binary star data to
+        std::string outFileOrFolderPath;
+
+        // If true then task will read from a single FITS file and output a single binary
+        // file. If false then task will read all files in specified folder and output
+        // multiple files sorted by location
+        std::optional<bool> singleFileProcess;
+
+        // Defines how many threads to use when reading from multiple files
+        std::optional<int> threadsToUse [[codegen::greater(1)]];
+
+        // Defines the first row that will be read from the specified FITS file(s). If not
+        // defined then reading will start at first row
+        std::optional<int> firstRow;
+
+        // Defines the last row that will be read from the specified FITS file(s). If not
+        // defined (or less than FirstRow) then full file(s) will be read
+        std::optional<int> lastRow;
+
+        // A list of strings with the names of all the additional columns that are to be
+        // read from the specified FITS file(s). These columns can be used for filtering
+        // while constructing Octree later
+        std::optional<std::vector<std::string>> filterColumnNames;
+    };
+#include "readfitstask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ReadFitsTask"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inFileOrFolderPath = absPath(dictionary.value<std::string>(KeyInFileOrFolderPath));
-    _outFileOrFolderPath = absPath(dictionary.value<std::string>(KeyOutFileOrFolderPath));
+    _inFileOrFolderPath = absPath(p.inFileOrFolderPath);
+    _outFileOrFolderPath = absPath(p.outFileOrFolderPath);
+    _singleFileProcess = p.singleFileProcess.value_or(_singleFileProcess);
+    _threadsToUse = p.threadsToUse.value_or(_threadsToUse);
+    _firstRow = p.firstRow.value_or(_firstRow);
+    _lastRow = p.lastRow.value_or(_lastRow);
 
-    if (dictionary.hasKey(KeySingleFileProcess)) {
-        _singleFileProcess = dictionary.value<bool>(KeySingleFileProcess);
-    }
-
-    if (dictionary.hasKey(KeyThreadsToUse)) {
-        _threadsToUse = static_cast<size_t>(dictionary.value<double>(KeyThreadsToUse));
-        if (_threadsToUse < 1) {
-            LINFO(fmt::format(
-                "User defined ThreadsToUse was: {}. Will be set to 1", _threadsToUse
-            ));
-            _threadsToUse = 1;
-        }
-    }
-
-    if (dictionary.hasKey(KeyFirstRow)) {
-        _firstRow = static_cast<int>(dictionary.value<double>(KeyFirstRow));
-    }
-
-    if (dictionary.hasKey(KeyLastRow)) {
-        _lastRow = static_cast<int>(dictionary.value<double>(KeyLastRow));
-    }
-
-
-    if (dictionary.hasKey(KeyFilterColumnNames)) {
+    if (p.filterColumnNames.has_value()) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
 
         // Ugly fix for ASCII sorting when there are more columns read than 10.
         std::set<int> intKeys;
-        for (const std::string& key : d.keys()) {
-            intKeys.insert(std::stoi(key));
+        for (std::string_view key : d.keys()) {
+            intKeys.insert(std::stoi(std::string(key)));
         }
 
         for (int key : intKeys) {
@@ -126,7 +131,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
-        _inFileOrFolderPath,
+        _inFileOrFolderPath.string(),
         nValuesPerStar,
         _firstRow,
         _lastRow,
@@ -160,7 +165,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file.", _outFileOrFolderPath
+            "Error opening file: {} as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -179,8 +184,16 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(threadPool);
 
     // Get all files in specified folder.
-    ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<std::filesystem::path> allInputFiles;
+    if (std::filesystem::is_directory(_inFileOrFolderPath)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
+            if (e.is_regular_file()) {
+                allInputFiles.push_back(e.path());
+            }
+        }
+    }
+    
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
@@ -232,12 +245,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     // Divide all files into ReadFilejobs and then delegate them onto several threads!
     while (!allInputFiles.empty()) {
-        std::string fileToRead = allInputFiles.back();
+        std::filesystem::path fileToRead = allInputFiles.back();
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
         auto readFileJob = std::make_shared<gaia::ReadFileJob>(
-            fileToRead,
+            fileToRead.string(),
             _allColumnNames,
             _firstRow,
             _lastRow,
@@ -288,7 +301,9 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
+    std::string outPath = fmt::format(
+        "{}octant_{}.bin", _outFileOrFolderPath.string(), index
+    );
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());
@@ -322,71 +337,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    using namespace documentation;
-    return {
-        "ReadFitsFile",
-        "gaiamission_fitsfiletorawdata",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("ReadFitsTask"),
-                Optional::No
-            },
-            {
-                KeyInFileOrFolderPath,
-                new StringVerifier,
-                Optional::No,
-                "If SingleFileProcess is set to true then this specifies the path to a "
-                "single FITS file that will be read. Otherwise it specifies the path to "
-                "a folder with multiple FITS files that are to be read.",
-            },
-            {
-                KeyOutFileOrFolderPath,
-                new StringVerifier,
-                Optional::No,
-                "If SingleFileProcess is set to true then this specifies the name "
-                "(including entire path) to the output file. Otherwise it specifies the "
-                "path to the output folder which to export binary star data to.",
-            },
-            {
-                KeySingleFileProcess,
-                new BoolVerifier,
-                Optional::Yes,
-                "If true then task will read from a single FITS file and output a single "
-                "binary file. If false then task will read all files in specified folder "
-                "and output multiple files sorted by location."
-            },
-            {
-                KeyThreadsToUse,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines how many threads to use when reading from multiple files."
-            },
-            {
-                KeyFirstRow,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines the first row that will be read from the specified FITS "
-                "file(s). If not defined then reading will start at first row.",
-            },
-            {
-                KeyLastRow,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines the last row that will be read from the specified FITS file(s). "
-                "If not defined (or less than FirstRow) then full file(s) will be read.",
-            },
-            {
-                KeyFilterColumnNames,
-                new StringListVerifier,
-                Optional::Yes,
-                "A list of strings with the names of all the additional columns that are "
-                "to be read from the specified FITS file(s). These columns can be used "
-                "for filtering while constructing Octree later.",
-            },
-
-        }
-    };
+    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
 }
 
 } // namespace openspace

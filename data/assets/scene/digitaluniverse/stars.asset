@@ -1,69 +1,99 @@
 local assetHelper = asset.require('util/asset_helper')
 
-
-
-local textures = asset.syncedResource({
-    Name = "Stars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "stars_textures",
-    Version = 1
-})
+local colormaps = asset.require('./stars_colormap').ColorMaps
+local textures = asset.require('./stars_textures').textures
 
 local speck = asset.syncedResource({
-    Name = "Stars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "stars_du",
-    Version = 4
+  Name = "Stars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "stars_du",
+  Version = 4
 })
 
 local sunspeck = asset.syncedResource({
-    Name = "Stars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_sunstar_speck",
-    Version = 1
-})
-
-local colorLUT = asset.syncedResource({
-    Name = "Stars Color Table",
-    Type = "HttpSynchronization",
-    Identifier = "stars_colormap",
-    Version = 2
+  Name = "Stars Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_sunstar_speck",
+  Version = 1
 })
 
 local stars = {
-    Identifier = "Stars",
-    Renderable = {
-        Type = "RenderableStars",
-        File = speck .. "/stars.speck",
-        Texture = textures .. "/halo.png",
-        --ShapeTexture = textures .. "/disc.png",
-        ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 6.2,
-        SizeComposition = "Distance Modulus",
-        RenderMethod = "Texture Based" -- or PSF
-    },
-    GUI = {
-        Path = "/Milky Way/Stars"
+  Identifier = "Stars",
+  Renderable = {
+    Type = "RenderableStars",
+    File = speck .. "/stars.speck",
+    Texture = textures .. "/halo.png",
+    --ShapeTexture = textures .. "/disc.png",
+    ColorMap = colormaps .. "/colorbv.cmap",
+    OtherDataColorMap = colormaps .. "/viridis.cmap",
+    MagnitudeExponent = 6.2,
+    SizeComposition = "Distance Modulus",
+    RenderMethod = "Texture Based", -- or PSF
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
     }
+  },
+  GUI = {
+    Name = "Stars",
+    Path = "/Milky Way/Stars",
+    Description = [[Census:  117,003 stars with 321 labels.<br> DU Version 7.8. This
+      star catalog is a combination of all available star catalogs, wherein we
+      choose the best distance available to place the stars around the Sun as
+      accurately as is possible. (Description from URL) <br><br> Data Reference:
+      XHIP: An Extended Hipparcos Compilation (Anderson E., Francis C. 2012);
+      Hipparcos Catalog (European Space Agency 1997); Gliese Catalog (Gliese and
+      Jahriess 1991)]],
+  }
 }
 
 local sunstar = {
-    Identifier = "SunStar",
-    Renderable = {
-        Type = "RenderableStars",
-        File = sunspeck .. "/sunstar.speck",
-        Texture = textures .. "/halo.png",
-        --ShapeTexture = textures .. "/disc.png",
-        ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 6.2,
-        SizeComposition = "Distance Modulus",
-        RenderMethod = "Texture Based", -- or PSF
-        FadeInDistances = {0.0001, 0.1}
-    },
-    GUI = {
-        Name = "Sun",
-        Path = "/Milky Way/Stars"
+  Identifier = "SunStar",
+  Renderable = {
+    Type = "RenderableStars",
+    File = sunspeck .. "/sunstar.speck",
+    Texture = textures .. "/halo.png",
+    --ShapeTexture = textures .. "/disc.png",
+    ColorMap = colormaps .. "/colorbv.cmap",
+    MagnitudeExponent = 6.2,
+    SizeComposition = "Distance Modulus",
+    RenderMethod = "Texture Based", -- or PSF
+    FadeInDistances = { 0.0001, 0.1 },
+    RenderableType = "PostDeferredTransparent",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed",
     }
+  },
+  GUI = {
+    Name = "Sun",
+    Path = "/Milky Way/Stars",
+    Description = [[Individual star to represent the sun when outside of the solar
+      system]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { stars, sunstar })
+
+
+asset.meta = {
+  Name = "Stars",
+  Version = "2.0",
+  Description = [[Digital Universe asset for the stars.]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"Stars"}
+}

@@ -1,0 +1,13 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "MessengerDistance",
+    GuiName = "Messenger - Mercury Distance",
+    SourceType = "Node",
+    SourceNodeName = "Messenger",
+    DestinationType = "Node",
+    DestinationNodeName = "Mercury"
+  }
+})

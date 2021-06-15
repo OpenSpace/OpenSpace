@@ -5,27 +5,37 @@ local kernel = asset.require('../kernels').sat375
 
 
 local IapetusTrail = {
-    Identifier = "IapetusTrail",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "IAPETUS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 79.0,
-        Resolution = 1000
+  Identifier = "IapetusTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "IAPETUS",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GUI = {
-        Name = "Iapetus Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 79.0,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
+  GUI = {
+    Name = "Iapetus Trail",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[ Trail of Saturn's moon Iapetus as observed by Saturn.]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { IapetusTrail })
+
+
+asset.meta = {
+  Name = "Iapetus Trail",
+  Version = "1.0",
+  Description = [[Main trail for Iapetus. Data from NASA Spice (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"IapetusTrail"}
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,55 +30,29 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyKeyframes = "Keyframes";
+    struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
+        // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
+        // that are valid Translation objects
+        std::map<std::string, ghoul::Dictionary> keyframes
+            [[codegen::reference("core_transform_translation")]];
+    };
+#include "timelinetranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimelineTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Timeline Translation",
-        "base_transform_translation_keyframe",
-        {
-            {
-                KeyType,
-                new StringEqualVerifier("TimelineTranslation"),
-                Optional::No
-            },
-            {
-                KeyKeyframes,
-                new TableVerifier({
-                    { "*", new TableVerifier(), Optional::No, "Any translation object" }
-                }),
-                Optional::No,
-                "A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS"
-                "and values that are valid Translation objects."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_transform_translation_keyframe");
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TimelineTranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const ghoul::Dictionary& keyframes =
-        dictionary.value<ghoul::Dictionary>(KeyKeyframes);
+    for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
+        const double t = Time::convertTime(kf.first);
 
-    std::vector<std::string> timeStrings = keyframes.keys();
-    for (const std::string& timeString : timeStrings) {
-        const double t = Time::convertTime(timeString);
-
-        std::unique_ptr<Translation> translation =
-            Translation::createFromDictionary(
-                keyframes.value<ghoul::Dictionary>(timeString)
-            );
-
+        ghoul::mm_unique_ptr<Translation> translation =
+            Translation::createFromDictionary(kf.second);
         if (translation) {
             _timeline.addKeyframe(t, std::move(translation));
         }
@@ -87,7 +61,7 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
     const double now = data.time.j2000Seconds();
-    using KeyframePointer = const Keyframe<std::unique_ptr<Translation>>*;
+    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Translation>>*;
 
     KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);
     KeyframePointer next = _timeline.firstKeyframeAfter(now, true);

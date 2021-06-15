@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ int loadNavigationState(lua_State* L) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    global::navigationHandler.loadNavigationState(cameraStateFilePath);
+    global::navigationHandler->loadNavigationState(cameraStateFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -65,22 +65,22 @@ int getNavigationState(lua_State* L) {
             lua_settop(L, 0);
             return 0;
         }
-        state = global::navigationHandler.navigationState(*referenceFrame);
+        state = global::navigationHandler->navigationState(*referenceFrame);
     }
     else {
-        state = global::navigationHandler.navigationState();
+        state = global::navigationHandler->navigationState();
     }
 
     lua_settop(L, 0);
 
-    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, v.x);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, v.y);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 3, v.z);
-        lua_rawset(L, -3);
+    const auto pushVector = [](lua_State* s, const glm::dvec3& v) {
+        lua_newtable(s);
+        ghoul::lua::push(s, 1, v.x);
+        lua_rawset(s, -3);
+        ghoul::lua::push(s, 2, v.y);
+        lua_rawset(s, -3);
+        ghoul::lua::push(s, 3, v.z);
+        lua_rawset(s, -3);
     };
 
     lua_newtable(L);
@@ -135,7 +135,7 @@ int setNavigationState(lua_State* L) {
         );
     }
 
-    global::navigationHandler.setNavigationStateNextFrame(navigationStateDictionary);
+    global::navigationHandler->setNavigationStateNextFrame(navigationStateDictionary);
 
     // @CLEANUP:  When luaDictionaryFromState doesn't leak space anymore, remove the next
     //            line ---abock(2018-02-15)
@@ -162,7 +162,7 @@ int saveNavigationState(lua_State* L) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    global::navigationHandler.saveNavigationState(cameraStateFilePath, referenceFrame);
+    global::navigationHandler->saveNavigationState(cameraStateFilePath, referenceFrame);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -172,7 +172,7 @@ int saveNavigationState(lua_State* L) {
 int retargetAnchor(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAnchor");
 
-    global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -181,7 +181,7 @@ int retargetAnchor(lua_State* L) {
 int retargetAim(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAim");
 
-    global::navigationHandler.orbitalNavigator().startRetargetAim();
+    global::navigationHandler->orbitalNavigator().startRetargetAim();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -190,7 +190,7 @@ int retargetAim(lua_State* L) {
 int bindJoystickAxis(lua_State* L) {
     const int n = ghoul::lua::checkArgumentsAndThrow(
         L,
-        { 2, 4 },
+        { 2, 6 },
         "lua::bindJoystickAxis"
     );
 
@@ -199,12 +199,16 @@ int bindJoystickAxis(lua_State* L) {
 
     const bool shouldInvert = n > 2 ? ghoul::lua::value<bool>(L, 3) : false;
     const bool shouldNormalize = n > 3 ? ghoul::lua::value<bool>(L, 4) : false;
+    const bool isSticky = n > 4 ? ghoul::lua::value<bool>(L, 5) : false;
+    const double sensitivity = n > 5 ? ghoul::lua::value<double>(L, 6) : 0.0;
 
-    global::navigationHandler.setJoystickAxisMapping(
+    global::navigationHandler->setJoystickAxisMapping(
         axis,
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(shouldInvert),
-        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize)
+        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize),
+        isSticky,
+        sensitivity
     );
 
     lua_settop(L, 0);
@@ -218,15 +222,24 @@ int joystickAxis(lua_State* L) {
     const int axis = ghoul::lua::value<int>(L, 1);
 
     using AI = interaction::JoystickCameraStates::AxisInformation;
-    AI info = global::navigationHandler.joystickAxisMapping(axis);
+    AI info = global::navigationHandler->joystickAxisMapping(axis);
 
     lua_settop(L, 0);
     const bool invert = info.invert;
     const bool normalize = info.normalize;
-    ghoul::lua::push(L, ghoul::to_string(info.type), invert, normalize);
+    const bool isSticky = info.isSticky;
+    const double sensitivity = info.sensitivity;
+    ghoul::lua::push(
+        L,
+        ghoul::to_string(info.type),
+        invert,
+        normalize,
+        isSticky,
+        sensitivity
+    );
 
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
-    return 3;
+    ghoul_assert(lua_gettop(L) == 5, "Incorrect number of items left on stack");
+    return 5;
 }
 
 int setJoystickAxisDeadzone(lua_State* L) {
@@ -236,7 +249,7 @@ int setJoystickAxisDeadzone(lua_State* L) {
     const float deadzone = ghoul::lua::value<float>(L, 2);
     lua_settop(L, 0);
 
-    global::navigationHandler.setJoystickAxisDeadzone(axis, deadzone);
+    global::navigationHandler->setJoystickAxisDeadzone(axis, deadzone);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -247,7 +260,7 @@ int joystickAxisDeadzone(lua_State* L) {
 
     const int axis = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
-    const float deadzone = global::navigationHandler.joystickAxisDeadzone(axis);
+    const float deadzone = global::navigationHandler->joystickAxisDeadzone(axis);
 
     ghoul::lua::push(L, deadzone);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
@@ -262,8 +275,8 @@ int bindJoystickButton(lua_State* L) {
     );
 
     const int button = ghoul::lua::value<int>(L, 1);
-    const std::string& command = ghoul::lua::value<std::string>(L, 2);
-    const std::string& documentation = ghoul::lua::value<std::string>(L, 3);
+    std::string command = ghoul::lua::value<std::string>(L, 2);
+    std::string documentation = ghoul::lua::value<std::string>(L, 3);
 
     interaction::JoystickAction action = interaction::JoystickAction::Press;
     if (n >= 4) {
@@ -274,12 +287,12 @@ int bindJoystickButton(lua_State* L) {
     const bool isRemote = n == 5 ? ghoul::lua::value<bool>(L, 5) : true;
     lua_settop(L, 0);
 
-    global::navigationHandler.bindJoystickButtonCommand(
+    global::navigationHandler->bindJoystickButtonCommand(
         button,
-        std::move(command),
+        command,
         action,
         interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
-        std::move(documentation)
+        documentation
     );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -291,7 +304,7 @@ int clearJoystickButton(lua_State* L) {
 
     const int button = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
-    global::navigationHandler.clearJoystickButtonCommand(button);
+    global::navigationHandler->clearJoystickButtonCommand(button);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -303,13 +316,13 @@ int joystickButton(lua_State* L) {
     const int button = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
     const std::vector<std::string>& cmds =
-        global::navigationHandler.joystickButtonCommand(button);
+        global::navigationHandler->joystickButtonCommand(button);
 
     std::string cmd = std::accumulate(
         cmds.begin(),
         cmds.end(),
         std::string(),
-        [](std::string lhs, std::string rhs) {
+        [](const std::string& lhs, const std::string& rhs) {
             return lhs + ";" + rhs;
         }
     );
@@ -325,7 +338,7 @@ int addGlobalRotation(lua_State* L) {
     const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
     const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
 
-    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRotation(
+    global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
         glm::dvec2(v1, v2)
     );
 
@@ -339,7 +352,7 @@ int addLocalRotation(lua_State* L) {
     const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
     const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
 
-    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRotation(
+    global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
         glm::dvec2(v1, v2)
     );
 
@@ -353,7 +366,7 @@ int addTruckMovement(lua_State* L) {
     const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
     const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
 
-    global::navigationHandler.orbitalNavigator().scriptStates().addTruckMovement(
+    global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(
         glm::dvec2(v1, v2)
     );
 
@@ -367,7 +380,7 @@ int addLocalRoll(lua_State* L) {
     const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
     const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
 
-    global::navigationHandler.orbitalNavigator().scriptStates().addLocalRoll(
+    global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(
         glm::dvec2(v1, v2)
     );
 
@@ -381,7 +394,7 @@ int addGlobalRoll(lua_State* L) {
     const double v1 = ghoul::lua::value<double>(L, 1, ghoul::lua::PopValue::No);
     const double v2 = ghoul::lua::value<double>(L, 2, ghoul::lua::PopValue::No);
 
-    global::navigationHandler.orbitalNavigator().scriptStates().addGlobalRoll(
+    global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(
         glm::dvec2(v1, v2)
     );
 

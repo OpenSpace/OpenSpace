@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,8 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
+    {
         "Downscale",
         "Downscale Factor Volume Rendering",
         "This value set the downscaling factor"
@@ -91,66 +92,66 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         glm::vec3(0.f),
         glm::vec3(glm::two_pi<float>())
     )
-    , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
+    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
-    if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
+    if (dictionary.hasValue<double>(ScalingExponentInfo.identifier)) {
         _scalingExponent = static_cast<int>(
             dictionary.value<double>(ScalingExponentInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::vec3>(SizeInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(SizeInfo.identifier)) {
+        _size = dictionary.value<glm::dvec3>(SizeInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
-        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
-        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec4>(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::vec4>(ColorInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+    if (dictionary.hasValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    _downScaleVolumeRendering.setVisibility(
-        openspace::properties::Property::Visibility::Developer
-    );
+    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     if (dictionary.hasKey("Downscale")) {
-        _downScaleVolumeRendering = dictionary.value<float>("Downscale");
+        _downScaleVolumeRendering = static_cast<float>(
+            dictionary.value<double>("Downscale")
+        );
     }
 
     if (dictionary.hasKey("Steps")) {
-        _rayCastSteps = static_cast<int>(dictionary.value<float>("Steps"));
+        _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
         LINFO("Number of raycasting steps not specified for ToyVolume."
             " Using default value.");
     }
-
 }
 
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
+    glm::vec4 color(glm::vec3(_color), _opacity);
+    _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster.get());
 
     std::function<void(bool)> onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -162,12 +163,13 @@ void RenderableToyVolume::initializeGL() {
     addProperty(_translation);
     addProperty(_rotation);
     addProperty(_color);
+    addProperty(_opacity);
     addProperty(_downScaleVolumeRendering);
 }
 
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
@@ -195,7 +197,9 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        _raycaster->setColor(_color);
+        glm::vec4 color(glm::vec3(_color), _opacity);
+
+        _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
         _raycaster->setTime(data.time.j2000Seconds());

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -77,7 +78,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
+    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
@@ -103,7 +104,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 }
 
 void ScreenSpaceFramebuffer::render() {
-    const glm::vec2& resolution = global::windowDelegate.currentDrawBufferResolution();
+    const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     const glm::vec4& size = _size.value();
 
     const float xratio = resolution.x / (size.z - size.x);
@@ -111,13 +112,16 @@ void ScreenSpaceFramebuffer::render() {
 
     if (!_renderFunctions.empty()) {
         GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        //glGetIntegerv(GL_VIEWPORT, viewport);
+        global::renderEngine->openglStateCache().viewport(viewport);
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
             static_cast<GLsizei>(resolution.x * xratio),
             static_cast<GLsizei>(resolution.y * yratio)
         );
+        global::renderEngine->openglStateCache().setViewportState(viewport);
+
         GLint defaultFBO = _framebuffer->getActiveObject();
         _framebuffer->activate();
 
@@ -167,7 +171,7 @@ void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
 }
 
 void ScreenSpaceFramebuffer::createFramebuffer() {
-    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
+    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
@@ -180,6 +184,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     _framebuffer->deactivate();
 }

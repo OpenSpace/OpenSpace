@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,26 +24,23 @@
 
 #include "fragment.glsl"
 
-//in float gs_screenSpaceDepth;
 in float vs_screenSpaceDepth;
 
 uniform vec3 color;
 uniform float alphaValue;
-
-// Sprite
 uniform sampler2D spriteTexture;
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    if (alphaValue == 0.0) {
-        discard;
-    }
+  if (alphaValue == 0.0) {
+    discard;
+  }
 
-    frag.color = texture(spriteTexture, gl_PointCoord) * vec4(color, alphaValue);
-    //frag.depth = gs_screenSpaceDepth;
-    frag.depth = vs_screenSpaceDepth;
-    frag.blend = BLEND_MODE_ADDITIVE;
+  frag.color = texture(spriteTexture, gl_PointCoord) * vec4(color, alphaValue);
+  //frag.depth = gs_screenSpaceDepth;
+  frag.depth = vs_screenSpaceDepth;
+  frag.blend = BLEND_MODE_ADDITIVE;
 
-    return frag;
+  return frag;
 }

@@ -26,3 +26,9 @@
 [submodule "apps/OpenSpace-MinVR/ext/glfw"]
 	path = apps/OpenSpace-MinVR/ext/glfw
 	url = https://github.com/opensgct/glfw
+[submodule "ext/date"]
+	path = ext/date
+	url = https://github.com/HowardHinnant/date
+[submodule "support/coding/codegen"]
+	path = support/coding/codegen
+	url = https://github.com/OpenSpace/codegen

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
@@ -55,7 +56,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             KeyHttpSynchronizationRepositories
         );
 
-        for (const std::string& key : dictionary.keys()) {
+        for (std::string_view key : dictionary.keys()) {
             _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
         }
     }
@@ -78,22 +79,41 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     fSynchronization->registerClass(
         "HttpSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary) {
-            return new HttpSynchronization(
-                dictionary,
-                _synchronizationRoot,
-                _synchronizationRepositories
-            );
+        [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->allocate(sizeof(HttpSynchronization));
+                return new (ptr) HttpSynchronization(
+                    dictionary,
+                    _synchronizationRoot,
+                    _synchronizationRepositories
+                );
+            }
+            else {
+                return new HttpSynchronization(
+                    dictionary,
+                    _synchronizationRoot,
+                    _synchronizationRepositories
+                );
+            }
         }
     );
 
     fSynchronization->registerClass(
         "UrlSynchronization",
-        [this](bool, const ghoul::Dictionary& dictionary) {
-            return new UrlSynchronization(
-                dictionary,
-                _synchronizationRoot
-            );
+        [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->allocate(sizeof(UrlSynchronization));
+                return new (ptr) UrlSynchronization(
+                    dictionary,
+                    _synchronizationRoot
+                );
+            }
+            else {
+                return new UrlSynchronization(
+                    dictionary,
+                    _synchronizationRoot
+                );
+            }
         }
     );
 

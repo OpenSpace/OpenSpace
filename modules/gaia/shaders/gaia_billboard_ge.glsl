@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,6 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
-
     ge_brightness = vs_brightness[0];
     ge_starDistFromSun = vs_starDistFromSun[0];
     ge_cameraDistFromSun = vs_cameraDistFromSun[0];
@@ -80,7 +79,7 @@ void main() {
     float initStarSize = billboardSize;
 
     // Use magnitude for size boost as well.
-    if ( renderOption != RENDEROPTION_STATIC ) {
+    if (renderOption != RENDEROPTION_STATIC) {
         // DR1 magnitudes are [4, 20], but could be [-15, 20] according to this chart:
         // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
         // Negative magnitude => Giants

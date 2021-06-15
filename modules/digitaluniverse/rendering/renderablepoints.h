@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -63,7 +64,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -74,20 +74,15 @@ private:
         GigalightYears = 6
     };
 
-    void createDataSlice();
+    std::vector<double> createDataSlice();
 
-    bool loadData();
-    bool readSpeckFile();
-    bool readColorMapFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    void readColorMapFile();
 
     bool _dataIsDirty = true;
     bool _hasSpriteTexture = false;
     bool _spriteTextureIsDirty = true;
     bool _hasColorMapFile = false;
 
-    properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
@@ -95,19 +90,20 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
-        spriteTexture, hasColorMap) _uniformCache;
+    UniformCache(
+        modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
+        spriteTexture, hasColorMap
+    ) _uniformCache;
 
     std::string _speckFile;
     std::string _colorMapFile;
 
     Unit _unit = Parsec;
 
-    std::vector<double> _slicedData;
-    std::vector<float> _fullData;
+    speck::Dataset _dataset;
     std::vector<glm::vec4> _colorMapData;
 
-    int _nValuesPerAstronomicalObject = 0;
+    //int _nValuesPerAstronomicalObject = 0;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,18 +38,18 @@ SyncEngine::SyncEngine(unsigned int syncBufferSize)
 }
 
 // Should be called on sgct master
-std::vector<char> SyncEngine::encodeSyncables() {
+std::vector<std::byte> SyncEngine::encodeSyncables() {
     for (Syncable* syncable : _syncables) {
         syncable->encode(&_syncBuffer);
     }
 
-    std::vector<char> data = _syncBuffer.data();
+    std::vector<std::byte> data = _syncBuffer.data();
     _syncBuffer.reset();
     return data;
 }
 
 // Should be called on sgct slaves
-void SyncEngine::decodeSyncables(std::vector<char> data) {
+void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
     _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {
         syncable->decode(&_syncBuffer);

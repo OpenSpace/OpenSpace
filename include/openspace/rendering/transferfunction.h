@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -52,16 +53,13 @@ public:
     glm::vec4 sample(size_t offset);
     size_t width();
     void setCallback(TfChangedCallback callback);
-    void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);
+    void setTextureFromTxt();
 
 private:
-    void setTextureFromTxt() {
-        setTextureFromTxt(_texture);
-    }
     void setTextureFromImage();
     void uploadTexture();
 
-    std::string _filepath;
+    std::filesystem::path _filepath;
     std::unique_ptr<ghoul::filesystem::File> _file;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
     bool _needsUpdate = false;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,32 +31,20 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* KeyStart = "Start";
-    constexpr const char* KeyEnd = "End";
+    struct [[codegen::Dictionary(TimeRange)]] Parameters {
+        // The start date of the time range
+        std::string start [[codegen::annotation("A string representing a valid date")]];
+
+        // The end date of the time range
+        std::string end [[codegen::annotation("A string representing a valid date")]];
+    };
+#include "timerange_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeRange::Documentation() {
-    using namespace documentation;
-    return {
-        "Time Range",
-        "core_util_timerange",
-        {
-            {
-                KeyStart,
-                new StringAnnotationVerifier("A string representing a valid date"),
-                Optional::No,
-                "The start date of the time range"
-            },
-            {
-                KeyEnd,
-                new StringAnnotationVerifier("A string representing a valid date"),
-                Optional::No,
-                "The end date of the time range"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_util_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)
@@ -73,23 +61,10 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
 bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
                                          TimeRange& timeRange)
 {
-    std::string startTimeStr;
-    std::string endTimeStr;
-
-    bool success = true;
-    success &= dict.getValue(KeyStart, startTimeStr);
-    success &= dict.getValue(KeyEnd, endTimeStr);
-    if (success) {
-        // Parse to date.
-        // @TODO converting string to time stamp should not rely on Spice
-        timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
-        timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
-        return true;
-    }
-    else {
-        // Could not read TimeRange from Dict
-        return false;
-    }
+    const Parameters p = codegen::bake<Parameters>(dict);
+    timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(p.start);
+    timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(p.end);
+    return true;
 }
 
 void TimeRange::include(double val) {

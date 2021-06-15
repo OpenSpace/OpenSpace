@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,7 +115,8 @@ public:
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::AxisNormalize shouldNormalize =
-            JoystickCameraStates::AxisNormalize::No
+            JoystickCameraStates::AxisNormalize::No,
+        bool isSticky = false, double sensitivity = 0.0
     );
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
@@ -135,7 +136,7 @@ public:
         WebsocketCameraStates::AxisInvert::No,
         WebsocketCameraStates::AxisNormalize shouldNormalize =
         WebsocketCameraStates::AxisNormalize::No);
-    
+
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
@@ -166,7 +167,8 @@ private:
 
     std::optional<NavigationState> _pendingNavigationState;
 
-    properties::BoolProperty _disableInputs;
+    properties::BoolProperty _disableMouseInputs;
+    properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
 };
 

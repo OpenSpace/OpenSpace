@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,24 +32,9 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PropertyUriInfo = {
         "URI",
         "Property URI",
@@ -63,94 +48,42 @@ namespace {
         "the value itself will be displayed), or it must contain extact one instance of "
         "{}, which will be replaced with the value of the property during rendering."
     };
+
+    struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
+        // [[codegen::verbatim(PropertyUriInfo.description)]]
+        std::optional<std::string> uri [[codegen::key("URI")]];
+
+        // [[codegen::verbatim(DisplayStringInfo.description)]]
+        std::optional<std::string> displayString;
+    };
+#include "dashboarditempropertyvalue_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem PropertyValue",
-        "base_dashboarditem_propertyvalue",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemPropertyValue"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                PropertyUriInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                PropertyUriInfo.description
-            },
-            {
-                DisplayStringInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                DisplayStringInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_dashboarditem_propertyvalue");
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _propertyUri(PropertyUriInfo)
     , _displayString(DisplayStringInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemPropertyValue"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    if (dictionary.hasKey(PropertyUriInfo.identifier)) {
-        _propertyUri = dictionary.value<std::string>(PropertyUriInfo.identifier);
-    }
+    _propertyUri = p.uri.value_or(_propertyUri);
     _propertyUri.onChange([this]() { _propertyIsDirty = true; });
     addProperty(_propertyUri);
 
-    if (dictionary.hasKey(DisplayStringInfo.identifier)) {
-        _displayString = dictionary.value<std::string>(DisplayStringInfo.identifier);
-    }
+    _displayString = p.displayString.value_or(_displayString);
     addProperty(_displayString);
-
-    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
@@ -160,16 +93,15 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         std::string value;
         _property->getStringValue(value);
 
-        penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, fmt::format(_displayString.value(), value));
+        penPosition.y -= _font->height();
     }
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        _displayString.value()
-    ).boundingBox;
+    ZoneScoped
+
+    return _font->boundingBox(_displayString.value());
 }
 
 } // namespace openspace

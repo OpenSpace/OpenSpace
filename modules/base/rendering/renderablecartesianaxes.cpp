@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,9 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "CartesianAxesProgram";
@@ -55,82 +57,44 @@ namespace {
         "Z Color",
         "This value determines the color of the z axis."
     };
+
+    struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
+        // [[codegen::verbatim(XColorInfo.description)]]
+        std::optional<glm::vec3> xColor [[codegen::color()]];
+
+        // [[codegen::verbatim(YColorInfo.description)]]
+        std::optional<glm::vec3> yColor [[codegen::color()]];
+
+        // [[codegen::verbatim(ZColorInfo.description)]]
+        std::optional<glm::vec3> zColor [[codegen::color()]];
+
+    };
+#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableCartesianAxes::Documentation() {
-    using namespace documentation;
-    return {
-        "CartesianAxesProgram",
-        "base_renderable_cartesianaxes",
-        {
-            {
-                XColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                XColorInfo.description
-            },
-            {
-                YColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                YColorInfo.description
-            },
-            {
-                ZColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                ZColorInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
-
 
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _program(nullptr)
-    , _xColor(
-        XColorInfo,
-        glm::vec4(0.f, 0.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _yColor(
-        YColorInfo,
-        glm::vec4(0.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _zColor(
-        ZColorInfo,
-        glm::vec4(0.f, 0.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+    , _xColor(XColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _yColor(YColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCartesianAxes"
-    );
-
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::vec4>(XColorInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::vec4>(YColorInfo.identifier);
-    }
+    _yColor = p.yColor.value_or(_yColor);
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
-    if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::vec4>(ZColorInfo.identifier);
-    }
+    _zColor = p.zColor.value_or(_zColor);
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);
 }
@@ -145,7 +109,7 @@ void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/axes_fs.glsl")
@@ -209,7 +173,7 @@ void RenderableCartesianAxes::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -233,21 +197,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
 
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
@@ -261,15 +210,8 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 } // namespace openspace

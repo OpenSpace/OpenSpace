@@ -3,43 +3,55 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local data = asset.syncedResource({
-    Name = "Constellation Bounds Data",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_constellationbounds_data",
-    Version = 1
+  Name = "Constellation Bounds Data",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellationbounds_data",
+  Version = 1
 })
 
 local zodiacs = {
-    "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
-    "Virgo", "Sagittarius", "Gemini", "Leo"
+  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
+  "Virgo", "Sagittarius", "Gemini", "Leo"
 }
 
 local object = {
-    Identifier = "ConstellationBounds",
-    Renderable = {
-        Type = "RenderableConstellationBounds",
-        Enabled = false,
-        File = data .. "/bound_20.dat",
-        ConstellationFile = data .. "/constellations.dat"
-        -- ConstellationSelection = zodiacs
+  Identifier = "ConstellationBounds",
+  Renderable = {
+    Type = "RenderableConstellationBounds",
+    Enabled = false,
+    File = data .. "/bound_20.dat",
+    ConstellationFile = data .. "/constellations.dat"
+    -- ConstellationSelection = zodiacs
+  },
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "J2000",
+      DestinationFrame = "GALACTIC"
     },
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "J2000",
-            DestinationFrame = "GALACTIC"
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 10e17
-        }
-    },
-    GUI = {
-        Name = "Constellation Bounds",
-        Path = "/Milky Way/Constellations"
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10e17
     }
+  },
+  GUI = {
+    Name = "Constellation Bounds",
+    Path = "/Milky Way/Constellations",
+    Description = [[A Spherical mesh dividing the sky into regions that fit the
+    constellations.]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Constellation Bounds",
+  Version = "1.0",
+  Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
+      fit the constellations.]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"ConstellationBounds"}
+}

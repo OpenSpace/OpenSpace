@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -146,7 +146,7 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
     FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
     double f0 = distToMinimize(par, x, fdata, lmstat);
     // scale value to find minimum step size h, dependant on planet size
-    double scale = log10(ptr->node->boundingSphere());
+    double scale = log10(ptr->node->interactionSphere());
     std::vector<double> dPar(ptr->nDOF, 0.0);
     dPar.assign(par, par + ptr->nDOF);
 

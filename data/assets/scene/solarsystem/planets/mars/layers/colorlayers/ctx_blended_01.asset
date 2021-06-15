@@ -1,0 +1,46 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+  Identifier = "CTX_blended_01",
+  Name = "CTX Blended beta01",
+  FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+  BlendMode = "Color",
+  Settings = {
+    Gamma = 2.14,
+    Multiplier = 1.54
+  },
+  Description = [[This product contains CTX data through MRO release 45, CTX mission
+    phase J21 (December 1, 2017). The mosaic is comprised of 74,196 separate CTX
+    images out of 95,106 available (78.0%). Orbits not included were either (1) low
+    signal/noise (increased atmospheric opacity), or (2) redundant coverage (stereo
+    targets, change detection, etc.). With low-quality images removed, the mosaic
+    covers 97.3% of Mars. The mosaic covers 88°S to 88°N. All data are resampled to
+    5.0 m/px, including 2,334 orbits (3.14%) that are natively higher resolution than
+    5.0 m/px, though no images are higher resolution than 4.93 m/px. The planet was
+    divided into 3,960 4°x4° tiles, which are not blended with each other in this
+    version. As we describe below, every pixel can be traced to its host orbit through
+    vectorized seam-maps that are provided with every tile. These seam-maps provide
+    pixel-for-pixel spatial documentation of image seams, to prevent misinterpretation
+    of seams as possible landforms and to provide instant access to original data. A
+    completely seamless CTX mosaic is currently infeasible, so seam-maps are required
+    to prevent misinterpretation. (Description from URL)]],
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "CTX Blended beta01",
+  Version = "1.0",
+  Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
+    hosted by ESRI.]],
+  Author = "Caltech Murray Lab",
+  URL = "http://murray-lab.caltech.edu/CTX/",
+  License = "Esri Master License Agreement",
+  Identifiers = {"CTX_blended_01"}
+}

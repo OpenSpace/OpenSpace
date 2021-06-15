@@ -3,25 +3,25 @@ local earthTransforms = asset.require('scene/solarsystem/planets/earth/transform
 
 
 local trail = asset.syncedResource({
-    Name = "Gaia Trail",
-    Type = "HttpSynchronization",
-    Identifier = "gaia_trail",
-    Version = 1
+  Name = "Gaia Trail",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_trail",
+  Version = 1
 })
 
 local GaiaPosition = {
-    Identifier = "GaiaPosition",
-    Parent = earthTransforms.EarthBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "HorizonsTranslation",
-            HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
-        },
+  Identifier = "GaiaPosition",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
     },
-    GUI = {
-        Name = "Position",
-        Path = "/Solar System/Missions/Gaia"
-    }
+  },
+  GUI = {
+    Name = "Position",
+    Path = "/Solar System/Missions/Gaia"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaPosition })

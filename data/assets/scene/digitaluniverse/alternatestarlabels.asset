@@ -3,32 +3,48 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local speck = asset.syncedResource({
-    Name = "Alternate Star Labels Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_alternatestarlabels_speck",
-    Version = 1
+  Name = "Alternate Star Labels Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_alternatestarlabels_speck",
+  Version = 1
 })
 
 local object = {
-    Identifier = "StarLabelsAlternate",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.65,
-        LabelFile = speck .. "/stars-altlbl.label",
-        TextColor = { 0.4, 0.4, 0.4, 1.0 },
-        DrawLabels = true,
-        TextSize = 14.7,
-        TextMinSize = 6.0,
-        Unit = "pc"
-    },
-    GUI = {
-        Name = "Stars Labels - Alternate",
-        Path = "/Milky Way/Stars"
-    }
+  Identifier = "StarLabelsAlternate",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.65,
+    LabelFile = speck .. "/stars-altlbl.label",
+    Unit = "pc",
+    TextColor = { 0.4, 0.4, 0.4 },
+    DrawLabels = true,
+    TextSize = 14.7,
+    TextMinMaxSize = { 6, 20 }
+  },
+  GUI = {
+    Name = "Stars Labels - Alternate",
+    Path = "/Milky Way/Stars",
+    Description = [[Census 3,550 star names. DU Version 1.7. <br>The main star data
+    identify the accepted IAU star names for the brightest stars. However, astronomers
+    have long cataloged thousands of stars beyond the brightest ones we see. Several
+    attempts over thousands of years to name all the visible stars have led to two
+    main catalogs: Johann Bayer's Catalog from 1603 and John Flamsteed's Catalog
+    published in 1725. (Description from URL) <br><br> Data Reference: Various
+    sources]],
+  }
 }
 
 
+asset.meta = {
+  Name = "Stars Labels - Alternate",
+  Version = "1.0",
+  Description = [[Digital Universe asset for alternate start labels]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"StarLabelsAlternate"}
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

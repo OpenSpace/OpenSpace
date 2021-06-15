@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,24 +41,31 @@ namespace {
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed."
     };
+
+    struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string url [[codegen::key("URL")]];
+    };
+#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Online",
-        "base_renderable_plane_image_online",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_plane_image_online"
+    );
+
+    // @TODO cleanup
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderablePlane::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+    return doc;
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
@@ -66,20 +73,10 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageOnline"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
-    addProperty(_texturePath);
-
-    std::string texturePath;
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
-    }
-
+    _texturePath = p.url;
     addProperty(_texturePath);
 }
 
@@ -120,26 +117,30 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
                 return;
             }
 
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    imageFile.format
-                );
+            try {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        reinterpret_cast<void*>(imageFile.buffer),
+                        imageFile.size,
+                        imageFile.format
+                    );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                if (texture) {
+                    // Images don't need to start on 4-byte boundaries, for example if the
+                    // image is only RGB
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                texture->uploadTexture();
+                    texture->uploadTexture();
+                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                    texture->purgeFromRAM();
 
-                // Textures of planets looks much smoother with AnisotropicMipMap rather
-                // than linear
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
-                _texture = std::move(texture);
+                    _texture = std::move(texture);
+                    _textureIsDirty = false;
+                }
+            }
+            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
                 _textureIsDirty = false;
+                LERRORC(e.component, e.message);
             }
         }
     }
@@ -148,7 +149,7 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
 std::future<DownloadManager::MemoryFile>
 RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

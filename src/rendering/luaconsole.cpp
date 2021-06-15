@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -169,13 +170,8 @@ LuaConsole::~LuaConsole() {} // NOLINT
 void LuaConsole::initialize() {
     ZoneScoped
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(
-        HistoryFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    if (FileSys.fileExists(filename)) {
+    const std::string filename = FileSys.cacheManager()->cachedFilename(HistoryFile, "");
+    if (std::filesystem::is_regular_file(filename)) {
         std::ifstream file(filename, std::ios::binary | std::ios::in);
 
         if (file.good()) {
@@ -209,23 +205,23 @@ void LuaConsole::initialize() {
     _commands.emplace_back("");
     _activeCommand = _commands.size() - 1;
 
-    _font = global::fontManager.font(
+    _font = global::fontManager->font(
         FontName,
         EntryFontSize,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    _historyFont = global::fontManager.font(
+    _historyFont = global::fontManager->font(
         FontName,
         HistoryFontSize,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    global::parallelPeer.connectionEvent().subscribe(
+    global::parallelPeer->connectionEvent().subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = global::parallelPeer.status();
+            ParallelConnection::Status status = global::parallelPeer->status();
             parallelConnectionChanged(status);
         }
     );
@@ -234,11 +230,7 @@ void LuaConsole::initialize() {
 void LuaConsole::deinitialize() {
     ZoneScoped
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(
-        HistoryFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+    const std::string filename = FileSys.cacheManager()->cachedFilename(HistoryFile, "");
 
     // We want to limit the command history to a realistic value, so that it doesn't
     // grow without bounds
@@ -265,7 +257,7 @@ void LuaConsole::deinitialize() {
         }
     }
 
-    global::parallelPeer.connectionEvent().unsubscribe("luaConsole");
+    global::parallelPeer->connectionEvent().unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -288,7 +280,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (global::parallelPeer.status() == ParallelConnection::Status::Host) {
+            if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
                 _remoteScripting = true;
             }
         }
@@ -428,7 +420,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
-            global::scriptEngine.queueScript(cmd, RemoteScripting(_remoteScripting));
+            global::scriptEngine->queueScript(cmd, RemoteScripting(_remoteScripting));
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -457,7 +449,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift) {
             _autoCompleteInfo.lastIndex -= 2;
         }
-        std::vector<std::string> allCommands = global::scriptEngine.allLuaFunctions();
+        std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
         std::string currentCommand = _commands.at(_activeCommand);
@@ -590,7 +582,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
         return;
     }
 
-    addToCommand(std::string(1, static_cast<const char>(codepoint)));
+    addToCommand(std::string(1, static_cast<char>(codepoint)));
 }
 
 void LuaConsole::update() {
@@ -599,37 +591,32 @@ void LuaConsole::update() {
     // Compute the height by simulating _historyFont number of lines and checking
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
-    const size_t nLines = std::min(
-        static_cast<size_t>(_historyLength),
-        _commandsHistory.size()
-    );
-    const FontRenderer::BoundingBoxInformation& bbox =
-        FontRenderer::defaultRenderer().boundingBox(
-            *_historyFont,
-            std::string(nLines, '\n')
-        );
+
+    const float height =
+        _historyFont->height() *
+        (std::min(static_cast<int>(_commandsHistory.size()), _historyLength.value()) + 1);
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.
-    _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
+    _fullHeight = (height + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
     // The first frame is going to be finished in approx 10 us, which causes a floating
     // point overflow when computing dHeight
     constexpr double Epsilon = 1e-4;
-    const double frametime = std::max(global::windowDelegate.deltaTime(), Epsilon);
+    const double frametime = std::max(global::windowDelegate->deltaTime(), Epsilon);
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
-    const glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
         std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
     _currentHeight += static_cast<float>(dHeight);
 
-    _currentHeight = std::max(0.0f, _currentHeight);
+    _currentHeight = std::max(0.f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
 
@@ -643,9 +630,9 @@ void LuaConsole::render() {
         return;
     }
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
 
 
     // Render background
@@ -683,10 +670,8 @@ void LuaConsole::render() {
         using namespace ghoul::fontrendering;
 
         // Compute the current width of the string and console prefix.
-        const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "> " + currentCommand
-        ).boundingBox.x + inputLocation.x;
+        const float currentWidth =
+            _font->boundingBox("> " + currentCommand).x + inputLocation.x;
 
         // Compute the overflow in pixels
         const float overflow = currentWidth - res.x * 0.995f;
@@ -696,7 +681,7 @@ void LuaConsole::render() {
 
         // Since the overflow is positive, at least one character needs to be removed.
         const size_t nCharsOverflow = static_cast<size_t>(std::min(
-            std::max(1.f, overflow / _font->glyph('m')->width()),
+            std::max(1.f, overflow / _font->glyph('m')->width),
             static_cast<float>(currentCommand.size())
         ));
 
@@ -792,22 +777,17 @@ void LuaConsole::render() {
             res.y - _currentHeight + EntryFontSize
         );
 
-        const FontRenderer::BoundingBoxInformation bbox =
-            FontRenderer::defaultRenderer().boundingBox(*_font, text);
-
-        return glm::vec2(
-            loc.x + res.x - bbox.boundingBox.x - 10.f,
-            loc.y
-        );
+        const glm::vec2 bbox = _font->boundingBox(text);
+        return glm::vec2(loc.x + res.x - bbox.x - 10.f, loc.y);
     };
 
     if (_remoteScripting) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
-        ParallelConnection::Status status = global::parallelPeer.status();
+        ParallelConnection::Status status = global::parallelPeer->status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
-            global::parallelPeer.nConnections() - 1 :
+            global::parallelPeer->nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -818,7 +798,7 @@ void LuaConsole::render() {
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
     }
-    else if (global::parallelPeer.isHost()) {
+    else if (global::parallelPeer->isHost()) {
         const glm::vec4 LightBlue(0.4f, 0.4f, 1.f, 1.f);
 
         const std::string localExecutionText = "Local script execution";

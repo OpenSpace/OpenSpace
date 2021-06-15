@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,16 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 
+#ifdef WIN32
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#endif // WIN32
+
 #include <include/wrapper/cef_helpers.h>
+
+#ifdef WIN32
+#pragma warning(pop)
+#endif // WIN32
 #include <string>
 
 struct CefSettingsTraits;

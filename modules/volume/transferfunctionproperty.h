@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,22 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(TransferFunctionProperty, volume::TransferFunction)
+class TransferFunctionProperty : public TemplateProperty<volume::TransferFunction> {
+public:
+    TransferFunctionProperty(Property::PropertyInfo info,
+        volume::TransferFunction value = volume::TransferFunction());
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<volume::TransferFunction>::operator=;
+
+protected:
+    volume::TransferFunction fromLuaConversion(lua_State* state,
+        bool& success) const override;
+    void toLuaConversion(lua_State* state) const override;
+    std::string toStringConversion() const override;
+};
 
 } // namespace openspace::properties
 

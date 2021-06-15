@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,20 @@
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <openspace/util/spicemanager.h>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor"
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor", "opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
@@ -105,95 +104,53 @@ namespace {
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
     };
+
+    struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
+        // [[codegen::verbatim(NumberPointsInfo.description)]]
+        std::optional<int> numberOfPoints [[codegen::key("AmountOfPoints")]];
+
+        // [[codegen::verbatim(ShadowLengthInfo.description)]]
+        std::optional<float> shadowLength;
+
+        // [[codegen::verbatim(ShadowColorInfo.description)]]
+        std::optional<glm::vec3> shadowColor [[codegen::color()]];
+
+        enum class TerminatorType {
+            Umbral [[codegen::key("UMBRAL")]],
+            Penumbral [[codegen::key("PENUMBRAL")]]
+        };
+        // [[codegen::verbatim(TerminatorTypeInfo.description)]]
+        TerminatorType terminatorType;
+
+        // [[codegen::verbatim(LightSourceInfo.description)]]
+        std::string lightSource;
+
+        // [[codegen::verbatim(ObserverInfo.description)]]
+        std::string observer;
+
+        // [[codegen::verbatim(BodyInfo.description)]]
+        std::string body;
+
+        // [[codegen::verbatim(BodyFrameInfo.description)]]
+        std::string bodyFrame;
+
+        // [[codegen::verbatim(AberrationInfo.description)]]
+        std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
+    };
+#include "renderableshadowcylinder_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableShadowCylinder::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableShadowCylinder",
-        "newhorizons_renderable_shadowcylinder",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableShadowCylinder"),
-                Optional::No,
-                ""
-            },
-            {
-                NumberPointsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                NumberPointsInfo.description
-            },
-            {
-                ShadowLengthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ShadowLengthInfo.description
-            },
-            {
-                ShadowColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                ShadowColorInfo.description
-            },
-            {
-                TerminatorTypeInfo.identifier,
-                new StringInListVerifier({
-                    // Synchronized with SpiceManager::terminatorTypeFromString
-                    "UMBRAL", "PENUMBRAL"
-                }),
-                Optional::No,
-                TerminatorTypeInfo.description
-            },
-            {
-                LightSourceInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                LightSourceInfo.description
-            },
-            {
-                ObserverInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ObserverInfo.description
-            },
-            {
-                BodyInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                BodyInfo.description
-            },
-            {
-                BodyFrameInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                BodyFrameInfo.description
-            },
-            {
-                AberrationInfo.identifier,
-                new StringInListVerifier({
-                    // SpiceManager::AberrationCorrection::AberrationCorrection
-                    "NONE", "LT", "LT+S", "CN", "CN+S"
-                }),
-                Optional::No,
-                AberrationInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("newhorizons_renderable_shadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _numberOfPoints(NumberPointsInfo, 190, 1, 300)
     , _shadowLength(ShadowLengthInfo, 0.1f, 0.f, 0.5f)
-    , _shadowColor(
-        ShadowColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.25f),
-        glm::vec4(0.f), glm::vec4(1.f)
-    )
+    , _shadowColor(ShadowColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _terminatorType(
         TerminatorTypeInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -204,49 +161,40 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _bodyFrame(BodyFrameInfo)
     , _aberration(AberrationInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableShadowCylinder"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(NumberPointsInfo.identifier)) {
-        _numberOfPoints = static_cast<int>(
-            dictionary.value<double>(NumberPointsInfo.identifier)
-        );
-    }
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
+    _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
     addProperty(_numberOfPoints);
 
-
-    if (dictionary.hasKey(ShadowLengthInfo.identifier)) {
-        _shadowLength = static_cast<float>(
-            dictionary.value<double>(ShadowLengthInfo.identifier)
-        );
-    }
+    _shadowLength = p.shadowLength.value_or(_shadowLength);
     addProperty(_shadowLength);
 
-
-    if (dictionary.hasKey(ShadowColorInfo.identifier)) {
-        _shadowColor = dictionary.value<glm::vec4>(ShadowLengthInfo.identifier);
-    }
+    _shadowColor = p.shadowColor.value_or(_shadowColor);
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
-
 
     _terminatorType.addOptions({
         { static_cast<int>(SpiceManager::TerminatorType::Umbral), "Umbral" },
         { static_cast<int>(SpiceManager::TerminatorType::Penumbral), "Penumbral" }
     });
-    _terminatorType = static_cast<int>(SpiceManager::terminatorTypeFromString(
-        dictionary.value<std::string>(TerminatorTypeInfo.identifier)
-    ));
+    switch (p.terminatorType) {
+        case Parameters::TerminatorType::Umbral:
+            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Umbral);
+            break;
+        case Parameters::TerminatorType::Penumbral:
+            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Penumbral);
+            break;
+    }
     addProperty(_terminatorType);
 
 
-    _lightSource = dictionary.value<std::string>(LightSourceInfo.identifier);
-    _observer = dictionary.value<std::string>(ObserverInfo.identifier);
-    _body = dictionary.value<std::string>(BodyInfo.identifier);
-    _bodyFrame = dictionary.value<std::string>(BodyFrameInfo.identifier);
+    _lightSource = p.lightSource;
+    _observer = p.observer;
+    _body = p.body;
+    _bodyFrame = p.bodyFrame;
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -258,7 +206,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 
     });
     SpiceManager::AberrationCorrection aberration = SpiceManager::AberrationCorrection(
-        dictionary.value<std::string>(AberrationInfo.identifier)
+        p.aberration
     );
     _aberration = static_cast<int>(aberration.type);
 }
@@ -270,7 +218,7 @@ void RenderableShadowCylinder::initializeGL() {
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
@@ -289,7 +237,7 @@ void RenderableShadowCylinder::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -306,6 +254,8 @@ bool RenderableShadowCylinder::isReady() const {
 
 void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
+    glDisable(GL_CULL_FACE);
+
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
@@ -321,6 +271,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform(_uniformCache.shadowColor, _shadowColor);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
@@ -328,6 +279,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
+    glDisable(GL_CULL_FACE);
     glDepthMask(true);
 }
 
@@ -365,9 +317,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
-        [](const glm::dvec3& p) {
-            return p * 1000.0;
-        }
+        [](const glm::dvec3& p) { return p * 1000.0; }
     );
 
     double lt;
@@ -408,7 +358,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         GL_ARRAY_BUFFER,
         0,
         _vertices.size() * sizeof(CylinderVBOLayout),
-        &_vertices[0]
+        _vertices.data()
     );
 
     glEnableVertexAttribArray(0);

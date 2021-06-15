@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -43,30 +44,21 @@ namespace {
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane."
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
+        // Specifies the GUI name of the ScreenspaceImage
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::optional<std::string> url [[codegen::key("URL")]];
+    };
+#include "screenspaceimageonline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Online Image",
-        "base_screenspace_image_online",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_screenspace_image_online");
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -74,14 +66,10 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     , _textureIsDirty(false)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceImageOnline"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::string identifier;
-    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
     }
     else {
@@ -91,12 +79,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     setIdentifier(std::move(identifier));
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
+    _texturePath = p.url.value_or(_texturePath);
     addProperty(_texturePath);
-
-    std::string texturePath;
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
-    }
 }
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
@@ -129,27 +113,31 @@ void ScreenSpaceImageOnline::update() {
                 return;
             }
 
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    imageFile.format
-                );
+            try {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        reinterpret_cast<void*>(imageFile.buffer),
+                        imageFile.size,
+                        imageFile.format
+                    );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                if (texture) {
+                    // Images don't need to start on 4-byte boundaries, for example if the
+                    // image is only RGB
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                texture->uploadTexture();
+                    texture->uploadTexture();
+                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                    texture->purgeFromRAM();
 
-                // Textures of planets looks much smoother with AnisotropicMipMap rather
-                // than linear
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
-                _texture = std::move(texture);
-                _objectSize = _texture->dimensions();
+                    _texture = std::move(texture);
+                    _objectSize = _texture->dimensions();
+                    _textureIsDirty = false;
+                }
+            }
+            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
                 _textureIsDirty = false;
+                LERRORC(e.component, e.message);
             }
         }
     }
@@ -158,7 +146,7 @@ void ScreenSpaceImageOnline::update() {
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
                                                                    const std::string& url)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

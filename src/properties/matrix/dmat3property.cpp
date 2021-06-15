@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,127 +24,33 @@
 
 #include <openspace/properties/matrix/dmat3property.h>
 
-#include <ghoul/misc/misc.h>
-
-#include <limits>
-#include <sstream>
-#include <vector>
-
-namespace {
-
-glm::dmat3x3 fromLuaConversion(lua_State* state, bool& success) {
-    glm::dmat3x3 result;
-    lua_pushnil(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
-            int hasNext = lua_next(state, -2);
-            if (hasNext != 1) {
-                success = false;
-                return glm::dmat3x3(0.0);
-            }
-            if (lua_isnumber(state, -1) != 1) {
-                success = false;
-                return glm::dmat3x3(0.0);
-            }
-            else {
-                result[i][j] = lua_tonumber(state, -1);
-                lua_pop(state, 1);
-                ++number;
-            }
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::dmat3x3 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
-            lua_pushnumber(state, value[i][j]);
-            lua_rawseti(state, -2, number);
-            ++number;
-        }
-    }
-    return true;
-}
-
-glm::dmat3x3 fromStringConversion(const std::string& val, bool& success) {
-    glm::dmat3x3 result = glm::dmat3x3(1.0);
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() !=
-        (ghoul::glm_rows<glm::dmat3x3>::value * ghoul::glm_cols<glm::dmat3x3>::value))
-    {
-        success = false;
-        return result;
-    }
-    int number = 0;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
-            std::stringstream s(tokens[number]);
-            glm::dmat3x3::value_type v;
-            s >> v;
-            if (s.fail()) {
-                success = false;
-                return result;
-            }
-            else {
-                result[i][j] = v;
-                ++number;
-            }
-        }
-    }
-    success = true;
-    return result;
-}
-
-bool toStringConversion(std::string& outValue, glm::dmat3x3 inValue) {
-    outValue = "[";
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
-        }
-    }
-    outValue.pop_back();
-    outValue += "]";
-    return true;
-}
-
-
-} // namespace
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<double>;
+DMat3Property::DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value,
+                             glm::dmat3x3 minValue, glm::dmat3x3 maxValue,
+                             glm::dmat3x3 stepValue)
+    : NumericalProperty<glm::dmat3x3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    DMat3Property,
-    glm::dmat3x3,
-    glm::dmat3x3(0.0),
-    glm::dmat3x3(
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest()
-    ),
-    glm::dmat3x3(
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max()
-    ),
-    glm::dmat3x3(
-        0.01, 0.01, 0.01,
-        0.01, 0.01, 0.01,
-        0.01, 0.01, 0.01
-    ),
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string DMat3Property::className() const {
+    return "DMat3Property";
+}
+
+int DMat3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::dmat3x3 DMat3Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::mat3x3>(state, success);
+}
 
 }  // namespace openspace::properties

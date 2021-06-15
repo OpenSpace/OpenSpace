@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,9 +39,10 @@ SyncBuffer::~SyncBuffer() {} // NOLINT
 void SyncBuffer::encode(const std::string& s) {
     ZoneScoped
 
-    int32_t anticpatedBufferSize = _encodeOffset + (sizeof(char) * s.size())
-        + sizeof(int32_t);
-    if (anticpatedBufferSize >= _n) {
+    int32_t anticpatedBufferSize = static_cast<int32_t>(
+        _encodeOffset + (sizeof(char) * s.size()) + sizeof(int32_t)
+    );
+    if (anticpatedBufferSize >= static_cast<int32_t>(_n)) {
         _dataStream.resize(anticpatedBufferSize);
     }
 
@@ -78,11 +79,39 @@ void SyncBuffer::decode(std::string& s) {
     s = decode();
 }
 
-void SyncBuffer::setData(std::vector<char> data) {
+void SyncBuffer::decode(glm::quat& value) {
+    const size_t size = sizeof(glm::quat);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
+void SyncBuffer::decode(glm::dquat& value) {
+    const size_t size = sizeof(glm::dquat);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
+void SyncBuffer::decode(glm::vec3& value) {
+    const size_t size = sizeof(glm::vec3);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
+void SyncBuffer::decode(glm::dvec3& value) {
+    const size_t size = sizeof(glm::dvec3);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
+void SyncBuffer::setData(std::vector<std::byte> data) {
     _dataStream = std::move(data);
 }
 
-std::vector<char> SyncBuffer::data() {
+std::vector<std::byte> SyncBuffer::data() {
     _dataStream.resize(_encodeOffset);
 
     return _dataStream;

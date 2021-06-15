@@ -3,65 +3,68 @@ local assetHelper = asset.require('util/asset_helper')
 local kernels = asset.require('../mar097').Kernels
 
 
--- local textures = asset.syncedResource({
---     Name = "Mars Textures",
---     Type = "HttpSynchronization",
---     Identifier = "mars_textures",
---     Version = 1
--- })
-
-
 local Phobos = {
-    Identifier = "Phobos",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_PHOBOS",
-            DestinationFrame = "GALACTIC",
-            Kernels = kernels
-        },
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PHOBOS",
-            Observer = "MARS BARYCENTER",
-            Kernels = kernels
-        }
+  Identifier = "Phobos",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_PHOBOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 27, 22, 18 },
-        SegmentsPerPatch = 90,
-        Layers = {
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
-    GUI = {
-        Path = "/Solar System/Planets/Mars"
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 27000, 22000, 18000 },
+    SegmentsPerPatch = 90,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Phobos",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[One of two moons of Mars.]]
+  }
 }
 
 local PhobosTrail = {
-    Identifier = "PhobosTrail",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PHOBOS",
-            Observer = "MARS BARYCENTER"
-        },
-        Color = { 1.0, 0.605, 0.420 },
-        Period = 0.31891023,
-        Resolution = 1000
+  Identifier = "PhobosTrail",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER"
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
-    GUI = {
-        Name = "Phobos Trail",
-        Path = "/Solar System/Planets/Mars"
-    }
+    Color = { 1.0, 0.605, 0.420 },
+    Period = 0.31891023,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+  GUI = {
+    Name = "Phobos Trail",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[Trail for Phobos.]]
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Phobos, PhobosTrail })
+
+
+asset.meta = {
+  Name = "Phobos",
+  Version = "1.0",
+  Description = [[ RenderableGlobe and Trail for Phobos.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Phobos", "PhobosTrail"}
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -291,9 +291,8 @@ public:
      */
     void removeTag(const std::string& tag);
 
-    //Generate JSON for documentation
+    // Generate JSON for documentation
     std::string generateJson() const override;
-
 
 protected:
     /// The unique identifier of this PropertyOwner

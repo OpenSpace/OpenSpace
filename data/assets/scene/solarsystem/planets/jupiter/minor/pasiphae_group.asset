@@ -9,340 +9,377 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_pasiphae" }
 local trailColor = { 0.4, 0.3, 0.01 }
-
-local pasiphaeGroup = {
-    {
-        Identifier = "Euporie",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "EUPORIE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 538.78,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2003J18",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "555",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2003 J 18",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 587.38,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Helike",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HELIKE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 601.40,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Orthosie",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ORTHOSIE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 602.62,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2016J1",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "554",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2016 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 603.83,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2003J15",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "558",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2003 J 15",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 699.68,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Aoede",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "AOEDE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 714.66,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Callirrhoe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CALLIRRHOE",
-        Radii = { 9000, 9000, 9000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 727.11,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Eurydome",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "EURYDOME",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 723.36,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Kore",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "KORE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 776.02,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Cyllene",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CYLLENE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 731.10,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2011J2",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "556",
-        Radii = { 1000, 1000, 1000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2011 J 2",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 731.32,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2017J1",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "559",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2017 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 734.15,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2003J4",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55062",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2003 J 4",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 739.29,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Pasiphae",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PASIPHAE",
-        Radii = { 60000, 60000, 60000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 739.80,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Hegemone",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HEGEMONE",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 745.50,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Sinope",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "SINOPE",
-        Radii = { 38000, 38000, 38000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 739.33,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Sponde",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "SPONDE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 771.60,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Autonoe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "AUTONOE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 772.17,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Megaclite",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        -- sic:  The Identifier in the SPICE kernel is wrong
-        Spice = "MAGACLITE",
-        Radii = { 5000, 5000, 5000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 792.44,
-        Kernels = kernel
-    }
+local trailTags = {
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
-
-
+local pasiphaeGroup = {
+  {
+    Identifier = "Euporie",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "EUPORIE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 538.78,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J18",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "555",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 18",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 587.38,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Helike",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HELIKE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 601.40,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Orthosie",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ORTHOSIE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 602.62,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2016J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "554",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2016 J 1",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 603.83,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J15",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "558",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 15",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 699.68,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Aoede",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "AOEDE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 714.66,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Callirrhoe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CALLIRRHOE",
+    Radii = { 9000, 9000, 9000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 727.11,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Eurydome",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "EURYDOME",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 723.36,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Kore",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "KORE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 776.02,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Cyllene",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CYLLENE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 731.10,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2011J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "556",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2011 J 2",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 731.32,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2017J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "559",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2017 J 1",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 734.15,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J4",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55062",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 4",
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 739.29,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Pasiphae",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PASIPHAE",
+    Radii = { 60000, 60000, 60000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 739.80,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Hegemone",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HEGEMONE",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 745.50,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Sinope",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "SINOPE",
+    Radii = { 38000, 38000, 38000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 739.33,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Sponde",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "SPONDE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 771.60,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Autonoe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "AUTONOE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 772.17,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Megaclite",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    -- sic:  The Identifier in the SPICE kernel is wrong
+    Spice = "MAGACLITE",
+    Radii = { 5000, 5000, 5000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 792.44,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(pasiphaeGroup)
 )
+
+
+asset.meta = {
+    Name = "Jupiter Pasiphae Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Jupiter's Pasiphae Group
+        moons: Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe,
+        Eurydome, Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope,
+        Sponde, Autonoe and Megaclite. Blank globes and SPICE trails are generated for
+        each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

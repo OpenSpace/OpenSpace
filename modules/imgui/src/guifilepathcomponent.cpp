@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ void GuiFilePathComponent::render() {
     for (const std::string& t : tokens) {
         ImGui::Text("%s", t.c_str());
         ImGui::NextColumn();
-        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::Text("%s", absPath(t).string().c_str());
         ImGui::NextColumn();
         ImGui::Separator();
     }

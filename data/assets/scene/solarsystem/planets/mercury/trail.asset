@@ -5,26 +5,37 @@ asset.require("spice/base")
 
 
 local MercuryTrail = {
-    Identifier = "MercuryTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MERCURY",
-            Observer = "SUN"
-        },
-        Color = { 0.6, 0.5, 0.5 },
-        Period = 87.968,
-        Resolution = 1000
+  Identifier = "MercuryTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MERCURY",
+      Observer = "SUN"
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
-    GUI = {
-        Name = "Mercury Trail",
-        Path = "/Solar System/Planets/Mercury"
-    }
+    Color = { 0.6, 0.5, 0.5 },
+    Period = 87.968,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+  GUI = {
+    Name = "Mercury Trail",
+    Path = "/Solar System/Planets/Mercury",
+    Description = [[ Trail of Mercury as observed by the Sun.]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrail })
+
+
+asset.meta = {
+  Name = "Mercury Trail",
+  Version = "1.0",
+  Description = [[ Main trail for Mercury. Data from NASA Spice (see
+    base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"MercuryTrail"}
+}

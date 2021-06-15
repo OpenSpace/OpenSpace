@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,9 @@
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
-
+#include <ghoul/misc/profiling.h>
 
 #include "assetloader_lua.inl"
 
@@ -42,7 +43,6 @@ namespace {
     constexpr const char* AssetGlobalVariableName = "asset";
 
     constexpr const char* RequireFunctionName = "require";
-    constexpr const char* RequestFunctionName = "request";
     constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
 
@@ -55,6 +55,15 @@ namespace {
     constexpr const char* DirectoryConstantName = "directory";
     constexpr const char* FilePathConstantName = "filePath";
 
+    constexpr const char* MetaInformationKey = "meta";
+    constexpr const char* MetaInformationName = "Name";
+    constexpr const char* MetaInformationVersion = "Version";
+    constexpr const char* MetaInformationDescription = "Description";
+    constexpr const char* MetaInformationAuthor = "Author";
+    constexpr const char* MetaInformationURL = "URL";
+    constexpr const char* MetaInformationLicense = "License";
+    constexpr const char* MetaInformationIdentifiers = "Identifiers";
+
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
     constexpr const char* DependantsTableName = "_dependants";
@@ -64,10 +73,11 @@ namespace {
     constexpr const char* AssetFileSuffix = "asset";
     constexpr const char* SceneFileSuffix = "scene";
 
-    enum class PathType : int {
+    enum class PathType {
         RelativeToAsset = 0,
         RelativeToAssetRoot,
-        Absolute
+        Absolute,
+        Tokenized
     };
 
     PathType classifyPath(const std::string& path) {
@@ -80,12 +90,15 @@ namespace {
         if (path.size() > 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
             return PathType::Absolute;
         }
+        if (path.size() > 3 && path[0] == '$' && path[1] == '{') {
+            return PathType::Tokenized;
+        }
         if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
             return PathType::Absolute;
         }
         return PathType::RelativeToAssetRoot;
     }
-}
+} // namespace
 
 namespace openspace {
 
@@ -97,9 +110,9 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState,
     , _assetRootDirectory(std::move(assetRootDirectory))
     , _luaState(luaState)
 {
-    setCurrentAsset(_rootAsset);
+    setCurrentAsset(_rootAsset.get());
 
-    // Create _assets table.
+    // Create _assets table
     lua_newtable(*_luaState);
     _assetsTableRef = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
 }
@@ -124,37 +137,35 @@ void AssetLoader::untrackAsset(Asset* asset) {
 }
 
 void AssetLoader::setUpAssetLuaTable(Asset* asset) {
-    /*
-    Set up lua table:
-    AssetInfo
-    |- Exports (table<name, exported data>)
-    |- Asset
-    |  |- localResource
-    |  |- syncedResource
-    |  |- require
-    |  |- request
-    |  |- exists
-    |  |- export
-    |  |- onInitialize
-    |  |- onDeinitialize
-    |  |- directory
-    |- Dependants (table<dependant, Dependency dep>)
+    // Set up lua table:
+    // AssetInfo
+    // |- Exports (table<name, exported data>)
+    // |- Asset
+    // |  |- localResource
+    // |  |- syncedResource
+    // |  |- require
+    // |  |- request
+    // |  |- exists
+    // |  |- export
+    // |  |- onInitialize
+    // |  |- onDeinitialize
+    // |  |- directory
+    // |- Dependants (table<dependant, Dependency dep>)
+    //
+    // where Dependency is a table:
+    // Dependency
+    // |- onInitialize
+    // |- onDeinitialize
 
-    where Dependency is a table:
-    Dependency
-    |- onInitialize
-    |- onDeinitialize
-    */
-
-    int top = lua_gettop(*_luaState);
+    const int top = lua_gettop(*_luaState);
 
     // Push the global table of AssetInfos to the lua stack.
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    int globalTableIndex = lua_gettop(*_luaState);
+    const int globalTableIndex = lua_gettop(*_luaState);
 
     // Create a AssetInfo table for the current asset.
     lua_newtable(*_luaState);
-    int assetInfoTableIndex = lua_gettop(*_luaState);
+    const int assetInfoTableIndex = lua_gettop(*_luaState);
 
     // Register empty Exports table for the current asset.
     // (string => exported object)
@@ -164,7 +175,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     // Create Asset table
     // (string => lua functions)
     lua_newtable(*_luaState);
-    int assetTableIndex = lua_gettop(*_luaState);
+    const int assetTableIndex = lua_gettop(*_luaState);
 
     // Register local resource function
     // string localResource(string path)
@@ -184,14 +195,8 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushcclosure(*_luaState, &assetloader::require, 1);
     lua_setfield(*_luaState, assetTableIndex, RequireFunctionName);
 
-    // Register request function
-    // Dependency request(string path)
-    lua_pushlightuserdata(*_luaState, asset);
-    lua_pushcclosure(*_luaState, &assetloader::request, 1);
-    lua_setfield(*_luaState, assetTableIndex, RequestFunctionName);
-
     // Register exists function
-    // bool exsists(string path)
+    // bool exists(string path)
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exists, 1);
     lua_setfield(*_luaState, assetTableIndex, ExistsFunctionName);
@@ -239,10 +244,10 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
 }
 
 void AssetLoader::tearDownAssetLuaTable(Asset* asset) {
-    int top = lua_gettop(*_luaState);
+    const int top = lua_gettop(*_luaState);
     // Push the global table of AssetInfos to the lua stack.
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    int globalTableIndex = lua_gettop(*_luaState);
+    const int globalTableIndex = lua_gettop(*_luaState);
 
     lua_pushnil(*_luaState);
 
@@ -251,16 +256,16 @@ void AssetLoader::tearDownAssetLuaTable(Asset* asset) {
     lua_settop(*_luaState, top);
 }
 
-bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
-    int top = lua_gettop(*_luaState);
-    std::shared_ptr<Asset> parentAsset = _currentAsset;
+bool AssetLoader::loadAsset(Asset* asset) {
+    const int top = lua_gettop(*_luaState);
+    Asset* parentAsset = _currentAsset;
 
     setCurrentAsset(asset);
     defer {
         setCurrentAsset(parentAsset);
     };
 
-    if (!FileSys.fileExists(asset->assetFilePath())) {
+    if (!std::filesystem::is_regular_file(asset->assetFilePath())) {
         LERROR(fmt::format(
             "Could not load asset '{}': File does not exist", asset->assetFilePath())
         );
@@ -270,12 +275,68 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
 
     try {
         ghoul::lua::runScriptFile(*_luaState, asset->assetFilePath());
-    } catch (const ghoul::lua::LuaRuntimeException& e) {
+    }
+    catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
             "Could not load asset '{}': {}", asset->assetFilePath(), e.message)
         );
         lua_settop(*_luaState, top);
         return false;
+    }
+
+    // Extract meta information from the asset file if it was provided
+    // 1. Load the asset table
+    lua_getglobal(*_luaState, AssetGlobalVariableName);
+    ghoul_assert(lua_istable(*_luaState, -1), "Expected 'asset' table");
+    lua_getfield(*_luaState, -1, MetaInformationKey);
+    if (!lua_isnil(*_luaState, -1)) {
+        // The 'meta' object exist;  quick sanity check that it is a table
+        if (!lua_istable(*_luaState, -1)) {
+            LWARNING(fmt::format(
+                "When loading asset '{}', encountered a '{}' entry that was not a table",
+                asset->assetFilePath(), MetaInformationKey
+            ));
+        }
+        else {
+            // The 'meta' object exists and it is a table
+            ghoul::Dictionary metaDict;
+            ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
+
+            Asset::MetaInformation meta;
+            if (metaDict.hasValue<std::string>(MetaInformationName)) {
+                meta.name = metaDict.value<std::string>(MetaInformationName);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationVersion)) {
+                meta.version = metaDict.value<std::string>(MetaInformationVersion);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationDescription)) {
+                meta.description =
+                    metaDict.value<std::string>(MetaInformationDescription);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationAuthor)) {
+                meta.author = metaDict.value<std::string>(MetaInformationAuthor);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationURL)) {
+                meta.url = metaDict.value<std::string>(MetaInformationURL);
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationLicense)) {
+                meta.license = metaDict.value<std::string>(MetaInformationLicense);
+            }
+            if (metaDict.hasValue<ghoul::Dictionary>(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict =
+                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (size_t i = 1; i <= iddict.size(); ++i) {
+                    std::string key = std::to_string(i);
+                    std::string identifier = iddict.value<std::string>(key);
+                    meta.identifiers.push_back(identifier);
+                }
+            }
+            asset->setMetaInformation(std::move(meta));
+        }
     }
 
     lua_settop(*_luaState, top);
@@ -293,14 +354,18 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const auto& it : _onDependencyInitializationFunctionRefs[asset]) {
+    for (std::pair<Asset*, std::vector<int>> it :
+         _onDependencyInitializationFunctionRefs[asset])
+    {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset]) {
+    for (std::pair<Asset*, std::vector<int>> it :
+         _onDependencyDeinitializationFunctionRefs[asset])
+    {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
@@ -322,75 +387,73 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     PathType pathType = classifyPath(assetPath);
     std::string prefix;
     if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = baseDirectory + '/';
     }
     else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = _assetRootDirectory + '/';
     }
 
     // Construct the full path including the .asset extension
     std::string assetSuffix = std::string(".") + AssetFileSuffix;
-    bool hasAssetSuffix =
+    const bool hasAssetSuffix =
         (assetPath.size() > assetSuffix.size()) &&
         (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
     std::string fullAssetPath =
-        hasAssetSuffix ?
-        prefix + assetPath :
-        prefix + assetPath + assetSuffix;
-    bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
+        (pathType == PathType::Tokenized) ?
+        absPath(assetPath).string() :
+        prefix + assetPath;
+    if (!hasAssetSuffix) {
+        fullAssetPath += assetSuffix;
+    }
+    bool fullAssetPathExists = std::filesystem::is_regular_file(absPath(fullAssetPath));
 
     // Construct the full path including the .scene extension
-    std::string sceneSuffix = std::string(".") + SceneFileSuffix;
-    bool hasSceneSuffix =
+    const std::string sceneSuffix = std::string(".") + SceneFileSuffix;
+    const bool hasSceneSuffix =
         (assetPath.size() > sceneSuffix.size()) &&
         (assetPath.substr(assetPath.size() - sceneSuffix.size()) == sceneSuffix);
-    std::string fullScenePath =
+    const std::string fullScenePath =
         hasSceneSuffix ?
         prefix + assetPath :
         prefix + assetPath + sceneSuffix;
-    bool fullScenePathExists = FileSys.fileExists(FileSys.absPath(fullScenePath));
+    const bool fullScenePathExists =
+        std::filesystem::is_regular_file(absPath(fullScenePath));
 
     if (fullAssetPathExists && fullScenePathExists) {
-        LWARNING(
-            fmt::format(
-                "'{}' and '{}' file found with non-specific request '{}'. Loading '{}'. "
-                "Explicitly add extension to suppress this warning.",
-                fullAssetPath,
-                fullScenePath,
-                prefix + assetPath,
-                fullAssetPath
-            )
-        );
+        LWARNING(fmt::format(
+            "'{}' and '{}' file found with non-specific request '{}'. Loading '{}'. "
+            "Explicitly add extension to suppress this warning.",
+            fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
+        ));
 
-        return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
+        return absPath(fullAssetPath).string();
     }
 
     if (fullScenePathExists) {
-        return ghoul::filesystem::File(FileSys.absPath(fullScenePath));
+        return absPath(fullScenePath).string();
     }
 
     // We don't check whether the file exists here as the error will be more
     // comprehensively logged by Lua either way
-    return ghoul::filesystem::File(FileSys.absPath(fullAssetPath));
+    return absPath(fullAssetPath).string();
 }
 
-std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, std::move(name));
+std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
+    std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
 
     if (it != _trackedAssets.end()) {
-        std::shared_ptr<Asset> a = it->second.lock();
-        if (a != nullptr) {
+        if (std::shared_ptr<Asset> a = it->second.lock(); a != nullptr) {
             return a;
         }
     }
 
     std::shared_ptr<Asset> asset = std::make_shared<Asset>(
         this,
-       _synchronizationWatcher,
+        _synchronizationWatcher,
         path
     );
 
@@ -401,7 +464,7 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
 int AssetLoader::onInitializeLua(Asset* asset) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onInitialize");
 
-    int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
+    const int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onInitializationFunctionRefs[asset].push_back(referenceIndex);
 
     lua_settop(*_luaState, 0);
@@ -411,7 +474,7 @@ int AssetLoader::onInitializeLua(Asset* asset) {
 int AssetLoader::onDeinitializeLua(Asset* asset) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitialize");
 
-    int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
+    const int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDeinitializationFunctionRefs[asset].push_back(referenceIndex);
 
     lua_settop(*_luaState, 0);
@@ -421,9 +484,8 @@ int AssetLoader::onDeinitializeLua(Asset* asset) {
 int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onInitializeDependency");
 
-    int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
-    _onDependencyInitializationFunctionRefs[dependant][dependency]
-        .push_back(referenceIndex);
+    const int refIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
+    _onDependencyInitializationFunctionRefs[dependant][dependency].push_back(refIndex);
 
     lua_settop(*_luaState, 0);
     return 0;
@@ -432,37 +494,21 @@ int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) 
 int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitializeDependency");
 
-    int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
-    _onDependencyDeinitializationFunctionRefs[dependant][dependency]
-        .push_back(referenceIndex);
+    const int refIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
+    _onDependencyDeinitializationFunctionRefs[dependant][dependency].push_back(refIndex);
 
     lua_settop(*_luaState, 0);
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
-    std::shared_ptr<Asset> asset = getAsset(identifier);
-    std::shared_ptr<Asset> dependant = _currentAsset;
-    dependant->require(asset);
-    return asset;
-}
-
-std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
-    std::shared_ptr<Asset> asset = getAsset(identifier);
-    std::shared_ptr<Asset> parent = _currentAsset;
-    parent->request(asset);
-    assetRequested(parent, asset);
-    return asset;
-}
-
 void AssetLoader::unrequest(const std::string& identifier) {
     std::shared_ptr<Asset> asset = has(identifier);
-    std::shared_ptr<Asset> parent = _currentAsset;
+    Asset* parent = _currentAsset;
     parent->unrequest(asset.get());
     assetUnrequested(parent, asset);
 }
 
-ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
+std::filesystem::path AssetLoader::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
     }
@@ -472,19 +518,26 @@ ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
 }
 
 std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
-    setCurrentAsset(_rootAsset);
-    return request(identifier);
+    ZoneScoped
+
+    setCurrentAsset(_rootAsset.get());
+    std::shared_ptr<Asset> asset = getAsset(identifier);
+    Asset* parent = _currentAsset;
+    parent->request(asset);
+    assetRequested(parent, asset);
+    return asset;
 }
 
-
 void AssetLoader::remove(const std::string& identifier) {
-    setCurrentAsset(_rootAsset);
+    ZoneScoped
+
+    setCurrentAsset(_rootAsset.get());
     unrequest(identifier);
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, identifier);
+    std::filesystem::path directory = currentDirectory();
+    std::string path = generateAssetPath(directory.string(), identifier);
 
     const auto it = _trackedAssets.find(path);
     if (it == _trackedAssets.end()) {
@@ -493,12 +546,12 @@ std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
     return it->second.lock();
 }
 
-ghoul::lua::LuaState* AssetLoader::luaState() {
-    return _luaState;
+const Asset& AssetLoader::rootAsset() const {
+    return *_rootAsset;
 }
 
-std::shared_ptr<Asset> AssetLoader::rootAsset() const {
-    return _rootAsset;
+Asset& AssetLoader::rootAsset() {
+    return *_rootAsset;
 }
 
 const std::string& AssetLoader::assetRootDirectory() const {
@@ -506,6 +559,8 @@ const std::string& AssetLoader::assetRootDirectory() const {
 }
 
 void AssetLoader::callOnInitialize(Asset* asset) {
+    ZoneScoped
+
     for (int init : _onInitializationFunctionRefs[asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -519,8 +574,10 @@ void AssetLoader::callOnInitialize(Asset* asset) {
     }
 }
 
-void AssetLoader::callOnDeinitialize(Asset * asset) {
-    std::vector<int>& funs = _onDeinitializationFunctionRefs[asset];
+void AssetLoader::callOnDeinitialize(Asset* asset) {
+    ZoneScoped
+
+    const std::vector<int>& funs = _onDeinitializationFunctionRefs[asset];
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -535,6 +592,8 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
 }
 
 void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
+    ZoneScoped
+
     for (int init : _onDependencyInitializationFunctionRefs[dependant][asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -553,7 +612,11 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
 }
 
 void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
-    std::vector<int>& funs = _onDependencyDeinitializationFunctionRefs[dependant][asset];
+    ZoneScoped
+
+    const std::vector<int>& funs =
+        _onDependencyDeinitializationFunctionRefs[dependant][asset];
+
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -569,33 +632,38 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
 }
 
 int AssetLoader::localResourceLua(Asset* asset) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::localResourceLua");
 
-    std::string resourceName = ghoul::lua::value<std::string>(
+    std::string name = ghoul::lua::value<std::string>(
         *_luaState,
         1,
         ghoul::lua::PopValue::Yes
     );
-    std::string resolved = asset->resolveLocalResource(resourceName);
 
-    lua_pushstring(*_luaState, resolved.c_str());
+    const std::string resolvedName = fmt::format("{}/{}", asset->assetDirectory(), name);
+
+    lua_pushstring(*_luaState, resolvedName.c_str());
 
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
 int AssetLoader::syncedResourceLua(Asset* asset) {
+    ZoneScoped
+
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::syncedResourceLua");
 
     ghoul::Dictionary d;
     ghoul::lua::luaDictionaryFromState(*_luaState, d);
 
-    std::shared_ptr<ResourceSynchronization> sync =
+    std::unique_ptr<ResourceSynchronization> sync =
         ResourceSynchronization::createFromDictionary(d);
 
-    std::string absolutePath = sync->directory();
+    const std::string absolutePath = sync->directory();
 
-    asset->addSynchronization(sync);
+    asset->addSynchronization(std::move(sync));
 
     lua_settop(*_luaState, 0);
     lua_pushstring(*_luaState, absolutePath.c_str());
@@ -604,13 +672,15 @@ int AssetLoader::syncedResourceLua(Asset* asset) {
     return 1;
 }
 
-void AssetLoader::setCurrentAsset(std::shared_ptr<Asset> asset) {
-    int top = lua_gettop(*_luaState);
+void AssetLoader::setCurrentAsset(Asset* asset) {
+    ZoneScoped
+
+    const int top = lua_gettop(*_luaState);
 
     _currentAsset = asset;
     // Set `asset` lua global to point to the current asset table
 
-    if (asset == _rootAsset) {
+    if (asset == _rootAsset.get()) {
         lua_pushnil(*_luaState);
         lua_setglobal(*_luaState, AssetGlobalVariableName);
         lua_settop(*_luaState, top);
@@ -631,7 +701,8 @@ int AssetLoader::requireLua(Asset* dependant) {
     std::string assetName = luaL_checkstring(*_luaState, 1);
     lua_settop(*_luaState, 0);
 
-    std::shared_ptr<Asset> dependency = require(assetName);
+    std::shared_ptr<Asset> dependency = getAsset(assetName);
+    _currentAsset->require(dependency);
 
     if (!dependency) {
         return ghoul::lua::luaError(
@@ -646,14 +717,14 @@ int AssetLoader::requireLua(Asset* dependant) {
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     lua_getfield(*_luaState, -1, dependency->id().c_str());
     lua_getfield(*_luaState, -1, ExportsTableName);
-    int exportsTableIndex = lua_gettop(*_luaState);
+    const int exportsTableIndex = lua_gettop(*_luaState);
 
     // Get the dependency table
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     lua_getfield(*_luaState, -1, dependency->id().c_str());
     lua_getfield(*_luaState, -1, DependantsTableName);
     lua_getfield(*_luaState, -1, dependant->id().c_str());
-    int dependencyTableIndex = lua_gettop(*_luaState);
+    const int dependencyTableIndex = lua_gettop(*_luaState);
 
     lua_pushvalue(*_luaState, exportsTableIndex);
     lua_pushvalue(*_luaState, dependencyTableIndex);
@@ -666,42 +737,16 @@ int AssetLoader::requireLua(Asset* dependant) {
     return 2;
 }
 
-int AssetLoader::requestLua(Asset* parent) {
-    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::request");
-
-    std::string assetName = luaL_checkstring(*_luaState, 1);
-    lua_settop(*_luaState, 0);
-
-    std::shared_ptr<Asset> child = request(assetName);
-
-    addLuaDependencyTable(parent, child.get());
-
-    // Get the dependency table
-    lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    lua_getfield(*_luaState, -1, child->id().c_str());
-    lua_getfield(*_luaState, -1, DependantsTableName);
-    lua_getfield(*_luaState, -1, parent->id().c_str());
-    int dependencyTableIndex = lua_gettop(*_luaState);
-
-    lua_pushvalue(*_luaState, dependencyTableIndex);
-
-    lua_replace(*_luaState, 1);
-    lua_settop(*_luaState, 1);
-
-    ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-
 int AssetLoader::existsLua(Asset*) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::exists");
 
-    std::string assetName = luaL_checkstring(*_luaState, 1);
+    const std::string assetName = luaL_checkstring(*_luaState, 1);
 
-    ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, assetName);
+    const std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), assetName);
 
     lua_settop(*_luaState, 0);
-    lua_pushboolean(*_luaState, FileSys.fileExists(path));
+    lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -709,12 +754,12 @@ int AssetLoader::existsLua(Asset*) {
 int AssetLoader::exportAssetLua(Asset* asset) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 2, "lua::exportAsset");
 
-    std::string exportName = luaL_checkstring(*_luaState, 1);
+    const std::string exportName = luaL_checkstring(*_luaState, 1);
 
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     lua_getfield(*_luaState, -1, asset->id().c_str());
     lua_getfield(*_luaState, -1, ExportsTableName);
-    int exportsTableIndex = lua_gettop(*_luaState);
+    const int exportsTableIndex = lua_gettop(*_luaState);
 
     // push the second argument
     lua_pushvalue(*_luaState, 2);
@@ -726,7 +771,7 @@ int AssetLoader::exportAssetLua(Asset* asset) {
 }
 
 void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
-    int top = lua_gettop(*_luaState);
+    const int top = lua_gettop(*_luaState);
 
     const std::string dependantId = dependant->id();
     const std::string dependencyId = dependency->id();
@@ -765,13 +810,9 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
 }
 
 void AssetLoader::addAssetListener(AssetListener* listener) {
-    auto it = std::find(
-        _assetListeners.begin(),
-        _assetListeners.end(),
-        listener
-    );
+    const auto it = std::find(_assetListeners.cbegin(), _assetListeners.cend(), listener);
 
-    if (it == _assetListeners.end()) {
+    if (it == _assetListeners.cend()) {
         _assetListeners.push_back(listener);
     }
 }
@@ -784,23 +825,19 @@ void AssetLoader::removeAssetListener(AssetListener* listener) {
     ));
 }
 
-void AssetLoader::assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) {
+void AssetLoader::assetStateChanged(Asset* asset, Asset::State state) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetStateChanged(asset, state);
     }
 }
 
-void AssetLoader::assetRequested(std::shared_ptr<Asset> parent,
-                                 std::shared_ptr<Asset> child)
-{
+void AssetLoader::assetRequested(Asset* parent, std::shared_ptr<Asset> child) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetRequested(parent, child);
     }
 }
 
-void AssetLoader::assetUnrequested(std::shared_ptr<Asset> parent,
-                                   std::shared_ptr<Asset> child)
-{
+void AssetLoader::assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) {
     for (AssetListener* listener : _assetListeners) {
         listener->assetUnrequested(parent, child);
     }

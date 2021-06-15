@@ -1,97 +1,99 @@
 local createDeck = function (identifier, defaultRenderableProperties)
-    return {
-        SlideIdentifiers = {},
-        IdentifierPrefix = identifier,
-        CurrentSlideIndex = 1,
-        DefaultRenderableProperties = defaultRenderableProperties,
-        Visible = true
-    }
+  return {
+    SlideIdentifiers = {},
+    IdentifierPrefix = identifier,
+    CurrentSlideIndex = 1,
+    DefaultRenderableProperties = defaultRenderableProperties,
+    Visible = true
+  }
 end
 
 local removeDeck = function (deck)
-    for i, identifier in pairs(deck.SlideIdentifiers) do
-        openspace.removeScreenSpaceRenderable(identifier)
-    end
+  for i, identifier in pairs(deck.SlideIdentifiers) do
+    openspace.removeScreenSpaceRenderable(identifier)
+  end
 end
 
 local addSlide = function (deck, path)
-    local index = #deck.SlideIdentifiers + 1
-    local identifier = deck.IdentifierPrefix .. index
+  local index = #deck.SlideIdentifiers + 1
+  local identifier = deck.IdentifierPrefix .. index
 
-    local spec = {
-        Type = "ScreenSpaceImageLocal",
-        Identifier = identifier,
-        Name = identifier,
-        TexturePath = path
-    };
+  local spec = {
+    Type = "ScreenSpaceImageLocal",
+    Identifier = identifier,
+    Name = identifier,
+    TexturePath = path
+  };
 
-    for key, value in pairs(deck.DefaultRenderableProperties) do
-        spec[key] = value
-    end
+  for key, value in pairs(deck.DefaultRenderableProperties) do
+    spec[key] = value
+  end
 
-    openspace.addScreenSpaceRenderable(spec)
+  openspace.addScreenSpaceRenderable(spec)
 
-    deck.SlideIdentifiers[#deck.SlideIdentifiers + 1] = identifier
+  deck.SlideIdentifiers[#deck.SlideIdentifiers + 1] = identifier
 end
 
 
 local setCurrentSlide = function (deck, index, interpolationDuration)
-    if (interpolationDuration == nil) then
-        interpolationDuration = 0
-    end
+  if (interpolationDuration == nil) then
+    interpolationDuration = 0
+  end
 
-    if (index < 0) then
-        index = 0
-    end
+  if (index < 0) then
+    index = 0
+  end
 
-    if (index > #deck.SlideIdentifiers + 1) then
-        index = #deck.SlideIdentifiers + 1
-    end
+  if (index > #deck.SlideIdentifiers + 1) then
+    index = #deck.SlideIdentifiers + 1
+  end
 
-    deck.CurrentSlideIndex = index
+  deck.CurrentSlideIndex = index
 
-    if not deck.Visible then
-        return
-    end
+  if not deck.Visible then
+    return
+  end
 
-    for i, identifier in pairs(deck.SlideIdentifiers) do
-        local opacity = 0
-        if (index == i) then
-            opacity = 1
-        end
-        openspace.setPropertyValueSingle(
-            "ScreenSpace." .. identifier .. ".Alpha", opacity,
-            interpolationDuration, "QuadraticEaseOut")
+  for i, identifier in pairs(deck.SlideIdentifiers) do
+    local opacity = 0
+    if (index == i) then
+      opacity = 1
     end
+    if interpolationDuration == 0 then
+      openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Opacity", opacity)
+    else
+      openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Opacity", opacity, interpolationDuration, "QuadraticEaseOut")
+    end
+  end
 end
 
 local goToNextSlide = function (deck, interpolationDuration)
-    setCurrentSlide(deck, deck.CurrentSlideIndex + 1, interpolationDuration)
+  setCurrentSlide(deck, deck.CurrentSlideIndex + 1, interpolationDuration)
 end
 
 local goToPreviousSlide = function (deck, interpolationDuration)
-    setCurrentSlide(deck, deck.CurrentSlideIndex - 1, interpolationDuration)
+  setCurrentSlide(deck, deck.CurrentSlideIndex - 1, interpolationDuration)
 end
 
 local toggleSlides = function (deck, interpolationDuration) 
-    deck.Visible = not deck.Visible
-    if deck.Visible then
-        for i, identifier in pairs(deck.SlideIdentifiers) do
-            local opacity = 0
-            if (i == deck.CurrentSlideIndex) then
-                opacity = 1
-            end
-            openspace.setPropertyValueSingle(
-                "ScreenSpace." .. identifier .. ".Alpha", opacity,
-                interpolationDuration, "QuadraticEaseOut")
-        end
-    else 
-        for i, identifier in pairs(deck.SlideIdentifiers) do
-            openspace.setPropertyValueSingle(
-                "ScreenSpace." .. identifier .. ".Alpha", 0,
-                interpolationDuration, "QuadraticEaseOut")
-        end
+  deck.Visible = not deck.Visible
+  if deck.Visible then
+    for i, identifier in pairs(deck.SlideIdentifiers) do
+      local opacity = 0
+      if (i == deck.CurrentSlideIndex) then
+        opacity = 1
+      end
+      openspace.setPropertyValueSingle(
+        "ScreenSpace." .. identifier .. ".Opacity", opacity,
+        interpolationDuration, "QuadraticEaseOut")
     end
+  else 
+    for i, identifier in pairs(deck.SlideIdentifiers) do
+      openspace.setPropertyValueSingle(
+        "ScreenSpace." .. identifier .. ".Opacity", 0,
+        interpolationDuration, "QuadraticEaseOut")
+    end
+  end
 end
 
 asset.export('createDeck', createDeck)

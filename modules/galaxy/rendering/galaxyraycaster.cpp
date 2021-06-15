@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
@@ -49,13 +50,15 @@ GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
 {}
 
 void GalaxyRaycaster::initialize() {
+    ZoneScoped
+
     _boundingBox.initialize();
 }
 
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
                                         ghoul::opengl::ProgramObject& program)
 {
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
@@ -70,7 +73,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
     // Uniforms
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
@@ -97,7 +100,6 @@ glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
                                  ghoul::opengl::ProgramObject& program)
 {
-    const std::string colorUniformName = "color" + std::to_string(data.id);
     const std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
     const std::string galaxyTextureUniformName = "galaxyTexture" +
                                                  std::to_string(data.id);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,7 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
     return success;
 }
 
-bool TransferFunction::envelopesToLua(lua_State* state) {
+void TransferFunction::envelopesToLua(lua_State* state) const {
     lua_newtable(state);
     for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
         lua_newtable(state);
@@ -101,7 +101,6 @@ bool TransferFunction::envelopesToLua(lua_State* state) {
             ("[\"" + std::to_string(iter - _envelopes.begin() + 1) + "\"]").c_str()
         );
     }
-    return true;
 }
 
 void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
@@ -109,18 +108,15 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
     ghoul::Dictionary dictionary;
     ghoul::lua::loadDictionaryFromFile(path, dictionary, L);
 
-    const std::vector<std::string>& tfKeys = dictionary.keys();
-    for (const std::string& key : tfKeys) {
+    for (std::string_view key : dictionary.keys()) {
         ghoul::Dictionary tfDictionary = dictionary.value<ghoul::Dictionary>(key);
 
-        const std::vector<std::string>& envelopeKeys = tfDictionary.keys();
-        for (const std::string& envelopeKey : envelopeKeys) {
+        for (std::string_view envelopeKey : tfDictionary.keys()) {
             ghoul::Dictionary envelopeDictionary =
                 tfDictionary.value<ghoul::Dictionary>(envelopeKey);
-            const std::vector<std::string>& pointKeys = envelopeDictionary.keys();
             Envelope env;
             std::vector<EnvelopePoint> tmpVec;
-            for (const std::string& pointKey : pointKeys) {
+            for (std::string_view pointKey : envelopeDictionary.keys()) {
                 ghoul::Dictionary pointDictionary =
                     envelopeDictionary.value<ghoul::Dictionary>(pointKey);
 
@@ -128,9 +124,13 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
                     pointDictionary.value<ghoul::Dictionary>("position");
 
                 std::string color = pointDictionary.value<std::string>("color");
-                float posX = positionDictionary.value<float>("x");
-                float posY = positionDictionary.value<float>("y");
-                tmpVec.emplace_back(color, posX, posY);
+                double posX = positionDictionary.value<double>("x");
+                double posY = positionDictionary.value<double>("y");
+                tmpVec.emplace_back(
+                    color,
+                    static_cast<float>(posX),
+                    static_cast<float>(posY)
+                );
             }
             env.setPoints(tmpVec);
             _envelopes.emplace_back(env);

@@ -2,45 +2,61 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local sync = asset.syncedResource({
-    Name = "Swift Tuttle Orbit",
-    Type = "HttpSynchronization",
-    Identifier = "swift_tuttle_horizons",
-    Version = 1
+  Name = "Swift Tuttle Orbit",
+  Type = "HttpSynchronization",
+  Identifier = "swift_tuttle_horizons",
+  Version = 1
 })
 
 local SwiftTuttleTrail = {
-    Identifier = "SwiftTuttleTrail",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "HorizonsTranslation",
-            HorizonsTextFile = sync .. "/horizons_swifttuttle.dat"
-        },
-        Color = { 0.9, 0.9, 0.0 },
-        StartTime = "1879 JUN 27 00:00:00",
-        EndTime = "2019 JUN 27 00:00:00",
-        SampleInterval = 60
+  Identifier = "SwiftTuttleTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = sync .. "/horizons_swifttuttle.dat"
     },
-    GUI = {
-        Name = "Swift Tuttle Trail",
-        Path = "/Solar System/SSSB"
-    }
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "1879 JUN 27 00:00:00",
+    EndTime = "1879 JUN 27 00:00:00",
+    SampleInterval = 60
+  },
+  GUI = {
+    Name = "Swift Tuttle Trail",
+    Path = "/Solar System/SSSB"
+  }
 }
 
 local SwiftTuttlePosition = {
-    Identifier = "SwiftTuttlePosition",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "HorizonsTranslation",
-            HorizonsTextFile = sync .. "/horizons_swifttuttle.dat"
-        },
-    },
-    GUI = {
-        Name = "Swift Tuttle Position",
-        Path = "/Solar System/SSSB"
+  Identifier = "SwiftTuttlePosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = sync .. "/horizons_swifttuttle.dat"
     }
+  },
+  GUI = {
+    Name = "Swift Tuttle Position",
+    Path = "/Solar System/SSSB"
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SwiftTuttlePosition, SwiftTuttleTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  SwiftTuttlePosition, SwiftTuttleTrail 
+})
+
+
+asset.meta = {
+  Name = "Swift Tuttle",
+  Version = "1.0",
+  Description = [[ Position and Trail of Swift Tuttle from 1879 JUN 27
+    to 1879 JUN 27. Data from JPL Horizons]],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = [[ JPL-authored documents are sponsored by NASA under Contract
+    NAS7-030010. All documents available from this server may be protected
+    under the U.S. and Foreign Copyright Laws."]],
+  Identifiers = {"SwiftTuttlePosition", "SwiftTuttleTrail"}
+}

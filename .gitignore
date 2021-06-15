@@ -13,6 +13,7 @@
 .vscode
 CMakeCache.txt
 CMakeFiles
+CMakeLists.txt.user
 cmake-build-*
 cmake_install.cmake
 install_manifest.txt
@@ -25,14 +26,17 @@ Thumbs.db
 # OpenSpace-generated folders and files
 /bin/
 /cache/
+/cache-*/
 /cache_gdal/
 /documentation/
 /logs/
 /screenshots/
 /recordings/
+/user/
 /sync/
 /temp/
 # Customization is not supposed to be committed
 customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
+*_codegen.cpp

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-
 #include <chrono>
 
 namespace {
@@ -43,26 +42,20 @@ namespace {
         "scaling factor for this transformation. The script needs to define a function "
         "'scale' that takes the current simulation time in seconds past the J2000 epoch "
         "as the first argument, the current wall time as milliseconds past the J2000 "
-        "epoch the second argument and computes the scaling factor."
+        "epoch the second argument and computes the three scaling factors."
     };
+
+    struct [[codegen::Dictionary(LuaScale)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::string script;
+    };
+#include "luascale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Lua Scaling",
-        "base_scale_lua",
-        {
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale()
@@ -73,20 +66,17 @@ LuaScale::LuaScale()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
-            requireUpdate();
-        });
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "LuaScale");
-
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _luaScriptFile = absPath(p.script).string();
 }
 
-double LuaScale::scaleValue(const UpdateData& data) const {
+glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -97,7 +87,7 @@ double LuaScale::scaleValue(const UpdateData& data) const {
             "LuaScale",
             fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
         );
-        return 0.0;
+        return glm::dvec3(1.0);
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
@@ -120,7 +110,11 @@ double LuaScale::scaleValue(const UpdateData& data) const {
         );
     }
 
-    return luaL_checknumber(_state, -1);
+    const double x = luaL_checknumber(_state, -1);
+    const double y = luaL_checknumber(_state, -2);
+    const double z = luaL_checknumber(_state, -3);
+    lua_settop(_state, 0);
+    return glm::dvec3(x, y, z);
 }
 
 } // namespace openspace

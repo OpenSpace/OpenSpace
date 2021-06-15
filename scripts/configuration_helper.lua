@@ -88,6 +88,8 @@ function sgct.config.fisheye(arg) end
 
 function sgct.config.cube(arg) end
 
+-- Global variable storing the name of the config function called at initialization
+sgctconfiginitializeString = ""
 
 --[[
 ########################################################################################## 
@@ -343,7 +345,6 @@ function generateCluster(arg)
 <?xml version="1.0" ?>
 <Cluster
     masterAddress="localhost"
-    externalControlPort="20500"
     debug="]] .. tostring(arg["sgctDebug"]) .. [["
 >
 ]] .. (arg["settings"] or "") .. [[
@@ -699,7 +700,9 @@ function sgct.config.single(arg)
         type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
         "tracked must be a boolean or nil"
     )
-    trackedSpecifier = "tracked=\"true\""
+    sgctconfiginitializeString = "sgct.config.single"
+
+    local trackedSpecifier = "tracked=\"true\""
 
     if (arg["tracked"] ~= nil and arg["tracked"] == false) then
         trackedSpecifier = "tracked=\"false\""
@@ -718,6 +721,7 @@ end
 
 
 function sgct.config.fisheye(arg)
+
     arg = normalizeArg(arg)
 
     assert(
@@ -775,6 +779,8 @@ function sgct.config.fisheye(arg)
         assert(type(arg["offset"]["z"]) == "number", "offset['z'] must be a number")
     end
 
+    sgctconfiginitializeString = "sgct.config.fisheye"
+
     if arg["fov"] == nil then
         arg["fov"] = 180
     end
@@ -791,6 +797,7 @@ function sgct.config.fisheye(arg)
         arg["background"] = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
     end
 
+    local trackedSpecifier = ""
     if (arg["tracked"] ~= nil and arg["tracked"] == true) then
         trackedSpecifier = "tracked=\"true\""
     else
@@ -869,6 +876,7 @@ function sgct.config.cube(arg)
         return generateWindow(arg)
     end
 
+    sgctconfiginitializeString = "sgct.config.cube"
 
     res = 1024
     size = { 640, 360 }
@@ -894,3 +902,4 @@ function sgct.config.cube(arg)
 
     return sgct.makeConfig(generateCluster(arg))
 end
+

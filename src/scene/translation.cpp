@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,50 +25,41 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    struct [[codegen::Dictionary(Translation)]] Parameters {
+        // The type of translation that is described in this element. The available types
+        // of translations depend on the configuration of the application and can be
+        // written to disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid Translation type")]];
+    };
+#include "translation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Translation::Documentation() {
-    using namespace documentation;
-
-    return {
-        "Transformation Translation",
-        "core_transform_translation",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Translation type"),
-                Optional::No,
-                "The type of translation that is described in this element. "
-                "The available types of translations depend on the "
-                "configuration of the application and can be written to disk "
-                "on application startup into the FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_transform_translation");
 }
 
-std::unique_ptr<Translation> Translation::createFromDictionary(
+ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& translationType = dictionary.value<std::string>(KeyType);
-    ghoul::TemplateFactory<Translation>* factory
-          = FactoryManager::ref().factory<Translation>();
-    std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
-    result->setIdentifier("Translation");
-    return result;
+    Translation* result = FactoryManager::ref().factory<Translation>()->create(
+        p.type,
+        dictionary,
+        &global::memoryManager->PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<Translation>(result);
 }
 
 Translation::Translation() : properties::PropertyOwner({ "Translation" }) {}

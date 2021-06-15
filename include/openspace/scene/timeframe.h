@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -40,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class TimeFrame : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<TimeFrame> createFromDictionary(
+    static ghoul::mm_unique_ptr<TimeFrame> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     TimeFrame();

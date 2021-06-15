@@ -207,7 +207,7 @@ if(OS_LINUX)
     natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
-    swiftshader
+    #swiftshader
     )
 
   # List of CEF resource files.
@@ -305,7 +305,7 @@ if(OS_MACOSX)
   endforeach()
 
   # Target SDK.
-  set(CEF_TARGET_SDK               "10.14")
+  set(CEF_TARGET_SDK               "10.15")
   list(APPEND CEF_COMPILER_FLAGS
     -mmacosx-version-min=${CEF_TARGET_SDK}
   )
@@ -464,7 +464,7 @@ if(OS_WINDOWS)
     natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
-    swiftshader
+    #swiftshader
     )
 
   # List of CEF resource files.

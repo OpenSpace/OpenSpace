@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,20 @@
 
 namespace openspace::distanceconstants {
     constexpr double EarthRadius = 6371;
+    constexpr double JupiterRadius = 7.1492E7;
+    constexpr double SolarRadius = 6.95700E8;
     constexpr double LightYear = 9.4607304725808E15;
     constexpr double LightMonth = LightYear / 12;
     constexpr double LightDay = LightYear / 365;
     constexpr double LightHour = LightDay / 24;
     constexpr double AstronomicalUnit = 1.495978707E11;
     constexpr double Parsec = 3.0856776E16;
+
+    constexpr double Inch = 0.0254;
+    constexpr double Foot = 0.3048;
+    constexpr double Yard = 0.9144;
+    constexpr double Chain = 20.1168;
+    constexpr double Mile = 1609.344;
 } // openspace::distanceconstants
 
 #endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__

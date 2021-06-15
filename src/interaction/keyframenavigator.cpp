@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,14 @@ namespace {
 #endif
 
 namespace openspace::interaction {
+
+KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&& kf)
+    : position(std::move(kf._position))
+    , rotation(std::move(kf._rotation))
+    , focusNode(std::move(kf._focusNode))
+    , scale(std::move(kf._scale))
+    , followFocusNodeRotation(std::move(kf._followNodeRotation))
+{}
 
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     double now = currentTime();
@@ -89,13 +97,7 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
-    return updateCamera(
-        &camera,
-        prevKeyframe->data,
-        nextKeyframe->data,
-        t,
-        ignoreFutureKeyframes
-    );
+    return updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
 }
 
 bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
@@ -181,13 +183,13 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
 
 double KeyframeNavigator::currentTime() const {
     if (_timeframeMode == KeyframeTimeRef::Relative_recordedStart) {
-        return (global::windowDelegate.applicationTime() - _referenceTimestamp);
+        return (global::windowDelegate->applicationTime() - _referenceTimestamp);
     }
     else if (_timeframeMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return global::timeManager.time().j2000Seconds();
+        return global::timeManager->time().j2000Seconds();
     }
     else {
-        return global::windowDelegate.applicationTime();
+        return global::windowDelegate->applicationTime();
     }
 }
 

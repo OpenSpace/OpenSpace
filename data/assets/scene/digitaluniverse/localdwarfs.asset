@@ -3,46 +3,66 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Local Dwarfs Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_localdwarfs_textures",
-    Version = 1
+  Name = "Local Dwarfs Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_localdwarfs_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "Local Dwarfs Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_localdwarfs_speck",
-    Version = 2
+  Name = "Local Dwarfs Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_localdwarfs_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "LocalDwarfGalaxies",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 0.5, 1.0, 0.2 },
-        ColorMap = speck .. "/localgroup.cmap",
-        ColorOption = { "association" },
-        Opacity = 0.3,
-        File = speck .. "/localgroup.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 12,
-        LabelFile = speck .. "/localgroup.label",
-        TextColor = { 0.3, 0.3, 1.0, 1.0 },
-        ScaleFactor = 465,
-        TextSize = 18.3,
-        TextMinSize = 7.3,
-        Unit = "Mpc",
-        BillboardMaxSize = 20.0,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Local Group",
-        Path = "/Universe/Galaxies"
-    }
+  Identifier = "LocalDwarfGalaxies",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 0.5, 1.0, 0.2 },
+    ColorMap = speck .. "/localgroup.cmap",
+    ColorOption = { "association" },
+    Opacity = 0.3,
+    File = speck .. "/localgroup.speck",
+    Texture = textures .. "/point4.png",
+    PolygonSides = 12,
+    LabelFile = speck .. "/localgroup.label",
+    Unit = "Mpc",
+    TextColor = { 0.3, 0.3, 1.0 },
+    ScaleFactor = 465,
+    TextSize = 18.3,
+    TextMinMaxSize = { 7, 20 },
+    BillboardMinMaxSize = { 0.0, 20.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+      Name = "Local Group",
+      Path = "/Universe/Galaxies",
+      Description = [[Census: 102 galaxies. DU Version 6.4. <br> A group of galaxies is
+        a small number of large galaxies that are typically surrounded by a large
+        number of small galaxies. The Milky Way belongs to the Local Group, and is one
+        of roughly 100 galaxies in that group. The Milky Way, the Andromeda Galaxy
+        (also known as Messier 31, or M31), and the Triangulum Galaxy (M33) are three
+        of the largest galaxies in the Local Group. Each is a spiral galaxy containing
+        hundreds of billions of stars. Surrounding the Milky Way and Andromeda are a
+        bevy of dwarf galaxies-smaller, often irregular galaxies, that contain
+        hundreds of millions to a few billion stars. (Description from URL) <br><br>
+        Data Reference: Properties of dwarf galaxies in the Local Group
+        (McConnachie+, 2012)]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Local Group",
+  Version = "2.0",
+  Description = [[Digital Universe asset for the Local Goup]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"LocalDwarfGalaxies"}
+}

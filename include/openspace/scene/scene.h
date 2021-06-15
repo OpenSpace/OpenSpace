@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicense.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/memorypool.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -81,12 +81,12 @@ public:
     /**
      * Attach node to the root
      */
-    void attachNode(std::unique_ptr<SceneGraphNode> node);
+    void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
 
     /**
      * Detach node from the root
      */
-    std::unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
+    ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
      * Set the camera of the scene
@@ -134,8 +134,6 @@ public:
      */
     void unregisterNode(SceneGraphNode* node);
 
-    void addSceneLicense(SceneLicense license);
-
     /**
     * Mark the node registry as dirty
     */
@@ -145,14 +143,6 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
-
-    /**
-     * Generate JSON about the license information for the scenegraph nodes that are
-     * contained in this scene
-     * \param path The file path that will contain the documentation about the licenses
-     * used in this scene
-     */
-    std::string generateSceneLicenseDocumentationJson();
 
     /**
      * Returns a map from identifier to scene graph node.
@@ -261,8 +251,6 @@ private:
 
     std::vector<InterestingTime> _interestingTimes;
 
-    std::vector<SceneLicense> _licenses;
-
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
@@ -275,6 +263,8 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
+
+    ghoul::MemoryPool<4096> _memoryPool;
 };
 
 } // namespace openspace

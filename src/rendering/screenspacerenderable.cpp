@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,13 +38,12 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyTag = "Tag";
-
     constexpr const std::array<const char*, 4> UniformNames = {
-        "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+        "color", "opacity", "mvpMatrix", "tex"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -101,11 +100,17 @@ namespace {
         "An euler rotation (x, y, z) to apply to the plane."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the plane's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images."
+    };
 
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
-        "Alpha",
-        "Transparency",
-        "This value determines the transparency of the screen space plane. If this value "
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "This value determines the opacity of the screen space plane. If this value "
         "is 1, the plane is completely opaque, if this value is 0, the plane is "
         "completely transparent."
     };
@@ -207,122 +212,89 @@ namespace {
             wrap(elevation, -glm::pi<float>(), glm::pi<float>())
         );
     }
+
+    struct [[codegen::Dictionary(ScreenSpaceRenderable)]] Parameters {
+        // The type of the Screenspace renderable that is to be created. The available
+        // types of Screenspace renderable depend on the configuration of the application
+        // and can be written to disk on application startup into the FactoryDocumentation
+        std::string type
+            [[codegen::annotation("Must name a valid Screenspace renderable")]];
+
+        // Specifies the name of this screenspace renderable. This does not have to be
+        // unique to the scene, but it is recommended to be
+        std::optional<std::string> name;
+
+        // This is the unique identifier for this screenspace renderable. It has to be
+        // unique amongst all existing screenspace nodes that already have been added to
+        // the scene. The identifier is not allowed to have any whitespace or '.' and must
+        // not be empty
+        std::optional<std::string> identifier;
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
+        std::optional<bool> useRadiusAzimuthElevation;
+
+        // [[codegen::verbatim(FaceCameraInfo.description)]]
+        std::optional<bool> faceCamera;
+
+        // [[codegen::verbatim(CartesianPositionInfo.description)]]
+        std::optional<glm::vec3> cartesianPosition;
+
+        // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
+        std::optional<glm::vec3> radiusAzimuthElevation;
+
+        // [[codegen::verbatim(ScaleInfo.description)]]
+        std::optional<float> scale;
+
+        // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
+        std::optional<bool> usePerspectiveProjection;
+
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+
+        // [codegen::verbatim(OpacityInfo.description)]]
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
+        // Defines either a single or multiple tags that apply to this
+        // ScreenSpaceRenderable, thus making it possible to address multiple, separate 
+        // Renderables with a single property change
+        std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+    };
+#include "screenspacerenderable_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceRenderable::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Screenspace Renderable",
-        "core_screenspacerenderable",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
-                Optional::No,
-                "The type of the Screenspace renderable that is to be created. The "
-                "available types of Screenspace renderable depend on the configuration of"
-                "the application and can be written to disk on application startup into "
-                "the FactoryDocumentation."
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the name of this screenspace renderable. This does not have "
-                "to be unique to the scene, but it is recommended to be."
-            },
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::Yes,
-                "This is the unique identifier for this screenspace renderable. It has "
-                "to be unique amongst all existing screenspace nodes that already have "
-                "been added to the scene. The identifier is not allowed to have any "
-                "whitespace or '.' and must not be empty."
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnabledInfo.description
-            },
-            {
-                UseRadiusAzimuthElevationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseRadiusAzimuthElevationInfo.description
-            },
-            {
-                FaceCameraInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                FaceCameraInfo.description
-            },
-            {
-                CartesianPositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                CartesianPositionInfo.description
-            },
-            {
-                RadiusAzimuthElevationInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                RadiusAzimuthElevationInfo.description
-            },
-            {
-                ScaleInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleInfo.description
-            },
-            {
-                AlphaInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                AlphaInfo.description
-            },
-            {
-                KeyTag,
-                new OrVerifier({ new StringVerifier, new StringListVerifier }),
-                Optional::Yes,
-                "Defines either a single or multiple tags that apply to this "
-                "ScreenSpaceRenderable, thus making it possible to address multiple, "
-                "seprate Renderables with a single property change."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_screenspacerenderable");
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceRenderable"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& renderableType = dictionary.value<std::string>(KeyType);
-    return FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
-        renderableType,
-        dictionary
-    );
+    ScreenSpaceRenderable* ssr =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
+            p.type,
+            dictionary
+        );
+    return std::unique_ptr<ScreenSpaceRenderable>(ssr);
 }
 
 std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
-    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+    std::vector<ScreenSpaceRenderable*> rs =
+        global::renderEngine->screenSpaceRenderables();
 
-    auto nameTaken = [&r](const std::string& name) {
-        bool nameTaken = std::any_of(
-            r.begin(),
-            r.end(),
-            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+    auto nameTaken = [&rs](const std::string& n) {
+        const bool taken = std::any_of(
+            rs.cbegin(),
+            rs.cend(),
+            [&n](ScreenSpaceRenderable* r) { return r->identifier() == n; }
         );
-        return nameTaken;
+        return taken;
     };
 
     std::string baseName = name;
@@ -359,17 +331,19 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
-    , _alpha(AlphaInfo, 1.f, 0.f, 1.f)
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
-    if (dictionary.hasKey(KeyIdentifier)) {
-        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.identifier.has_value()) {
+        setIdentifier(*p.identifier);
     }
 
-    if (dictionary.hasKey(KeyName)) {
-        setGuiName(dictionary.value<std::string>(KeyName));
+    if (p.name.has_value()) {
+        setGuiName(*p.name);
     }
-
 
     addProperty(_enabled);
     addProperty(_useRadiusAzimuthElevation);
@@ -389,75 +363,52 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
 
     addProperty(_scale);
-    addProperty(_alpha);
+    addProperty(_multiplyColor);
+    addProperty(_opacity);
     addProperty(_localRotation);
 
-    if (dictionary.hasKey(EnabledInfo.identifier)) {
-        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
-    }
 
-    if (dictionary.hasKey(UseRadiusAzimuthElevationInfo.identifier)) {
-        _useRadiusAzimuthElevation = dictionary.value<bool>(
-            UseRadiusAzimuthElevationInfo.identifier
-        );
-    }
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+
+    _enabled = p.enabled.value_or(_enabled);
+    _useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
 
     if (_useRadiusAzimuthElevation) {
-        if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
-            _raePosition = dictionary.value<glm::vec3>(
-                RadiusAzimuthElevationInfo.identifier
-            );
-        }
+        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
     }
     else {
-        if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
-            _cartesianPosition = dictionary.value<glm::vec3>(
-                CartesianPositionInfo.identifier
-            );
+        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
+    }
+
+    _scale = p.scale.value_or(_scale);
+    _opacity = p.opacity.value_or(_opacity);
+    _usePerspectiveProjection =
+        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
+
+    if (p.tag.has_value()) {
+        if (std::holds_alternative<std::string>(*p.tag)) {
+            addTag(std::get<std::string>(*p.tag));
         }
-    }
-
-    if (dictionary.hasKey(ScaleInfo.identifier)) {
-        _scale = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
-    }
-
-    if (dictionary.hasKey(AlphaInfo.identifier)) {
-        _alpha = static_cast<float>(dictionary.value<double>(AlphaInfo.identifier));
-    }
-
-    if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
-        _usePerspectiveProjection = static_cast<bool>(
-            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(FaceCameraInfo.identifier)) {
-        _faceCamera = static_cast<bool>(
-            dictionary.value<bool>(FaceCameraInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
-        std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty()) {
-            addTag(std::move(tagName));
-        }
-    }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
-            std::string tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty()) {
-                addTag(std::move(tagName));
+        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+            for (const std::string& t : std::get<std::vector<std::string>>(*p.tag)) {
+                if (!t.empty()) {
+                    addTag(t);
+                }
             }
+        }
+        else {
+            throw ghoul::MissingCaseException();
         }
     }
 
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
         );
@@ -482,7 +433,7 @@ bool ScreenSpaceRenderable::deinitialize() {
 
 bool ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -519,17 +470,25 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentDrawBufferResolution();
-    ghoul::Dictionary rendererData = {
-        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-        { "windowWidth" , res.x },
-        { "windowHeight" , res.y },
-        { "hdrExposure", global::renderEngine.hdrExposure() },
-        { "disableHDR", global::renderEngine.isHdrDisabled() }
-    };
+    auto res = global::windowDelegate->currentDrawBufferResolution();
+    ghoul::Dictionary rendererData;
+    rendererData.setValue(
+        "fragmentRendererPath",
+        std::string("${SHADERS}/framebuffer/renderframebuffer.frag")
+    );
+    rendererData.setValue("windowWidth", res.x);
+    rendererData.setValue("windowHeight", res.y);
+    rendererData.setValue(
+        "hdrExposure",
+        static_cast<double>(global::renderEngine->hdrExposure())
+    );
+    rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
 
     dict.setValue("rendererData", rendererData);
-    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    dict.setValue(
+        "fragmentPath",
+        std::string("${MODULE_BASE}/shaders/screenspace_fs.glsl")
+    );
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
@@ -541,9 +500,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
-
-    //to scale the plane
+    // to scale the plane
     float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
@@ -569,12 +526,12 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // 2) sgct's scene matrix (also called model matrix by sgct)
 
     glm::mat4 inverseRotation = glm::inverse(
-        global::renderEngine.globalRotation() *
-        global::windowDelegate.modelMatrix()
+        global::renderEngine->globalRotation() *
+        global::windowDelegate->modelMatrix()
     );
 
     // The rotation of all screen space renderables is adjustable in the render engine:
-    return global::renderEngine.screenSpaceRotation() * inverseRotation;
+    return global::renderEngine->screenSpaceRotation() * inverseRotation;
 }
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
@@ -610,12 +567,11 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->activate();
 
-    _shader->setUniform(_uniformCache.alpha, _alpha);
-    _shader->setUniform(_uniformCache.modelTransform, modelTransform);
-
+    _shader->setUniform(_uniformCache.color, _multiplyColor);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(
-        _uniformCache.viewProj,
-        global::renderEngine.scene()->camera()->viewProjectionMatrix()
+        _uniformCache.mvp,
+        global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
     );
 
     ghoul::opengl::TextureUnit unit;
@@ -632,8 +588,6 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {
-}
-
+void ScreenSpaceRenderable::unbindTexture() {}
 
 } // namespace openspace

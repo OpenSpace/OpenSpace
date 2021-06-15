@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,13 @@ uniform int renderPhase;
 uniform float opacity = 1.0;
 uniform float lineWidth;
 
+uniform vec4 viewport;
+
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+const int RenderPhaseLines = 0;
+const int RenderPhasePoints = 1;
 
-#define Delta 0.25
-
+const float Delta = 0.25;
 
 Fragment getFragment() {
     Fragment frag;
@@ -61,9 +62,15 @@ Fragment getFragment() {
         frag.color.a = transparencyCorrection;
     }
 
-    double distanceCenter = length(mathLine - vec2(gl_FragCoord.xy));
+    // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
+    // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
+    // this more complicated method that is also used in the FXAA and HDR rendering steps
+    vec2 xy = vec2(gl_FragCoord.xy);
+    xy -= viewport.xy;
+
+    double distanceCenter = length(mathLine - xy);
     double dLW = double(lineWidth);
-    float blendFactor = 20;
+    const float blendFactor = 20.0;
     
     if (distanceCenter > dLW) {
         frag.color.a = 0.0;
@@ -73,7 +80,7 @@ Fragment getFragment() {
     }
 
     frag.gPosition = vs_gPosition;
-
+    
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 

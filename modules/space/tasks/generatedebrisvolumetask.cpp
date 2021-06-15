@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,6 @@
 
 
 namespace {
-
     constexpr const char* ProgramName = "RenderableSatellites";
     constexpr const char* _loggerCat = "SpaceDebris";
 
@@ -62,13 +61,11 @@ namespace {
     // constexpr const char* KeyInputPath3 = "InputPath3";
     // constexpr const char* KeyInputPath4 = "InputPath4";
 
-
      constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
+     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+} // namespace
 
-}
-
-namespace openspace{
+namespace openspace {
 namespace volume {
 // The list of leap years only goes until 2056 as we need to touch this file then
 // again anyway ;)
@@ -263,14 +260,14 @@ double epochFromSubstring(const std::string& epochString) {
 
 std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
-    
+
     std::vector<KeplerParameters> data;
 
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     file.open(filename);
 
-    int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
+    int numberOfLines = std::count(std::istreambuf_iterator<char>(file),
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
@@ -281,7 +278,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     for (int i = 0; i < numberOfObjects; i++) {
 
         std::getline(file, line); // get rid of title
-        
+
         KeplerParameters keplerElements;
 
         std::getline(file, line);
@@ -379,21 +376,19 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
 
 glm::dvec3 cartesianToSphericalCoord(glm::dvec3 position){
     glm::dvec3 sphericalPosition;
-    //sphericalPosition.x = pow(pow(position.x,2)+pow(position.y,2)+pow(position.z,2) , 0.5);  //abs(position.x + position.y + position.z);  // r
-    //sphericalPosition.y = atan(position.y/position.x);  // theta
-    //sphericalPosition.z = atan(pow(pow(position.x,2)+pow(position.y,2),0.5)/position.z);  // abs(position.x + position.y) // p
-
-    sphericalPosition.x = sqrt(pow(position.x,2)+pow(position.y,2)+pow(position.z,2));  // r [0, MaxApogee]
-    sphericalPosition.y = acos(position.z/sphericalPosition.x);  // theta [0, pi]
-    sphericalPosition.z = atan2(position.y,position.x);  // phi [-pi, pi] -> [0, 2*pi]
-    // if(sphericalPosition.y < 0)
-        sphericalPosition.z += 3.14159265358979323846264338327950288;
+    // r [0, MaxApogee]
+    sphericalPosition.x = sqrt(pow(position.x,2)+pow(position.y,2)+pow(position.z,2));
+    // theta [0, pi]
+    sphericalPosition.y = acos(position.z/sphericalPosition.x);
+    // phi [-pi, pi] -> [0, 2*pi]
+    sphericalPosition.z = atan2(position.y,position.x);
+    sphericalPosition.z += glm::pi<double>();
     return sphericalPosition;
 }
 
-
-std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds, std::string gridType) {
-
+std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
+                                          double timeInSeconds, std::string gridType)
+{
     float minTheta = 0.0;
     float minPhi = 0.0;
     float maxTheta = 0.0;
@@ -437,14 +432,14 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             }
             // LINFO(fmt::format("pos: {} ", sphPos));
             positionBuffer.push_back(sphPos);
-        
+
         }
         else
         {
             positionBuffer.push_back(position);
         }
-        
-        
+
+
     }
     LINFO(fmt::format("max theta: {} ", maxTheta));
     LINFO(fmt::format("max phi: {} ", maxPhi));
@@ -456,7 +451,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
 
 // std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
 //     std::vector<glm::dvec3> positions;
-    
+
 //     float radius = 700000;   // meter
 //     float degreeStep = 360 / numberOfPositions;
 
@@ -483,12 +478,14 @@ float getMaxApogee(std::vector<KeplerParameters> inData){
         double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity);
         if (ah > maxApogee)
             maxApogee = ah;
-    }   
+    }
 
     return static_cast<float>(maxApogee*1000);  // * 1000 for meters
 }
 
-int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, std::string gridType){
+int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee,
+                         std::string gridType)
+{
     // epsilon is to make sure that for example if newPosition.x/maxApogee = 1,
     // then the index for that dimension will not exceed the range of the grid.
     float epsilon = static_cast<float>(0.000000001);
@@ -497,12 +494,15 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
                                         ,position.y + maxApogee
                                         ,position.z + maxApogee);
 
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+        glm::uvec3 coordinateIndex = glm::uvec3(
+            static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon))),
+            static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
+            static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon)))
+        );
 
-        
-        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+
+        return coordinateIndex.z * (dim.x * dim.y) +
+            coordinateIndex.y * dim.x + coordinateIndex.x;
     }
     else if(gridType == "Spherical"){
 
@@ -513,23 +513,20 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
             position.z = 0;
         }
 
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(position.x * dim.x / (maxApogee))
-                                                ,static_cast<int>(position.y * dim.y / (3.14159265358979323846264338327950288))
-                                                ,static_cast<int>(position.z * dim.z / (2*3.14159265358979323846264338327950288)));
+        glm::uvec3 coordinateIndex = glm::uvec3(
+            static_cast<int>(position.x * dim.x / (maxApogee)),
+            static_cast<int>(position.y * dim.y / glm::pi<double>()),
+            static_cast<int>(position.z * dim.z / glm::two_pi<double>()));
 
-        
-        // LINFO(fmt::format("index coords: {} ", coordinateIndex));
-        // LINFO(fmt::format("index dim: {} ", dim));
-        // LINFO(fmt::format("index va: {} ", coordinateIndex.y * (dim.x * dim.y) + coordinateIndex.z * dim.x + coordinateIndex.x));
-
-        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+        return coordinateIndex.z * (dim.x * dim.y) +
+            coordinateIndex.y * dim.x + coordinateIndex.x;
     }
 
     return -1;
 }
 
 double getVoxelVolume(int index, RawVolume<float>& raw, glm::uvec3 dim, float maxApogee){
-    // get coords from index 
+    // get coords from index
     glm::uvec3 coords = raw.indexToCoords(index);
 
     double rMax = maxApogee / dim.x;
@@ -546,9 +543,12 @@ double getVoxelVolume(int index, RawVolume<float>& raw, glm::uvec3 dim, float ma
 
 }
 
-double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee, std::string gridType, RawVolume<float>& raw) {
+double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positions,
+                           glm::uvec3 dim, float maxApogee, std::string gridType,
+                           RawVolume<float>& raw)
+{
 
-    for(const glm::dvec3& position : positions) {
+    for (const glm::dvec3& position : positions) {
         //LINFO(fmt::format("pos: {} ", position));
         int index = getIndexFromPosition(position, dim, maxApogee, gridType);
         //LINFO(fmt::format("index: {} ", index));
@@ -556,7 +556,8 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
             ++densityArray[index];
         }
         else if(gridType == "Spherical"){
-            double voxelVolume = getVoxelVolume(index, raw, dim, maxApogee); //something like this
+            // something like this
+            double voxelVolume = getVoxelVolume(index, raw, dim, maxApogee);
             densityArray[index] += 1/voxelVolume;
         }
     }
@@ -574,9 +575,11 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = dictionary.value<glm::vec3>(KeyDimensions); // must not be <glm::uvec3> for some reason.
+    // must not be <glm::uvec3> for some reason.
+    _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     _startTime = dictionary.value<std::string>(KeyStartTime);
-    _timeStep = dictionary.value<std::string>(KeyTimeStep); // Todo: send KeyTimeStep in as a int or float correctly.
+    // Todo: send KeyTimeStep in as a int or float correctly.
+    _timeStep = dictionary.value<std::string>(KeyTimeStep);
     _endTime = dictionary.value<std::string>(KeyEndTime);
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
@@ -585,10 +588,9 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     _gridType = dictionary.value<std::string>(KeyGridType);
     _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
- 
+
     _TLEDataVector = readTLEFile(_inputPath);
     _maxApogee = getMaxApogee(_TLEDataVector);
-   
 }
 
 std::string GenerateDebrisVolumeTask::description() {
@@ -603,7 +605,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         SpiceManager::ref().unloadKernel(kernel);
     };
 
-    ////////// 
+    //////////
     //1. read TLE-data and position of debris elements.
     // std::vector<KeplerParameters>TLEDataVector = readTLEFile(_inputPath);
     // std::vector<KeplerParameters>TLEDataVector1 = readTLEFile(_inputPath1);
@@ -611,16 +613,39 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     // std::vector<KeplerParameters>TLEDataVector3 = readTLEFile(_inputPath3);
     // std::vector<KeplerParameters>TLEDataVector4 = readTLEFile(_inputPath4);
 
-    // _TLEDataVector.reserve( TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() + TLEDataVector3.size() + TLEDataVector4.size());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector.begin(), TLEDataVector.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector1.begin(), TLEDataVector1.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector2.begin(), TLEDataVector2.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector3.begin(), TLEDataVector3.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector4.begin(), TLEDataVector4.end());
+    // _TLEDataVector.reserve(
+    //     TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() +
+    //     TLEDataVector3.size() + TLEDataVector4.size()
+    // );
+    // _TLEDataVector.insert(
+    //     _TLEDataVector.end(),
+    //     TLEDataVector.begin(),
+    //     TLEDataVector.end()
+    // );
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector1.begin(),
+    //    TLEDataVector1.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector2.begin(),
+    //    TLEDataVector2.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector3.begin(),
+    //    TLEDataVector3.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector4.begin(),
+    //    TLEDataVector4.end()
+    //);
     // ----- or ----- if only one
 
         // _TLEDataVector = readTLEFile(_inputPath);
-    
+
     //////////
     VolumeGridType GridType = VolumeGridType::Cartesian;
     if(_gridType == "Spherical"){
@@ -637,7 +662,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     /**  SEQUENCE
     *   1. handle timeStep
     *       1.1 either ignore last timeperiod from the latest whole timestep to _endTime
-    *       1.2 or extend endTime to be equal to next full timestep 
+    *       1.2 or extend endTime to be equal to next full timestep
     *   2. loop to create a rawVolume for each timestep.
     */
 
@@ -657,16 +682,31 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
     // 2.
-    for(int i=0 ; i<=numberOfIterations ; ++i) {
-
-        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, startTimeInSeconds+(i*timeStep), _gridType);   //+(i*timeStep)     
+    for (int i=0 ; i<=numberOfIterations ; ++i) {
+        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(
+            _TLEDataVector,
+            startTimeInSeconds + (i * timeStep),
+            _gridType
+        );   //+(i*timeStep)
         //LINFO(fmt::format("pos: {} ", startPositionBuffer[4]));
 
         double *densityArrayp = new double[size]();
-        //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
+        //densityArrayp = mapDensityToVoxels(
+        //    densityArrayp,
+        //    generatedPositions,
+        //    _dimensions,
+        //    maxApogee
+        //);
         volume::RawVolume<float> rawVolume(_dimensions);
 
-        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee, _gridType, rawVolume);
+        densityArrayp = mapDensityToVoxels(
+            densityArrayp,
+            startPositionBuffer,
+            _dimensions,
+            _maxApogee,
+            _gridType,
+            rawVolume
+        );
         /*std::vector<glm::dvec3> testBuffer;
         testBuffer.push_back(glm::dvec3(0,0,0));
         testBuffer.push_back(glm::dvec3(1,1.5,1.5));
@@ -675,19 +715,25 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         //testBuffer.push_back(glm::dvec3(10000,1000000000,1000000000));
 
 
-        densityArrayp = mapDensityToVoxels(densityArrayp, testBuffer, _dimensions, _maxApogee, _gridType);
+        densityArrayp = mapDensityToVoxels(
+            densityArrayp,
+            testBuffer,
+            _dimensions,
+            _maxApogee,
+            _gridType
+        );
         */
         // create object rawVolume
-        
+
         //glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
-             
-        // TODO: Create a forEachSatallite and set(cell, value) to combine mapDensityToVoxel
-        //      and forEachVoxel for less time complexity.
+
+        // TODO: Create a forEachSatallite and set(cell, value) to combine
+        //       mapDensityToVoxel and forEachVoxel for less time complexity.
         rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
         //     glm::vec3 coord = _lowerDomainBound +
         //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
             float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
-      
+
             rawVolume.set(cell, value);
 
             minVal = std::min(minVal, value);
@@ -705,22 +751,25 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
         size_t lastIndex = _rawVolumeOutputPath.find_last_of(".");
         std::string rawOutputName = _rawVolumeOutputPath.substr(0, lastIndex);
-        rawOutputName += std::to_string(i) + ".rawvolume"; 
+        rawOutputName += std::to_string(i) + ".rawvolume";
 
         lastIndex = _dictionaryOutputPath.find_last_of(".");
         std::string dictionaryOutputName = _dictionaryOutputPath.substr(0, lastIndex);
-        dictionaryOutputName += std::to_string(i) + ".dictionary"; 
+        dictionaryOutputName += std::to_string(i) + ".dictionary";
 
         ghoul::filesystem::File file(rawOutputName);
         const std::string directory = file.directoryName();
         if (!FileSys.directoryExists(directory)) {
-            FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+            FileSys.createDirectory(
+                directory,
+                ghoul::filesystem::FileSystem::Recursive::Yes
+            );
         }
-    
+
         volume::RawVolumeWriter<float> writer(rawOutputName);
         writer.write(rawVolumeQueue.front());
         rawVolumeQueue.pop();
-        
+
         RawVolumeMetadata metadata;
         // alternatively metadata.hasTime = false;
         metadata.time = Time::convertTime(_startTime)+(i*timeStep);
@@ -745,7 +794,6 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         std::fstream f(dictionaryOutputName, std::ios::out);
         f << "return " << metadataString;
         f.close();
-    
     }
 }
 

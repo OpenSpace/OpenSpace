@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,132 +24,33 @@
 
 #include <openspace/properties/matrix/mat4property.h>
 
-#include <ghoul/misc/misc.h>
-
-#include <limits>
-#include <sstream>
-#include <vector>
-
-using std::numeric_limits;
-
-namespace {
-
-glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat4x4 result = glm::mat4x4(1.f);
-    lua_pushnil(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x4>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat4x4>::value; ++j) {
-            int hasNext = lua_next(state, -2);
-            if (hasNext != 1) {
-                success = false;
-                return glm::mat4x4(1.f);
-            }
-            if (lua_isnumber(state, -1) != 1) {
-                success = false;
-                return glm::mat4x4(1.f);
-            }
-            else {
-                result[i][j]
-                        = static_cast<glm::mat4x4::value_type>(lua_tonumber(state, -1));
-                lua_pop(state, 1);
-                ++number;
-            }
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::mat4x4 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x4>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat4x4>::value; ++j) {
-            lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));
-            lua_rawseti(state, -2, number);
-            ++number;
-        }
-    }
-    return true;
-}
-
-glm::mat4x4 fromStringConversion(const std::string& val, bool& success) {
-    glm::mat4x4 result = glm::mat4x4(1.f);
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() !=
-        (ghoul::glm_rows<glm::mat4x4>::value * ghoul::glm_cols<glm::mat4x4>::value))
-    {
-        success = false;
-        return result;
-    }
-    int number = 0;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x4>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat4x4>::value; ++j) {
-            std::stringstream s(tokens[number]);
-            glm::mat4x4::value_type v;
-            s >> v;
-            if (s.fail()) {
-                success = false;
-                return result;
-            }
-            else {
-                result[i][j] = v;
-                ++number;
-            }
-        }
-    }
-    success = true;
-    return result;
-}
-
-bool toStringConversion(std::string& outValue, glm::mat4x4 inValue) {
-    outValue = "[";
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat4x4>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat4x4>::value; ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
-        }
-    }
-    outValue.pop_back();
-    outValue += "]";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<float>;
+Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4x4 value,
+                           glm::mat4x4 minValue, glm::mat4x4 maxValue,
+                           glm::mat4x4 stepValue)
+    : NumericalProperty<glm::mat4x4>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    Mat4Property,
-    glm::mat4x4,
-    glm::mat4x4(1.f),
-    glm::mat4x4(
-        nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(), nl::lowest()
-    ),
-    glm::mat4x4(
-        nl::max(), nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(), nl::max()
-    ),
-    glm::mat4x4(
-        0.01f, 0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f, 0.01f
-    ),
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string Mat4Property::className() const {
+    return "Mat4Property";
+}
+
+int Mat4Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::mat4x4 Mat4Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::mat4x4>(state, success);
+}
 
 }  // namespace openspace::properties

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,8 +64,10 @@ public:
      * \pre \p timeString must not be empty
      */
     static double convertTime(const std::string& time);
+    static double convertTime(const char* time);
 
     explicit Time(double secondsJ2000 = -1);
+    explicit Time(const std::string& time);
     Time(const Time& other) = default;
 
     /**
@@ -98,7 +100,8 @@ public:
      * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
      * \param time The time to be set as a date string
      */
-    void setTime(std::string time);
+    void setTime(const std::string& time);
+    void setTime(const char* time);
 
     /**
      * Returns the current time as the number of seconds past the J2000 epoch. If the
@@ -112,13 +115,19 @@ public:
      * thus also compliant with the Spice library.
      * \return The current time as a formatted date string
      */
-    std::string UTC() const;
+    std::string_view UTC() const;
 
     /**
-    * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
-    * \return The current time as a ISO 8601 formatted string
-    */
-    std::string ISO8601() const;
+     * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
+     * \return The current time as a ISO 8601 formatted string
+     */
+    std::string_view ISO8601() const;
+
+    /**
+     * Creates the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ into the
+     * provided Buffer. The buffer needs to have space for 25 characters.
+     */
+    void ISO8601(char* buffer) const;
 
     /**
      * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.

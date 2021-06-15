@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "InteractionMonitor";
-
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle Time",
@@ -65,7 +63,7 @@ void InteractionMonitor::setIdleTime(float time) {
 }
 
 void InteractionMonitor::updateActivityState() {
-    const double currentApplicationTime = global::windowDelegate.applicationTime();
+    const double currentApplicationTime = global::windowDelegate->applicationTime();
     const double timeDiff = currentApplicationTime - _lastInteractionTime;
 
     if (timeDiff >= _idleTime && _isInActiveState) {
@@ -74,7 +72,7 @@ void InteractionMonitor::updateActivityState() {
 }
 
 void InteractionMonitor::markInteraction() {
-    _lastInteractionTime = global::windowDelegate.applicationTime();
+    _lastInteractionTime = global::windowDelegate->applicationTime();
     _isInActiveState = true;
 }
 

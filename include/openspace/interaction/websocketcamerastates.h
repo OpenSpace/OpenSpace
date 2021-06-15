@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,11 +106,46 @@ private:
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::WebsocketCameraStates::AxisType& type);
+inline std::string to_string(
+                      const openspace::interaction::WebsocketCameraStates::AxisType& type)
+{
+    using T = openspace::interaction::WebsocketCameraStates::AxisType;
+    switch (type) {
+        case T::None:        return "None";
+        case T::OrbitX:      return "Orbit X";
+        case T::OrbitY:      return "Orbit Y";
+        case T::ZoomIn:      return "Zoom In";
+        case T::ZoomOut:     return "Zoom Out";
+        case T::LocalRollX:  return "LocalRoll X";
+        case T::LocalRollY:  return "LocalRoll Y";
+        case T::GlobalRollX: return "GlobalRoll X";
+        case T::GlobalRollY: return "GlobalRoll Y";
+        case T::PanX:        return "Pan X";
+        case T::PanY:        return "Pan Y";
+        default:             return "";
+    }
+}
 
 template <>
-openspace::interaction::WebsocketCameraStates::AxisType
-from_string(const std::string& string);
+constexpr openspace::interaction::WebsocketCameraStates::AxisType from_string(
+                                                                  std::string_view string)
+{
+    using T = openspace::interaction::WebsocketCameraStates::AxisType;
+
+    if (string == "None") { return T::None; }
+    if (string == "Orbit X") { return T::OrbitX; }
+    if (string == "Orbit Y") { return T::OrbitY; }
+    if (string == "Zoom In") { return T::ZoomIn; }
+    if (string == "Zoom Out") { return T::ZoomOut; }
+    if (string == "LocalRoll X") { return T::LocalRollX; }
+    if (string == "LocalRoll Y") { return T::LocalRollY; }
+    if (string == "GlobalRoll X") { return T::GlobalRollX; }
+    if (string == "GlobalRoll Y") { return T::GlobalRollY; }
+    if (string == "Pan X") { return T::PanX; }
+    if (string == "Pan Y") { return T::PanY; }
+
+    throw RuntimeError("Unknown axis type '" + std::string(string) + "'");
+}
 
 } // namespace ghoul
 

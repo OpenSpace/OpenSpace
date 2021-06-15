@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,7 +66,7 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
 
-            if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
+            if (layerDict.hasValue<ghoul::Dictionary>(KeyFallback))  {
                 LWARNING("Unable to create layer. Initializing fallback layer.");
                 ghoul::Dictionary fallbackLayerDict =
                     layerDict.value<ghoul::Dictionary>(KeyFallback);
@@ -114,6 +114,8 @@ int LayerGroup::update() {
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    ZoneScoped
+
     documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),
         layerDict
@@ -122,7 +124,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("Error adding layer. " + ghoul::to_string(res));
     }
 
-    if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
+    if (!layerDict.hasValue<std::string>("Identifier")) {
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }
@@ -151,6 +153,9 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          ++it)
     {
         if (it->get()->identifier() == layerName) {
+            // we need to make a copy as the layername is only a reference
+            // which will no longer be valid once it is deleted
+            std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
@@ -158,7 +163,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
             }
-            LINFO("Deleted layer " + layerName);
+            LINFO("Deleted layer " + name);
 
             if (_layers.empty()) {
                 _levelBlendingEnabled.setVisibility(

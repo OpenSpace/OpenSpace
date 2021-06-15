@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -40,7 +41,7 @@ namespace documentation { struct Documentation; }
 
 class Scale : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(
+    static ghoul::mm_unique_ptr<Scale> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Scale();
@@ -48,8 +49,8 @@ public:
 
     virtual bool initialize();
 
-    double scaleValue() const;
-    virtual double scaleValue(const UpdateData& data) const = 0;
+    glm::dvec3 scaleValue() const;
+    virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
     virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
@@ -60,7 +61,7 @@ protected:
 private:
     bool _needsUpdate = true;
     double _cachedTime = -std::numeric_limits<double>::max();
-    double _cachedScale = 1.0;
+    glm::dvec3 _cachedScale = glm::dvec3(1.0);
 };
 
 }  // namespace openspace

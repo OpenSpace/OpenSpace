@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,28 +34,22 @@ namespace {
         "This value is used as a scaling factor for the scene graph node that this "
         "transformation is attached to relative to its parent."
     };
+
+    struct [[codegen::Dictionary(StaticScale)]] Parameters {
+        // [[codegen::verbatim(ScaleInfo.description)]]
+        float scale;
+    };
+#include "staticscale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation StaticScale::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Static Scaling",
-        "base_scale_static",
-        {
-            {
-                ScaleInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                ScaleInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
-double StaticScale::scaleValue(const UpdateData&) const {
-    return _scaleValue;
+glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {
+    return glm::dvec3(_scaleValue);
 }
 
 StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
@@ -67,9 +61,8 @@ StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary) : StaticScale() {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
-
-    _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _scaleValue = p.scale;
 }
 
 } // namespace openspace

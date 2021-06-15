@@ -3,42 +3,63 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "6dF Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_6dF_textures",
-    Version = 2
+  Name = "6dF Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_6dF_textures",
+  Version = 2
 })
 
 local speck = asset.syncedResource({
-    Name = "6dF Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_6dF_speck",
-    Version = 2
+  Name = "6dF Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_6dF_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "6dF",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 0.0 },
-        Opacity = 1.0,
-        File = speck .. "/6dF.speck",
-        Texture = textures .. "/point3A.png",
-        ColorMap = speck .. "/6dF.cmap",
-        ColorOption = { "redshift", "proximity" },
-        ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
-        Unit = "Mpc",
-        ScaleFactor = 534.0,
-        BillboardMaxSize = 7.0,
-        EnablePixelSizeControl = true,
-    },
-    GUI = {
-        Name = "6dF Galaxies",
-        Path = "/Universe/Galaxies"
-    }
+  Identifier = "6dF",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 0.0 },
+    Opacity = 1.0,
+    File = speck .. "/6dF.speck",
+    Unit = "Mpc",
+    Texture = textures .. "/point3A.png",
+    ColorMap = speck .. "/6dF.cmap",
+    ColorOption = { "redshift", "proximity" },
+    ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
+    ScaleFactor = 534.0,
+    BillboardMinMaxSize = { 0.0, 9.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "6dF Galaxies",
+    Path = "/Universe/Galaxies",
+    Description = [[Census 109,569 galaxies. DU Version 1.4.<br> The Six-degree Field
+        (6dF) Galaxy Survey mapped nearly half the sky from the Anglo-Australian
+        Observatory. Unlike previous datasets, this one is not all-sky, meaning there
+        are patches of sky that are not covered. In this case, the entire northern
+        hemisphere has no coverage at all. This catalog overlaps with the Tully
+        dataset, and there is a noticeable difference in the quality of these
+        datasets. Tully is much tighter and the structure is more apparent, while the
+        6dF data are more spread out. This is because of local motions within galaxy
+        clusters have not been corrected in these data. (Description from URL)
+        <br><br> Data Reference: The 6dF Galaxy Survey Redshift Catalogue
+        (Jones+, 2009)]]
+  }
 }
 
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "6dF Galaxies",
+  Version = "2.0",
+  Description = [[Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"6dF"}
+}

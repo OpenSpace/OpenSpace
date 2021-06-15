@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,36 +54,36 @@ public:
      * Checks if a date/time value falls within the start/end range defined in this
      * instance of the class.
      *
-     * \param checkTime An ISO8601 date/time string to test if it falls within the range
+     * \param checkTime The time to test if it falls within the range
      *
      * \returns true if the input date/time falls between the start and end date/times
     */
-    bool includes(const std::string& checkTime);
+    bool includes(const Time& checkTime) const;
 
     /*
      * Enforces the start/end range on a given date/time string by clamping the value
      *
      * \param checkTime An ISO8601 date/time string to clamp if falls outside of range
      *
-     * \returns clamped value of input parameter, will be equal to the start value if 
+     * \returns clamped value of input parameter, will be equal to the start value if
      *          less than start, equal to end if greater than end, or equal to input
      *          parameter if falls in-between
     */
-    std::string clamp(const std::string& checkTime);
+    const char* clamp(const char* checkTime);
 
     /*
      * Get the start date/time of the time range
      *
      * \returns The ISO8601 date/time string that defines the start of the range
      */
-    std::string start() const;
+    std::string_view start() const;
 
     /*
      * Get the end date/time of the time range
      *
      * \returns The ISO8601 date/time string that defines the end of the range
      */
-    std::string end() const;
+    std::string_view end() const;
 
     /*
      * Set the start date/time of the time range
@@ -122,21 +122,14 @@ public:
      *
      * \params initDateTime the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss)
      */
-    DateTime(const std::string& initDateTime);
+    DateTime(std::string_view initDateTime);
 
     /*
      * Set the date/time value
      *
      * \params input the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) to set
      */
-    void setTime(const std::string& input);
-
-    /*
-     * Used to deep-copy from another DateTime instance
-     *
-     * \params src the DateTime object to copy from
-     */
-    void operator=(DateTime& src);
+    void setTime(std::string_view input);
 
     /*
      * Get the date/time value in ISO8601 format
@@ -227,7 +220,7 @@ public:
 
     /*
      * Increment operation for the date/time
-     * 
+     *
      * \param value integer value for number of units in an operation
      * \param unit single char that specifies the unit of increment. Allowable units are:
      *             (y)ear, (M)onth, (d)ay, (h)our, (m)inute, (s)econd
@@ -254,7 +247,7 @@ public:
      * \returns The number of decrements that were performed in order to get as close as
      *          possible to the target, where each decrement is defined by the value &
      *          unit (and approximated but not fixed by the resolution param)
-     */    
+     */
     int decrement(int value, char unit, double error, double resolution);
 
     /*
@@ -276,17 +269,6 @@ public:
     void decrementOnce(int value, char unit);
 
 private:
-    // index_ values are indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
-    const int index_year = 0;
-    const int index_month = 5;
-    const int index_day = 8;
-    const int index_hour = 11;
-    const int index_minute = 14;
-    const int index_second = 17;
-
-    const int len_year = 4;
-    const int len_nonYear = 2;
-
     int _year = 2000;
     int _month = 1;
     int _day = 1;
@@ -369,7 +351,6 @@ public:
 private:
     void verifyStartTimeRestrictions();
     void verifyResolutionRestrictions(const int value, const char unit);
-    double diff(DateTime& from, DateTime& to);
     void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;

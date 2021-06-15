@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,13 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
+#include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderablesmallbody.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/simplespheregeometry.h>
-//#include <modules/space/tasks/generatedebrisvolumetask.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/tletranslation.h>
@@ -68,7 +67,7 @@ SpaceModule::SpaceModule()
     addProperty(_showSpiceExceptions);
 }
 
-void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
+void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
         "PlanetGeometry"
@@ -80,7 +79,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
     );
-
+    fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
     fRenderable->registerClass<RenderableSmallBody>("RenderableSmallBody");
@@ -106,6 +105,10 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+
+    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
+        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
+    }
 }
 
 void SpaceModule::internalDeinitializeGL() {
@@ -115,6 +118,7 @@ void SpaceModule::internalDeinitializeGL() {
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         RenderableConstellationBounds::Documentation(),
+        RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
         RenderableSatellites::Documentation(),
         RenderableSmallBody::Documentation(),

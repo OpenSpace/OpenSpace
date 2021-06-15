@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,7 @@ public:
     explicit RenderableGalaxy(const ghoul::Dictionary& dictionary);
     virtual ~RenderableGalaxy() = default;
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
@@ -56,14 +57,13 @@ public:
 private:
     void renderPoints(const RenderData& data);
     void renderBillboards(const RenderData& data);
-    float safeLength(const glm::vec3& vector) const;
 
     struct Result {
         bool success;
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> color;
     };
-    Result loadPointFile(const std::string& file);
+    Result loadPointFile();
     Result loadCachedFile(const std::string& file);
 
     glm::vec3 _volumeSize = glm::vec3(0.f);
@@ -75,7 +75,6 @@ private:
     properties::FloatProperty _emissionMultiply;
     properties::OptionProperty _starRenderingMethod;
     properties::FloatProperty _enabledPointsRatio;
-    properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::FloatProperty _downScaleVolumeRendering;
     properties::FloatProperty _numberOfRayCastingSteps;
@@ -110,6 +109,9 @@ private:
     GLuint _pointsVao = 0;
     GLuint _positionVbo = 0;
     GLuint _colorVbo = 0;
+
+    std::vector<glm::vec3> _pointPositionsCache;
+    std::vector<glm::vec3> _pointColorsCache;
 };
 
 } // namespace openspace

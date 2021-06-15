@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+
+local layer = {
+  Identifier = "Lola_Shade_Sweden",
+  Name = "Lola Shade [Sweden]",
+  FilePath = mapServiceConfigs .. "/LiU/Lola_Shade.wms"
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

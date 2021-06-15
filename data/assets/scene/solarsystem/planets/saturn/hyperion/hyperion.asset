@@ -1,53 +1,59 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
-
-
-
--- local textures = asset.syncedResource({
---     Name = "Hyperion textures",
---     Type = "HttpSynchronization",
---     Identifier = "hyperion_textures",
---     Version = 1
--- })
+asset.require('./trail')
+local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Hyperion = {
-    Identifier = "Hyperion",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "HYPERION",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        }
-        --[[
-         The IAU report does not give an orientation model for Hyperion.
-         Hyperion's rotation is in chaotic and is not predictable for
-         long periods.
-        ]]--
-    },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 360200, 266000, 205400},
-        SegmentsPerPatch = 64,
-        Layers = {
-            -- ColorLayers = {
-            --     {
-            --         Name = "Hyperion Texture",
-            --         FilePath = textures .. "/hyperion.jpg",
-            --         Enabled = true
-            --     }
-            -- }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+  Identifier = "Hyperion",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "HYPERION",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     }
+    --[[
+      The IAU report does not give an orientation model for Hyperion.
+      Hyperion's rotation is in chaotic and is not predictable for
+      long periods.
+    ]]--
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 360200, 266000, 205400},
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
+      Enabled = false,
+      FileName = labelsPath .. "/hyperion.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.6,
+      FadeInEnabled = true,
+      FadeDistances = { 500000.0, 1000000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Hyperion",
+    Path = "/Solar System/Planets/Saturn/Moons"
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Hyperion })
+
+
+asset.meta = {
+  Name = "Hyperion",
+  Version = "1.0",
+  Description = [[ Hyperion globe with labels]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Hyperion"}
+}

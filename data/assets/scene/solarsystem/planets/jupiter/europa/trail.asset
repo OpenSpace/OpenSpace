@@ -6,27 +6,37 @@ local kernel = asset.require('../kernels').jup310
 
 
 local EuropaTrail = {
-    Identifier = "EuropaTrail",
-    Parent = transforms.JupiterBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "EUROPA",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 85.0 / 24.0,
-        Resolution = 1000
+  Identifier = "EuropaTrail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EUROPA",
+      Observer = "JUPITER BARYCENTER",
+      Kernels = kernel
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    GUI = {
-        Name = "Europa Trail",
-        Path = "/Solar System/Planets/Jupiter/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 85.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+  GUI = {
+    Name = "Europa Trail",
+    Path = "/Solar System/Planets/Jupiter/Moons"
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EuropaTrail })
+
+
+asset.meta = {
+  Name = "Europa Trail",
+  Version = "1.0",
+  Description = [[ Trail of Europa as observed by the Jupiter. Data from NASA Spice (see
+    base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"EuropaTrail"}
+}

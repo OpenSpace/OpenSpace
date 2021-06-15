@@ -3,33 +3,42 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local speck = asset.syncedResource({
-    Name = "Star Labels Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_starlabels_speck",
-    Version = 2
+  Name = "Star Labels Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_starlabels_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "StarsLabels",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.65,
-        LabelFile = speck .. "/stars.label",
-        TextColor = { 0.4, 0.4, 0.4, 1.0 },
-        DrawLabels = true,
-        TextSize = 14.7,
-        TextMinSize = 6.0,
-        TextMaxSize = 50.0,
-        Unit = "pc"
-    },
-    GUI = {
-        Name = "Stars Labels",
-        Path = "/Milky Way/Stars"
-    }
+  Identifier = "StarsLabels",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.65,
+    LabelFile = speck .. "/stars.label",
+    Unit = "pc",
+    TextColor = { 0.4, 0.4, 0.4 },
+    DrawLabels = true,
+    TextSize = 14.7,
+    TextMinMaxSize = { 6, 50 }
+  },
+  GUI = {
+    Name = "Stars Labels",
+    Path = "/Milky Way/Stars",
+    Description = [[Labels for stars in the Milky Way. See 'Stars' for more info.]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Star Labels",
+  Version = "2.0",
+  Description = [[Digital Universe asset for labels of the stars.]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"StarsLabels"}
+}

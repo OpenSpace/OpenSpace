@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,23 +34,28 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInFilePath = "InFilePath";
-    constexpr const char* KeyOutFilePath = "OutFilePath";
-
     constexpr const char* _loggerCat = "ReadSpeckTask";
+
+    struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
+        // The path to the SPECK file that are to be read
+        std::string inFilePath;
+        
+        // The path to the file to export raw VBO data to
+        std::string outFilePath;
+    };
+#include "readspecktask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ReadSpeckTask"
-    );
+documentation::Documentation ReadSpeckTask::Documentation() {
+    return codegen::doc<Parameters>("gaiamission_speckfiletorawdata");
+}
 
-    _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
-    _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inFilePath = absPath(p.inFilePath);
+    _outFilePath = absPath(p.outFilePath);
 }
 
 std::string ReadSpeckTask::description() {
@@ -65,7 +70,10 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     int32_t nRenderValues = 0;
 
     FitsFileReader fileReader(false);
-    std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
+    std::vector<float> fullData = fileReader.readSpeckFile(
+        _inFilePath.string(),
+        nRenderValues
+    );
 
     onProgress(0.9f);
 
@@ -90,33 +98,6 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     }
 
     onProgress(1.f);
-}
-
-documentation::Documentation ReadSpeckTask::Documentation() {
-    using namespace documentation;
-    return {
-        "ReadSpeckTask",
-        "gaiamission_speckfiletorawdata",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("ReadSpeckTask"),
-                Optional::No
-            },
-            {
-                KeyInFilePath,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that are to be read.",
-            },
-            {
-                KeyOutFilePath,
-                new StringVerifier,
-                Optional::No,
-                "The path to the file to export raw VBO data to.",
-            },
-        }
-    };
 }
 
 } // namespace openspace

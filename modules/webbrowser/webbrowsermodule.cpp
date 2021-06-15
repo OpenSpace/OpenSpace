@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <modules/webbrowser/include/cefhost.h>
+#include <modules/webbrowser/include/eventhandler.h>
+#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -36,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -72,8 +74,9 @@ WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
+    , _eventHandler(new EventHandler)
 {
-    global::callback::deinitialize.emplace_back([this]() {
+    global::callback::deinitialize->emplace_back([this]() {
         ZoneScopedN("WebBrowserModule")
 
         deinitialize();
@@ -105,7 +108,7 @@ void WebBrowserModule::internalDeinitialize() {
         return;
     }
 
-    _eventHandler.resetBrowserInstance();
+    _eventHandler->resetBrowserInstance();
 
     bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
@@ -113,43 +116,37 @@ void WebBrowserModule::internalDeinitialize() {
     }
 }
 
-std::string WebBrowserModule::findHelperExecutable() {
-    std::string execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
-    if (!FileSys.fileExists(execLocation)) {
+std::filesystem::path WebBrowserModule::findHelperExecutable() {
+    std::filesystem::path execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
+    if (!std::filesystem::is_regular_file(execLocation)) {
         LERROR(fmt::format(
             "Could not find web helper executable at location: {}" , execLocation
         ));
     }
     return execLocation;
-
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
-    if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
+    if (dictionary.hasValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
     }
     else {
         _webHelperLocation = findHelperExecutable();
     }
 
-    if (dictionary.hasKeyAndValue<bool>("Enabled")) {
+    if (dictionary.hasValue<bool>("Enabled")) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isGuiWindow =
-        global::windowDelegate.hasGuiWindow() ?
-        global::windowDelegate.isGuiWindow() :
-        true;
-    const bool isMaster = global::windowDelegate.isMaster();
-
-    if (!_enabled || !isGuiWindow || !isMaster) {
+    const bool isMaster = global::windowDelegate->isMaster();
+    if (!_enabled || (!isMaster)) {
         return;
     }
 
-    LDEBUG("CEF using web helper executable: " + _webHelperLocation);
-    _cefHost = std::make_unique<CefHost>(_webHelperLocation);
+    LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
+    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
     LDEBUG("Starting CEF... done!");
 
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
@@ -163,7 +160,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         );
     }
 
-    _eventHandler.initialize();
+    _eventHandler->initialize();
 
     // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -191,7 +188,7 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
         _browsers.erase(p);
     }
     else {
-        LWARNING("Could not find browser in list of browsers.");
+        LWARNING("Could not find browser in list of browsers");
     }
 
     if (_browsers.empty()) {
@@ -203,17 +200,13 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
 
 void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
     if (_enabled) {
-        _eventHandler.setBrowserInstance(browserInstance);
+        _eventHandler->setBrowserInstance(browserInstance);
     }
-}
-
-EventHandler WebBrowserModule::eventHandler() {
-    return _eventHandler;
 }
 
 void WebBrowserModule::detachEventHandler() {
     if (_enabled) {
-        _eventHandler.setBrowserInstance(nullptr);
+        _eventHandler->setBrowserInstance(nullptr);
     }
 }
 
@@ -221,17 +214,14 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
-/**
- * Logic for the webbrowser performance hotfix,
- * described in more detail in globalscallbacks.h.
- */
+/// Logic for the webbrowser performance hotfix, described in globalscallbacks.h
 namespace webbrowser {
 
- /**
-* The time interval to describe how often the CEF message loop needs to
-* be pumped to work properly. A value of 10000 us updates CEF a 100 times
-* per second which is enough for fluid interaction without wasting resources
-*/
+/**
+ * The time interval to describe how often the CEF message loop needs to be pumped to work
+ * properly. A value of 10000 us updates CEF a 100 times per second which is enough for
+ * fluid interaction without wasting resources
+ */
 std::chrono::microseconds interval = std::chrono::microseconds(10000);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
@@ -252,7 +242,7 @@ void update() {
         latestCall = timeAfter;
     }
 }
-}
+
+} // namespace webbrowser
 
 } // namespace openspace
-

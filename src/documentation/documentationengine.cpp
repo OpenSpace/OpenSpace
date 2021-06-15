@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,10 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/profiling.h>
 
 #include <fstream>
 
@@ -45,13 +47,11 @@ namespace openspace::documentation {
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                                                              Documentation documentation)
+                                                                        Documentation doc)
     : ghoul::RuntimeError(fmt::format(
-        "Duplicate Documentation with name '{}' and id '{}'",
-        documentation.name,
-        documentation.id
+        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
     ))
-    , documentation(std::move(documentation))
+    , documentation(std::move(doc))
 {}
 
 DocumentationEngine::DocumentationEngine()
@@ -194,6 +194,8 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
 void DocumentationEngine::writeDocumentationHtml(const std::string& path,
                                                  std::string data)
 {
+    ZoneScoped
+
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);
     handlebarsInput.open(absPath(HandlebarsFilename));

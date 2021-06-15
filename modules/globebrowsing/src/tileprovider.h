@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
 
@@ -76,7 +77,7 @@ struct TileProvider : public properties::PropertyOwner {
 
     std::string name;
 
-    unsigned int uniqueIdentifier = 0;
+    uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
 };
 
@@ -174,6 +175,8 @@ struct TemporalTileProvider : public TileProvider {
 
     ghoul::Dictionary initDict;
     properties::StringProperty filePath;
+    properties::BoolProperty useFixedTime;
+    properties::StringProperty fixedTime;
     std::string gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> tileProviderMap;

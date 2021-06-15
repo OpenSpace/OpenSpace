@@ -5,20 +5,31 @@ asset.require("spice/base")
 
 
 local JupiterBarycenter = {
-    Identifier = "JupiterBarycenter",
-    Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "JUPITER BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Jupiter Barycenter",
-        Path = "/Solar System/Planets/Jupiter",
-        Hidden = true
+  Identifier = "JupiterBarycenter",
+  Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER BARYCENTER",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "Jupiter Barycenter",
+    Path = "/Solar System/Planets/Jupiter",
+    Hidden = true
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterBarycenter })
+
+
+asset.meta = {
+  Name = "Jupiter Transforms",
+  Version = "1.0",
+  Description = [[ Jupiter Barycenter transform]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JupiterBarycenter"}
+}

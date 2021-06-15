@@ -2,45 +2,59 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local trajectory = asset.syncedResource({
-    Name = "C-2019 Q4 Borisov Trajectory",
-    Type = "HttpSynchronization",
-    Identifier = "borisov_horizons",
-    Version = 1
+  Name = "C-2019 Q4 Borisov Trajectory",
+  Type = "HttpSynchronization",
+  Identifier = "borisov_horizons",
+  Version = 1
 })
 
 local C2019Q4BorisovTrail = {
-    Identifier = "C2019Q4BorisovTrail",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "HorizonsTranslation",
-            HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
-        },
-        Color = { 0.9, 0.9, 0.0 },
-        StartTime = "2015 JAN 01 00:00:00",
-        EndTime = "2024 JAN 01 00:00:00",
-        SampleInterval = 60
+  Identifier = "C2019Q4BorisovTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
     },
-    GUI = {
-        Name = "C-2019 Q4 Borisov Trail",
-        Path = "/Solar System/Interstellar"
-    }
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "2015 JAN 01 00:00:00",
+    EndTime = "2024 JAN 01 00:00:00",
+    SampleInterval = 60 * 60 * 24 * 7
+  },
+  GUI = {
+    Name = "C/2019 Q4 Borisov Trail",
+    Path = "/Solar System/Interstellar"
+  }
 }
 
 local C2019Q4BorisovPosition = {
-    Identifier = "C2019Q4BorisovPosition",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "HorizonsTranslation",
-            HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
-        },
-    },
-    GUI = {
-        Name = "C-2019 Q4 Borisov",
-        Path = "/Solar System/Interstellar"
+  Identifier = "C2019Q4BorisovPosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = trajectory .. "/horizons_c2019q4borisov.dat"
     }
+  },
+  GUI = {
+    Name = "C/2019 Q4 Borisov",
+    Path = "/Solar System/Interstellar"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { C2019Q4BorisovPosition, C2019Q4BorisovTrail })
+
+
+asset.meta = {
+  Name = "C/2019 Q4 Borisov",
+  Version = "1.0",
+  Description = [[ This asset contains the trail
+    and position of C-2019 Q4 Borisov from 2015 JAN 01 00:00:00
+    to 2024 JAN 01 00:00:00. Data from JPL Horizons']],
+  Author = "OpenSpace Team",
+  URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+  License = [[ JPL-authored documents are sponsored by NASA under Contract
+    NAS7-030010. All documents available from this server may be protected
+    under the U.S. and Foreign Copyright Laws."]]
+}

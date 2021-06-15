@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/lightsource.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -83,6 +84,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(ParallelPeer::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());
+    engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());

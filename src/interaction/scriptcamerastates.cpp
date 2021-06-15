@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,11 @@
 
 #include <openspace/interaction/inputstate.h>
 
-namespace {
-    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
-    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
-}
-
 namespace openspace::interaction {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
 
-void ScriptCameraStates::updateStateFromInput(const InputState& inputState,
-                                             double deltaTime)
-{
+void ScriptCameraStates::updateStateFromInput(const InputState&, double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {
         _localRotationState.velocity.set(
             _localRotation * _sensitivity,
@@ -113,6 +106,5 @@ void ScriptCameraStates::addLocalRoll(const glm::dvec2& delta) {
 void ScriptCameraStates::addGlobalRoll(const glm::dvec2& delta) {
     _globalRoll += delta;
 }
-
 
 } // namespace openspace::interaction

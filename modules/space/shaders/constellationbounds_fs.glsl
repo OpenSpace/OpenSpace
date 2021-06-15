@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,14 @@
 
 in vec4 vs_position;
 
-uniform vec4 campos;
-uniform vec4 objpos;
 uniform vec3 color;
 
 Fragment getFragment() {
-    vec4 position = vs_position;
+  vec4 position = vs_position;
     
-    Fragment frag;
-    frag.color = vec4(color, 1.0);
-    frag.depth = pscDepth(position);
+  Fragment frag;
+  frag.color = vec4(color, 1.0);
+  frag.depth = pscDepth(position);
 
-    return frag;
+  return frag;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@ bool operator==(const TileIndex& lhs, const TileIndex& rhs) {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.level == rhs.level);
 }
 
-TileIndex::TileIndex(int x_, int y_, int level_)
+TileIndex::TileIndex(uint32_t x_, uint32_t y_, uint8_t level_)
     : x(x_)
     , y(y_)
     , level(level_)

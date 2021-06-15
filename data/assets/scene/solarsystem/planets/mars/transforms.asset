@@ -3,20 +3,32 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local MarsBarycenter = {
-    Identifier = "MarsBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MARS BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Mars Barycenter",
-        Path = "/Solar System/Planets/Mars",
-        Hidden = true
+  Identifier = "MarsBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MARS BARYCENTER",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "Mars Barycenter",
+    Path = "/Solar System/Planets/Mars",
+    Hidden = true,
+    Description = [[ SPICE Translation for targeting Mars Barycenter]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { MarsBarycenter })
+
+
+asset.meta = {
+  Name = "Mars Transforms",
+  Version = "1.0",
+  Description = [[ Transform with position for Mars.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"MarsBarycenter"}
+}

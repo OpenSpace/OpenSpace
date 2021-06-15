@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     bool _textureIsDirty = false;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-//    ghoul::opengl::Texture* _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;

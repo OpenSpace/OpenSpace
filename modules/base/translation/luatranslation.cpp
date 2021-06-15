@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-
 #include <chrono>
 
 namespace {
@@ -46,31 +45,19 @@ namespace {
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the translation."
     };
+
+    struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::string script;
+    };
+#include "luatranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Lua Translation",
-        "base_transform_translation_lua",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("LuaTranslation"),
-                Optional::No
-            },
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_transform_translation_lua");
 }
-
 
 LuaTranslation::LuaTranslation()
     : _luaScriptFile(ScriptInfo)
@@ -80,8 +67,8 @@ LuaTranslation::LuaTranslation()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() {
              requireUpdate();
              notifyObservers();
          });
@@ -89,13 +76,8 @@ LuaTranslation::LuaTranslation()
 }
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticTranslation"
-    );
-
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {

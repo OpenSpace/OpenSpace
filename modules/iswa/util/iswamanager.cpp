@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <filesystem>
 #include <fstream>
 
 #include "iswamanager_lua.inl"
@@ -84,7 +85,7 @@ namespace {
 
     void createScreenSpace(int id) {
         std::string idStr = std::to_string(id);
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -190,7 +191,7 @@ void IswaManager::addIswaCygnet(int id, const std::string& type, std::string gro
             };
 
         // Download metadata
-        global::downloadManager.fetchFile(
+        global::downloadManager->fetchFile(
             _baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err) {
@@ -221,7 +222,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos) {
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                                                                        double timestamp)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -241,7 +242,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                                                                       double timestamp)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -268,9 +269,8 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
               "window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }
 
-    //std::string t = Time::ref().currentTimeUTC();
-    std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
-    std::stringstream ss(t);
+    std::stringstream ss;
+    ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
     std::getline(ss, token, ' ');
@@ -339,7 +339,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id) {
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
-    global::downloadManager.fetchFile(
+    global::downloadManager->fetchFile(
         _baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file) {
             metaFuture->json = std::string(file.buffer, file.buffer + file.size);
@@ -411,10 +411,9 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         return "";
     }
 
-    const std::string& extension =
-        ghoul::filesystem::File(absPath(info.path)).fileExtension();
-    if (extension == "cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
+    std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
+    if (ext == ".cdf") {
+        KameleonWrapper kw = KameleonWrapper(absPath(info.path).string());
 
         std::string parent = kw.parent();
         std::string frame = kw.frame();
@@ -482,8 +481,6 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
     float updateTime = j["output_time_interval"];
     float radius = j["radius"];
 
-    glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
-
     glm::vec3 max(
         j["x"]["actual_max"],
         j["y"]["actual_max"],
@@ -541,7 +538,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
 
     data.name = name;
 
-    if (global::renderEngine.scene()->sceneGraphNode(name)) {
+    if (global::renderEngine->scene()->sceneGraphNode(name)) {
         LERROR("A node with name \"" + name + "\" already exist");
         return;
     }
@@ -549,7 +546,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     std::string luaTable = jsonPlaneToLuaTable(data);
     if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -575,14 +572,14 @@ void IswaManager::createSphere(MetadataFuture& data) {
 
     data.name = name;
 
-    if (global::renderEngine.scene()->sceneGraphNode(name)) {
+    if (global::renderEngine->scene()->sceneGraphNode(name)) {
         LERROR("A node with name \"" + name +"\" already exist");
         return;
     }
     std::string luaTable = jsonSphereToLuaTable(data);
     if (luaTable != "") {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -590,10 +587,8 @@ void IswaManager::createSphere(MetadataFuture& data) {
 }
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
-    const std::string& extension = ghoul::filesystem::File(
-        absPath(info.path)
-    ).fileExtension();
-    if (FileSys.fileExists(absPath(info.path)) && extension == "cdf") {
+    std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
+    if (std::filesystem::is_regular_file(absPath(info.path)) && ext == ".cdf") {
         if (!info.group.empty()) {
             std::string type = typeid(KameleonPlane).name();
             registerGroup(info.group, type);
@@ -609,7 +604,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
 
         info.name = info.name + "-" + cut;
 
-        if (global::renderEngine.scene()->sceneGraphNode(info.name)) {
+        if (global::renderEngine->scene()->sceneGraphNode(info.name)) {
             LERROR("A node with name \"" + info.name +"\" already exist");
             return;
         }
@@ -617,23 +612,24 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         std::string luaTable = parseKWToLuaTable(info, cut);
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
     }
     else {
-        LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
+        LWARNING(
+            fmt::format("{} is not a cdf file or can't be found", absPath(info.path))
+        );
     }
 }
 
 void IswaManager::createFieldline(std::string name, std::string cdfPath,
                                   std::string seedPath)
 {
-    const std::string& ext = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
-
-    if (FileSys.fileExists(absPath(cdfPath)) && ext == "cdf") {
+    std::filesystem::path ext = std::filesystem::path(absPath(cdfPath)).extension();
+    if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == ".cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
             "Parent = 'Earth',"
@@ -657,14 +653,14 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
         "}";
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
     }
     else {
-        LWARNING( cdfPath + " is not a cdf file or can't be found.");
+        LWARNING(cdfPath + " is not a cdf file or can't be found");
     }
 }
 
@@ -703,10 +699,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    cdfpath = absPath(cdfpath);
-    if (FileSys.fileExists(cdfpath)) {
+    std::filesystem::path cdf = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdf)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdfpath);
+        std::ifstream jsonFile(cdf);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -745,7 +741,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(cdfpath + " is not a cdf file or can't be found.");
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
     }
 }
 

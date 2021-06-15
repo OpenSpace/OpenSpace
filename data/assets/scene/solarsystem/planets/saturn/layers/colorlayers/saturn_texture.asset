@@ -1,0 +1,23 @@
+local texturesPath = asset.require("./../../saturn_textures").TexturesPath
+local globeIdentifier = asset.require("./../../saturn").Saturn.Identifier
+
+local layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "/saturn.jpg",
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "Saturn Texutre",
+  Version = "1.0",
+  Description = [[ Default jpg texture for Saturn]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

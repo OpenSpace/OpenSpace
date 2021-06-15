@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,13 +43,12 @@ uniform int vertexSortingMethod;
 uniform int pointSize;
 uniform int stride;
 
-uniform ivec2 resolution;
+uniform vec4 viewport;
 
 // Fragile! Keep in sync with RenderableTrail::render
 #define VERTEX_SORTING_NEWESTFIRST 0
 #define VERTEX_SORTING_OLDESTFIRST 1
 #define VERTEX_SORTING_NOSORTING 2
-
 
 void main() {
     int modId = gl_VertexID;
@@ -83,5 +82,5 @@ void main() {
                     float(pointSize) : float(pointSize) / 2;
     gl_Position  = z_normalization(vs_positionClipSpace);
 
-    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * vec2(resolution);
+    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -45,6 +46,7 @@ struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
     std::string profile;
+    std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -84,13 +86,14 @@ struct Configuration {
     bool shouldUseScreenshotDate = false;
 
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache = false;
+    bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
     glm::dvec3 globalRotation = glm::dvec3(0.0);
     glm::dvec3 screenSpaceRotation = glm::dvec3(0.0);
     glm::dvec3 masterRotation = glm::dvec3(0.0);
     bool isConsoleDisabled = false;
+    bool bypassLauncher = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
@@ -119,16 +122,18 @@ struct Configuration {
     };
     HTTPProxy httpProxy;
 
+    // Values not read from the openspace.cfg file
+    bool usingProfile = false;
+    std::string sgctConfigNameInitialized;
 
     static documentation::Documentation Documentation;
     ghoul::lua::LuaState state;
 };
 
-std::string findConfiguration(const std::string& filename = "openspace.cfg");
+std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename);
-
-void parseLuaState(Configuration& configuration);
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
+    const std::string& overrideScript);
 
 } // namespace openspace::configuration
 

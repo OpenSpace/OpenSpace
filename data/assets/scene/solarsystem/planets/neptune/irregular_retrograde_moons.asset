@@ -11,61 +11,80 @@ local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_retrograde" }
 local trailColor = { 0.2, 0.5, 0.75 }
-
-local irregularRetrogradeMoons = {
-    {
-        Identifier = "Nereid",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "NEREID",
-        Radii = { 340000, 340000, 340000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 360.13,
-        Kernels = kernel081
-    },
-    {
-        Identifier = "Sao",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "SAO",
-        Radii = { 44000, 44000, 44000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 2912.72,
-        Kernels = kernel086
-    },
-    {
-        Identifier = "Laomedeia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "LAOMEDEIA",
-        Radii = { 42000, 42000, 42000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 3171.33,
-        Kernels = kernel086
-    }
+local trailTags = { 
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_neptune",
+  "moonTrail_minor"
 }
 
-
+local irregularRetrogradeMoons = {
+  {
+    Identifier = "Nereid",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "NEREID",
+    Radii = { 340000, 340000, 340000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 360.13,
+    Kernels = kernel081
+  },
+  {
+    Identifier = "Sao",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "SAO",
+    Radii = { 44000, 44000, 44000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 2912.72,
+    Kernels = kernel086
+  },
+  {
+    Identifier = "Laomedeia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "LAOMEDEIA",
+    Radii = { 42000, 42000, 42000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 3171.33,
+    Kernels = kernel086
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(irregularRetrogradeMoons)
+  asset,
+  proceduralGlobes.createGlobes(irregularRetrogradeMoons)
 )
+
+
+asset.meta = {
+  Name = "Neptune Irregular Retrograde Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Neptune' irregular retrograde
+    moons: Nereid, Sao and Laomedeia. Blank globes and SPICE trails are generated for
+    each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

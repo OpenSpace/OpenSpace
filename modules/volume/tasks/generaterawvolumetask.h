@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,11 +28,10 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
-
+#include <filesystem>
 #include <string>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 class GenerateRawVolumeTask : public Task {
 public:
@@ -42,8 +41,8 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _rawVolumeOutputPath;
-    std::string  _dictionaryOutputPath;
+    std::filesystem::path _rawVolumeOutputPath;
+    std::filesystem::path  _dictionaryOutputPath;
     std::string _time;
 
     glm::uvec3 _dimensions = glm::uvec3(0);
@@ -53,7 +52,6 @@ private:
     std::string _valueFunctionLua;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__

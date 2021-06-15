@@ -1,77 +1,60 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-
-local textures = asset.syncedResource({
-    Name = "Enceladus textures",
-    Type = "HttpSynchronization",
-    Identifier = "enceladus_textures",
-    Version = 1
-})
-
-local mapServiceConfigsPath = asset.localResource("map_service_configs")
-
 local Enceladus = {
-    Identifier = "Enceladus",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "ENCELADUS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
-            DestinationFrame = "GALACTIC"
-        }
-    },    
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 252000,
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/enceladus.jpg",
-                },
-                {
-                    Identifier = "Global_Mosaic_100m_HPF",
-                    Name = "Cassini Global Mosaic 100m HPF",
-                    FilePath = mapServiceConfigsPath .. "/Cassini_ISS_Global_Mosaic_100m_HPF.wms",
-                    Enabled = true,
-                },
-            }
-        },
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/enceladus.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
-        }
+  Identifier = "Enceladus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ENCELADUS",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_ENCELADUS",
+      DestinationFrame = "GALACTIC"
     }
+  },    
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 252000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/enceladus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.1,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 300000.0, 1000000.0 },
+      DistanceEPS = 100000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Enceladus",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[ Enceladus globe with labels]]
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
+
+
+asset.meta = {
+    Name = "Enceladus",
+    Version = "1.0",
+    Description = [[ Enceladus globe with labels and map layers]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Enceladus"}
+}

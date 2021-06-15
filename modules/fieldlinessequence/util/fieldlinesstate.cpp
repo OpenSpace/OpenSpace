@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -245,7 +245,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  */
 void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
     // ------------------------------- Create the file ------------------------------- //
-    std::string pathSafeTimeString = Time(_triggerTime).ISO8601();
+    std::string pathSafeTimeString = std::string(Time(_triggerTime).ISO8601());
     pathSafeTimeString.replace(13, 1, "-");
     pathSafeTimeString.replace(16, 1, "-");
     pathSafeTimeString.replace(19, 1, "-");
@@ -341,7 +341,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 
     json jFile;
 
-    const std::string timeStr = Time(_triggerTime).ISO8601();
+    std::string_view timeStr = Time(_triggerTime).ISO8601();
     const size_t nLines = _lineStart.size();
     // const size_t nPoints      = _vertexPositions.size();
     const size_t nExtras = _extraQuantities.size();

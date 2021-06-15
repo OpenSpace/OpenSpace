@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,12 +53,6 @@ public:
         ResourceSynchronization::StateChangeCallback callback;
     };
 
-    /*using SyncStateChangeCallback =
-        std::function<void(
-            std::shared_ptr<ResourceSynchronization>,
-            ResourceSynchronization::State
-        )>;*/
-
     WatchHandle watchSynchronization(
         std::shared_ptr<ResourceSynchronization> synchronization,
         ResourceSynchronization::StateChangeCallback callback
@@ -69,7 +63,6 @@ public:
     void notify();
 
 private:
-    WatchHandle generateWatchHandle();
     std::mutex _mutex;
     std::unordered_map<WatchHandle, WatchData> _watchedSyncs;
     std::vector<NotificationData> _pendingNotifications;

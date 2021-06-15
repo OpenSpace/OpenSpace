@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,22 +50,20 @@ namespace documentation { struct Documentation; }
 
 class RingsComponent : public properties::PropertyOwner {
 public:
-    enum RenderPass {
+    enum class RenderPass {
         GeometryOnly,
         GeometryAndShading
     };
-    
+
     RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
     void deinitializeGL();
-      
+
     bool isReady() const;
 
-    void draw(
-        const RenderData& data, 
-        const RingsComponent::RenderPass renderPass, 
+    void draw(const RenderData& data, RenderPass renderPass,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
@@ -73,6 +71,7 @@ public:
     static documentation::Documentation Documentation();
 
     bool isEnabled() const;
+    double size() const;
 
 private:
     void loadTexture();
@@ -80,31 +79,53 @@ private:
     void compileShadowShader();
 
     properties::StringProperty _texturePath;
+    properties::StringProperty _textureFwrdPath;
+    properties::StringProperty _textureBckwrdPath;
+    properties::StringProperty _textureUnlitPath;
+    properties::StringProperty _textureColorPath;
+    properties::StringProperty _textureTransparencyPath;
     properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
-    properties::FloatProperty _transparency;
+    properties::FloatProperty _colorFilter;
     properties::BoolProperty _enabled;
     properties::FloatProperty _zFightingPercentage;
     properties::IntProperty _nShadowSamples;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
-    UniformCache(modelViewProjectionMatrix, textureOffset, transparency, nightFactor, 
+    UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
-    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture)  
-        _geomUniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
+        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
+        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
+        shadowMapTexture, zFightingPercentage
+    ) _uniformCacheAdvancedRings;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
+    ) _geomUniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
+    std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;
+    std::unique_ptr<ghoul::opengl::Texture> _textureUnlit;
+    std::unique_ptr<ghoul::opengl::Texture> _textureTransparency;
+    std::unique_ptr<ghoul::opengl::Texture> _textureColor;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileForwards;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileBackwards;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileUnlit;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileColor;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileTransparency;
 
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
+    bool _isAdvancedTextureEnabled = false;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
     bool _planeIsDirty = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
+    glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
 };
 
 } // namespace openspace

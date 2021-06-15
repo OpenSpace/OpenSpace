@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -48,6 +49,7 @@ namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
 
+#ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
         // Synced with Renderable::RenderBin
         if (renderBin == 1) {
@@ -57,15 +59,19 @@ namespace {
             return "Opaque";
         }
         else if (renderBin == 4) {
-            return "Transparent";
+            return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 16) {
             return "Overlay";
         }
         else {
             throw ghoul::MissingCaseException();
         }
     }
+#endif // TRACY_ENABLE
 } // namespace
 
 namespace openspace {
@@ -87,11 +93,11 @@ Scene::~Scene() {
     _rootDummy.setScene(nullptr);
 }
 
-void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
     _rootDummy.attachChild(std::move(node));
 }
 
-std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
@@ -144,10 +150,6 @@ void Scene::updateNodeRegistry() {
 
     sortTopologically();
     _dirtyNodeRegistry = false;
-}
-
-void Scene::addSceneLicense(SceneLicense license) {
-    _licenses.push_back(std::move(license));
 }
 
 void Scene::sortTopologically() {
@@ -304,11 +306,11 @@ void Scene::update(const UpdateData& data) {
     ZoneScoped
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-
     for (SceneGraphNode* node : initializedNodes) {
         try {
             node->initializeGL();
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -317,9 +319,7 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -336,9 +336,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -346,20 +344,19 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
-        
-        {
-            ZoneScopedN("Get Error Hack")
+    }
 
-            // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
-            // thread and the CPU thread from diverging too much, particularly the
-            // uploading of a lot of textures for the globebrowsing planets can cause a
-            // hard stuttering effect. Asking for a glGetError after every rendering call
-            // will force the threads to implicitly synchronize and thus prevent the
-            // stuttering.  The better solution would be to reduce the number of uploads
-            // per frame, use a staggered buffer, or something else like that preventing a
-            // large spike in uploads
-            glGetError();
-        }
+    {
+        ZoneScopedN("Get Error Hack")
+
+        // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
+        // thread and the CPU thread from diverging too much, particularly the uploading
+        // of a lot of textures for the globebrowsing planets can cause a hard stuttering
+        // effect. Asking for a glGetError after every rendering call will force the
+        // threads to implicitly synchronize and thus prevent the stuttering.  The better
+        // solution would be to reduce the number of uploads per frame, use a staggered
+        // buffer, or something else like that preventing a large spike in uploads
+        glGetError();
     }
 }
 
@@ -420,7 +417,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         }
     }
 
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+    ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
     if (!node) {
@@ -434,11 +431,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies;
-        nodeDictionary.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+        ghoul::Dictionary nodeDependencies =
+            nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        const std::vector<std::string>& keys = nodeDependencies.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
             dependencyNames.push_back(value);
         }
@@ -500,9 +496,14 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
+    std::chrono::steady_clock::time_point now = (
+        global::sessionRecording->isSavingFramesDuringPlayback()     ?
+        global::sessionRecording->currentPlaybackInterpolationTime() :
+        std::chrono::steady_clock::now()
+    );
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
-            info.beginTime = std::chrono::steady_clock::now();
+            info.beginTime = now;
             info.durationSeconds = durationSeconds;
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
@@ -513,7 +514,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
 
     PropertyInterpolationInfo i = {
         prop,
-        std::chrono::steady_clock::now(),
+        now,
         durationSeconds,
         func
     };
@@ -549,8 +550,13 @@ void Scene::updateInterpolations() {
 
     using namespace std::chrono;
 
-    auto now = steady_clock::now();
-
+    steady_clock::time_point now;
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        now = global::sessionRecording->currentPlaybackInterpolationTime();
+    }
+    else {
+        now = steady_clock::now();
+    }
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(
@@ -597,11 +603,6 @@ const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
 }
 
-std::string Scene::generateSceneLicenseDocumentationJson() {
-    SceneLicenseWriter writer(_licenses);
-    return writer.generateJson();
-}
-
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
@@ -616,19 +617,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "to match the type that the property (or properties) expect. If the "
                 "third is not present or is '0', the value changes instantly, otherwise "
                 "the change will take that many seconds and the value is interpolated at "
-                "each steap in between. The fourth parameter is an optional easing "
+                "each step in between. The fourth parameter is an optional easing "
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the last "
+                "argument must be either empty, 'regex', or 'single'. If the fifth"
                 "argument is empty (the default), the URI is interpreted using a "
                 "wildcard in which '*' is expanded to '(.*)' and bracketed components "
                 "'{ }' are interpreted as group tag names. Then, the passed value will "
                 "be set on all properties that fit the regex + group name combination. "
-                "If the third argument is 'regex' neither the '*' expansion, nor the "
+                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
                 "group tag expansion is performed and the first argument is used as an "
                 "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the third arugment is 'single' no "
+                "qualified IDs of properties. If the fifth argument is 'single' no "
                 "substitutions are performed and exactly 0 or 1 properties are changed."
             },
             {
@@ -640,7 +641,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "second argument can be any type, but it has to match the type that the "
                 "property expects. If the third is not present or is '0', the value "
                 "changes instantly, otherwise the change will take that many seconds and "
-                "the value is interpolated at each steap in between. The fourth "
+                "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
@@ -648,12 +649,18 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the fourth argument to setPropertyValue."
             },
             {
+                "hasProperty",
+                &luascriptfunctions::property_hasProperty,
+                {},
+                "string",
+                "Returns whether a property with the given URI exists"
+            },
+            {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
                 {},
                 "string",
-                "Returns the value the property, identified by "
-                "the provided URI."
+                "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
@@ -687,6 +694,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Removes the SceneGraphNode identified by name"
             },
             {
+                "removeSceneGraphNodesFromRegex",
+                &luascriptfunctions::removeSceneGraphNodesFromRegex,
+                {},
+                "string",
+                "Removes all SceneGraphNodes with identifiers matching the input regular "
+                "expression"
+            },
+            {
                 "hasSceneGraphNode",
                 &luascriptfunctions::hasSceneGraphNode,
                 {},
@@ -702,6 +717,20 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Adds an interesting time to the current scene. The first argument is "
                 "the name of the time and the second argument is the time itself in the "
                 "format YYYY-MM-DDThh:mm:ss.uuu"
+            },
+            {
+                "worldPosition",
+                &luascriptfunctions::worldPosition,
+                {},
+                "string",
+                "Returns the world position of the scene graph node with the given string as identifier"
+            },
+            {
+                "worldRotation",
+                & luascriptfunctions::worldRotation,
+                {},
+                "string",
+                "Returns the world rotation matrix of the scene graph node with the given string as identifier"
             }
         }
     };

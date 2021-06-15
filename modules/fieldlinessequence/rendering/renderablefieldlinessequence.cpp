@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -221,7 +222,7 @@ namespace {
         Invalid
     };
 
-    float stringToFloat(const std::string input, const float backupValue = 0.f) {
+    float stringToFloat(const std::string& input, float backupValue = 0.f) {
         float tmp;
         try {
             tmp = std::stof(input);
@@ -294,7 +295,9 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -348,7 +351,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     setupProperties();
 
     // Setup shader program
-    _shaderProgram = global::renderEngine.buildRenderProgram(
+    _shaderProgram = global::renderEngine->buildRenderProgram(
         "FieldlinesSequence",
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
@@ -372,15 +375,17 @@ void RenderableFieldlinesSequence::initializeGL() {
 bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                                                            SourceFileType& sourceFileType)
 {
-
-    _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
+    if (_dictionary->hasValue<std::string>(SceneGraphNode::KeyIdentifier)) {
+        _identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
+    }
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
-    if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
+    if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
     }
     else {
+        inputFileTypeString = _dictionary->value<std::string>(KeyInputFileType);
         std::transform(
             inputFileTypeString.begin(),
             inputFileTypeString.end(),
@@ -407,21 +412,24 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         }
     }
 
-    std::string sourceFolderPath;
-    if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
+    if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
         return false;
     }
+    std::string sourceFolderPath = _dictionary->value<std::string>(KeySourceFolder);
 
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    if (std::filesystem::is_directory(sourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolderPath)) {
+            if (e.is_regular_file()) {
+                _sourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         // Remove all files that don't have <inputFileTypeString> as extension
         _sourceFiles.erase(
@@ -467,10 +475,10 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
-    if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
-        ghoul::filesystem::Directory outputFolder(outputFolderPath);
-        if (FileSys.directoryExists(outputFolder)) {
-            outputFolderPath = absPath(outputFolderPath);
+    if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
+        outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
+        if (std::filesystem::is_directory(outputFolderPath)) {
+            outputFolderPath = absPath(outputFolderPath).string();
         }
         else {
             LERROR(fmt::format(
@@ -481,8 +489,9 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         }
     }
 
-    ghoul::Dictionary colorTablesPathsDictionary;
-    if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyColorTablePaths)) {
+        ghoul::Dictionary colorTablesPathsDictionary =
+            _dictionary->value<ghoul::Dictionary>(KeyColorTablePaths);
         const size_t nProvidedPaths = colorTablesPathsDictionary.size();
         if (nProvidedPaths > 0) {
             // Clear the default! It is already specified in the transferFunction
@@ -494,28 +503,30 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         }
     }
 
-    ghoul::Dictionary colorTablesRangesDictionary;
-    if (_dictionary->getValue(KeyColorTableRanges, colorTablesRangesDictionary)) {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyColorTableRanges)) {
+        ghoul::Dictionary colorTablesRangesDictionary =
+            _dictionary->value<ghoul::Dictionary>(KeyColorTableRanges);
         const size_t nProvidedRanges = colorTablesRangesDictionary.size();
         for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _colorTableRanges.push_back(
-                colorTablesRangesDictionary.value<glm::vec2>(std::to_string(i)));
+                colorTablesRangesDictionary.value<glm::dvec2>(std::to_string(i)));
         }
     }
     else {
-        _colorTableRanges.push_back(glm::vec2(0, 1));
+        _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
     }
 
-    ghoul::Dictionary maskingRangesDictionary;
-    if (_dictionary->getValue(KeyMaskingRanges, maskingRangesDictionary)) {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyMaskingRanges)) {
+        ghoul::Dictionary maskingRangesDictionary =
+            _dictionary->value<ghoul::Dictionary>(KeyMaskingRanges);
         const size_t nProvidedRanges = maskingRangesDictionary.size();
         for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _maskingRanges.push_back(
-                maskingRangesDictionary.value<glm::vec2>(std::to_string(i)));
+                maskingRangesDictionary.value<glm::dvec2>(std::to_string(i)));
         }
     }
     else {
-        _maskingRanges.push_back(glm::vec2(-100000, 100000)); // Just some default values!
+        _maskingRanges.push_back(glm::dvec2(-100000, 100000)); // Just some default values
     }
 }
 
@@ -523,8 +534,8 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
-    std::string modelStr;
-    if (_dictionary->getValue(KeyJsonSimulationModel, modelStr)) {
+    if (_dictionary->hasValue<std::string>(KeyJsonSimulationModel)) {
+        std::string modelStr = _dictionary->value<std::string>(KeyJsonSimulationModel);
         std::transform(
             modelStr.begin(),
             modelStr.end(),
@@ -540,9 +551,10 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         return false;
     }
 
-    float scaleFactor;
-    if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
-        _scalingFactor = scaleFactor;
+    if (_dictionary->hasValue<double>(KeyJsonScalingFactor)) {
+        _scalingFactor = static_cast<float>(
+            _dictionary->value<double>(KeyJsonScalingFactor)
+        );
     }
     else {
         LWARNING(fmt::format(
@@ -598,8 +610,9 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
-                ghoul::filesystem::File tmpFile(filePath);
-                newState.saveStateToJson(outputFolder + tmpFile.baseName());
+                newState.saveStateToJson(
+                    outputFolder + std::filesystem::path(filePath).stem().string()
+                );
             }
         }
         else {
@@ -609,9 +622,8 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
 }
 
 void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
-    bool shouldLoadInRealtime = false;
-    if (_dictionary->getValue(KeyOslfsLoadAtRuntime, shouldLoadInRealtime)) {
-        _loadingStatesDynamically = shouldLoadInRealtime;
+    if (_dictionary->hasValue<bool>(KeyOslfsLoadAtRuntime)) {
+        _loadingStatesDynamically = _dictionary->value<bool>(KeyOslfsLoadAtRuntime);
     }
     else {
         LWARNING(fmt::format(
@@ -757,21 +769,21 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     }
 
     _pFocusOnOriginBtn.onChange([this] {
-        SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(_identifier);
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_identifier);
         if (!node) {
             LWARNING(fmt::format(
                 "Could not find a node in scenegraph called '{}'", _identifier
             ));
             return;
         }
-        global::navigationHandler.orbitalNavigator().setFocusNode(
+        global::navigationHandler->orbitalNavigator().setFocusNode(
             node->parent()->identifier()
         );
-        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+        global::navigationHandler->orbitalNavigator().startRetargetAnchor();
     });
 
     _pJumpToStartBtn.onChange([this] {
-        global::timeManager.setTimeNextFrame(Time(_startTimes[0]));
+        global::timeManager->setTimeNextFrame(Time(_startTimes[0]));
     });
 }
 
@@ -908,11 +920,10 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
                                                                 std::string& tracingVar,
                                                       std::vector<std::string>& extraVars)
 {
-
-    if (_dictionary->getValue(KeyCdfSeedPointFile, seedFilePath)) {
-        ghoul::filesystem::File seedPointFile(seedFilePath);
-        if (FileSys.fileExists(seedPointFile)) {
-            seedFilePath = absPath(seedFilePath);
+    if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
+        seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
+        if (std::filesystem::is_regular_file(seedFilePath)) {
+            seedFilePath = absPath(seedFilePath).string();
         }
         else {
             LERROR(fmt::format(
@@ -927,7 +938,10 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         return false;
     }
 
-    if (!_dictionary->getValue(KeyCdfTracingVariable, tracingVar)) {
+    if (_dictionary->hasValue<std::string>(KeyCdfTracingVariable)) {
+        tracingVar = _dictionary->value<std::string>(KeyCdfTracingVariable);
+    }
+    else {
         tracingVar = "b"; //  Magnetic field variable as default
         LWARNING(fmt::format(
             "{}: No '{}', using default '{}'",
@@ -935,8 +949,9 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         ));
     }
 
-    ghoul::Dictionary extraQuantityNamesDictionary;
-    if (_dictionary->getValue(KeyCdfExtraVariables, extraQuantityNamesDictionary)) {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyCdfExtraVariables)) {
+        ghoul::Dictionary extraQuantityNamesDictionary =
+            _dictionary->value<ghoul::Dictionary>(KeyCdfExtraVariables);
         const size_t nProvidedExtras = extraQuantityNamesDictionary.size();
         for (size_t i = 1; i <= nProvidedExtras; ++i) {
             extraVars.push_back(
@@ -952,7 +967,7 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
                                                            std::vector<glm::vec3>& outVec)
 {
 
-    std::ifstream seedFile(FileSys.relativePath(path));
+    std::ifstream seedFile(path);
     if (!seedFile.good()) {
         LERROR(fmt::format("Could not open seed points file '{}'", path));
         return false;
@@ -1027,7 +1042,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
     _vertexMaskingBuffer = 0;
 
     if (_shaderProgram) {
-        global::renderEngine.removeRenderProgram(_shaderProgram.get());
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 
@@ -1092,12 +1107,12 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
         _shaderProgram->setUniform(
             "time",
-            global::windowDelegate.applicationTime() * (_pFlowReversed ? -1 : 1)
+            global::windowDelegate->applicationTime() * (_pFlowReversed ? -1 : 1)
         );
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto renderer = global::renderEngine.rendererImplementation();
+            const auto renderer = global::renderEngine->rendererImplementation();
             const bool usingFBufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::Framebuffer;
 

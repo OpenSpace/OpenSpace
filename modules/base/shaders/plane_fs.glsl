@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
-in vec2 vs_st;
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
+in float vs_screenSpaceDepth;
+in vec2 vs_st;
 
 uniform sampler2D texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
-
+uniform vec3 multiplyColor;
 
 Fragment getFragment() {
     Fragment frag;
@@ -42,6 +42,8 @@ Fragment getFragment() {
     else {
         frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
     }
+
+    frag.color.rgb *= multiplyColor;
 
     frag.color.a *= opacity;
     if (frag.color.a == 0.0) {
@@ -54,9 +56,9 @@ Fragment getFragment() {
         frag.blend = BLEND_MODE_ADDITIVE;
     }
 
-    // G-Buffer 
-    frag.gPosition  = vs_gPosition;
-    frag.gNormal    = vec4(vs_gNormal, 1.0);
-    
+    // G-Buffer
+    frag.gPosition = vs_gPosition;
+    frag.gNormal = vec4(vs_gNormal, 1.0);
+
     return frag;
 }

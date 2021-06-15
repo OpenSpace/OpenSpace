@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -70,7 +69,7 @@ private:
 
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
-    properties::Vec4Property _shadowColor;
+    properties::Vec3Property _shadowColor;
     properties::OptionProperty _terminatorType;
     properties::StringProperty _lightSource;
     properties::StringProperty _observer;
@@ -79,7 +78,7 @@ private:
     properties::OptionProperty _aberration;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
+    UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;
 
     glm::dmat3 _stateMatrix = glm::dmat3(1.0);
 

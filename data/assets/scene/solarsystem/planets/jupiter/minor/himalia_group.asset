@@ -9,94 +9,115 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia" }
 local trailColor = { 0.4, 0.3, 0.01 }
-
-local himaliaGroup = {
-    {
-        Identifier = "Leda",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "LEDA",
-        Radii = { 16000, 16000, 16000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 240.82,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Himalia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HIMALIA",
-        Radii = { 170000, 170000, 170000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 250.23,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Lysithea",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "LYSITHEA",
-        Radii = { 36000, 36000, 36000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 259.89,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Elara",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ELARA",
-        Radii = { 86000, 86000, 86000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 257.62,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Dia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        -- Spice = "DIA", -- The Identifier is not correctly registered in the Spice kernel
-        Spice = "553",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 287.93,
-        Kernels = kernel
-    }
+local trailTags = {
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
 
-
+local himaliaGroup = {
+  {
+    Identifier = "Leda",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "LEDA",
+    Radii = { 16000, 16000, 16000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 240.82,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Himalia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HIMALIA",
+    Radii = { 170000, 170000, 170000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 250.23,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Lysithea",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "LYSITHEA",
+    Radii = { 36000, 36000, 36000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 259.89,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Elara",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ELARA",
+    Radii = { 86000, 86000, 86000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 257.62,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Dia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    -- Spice = "DIA", -- The Identifier is not correctly registered in the Spice kernel
+    Spice = "553",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 287.93,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(himaliaGroup)
+  asset,
+  proceduralGlobes.createGlobes(himaliaGroup)
 )
+
+
+asset.meta = {
+  Name = "Jupiter Himalia Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Jupiter's Himalia Group
+    moons: Leda, Himalia, Lysithea, Elara and Dia. Blank globes and SPICE trails
+    are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

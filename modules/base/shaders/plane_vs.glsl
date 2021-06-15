@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,10 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionScreenSpace;
-// G-Buffer
 out vec4 vs_gPosition;
 out vec3 vs_gNormal;
+out float vs_screenSpaceDepth;
+out vec2 vs_st;
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;

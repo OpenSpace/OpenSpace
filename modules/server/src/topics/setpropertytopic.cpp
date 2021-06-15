@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,6 +78,10 @@ namespace {
             return std::to_string(value.get<double>());
         }
         else if (value.is_array()) {
+            if (value.empty()) {
+                return "{}";
+            }
+
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += luaLiteralFromJson(it.value()) += ",";
@@ -87,6 +91,10 @@ namespace {
             return literal;
         }
         else if (value.is_object()) {
+            if (value.empty()) {
+                return "{}";
+            }
+
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
@@ -110,13 +118,13 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         if (propertyKey == SpecialKeyTime) {
             Time newTime;
             newTime.setTime(json.at(ValueKey).get<std::string>());
-            global::timeManager.setTimeNextFrame(newTime);
+            global::timeManager->setTimeNextFrame(newTime);
         }
         else {
             nlohmann::json value = json.at(ValueKey);
             std::string literal = luaLiteralFromJson(value);
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),

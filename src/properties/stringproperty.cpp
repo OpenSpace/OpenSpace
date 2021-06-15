@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,60 +25,36 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 #include <openspace/json.h>
-
-namespace {
-
-std::string fromLuaConversion(lua_State* state, bool& success) {
-    success = lua_isstring(state, -1) == 1;
-    if (success) {
-        return lua_tostring(state, -1);
-    }
-    else {
-        return "";
-    }
-}
-
-bool toLuaConversion(lua_State* state, const std::string& val) {
-    lua_pushstring(state, val.c_str());
-    return true;
-}
-
-std::string fromStringConversion(std::string val, bool& success) {
-    // An incoming string is of the form
-    // "value"
-    // so we want to remove the leading and trailing " characters
-    if (val.size() > 2 && (val[0] == '"' && val[val.size() - 1] == '"')) {
-        // Removing the first and last "
-        success = true;
-        return val.substr(1, val.size() - 2);
-    }
-    success = false;
-    return val;
-}
-
-bool toStringConversion(std::string& outValue, std::string inValue) {
-    std::string str;
-    nlohmann::json json;
-    nlohmann::to_json(json, inValue);
-    outValue = json.dump();
-
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    StringProperty,
-    std::string,
-    "",
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TSTRING
-)
+StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
+    : TemplateProperty<std::string>(info, value)
+{}
+
+std::string StringProperty::className() const {
+    return "StringProperty";
+}
+
+int StringProperty::typeLua() const {
+    return LUA_TSTRING;
+}
+
+std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) const {
+    success = lua_isstring(state, -1) == 1;
+    return success ? lua_tostring(state, -1) : "";
+}
+
+void StringProperty::toLuaConversion(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+std::string StringProperty::toStringConversion() const {
+    nlohmann::json json;
+    nlohmann::to_json(json, _value);
+    return json.dump();
+}
 
 } // namespace openspace::properties

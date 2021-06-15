@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,23 +30,23 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <filesystem>
 
 namespace {
     std::string assetStateToString(openspace::Asset::State state) {
         using State = openspace::Asset::State;
 
         switch (state) {
-        case State::Loaded: return "Loaded";
-        case State::LoadingFailed: return "LoadingFailed";
-        case State::Synchronizing: return "Synchronizing";
-        case State::SyncRejected: return "SyncRejected";
-        case State::SyncResolved: return "SyncResolved";
-        case State::Initialized: return "Initialized";
-        case State::InitializationFailed: return "InitializationFailed";
-        default: return "Unknown";
+            case State::Loaded: return "Loaded";
+            case State::LoadingFailed: return "LoadingFailed";
+            case State::Synchronizing: return "Synchronizing";
+            case State::SyncRejected: return "SyncRejected";
+            case State::SyncResolved: return "SyncResolved";
+            case State::Initialized: return "Initialized";
+            case State::InitializationFailed: return "InitializationFailed";
+            default: return "Unknown";
         }
     }
 
@@ -54,14 +54,14 @@ namespace {
         using State = openspace::ResourceSynchronization::State;
 
         switch (state) {
-        case State::Unsynced: return "Unsynced";
-        case State::Syncing: return "Syncing";
-        case State::Resolved: return "Resolved";
-        case State::Rejected: return "Rejected";
-        default: return "Unknown";
+            case State::Unsynced: return "Unsynced";
+            case State::Syncing: return "Syncing";
+            case State::Resolved: return "Resolved";
+            case State::Rejected: return "Rejected";
+            default: return "Unknown";
         }
     }
-}
+} // namespace
 
 namespace openspace::gui {
 
@@ -69,17 +69,16 @@ GuiAssetComponent::GuiAssetComponent()
     : GuiComponent("Assets")
 {}
 
-
 void GuiAssetComponent::render() {
     bool e = _isEnabled;
     ImGui::Begin("Assets", &e);
     _isEnabled = e;
 
-    AssetManager& assetManager = global::openSpaceEngine.assetManager();
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
 
     std::string rootPath;
 
-    for (const std::shared_ptr<Asset>& a : assetManager.rootAsset()->childAssets()) {
+    for (Asset* a : assetManager.rootAsset().childAssets()) {
         renderTree(*a, rootPath);
     }
 
@@ -91,10 +90,10 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
     using namespace ghoul::filesystem;
 
     std::string assetPath = asset.assetFilePath();
-    const std::string& assetDirectory = File(assetPath).directoryName();
+    std::string assetDirectory = std::filesystem::path(assetPath).parent_path().string();
 
     if (!relativeToPath.empty()) {
-        assetPath = FileSys.relativePath(assetPath, relativeToPath);
+        assetPath = std::filesystem::relative(assetPath, relativeToPath).string();
     }
 
     std::string assetText = assetPath + " " + assetStateToString(asset.state());
@@ -104,29 +103,29 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
         assetText += " (" + std::to_string(prog) + "%)";
     }
 
-    const std::vector<std::shared_ptr<Asset>>& requested = asset.requestedAssets();
-    const std::vector<std::shared_ptr<Asset>>& required = asset.requiredAssets();
+    std::vector<Asset*> requested = asset.requestedAssets();
+    std::vector<Asset*> required = asset.requiredAssets();
 
-    const std::vector<std::shared_ptr<ResourceSynchronization>>& resourceSyncs =
+    const std::vector<ResourceSynchronization*>& resourceSyncs =
         asset.ownSynchronizations();
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
         ImGui::Text("%s", assetText.c_str());
     }
     else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
-        for (const std::shared_ptr<Asset>& child : required) {
+        for (const Asset* child : required) {
             renderTree(*child, assetDirectory);
         }
 
         if (!requested.empty() && ImGui::TreeNode("Requested assets")) {
-            for (const std::shared_ptr<Asset>& child : requested) {
+            for (const Asset* child : requested) {
                 renderTree(*child, assetDirectory);
             }
             ImGui::TreePop();
         }
 
         if (!resourceSyncs.empty() && ImGui::TreeNode("Resource Synchronizations")) {
-            for (const std::shared_ptr<ResourceSynchronization>& sync : resourceSyncs) {
+            for (ResourceSynchronization* sync : resourceSyncs) {
                 std::string resourceText = sync->directory() +
                     " " + syncStateToString(sync->state());
                 if (sync->state() == ResourceSynchronization::State::Syncing) {

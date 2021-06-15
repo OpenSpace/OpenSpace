@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,28 +27,31 @@
 #include <openspace/documentation/documentationengine.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
+#include <filesystem>
+#include <iomanip>
+#include <sstream>
 
 namespace openspace::documentation {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
-template struct Vector2Verifier<bool>;
+//template struct Vector2Verifier<bool>;
 template struct Vector2Verifier<int>;
 template struct Vector2Verifier<double>;
-template struct Vector3Verifier<bool>;
+//template struct Vector3Verifier<bool>;
 template struct Vector3Verifier<int>;
 template struct Vector3Verifier<double>;
-template struct Vector4Verifier<bool>;
+//template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
 
-template struct Vector2ListVerifier<bool>;
+//template struct Vector2ListVerifier<bool>;
 template struct Vector2ListVerifier<int>;
 template struct Vector2ListVerifier<double>;
-template struct Vector3ListVerifier<bool>;
+//template struct Vector3ListVerifier<bool>;
 template struct Vector3ListVerifier<int>;
 template struct Vector3ListVerifier<double>;
-template struct Vector4ListVerifier<bool>;
+//template struct Vector4ListVerifier<bool>;
 template struct Vector4ListVerifier<int>;
 template struct Vector4ListVerifier<double>;
 
@@ -100,13 +103,13 @@ template struct AnnotationVerifier<IntVerifier>;
 template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
-template struct AnnotationVerifier<BoolVector2Verifier>;
+//template struct AnnotationVerifier<BoolVector2Verifier>;
 template struct AnnotationVerifier<IntVector2Verifier>;
 template struct AnnotationVerifier<DoubleVector2Verifier>;
-template struct AnnotationVerifier<BoolVector3Verifier>;
+//template struct AnnotationVerifier<BoolVector3Verifier>;
 template struct AnnotationVerifier<IntVector3Verifier>;
 template struct AnnotationVerifier<DoubleVector3Verifier>;
-template struct AnnotationVerifier<BoolVector4Verifier>;
+//template struct AnnotationVerifier<BoolVector4Verifier>;
 template struct AnnotationVerifier<IntVector4Verifier>;
 template struct AnnotationVerifier<DoubleVector4Verifier>;
 
@@ -115,13 +118,13 @@ template struct DeprecatedVerifier<IntVerifier>;
 template struct DeprecatedVerifier<DoubleVerifier>;
 template struct DeprecatedVerifier<StringVerifier>;
 template struct DeprecatedVerifier<TableVerifier>;
-template struct DeprecatedVerifier<BoolVector2Verifier>;
+//template struct DeprecatedVerifier<BoolVector2Verifier>;
 template struct DeprecatedVerifier<IntVector2Verifier>;
 template struct DeprecatedVerifier<DoubleVector2Verifier>;
-template struct DeprecatedVerifier<BoolVector3Verifier>;
+//template struct DeprecatedVerifier<BoolVector3Verifier>;
 template struct DeprecatedVerifier<IntVector3Verifier>;
 template struct DeprecatedVerifier<DoubleVector3Verifier>;
-template struct DeprecatedVerifier<BoolVector4Verifier>;
+//template struct DeprecatedVerifier<BoolVector4Verifier>;
 template struct DeprecatedVerifier<IntVector4Verifier>;
 template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
@@ -133,12 +136,14 @@ std::string DoubleVerifier::type() const {
     return "Double";
 }
 
-TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
+TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string & key) const
 {
-    if (dict.hasKeyAndValue<int>(key)) {
-        // We we have a key and the value is int, we are done
-        return { true, {}, {} };
+    if (dict.hasValue<int>(key)) {
+        // We have a key and the value is int, we are done
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
         if (dict.hasKey(key)) {
@@ -148,23 +153,39 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                 double intPart;
                 bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
-                    return { true, {}, {} };
+                    TestResult res;
+                    res.success = true;
+                    return res;
                 }
                 else {
-                    return {
-                        false,
-                        { { key, TestResult::Offense::Reason::WrongType } },
-                        {}
-                    };
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;
             }
         }
         else {
-            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
         }
     }
 }
@@ -173,8 +194,390 @@ std::string IntVerifier::type() const {
     return "Integer";
 }
 
+StringVerifier::StringVerifier(bool mustBeNotEmpty)
+    : TemplateVerifier<std::string>()
+    , _mustBeNotEmpty(mustBeNotEmpty)
+{}
+
+TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = TemplateVerifier<std::string>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string value = dictionary.value<std::string>(key);
+    if (value.empty() && _mustBeNotEmpty) {
+        res.success = false;
+        res.offenses.push_back({
+            key, TestResult::Offense::Reason::Verification, "value must not be empty"
+        });
+    }
+    return res;
+}
+
+bool StringVerifier::mustBeNotEmpty() const {
+    return _mustBeNotEmpty;
+}
+
 std::string StringVerifier::type() const {
     return "String";
+}
+
+TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
+                                    const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string file = dict.value<std::string>(key);
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "File did not exist";
+        res.offenses.push_back(off);
+    }
+    return res;
+}
+
+std::string FileVerifier::type() const {
+    return "File";
+}
+
+TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
+                                         const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string dir = dict.value<std::string>(key);
+    if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Directory did not exist";
+        res.offenses.push_back(off);
+    }
+    return res;
+}
+
+std::string DirectoryVerifier::type() const {
+    return "Directory";
+}
+
+TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
+                                        const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string dateTime = dict.value<std::string>(key);
+    std::string format = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
+
+    std::tm t = {};
+    std::istringstream ss(dateTime);
+    ss >> std::get_time(&t, format.c_str());
+
+    // first check format (automatically checks if valid time)
+    if (ss.fail()) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Not a valid format, should be: YYYY MM DD hh:mm:ss";
+        res.offenses.push_back(off);
+    }
+    // then check if valid date
+    else {
+        // normalize e.g. 29/02/2013 would become 01/03/2013
+        std::tm t_copy(t);
+        time_t when = mktime(&t_copy);
+        std::tm* norm = localtime(&when);
+
+        // validate (is the normalized date still the same?):
+        if (norm->tm_mday != t.tm_mday &&
+            norm->tm_mon != t.tm_mon &&
+            norm->tm_year != t.tm_year)
+        {
+            res.success = false;
+            TestResult::Offense off;
+            off.offender = key;
+            off.reason = TestResult::Offense::Reason::Verification;
+            off.explanation = "Not a valid date";
+            res.offenses.push_back(off);
+        }
+    }
+    return res;
+}
+
+std::string DateTimeVerifier::type() const {
+    return "Date and time";
+}
+
+TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = Vector3Verifier<double>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    glm::dvec3 values = dictionary.value<glm::dvec3>(key);
+    if (values.x < 0.0 || values.x > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".x";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    if (values.y < 0.0 || values.y > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".y";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    if (values.z < 0.0 || values.z > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".z";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    return res;
+}
+
+std::string Color3Verifier::type() const {
+    return std::string("Color3");
+}
+
+TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = Vector4Verifier<double>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    glm::dvec4 values = dictionary.value<glm::dvec4>(key);
+    if (values.x < 0.0 || values.x > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".x";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    if (values.y < 0.0 || values.y > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".y";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    if (values.z < 0.0 || values.z > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".z";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    if (values.w < 0.0 || values.w > 1.0) {
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key + ".a";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+    }
+
+    return res;
+}
+
+std::string Color4Verifier::type() const {
+    return std::string("Color4");
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec2>(key)) {
+        TestResult res;
+        res.success = true;
+        return res;
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec2>(key)) {
+                glm::dvec2 value = dict.value<glm::dvec2>(key);
+                glm::dvec2 intPart;
+                glm::bvec2 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0
+                };
+                if (isInt.x && isInt.y) {
+                    TestResult res;
+                    res.success = true;
+                    return res;
+                }
+                else {
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
+                }
+            }
+            else {
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;
+            }
+        }
+        else {
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;            
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec3>(key)) {
+        TestResult res;
+        res.success = true;
+        return res;
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec3>(key)) {
+                glm::dvec3 value = dict.value<glm::dvec3>(key);
+                glm::dvec3 intPart;
+                glm::bvec3 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z) {
+                    TestResult res;
+                    res.success = true;
+                    return res;
+                }
+                else {
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;  
+                }
+            }
+            else {
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;  
+            }
+        }
+        else {
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec4>(key)) {
+        TestResult res;
+        res.success = true;
+        return res;
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec4>(key)) {
+                glm::dvec4 value = dict.value<glm::dvec4>(key);
+                glm::dvec4 intPart;
+                glm::bvec4 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0,
+                    modf(value.w, &intPart.w) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z && isInt.w) {
+                    TestResult res;
+                    res.success = true;
+                    return res;
+                }
+                else {
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
+                }
+            }
+            else {
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;                
+            }
+        }
+        else {
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;                
+        }
+    }
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)
@@ -184,7 +587,7 @@ TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntrie
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
                                      const std::string& key) const
 {
-    if (dictionary.hasKeyAndValue<Type>(key)) {
+    if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
 
@@ -202,11 +605,22 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
     }
     else {
         if (dictionary.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
-
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::WrongType;
+            res.offenses.push_back(o);
+            return res;
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } }, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
         }
     }
 }
@@ -255,11 +669,11 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
         );
 
         if (it == docs.end()) {
-            res.offenses.push_back({
-                key,
-                TestResult::Offense::Reason::UnknownIdentifier
-            });
             res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::UnknownIdentifier;
+            res.offenses.push_back(o);
             return res;
         }
 
@@ -292,9 +706,9 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(const std::vector<Verifier*> values) {
-    ghoul_assert(!values.empty(), "values must not be empty");
-    for (Verifier* v : values) {
+AndVerifier::AndVerifier(const std::vector<Verifier*> values_) {
+    ghoul_assert(!values_.empty(), "values must not be empty");
+    for (Verifier* v : values_) {
         this->values.push_back(std::shared_ptr<Verifier>(v));
     }
 }
@@ -304,8 +718,8 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     std::vector<TestResult> res(values.size());
     std::transform(
-        values.begin(),
-        values.end(),
+        values.cbegin(),
+        values.cend(),
         res.begin(),
         [dictionary, key](const std::shared_ptr<Verifier>& v) {
             return v->operator()(dictionary, key);
@@ -313,16 +727,24 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     const bool success = std::all_of(
-        res.begin(),
-        res.end(),
-        [](const TestResult& res) { return res.success; }
+        res.cbegin(),
+        res.cend(),
+        std::mem_fn(&TestResult::success)
     );
 
     if (success) {
-        return { true, {}, {} };
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+        TestResult r;
+        r.success = false;
+        TestResult::Offense o;
+        o.offender = key;
+        o.reason = TestResult::Offense::Reason::Verification;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 
@@ -330,10 +752,10 @@ std::string AndVerifier::type() const {
     // Dirty hack to get an "and " inserted before the last element
     std::vector<std::string> types(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         types.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+        std::mem_fn(&Verifier::type)
     );
     types.push_back(std::string("and ") + values.back()->type());
 
@@ -344,20 +766,27 @@ std::string AndVerifier::documentation() const {
     // Dirty hack to get an "and " inserted before the last element
     std::vector<std::string> documentations(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         documentations.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+        std::mem_fn(&Verifier::documentation)
     );
     documentations.push_back(std::string("and ") + values.back()->documentation());
 
     return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(const std::vector<Verifier*> values) {
-    ghoul_assert(!values.empty(), "values must not be empty");
-    for (Verifier* v : values) {
-        this->values.push_back(std::shared_ptr<Verifier>(v));
+OrVerifier::OrVerifier(
+            const std::vector<std::variant<Verifier*, std::shared_ptr<Verifier>>> values_)
+{
+    ghoul_assert(!values_.empty(), "values must not be empty");
+    for (const std::variant<Verifier*, std::shared_ptr<Verifier>>& v : values_) {
+        if (std::holds_alternative<Verifier*>(v)) {
+            this->values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
+        }
+        else {
+            this->values.push_back(std::get<std::shared_ptr<Verifier>>(v));
+        }
     }
 }
 
@@ -366,8 +795,8 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     std::vector<TestResult> res(values.size());
     std::transform(
-        values.begin(),
-        values.end(),
+        values.cbegin(),
+        values.cend(),
         res.begin(),
         [dictionary, key](const std::shared_ptr<Verifier>& v) {
             return v->operator()(dictionary, key);
@@ -375,16 +804,24 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     const bool success = std::any_of(
-        res.begin(),
-        res.end(),
-        [](const TestResult& res) { return res.success; }
+        res.cbegin(),
+        res.cend(),
+        std::mem_fn(&TestResult::success)
     );
 
     if (success) {
-        return { true, {}, {} };
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+        TestResult r;
+        r.success = false;
+        TestResult::Offense o;
+        o.offender = key;
+        o.reason = TestResult::Offense::Reason::Verification;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 
@@ -392,10 +829,10 @@ std::string OrVerifier::type() const {
     // Dirty hack to get an "or " inserted before the last element
     std::vector<std::string> types(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         types.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+        std::mem_fn(&Verifier::type)
     );
     types.push_back(std::string("or ") + values.back()->type());
 
@@ -406,10 +843,10 @@ std::string OrVerifier::documentation() const {
     // Dirty hack to get an "or " inserted before the last element
     std::vector<std::string> documentations(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         documentations.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+        std::mem_fn(&Verifier::documentation)
     );
     documentations.push_back(std::string("or ") + values.back()->documentation());
 

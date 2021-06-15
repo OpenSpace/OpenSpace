@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -39,7 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "GUI";
@@ -54,7 +53,7 @@ namespace {
     constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
-        if (!FileSys.fileExists(absPath(texturePath))) {
+        if (!std::filesystem::is_regular_file(absPath(texturePath))) {
             LWARNING(fmt::format("Could not find image '{}'", texturePath));
             return;
         }
@@ -83,7 +82,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -114,7 +113,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -190,16 +189,11 @@ GUI::GUI()
 
 GUI::~GUI() {} // NOLINT
 
-void GUI::initialize() {
-
-}
+void GUI::initialize() {}
 
 void GUI::deinitialize() {
-    ImGui::Shutdown();
-
-    int nWindows = global::windowDelegate.nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        ImGui::DestroyContext(_contexts[i]);
+    for (ImGuiContext* ctx : _contexts) {
+        ImGui::DestroyContext(ctx);
     }
 
     for (GuiComponent* comp : _components) {
@@ -212,8 +206,7 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));
@@ -226,7 +219,7 @@ void GUI::initializeGL() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = global::windowDelegate.nWindows();
+    int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -254,9 +247,9 @@ void GUI::initializeGL() {
         io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
         io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
-        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).c_str(), FontSize);
+        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
         captionFont = io.Fonts->AddFontFromFileTTF(
-            absPath(GuiFont).c_str(),
+            absPath(GuiFont).string().c_str(),
             FontSize * 1.5f
         );
 
@@ -277,7 +270,7 @@ void GUI::initializeGL() {
         style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
         style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
         style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
-        style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
         style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
         style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
         style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
@@ -292,7 +285,6 @@ void GUI::initializeGL() {
         style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
         style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
         style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-        style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
         style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
         style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
         style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
@@ -302,21 +294,18 @@ void GUI::initializeGL() {
         style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
         style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
         style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
-        style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-        style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
+        style.Colors[ImGuiCol_Separator] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+        style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
         style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
         style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
         style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-        style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
-        style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
-        style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
         style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
         style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
         style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
         style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
         style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
-        style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+        style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
     }
 
     for (GuiComponent* comp : _components) {
@@ -424,7 +413,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = global::windowDelegate.currentWindowId();
+    const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -446,12 +435,6 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(global::performanceManager.isEnabled());
-
-    if (_performance.isEnabled()) {
-        _performance.render();
-    }
-
     if (_isEnabled) {
         render();
 
@@ -464,8 +447,7 @@ void GUI::endFrame() {
 
     ImGui::Render();
 
-    const bool shouldRender = _performance.isEnabled() || _isEnabled;
-    if (!shouldRender) {
+    if (!_isEnabled) {
         return;
     }
 
@@ -523,7 +505,7 @@ void GUI::endFrame() {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(cmdList->VtxBuffer.size() * sizeof(ImDrawVert)),
+            cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
             reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
@@ -531,7 +513,7 @@ void GUI::endFrame() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+            cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
             reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW
         );
@@ -637,6 +619,77 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
     return consumeEvent;
 }
 
+bool GUI::touchDetectedCallback(TouchInput input) {
+    ImGuiIO& io = ImGui::GetIO();
+    const glm::vec2 windowPos = input.currentWindowCoordinates();
+    const bool consumeEvent = io.WantCaptureMouse;
+
+    if (!consumeEvent) {
+        return false;
+    }
+    if (_validTouchStates.empty()) {
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = true;
+    }
+    _validTouchStates.push_back(input);
+    return true;
+}
+
+bool GUI::touchUpdatedCallback(TouchInput input) {
+    if (_validTouchStates.empty()) {
+        return false;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+
+    auto it = std::find_if(
+        _validTouchStates.cbegin(),
+        _validTouchStates.cend(),
+        [&](const TouchInput& state){
+            return state.fingerId == input.fingerId &&
+            state.touchDeviceId == input.touchDeviceId;
+        }
+    );
+
+    if (it == _validTouchStates.cbegin()) {
+        glm::vec2 windowPos = input.currentWindowCoordinates();
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = true;
+        return true;
+    }
+    else if (it != _validTouchStates.cend()){
+        return true;
+    }
+    return false;
+}
+
+void GUI::touchExitCallback(TouchInput input) {
+    if (_validTouchStates.empty()) {
+        return;
+    }
+
+    const auto found = std::find_if(
+        _validTouchStates.cbegin(),
+        _validTouchStates.cend(),
+        [&](const TouchInput& state){
+            return state.fingerId == input.fingerId &&
+            state.touchDeviceId == input.touchDeviceId;
+        }
+    );
+
+    if (found == _validTouchStates.cend()) {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    _validTouchStates.erase(found);
+    if (_validTouchStates.empty()) {
+        glm::vec2 windowPos = input.currentWindowCoordinates();
+        io.MousePos = {windowPos.x, windowPos.y};
+        io.MouseClicked[0] = false;
+    }
+}
+
+
 void GUI::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
@@ -692,7 +745,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -700,7 +753,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",
@@ -716,7 +769,7 @@ void GUI::render() {
         ImGui::End();
 
         ImGui::Begin("Test Window");
-        ImGui::ShowTestWindow();
+        ImGui::ShowDemoWindow();
         ImGui::End();
 
         ImGui::Begin("Metrics Window");

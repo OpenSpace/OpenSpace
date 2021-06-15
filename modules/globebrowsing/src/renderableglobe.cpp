@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,24 +24,27 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 
+#include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider.h>
-#include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/performance/performancemanager.h>
-#include <openspace/performance/performancemeasurement.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -49,13 +52,16 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
+#include <vector>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-#include <openspace/engine/moduleengine.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-openspace::GlobeBrowsingModule* _module = nullptr;
-
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+#include <experimental/memory_resource>
+namespace std {
+    using namespace experimental;
+} // namespace std
+#else
+#include <memory_resource>
+#endif
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -73,13 +79,6 @@ namespace {
         glm::dvec3 casterPositionVec = glm::dvec3(0.0);
         bool isShadowing = false;
     };
-
-    constexpr const char* KeyRadii = "Radii";
-    constexpr const char* KeyLayers = "Layers";
-    constexpr const char* KeyShadowGroup = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
-    constexpr const char* KeyLabels = "Labels";
 
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
@@ -109,68 +108,57 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
         "ShowChunkEdges",
         "Show chunk edges",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowChunkBoundsInfo = {
-        "ShowChunkBounds",
-        "Show chunk bounds",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
-        "ShowChunkAABB",
-        "Show chunk AABB",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo HeightResolutionInfo = {
-        "ShowHeightResolution",
-        "Show height resolution",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo HeightIntensityInfo = {
-        "ShowHeightIntensities",
-        "Show height intensities",
-        "" // @TODO Missing documentation
+        "If this value is set to 'true', the borders between chunks are shown using a "
+        "red highlight"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
         "LevelByProjectedAreaElseDistance",
         "Level by projected area (else distance)",
-        "" // @TODO Missing documentation
+        "If this value is set to 'true', the tile level is determined by the area "
+        "projected on screen. If it is 'false', the distance to the center of the tile "
+        "is used instead."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
-        "" // @TODO Missing documentation
+        "If this property is triggered, all tile provides for the globe are reset and "
+        "data is reloaded from scratch."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
         "Model Space Rendering Cutoff Level",
-        "" // @TODO Missing documentation
+        "This value determines the tile level that is used as the cut off between "
+        "rendering tiles using the globe model rendering vs the flat in-game rendering "
+        "method. This value is a tradeoff between not having precision errors in the "
+        "rendering and represting a tile as flat or curved."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
     {
         "DynamicLodIterationCount",
         "Data availability checks before LOD factor impact",
-        "" // @TODO Missing documentation
+        "The number of checks that have to fail/succeed in a row before the dynamic "
+        "level-of-detail adjusts the actual level-of-detail up or down during a session "
+        "recording"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
-        "" // @TODO Missing documentation
+        "This value determines whether there should be lighting applied to the surface "
+        "of the globe. Note that if there is an atmosphere attached to the planet, there "
+        "is a separate setting to control the shadowing induced by the atmosphere part."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
         "Use Accurate Normals",
-        "" // @TODO Missing documentation
+        "This value determines whether higher-accuracy normals should be used in the "
+        "rendering. These normals are calculated based on the height field information "
+        "and are thus only available if the planet has a height map"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
@@ -208,25 +196,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
         "TargetLodScaleFactor",
         "Target Level of Detail Scale Factor",
-        "" // @TODO Missing documentation
+        "Determines the targeted level-of-detail of the tiles for this globe. A higher "
+        "value means that the tiles rendered are a higher resolution for the same "
+        "distance of the camera to the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentLodScaleFactorInfo = {
         "CurrentLodScaleFactor",
         "Current Level of Detail Scale Factor (Read Only)",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CameraMinHeightInfo = {
-        "CameraMinHeight",
-        "Camera Minimum Height",
-        "" // @TODO Missing documentation
+        "The currently used scale factor whose target value is deteremined by "
+        "'TargetLodScaleFactor'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "orenNayarRoughness",
-        "" // @TODO Missing documentation
+        "The roughness factor that is used for the Oren-Nayar lighting mode"
     };
 
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
@@ -235,6 +220,47 @@ namespace {
         "This is the number of currently active layers, if this value reaches the "
         "maximum, bad things will happen."
     };
+
+    struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
+        // Specifies the radii for this planet. If the Double version of this is used, all
+        // three radii are assumed to be equal
+        std::optional<std::variant<glm::dvec3, double>> radii;
+
+        // Specifies whether the planet should be shaded by the primary light source or
+        // not. If it is disabled, all parts of the planet are illuminated
+        std::optional<bool> performShading;
+
+        // A list of all the layers that should be added
+        std::map<std::string, ghoul::Dictionary> layers
+            [[codegen::reference("globebrowsing_layermanager")]];
+
+        // Specifies information about planetary labels that can be rendered on the
+        // object's surface
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("globebrowsing_globelabelscomponent")]];
+
+        struct ShadowGroup {
+            struct Source {
+                std::string name;
+                double radius;
+            };
+            std::vector<Source> sources;
+
+            struct Caster {
+                std::string name;
+                double radius;
+            };
+            std::vector<Caster> casters;
+        };
+        std::optional<ShadowGroup> shadowGroup;
+
+        std::optional<ghoul::Dictionary> rings
+            [[codegen::reference("globebrowsing_rings_component")]];
+
+        std::optional<ghoul::Dictionary> shadows
+            [[codegen::reference("globebrowsing_shadows_component")]];
+    };
+#include "renderableglobe_codegen.cpp"
 } // namespace
 
 using namespace openspace::properties;
@@ -265,10 +291,23 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
-tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#else
+using ChunkTileVector =
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#endif
+
+ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
+                                         const TileIndex& tileIndex)
 {
-    std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
+    ZoneScoped
+
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+    ChunkTileVector tilesAndSettings;
+#else
+    ChunkTileVector tilesAndSettings(&global::memoryManager->TemporaryMemory);
+#endif
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -282,6 +321,8 @@ tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileInde
 }
 
 BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
+    ZoneScoped
+
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights { 0.f, 0.f, false, true };
@@ -291,7 +332,8 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     // (that is channel 0).
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
+
+    ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
         heightmaps,
         chunk.tileIndex
     );
@@ -344,18 +386,16 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 }
 
 bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
-    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
-    const LayerGroup& colormaps = lm.layerGroup(layergroupid::GroupID::ColorLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
-        colormaps,
-        chunk.tileIndex
-    );
+    ZoneScoped
 
-    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
-        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
+    const LayerGroup& colorLayers = lm.layerGroup(layergroupid::GroupID::ColorLayers);
 
-        if (chunkTile.tile.status == Tile::Status::Unavailable) {
-            return false;
+    for (Layer* lyr : colorLayers.activeLayers()) {
+        if (lyr->tileProvider()) {
+            ChunkTile t = tileprovider::chunkTile(*lyr->tileProvider(), chunk.tileIndex);
+            if (t.tile.status == Tile::Status::Unavailable) {
+                return false;
+            }
         }
     }
 
@@ -366,6 +406,8 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
                                                   const Ellipsoid& ellipsoid,
                                                   const BoundingHeights& heights)
 {
+    ZoneScoped
+
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
 
@@ -448,64 +490,13 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 documentation::Documentation RenderableGlobe::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableGlobe",
-        "globebrowsing_renderableglobe",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableGlobe"),
-                Optional::No,
-                ""
-            },
-            {
-                KeyRadii,
-                new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
-                Optional::Yes,
-                "Specifies the radii for this planet. If the Double version of this is "
-                "used, all three radii are assumed to be equal."
-            },
-            {
-                "PerformShading",
-                new BoolVerifier,
-                Optional::Yes,
-                "Specifies whether the planet should be shaded by the primary light "
-                "source or not. If it is disabled, all parts of the planet are "
-                "illuminated."
-            },
-            {
-                KeyLayers,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("globebrowsing_layermanager"),
-                        Optional::Yes,
-                        "Descriptions of the individual layer groups"
-                    }
-                }),
-                Optional::Yes,
-                "A list of all the layers that should be added"
-            },
-            {
-                KeyLabels,
-                new ReferencingVerifier("globebrowsing_globelabelscomponent"),
-                Optional::Yes,
-                "Specifies information about planetary labels that can be rendered on "
-                "the object's surface."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("globebrowsing_renderableglobe");
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
         BoolProperty(ShowChunkEdgeInfo, false),
-        BoolProperty(ShowChunkBoundsInfo, false),
-        BoolProperty(ShowChunkAABBInfo, false),
-        BoolProperty(HeightResolutionInfo, false),
-        BoolProperty(HeightIntensityInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
         BoolProperty(ResetTileProviderInfo, false),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
@@ -521,47 +512,70 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
-        FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _debugPropertyOwner({ "Debug" })
+    , _shadowMappingPropertyOwner({ "ShadowMapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
     , _ringsComponent(dictionary)
     , _shadowComponent(dictionary)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _generalProperties.currentLodScaleFactor.setReadOnly(true);
 
     // Read the radii in to its own dictionary
-    if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
-        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
-    }
-    else if (dictionary.hasKeyAndValue<double>(KeyRadii)) {
-        const double radius = dictionary.value<double>(KeyRadii);
-        _ellipsoid = Ellipsoid({ radius, radius, radius });
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    if (p.radii.has_value()) {
+        if (std::holds_alternative<glm::dvec3>(*p.radii)) {
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
+            setBoundingSphere(_ellipsoid.maximumRadius());
+        }
+        else if (std::holds_alternative<double>(*p.radii)) {
+            const double radius = std::get<double>(*p.radii);
+            _ellipsoid = Ellipsoid({ radius, radius, radius });
+            setBoundingSphere(_ellipsoid.maximumRadius());
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
 
-    if (dictionary.hasValue<bool>("PerformShading")) {
-        _generalProperties.performShading = dictionary.value<bool>("PerformShading");
-    }
+    // For globes, the interaction sphere is always the same as the bounding sphere
+    setInteractionSphere(boundingSphere());
+
+    _generalProperties.performShading =
+        p.performShading.value_or(_generalProperties.performShading);
+
 
     // Init layer manager
-    ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(KeyLayers, layersDictionary)) {
-        throw ghoul::RuntimeError(std::string(KeyLayers) + " must be specified");
-    }
-
+    // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
+    // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
+    // as a bare dictionary anymore and can use the value from the struct directly
+    ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
+    addProperty(_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
-    addProperty(_generalProperties.eclipseShadowsEnabled);
-    addProperty(_generalProperties.eclipseHardShadows);
+
+    if (p.shadowGroup.has_value()) {
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
+        for (const Parameters::ShadowGroup::Source& source : p.shadowGroup->sources) {
+            for (const Parameters::ShadowGroup::Caster& caster : p.shadowGroup->casters) {
+                Ellipsoid::ShadowConfiguration sc;
+                sc.source = std::pair<std::string, double>(source.name, source.radius);
+                sc.caster = std::pair<std::string, double>(caster.name, caster.radius);
+                shadowConfArray.push_back(sc);
+            }
+        }
+        _ellipsoid.setShadowConfigurationArray(shadowConfArray);
+
+        addProperty(_generalProperties.eclipseShadowsEnabled);
+        addProperty(_generalProperties.eclipseHardShadows);
+    }
 
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
@@ -578,16 +592,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     });
     addProperty(_generalProperties.targetLodScaleFactor);
     addProperty(_generalProperties.currentLodScaleFactor);
-    addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
     _generalProperties.nActiveLayers.setReadOnly(true);
     addProperty(_generalProperties.nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
-    _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
-    _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
     _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
@@ -601,8 +610,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
-    _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
-    _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
 
     _layerManager.onChange([&](Layer* l) {
         _shadersNeedRecompilation = true;
@@ -614,109 +621,31 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
-    //================================================================
-    //======== Reads Shadow (Eclipses) Entries in mod file ===========
-    //================================================================
-    ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
-    bool disableShadows = false;
-    if (success) {
-        std::vector<std::pair<std::string, double>> sourceArray;
-        unsigned int sourceCounter = 1;
-        while (success) {
-            std::string sourceName;
-            success = shadowDictionary.getValue(KeyShadowSource +
-                std::to_string(sourceCounter) + ".Name", sourceName);
-            if (success) {
-                double sourceRadius;
-                success = shadowDictionary.getValue(KeyShadowSource +
-                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
-                if (success) {
-                    sourceArray.emplace_back(sourceName, sourceRadius);
-                }
-                else {
-                    //LWARNING("No Radius value expecified for Shadow Source Name "
-                    //    << sourceName << " from " << name
-                    //    << " planet.\nDisabling shadows for this planet.");
-                    disableShadows = true;
-                    break;
-                }
-            }
-            sourceCounter++;
-        }
+    _globalChunkBuffer.resize(2048);
+    _localChunkBuffer.resize(2048);
+    _traversalMemory.resize(512);
 
-        if (!disableShadows && !sourceArray.empty()) {
-            success = true;
-            std::vector<std::pair<std::string, double>> casterArray;
-            unsigned int casterCounter = 1;
-            while (success) {
-                std::string casterName;
-                success = shadowDictionary.getValue(KeyShadowCaster +
-                    std::to_string(casterCounter) + ".Name", casterName);
-                if (success) {
-                    double casterRadius;
-                    success = shadowDictionary.getValue(KeyShadowCaster +
-                        std::to_string(casterCounter) + ".Radius", casterRadius);
-                    if (success) {
-                        casterArray.emplace_back(casterName, casterRadius);
-                    }
-                    else {
-                        //LWARNING("No Radius value expecified for Shadow Caster Name "
-                        //    << casterName << " from " << name
-                        //    << " planet.\nDisabling shadows for this planet.");
-                        disableShadows = true;
-                        break;
-                    }
-                }
+    _labelsDictionary = p.labels.value_or(_labelsDictionary);
 
-                casterCounter++;
-            }
-
-            std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
-            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const std::pair<std::string, double>& source : sourceArray) {
-                    for (const std::pair<std::string, double>& caster : casterArray) {
-                        Ellipsoid::ShadowConfiguration sc;
-                        sc.source = source;
-                        sc.caster = caster;
-                        shadowConfArray.push_back(sc);
-                    }
-                }
-                _ellipsoid.setShadowConfigurationArray(shadowConfArray);
-            }
-        }
-    }
-
-    // Labels Dictionary
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
-        _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
-    }
 
     // Components
-    if (dictionary.hasKey("Rings")) {
+    _hasRings = p.rings.has_value();
+    if (_hasRings) {
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
-        _hasRings = true;
-        
-        ghoul::Dictionary ringsDic;
-        dictionary.getValue("Rings", ringsDic);
     }
 
-    if (dictionary.hasKey("Shadows")) {
+    _hasShadows = p.shadows.has_value();
+    if (_hasShadows) {
         _shadowComponent.initialize();
         addPropertySubOwner(_shadowComponent);
-        _hasShadows = true;
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module = global::moduleEngine.module<GlobeBrowsingModule>();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void RenderableGlobe::initializeGL() {
-    if (!_labelsDictionary.empty()) {
+    if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
     }
@@ -744,12 +673,12 @@ void RenderableGlobe::deinitialize() {
 
 void RenderableGlobe::deinitializeGL() {
     if (_localRenderer.program) {
-        global::renderEngine.removeRenderProgram(_localRenderer.program.get());
+        global::renderEngine->removeRenderProgram(_localRenderer.program.get());
         _localRenderer.program = nullptr;
     }
 
     if (_globalRenderer.program) {
-        global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
+        global::renderEngine->removeRenderProgram(_globalRenderer.program.get());
         _globalRenderer.program = nullptr;
     }
 
@@ -785,8 +714,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     if (distanceToCamera < distance) {
         try {
             // Before Shadows
-            //renderChunks(data, rendererTask);
-            //_globeLabelsComponent.draw(data);
+            _globeLabelsComponent.draw(data);
 
             if (_hasShadows && _shadowComponent.isEnabled()) {
                 // Set matrices and other GL states
@@ -797,12 +725,13 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
                 if (_hasRings && _ringsComponent.isEnabled()) {
-                    _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
+                    _ringsComponent.draw(
+                        lightRenderData,
+                        RingsComponent::RenderPass::GeometryOnly
+                    );
                 }
-                    
-                glEnable(GL_BLEND);
 
-                _shadowComponent.setViewDepthMap(false);
+                glEnable(GL_BLEND);
 
                 _shadowComponent.end();
 
@@ -811,7 +740,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_hasRings && _ringsComponent.isEnabled()) {
                     _ringsComponent.draw(
                         data,
-                        RingsComponent::GeometryAndShading,
+                        RingsComponent::RenderPass::GeometryAndShading,
                         _shadowComponent.shadowMapData()
                     );
                 }
@@ -819,7 +748,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             else {
                 renderChunks(data, rendererTask);
                 if (_hasRings && _ringsComponent.isEnabled()) {
-                    _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
+                    _ringsComponent.draw(
+                        data,
+                        RingsComponent::RenderPass::GeometryAndShading
+                    );
                 }
             }
         }
@@ -853,17 +785,12 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_localRenderer.program && _localRenderer.program->isDirty()) {
         _localRenderer.program->rebuildFromFile();
 
         _localRenderer.program->setUniform("xSegments", _grid.xSegments);
-
-        if (_debugProperties.showHeightResolution) {
-            _localRenderer.program->setUniform(
-                "vertexResolution",
-                glm::vec2(_grid.xSegments, _grid.ySegments)
-            );
-        }
 
         ghoul::opengl::updateUniformLocations(
             *_localRenderer.program,
@@ -877,12 +804,6 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-        if (_debugProperties.showHeightResolution) {
-            _globalRenderer.program->setUniform(
-                "vertexResolution",
-                glm::vec2(_grid.xSegments, _grid.ySegments)
-            );
-        }
         // Ellipsoid Radius (Model Space)
         _globalRenderer.program->setUniform(
             "radiiSquared",
@@ -896,16 +817,20 @@ void RenderableGlobe::update(const UpdateData& data) {
         );
     }
 
-    setBoundingSphere(static_cast<float>(
-        _ellipsoid.maximumRadius() * data.modelTransform.scale
-    ));
+    double bs = _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale);
+    if (_hasRings) {
+        const double ringSize = _ringsComponent.size();
+        if (ringSize > bs) {
+            bs = ringSize;
+        }
+    }
+    setBoundingSphere(bs);
+    setInteractionSphere(bs);
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
     glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-    glm::dmat4 scaling =
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale,
-            data.modelTransform.scale, data.modelTransform.scale));
+    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     _cachedModelTransform = translation * rotation * scaling;
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
@@ -923,25 +848,20 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowComponent.update(data);
     }
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _nUploadedTiles = _layerManager.update();
-#else
-    _layerManager.update();
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-
-    if (_nLayersIsDirty) {
-        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
-            _layerManager.layerGroups();
-        _generalProperties.nActiveLayers = std::accumulate(
-            lgs.begin(),
-            lgs.end(),
-            0,
-            [](int lhs, LayerGroup* lg) {
-                return lhs + static_cast<int>(lg->activeLayers().size());
-            }
-        );
-        _nLayersIsDirty = false;
-    }
+    // abock (2020-08-21)
+    // This is a bit nasty every since we removed the second update call from the render
+    // loop. The problem is when we enable a new layer, the dirty flags above will be set
+    // to true, but the update method hasn't run yet.  So we need to move the layerManager
+    // update method to the render function call, but we don't want to *actually* update
+    // the layers once per render call; hence this nasty dirty flag
+    //
+    // How it is without in the frame when we enable a layer:
+    //
+    // RenderableGlobe::update() // updated with the old number of layers
+    // // Lua script to enable layer is executed and sets the dirty flags
+    // RenderableGlobe::render() // rendering with the new number of layers but the
+    //                           // LayerManager hasn't updated yet :o
+    _layerManagerDirty = true;
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -968,11 +888,31 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 //  Rendering code
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&, 
+void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                                    const ShadowComponent::ShadowMapData& shadowData,
                                    bool renderGeomOnly)
 {
     ZoneScoped
+
+
+    if (_layerManagerDirty) {
+        _layerManager.update();
+        _layerManagerDirty = false;
+    }
+
+    if (_nLayersIsDirty) {
+        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
+            _layerManager.layerGroups();
+        _generalProperties.nActiveLayers = std::accumulate(
+            lgs.begin(),
+            lgs.end(),
+            0,
+            [](int lhs, LayerGroup* lg) {
+            return lhs + static_cast<int>(lg->activeLayers().size());
+        }
+        );
+        _nLayersIsDirty = false;
+    }
 
     if (_shadersNeedRecompilation) {
         recompileShaders();
@@ -986,7 +926,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             const float dsf = static_cast<float>(
                 _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
             );
-            
+
             // We are setting the setIgnoreUniformLocationError as it is not super trivial
             // and brittle to figure out apriori whether the uniform was optimized away
             // or not. It should be something long the lines of:
@@ -1012,10 +952,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
 
+    _localRenderer.program->setUniform("opacity", _opacity);
+    _globalRenderer.program->setUniform("opacity", _opacity);
+
 
     if (_globalRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i].bind(
@@ -1040,6 +984,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (_localRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _localRenderer.gpuLayerGroups[i].bind(
@@ -1061,20 +1006,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _localRenderer.updatedSinceLastCall = false;
     }
 
+    // Calculate the MVP matrix
+    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
+    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
     _allChunksAvailable = true;
-    updateChunkTree(_leftRoot, data);
-    updateChunkTree(_rightRoot, data);
+    updateChunkTree(_leftRoot, data, mvp);
+    updateChunkTree(_rightRoot, data, mvp);
     _chunkCornersDirty = false;
     _iterationsOfAvailableData =
         (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
     _iterationsOfUnavailableData =
         (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
-    // Calculate the MVP matrix
-    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-        viewTransform;
-    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
 
     //
     // Setting uniforms that don't change between chunks but are view dependent
@@ -1101,16 +1048,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         modelViewProjectionTransform
     );
 
-    const bool hasNightLayers = !_layerManager.layerGroup(
-        layergroupid::GroupID::NightLayers
-    ).activeLayers().empty();
-
-    const bool hasWaterLayer = !_layerManager.layerGroup(
-        layergroupid::GroupID::WaterMasks
-    ).activeLayers().empty();
-    
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
-    
+
     const bool hasHeightLayer = !_layerManager.layerGroup(
         layergroupid::HeightLayers
     ).activeLayers().empty();
@@ -1118,7 +1057,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         // Apply an extra scaling to the height if the object is scaled
         _globalRenderer.program->setUniform(
             "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
         );
     }
 
@@ -1135,11 +1076,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _globalRenderer.program->setUniform(
+        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
+        // way is to figure out with the uniform is optimized away. I assume that it is
+        // because the shader doesn't get recompiled when the last layer of the night
+        // or water is disabled;  so the shader thinks it has to do the calculation, but
+        // there are actually no layers left
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _localRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
+
 
 
     // Local shader
@@ -1156,120 +1106,117 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _localRenderer.program->setUniform(
+        // @TODO (abock, 2020-04-14); This is just a bandaid for issue #1136.  The better
+        // way is to figure out with the uniform is optimized away. I assume that it is
+        // because the shader doesn't get recompiled when the last layer of the night
+        // or water is disabled;  so the shader thinks it has to do the calculation, but
+        // there are actually no layers left
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    constexpr const int ChunkBufferSize = 2048;
-    std::array<const Chunk*, ChunkBufferSize> global;
     int globalCount = 0;
-    std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    auto traversal = [&global, &globalCount, &local, &localCount,
-          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
+    auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
+        int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
+        std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
 
-        std::vector<const Chunk*> Q;
-        Q.reserve(256);
+        traversalMemory.clear();
 
         // Loop through nodes in breadths first order
-        Q.push_back(&node);
-        while (!Q.empty()) {
-            const Chunk* n = Q.front();
-            Q.erase(Q.begin());
+        traversalMemory.push_back(&node);
+        while (!traversalMemory.empty()) {
+            const Chunk* n = traversalMemory.front();
+            traversalMemory.erase(traversalMemory.begin());
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
-                    global[globalCount] = n;
-                    ++globalCount;
+                    global[iGlobal] = n;
+                    ++iGlobal;
                 }
                 else {
-                    local[localCount] = n;
-                    ++localCount;
+                    local[iLocal] = n;
+                    ++iLocal;
                 }
             }
 
             // Add children to queue, if any
             if (!isLeaf(*n)) {
                 for (int i = 0; i < 4; ++i) {
-                    Q.push_back(n->children[i]);
+                    traversalMemory.push_back(n->children[i]);
                 }
             }
         }
     };
 
-    traversal(_leftRoot);
-    traversal(_rightRoot);
+    traversal(
+        _leftRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
+    traversal(
+        _rightRoot,
+        _globalChunkBuffer,
+        globalCount,
+        _localChunkBuffer,
+        localCount,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        _traversalMemory
+    );
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
-    for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-        renderChunkGlobally(*global[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < globalCount; ++i) {
+        renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-        renderChunkLocally(*local[i], data, shadowData, renderGeomOnly);
+    for (int i = 0; i < localCount; ++i) {
+        renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _module->addFrameInfo(
-        this,
-        std::min(localCount, ChunkBufferSize),
-        std::min(globalCount, ChunkBufferSize),
-        _nUploadedTiles
-    );
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-
-    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
-        for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-            debugRenderChunk(
-                *global[i],
-                mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
-            );
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        // If our tile cache is very full, we assume we need to adjust the level of detail
+        // dynamically to not keep rendering frames with unavailable data
+        // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
+        // unavailable/available data in a row, we assume that a change could be made.
+        const int iterCount = _debugProperties.dynamicLodIterationCount;
+        const bool exceededIterations =
+            static_cast<int>(_iterationsOfUnavailableData) > iterCount;
+        const float clf = _generalProperties.currentLodScaleFactor;
+        const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
+        const float targetLod = _generalProperties.targetLodScaleFactor;
+        const bool validLodFactor = clf > clfMin;
+        if (exceededIterations && validLodFactor) {
+            _generalProperties.currentLodScaleFactor =
+                _generalProperties.currentLodScaleFactor - 0.1f;
+            _iterationsOfUnavailableData = 0;
+            _lodScaleFactorDirty = true;
+        } // Make 2 times the iterations with available data to move it up again
+        else if (static_cast<int>(_iterationsOfAvailableData) >
+            (iterCount * 2) && clf < targetLod)
+        {
+            _generalProperties.currentLodScaleFactor =
+                _generalProperties.currentLodScaleFactor + 0.1f;
+            _iterationsOfAvailableData = 0;
+            _lodScaleFactorDirty = true;
         }
-
-        for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-            debugRenderChunk(
-                *local[i],
-                mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
-            );
-        }
-    }
-
-    // If our tile cache is very full, we assume we need to adjust the level of detail
-    // dynamically to not keep rendering frames with unavailable data
-    // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
-    // unavailable/available data in a row, we assume that a change could be made.
-    const int iterCount = _debugProperties.dynamicLodIterationCount;
-    const bool exceededIterations = _iterationsOfUnavailableData > iterCount;
-    const float clf = _generalProperties.currentLodScaleFactor;
-    const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
-    const float targetLod = _generalProperties.targetLodScaleFactor;
-    const bool validLodFactor = clf > clfMin;
-    if (exceededIterations && validLodFactor) {
-        _generalProperties.currentLodScaleFactor =
-            _generalProperties.currentLodScaleFactor - 0.1f;
-        _iterationsOfUnavailableData = 0;
-        _lodScaleFactorDirty = true;
-    } // Make 2 times the iterations with available data to move it up again
-    else if (_iterationsOfAvailableData > (iterCount * 2) && clf < targetLod) {
-        _generalProperties.currentLodScaleFactor =
-            _generalProperties.currentLodScaleFactor + 0.1f;
-        _iterationsOfAvailableData = 0;
-        _lodScaleFactorDirty = true;
     }
 }
 
@@ -1280,11 +1227,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     ZoneScoped
     TracyGpuZone("renderChunkGlobally")
 
-    //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
-    const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+    std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
@@ -1329,9 +1275,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a 
-           // complete transformation from the model coordinates to the clip space of 
-           // the light position.
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of the
+        // light position.
         program.setUniform(
             "shadowMatrix",
             shadowData.shadowMatrix * modelTransform()
@@ -1343,16 +1289,23 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
+    }
 
     glEnable(GL_DEPTH_TEST);
-    
+
     if (!renderGeomOnly) {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }
 
     _grid.drawUsingActiveProgram();
-    
+
     for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
         l.deactivate();
     }
@@ -1444,7 +1397,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         // Apply an extra scaling to the height if the object is scaled
         program.setUniform(
             "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+            static_cast<float>(
+                glm::compMax(data.modelTransform.scale) * data.camera.scaling()
+            )
         );
     }
 
@@ -1459,9 +1414,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // Shadow Mapping
     ghoul::opengl::TextureUnit shadowMapUnit;
     if (_generalProperties.shadowMapping && shadowData.shadowDepthTexture != 0) {
-        // Adding the model transformation to the final shadow matrix so we have a 
-           // complete transformation from the model coordinates to the clip space of 
-           // the light position.
+        // Adding the model transformation to the final shadow matrix so we have a
+        // complete transformation from the model coordinates to the clip space of the
+        // light position.
         program.setUniform(
             "shadowMatrix",
             shadowData.shadowMatrix * modelTransform()
@@ -1473,13 +1428,20 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
+    }
 
     glEnable(GL_DEPTH_TEST);
     if (!renderGeomOnly) {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }
-    
+
     _grid.drawUsingActiveProgram();
 
     for (GPULayerGroup& l : _localRenderer.gpuLayerGroups) {
@@ -1488,7 +1450,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-                                       bool renderBounds, bool renderAABB) const
+                                       bool renderBounds) const
 {
     ZoneScoped
 
@@ -1516,12 +1478,6 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
     if (renderBounds) {
         DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
-    }
-
-    if (renderAABB) {
-        const std::vector<glm::vec4>& screenSpacePoints =
-            DebugRenderer::ref().verticesFor(screenSpaceBounds);
-        DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
     }
 }
 
@@ -1616,7 +1572,7 @@ void RenderableGlobe::recompileShaders() {
         //);
         layeredTextureInfo.lastLayerIdx = static_cast<int>(
             layerGroup.activeLayers().size() - 1
-            );
+        );
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
         for (Layer* layer : layers) {
@@ -1633,8 +1589,12 @@ void RenderableGlobe::recompileShaders() {
     std::vector<std::pair<std::string, std::string>>& pairs =
         preprocessingData.keyValuePairs;
 
+    const bool hasHeightLayer = !_layerManager.layerGroup(
+        layergroupid::HeightLayers
+    ).activeLayers().empty();
+
     pairs.emplace_back("useAccurateNormals",
-        std::to_string(_generalProperties.useAccurateNormals)
+        std::to_string(_generalProperties.useAccurateNormals && hasHeightLayer)
     );
     pairs.emplace_back(
         "performShading",
@@ -1653,12 +1613,8 @@ void RenderableGlobe::recompileShaders() {
         std::to_string(_generalProperties.shadowMapping)
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
-    pairs.emplace_back("showHeightResolution",
-        std::to_string(_debugProperties.showHeightResolution)
-    );
-    pairs.emplace_back("showHeightIntensities",
-        std::to_string(_debugProperties.showHeightIntensities)
-    );
+    pairs.emplace_back("showHeightResolution", "0");
+    pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
 
 
@@ -1735,7 +1691,7 @@ void RenderableGlobe::recompileShaders() {
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
-            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+            std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i])
         );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
@@ -1748,11 +1704,14 @@ void RenderableGlobe::recompileShaders() {
     // Shadow Mapping Samples
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
+    // Exclise Shadow Samples
+    int nEclipseShadows = static_cast<int>(_ellipsoid.shadowConfigurationArray().size());
+    shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader
     //
-    global::renderEngine.removeRenderProgram(_localRenderer.program.get());
-    _localRenderer.program = global::renderEngine.buildRenderProgram(
+    global::renderEngine->removeRenderProgram(_localRenderer.program.get());
+    _localRenderer.program = global::renderEngine->buildRenderProgram(
         "LocalChunkedLodPatch",
         absPath("${MODULE_GLOBEBROWSING}/shaders/localrenderer_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
@@ -1762,13 +1721,6 @@ void RenderableGlobe::recompileShaders() {
     _localRenderer.updatedSinceLastCall = true;
 
     _localRenderer.program->setUniform("xSegments", _grid.xSegments);
-
-    if (_debugProperties.showHeightResolution) {
-        _localRenderer.program->setUniform(
-            "vertexResolution",
-            glm::vec2(_grid.xSegments, _grid.ySegments)
-        );
-    }
 
     ghoul::opengl::updateUniformLocations(
         *_localRenderer.program,
@@ -1780,8 +1732,8 @@ void RenderableGlobe::recompileShaders() {
     //
     // Create global shader
     //
-    global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
-    _globalRenderer.program = global::renderEngine.buildRenderProgram(
+    global::renderEngine->removeRenderProgram(_globalRenderer.program.get());
+    _globalRenderer.program = global::renderEngine->buildRenderProgram(
         "GlobalChunkedLodPatch",
         absPath("${MODULE_GLOBEBROWSING}/shaders/globalrenderer_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
@@ -1791,12 +1743,6 @@ void RenderableGlobe::recompileShaders() {
 
     _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
-    if (_debugProperties.showHeightResolution) {
-        _globalRenderer.program->setUniform(
-            "vertexResolution",
-            glm::vec2(_grid.xSegments, _grid.ySegments)
-        );
-    }
     // Ellipsoid Radius (Model Space)
     _globalRenderer.program->setUniform(
         "radiiSquared",
@@ -1832,7 +1778,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     double heightToSurface = getHeight(targetModelSpace);
     heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
     centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
-        (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
+        (glm::dvec3(0.0, 1.0, 0.0) * interactionSphere()) :
         centerToEllipsoidSurface;
     ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
         glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;
@@ -1846,12 +1792,13 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
 bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const RenderData& renderData,
-                                     const BoundingHeights& heights) const
+                                     const BoundingHeights& heights,
+                                     const glm::dmat4& mvp) const
 {
     ZoneScoped
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
+           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -1898,7 +1845,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    const TileIndex tileIndex(x, y, chunkLevel);
+    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
     const Geodetic2 northEast = patch.corner(Quad::NORTH_EAST);
@@ -2063,25 +2011,47 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             lt
         );
         casterPos *= KM_TO_M; // converting to meters
-        // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-        //     casterPos.x,
-        //     casterPos.y,
-        //     casterPos.z
-        // );
 
+        const std::string source = shadowConf.source.first;
+        SceneGraphNode* sourceNode =
+            global::renderEngine->scene()->sceneGraphNode(source);
+        const std::string caster = shadowConf.caster.first;
+        SceneGraphNode* casterNode =
+            global::renderEngine->scene()->sceneGraphNode(caster);
+
+        const double sourceRadiusScale = std::max(
+            glm::compMax(sourceNode->scale()),
+            1.0
+        );
+
+        const double casterRadiusScale = std::max(
+            glm::compMax(casterNode->scale()),
+            1.0
+        );
+
+        if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+            LERRORC(
+                "Renderableglobe",
+                "Invalid scenegraph node for the shadow's caster or shadow's receiver."
+            );
+            return;
+        }
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
         const glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
         const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+
         const double sc_length = glm::length(sourceCasterVec);
         const glm::dvec3 planetCaster_proj =
             (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) *
             sourceCasterVec;
-        const double d_test = glm::length(planetCasterVec - planetCaster_proj);
-        const double xp_test = shadowConf.caster.second * sc_length /
-            (shadowConf.source.second + shadowConf.caster.second);
-        const double rp_test = shadowConf.caster.second *
+
+        const double d_test  = glm::length(planetCasterVec - planetCaster_proj);
+        const double xp_test = shadowConf.caster.second * casterRadiusScale *
+                sc_length / (shadowConf.source.second * sourceRadiusScale +
+                             shadowConf.caster.second * casterRadiusScale);
+        const double rp_test = shadowConf.caster.second * casterRadiusScale *
             (glm::length(planetCaster_proj) + xp_test) / xp_test;
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
@@ -2104,13 +2074,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             (casterDistSun < planetDistSun))
         {
             // The current caster is shadowing the current planet
-            shadowData.isShadowing = true;
-            shadowData.rs = shadowConf.source.second;
-            shadowData.rc = shadowConf.caster.second;
-            shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
-            shadowData.xp = xp_test;
-            shadowData.xu = shadowData.rc * sc_length /
-                (shadowData.rs - shadowData.rc);
+            shadowData.isShadowing       = true;
+            shadowData.rs                = shadowConf.source.second * sourceRadiusScale;
+            shadowData.rc                = shadowConf.caster.second * casterRadiusScale;
+            shadowData.sourceCasterVec   = glm::normalize(sourceCasterVec);
+            shadowData.xp                = xp_test;
+            shadowData.xu                = shadowData.rc * sc_length /
+                                          (shadowData.rs - shadowData.rc);
             shadowData.casterPositionVec = casterPos;
         }
         shadowDataArray.push_back(shadowData);
@@ -2120,15 +2090,16 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     unsigned int counter = 0;
     for (const ShadowRenderingStruct& sd : shadowDataArray) {
         constexpr const char* NameIsShadowing = "shadowDataArray[{}].isShadowing";
-        constexpr const char* NameXp = "shadowDataArray[{}].xp";
-        constexpr const char* NameXu = "shadowDataArray[{}].xu";
-        constexpr const char* NameRc = "shadowDataArray[{}].rc";
-        constexpr const char* NameSource = "shadowDataArray[{}].sourceCasterVec";
-        constexpr const char* NamePos = "shadowDataArray[{}].casterPositionVec";
+        constexpr const char* NameXp          = "shadowDataArray[{}].xp";
+        constexpr const char* NameXu          = "shadowDataArray[{}].xu";
+        constexpr const char* NameRc          = "shadowDataArray[{}].rc";
+        constexpr const char* NameSource      = "shadowDataArray[{}].sourceCasterVec";
+        constexpr const char* NamePos         = "shadowDataArray[{}].casterPositionVec";
 
         programObject.setUniform(
             fmt::format(NameIsShadowing, counter), sd.isShadowing
         );
+
         if (sd.isShadowing) {
             programObject.setUniform(fmt::format(NameXp, counter), sd.xp);
             programObject.setUniform(fmt::format(NameXu, counter), sd.xu);
@@ -2310,22 +2281,17 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData) const
+                                          const RenderData&,
+                                          const glm::dmat4& mvp) const
 {
     ZoneScoped
-
-    // Calculate the MVP matrix
-    const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
-    const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
-        renderData.camera.sgctInternal.projectionMatrix()
-    ) * viewTransform * _cachedModelTransform;
 
     const std::array<glm::dvec4, 8>& corners = chunk.corners;
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
     for (size_t i = 0; i < 8; ++i) {
-        const glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        const glm::dvec4 cornerClippingSpace = mvp * corners[i];
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
@@ -2463,7 +2429,9 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
     cn.children.fill(nullptr);
 }
 
-bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
+                                      const glm::dmat4& mvp)
+{
     ZoneScoped
 
     // abock:  I tried turning this into a queue and use iteration, rather than recursion
@@ -2472,7 +2440,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     //         children and then again it self to be processed after the children finish).
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
-        updateChunk(cn, data);
+        ZoneScopedN("leaf")
+        updateChunk(cn, data, mvp);
 
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
@@ -2485,15 +2454,16 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         return cn.status == Chunk::Status::WantMerge;
     }
     else {
+        ZoneScopedN("!leaf")
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children[i], data)) {
+            if (updateChunkTree(*cn.children[i], data, mvp)) {
                 requestedMergeMask |= (1 << i);
             }
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        updateChunk(cn, data);
+        updateChunk(cn, data, mvp);
 
         if (allChildrenWantsMerge && (cn.status != Chunk::Status::WantSplit)) {
             mergeChunkNode(cn);
@@ -2509,7 +2479,11 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     }
 }
 
-void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data,
+                                  const glm::dmat4& mvp) const
+{
+    ZoneScoped
+
     const BoundingHeights& heights = boundingHeightsForChunk(chunk, _layerManager);
     chunk.heightTileOK = heights.tileOK;
     chunk.colorTileOK = colorAvailableForChunk(chunk, _layerManager);
@@ -2520,7 +2494,7 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
         // The flag gets set to false globally after the updateChunkTree calls
     }
 
-    if (testIfCullable(chunk, data, heights)) {
+    if (testIfCullable(chunk, data, heights, mvp)) {
         chunk.isVisible = false;
         chunk.status = Chunk::Status::WantMerge;
     }

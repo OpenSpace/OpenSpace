@@ -2,89 +2,72 @@
 -- loading this scene directly without any other elements added on top of it will
 -- probably not work
 
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
-local propertyHelper = asset.require('util/property_helper')
+asset.require('./base_blank')
 
 -- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-
 asset.require('scene/solarsystem/sun/sun')
 asset.require('scene/solarsystem/sun/glare')
-asset.require('scene/solarsystem/planets')
-asset.require('scene/solarsystem/planets/mars/moons/phobos')
-asset.require('scene/solarsystem/planets/mars/moons/deimos')
+asset.require('scene/solarsystem/sun/habitablezone')
+asset.require('scene/solarsystem/sun/default_layers')
+asset.require('scene/solarsystem/planets/planets')
+asset.require('scene/solarsystem/planets/default_layers')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-asset.request('scene/milkyway/milkyway/volume')
+asset.require('scene/solarsystem/dwarf_planets/pluto/default_layers')
+asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
+asset.require('scene/milkyway/milkyway/volume')
+asset.require('scene/milkyway/constellations/constellation_art')
+asset.require('scene/milkyway/constellations/constellation_keybinds')
+asset.require('scene/milkyway/objects/orionnebula/orionnebula')
+asset.require('util/launcher_images')
 
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- For exoplanet system visualizations
+asset.require('scene/milkyway/exoplanets/exoplanets_data')
+asset.require('scene/milkyway/exoplanets/exoplanets_textures')
 
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
+local assetHelper = asset.require('util/asset_helper')
+asset.require('scene/digitaluniverse/2dF')
+asset.require('scene/digitaluniverse/2mass')
+asset.require('scene/digitaluniverse/6dF')
+asset.require('scene/digitaluniverse/abell')
+asset.require('scene/digitaluniverse/alternatestarlabels')
+asset.require('scene/digitaluniverse/backgroundradiation')
+-- asset.require('scene/digitaluniverse/backgroundradiation_multiverse')
+asset.require('scene/digitaluniverse/clusters')
+asset.require('scene/digitaluniverse/constellationbounds')
+asset.require('scene/digitaluniverse/constellations')
+asset.require('scene/digitaluniverse/deepsky')
+asset.require('scene/digitaluniverse/dwarfs')
+asset.require('scene/digitaluniverse/exoplanets')
+asset.require('scene/digitaluniverse/globularclusters')
+asset.require('scene/digitaluniverse/grids')
+asset.require('scene/digitaluniverse/groups')
+asset.require('scene/digitaluniverse/h2regions')
+asset.require('scene/digitaluniverse/kepler')
+asset.require('scene/digitaluniverse/localdwarfs')
+asset.require('scene/digitaluniverse/milkyway')
+asset.require('scene/digitaluniverse/milkyway_arm_labels')
+asset.require('scene/digitaluniverse/milkyway_data')
+asset.require('scene/digitaluniverse/milkyway_label')
+asset.require('scene/digitaluniverse/milkyway_sphere')
+asset.require('scene/digitaluniverse/obassociations')
+asset.require('scene/digitaluniverse/openclusters')
+asset.require('scene/digitaluniverse/planetarynebulae')
+asset.require('scene/digitaluniverse/pulsars')
+asset.require('scene/digitaluniverse/quasars')
+asset.require('scene/digitaluniverse/sdss')
+asset.require('scene/digitaluniverse/starlabels')
+asset.require('scene/digitaluniverse/starorbits')
+asset.require('scene/digitaluniverse/stars')
+asset.require('scene/digitaluniverse/superclusters')
+asset.require('scene/digitaluniverse/supernovaremnants')
+asset.require('scene/digitaluniverse/tully')
+asset.require('scene/digitaluniverse/voids')
 
--- Load web gui
-local webGui = asset.require('util/webgui')
 
-asset.request('customization/globebrowsing')
-
--- Keybindings that are specific for this scene
-local Keybindings = {
-    {
-        Key = "b",
-        Name = "Toggle background",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled'),
-        Documentation = "Toggle background (Stars and Milkyway).",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "g",
-        Name = "Toggle background/shading",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
-                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  propertyHelper.invert('Scene.Moon.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
-        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "h",
-        Name="Toggle Trails",
-        Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
-        "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Toggles the visibility of planet and moon trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "l",
-        Name = "Toggle planet labels",
-        Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Turns on visibility for all solar system labels",
-        GuiPath = "/Rendering",
-        Local = false
-    }
-}
+asset.require('customization/globebrowsing')
 
 asset.onInitialize(function ()
-    webGui.setCefRoute("onscreen")
-
-    sceneHelper.bindKeys(Keybindings)
-    openspace.setDefaultGuiSorting()
-
-    openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    )
-end)
-
-asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
+  openspace.globebrowsing.loadWMSServersFromFile(
+    openspace.absPath("${DATA}/globebrowsing_servers.lua")
+  )
 end)

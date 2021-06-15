@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <string_view>
 #include <vector>
 
 namespace openspace {
@@ -91,8 +92,8 @@ public:
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-    void log(ghoul::logging::LogLevel level, const std::string& category,
-        const std::string& message) override;
+    void log(ghoul::logging::LogLevel level, std::string_view category,
+        std::string_view message) override;
 
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/assetlistener.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
@@ -38,65 +37,31 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 
-#include <string>
-#include <fstream>
 #include <chrono>
-
+#include <filesystem>
+#include <fstream>
+#include <string>
 #include <thread>
 
 namespace {
-    constexpr const char* KeyAsset = "Asset";
-    constexpr const char* _loggerCat = "SyncAssetTask";
     constexpr std::chrono::milliseconds ProgressPollInterval(200);
+
+    struct [[codegen::Dictionary(SyncAssetTask)]] Parameters {
+        // The asset file to sync
+        std::filesystem::path asset;
+    };
+#include "syncassettask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation SyncAssetTask::documentation() {
-    using namespace documentation;
-    return {
-        "SyncAssetTask",
-        "sync_asset_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("SyncAssetTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
-                KeyAsset,
-                new StringAnnotationVerifier("A file path to an asset"),
-                Optional::No,
-                "The asset file to sync"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("sync_asset_task");
 }
 
-class RequestListener : public AssetListener {
-public:
-    virtual ~RequestListener() = default;
-    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override {
-        if (state == Asset::State::LoadingFailed) {
-            LERROR(fmt::format("Failed to load asset: {}", asset->id()));
-        }
-        if (state == Asset::State::SyncRejected) {
-            LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
-        }
-    }
-    void assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
-    void assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
-};
-
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "SyncAssetTask"
-    );
-
-    _asset = dictionary.value<std::string>(KeyAsset);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _asset = p.asset.string();
 }
 
 std::string SyncAssetTask::description() {
@@ -110,7 +75,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
 
     registerCoreClasses(scriptEngine);
 
-    for (OpenSpaceModule* m : global::moduleEngine.modules()) {
+    for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
         for (scripting::LuaLibrary& l : m->luaLibraries()) {
@@ -125,18 +90,14 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
 
     AssetLoader loader(&luaState, &watcher, "${ASSETS}");
 
-    RequestListener listener;
-    loader.addAssetListener(&listener);
-
     loader.add(_asset);
-    loader.rootAsset()->startSynchronizations();
+    loader.rootAsset().startSynchronizations();
 
-    std::vector<std::shared_ptr<const Asset>> allAssets =
-        loader.rootAsset()->subTreeAssets();
+    std::vector<const Asset*> allAssets = loader.rootAsset().subTreeAssets();
 
     while (true) {
         bool inProgress = false;
-        for (const std::shared_ptr<const Asset>& asset : allAssets) {
+        for (const Asset* asset : allAssets) {
             Asset::State state = asset->state();
             if (state == Asset::State::Unloaded ||
                 state == Asset::State::Loaded ||
@@ -145,7 +106,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
                 inProgress = true;
             }
         }
-        progressCallback(loader.rootAsset()->requestedSynchronizationProgress());
+        progressCallback(loader.rootAsset().requestedSynchronizationProgress());
         std::this_thread::sleep_for(ProgressPollInterval);
         watcher.notify();
         if (!inProgress) {

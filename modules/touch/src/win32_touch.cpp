@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <thread>
 #include <tchar.h>
 #include <tpcshrd.h>
+#include <debugapi.h>
 
 // #define ENABLE_TUIOMESSAGES
 #define ENABLE_DIRECTMSG
@@ -42,7 +43,7 @@
 namespace {
     constexpr const char* _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
-    std::thread* gMouseHookThread;
+    std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
     std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
@@ -50,13 +51,22 @@ namespace {
         UINT32,
         std::unique_ptr<openspace::TouchInputHolder>
     > gTouchInputsMap;
+
 #ifdef ENABLE_TUIOMESSAGES
     TUIO::TuioServer* gTuioServer = nullptr;
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
 #endif
+
+    const long long gFrequency = []() -> long long {
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        return frequency.QuadPart;
+    }();
+
 } // namespace
 
 namespace openspace {
+
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 // This hook will only work for Win8+ Digitizers.
@@ -79,10 +89,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
             }
 
-            using namespace std::chrono;
-            const microseconds timestamp = duration_cast<microseconds>(
-                high_resolution_clock::now().time_since_epoch()
-            ) - gStartTime;
+            //Implementation from microsoft STL of high_resolution_clock(steady_clock):
+            const long long freq = gFrequency;
+            const long long whole = (info.PerformanceCount / freq) * std::micro::den;
+            const long long part  = (info.PerformanceCount % freq) *
+                                    std::micro::den / freq;
+            const std::chrono::microseconds timestamp =
+                std::chrono::duration<UINT64, std::micro>(whole + part) - gStartTime;
+
             RECT rect;
             GetClientRect(pStruct->hwnd, reinterpret_cast<LPRECT>(&rect));
 
@@ -90,17 +104,17 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             // native touch to screen conversion
             ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-            float xPos = static_cast<float>(p.x) /
-                         static_cast<float>(rect.right - rect.left);
-            float yPos = static_cast<float>(p.y) /
-                         static_cast<float>(rect.bottom - rect.top);
+            const float xPos = static_cast<float>(p.x) /
+                               static_cast<float>(rect.right - rect.left);
+            const float yPos = static_cast<float>(p.y) /
+                               static_cast<float>(rect.bottom - rect.top);
 
             TouchInput touchInput(
                 reinterpret_cast<size_t>(info.sourceDevice),
                 static_cast<size_t>(info.pointerId),
                 xPos,
                 yPos,
-                static_cast<double>(timestamp.count())/1'000'000.0
+                static_cast<double>(timestamp.count()) / 1000000.0
             );
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
@@ -108,7 +122,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 std::unique_ptr<TouchInputHolder> points =
                     std::make_unique<TouchInputHolder>(touchInput);
                 gTouchInputsMap.emplace(info.pointerId, std::move(points));
-                global::openSpaceEngine.touchDetectionCallback(touchInput);
+                global::openSpaceEngine->touchDetectionCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle new touchpoint
@@ -126,7 +140,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 TouchInputHolder* points = gTouchInputsMap[info.pointerId].get();
 
                 if (points->tryAddInput(touchInput)) {
-                    global::openSpaceEngine.touchUpdateCallback(points->latestInput());
+                    global::openSpaceEngine->touchUpdateCallback(points->latestInput());
                 }
 #endif
 #ifdef ENABLE_TUIOMESSAGES
@@ -142,7 +156,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             else if (info.pointerFlags & POINTER_FLAG_UP) {
 #ifdef ENABLE_DIRECTMSG
                 gTouchInputsMap.erase(info.pointerId);
-                global::openSpaceEngine.touchExitCallback(touchInput);
+                global::openSpaceEngine->touchExitCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle removed touchpoint
@@ -160,22 +174,12 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
-Win32TouchHook::Win32TouchHook(void* nativeWindow)
-{
+Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
     if (hWnd == nullptr) {
         LINFO("No windowhandle available for touch input.");
         return;
     }
-
-    // HACK: This hack is required as long as our GLFW version is based on the touch
-    // branch. There is no convenient way to set a GLFWBool (uint32_t) which sets the
-    // state of touch-to-mouseinput interpretation. It happens to be 116 bytes into an
-    // internal glfw struct...
-    uint32_t* HACKY_PTR = (uint32_t *)GetPropW(hWnd, L"GLFW");
-    HACKY_PTR += 116/sizeof(uint32_t);
-    *HACKY_PTR = 1;
-
 
     // Test for touch:
     int value = GetSystemMetrics(SM_DIGITIZER);
@@ -223,29 +227,35 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow)
         gTouchHook = SetWindowsHookExW(
             WH_GETMESSAGE,
             HookCallback,
-            GetModuleHandleW(NULL),
+            GetModuleHandleW(nullptr),
             GetCurrentThreadId()
         );
 
-        // In theory, if our UI is pumped from a different thread, we can
-        // handle Low-level mouse events in that thread as well.
-        // this might help reduce mouse lag while running OpenSpace?
-        // gMouseHookThread = new std::thread([](){
-        //     gMouseHook = SetWindowsHookExW(
-        //         WH_MOUSE_LL,
-        //         LowLevelMouseProc,
-        //         GetModuleHandleW(NULL),
-        //         0 //<- Global thread id (low-level mouse is global only)
-        //     );
-        //     if (!gMouseHook) {
-        //         LINFO("Could not setup mousehook!");
-        //     }
+        // Attach a lowlevel mouse hook.
+        // This mouse hook prevents injected mouse events (touch-to-mouse),
+        // since we cannot catch it in our messageloop.
+        // Since this is attached to windows global thread, this will block lowlevel mouse
+        // access to all running applications if we stall in this thread.
+        // Debug breakpoints typically freeze our application, in which case we simply
+        // don't create this if a debugger is attached.
+        if (!IsDebuggerPresent()) {
+            gMouseHookThread = new std::thread([](){
+                gMouseHook = SetWindowsHookExW(
+                    WH_MOUSE_LL,
+                    LowLevelMouseProc,
+                    GetModuleHandleW(NULL),
+                    0 //<- Global thread id (low-level mouse is global only)
+                );
+                if (!gMouseHook) {
+                    LINFO("Could not setup mousehook!");
+                }
 
-        //     MSG msg;
-        //     while (GetMessage(&msg, NULL, 0, 0)) {
-        //         DispatchMessage(&msg);
-        //     }
-        // });
+                MSG msg;
+                while (GetMessage(&msg, NULL, 0, 0)) {
+                    DispatchMessage(&msg);
+                }
+            });
+        }
 
         if (!gTouchHook) {
             LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
@@ -268,14 +278,14 @@ Win32TouchHook::~Win32TouchHook() {
     }
 }
 
-// Low-level mouse hook is "needed" if we want to stop mousecursor from moving
-// when we get a touch-input on our window A negative effect is that this
-// function is for global threads, meaning our application will cause Windows to
-// stall the mouse cursor when this function can't be scheduled. This is not yet
-// fail-proof...might be a race-condition on message pumping?
+// Low-level mouse hook is "needed" if we want to stop mousecursor from moving when we get
+// a touch-input on our window.
+// A negative effect is that this function is for global threads, meaning our application
+// will cause Windows to stall the mouse cursor when this  function can't be scheduled
+// (i.e. when debugger hits a breakpoint). This is not yet fail-proof...might be a
+// race-condition on message pumping?
 // - Seems to move the cursor when we get two fingers as input..
-// - If we ourselves would pump windows for events, we can handle this in the
-// pump-loop
+// - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     constexpr const LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
     constexpr const LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
@@ -285,7 +295,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     }
     LPMSLLHOOKSTRUCT msg = reinterpret_cast<LPMSLLHOOKSTRUCT>(lParam);
     // block injected events (in most cases generated by touches)
-    bool isFromTouch = (msg->dwExtraInfo || SIGNATURE_MASK) == MOUSEEVENTF_FROMTOUCH;
+    bool isFromTouch = (msg->dwExtraInfo | SIGNATURE_MASK) == MOUSEEVENTF_FROMTOUCH;
     if (msg->flags & LLMHF_INJECTED || isFromTouch) {
         return 1;
     }

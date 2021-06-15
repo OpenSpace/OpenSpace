@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,
@@ -344,9 +345,6 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
     }
 
     size_t tfWidth = tf->width();
-    if (tfWidth <= 0) {
-        return false;
-    }
 
     std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {

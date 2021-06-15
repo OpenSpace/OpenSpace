@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ bool TouchModule::processNewInput() {
     _touch.touchActive(!_touchPoints.empty());
 
     if (!_touchPoints.empty()) {
-        global::interactionMonitor.markInteraction();
+        global::interactionMonitor->markInteraction();
     }
 
     // Erase old input id's that no longer exists
@@ -191,50 +191,50 @@ TouchModule::~TouchModule() {
 void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     _ear.reset(new TuioEar());
 
-    global::callback::initializeGL.push_back([&]() {
+    global::callback::initializeGL->push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
         // We currently only support one window of touch input internally
         // so here we grab the first window-handle and use it.
-        void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
+        void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
 #endif
     });
 
-    global::callback::deinitializeGL.push_back([&]() {
+    global::callback::deinitializeGL->push_back([&]() {
         LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
 
     // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
     // thread so we don't need a mutex here
-    global::callback::touchDetected.push_back(
+    global::callback::touchDetected->push_back(
         [this](TouchInput i) {
             addTouchInput(i);
             return true;
         }
     );
 
-    global::callback::touchUpdated.push_back(
+    global::callback::touchUpdated->push_back(
         [this](TouchInput i) {
             updateOrAddTouchInput(i);
-        return true;
+            return true;
         }
     );
 
-    global::callback::touchExit.push_back(
+    global::callback::touchExit->push_back(
         std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
     );
 
 
-    global::callback::preSync.push_back([&]() {
-        _touch.setCamera(global::navigationHandler.camera());
-        _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
+    global::callback::preSync->push_back([&]() {
+        _touch.setCamera(global::navigationHandler->camera());
+        _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate.isMaster() && _touchActive) {
+        if (processNewInput() && global::windowDelegate->isMaster() && _touchActive) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
@@ -247,11 +247,11 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
             _lastTouchInputs.emplace_back(points.latestInput());
         }
         // calculate the new camera state for this frame
-        _touch.step(global::windowDelegate.deltaTime());
+        _touch.step(global::windowDelegate->deltaTime());
         clearInputs();
     });
 
-    global::callback::render.push_back([&]() {
+    global::callback::render->push_back([&]() {
         _markers.render(_touchPoints);
     });
 }

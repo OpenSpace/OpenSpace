@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,6 +87,7 @@ private:
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
     properties::TriggerProperty _remove;
+    properties::StringProperty _guiDescription;
 
     layergroupid::TypeID _type;
     std::unique_ptr<tileprovider::TileProvider> _tileProvider;

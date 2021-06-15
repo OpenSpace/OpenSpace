@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 #include <string>
 
 namespace {
@@ -42,40 +43,56 @@ namespace {
         "Property to track a nodeline. When tracking the label text will be updating the "
         "distance from the nodeline start and end."
     };
-}
+
+    constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
+        "DistanceUnit",
+        "Distance Unit",
+        "Property to define the unit in which the distance should be displayed."
+        "Defaults to 'km' if not specified."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {
+        "CustomUnitDescriptor",
+        "Custom Unit Descriptor",
+        "Property to define a custom unit descriptor to use to describe the distance "
+        "value. Defaults to the units SI descriptor if not specified."
+    };
+
+    struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {
+        // [[codegen::verbatim(NodeLineInfo.description)]]
+        std::string nodeLine;
+
+        // [[codegen::verbatim(DistanceUnitInfo.description)]]
+        std::optional<int> distanceUnit;
+
+        // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
+        std::optional<std::string> customUnitDescriptor;
+    };
+#include "renderabledistancelabel_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDistanceLabel::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Distance Label",
-        "vislab_renderable_distance_label",
-        {
-            {
-                NodeLineInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                NodeLineInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("vislab_renderable_distance_label");
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
     : RenderableLabels(dictionary)
     , _nodelineId(NodeLineInfo)
+    , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
+    , _customUnitDescriptor(CustomUnitDescriptorInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableDistanceLabel"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(NodeLineInfo.identifier)) {
-        _nodelineId = dictionary.value<std::string>(NodeLineInfo.identifier);
-        addProperty(_nodelineId);
-    }
+    _nodelineId = p.nodeLine;
+    addProperty(_nodelineId);
+
+    _distanceUnit = p.distanceUnit.value_or(_distanceUnit);
+    addProperty(_distanceUnit);
+
+    _customUnitDescriptor = p.customUnitDescriptor.value_or(_customUnitDescriptor);
+    addProperty(_customUnitDescriptor);
 }
 
 void RenderableDistanceLabel::update(const UpdateData&) {
@@ -83,11 +100,10 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         return;
     }
 
-    RenderEngine& RE = global::renderEngine;
+    RenderEngine& RE = *global::renderEngine;
 
     SceneGraphNode* nodelineNode = RE.scene()->sceneGraphNode(_nodelineId);
     if (nodelineNode) {
-        // Calculate distance
         RenderableNodeLine* nodeline = dynamic_cast<RenderableNodeLine*>(
             nodelineNode->renderable()
         );
@@ -97,15 +113,25 @@ void RenderableDistanceLabel::update(const UpdateData&) {
             return;
         }
 
-        double myDistance = nodeline->distance();
+        // Get used unit scale
+        const float scale = unit(_distanceUnit);
 
-        // Format string
-        float scale = unit(Kilometer);
-        std::string distanceText = std::to_string(std::round(myDistance / scale));
+        // Get unit descriptor text
+        std::string unitDescriptor = toString(_distanceUnit);
+        if (!_customUnitDescriptor.value().empty()) {
+            unitDescriptor = _customUnitDescriptor.value();
+        }
+
+        // Get distance as string and remove fractional part
+        std::string distanceText = std::to_string(
+            std::round(nodeline->distance() / scale)
+        );
         int pos = static_cast<int>(distanceText.find("."));
         std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
-        std::string finalText = distanceText + " Km";
+
+        // Create final label text and set it
+        const std::string finalText = distanceText + " " + unitDescriptor;
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix

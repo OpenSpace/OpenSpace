@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -196,25 +198,25 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
  * Example: Side = left and pos = 16:
  *                 start.x = 16 and keep the size the same
  */
-void alignPixelRegion(PixelRegion& pr, Side side, int pos) {
+void alignPixelRegion(PixelRegion& pixelRegion, Side side, int pos) {
     switch (side) {
         case Side::Left:
-            pr.start.x = pos;
+            pixelRegion.start.x = pos;
             break;
         case Side::Top:
-            pr.start.y = pos;
+            pixelRegion.start.y = pos;
             break;
         case Side::Right:
-            pr.start.x = pos - pr.numPixels.x;
+            pixelRegion.start.x = pos - pixelRegion.numPixels.x;
             break;
         case Side::Bottom:
-            pr.start.y = pos - pr.numPixels.y;
+            pixelRegion.start.y = pos - pixelRegion.numPixels.y;
             break;
     }
 }
 
-PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
-    const bool lineIntersect = [pr, side, p]() {
+PixelRegion globalCut(PixelRegion& pixelRegion, Side side, int p) {
+    const bool lineIntersect = [pr = pixelRegion, side, p]() {
         switch (side) {
             case Side::Left:
             case Side::Right:
@@ -231,8 +233,8 @@ PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
         return PixelRegion();
     }
 
-    auto setSide = [](PixelRegion& pr, Side side, int pos) {
-        switch (side) {
+    auto setSide = [](PixelRegion& pr, Side s, int pos) {
+        switch (s) {
             case Side::Left:
                 pr.numPixels.x += (pr.start.x - pos);
                 pr.start.x = pos;
@@ -250,35 +252,35 @@ PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
         }
     };
 
-    PixelRegion cutOff(pr);
+    PixelRegion cutOff(pixelRegion);
     int cutSize = 0;
     switch (side) {
         case Side::Left:
-            setSide(pr, Side::Left, p);
+            setSide(pixelRegion, Side::Left, p);
             setSide(cutOff, Side::Right, p - cutSize);
             break;
         case Side::Top:
-            setSide(pr, Side::Top, p);
+            setSide(pixelRegion, Side::Top, p);
             setSide(cutOff, Side::Bottom, p - cutSize);
             break;
         case Side::Right:
-            setSide(pr, Side::Right, p);
+            setSide(pixelRegion, Side::Right, p);
             setSide(cutOff, Side::Left, p + cutSize);
             break;
         case Side::Bottom:
-            setSide(pr, Side::Bottom, p);
+            setSide(pixelRegion, Side::Bottom, p);
             setSide(cutOff, Side::Top, p + cutSize);
             break;
     }
     return cutOff;
 }
 
-int edge(const PixelRegion& pr, Side side) {
+int edge(const PixelRegion& pixelRegion, Side side) {
     switch (side) {
-        case Side::Left:   return pr.start.x;
-        case Side::Top:    return pr.start.y;
-        case Side::Right:  return pr.start.x + pr.numPixels.x;
-        case Side::Bottom: return pr.start.y + pr.numPixels.y;
+        case Side::Left:   return pixelRegion.start.x;
+        case Side::Top:    return pixelRegion.start.y;
+        case Side::Right:  return pixelRegion.start.x + pixelRegion.numPixels.x;
+        case Side::Bottom: return pixelRegion.start.y + pixelRegion.numPixels.y;
         default:           throw ghoul::MissingCaseException();
     }
 }
@@ -394,18 +396,15 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
     return region;
 }
 
-RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile, size_t nRasters,
+RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
+                                         [[ maybe_unused ]] size_t nRasters,
                                          float noDataValue)
 {
-    // This check was implicit before and just made explicit here
-    ghoul_assert(
-        nRasters == rawTile.tileMetaData.maxValues.size(),
-        "Wrong numbers of max values"
-    );
+    ghoul_assert(nRasters == rawTile.tileMetaData.nValues, "Wrong numbers of max values");
 
     const bool hasMissingData = std::any_of(
         rawTile.tileMetaData.maxValues.begin(),
-        rawTile.tileMetaData.maxValues.end(),
+        rawTile.tileMetaData.maxValues.begin() + rawTile.tileMetaData.nValues,
         [noDataValue](float v) { return v == noDataValue; }
     );
 
@@ -426,6 +425,8 @@ RawTileDataReader::RawTileDataReader(std::string filePath,
     , _initData(std::move(initData))
     , _preprocess(preprocess)
 {
+    ZoneScoped
+
     initialize();
 }
 
@@ -438,16 +439,19 @@ RawTileDataReader::~RawTileDataReader() {
 }
 
 void RawTileDataReader::initialize() {
+    ZoneScoped
+
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
     }
 
-    GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
+    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
     if (module.isWMSCachingEnabled()) {
+        ZoneScopedN("WMS Caching")
         std::string c;
-        if (FileSys.fileExists(_datasetFilePath)) {
+        if (std::filesystem::is_regular_file(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
             // caching
             std::ifstream t(_datasetFilePath);
@@ -483,7 +487,7 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.wmsCacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).string().c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
@@ -514,16 +518,19 @@ void RawTileDataReader::initialize() {
         }
     }
 
-    _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
-    if (!_dataset) {
-        throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+    {
+        ZoneScopedN("GDALOpen")
+        _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
+        if (!_dataset) {
+            throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+        }
     }
 
     // Assume all raster bands have the same data type
     _rasterCount = _dataset->GetRasterCount();
 
     // calculateTileDepthTransform
-    unsigned long long maximumValue = [t = _initData.glType]() {
+    unsigned long long maximumValue = [](GLenum t) {
         switch (t) {
             case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
             case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
@@ -533,11 +540,9 @@ void RawTileDataReader::initialize() {
             case GL_HALF_FLOAT:     return 1ULL;
             case GL_FLOAT:          return 1ULL;
             case GL_DOUBLE:         return 1ULL;
-            default:
-                ghoul_assert(false, "Unknown data type");
-                throw ghoul::MissingCaseException();
+            default:                throw ghoul::MissingCaseException();
         }
-    }();
+    }(_initData.glType);
 
 
     _depthTransform.scale = static_cast<float>(
@@ -557,13 +562,14 @@ void RawTileDataReader::initialize() {
     }
 
     double tileLevelDifference = calculateTileLevelDifference(
-        _dataset, _initData.dimensions.x
+        _dataset,
+        _initData.dimensions.x
     );
 
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     _maxChunkLevel = static_cast<int>(-tileLevelDifference);
     if (numOverviews > 0) {
-        _maxChunkLevel += numOverviews - 1;
+        _maxChunkLevel += numOverviews;
     }
     _maxChunkLevel = std::max(_maxChunkLevel, 2);
 }
@@ -645,7 +651,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     for (const MemoryLocation& ml : NoDataAvailableData) {
         std::byte* ptr = rawTile.imageData.get();
-        if (ml.offset >= numBytes || ptr[ml.offset] != ml.value) {
+        if (ml.offset >= static_cast<int>(numBytes) || ptr[ml.offset] != ml.value) {
             // Bail out as early as possible
             break;
         }
@@ -934,22 +940,18 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
 {
     const size_t bytesPerLine = _initData.bytesPerPixel * region.numPixels.x;
 
-    TileMetaData preprocessData;
-    preprocessData.maxValues.resize(_initData.nRasters);
-    preprocessData.minValues.resize(_initData.nRasters);
-    preprocessData.hasMissingData.resize(_initData.nRasters);
+    TileMetaData ppData;
+    ghoul_assert(_initData.nRasters <= 4, "Unexpected number of rasters");
+    ppData.nValues = static_cast<uint8_t>(_initData.nRasters);
 
-    std::vector<float> noDataValues(_initData.nRasters);
-    for (size_t raster = 0; raster < _initData.nRasters; ++raster) {
-        preprocessData.maxValues[raster] = -FLT_MAX;
-        preprocessData.minValues[raster] = FLT_MAX;
-        preprocessData.hasMissingData[raster] = false;
-        noDataValues[raster] = noDataValueAsFloat();
-    }
+    std::fill(ppData.maxValues.begin(), ppData.maxValues.end(), -FLT_MAX);
+    std::fill(ppData.minValues.begin(), ppData.minValues.end(), FLT_MAX);
+    std::fill(ppData.hasMissingData.begin(), ppData.hasMissingData.end(), false);
 
     bool allIsMissing = true;
     for (int y = 0; y < region.numPixels.y; ++y) {
-        const size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+        const size_t yi =
+            (static_cast<unsigned long long>(region.numPixels.y) - 1 - y) * bytesPerLine;
         size_t i = 0;
         for (int x = 0; x < region.numPixels.x; ++x) {
             for (size_t raster = 0; raster < _initData.nRasters; ++raster) {
@@ -959,18 +961,18 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
                     &(rawTile.imageData.get()[yi + i])
                 );
                 if (val != noDataValue && val == val) {
-                    preprocessData.maxValues[raster] = std::max(
+                    ppData.maxValues[raster] = std::max(
                         val,
-                        preprocessData.maxValues[raster]
+                        ppData.maxValues[raster]
                     );
-                    preprocessData.minValues[raster] = std::min(
+                    ppData.minValues[raster] = std::min(
                         val,
-                        preprocessData.minValues[raster]
+                        ppData.minValues[raster]
                     );
                     allIsMissing = false;
                 }
                 else {
-                    preprocessData.hasMissingData[raster] = true;
+                    ppData.hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(
                         rawTile.imageData[yi + i]
                     );
@@ -985,7 +987,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
         rawTile.error = RawTile::ReadError::Failure;
     }
 
-    return preprocessData;
+    return ppData;
 }
 
 int RawTileDataReader::maxChunkLevel() const {

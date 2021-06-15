@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,5 +42,5 @@ void main() {
     vs_position = position;
 
     // Set z to 0 to disable near/far-plane clipping
-    gl_Position =  vec4(position.xy, 0.0, position.w);
+    gl_Position = vec4(position.xy, 0.0, position.w);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,15 +42,7 @@ namespace {
     constexpr const char* KeyName = "Name";
     constexpr const char* KeyDesc = "Description";
     constexpr const char* KeyLayerGroupID = "LayerGroupID";
-    constexpr const char* KeySettings = "Settings";
     constexpr const char* KeyAdjustment = "Adjustment";
-    constexpr const char* KeyPadTiles = "PadTiles";
-
-    constexpr const char* KeyOpacity = "Opacity";
-    constexpr const char* KeyGamma = "Gamma";
-    constexpr const char* KeyMultiplier = "Multiplier";
-    constexpr const char* KeyOffset = "Offset";
-
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -94,114 +86,100 @@ namespace {
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+        "GuiDescription",
+        "Gui Description",
+        "This is the description for the scene graph node to be shown in the gui "
+        "example: Earth is a special place",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
+        // The unique identifier for this layer. May not contain '.' or spaces
+        std::string identifier;
+
+        // A human-readable name for the user interface. If this is omitted, the
+        // identifier is used instead
+        std::optional<std::string> name;
+
+        // A human-readable description of the layer to be used in informational texts
+        // presented to the user
+        std::optional<std::string> description;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
+
+        // Specifies the type of layer that is to be added. If this value is not
+        // specified, the layer is a DefaultTileLayer
+        std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
+            "SingleImageTileLayer", "SizeReferenceTileLayer", "TemporalTileLayer",
+            "TileIndexTileLayer", "ByIndexTileLayer", "ByLevelTileLayer", "SolidColor")]];
+
+        // Determine whether the layer is enabled or not. If this value is not specified,
+        // the layer is disabled
+        std::optional<bool> enabled;
+
+        // Determines whether the downloaded tiles should have a padding added to the
+        // borders
+        std::optional<bool> padTiles;
+
+        struct Settings {
+            // The opacity value of the layer
+            std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+
+            // The gamma value that is applied to each pixel of the layer
+            std::optional<float> gamma;
+
+            // The multiplicative factor that is applied to each pixel of the layer
+            std::optional<float> multiplier;
+
+            // An additive offset that is applied to each pixel of the layer
+            std::optional<float> offset;
+        };
+        // Specifies the render settings that should be applied to this layer
+        std::optional<Settings> settings;
+
+        struct LayerAdjustment {
+            enum class Type {
+                None,
+                ChromaKey,
+                TransferFunction
+            };
+
+            // Specifies the type of the adjustment that is applied
+            std::optional<Type> type;
+
+            // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
+            std::optional<glm::dvec3> chromaKeyColor;
+
+            // Specifies the tolerance to match the color to the chroma key when the
+            // 'ChromaKey' type is selected for the 'Type'
+            std::optional<double> chromaKeyTolerance;
+        };
+        // Parameters that set individual adjustment parameters for this layer
+        std::optional<LayerAdjustment> adjustment;
+
+        enum class BlendMode {
+            Normal,
+            Multiply,
+            Add,
+            Subtract,
+            Color
+        };
+        // Sets the blend mode of this layer to determine how it interacts with other
+        // layers on top of this
+        std::optional<BlendMode> blendMode;
+
+        // If the primary layer creation fails, this layer is used as a fallback
+        std::optional<ghoul::Dictionary>
+            fallback [[codegen::reference("globebrowsing_layer")]];
+    };
+#include "layer_codegen.cpp"
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    using namespace documentation;
-    return {
-        "Layer",
-        "globebrowsing_layer",
-        {
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "The unique identifier for this layer. May not contain '.' or spaces."
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "A human-readable name for the user interface. If this is omitted, the "
-                "identifier is used instead."
-            },
-            {
-                KeyDesc,
-                new StringVerifier,
-                Optional::Yes,
-                "A human-readable description of the layer to be used in informational "
-                "texts presented to the user."
-            },
-            {
-                "Type",
-                new StringInListVerifier({
-                    "DefaultTileLayer", "SingleImageTileLayer", "SizeReferenceTileLayer",
-                    "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-                    "ByLevelTileLayer", "SolidColor"
-                }),
-                Optional::Yes,
-                "Specifies the type of layer that is to be added. If this value is not "
-                "specified, the layer is a DefaultTileLayer."
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determine whether the layer is enabled or not. If this value is not "
-                "specified, the layer is disabled."
-            },
-            {
-                KeyPadTiles,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the downloaded tiles should have a padding added to "
-                "the borders."
-            },
-            {
-                KeySettings,
-                new TableVerifier({
-                    {
-                        KeyOpacity,
-                        new DoubleInRangeVerifier(0.0, 1.0),
-                        Optional::Yes,
-                        "The opacity value of the layer."
-                    },
-                    {
-                        KeyGamma,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "The gamma value that is applied to each pixel of the layer."
-                    },
-                    {
-                        KeyMultiplier,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "The multiplicative factor that is applied to each pixel of the "
-                        "layer."
-                    },
-                    {
-                        KeyOffset,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "An additive offset that is applied to each pixel of the layer."
-                    }
-                }),
-                Optional::Yes,
-                "Specifies the render settings that should be applied to this layer."
-            },
-            {
-                KeyAdjustment,
-                new ReferencingVerifier("globebrowsing_layeradjustment"),
-                Optional::Yes,
-                ""
-            },
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({
-                    "Normal", "Multiply", "Add", "Subtract", "Color"
-                }),
-                Optional::Yes,
-                "Sets the blend mode of this layer to determine how it interacts with "
-                "other layers on top of this."
-            },
-            {
-                "Fallback",
-                new ReferencingVerifier("globebrowsing_layer"),
-                Optional::Yes,
-                "If the primary layer creation fails, this layer is used as a fallback"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
@@ -217,57 +195,47 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
+    , _guiDescription(GuiDescriptionInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
+
 {
-    documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
+    const Parameters p = codegen::bake<Parameters>(layerDict);
 
     layergroupid::TypeID typeID;
-    if (layerDict.hasKeyAndValue<std::string>("Type")) {
-        const std::string& typeString = layerDict.value<std::string>("Type");
-        typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
+    if (p.type.has_value()) {
+        typeID = ghoul::from_string<layergroupid::TypeID>(*p.type);
+        if (typeID == layergroupid::TypeID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type!");
+        }
     }
     else {
         typeID = layergroupid::TypeID::DefaultTileLayer;
     }
-    if (typeID == layergroupid::TypeID::Unknown) {
-        throw ghoul::RuntimeError("Unknown layer type!");
-    }
 
     initializeBasedOnType(typeID, layerDict);
 
-    if (layerDict.hasKeyAndValue<bool>(EnabledInfo.identifier)) {
-        _enabled = layerDict.value<bool>(EnabledInfo.identifier);
+    _enabled = p.enabled.value_or(_enabled);
+
+    if (p.description.has_value()) {
+        _guiDescription = description();
+        addProperty(_guiDescription);
     }
 
-    bool padTiles = true;
-    if (layerDict.hasKeyAndValue<bool>(KeyPadTiles)) {
-        padTiles = layerDict.value<bool>(KeyPadTiles);
-    }
+    const bool padTiles = p.padTiles.value_or(true);
 
     TileTextureInitData initData = tileTextureInitData(_layerGroupId, padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset;
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference;
 
-    if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeySettings)) {
-        ghoul::Dictionary dict = layerDict.value<ghoul::Dictionary>(KeySettings);
-        if (dict.hasKeyAndValue<float>(KeyOpacity)) {
-            _renderSettings.opacity = dict.value<float>(KeyOpacity);
-        }
-
-        if (dict.hasKeyAndValue<float>(KeyGamma)) {
-            _renderSettings.gamma = dict.value<float>(KeyGamma);
-        }
-
-        if (dict.hasKeyAndValue<float>(KeyMultiplier)) {
-            _renderSettings.multiplier = dict.value<float>(KeyMultiplier);
-        }
-
-        if (dict.hasKeyAndValue<float>(KeyOffset)) {
-            _renderSettings.offset = dict.value<float>(KeyOffset);
-        }
+    if (p.settings.has_value()) {
+        _renderSettings.opacity = p.settings->opacity.value_or(_renderSettings.opacity);
+        _renderSettings.gamma = p.settings->gamma.value_or(_renderSettings.gamma);
+        _renderSettings.multiplier =
+            p.settings->multiplier.value_or(_renderSettings.multiplier);
+        _renderSettings.offset = p.settings->offset.value_or(_renderSettings.offset);
     }
-    if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyAdjustment)) {
+    if (layerDict.hasValue<ghoul::Dictionary>(KeyAdjustment)) {
         _layerAdjustment.setValuesFromDictionary(
             layerDict.value<ghoul::Dictionary>(KeyAdjustment)
         );
@@ -285,11 +253,24 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     // Initialize blend mode
-    if (layerDict.hasKeyAndValue<std::string>(BlendModeInfo.identifier)) {
-        using namespace layergroupid;
-        std::string blendMode = layerDict.value<std::string>(BlendModeInfo.identifier);
-        BlendModeID blendModeID = ghoul::from_string<BlendModeID>(blendMode);
-        _blendModeOption = static_cast<int>(blendModeID);
+    if (p.blendMode.has_value()) {
+        switch (*p.blendMode) {
+            case Parameters::BlendMode::Normal:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+                break;
+            case Parameters::BlendMode::Multiply:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Multiply);
+                break;
+            case Parameters::BlendMode::Add:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Add);
+                break;
+            case Parameters::BlendMode::Subtract:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Subtract);
+                break;
+            case Parameters::BlendMode::Color:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Color);
+                break;
+        }
     }
     else {
         _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
@@ -374,6 +355,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 }
 
 void Layer::initialize() {
+    ZoneScoped
+
     if (_tileProvider) {
         tileprovider::initialize(*_tileProvider);
     }
@@ -386,16 +369,18 @@ void Layer::deinitialize() {
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+    ZoneScoped
+
     if (_tileProvider) {
         return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
-        chunkTilePile.resize(pileSize);
+        std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i].tile = Tile();
-            chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
-            chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
+            ChunkTile tile;
+            tile.uvTransform = TileUvTransform{ { 0, 0 }, { 1, 1 } };
+            chunkTilePile[i] = tile;
         }
         return chunkTilePile;
     }
@@ -493,19 +478,17 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            initDict.setValue(KeyLayerGroupID, _layerGroupId);
-            if (initDict.hasKeyAndValue<std::string>(KeyName)) {
+            initDict.setValue(KeyLayerGroupID, static_cast<int>(_layerGroupId));
+            if (initDict.hasKey(KeyName) && initDict.hasValue<std::string>(KeyName)) {
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = std::unique_ptr<tileprovider::TileProvider>(
-                tileprovider::createFromDictionary(id, std::move(initDict))
-            );
+            _tileProvider = tileprovider::createFromDictionary(id, std::move(initDict));
             break;
         }
         case layergroupid::TypeID::SolidColor: {
-            if (initDict.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
-                _solidColor = initDict.value<glm::vec3>(ColorInfo.identifier);
+            if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
+                _solidColor = initDict.value<glm::dvec3>(ColorInfo.identifier);
             }
             break;
         }

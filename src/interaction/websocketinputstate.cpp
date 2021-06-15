@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>
@@ -39,7 +40,9 @@ float WebsocketInputStates::axis(int axis) const {
         begin(),
         end(),
         0.f,
-        [axis](float value, const std::pair<const size_t, const WebsocketInputState *> state) {
+        [axis](float value,
+               const std::pair<const size_t, const WebsocketInputState *> state)
+        {
             if (state.second->isConnected) {
                 value += state.second->axes[axis];
             }
@@ -58,9 +61,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
     bool res = std::any_of(
         begin(),
         end(),
-        [button, action](const std::pair<const size_t, const WebsocketInputState *> state) {
+        [button, action](const std::pair<const size_t, const WebsocketInputState *> state)
+        {
             return state.second->isConnected ?
-                ( state.second->buttons[button] == action )
+                (state.second->buttons[button] == action)
                 : false;
         }
     );
@@ -68,31 +72,3 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
 }
 
 } // namespace openspace::interaction
-
-namespace ghoul {
-
-template <>
-std::string to_string(const openspace::interaction::WebsocketAction& action) {
-    switch (action) {
-        case openspace::interaction::WebsocketAction::Idle:    return "Idle";
-        case openspace::interaction::WebsocketAction::Press:   return "Press";
-        case openspace::interaction::WebsocketAction::Repeat:  return "Repeat";
-        case openspace::interaction::WebsocketAction::Release: return "Release";
-        default:                                              return "";
-    }
-}
-
-template <>
-openspace::interaction::WebsocketAction from_string(const std::string& string) {
-    static const std::map<std::string, openspace::interaction::WebsocketAction> Map = {
-        { "Idle",    openspace::interaction::WebsocketAction::Idle },
-        { "Press",   openspace::interaction::WebsocketAction::Press },
-        { "Repeat",  openspace::interaction::WebsocketAction::Repeat },
-        { "Release", openspace::interaction::WebsocketAction::Release }
-    };
-
-    return Map.at(string);
-
-}
-
-} // namespace ghoul

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 
 #include <openspace/modulepath.h>
 
@@ -47,9 +48,7 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
-                                 const ghoul::Dictionary& configuration)
-{
+void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     ZoneScoped
     ZoneName(identifier().c_str(), identifier().size())
 
@@ -61,17 +60,12 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
         [](char v) { return static_cast<char>(toupper(v)); }
     );
 
-    std::string moduleToken =
-        ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        std::string(ModuleBaseToken) +
-        upperIdentifier +
-        ghoul::filesystem::FileSystem::TokenClosingBraces;
+    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
-    std::string path = modulePath();
+    std::filesystem::path path = modulePath();
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
     FileSys.registerPathToken(moduleToken, std::move(path));
 
-    _moduleEngine = moduleEngine;
     internalInitialize(configuration);
 }
 
@@ -126,27 +120,24 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleIdentifier))) {
-        return absPath("${MODULES}/" + moduleIdentifier);
+    std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
+    if (std::filesystem::is_directory(path)) {
+        return path.string();
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
-            if (FileSys.directoryExists(absPath(path))) {
-                return absPath(path);
+            const std::string& p = std::string(dir) + '/' + moduleIdentifier;
+            if (std::filesystem::is_directory(absPath(p))) {
+                return absPath(p).string();
             }
         }
     }
 
     // If we got this far, neither the internal module nor any of the external modules fit
     throw ghoul::RuntimeError(
-        "Could not resolve path for module '" + identifier() + "'",
+        fmt::format("Could not resolve path for module {}", identifier()),
         "OpenSpaceModule"
     );
-}
-
-const ModuleEngine* OpenSpaceModule::moduleEngine() const {
-    return _moduleEngine;
 }
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}

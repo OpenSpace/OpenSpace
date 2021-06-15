@@ -1,0 +1,34 @@
+local helper = asset.require('util/vrt_flipbook_helper')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+
+local assetPrefix = "A11flip";
+local assetGlobe = moon_asset.Moon.Identifier;
+local flipbookCount = 19;
+
+local flipbook = nil;
+
+local vrts = asset.syncedResource({
+  Name = "Apollo 11 Flipbook",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_11_flipbook",
+  Version = 1
+})
+
+asset.onInitialize(function ()
+  openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
+  flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
+
+  rawset(_G, "nextFlip", function() helper.nextFlipbookPage(flipbook) end)
+  rawset(_G, "previousFlip", function() helper.previousFlipbookPage(flipbook) end)
+
+  openspace.bindKey("p", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
+  openspace.bindKey("o", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
+end)
+
+
+asset.onDeinitialize(function ()
+  flipbook = nil;
+
+  openspace.clearKey("o")
+  openspace.clearKey("p")
+end)

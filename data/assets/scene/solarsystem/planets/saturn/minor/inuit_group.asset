@@ -9,93 +9,114 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit" }
 local trailColor = { 0.5, 0.3, 0.3 }
-
-local inuitGroup = {
-    {
-        Identifier = "Kiviuq",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "KIVIUQ",
-        Radii = { 16000, 16000, 16000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 448.16,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Ijiraq",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "IJIRAQ",
-        Radii = { 12000, 12000, 12000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 451.77,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Paaliaq",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PAALIAQ",
-        Radii = { 22000, 22000, 22000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 692.98,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Siarnaq",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "SIARNAQ",
-        Radii = { 40000, 40000, 40000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 884.88,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Tarqeq",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "TARQEQ",
-        Radii = { 7000, 7000, 7000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 894.86,
-        Kernels = kernel
-    },
+local trailTags = { 
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_saturn",
+  "moonTrail_minor"
 }
 
-
+local inuitGroup = {
+  {
+    Identifier = "Kiviuq",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "KIVIUQ",
+    Radii = { 16000, 16000, 16000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 448.16,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ijiraq",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "IJIRAQ",
+    Radii = { 12000, 12000, 12000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 451.77,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Paaliaq",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PAALIAQ",
+    Radii = { 22000, 22000, 22000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 692.98,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Siarnaq",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "SIARNAQ",
+    Radii = { 40000, 40000, 40000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 884.88,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Tarqeq",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "TARQEQ",
+    Radii = { 7000, 7000, 7000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 894.86,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(inuitGroup)
+  asset,
+  proceduralGlobes.createGlobes(inuitGroup)
 )
+
+
+asset.meta = {
+  Name = "Saturn Inuit Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Saturn's Inuit Group
+    moons: Kiviuq, Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails
+    are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

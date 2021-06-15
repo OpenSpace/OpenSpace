@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,39 +30,28 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
+namespace {
+    struct [[codegen::Dictionary(Task)]] Parameters {
+        // This key specifies the type of Task that gets created. It has to be one of the
+        // valid Tasks that are available for creation (see the FactoryDocumentation for a
+        // list of possible Tasks), which depends on the configration of the application
+        std::string type [[codegen::annotation("A valid Task created by a factory")]];
+    };
+#include "task_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation Task::documentation() {
-    using namespace documentation;
-    return {
-        "Task",
-        "core_task",
-        {
-            {
-                "Type",
-                new StringAnnotationVerifier("A valid Task created by a factory"),
-                Optional::No,
-                "This key specifies the type of Task that gets created. It has to be one"
-                "of the valid Tasks that are available for creation (see the "
-                "FactoryDocumentation for a list of possible Tasks), which depends on "
-                "the configration of the application"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_task");
 }
 
 std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation::Documentation(),
-        dictionary,
-        "Task"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string taskType = dictionary.value<std::string>("Type");
     auto factory = FactoryManager::ref().factory<Task>();
-
-    std::unique_ptr<Task> task = factory->create(taskType, dictionary);
-    return task;
+    Task* task = factory->create(p.type, dictionary);
+    return std::unique_ptr<Task>(task);
 }
 
 } // namespace openspace

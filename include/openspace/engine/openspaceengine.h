@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
+#include <future>
 #include <memory>
 #include <string>
 #include <vector>
@@ -76,6 +77,7 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
+    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
     void mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
@@ -84,8 +86,9 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
-    std::vector<char> encode();
-    void decode(std::vector<char> data);
+    void handleDragDrop(const std::string& file);
+    std::vector<std::byte> encode();
+    void decode(std::vector<std::byte> data);
 
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
@@ -96,6 +99,7 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
+    void createUserDirectoriesIfNecessary();
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -110,6 +114,7 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
     std::string generateFilePath(std::string openspaceRelativePath);
+    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -120,8 +125,12 @@ private:
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
+    glm::vec2 _mousePosition;
+
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
+
+    std::future<void> _writeDocumentationTask;
 
     ShutdownInformation _shutdown;
 
@@ -131,5 +140,12 @@ private:
 };
 
 } // namespace openspace
+
+// Lua functions - exposed for testing
+namespace openspace::luascriptfunctions {
+
+int createSingleColorImage(lua_State* L);
+
+} // openspace::luascriptfunctions
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

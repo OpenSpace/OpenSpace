@@ -9,255 +9,287 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carme" }
 local trailColor = { 0.4, 0.3, 0.01 }
-
-local carmeGroup = {
-    {
-        Identifier = "Herse",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HERSE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 672.75,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Aitne",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "AITNE",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 679.64,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Kale",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "KALE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 685.32,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Taygete",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "TAYGETE",
-        Radii = { 5000, 5000, 5000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 686.67,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Chaldene",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CHALDENE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 699.33,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Erinome",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ERINOME",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 711.96,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Kallichore",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "KALLICHORE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 717.81,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Kalyke",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "KALYKE",
-        Radii = { 5000, 5000, 5000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 721.02,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Pasithee",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PASITHEE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 726.93,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2010J1",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "551",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2010 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 722.83,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Eukelade",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "EUKELADE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 735.20,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Arche",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ARCHE",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 746.19,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Isonoe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ISONOE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 750.13,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Carme",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CARME",
-        Radii = { 46000, 46000, 46000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 763.95,
-        Kernels = kernel
-    },
-    {
-        Identifier = "S2003J5",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "557",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        GUI = {
-            Name = "S/2003 J 5",
-            Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 758.34,
-        Kernels = kernel
-    },
+local trailTags = {
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
 
-
+local carmeGroup = {
+  {
+    Identifier = "Herse",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HERSE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 672.75,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Aitne",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "AITNE",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 679.64,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Kale",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "KALE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 685.32,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Taygete",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "TAYGETE",
+    Radii = { 5000, 5000, 5000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 686.67,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Chaldene",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CHALDENE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 699.33,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Erinome",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ERINOME",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 711.96,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Kallichore",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "KALLICHORE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 717.81,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Kalyke",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "KALYKE",
+    Radii = { 5000, 5000, 5000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 721.02,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Pasithee",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PASITHEE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 726.93,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2010J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "551",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2010 J 1",
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 722.83,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Eukelade",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "EUKELADE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 735.20,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Arche",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ARCHE",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 746.19,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Isonoe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ISONOE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 750.13,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Carme",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CARME",
+    Radii = { 46000, 46000, 46000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 763.95,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J5",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "557",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 5",
+      Path = "/Solar System/Planets/Jupiter/Moons/Carme Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 758.34,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(carmeGroup)
+  asset,
+  proceduralGlobes.createGlobes(carmeGroup)
 )
+
+
+asset.meta = {
+  Name = "Jupiter Carme Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Jupiter's Carme Group
+    moons: Herse, Aitne, Kale, Taygete, Chaldene, Erinome, Kallichore, Kalyke,
+    Pasithee, S2010J1, Eukelade, Arche, Isonoe, Carme, and S2003J5. Blank globes
+    and SPICE trails are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

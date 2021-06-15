@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,15 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyIdentifier = "Indentifier";
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {
@@ -42,6 +43,7 @@ namespace {
         "Browser Dimensions",
         "Set the dimensions of the web browser windows."
     };
+
     const openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
@@ -53,6 +55,12 @@ namespace {
         "Reload",
         "Reload the web browser"
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
+        std::optional<std::string> identifier;
+        std::optional<std::string> url;
+    };
+#include "screenspacebrowser_codegen.cpp"
 
 } // namespace
 
@@ -66,31 +74,24 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
 
-ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
+ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _url(UrlInfo)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
     , _reload(ReloadInfo)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceBrowser";
-    }
+    std::string identifier = p.identifier.value_or("ScreenSpaceBrowser");
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
-    if (dictionary.hasKeyAndValue<std::string>(UrlInfo.identifier)) {
-        _url = dictionary.value<std::string>(UrlInfo.identifier);
-    }
+    _url = p.url.value_or(_url);
 
-    glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
+    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
     _dimensions = windowDimensions;
 
-    _renderHandler = new ScreenSpaceRenderHandler();
+    _renderHandler = new ScreenSpaceRenderHandler;
     _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler,
@@ -105,7 +106,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     addProperty(_dimensions);
     addProperty(_reload);
 
-    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->addBrowser(_browserInstance.get());
     }
@@ -113,7 +114,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
 bool ScreenSpaceBrowser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-         glm::uvec3(_dimensions.value(), 1.0f)
+         glm::uvec3(_dimensions.value(), 1.f)
     );
 
     _renderHandler->setTexture(*_texture);
@@ -129,13 +130,11 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     _renderHandler->setTexture(0);
     _texture = nullptr;
 
-    std::string urlString;
-    _url.getStringValue(urlString);
-    LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", urlString));
+    LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
 
-    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
@@ -151,6 +150,7 @@ void ScreenSpaceBrowser::render() {
     if (!_renderHandler->isTextureReady()) {
         return;
     }
+
     _renderHandler->updateTexture();
     draw(
         globalRotationMatrix() *

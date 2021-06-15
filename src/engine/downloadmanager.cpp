@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 #ifdef OPENSPACE_CURL_ENABLED
@@ -133,36 +134,36 @@ DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                                    const std::string& url,
-                                                      const ghoul::filesystem::File& file,
+                                                        const std::filesystem::path& file,
                                                                 OverrideFile overrideFile,
                                                                   FailOnError failOnError,
                                                                 unsigned int timeout_secs,
                                                 DownloadFinishedCallback finishedCallback,
                                                 DownloadProgressCallback progressCallback)
 {
-    if (!overrideFile && FileSys.fileExists(file)) {
+    if (!overrideFile && std::filesystem::is_regular_file(file)) {
         return nullptr;
     }
 
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
+    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
+        file.filename().string()
+    );
     errno = 0;
 #ifdef WIN32
     FILE* fp;
-    errno_t error = fopen_s(&fp, file.path().c_str(), "wb");
+    errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
     if (error != 0) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file, errno
+        ));
     }
 #else
-    FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
+    FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file, errno
+        ));
     }
 
     auto downloadFunction = [url, failOnError, timeout_secs,
@@ -188,8 +189,8 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 &progressCb
             };
             #if LIBCURL_VERSION_NUM >= 0x072000
-            // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
-            // will not be shown for downloads on the splash screen
+            // xferinfo was introduced in 7.32.0, if a lower curl version is used the
+            // progress will not be shown for downloads on the splash screen
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo); // NOLINT
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p); // NOLINT
             #endif

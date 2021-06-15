@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,9 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
 private:
-    void runScript(const std::string& script, bool returnValue);
+    void runScript(std::string script, bool returnValue);
 
     bool _waitingForReturnValue = true;
 };

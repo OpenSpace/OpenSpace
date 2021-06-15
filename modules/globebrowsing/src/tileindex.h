@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,11 +34,11 @@ namespace openspace::globebrowsing {
 struct TileIndex {
     using TileHashKey = uint64_t;
 
-    TileIndex(int x, int y, int level);
+    TileIndex(uint32_t x, uint32_t y, uint8_t level);
 
-    int x = 0;
-    int y = 0;
-    int level = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint8_t level = 0;
 
     TileIndex child(Quad q) const;
     glm::vec2 positionRelativeParent() const;

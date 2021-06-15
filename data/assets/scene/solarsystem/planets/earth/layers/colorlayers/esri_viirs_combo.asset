@@ -1,0 +1,60 @@
+local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
+
+local layer = {
+  Identifier = "ESRI_VIIRS_Combo",
+  Name = "ESRI VIIRS Combo",
+  Type = "ByLevelTileLayer",
+  LevelTileProviders = {
+    {
+      MaxLevel = 4,
+      TileProvider = {
+        Identifier = "Temporal_VIIRS_SNPP",
+        Name = "Temporal VIIRS SNPP",
+        Type = "TemporalTileLayer",
+        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+          "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+          "2015-11-24",
+          "Today",
+          "1d",
+          "250m",
+          "jpg"
+        ),
+        PadTiles = false
+      }
+    },
+    {
+      MaxLevel = 22,
+      TileProvider = {
+        Identifier = "ESRI_World_Imagery",
+        Name = "ESRI World Imagery",
+        FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
+        PadTiles = false
+      }
+    },
+  },
+  PadTiles = false,
+  Fallback = fallBackLayer,
+  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+    Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "ESRI VIIRS Combo",
+  Version = "1.0",
+  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+  Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
+  Author = "OpenSpace Tem",
+  URL = "http://www.openspaceproject.com",
+  License = "MIT License",
+  Identifiers = {"ESRI_VIIRS_Combo"}
+}

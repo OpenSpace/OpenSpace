@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,9 @@
 #define __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
 
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/rendering/transferfunction.h>
-#include <openspace/util/boxgeometry.h>
-#include <modules/volume/rendering/volumeclipplanes.h>
 
-#include <modules/volume/volumegridtype.h>
 #include <openspace/util/boxgeometry.h>
+#include <modules/volume/volumegridtype.h>
 
 namespace ghoul::opengl {
     class Texture;
@@ -42,6 +39,7 @@ namespace ghoul::opengl {
 namespace openspace {
     struct RenderData;
     struct RaycastData;
+    class TransferFunction;
 } // namespace openspace
 
 namespace openspace::volume {
@@ -78,8 +76,7 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(
-        std::shared_ptr<openspace::TransferFunction> transferFunction);
+    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
 
     void setStepSize(float stepSize);
     float opacity() const;
@@ -97,7 +94,7 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform = glm::mat4(1.f);

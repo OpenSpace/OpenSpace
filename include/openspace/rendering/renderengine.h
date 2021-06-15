@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,13 +33,19 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <chrono>
+#include <filesystem>
 
 namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+
     class Dictionary;
     class SharedMemory;
 } // ghoul
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -77,6 +83,8 @@ public:
     const Renderer& renderer() const;
     RendererImplementation rendererImplementation() const;
 
+    ghoul::opengl::OpenGLStateCache& openglStateCache();
+
     void updateShaderPrograms();
     void updateRenderer();
     void updateScreenSpaceRenderables();
@@ -102,12 +110,13 @@ public:
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        const std::string& csPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
@@ -179,39 +188,27 @@ private:
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
 
-    properties::BoolProperty _doPerformanceMeasurements;
-
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
+    ghoul::opengl::OpenGLStateCache* _openglStateCache;
+
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
+    properties::FloatProperty _verticalLogOffset;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
     properties::BoolProperty _applyWarping;
+    properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    struct FrameInfo {
-        uint64_t iFrame;
-        double deltaTime;
-        double avgDeltaTime;
-    };
-
-    struct {
-        std::vector<FrameInfo> frames;
-        uint64_t lastSavedFrame = 0;
-        uint16_t saveEveryNthFrame = 2048;
-    } _frameInfo;
-    properties::BoolProperty _saveFrameInformation;
-#endif // OPENSPACE_WITH_INSTRUMENTATION
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
-    
+
     properties::BoolProperty _enableFXAA;
 
     properties::BoolProperty _disableHDRPipeline;
@@ -221,13 +218,15 @@ private:
     properties::FloatProperty _hue;
     properties::FloatProperty _saturation;
     properties::FloatProperty _value;
-    
+
+    properties::IntProperty _framerateLimit;
+    std::chrono::high_resolution_clock::time_point _lastFrameTime;
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
-    
+
     uint64_t _frameNumber = 0;
     unsigned int _latestScreenshotNumber = 0;
 
@@ -243,6 +242,8 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
+
+    std::string _versionString;
 };
 
 } // namespace openspace

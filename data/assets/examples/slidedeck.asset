@@ -2,41 +2,41 @@ local helper = asset.require('util/slide_deck_helper')
 local deck = nil
 
 asset.onInitialize(function ()
-    deck = helper.createDeck("example", {
-        UseRadiusAzimuthElevation = true,
-        RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
-        UsePerspectiveProjection = true,
-        FaceCamera = true,
-        Scale = 0.7
-    })
+  deck = helper.createDeck("example", {
+    UseRadiusAzimuthElevation = true,
+    RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+    UsePerspectiveProjection = true,
+    FaceCamera = true,
+    Scale = 0.7
+  })
 
-    helper.addSlide(deck, "${DATA}/test2.jpg")
-    helper.addSlide(deck, "${DATA}/test3.jpg")
+  helper.addSlide(deck, "${DATA}/test2.jpg")
+  helper.addSlide(deck, "${DATA}/test3.jpg")
 
-    local interpolationDuration = 0.5
+  local interpolationDuration = 0.5
 
-    function nextSlide()
-        helper.goToNextSlide(deck, interpolationDuration)
-    end
+  function nextSlide()
+    helper.goToNextSlide(deck, interpolationDuration)
+  end
 
-    function previousSlide()
-        helper.goToPreviousSlide(deck, interpolationDuration)
-    end
+  function previousSlide()
+    helper.goToPreviousSlide(deck, interpolationDuration)
+  end
 
-    function toggleSlides()
-        helper.toggleSlides(deck, interpolationDuration)
-    end
+  function toggleSlides()
+    helper.toggleSlides(deck, interpolationDuration)
+  end
 
-    helper.setCurrentSlide(deck, 1)
-    openspace.bindKey("RIGHT", "nextSlide()", "Next slide", "Next slide", "/Slides")
-    openspace.bindKey("LEFT", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
-    openspace.bindKey("UP", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
-
+  helper.setCurrentSlide(deck, 1)
+  openspace.bindKey("KP_6", "nextSlide()", "Next slide", "Next slide", "/Slides")
+  openspace.bindKey("KP_4", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
+  openspace.bindKey("KP_0", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
 end)
 
 
 asset.onDeinitialize(function()
-    openspace.clearKey("RIGHT")
-    openspace.clearKey("LEFT")
-    helper.removeDeck(deck)
+  openspace.clearKey("KP_6")
+  openspace.clearKey("KP_4")
+  openspace.clearKey("KP_0")
+  helper.removeDeck(deck)
 end)

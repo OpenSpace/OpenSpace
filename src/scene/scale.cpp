@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,47 +26,43 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(Scale)]] Parameters {
+        // The type of the scaling that is described in this element. The available types
+        // of scaling depend on the configuration of the application and can be written to
+        // disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid Scale type")]];
+    };
+#include "scale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Scale::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Transformation Scaling",
-        "core_transform_scaling",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Scale type"),
-                Optional::No,
-                "The type of the scaling that is described in this element. "
-                "The available types of scaling depend on the configuration "
-                "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_transform_scaling");
 }
 
-std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
-
-    std::string scaleType = dictionary.value<std::string>(KeyType);
+ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto factory = FactoryManager::ref().factory<Scale>();
-    std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
+    Scale* result = factory->create(
+        p.type,
+        dictionary,
+        &global::memoryManager->PersistentMemory
+    );
     result->setIdentifier("Scale");
-    return result;
+    return ghoul::mm_unique_ptr<Scale>(result);
 }
 
 Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}
@@ -79,7 +75,7 @@ bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const {
+glm::dvec3 Scale::scaleValue() const {
     return _cachedScale;
 }
 

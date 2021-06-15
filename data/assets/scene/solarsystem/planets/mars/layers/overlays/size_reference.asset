@@ -1,0 +1,15 @@
+local marsAsset = asset.require("./../../mars").Mars
+local globeIdentifier = marsAsset.Identifier
+
+local layer ={
+  Identifier = "Size_Reference",
+  Name = "Size Reference",
+  Type = "SizeReferenceTileLayer",
+  Radii = marsAsset.Renderable.Radii
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.export("layer", layer)

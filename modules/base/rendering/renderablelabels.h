@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -74,8 +75,10 @@ protected:
 
     float unit(int unit) const;
 
+    std::string toString(int unit) const;
+
     // Data may require some type of transformation prior the spice transformation being
-    // applied.
+    // applied
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
     enum Unit {
@@ -97,31 +100,24 @@ private:
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    float changedPerlinSmoothStepFunc(float x, float startX, float endX) const;
-    
-    float linearSmoothStepFunc(float x, float startX, float endX, float sUnit,
-        float eUnit) const;
+    float computeFadeFactor(float distanceNodeToCamera) const;
 
-    properties::Vec4Property _labelColor;
-    properties::FloatProperty _labelSize;
+    properties::Vec3Property _color;
     properties::FloatProperty _fontSize;
-    properties::FloatProperty _labelMinSize;
-    properties::FloatProperty _labelMaxSize;
-    properties::BoolProperty _pixelSizeControl;
-    properties::BoolProperty _enableFadingEffect;
-    properties::StringProperty _labelText;
-    properties::FloatProperty _fadeStartDistance;
-    properties::FloatProperty _fadeEndDistance;
-    properties::FloatProperty _fadeStartSpeed;
-    properties::FloatProperty _fadeEndSpeed;
+    properties::FloatProperty _size;
+    properties::IVec2Property _minMaxSize;
 
-    properties::OptionProperty _labelOrientationOption;
-    properties::OptionProperty _fadeStartUnitOption;
-    properties::OptionProperty _fadeEndUnitOption;
+    properties::StringProperty _text;
+
+    properties::BoolProperty _enableFadingEffect;
+    properties::Vec2Property _fadeWidths;
+    properties::Vec2Property _fadeDistances;
+    properties::OptionProperty _fadeUnitOption;
+
+    properties::OptionProperty _orientationOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-    std::string _speckFile;
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;

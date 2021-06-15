@@ -3,57 +3,72 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local speck = asset.syncedResource({
-    Name = "Constellation Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_constellations_speck",
-    Version = 2
+  Name = "Constellation Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_speck",
+  Version = 2
 })
 
 local constellationsExtragalactic = {
-    Identifier = "ConstellationsExtragalactic",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        ScaleFactor = 1.0,
-        File = speck .. "/constellationsEXGAL.speck",
-        LabelFile = speck .. "/constellationsEXGAL.label",
-        TextColor = { 0.8, 0.8, 0.8, 1.0 },
-        TextSize = 20.0,
-        TextMinSize = 20.0,
-        TextMaxSize = 30.0,
-        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-        Unit = "Mpc"
-    },
-    GUI = {
-        Name = "Constellations (Extragalactic)",
-        Path = "/Milky Way/Constellations"
-    }
+  Identifier = "ConstellationsExtragalactic",
+  Renderable = {
+    Type = "RenderableDUMeshes",
+    Enabled = false,
+    Opacity = 0.4,
+    File = speck .. "/constellationsEXGAL.speck",
+    LabelFile = speck .. "/constellationsEXGAL.label",
+    TextColor = { 0.8, 0.8, 0.8 },
+    TextOpacity = 0.4,
+    TextSize = 20.0,
+    TextMinMaxSize = { 20, 30 },
+    MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "Mpc"
+  },
+  GUI = {
+    Name = "Constellations (Extragalactic)",
+    Path = "/Milky Way/Constellations"
+  }
 }
 
 local constellations = {
-    Identifier = "Constellations",
-    Renderable = {
-        Type = "RenderableDUMeshes",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Transparency = 1.0,
-        ScaleFactor = 1.0,
-        File = speck .. "/constellations.speck",
-        LabelFile = speck .. "/constellations.label",
-        TextColor = { 0.8, 0.8, 0.8, 1.0 },
-        TextSize = 14.5,
-        TextMaxSize = 170.0,
-        TextMinSize = 8.0,
-        MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
-        Unit = "pc"
-    },
-    GUI = {
-        Path = "/Milky Way/Constellations"
-    }
+  Identifier = "Constellations",
+  Renderable = {
+    Type = "RenderableDUMeshes",
+    Enabled = false,
+    Opacity = 0.3,
+    File = speck .. "/constellations.speck",
+    LabelFile = speck .. "/constellations.label",
+    TextColor = { 0.8, 0.8, 0.8 },
+    TextOpacity = 0.3,
+    TextSize = 14.5,
+    TextMinMaxSize = { 8, 170 },
+    MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "pc"
+  },
+  GUI = {
+      Name = "Constellations",
+    Path = "/Milky Way/Constellations",
+    Description = [[Census 88 constellations and labels. DU Version 2.3. <br> These
+      modern constellations are largely based on those of the Babylonians and
+      Greeks; however, most cultures have their own figures and stories of the sky.
+      More than half the official constellations adopted by scientists in 1930 were
+      known to the ancients over 2,000 years ago. Each star falls into one of these
+      88 regions. Of course, today we know the stars in any given constellation do
+      not necessarily have any physical relationship with one another. One star may
+      be nearby, while an adjacent star in the sky may be far away.(Description
+      from URL) <br><br> Data Reference: various]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })
+
+
+asset.meta = {
+  Name = "Constellations",
+  Version = "1.0",
+  Description = [[Digital Universe asset for constellation lines]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"Constellations", "ConstellationsExtragalactic"}
+}

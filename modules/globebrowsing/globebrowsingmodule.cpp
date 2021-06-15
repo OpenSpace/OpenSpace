@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,10 @@
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -66,8 +67,8 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeBrowsingModule";
-    constexpr const char* _factoryName = "TileProvider";
+    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
+    constexpr const char _factoryName[] = "TileProvider";
 
     constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
@@ -106,14 +107,6 @@ namespace {
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
     };
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    constexpr const openspace::properties::Property::PropertyInfo InstrumentationInfo = {
-        "SaveInstrumentationInfo",
-        "Save Instrumentation Info",
-        "If enabled, the instrumentation data is saved to disk at the end of the frame."
-    };
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-
 
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
@@ -129,13 +122,18 @@ namespace {
         Layer currentLayer;
         for (int i = 0; i < nSubdatasets; ++i) {
             int iDataset = -1;
-            static char IdentifierBuffer[64];
-            sscanf(
+            std::array<char, 256> IdentifierBuffer;
+            std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
+            int ret = sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%[^=]",
+                "SUBDATASET_%i_%256[^=]",
                 &iDataset,
-                IdentifierBuffer
+                IdentifierBuffer.data()
             );
+            if (ret != 2) {
+                LERROR("Error parsing dataset");
+                continue;
+            }
 
 
             if (iDataset != currentLayerNumber) {
@@ -145,7 +143,7 @@ namespace {
                 currentLayerNumber = iDataset;
             }
 
-            const std::string identifier = std::string(IdentifierBuffer);
+            const std::string identifier = std::string(IdentifierBuffer.data());
             const std::string ds(subDatasets[i]);
             const std::string value = ds.substr(ds.find_first_of('=') + 1);
 
@@ -165,6 +163,29 @@ namespace {
 
         return result;
     }
+
+    struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
+        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
+        std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
+
+        // [[codegen::verbatim(OfflineModeInfo.description)]]
+        std::optional<bool> offlineMode;
+
+        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
+        std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
+
+        // [[codegen::verbatim(WMSCacheSizeInfo.description)]]
+        std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
+
+        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
+        std::optional<int> tileCacheSize;
+
+        // If you know what you are doing and you have WMS caching *disabled* but offline
+        // mode *enabled*, you can set this value to 'true' to silence a warning that you
+        // would otherwise get at startup
+        std::optional<bool> noWarning;
+    };
+#include "globebrowsingmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -176,53 +197,24 @@ GlobeBrowsingModule::GlobeBrowsingModule()
     , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
     , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    , _saveInstrumentation(InstrumentationInfo, false)
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 {
     addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
     addProperty(_wmsCacheLocation);
     addProperty(_wmsCacheSizeMB);
     addProperty(_tileCacheSizeMB);
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    _saveInstrumentation.onChange([&]() {
-        if (_saveInstrumentation) {
-            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
-        }
-    });
-    addProperty(_saveInstrumentation);
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasKeyAndValue<bool>(WMSCacheEnabledInfo.identifier)) {
-        _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
-    }
-    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
-        _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
-    }
-    if (dict.hasKeyAndValue<std::string>(WMSCacheLocationInfo.identifier)) {
-        _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
-    }
-    if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
-        _wmsCacheSizeMB = static_cast<int>(
-            dict.value<double>(WMSCacheSizeInfo.identifier)
-        );
-    }
-    if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
-        _tileCacheSizeMB = static_cast<int>(
-            dict.value<double>(TileCacheSizeInfo.identifier)
-        );
-    }
-
-    // Sanity check
-    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
-        dict.value<bool>("NoWarning") :
-        false;
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
+    _offlineMode = p.offlineMode.value_or(_offlineMode);
+    _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
+    _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
+    _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
+    const bool noWarning = p.noWarning.value_or(false);
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
         LWARNINGC(
@@ -236,13 +228,11 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Initialize
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
-            _tileCacheSizeMB
-        );
-        addPropertySubOwner(*_tileCache);
+        _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        addPropertySubOwner(_tileCache.get());
 
         tileprovider::initializeDefaultTile();
 
@@ -254,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         addPropertySubOwner(GdalWrapper::ref());
     });
 
-    global::callback::deinitializeGL.emplace_back([]() {
+    global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         tileprovider::deinitializeDefaultTile();
@@ -262,53 +252,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Render
-    global::callback::render.emplace_back([&]() {
+    global::callback::render->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         _tileCache->update();
     });
 
-    // Postdraw
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-    global::callback::postDraw.emplace_back([&]() {
-        ZoneScopedN("GlobeBrowsingModule")
-
-        // >= as we might have multiple frames per postDraw call (stereo rendering,
-        // fisheye, etc)
-        const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-        const bool shouldSave = _saveInstrumentation &&
-                                global::renderEngine.frameNumber() >= next;
-        if (shouldSave) {
-            using K = const globebrowsing::RenderableGlobe*;
-            using V = std::vector<FrameInfo>;
-            for (const std::pair<K, V>& i : _frameInfo.frames) {
-                std::string filename = fmt::format(
-                    "_inst_globebrowsing_{}_{}_{}.txt",
-                    i.first->owner()->identifier(), // Owner of the renderable has a name
-                    _frameInfo.lastSavedFrame,
-                    _frameInfo.saveEveryNthFrame
-                );
-                std::ofstream file(absPath("${BIN}/" + filename));
-                for (const FrameInfo& f : i.second) {
-                    std::string line = fmt::format(
-                        "{}\t{}\t{}\t{}",
-                        f.iFrame,
-                        f.nTilesRenderedLocal,
-                        f.nTilesRenderedGlobal,
-                        f.nTilesUploaded
-                    );
-                    file << line << '\n';
-                }
-            }
-
-            _frameInfo.frames.clear();
-            _frameInfo.lastSavedFrame = global::renderEngine.frameNumber();
-        }
-    });
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-
     // Deinitialize
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         GdalWrapper::destroy();
@@ -506,14 +457,24 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
-        GlobeLabelsComponent::Documentation()
+        globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::RenderableGlobe::Documentation(),
+        GlobeLabelsComponent::Documentation(),
+        RingsComponent::Documentation(),
+        ShadowComponent::Documentation()
     };
 }
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
-    goToChunk(globe, globebrowsing::TileIndex(x, y, level), glm::vec2(0.5f, 0.5f), true);
+    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    goToChunk(
+        globe,
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
+        glm::vec2(0.5f, 0.5f),
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
@@ -572,7 +533,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     };
 
     // Compute altitude
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR(
@@ -580,15 +541,13 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         );
         return;
     }
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
         cameraPositionModelSpace
-    );
-
-    const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
     );
 
     const double altitude = glm::length(
@@ -604,13 +563,15 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
 {
     using namespace globebrowsing;
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
     }
 
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
 
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
@@ -626,8 +587,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
 }
 
 void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3,
-                                        bool doResetCameraDirection)
+                                        globebrowsing::Geodetic3 geo3, bool)
 {
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
@@ -643,7 +603,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
     state.position = positionModelSpace;
     state.up = slightlyNorth;
 
-    global::navigationHandler.setNavigationStateNextFrame(state);
+    global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
 glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
@@ -652,9 +612,6 @@ glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
                                                             globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
-
-    // Camera is described in world space
-    const glm::dmat4 modelTransform = globe.modelTransform();
 
     // Lookup vector
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(
@@ -682,7 +639,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     using namespace globebrowsing;
 
     const Renderable* renderable =
-        global::navigationHandler.orbitalNavigator().anchorNode()->renderable();
+        global::navigationHandler->orbitalNavigator().anchorNode()->renderable();
 
     if (!renderable) {
         return nullptr;
@@ -834,28 +791,5 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
 }
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
-void GlobeBrowsingModule::addFrameInfo(globebrowsing::RenderableGlobe* globe,
-                                       uint32_t nTilesRenderedLocal,
-                                       uint32_t nTilesRenderedGlobal,
-                                       uint32_t nTilesUploaded)
-{
-    auto it = _frameInfo.frames.find(globe);
-    if (it == _frameInfo.frames.end()) {
-        _frameInfo.frames[globe] = std::vector<FrameInfo>();
-        _frameInfo.frames[globe].reserve(_frameInfo.saveEveryNthFrame);
-    }
-    else {
-        it->second.push_back({
-            global::renderEngine.frameNumber(),
-            nTilesRenderedLocal,
-            nTilesRenderedGlobal,
-            nTilesUploaded
-        });
-    }
-}
-
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_INSTRUMENTATION
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,10 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,62 +38,74 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-
-
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
-    constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyValueFunction = "ValueFunction";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
+        // The Lua function used to compute the cell values
+        std::string valueFunction [[codegen::annotation("A Lua expression that returns a "
+            "function taking three numbers as arguments (x, y, z) and returning a "
+            "number")]];
+
+        // The raw volume file to export data to
+        std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
+
+        // The lua dictionary file to export metadata to
+        std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
+
+        // The timestamp that is written to the metadata of this volume
+        std::string time;
+
+        // A vector representing the number of cells in each dimension
+        glm::ivec3 dimensions;
+
+        // A vector representing the lower bound of the domain
+        glm::dvec3 lowerDomainBound;
+
+        // A vector representing the upper bound of the domain
+        glm::dvec3 upperDomainBound;
+    };
+#include "generaterawvolumetask_codegen.cpp"
 } // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
-GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary)
-{
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "GenerateRawVolumeTask"
-    );
+documentation::Documentation GenerateRawVolumeTask::documentation() {
+    return codegen::doc<Parameters>("generate_raw_volume_task");
+}
 
-    _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
-    _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
-    _time = dictionary.value<std::string>(KeyTime);
-    _valueFunctionLua = dictionary.value<std::string>(KeyValueFunction);
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
+    _dictionaryOutputPath = absPath(p.dictionaryOutput);
+    _dimensions = p.dimensions;
+    _time = p.time;
+    _valueFunctionLua = p.valueFunction;
+    _lowerDomainBound = p.lowerDomainBound;
+    _upperDomainBound = p.upperDomainBound;
 }
 
 std::string GenerateRawVolumeTask::description() {
-    return "Generate a raw volume with dimenstions: (" +
-        std::to_string(_dimensions.x) + ", " +
-        std::to_string(_dimensions.y) + ", " +
-        std::to_string(_dimensions.z) + "). " +
-        "For each cell, set the value by evaluating the lua function: " +
-        "`" + _valueFunctionLua + "`, with three arguments (x, y, z) ranging from " +
-        "(" + std::to_string(_lowerDomainBound.x) + ", "
-        + std::to_string(_lowerDomainBound.y) + ", " +
-        std::to_string(_lowerDomainBound.z) + ") to (" +
-        std::to_string(_upperDomainBound.x) + ", " +
-        std::to_string(_upperDomainBound.y) + ", " +
-        std::to_string(_upperDomainBound.z) + ")." +
-        "Write raw volume data into " + _rawVolumeOutputPath +
-        " and dictionary with metadata to " + _dictionaryOutputPath;
+    return fmt::format(
+        "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
+        "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
+        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into {} and "
+        "dictionary with metadata to {}",
+        _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua, 
+        _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
+        _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
+        _rawVolumeOutputPath, _dictionaryOutputPath
+    );
 }
 
 void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
     // Spice kernel is required for time conversions.
     // Todo: Make this dependency less hard coded.
-    SpiceManager::KernelHandle kernel =
-        SpiceManager::ref().loadKernel(absPath("${DATA}/assets/spice/naif0012.tls"));
+    SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
+        absPath("${DATA}/assets/spice/naif0012.tls").string()
+    );
 
     defer {
         SpiceManager::ref().unloadKernel(kernel);
@@ -106,11 +117,15 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     ghoul::lua::LuaState state;
     ghoul::lua::runScript(state, _valueFunctionLua);
 
+#if (defined(NDEBUG) || defined(DEBUG))
     ghoul::lua::verifyStackSize(state, 1);
+#endif
 
     int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
 
+#if (defined(NDEBUG) || defined(DEBUG))
     ghoul::lua::verifyStackSize(state, 0);
+#endif
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
@@ -122,14 +137,18 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         glm::vec3 coord = _lowerDomainBound +
             glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
+#if (defined(NDEBUG) || defined(DEBUG))
         ghoul::lua::verifyStackSize(state, 0);
+#endif
         lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
 
         lua_pushnumber(state, coord.x);
         lua_pushnumber(state, coord.y);
         lua_pushnumber(state, coord.z);
 
+#if (defined(NDEBUG) || defined(DEBUG))
         ghoul::lua::verifyStackSize(state, 4);
+#endif
 
         if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
             return;
@@ -145,13 +164,12 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
 
-    ghoul::filesystem::File file(_rawVolumeOutputPath);
-    const std::string directory = file.directoryName();
-    if (!FileSys.directoryExists(directory)) {
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+    const std::filesystem::path directory = _rawVolumeOutputPath.parent_path();
+    if (!std::filesystem::is_directory(directory)) {
+        std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath.string());
     writer.write(rawVolume);
 
     progressCallback(0.9f);
@@ -181,58 +199,4 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     progressCallback(1.0f);
 }
 
-documentation::Documentation GenerateRawVolumeTask::documentation() {
-    using namespace documentation;
-    return {
-        "GenerateRawVolumeTask",
-        "generate_raw_volume_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("GenerateRawVolumeTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
-                KeyValueFunction,
-                new StringAnnotationVerifier("A lua expression that returns a function "
-                "taking three numbers as arguments (x, y, z) and returning a number."),
-                Optional::No,
-                "The lua function used to compute the cell values",
-            },
-            {
-                KeyRawVolumeOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The raw volume file to export data to",
-            },
-            {
-                KeyDictionaryOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The lua dictionary file to export metadata to",
-            },
-            {
-                KeyDimensions,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "A vector representing the number of cells in each dimension",
-            },
-            {
-                KeyLowerDomainBound,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "A vector representing the lower bound of the domain"
-            },
-            {
-                KeyUpperDomainBound,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "A vector representing the upper bound of the domain"
-            }
-        }
-    };
-}
-
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

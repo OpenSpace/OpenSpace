@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -65,7 +66,7 @@ private:
     struct ConstellationBound {
         std::string constellationAbbreviation; ///< The abbreviation of the constellation
         std::string constellationFullName;
-        bool isEnabled;
+        bool isEnabled = false;
         GLsizei startIndex; ///< The index of the first vertex describing the bounds
         GLsizei nVertices; ///< The number of vertices describing the bounds
     };
@@ -104,6 +105,9 @@ private:
 
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
+
+    // Linewidth for the constellation bounds
+    properties::FloatProperty _lineWidth;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,9 +43,10 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
 
-    const std::string fullUrl = url +
-        "?client_version=" + OPENSPACE_VERSION_NUMBER +
-        "&commit_hash=" + OPENSPACE_GIT_COMMIT;
+    std::string fullUrl = fmt::format(
+        "{}?client_version={}&commit_hash={}",
+        url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT
+    );
 
     if (_request) {
         _request->cancel();

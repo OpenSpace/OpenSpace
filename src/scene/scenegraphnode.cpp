@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,34 +27,32 @@
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include "scenegraphnode_doc.inl"
+#include <cmath>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
-    constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyGuiName = "GUI.Name";
-    constexpr const char* KeyGuiPath = "GUI.Path";
-    constexpr const char* KeyGuiHidden = "GUI.Hidden";
-
-    constexpr const char* KeyTransformTranslation = "Transform.Translation";
-    constexpr const char* KeyTransformRotation = "Transform.Rotation";
-    constexpr const char* KeyTransformScale = "Transform.Scale";
-
-    constexpr const char* KeyTimeFrame = "TimeFrame";
 
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
     {
         "ComputeScreenSpaceData",
-        "Screen Space Data",
+        "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated."
     };
@@ -62,35 +60,55 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
-        "" // @TODO Missing documentation
+        "The x,y position in screen space. Can be used for placing GUI elements",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
-        "" // @TODO Missing documentation
+        "Determines if the node is currently visible on screen",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
-        "" // @TODO Missing documentation
+        "The distance from the camera to the node surface",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
-        "" // @TODO Missing documentation
+        "The screen size of the radius of the node",
+        openspace::properties::Property::Visibility::Hidden
     };
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
         "VisibilityDistance",
-        "" // @TODO Missing documentation
+        "The distace in world coordinates between node and camera "
+        "at which the screenspace object will become visible",
+        openspace::properties::Property::Visibility::Hidden
     };
-    constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
         "BoundingSphere",
         "Bounding Sphere",
-        "The bounding sphere of the scene graph node. This can be the "
-        "bounding sphere of a renderable or a fixed bounding sphere. "
+        "The bounding sphere of the scene graph node meaning that everything that this "
+        "scene graph node renders must be contained within this sphere. This value is "
+        "only used as an override to the bounding sphere calculated by the Renderable, "
+        "if present. If this value is -1, the Renderable's computed bounding sphere is "
+        "used",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
+        "InteractionSphere",
+        "Interaction Sphere",
+        "The minimum radius that the camera is allowed to get close to this scene graph "
+        "node. This value is "
+        "only used as an override to the bounding sphere calculated by the Renderable, "
+        "if present. If this value is -1, the Renderable's computed interaction sphere "
+        "is used",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
@@ -109,6 +127,14 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+        "GuiDescription",
+        "Gui Description",
+        "This is the description for the scene graph node to be shown in the gui "
+        "example: Earth is a special place",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "Gui Hidden",
@@ -117,6 +143,102 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
+        "ShowDebugSphere",
+        "Show Debug Sphere",
+        "If enabled the bounding sphere of this scene graph node is rendered as a debug "
+        "method",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
+        // The identifier of this scenegraph node. This name must be unique among all
+        // scene graph nodes that are loaded in a specific scene. If a duplicate is
+        // detected the loading of the node will fail, as will all childing that depend on
+        // the node. The identifier must not contain any whitespaces or '.'
+        std::string identifier;
+
+        // This names the parent of the currently specified scenegraph node. The parent
+        // must already exist in the scene graph. If not specified, the node will be
+        // attached to the root of the scenegraph
+        std::optional<std::string> parent
+            [[codegen::annotation(
+                "If specified, this must be a name for another scenegraph node"
+            )]];
+
+        // The renderable that is to be created for this scenegraph node. A renderable is
+        // a component of a scenegraph node that will lead to some visual result on the
+        // screen. The specifics heavily depend on the 'Type' of the renderable. If no
+        // Renderable is specified, this scenegraph node is an internal node and can be
+        // used for either group children, or apply common transformations to a group of
+        // children
+        std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
+
+        // A hard-coded bounding sphere to be used for the cases where the Renderable is
+        // not able to provide a reasonable bounding sphere or the calculated bounding
+        // sphere needs to be overwritten for some reason
+        std::optional<double> boundingSphere;
+
+        // A hard-coded radius for limiting the interaction radius, meaning the minimal
+        // distance that the camera can approach this scene graph node
+        std::optional<double> interactionSphere;
+
+        struct Transform {
+            // This node describes a translation that is applied to the scenegraph node
+            // and all its children. Depending on the 'Type' of the translation, this can
+            // either be a static translation or a time-varying one
+            std::optional<ghoul::Dictionary> translation
+                [[codegen::reference("core_transform_translation")]];
+
+            // This nodes describes a rotation that is applied to the scenegraph node and
+            // all its children. Depending on the 'Type' of the rotation, this can either
+            // be a static rotation or a time-varying one
+            std::optional<ghoul::Dictionary> rotation
+                [[codegen::reference("core_transform_rotation")]];
+
+            // This node describes a scaling that is applied to the scenegraph node and
+            // all its children. Depending on the 'Type' of the scaling, this can either
+            // be a static scaling or a time-varying one
+            std::optional<ghoul::Dictionary> scale
+                [[codegen::reference("core_transform_scaling")]];
+        };
+
+        // This describes a set of transformations that are applied to this scenegraph
+        // node and all of its children. There are only three possible values
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        std::optional<Transform> transform;
+
+        // Specifies the time frame for when this node should be active
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
+
+        // A tag or list of tags that can be used to reference to a group of scenegraph
+        // nodes.
+        std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+
+        struct Gui {
+            // An optional user-facing name for this SceneGraphNode, which does not have
+            // to be unique, though it is recommended, and can contain any characters
+            std::optional<std::string> name;
+
+            // If this value is specified, this '/' separated URI specifies the location
+            // of this scenegraph node in a GUI representation, for instance
+            // '/SolarSystem/Earth/Moon'
+            std::optional<std::string> path;
+
+            // A user-facing description about this scene graph node
+            std::optional<std::string> description;
+
+            // If this value is specified, GUI applications are incouraged to ignore this 
+            // scenegraph node. This is most useful to trim collective lists of nodes and
+            // not display, for example, barycenters
+            std::optional<bool> hidden;
+        };
+        // Additional information that is passed to GUI applications. These are all hints
+        // and do not have any impact on the actual function of the scenegraph node
+        std::optional<Gui> gui [[codegen::key("GUI")]];
+    };
+#include "scenegraphnode_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -125,92 +247,113 @@ namespace openspace {
 int SceneGraphNode::nextIndex = 0;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        SceneGraphNode::Documentation(),
-        dictionary,
-        "SceneGraphNode"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
+    SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
+    ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
+
 #ifdef Debugging_Core_SceneGraphNode_Indices
     result->index = nextIndex++;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-    std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(std::move(identifier));
+    result->setIdentifier(p.identifier);
 
-    if (dictionary.hasKey(KeyGuiName)) {
-        result->setGuiName(dictionary.value<std::string>(KeyGuiName));
-        result->_guiDisplayName = result->guiName();
-        result->addProperty(result->_guiDisplayName);
-    }
-
-    if (dictionary.hasKey(KeyGuiHidden)) {
-        result->_guiHidden = dictionary.value<bool>(KeyGuiHidden);
-        result->addProperty(result->_guiHidden);
-    }
-
-    if (dictionary.hasKey(KeyTransformTranslation)) {
-        ghoul::Dictionary translationDictionary;
-        dictionary.getValue(KeyTransformTranslation, translationDictionary);
-        result->_transform.translation = Translation::createFromDictionary(
-            translationDictionary
-        );
-        if (result->_transform.translation == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
-            ));
-            return nullptr;
+    if (p.gui.has_value()) {
+        if (p.gui->name.has_value()) {
+            result->setGuiName(*p.gui->name);
+            result->_guiDisplayName = result->guiName();
+            result->addProperty(result->_guiDisplayName);
         }
-        LDEBUG(fmt::format(
-            "Successfully created ephemeris for '{}'", result->identifier()
-        ));
-    }
-    if (result->_transform.translation) {
-        result->addPropertySubOwner(result->_transform.translation.get());
-    }
 
-    if (dictionary.hasKey(KeyTransformRotation)) {
-        ghoul::Dictionary rotationDictionary;
-        dictionary.getValue(KeyTransformRotation, rotationDictionary);
-        result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
-        if (result->_transform.rotation == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create rotation for SceneGraphNode '{}'", result->identifier()
-            ));
-            return nullptr;
+        if (p.gui->description.has_value()) {
+            result->setDescription(*p.gui->description);
+            result->_guiDescription = result->description();
+            result->addProperty(result->_guiDescription);
         }
-        LDEBUG(fmt::format(
-            "Successfully created rotation for '{}'", result->identifier()
-        ));
-    }
-    if (result->_transform.rotation) {
-        result->addPropertySubOwner(result->_transform.rotation.get());
-    }
 
-    if (dictionary.hasKey(KeyTransformScale)) {
-        ghoul::Dictionary scaleDictionary;
-        dictionary.getValue(KeyTransformScale, scaleDictionary);
-        result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
-        if (result->_transform.scale == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create scale for SceneGraphNode '{}'", result->identifier()
-            ));
-            return nullptr;
+        if (p.gui->hidden.has_value()) {
+            result->_guiHidden = *p.gui->hidden;
+            result->addProperty(result->_guiHidden);
         }
-        LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
-    }
-    if (result->_transform.scale) {
-        result->addPropertySubOwner(result->_transform.scale.get());
+
+        if (p.gui->path.has_value()) {
+            result->_guiPath = *p.gui->path;
+            result->addProperty(result->_guiPath);
+        }
     }
 
-    if (dictionary.hasKey(KeyTimeFrame)) {
-        ghoul::Dictionary timeFrameDictionary;
-        dictionary.getValue(KeyTimeFrame, timeFrameDictionary);
-        result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
+    result->_overrideBoundingSphere = p.boundingSphere;
+    result->_overrideInteractionSphere = p.interactionSphere;
+
+    if (p.transform.has_value()) {
+        if (p.transform->translation.has_value()) {
+            result->_transform.translation = Translation::createFromDictionary(
+                *p.transform->translation
+            );
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.translation == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create ephemeris for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created ephemeris for '{}'", result->identifier()
+            ));
+        }
+
+        if (p.transform->rotation.has_value()) {
+            result->_transform.rotation = Rotation::createFromDictionary(
+                *p.transform->rotation
+            );
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.rotation == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create rotation for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created rotation for '{}'", result->identifier()
+            ));
+        }
+
+        if (p.transform->scale.has_value()) {
+            result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.scale == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create scale for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created scale for '{}'", result->identifier()
+            ));
+        }
+    }
+    result->addPropertySubOwner(result->_transform.translation.get());
+    result->addPropertySubOwner(result->_transform.rotation.get());
+    result->addPropertySubOwner(result->_transform.scale.get());
+
+
+    if (p.timeFrame.has_value()) {
+        result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+
+        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+        // transitioned to throwing exceptions when the construction fails
         if (result->_timeFrame == nullptr) {
             LERROR(fmt::format(
                 "Failed to create time frame for SceneGraphNode '{}'",
@@ -218,63 +361,37 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_timeFrame.get());
         LDEBUG(fmt::format(
-            "Successfully created time frame for '{}'",
-            result->identifier()
+            "Successfully created time frame for '{}'", result->identifier()
         ));
+        result->addPropertySubOwner(result->_timeFrame.get());
     }
 
     // We initialize the renderable last as it probably has the most dependencies
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(KeyRenderable, renderableDictionary);
-
-        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
-
-        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
-        if (result->_renderable == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create renderable for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
+    if (p.renderable.has_value()) {
+        result->_renderable = Renderable::createFromDictionary(*p.renderable);
+        ghoul_assert(result->_renderable, "Failed to create Renderable");
+        result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
     }
 
-    if (dictionary.hasKey(KeyTag)) {
-        if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
-            std::string tagName = dictionary.value<std::string>(KeyTag);
-            if (!tagName.empty()) {
-                result->addTag(std::move(tagName));
-            }
+    if (p.tag.has_value()) {
+        if (std::holds_alternative<std::string>(*p.tag)) {
+            result->addTag(std::get<std::string>(*p.tag));
         }
-        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-            ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-            std::vector<std::string> keys = tagNames.keys();
-            std::string tagName;
-            for (const std::string& key : keys) {
-                tagName = tagNames.value<std::string>(key);
-                if (!tagName.empty()) {
-                    result->addTag(std::move(tagName));
+        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+            for (const std::string& tag : std::get<std::vector<std::string>>(*p.tag)) {
+                if (!tag.empty()) {
+                    result->addTag(tag);
                 }
             }
         }
-    }
-
-    if (dictionary.hasKey(KeyGuiPath)) {
-        result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
-        result->addProperty(result->_guiPath);
-    }
-
-    if (dictionary.hasKey(KeyFixedBoundingSphere)) {
-        result->_fixedBoundingSphere = static_cast<float>(
-            dictionary.value<double>(KeyFixedBoundingSphere)
-        );
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
@@ -283,24 +400,38 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     return result;
 }
 
+documentation::Documentation SceneGraphNode::Documentation() {
+    return codegen::doc<Parameters>("core_scene_node");
+}
+
+ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
+
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
     , _guiHidden(GuiHiddenInfo)
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
+    , _guiDescription(GuiDescriptionInfo)
     , _transform {
-        std::make_unique<StaticTranslation>(),
-        std::make_unique<StaticRotation>(),
-        std::make_unique<StaticScale>()
+        ghoul::mm_unique_ptr<Translation>(
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
+        ),
+        ghoul::mm_unique_ptr<Rotation>(
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
+        ),
+        ghoul::mm_unique_ptr<Scale>(
+            global::memoryManager->PersistentMemory.alloc<StaticScale>()
+        )
     }
+    , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
-    , _screenSpacePosition(
-        properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
-    )
-    , _screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
-    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
-    , _screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
-    , _visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e10f))
+    , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
+    , _screenVisibility(ScreenVisibilityInfo, false)
+    , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
+    , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
+    , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
+    , _showDebugSphere(ShowDebugSphereInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -308,6 +439,27 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
+    _boundingSphere.onChange([this]() {
+        if (_boundingSphere >= 0.0) {
+            _overrideBoundingSphere = _boundingSphere;
+        }
+        else {
+            _overrideBoundingSphere = std::nullopt;
+        }
+    });
+    _boundingSphere.setExponent(10.f);
+    addProperty(_boundingSphere);
+    _interactionSphere.onChange([this]() {
+        if (_interactionSphere >= 0.0) {
+            _overrideInteractionSphere = _interactionSphere;
+        }
+        else {
+            _overrideInteractionSphere = std::nullopt;
+        }
+        });
+    _interactionSphere.setExponent(10.f);
+    addProperty(_interactionSphere);
+    addProperty(_showDebugSphere);
 }
 
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
@@ -345,6 +497,25 @@ void SceneGraphNode::initializeGL() {
     if (_renderable) {
         _renderable->initializeGL();
     }
+
+    // The first one to get here will create program shared between all scene graph nodes
+    if (_debugSphereProgram == nullptr) {
+        std::unique_ptr<ghoul::opengl::ProgramObject> shader =
+            global::renderEngine->buildRenderProgram(
+                "DebugSphere",
+                absPath("${SHADERS}/core/xyzuvrgba_vs.glsl"),
+                absPath("${SHADERS}/core/xyzuvrgba_fs.glsl")
+            );
+        // Since we are only going to create a single of these shaders for the lifetime of
+        // the program, we are not bothering with freeing it as the overhead of detecting
+        // when the last scenegraph node will be destroyed would be a bit too much for the
+        // benefit that we would gain from it
+        _debugSphereProgram = shader.release();
+        _debugSphereProgram->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+    }
+
     _state = State::GLInitialized;
 
     LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
@@ -382,13 +553,13 @@ void SceneGraphNode::deinitializeGL() {
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
-    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -407,51 +578,15 @@ void SceneGraphNode::update(const UpdateData& data) {
     }
 
     if (_transform.translation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.translation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeTranslation = (end - start).count();
-        }
-        else {
-            _transform.translation->update(data);
-        }
+        _transform.translation->update(data);
     }
 
     if (_transform.rotation) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.rotation->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRotation = (end - start).count();
-        }
-        else {
-            _transform.rotation->update(data);
-        }
+        _transform.rotation->update(data);
     }
 
     if (_transform.scale) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            const auto start = std::chrono::high_resolution_clock::now();
-
-            _transform.scale->update(data);
-
-            glFinish();
-            const auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeScaling = (end - start).count();
-        }
-        else {
-            _transform.scale->update(data);
-        }
+        _transform.scale->update(data);
     }
     UpdateData newUpdateData = data;
 
@@ -471,30 +606,15 @@ void SceneGraphNode::update(const UpdateData& data) {
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
     glm::dmat4 scaling = glm::scale(
         glm::dmat4(1.0),
-        glm::dvec3(
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale
-        )
+        newUpdateData.modelTransform.scale
     );
 
     _modelTransformCached = translation * rotation * scaling;
-    _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
-    if (_renderable && _renderable->isReady()) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            _renderable->update(newUpdateData);
-
-            glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeRenderable = (end - start).count();
-        }
-        else {
-            _renderable->update(newUpdateData);
-        }
+    if (_renderable && _renderable->isReady() &&
+        (_renderable->isEnabled() || _renderable->shouldUpdateIfDisabled()))
+    {
+        _renderable->update(newUpdateData);
     }
 }
 
@@ -506,49 +626,86 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         return;
     }
 
-    RenderData newData = {
-        data.camera,
-        data.time,
-        data.doPerformanceMeasurement,
-        data.renderBinMask,
-        { _worldPositionCached, _worldRotationCached, _worldScaleCached }
-    };
-
-    if (!isTimeFrameActive(data.time)) {
-        return;
-    }
-
-    bool visible = _renderable &&
-                   _renderable->isVisible() &&
-                   _renderable->isReady() &&
-                   _renderable->isEnabled() &&
-                   _renderable->matchesRenderBinMask(data.renderBinMask);
+    const bool visible = _renderable && _renderable->isVisible() &&
+        _renderable->isReady() && _renderable->isEnabled() &&
+        _renderable->matchesRenderBinMask(data.renderBinMask);
 
     if (!visible) {
         return;
     }
 
-    if (data.doPerformanceMeasurement) {
-        glFinish();
-        auto start = std::chrono::high_resolution_clock::now();
-
-        _renderable->render(newData, tasks);
-        if (_computeScreenSpaceValues) {
-            computeScreenSpaceData(newData);
-        }
-
-        glFinish();
-        auto end = std::chrono::high_resolution_clock::now();
-        _performanceRecord.renderTime = (end - start).count();
+    if (!isTimeFrameActive(data.time)) {
+        return;
     }
-    else {
+
+    {
         TracyGpuZone("Render")
 
+        RenderData newData = {
+            data.camera,
+            data.time,
+            data.renderBinMask,
+            { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+        };
+
         _renderable->render(newData, tasks);
         if (_computeScreenSpaceValues) {
             computeScreenSpaceData(newData);
         }
     }
+
+    if (_showDebugSphere) {
+        if (const double bs = boundingSphere();  bs > 0.0) {
+            renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
+        }
+
+        if (const double is = interactionSphere();  is > 0.0) {
+            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.35f, 0.85f, 0.75f));
+        }
+    }
+}
+
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
+{
+    glm::dvec3 scaleVec = _worldScaleCached * size;
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), _worldPositionCached) *
+        glm::dmat4(_worldRotationCached) *
+        glm::scale(glm::dmat4(1.0), scaleVec);
+
+    glm::mat4 modelViewProjection = camera.projectionMatrix() *
+        glm::mat4(camera.combinedViewMatrix() * modelTransform);
+
+    _debugSphereProgram->activate();
+    _debugSphereProgram->setUniform("hasTexture", 0);
+    _debugSphereProgram->setUniform("proj", modelViewProjection);
+    _debugSphereProgram->setUniform("color", color);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
+    glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
+    glDrawElements(
+        GL_TRIANGLES,
+        rendering::helper::vertexObjects.sphere.nElements,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
+
+    glLineWidth(2.0);
+    _debugSphereProgram->setUniform("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
+    glDrawElements(
+        GL_LINES,
+        rendering::helper::vertexObjects.sphere.nElements,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
+
+    glBindVertexArray(0);
+
+    _debugSphereProgram->deactivate();
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
@@ -557,7 +714,7 @@ void SceneGraphNode::setParent(SceneGraphNode& parent) {
     parent.attachChild(_parent->detachChild(*this));
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
+void SceneGraphNode::attachChild(ghoul::mm_unique_ptr<SceneGraphNode> child) {
     ghoul_assert(child != nullptr, "Child may not be null");
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
@@ -570,7 +727,7 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
     childRaw->setScene(_scene);
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
+ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
     ghoul_assert(
         child._dependentNodes.empty(),
         "Nodes cannot depend on a node being detached"
@@ -580,7 +737,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
     const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const std::unique_ptr<SceneGraphNode>& c) {
+        [&child] (const ghoul::mm_unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
@@ -600,7 +757,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
 
     // Remove link between parent and child
     child._parent = nullptr;
-    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
+    ghoul::mm_unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
     return c;
@@ -610,7 +767,7 @@ void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
-    for (const std::unique_ptr<SceneGraphNode>& c : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -706,10 +863,10 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         return;
     }
 
-    glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
-    
+    glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
+
     // Get the radius of node
-    double nodeRadius = static_cast<double>(this->boundingSphere());
+    double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
     double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
@@ -742,13 +899,13 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     );
 
     constexpr const double RadiusThreshold = 2.0;
-    const double r = abs(_screenSizeRadius - screenSpaceRadius);
+    const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
     constexpr const double ZoomThreshold = 0.1;
-    const double d = abs(_distFromCamToNode - distFromCamToNode);
+    const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }
@@ -788,7 +945,7 @@ const glm::dmat3& SceneGraphNode::rotationMatrix() const {
     return _transform.rotation->matrix();
 }
 
-double SceneGraphNode::scale() const {
+glm::dvec3 SceneGraphNode::scale() const {
     return _transform.scale->scaleValue();
 }
 
@@ -804,11 +961,7 @@ glm::dmat4 SceneGraphNode::modelTransform() const {
     return _modelTransformCached;
 }
 
-glm::dmat4 SceneGraphNode::inverseModelTransform() const {
-    return _inverseModelTransformCached;
-}
-
-double SceneGraphNode::worldScale() const {
+glm::dvec3 SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
@@ -825,10 +978,10 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     if (_parent) {
         const glm::dvec3 wp = _parent->worldPosition();
         const glm::dmat3 wrot = _parent->worldRotationMatrix();
-        const double ws = _parent->worldScale();
+        const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
 
-        return wp + wrot * ws * p;
+        return wp + wrot * (ws * p);
     }
     else {
         return position();
@@ -859,7 +1012,7 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     }
 }
 
-double SceneGraphNode::calculateWorldScale() const {
+glm::dvec3 SceneGraphNode::calculateWorldScale() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
         return _parent->worldScale() * scale();
@@ -903,22 +1056,36 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
-    for (const std::unique_ptr<SceneGraphNode>& child : _children) {
+    for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const {
-    if (_renderable) {
-        return _renderable->boundingSphere();
+double SceneGraphNode::boundingSphere() const {
+    if (_overrideBoundingSphere.has_value()) {
+        return glm::compMax(scale() * *_overrideBoundingSphere);
     }
-    return _fixedBoundingSphere;
+
+    if (_renderable) {
+        return glm::compMax(scale() * _renderable->boundingSphere());
+    }
+    else {
+        return 0.0;
+    }
 }
 
-// renderable
-void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
-    _renderable = std::move(renderable);
+double SceneGraphNode::interactionSphere() const {
+    if (_overrideInteractionSphere.has_value()) {
+        return glm::compMax(scale() * *_overrideInteractionSphere);
+    }
+
+    if (_renderable) {
+        return glm::compMax(scale() * _renderable->interactionSphere());
+    }
+    else {
+        return 0.0;
+    }
 }
 
 const Renderable* SceneGraphNode::renderable() const {
@@ -934,7 +1101,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         return this;
     }
     else {
-        for (std::unique_ptr<SceneGraphNode>& it : _children) {
+        for (ghoul::mm_unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(id);
             if (tmp) {
                 return tmp;
@@ -942,10 +1109,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& id) {
         }
     }
     return nullptr;
-}
-
-const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
-    return _performanceRecord;
 }
 
 }  // namespace openspace

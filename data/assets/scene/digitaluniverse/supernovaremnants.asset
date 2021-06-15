@@ -3,47 +3,60 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Supernova Remnants Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_supernovaremnants_textures",
-    Version = 1
+  Name = "Supernova Remnants Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_supernovaremnants_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "Supernova Remnants Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_supernovaremnants_speck",
-    Version = 2
+  Name = "Supernova Remnants Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_supernovaremnants_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "SupernovaRemnants",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 0.5, 0.0 },
-        Opacity = 0.9,
-        File = speck .. "/snr.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 7,
-        LabelFile = speck .. "/snr.label",
-        TextColor = { 0.6, 0.3, 0.0, 1.0 },
-        ScaleFactor = 435,
-        TextSize = 17.5,
-        TextMinSize = 8.0,
-        TextMaxSize = 30.0,
-        --CorrectionSizeEndDistance = 17.5,
-        --CorrectionSizeFactor = 13.96,
-        Unit = "pc",
-        BillboardMaxSize = 27.2,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Supernova Remnants",
-        Path = "/Milky Way"
-    }
+  Identifier = "SupernovaRemnants",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 0.5, 0.0 },
+    Opacity = 0.32,
+    File = speck .. "/snr.speck",
+    Texture = textures .. "/point4.png",
+    PolygonSides = 7,
+    LabelFile = speck .. "/snr.label",
+    Unit = "pc",
+    TextColor = { 0.6, 0.46, 0.0 },
+    ScaleFactor = 424,
+    TextSize = 16.44,
+    TextMinMaxSize = { 4, 100 },
+    --CorrectionSizeEndDistance = 17.5,
+    --CorrectionSizeFactor = 13.96,
+    BillboardMinMaxSize = { 0.0, 500.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Supernova Remnants",
+    Path = "/Milky Way",
+    Description = [[Census: 112 supernova remnants.<br> DU Version 3.7. A supernova
+      remnant is the ejected gas that results from a supernova. It glows for a
+      cosmically short period of time before mixing with the interstellar medium.
+      (Description from URL) <br><br> Data Reference: The First Fermi LAT SNR
+      Catalog (Acero+, 2016)]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Supernova Remnants",
+  Version = "2.0",
+  Description = [[Digital Universe asset for Supernova Remnants.]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"SupernovaRemnants"}
+}

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -23,121 +23,117 @@
 ##########################################################################################
 
 function(set_cef_targets cef_root main_target)
-    # find cef cmake helpers
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
-    include(cef_support)
+  # find cef cmake helpers
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
+  include(cef_support)
 
-    # Use <PackageName>_ROOT variables
-    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-    cmake_policy(SET CMP0074 NEW)
-    find_package(CEF REQUIRED)
+  # Use <PackageName>_ROOT variables
+  # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+  cmake_policy(SET CMP0074 NEW)
+  find_package(CEF REQUIRED)
 
-    # ensure out target dir is set
-    set_openspace_cef_target_out_dir()
+  # ensure out target dir is set
+  set_openspace_cef_target_out_dir()
 
-    # main CEF executable target
-    set(CEF_TARGET ${main_target} PARENT_SCOPE)
-endfunction()
+  # main CEF executable target
+  set(CEF_TARGET ${main_target} PARENT_SCOPE)
+endfunction ()
 
 function(run_cef_platform_config cef_root cef_target module_path)
-    # find cef cmake helpers
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
-    include(cef_support)
+  # find cef cmake helpers
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
+  include(cef_support)
 
-    # Use <PackageName>_ROOT variables
-    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-    cmake_policy(SET CMP0074 NEW)
-    find_package(CEF REQUIRED)
+  # Use <PackageName>_ROOT variables
+  # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+  cmake_policy(SET CMP0074 NEW)
+  find_package(CEF REQUIRED)
 
-    if (OS_MACOSX)
-        run_cef_macosx_config("${cef_target}" "${module_path}")
-    endif()
-    if (OS_WINDOWS)
-        run_cef_windows_config("${cef_target}" "${cef_root}" "${module_path}")
-    endif()
-    if (OS_LINUX)
-        run_cef_linux_config("${cef_target}")
-    endif()
-endfunction()
+  if (OS_MACOSX)
+    run_cef_macosx_config("${cef_target}" "${module_path}")
+  endif ()
+  if (OS_WINDOWS)
+    run_cef_windows_config("${cef_target}" "${cef_root}" "${module_path}")
+  endif ()
+  if (OS_LINUX)
+    run_cef_linux_config("${cef_target}")
+  endif ()
+endfunction ()
 
 function(run_cef_macosx_config CEF_ROOT module_path)
-    if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR
-        ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-        set(CEF_OUTPUT_PREFIX "")
-    else()
-        set(CEF_OUTPUT_PREFIX "$<CONFIG>/")
-    endif()
+  if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+    set(CEF_OUTPUT_PREFIX "")
+  else ()
+    set(CEF_OUTPUT_PREFIX "$<CONFIG>/")
+  endif ()
 
-    set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_TARGET}.app")
-    set(CEF_INTERMEDIATE_HELPER_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_HELPER_TARGET}.app")
+  set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_TARGET}.app")
+  set(CEF_INTERMEDIATE_HELPER_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_OUTPUT_PREFIX}${CEF_HELPER_TARGET}.app")
 
-    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app")
-    set(CEF_FRAMEWORK_LOCATION "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
-    set(CEF_FRAMEWORK_FINAL_LOCATION "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework")
+  set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app")
+  set(CEF_FRAMEWORK_LOCATION "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
+  set(CEF_FRAMEWORK_FINAL_LOCATION "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework")
 
-    add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
+  add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
 
-    target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-    set_target_properties(${CEF_TARGET} PROPERTIES
-        RESOURCE "${WEBBROWSER_RESOURCES_SRCS}"
-        MACOSX_BUNDLE_INFO_PLIST ${module_path}/mac/Info.plist
-        )
+  # target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  target_link_libraries(${CEF_TARGET} PUBLIC libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  set_target_properties(${CEF_TARGET} PROPERTIES
+    RESOURCE "${WEBBROWSER_RESOURCES_SRCS}"
+    MACOSX_BUNDLE_INFO_PLIST ${module_path}/mac/Info.plist
+  )
 
-    # Copy files into the main app bundle.
+  # Copy files into the main app bundle.
+  add_custom_command(
+    TARGET ${CEF_TARGET}
+    POST_BUILD
+    # Copy the helper app bundle into the Frameworks directory.
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_INTERMEDIATE_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
+    # Copy the CEF framework into the Frameworks directory.
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_FRAMEWORK_LOCATION}" "${CEF_FRAMEWORK_FINAL_LOCATION}"
+    VERBATIM
+  )
+
+  # copy dynamic libraries to bundle
+  file(GLOB LIBRARIES_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib")
+  foreach (lib_file ${LIBRARIES_TO_COPY})
+    get_filename_component(file_name "${lib_file}" NAME)
     add_custom_command(
-        TARGET ${CEF_TARGET}
-        POST_BUILD
-        # Copy the helper app bundle into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_INTERMEDIATE_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
-        # Copy the CEF framework into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_FRAMEWORK_LOCATION}" "${CEF_FRAMEWORK_FINAL_LOCATION}"
-        VERBATIM
+      TARGET ${CEF_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${lib_file}"
+      "${CEF_FINAL_APP}/Contents/${file_name}"
     )
+  endforeach ()
 
-    # copy dynamic libraries to bundle
-    file(GLOB LIBRARIES_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib")
-    foreach (lib_file ${LIBRARIES_TO_COPY})
-        get_filename_component(file_name "${lib_file}" NAME)
-        add_custom_command(
-            TARGET ${CEF_TARGET} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${lib_file}"
-            "${CEF_FINAL_APP}/Contents/${file_name}"
-        )
-    endforeach ()
-
-    if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
-        # Manually process and copy over resource files.
-        # The Xcode generator handles this via the set_target_properties RESOURCE directive.
-        set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
-        COPY_MACOSX_RESOURCES("${WEBBROWSER_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${module_path}" "${CEF_FINAL_APP}")
-    endif()
-endfunction()
+  if (NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
+    # Manually process and copy over resource files.
+    # The Xcode generator handles this via the set_target_properties RESOURCE directive.
+    set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
+    COPY_MACOSX_RESOURCES("${WEBBROWSER_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${module_path}" "${CEF_FINAL_APP}")
+  endif ()
+endfunction ()
 
 function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
-    # Executable target.
-    add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
-    target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-    include_directories(${CEF_ROOT})
+  # Executable target.
+  add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
+  target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  include_directories(${CEF_ROOT})
 
-    add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
+  add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
 
-    if(USE_SANDBOX)
-        # Logical target used to link the cef_sandbox library.
-        message(STATUS "Using CEF in Sandboxed mode.")
-        ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
-        target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
-    endif()
+  if (USE_SANDBOX)
+    # Logical target used to link the cef_sandbox library.
+    message(STATUS "Using CEF in Sandboxed mode.")
+    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
+  endif ()
 
-    # Add the custom manifest files to the executable.
-    set_openspace_cef_target_out_dir()
-    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
-
-    # Copy binary and resource files to the target output directory.
-    copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-    copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-endfunction()
+  # Add the custom manifest files to the executable.
+  set_openspace_cef_target_out_dir()
+  add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
+endfunction ()
 
 function(run_cef_linux_config CEF_ROOT)
-    message(ERROR "Linux is not yet supported for Web Browser Module.")
-endfunction()
+  message(ERROR "Linux is not yet supported for Web Browser Module.")
+endfunction ()

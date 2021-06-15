@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,14 @@
 
 #include <modules/imgui/include/guiassetcomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
+#include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
+#include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
@@ -44,6 +45,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -62,7 +64,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 16;
+        const int nRegularComponents = 17;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -89,6 +91,10 @@ public:
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
+    bool touchDetectedCallback(TouchInput input);
+    bool touchUpdatedCallback(TouchInput input);
+    void touchExitCallback(TouchInput input);
+
     void startFrame(float deltaTime, const glm::vec2& windowSize,
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
         uint32_t mouseButtonsPressed);
@@ -100,13 +106,14 @@ public:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
+    GuiGIBSComponent _gibs;
     GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _moduleProperty;
+    GuiMemoryComponent _memoryComponent;
 
     GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
@@ -134,10 +141,12 @@ private:
         &_virtualProperty,
         &_globalProperty,
         &_moduleProperty,
+        &_memoryComponent,
 
         &_spaceTime,
         &_mission,
         &_parallel,
+        &_gibs,
         &_globeBrowsing,
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         &_iswa,
@@ -147,8 +156,6 @@ private:
         &_shortcuts,
         &_joystick,
         &_filePath,
-
-        &_performance,
 
         &_help
     };
@@ -169,6 +176,8 @@ private:
         properties::Property::Visibility::Developer;
 
     std::vector<ImGuiContext*> _contexts;
+
+    std::vector<TouchInput> _validTouchStates;
 };
 
 void CaptionText(const char* text);

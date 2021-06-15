@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,10 @@
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rawvolume.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/rendering/transferfunction.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>
@@ -41,6 +45,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableKameleonVolume";
@@ -150,70 +155,76 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
 {
-    if (dictionary.hasKeyAndValue<glm::vec3>(KeyDimensions)) {
-        _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
+    if (dictionary.hasValue<glm::dvec3>(KeyDimensions)) {
+        _dimensions = dictionary.value<glm::dvec3>(KeyDimensions);
     }
     else {
         LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
         _dimensions = glm::uvec3(32);
     }
 
-    _stepSize = dictionary.value<float>(KeyStepSize);
+    _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
+    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = dictionary.value<std::string>(KeyTransferFunction);
         _transferFunction = std::make_shared<openspace::TransferFunction>(
             _transferFunctionPath, [](const openspace::TransferFunction&) {}
         );
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeySource)) {
-        _sourcePath = absPath(dictionary.value<std::string>(KeySource));
+    if (dictionary.hasValue<std::string>(KeySource)) {
+        _sourcePath = absPath(dictionary.value<std::string>(KeySource)).string();
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyVariable)) {
+    if (dictionary.hasValue<std::string>(KeyVariable)) {
         _variable = dictionary.value<std::string>(KeyVariable);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(KeyLowerDomainBound)) {
-        _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    if (dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound)) {
+        _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(KeyUpperDomainBound)) {
-        _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    if (dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound)) {
+        _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(KeyDomainScale)) {
-        _domainScale = dictionary.value<glm::vec3>(KeyDomainScale);
+    if (dictionary.hasValue<glm::dvec3>(KeyDomainScale)) {
+        _domainScale = dictionary.value<glm::dvec3>(KeyDomainScale);
     }
 
-    if (dictionary.hasKeyAndValue<float>(KeyLowerValueBound)) {
-        _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
+    if (dictionary.hasValue<double>(KeyLowerValueBound)) {
+        _lowerValueBound = static_cast<float>(
+            dictionary.value<double>(KeyLowerValueBound)
+        );
     }
     else {
         _autoValueBounds = true;
     }
 
-    if (dictionary.hasKeyAndValue<float>(KeyUpperValueBound)) {
-        _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
+    if (dictionary.hasValue<double>(KeyUpperValueBound)) {
+        _upperValueBound = static_cast<float>(
+            dictionary.value<double>(KeyUpperValueBound)
+        );
     }
     else {
         _autoValueBounds = true;
     }
 
     ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
+        clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
+    }
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasKeyAndValue<bool>(KeyCache)) {
+    if (dictionary.hasValue<bool>(KeyCache)) {
         _cache = dictionary.value<bool>(KeyCache);
     }
 
@@ -227,7 +238,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
         const std::string& gridType = dictionary.value<std::string>(KeyGridType);
         if (gridType == ValueSphericalGridType) {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
@@ -264,14 +275,14 @@ void RenderableKameleonVolume::initializeGL() {
 
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -313,7 +324,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 }
 
 void RenderableKameleonVolume::load() {
-    if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
+    if (!std::filesystem::is_regular_file(_sourcePath.value())) {
         LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
@@ -321,13 +332,11 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    ghoul::filesystem::File sourceFile(_sourcePath);
     std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        sourceFile.baseName(),
-        cacheSuffix(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        std::filesystem::path(_sourcePath.value()).stem(),
+        cacheSuffix()
     );
-    if (FileSys.fileExists(cachePath)) {
+    if (std::filesystem::is_regular_file(cachePath)) {
         loadRaw(cachePath);
     }
     else {
@@ -342,15 +351,8 @@ std::string RenderableKameleonVolume::cacheSuffix() const {
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
-    ghoul::filesystem::File file(path);
-    std::string extension = file.fileExtension();
-    std::transform(
-        extension.begin(),
-        extension.end(),
-        extension.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    if (extension == "cdf") {
+    std::filesystem::path extension = std::filesystem::path(path).extension();
+    if (extension == ".cdf" || extension == ".CDF") {
         loadCdf(path);
     }
     else {
@@ -389,7 +391,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     if (_autoGridType) {
-        if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
+        if (variables[0] == "r" && variables[1] == "theta" && variables[2] == "phi") {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {
@@ -438,7 +440,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
 
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

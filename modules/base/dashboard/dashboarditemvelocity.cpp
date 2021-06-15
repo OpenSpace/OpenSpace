@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,25 +38,9 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the velocity."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
@@ -84,82 +68,31 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+    };
+#include "dashboarditemvelocity_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Velocity",
-        "base_dashboarditem_velocity",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemVelocity"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_dashboarditem_velocity");
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemVelocity"
-    );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
-    _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -173,25 +106,22 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
         _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        const std::string& value = dictionary.value<std::string>(
-            RequestedUnitInfo.identifier
-        );
-        DistanceUnit unit = distanceUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
-
-    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
-    const glm::dvec3 currentPos = global::renderEngine.scene()->camera()->positionVec3();
+    ZoneScoped
+
+    const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
     const double speedPerFrame = glm::length(dt);
 
-    const double secondsPerFrame = global::windowDelegate.averageDeltaTime();
+    const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
 
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
@@ -201,23 +131,25 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertDistance(speedPerSecond, unit);
+        const double convertedD = convertMeters(speedPerSecond, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
         fmt::format(
-            "Camera velocity: {} {}/s", dist.first, dist.second
+            "Camera velocity: {:.4f} {}/s", dist.first, dist.second
         )
     );
+    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }
 
 glm::vec2 DashboardItemVelocity::size() const {
+    ZoneScoped
+
     const double d = glm::length(1e20);
     std::pair<double, std::string> dist;
     if (_doSimplification) {
@@ -225,14 +157,13 @@ glm::vec2 DashboardItemVelocity::size() const {
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Camera velocity: {} {}/s", dist.first, dist.second)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

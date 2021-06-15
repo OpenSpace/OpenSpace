@@ -1,8 +1,19 @@
-asset.request('./minor/ananke_group')
-asset.request('./minor/carme_group')
-asset.request('./minor/carpo_group')
-asset.request('./minor/himalia_group')
-asset.request('./minor/inner_group')
-asset.request('./minor/other_groups')
-asset.request('./minor/pasiphae_group')
-asset.request('./minor/themisto_group')
+asset.require('./minor/ananke_group')
+asset.require('./minor/carme_group')
+asset.require('./minor/carpo_group')
+asset.require('./minor/himalia_group')
+asset.require('./minor/inner_group')
+asset.require('./minor/other_groups')
+asset.require('./minor/pasiphae_group')
+asset.require('./minor/themisto_group')
+
+
+asset.meta = {
+  Name = "Jupiter Minor Moons",
+  Version = "1.0",
+  Description = [[ Meta asset containing eight moon groups: Ananke, Carme, Carpo,
+     Himalia, Pasiphae, Themisto, Inner, and Other]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

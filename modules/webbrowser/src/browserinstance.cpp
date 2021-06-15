@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -75,8 +76,8 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
-        global::windowDelegate.dpiScaling()
+        static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+        global::windowDelegate->dpiScaling()
     ));
     _isInitialized = true;
     _shouldReshape = true;
@@ -96,12 +97,12 @@ void BrowserInstance::loadUrl(std::string url) {
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {
-    if (!FileSys.fileExists(path)) {
-        LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
+    if (!std::filesystem::is_regular_file(path)) {
+        LDEBUG(fmt::format("Could not find path '{}', verify that it is correct", path));
         return false;
     }
 
-    loadUrl(absPath(std::move(path)));
+    loadUrl(absPath(std::move(path)).string());
     return true;
 }
 
@@ -142,26 +143,17 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent& event) {
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
                                           CefBrowserHost::MouseButtonType button,
-                                          bool mouseUp,
-                                          int clickCount)
+                                          bool mouseUp, int clickCount)
 {
     _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, clickCount);
-    return hasContent(event.x, event.y);
+    return hasContent(glm::ivec2(event.x, event.y));
 }
 
-void BrowserInstance::sendTouchPressEvent(const CefMouseEvent& event,
-                                          CefBrowserHost::MouseButtonType button,
-                                          const int clickCount)
-{
-    _browser->GetHost()->SendMouseClickEvent(event, button, false, clickCount);
+#ifdef WIN32
+void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
+    _browser->GetHost()->SendTouchEvent(event);
 }
-
-void BrowserInstance::sendResleasePressEvent(const CefMouseEvent& event,
-                                             CefBrowserHost::MouseButtonType button,
-                                             const int clickCount)
-{
-    _browser->GetHost()->SendMouseClickEvent(event, button, true, clickCount);
-}
+#endif // WIN32
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
     constexpr const bool DidNotLeaveWindow = false;
@@ -174,15 +166,15 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent& event,
                                           const glm::ivec2& delta)
 {
     _browser->GetHost()->SendMouseWheelEvent(event, delta.x, delta.y);
-    return hasContent(event.x, event.y);
+    return hasContent(glm::ivec2(event.x, event.y));
 }
 
 void BrowserInstance::setZoom(float ratio) {
-    const float dpiScaling = global::windowDelegate.dpiScaling().x;
+    const float dpiScaling = global::windowDelegate->dpiScaling().x;
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    _zoomLevel = glm::log(static_cast<double>(ratio * dpiScaling))/glm::log(1.2);
+    _zoomLevel = glm::log(ratio * dpiScaling) / glm::log(1.2);
     _browser->GetHost()->SetZoomLevel(_zoomLevel);
 }
 
@@ -196,8 +188,8 @@ void BrowserInstance::selectAll() {
     }
 }
 
-bool BrowserInstance::hasContent(int x, int y) {
-    return _renderHandler->hasContent(x, y);
+bool BrowserInstance::hasContent(const glm::ivec2& pos) const {
+    return _renderHandler->hasContent(pos.x, pos.y);
 }
 
 } // namespace openspace

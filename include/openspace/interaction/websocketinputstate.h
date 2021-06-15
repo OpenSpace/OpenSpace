@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 #define __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
 #include <array>
 #include <memory>
@@ -84,9 +86,9 @@ constexpr const int MaxWebsockets = 16;
 struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputState*> {
     /**
      * This function adds the contributions of all connected websockets for the provided
-     * \p axis. After adding each websockets contribution, the result is clamped to [-1,1].
-     * If a websocket does not possess a particular axis, it's does not contribute to the
-     * sum.
+     * \p axis. After adding each websockets contribution, the result is clamped to
+     * [-1,1]. If a websocket does not possess a particular axis, it's does not contribute
+     * to the sum.
      *
      * \param axis The numerical axis for which the values are added
      * \return The summed axis values of all connected websockets
@@ -115,10 +117,25 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::WebsocketAction& action);
+inline std::string to_string(const openspace::interaction::WebsocketAction& action) {
+    switch (action) {
+        case openspace::interaction::WebsocketAction::Idle:    return "Idle";
+        case openspace::interaction::WebsocketAction::Press:   return "Press";
+        case openspace::interaction::WebsocketAction::Repeat:  return "Repeat";
+        case openspace::interaction::WebsocketAction::Release: return "Release";
+        default:                                             throw MissingCaseException();
+    }
+}
 
 template <>
-openspace::interaction::WebsocketAction from_string(const std::string& str);
+constexpr openspace::interaction::WebsocketAction from_string(std::string_view string) {
+    if (string == "Idle") { return openspace::interaction::WebsocketAction::Idle; }
+    if (string == "Press") { return openspace::interaction::WebsocketAction::Press; }
+    if (string == "Repeat") { return openspace::interaction::WebsocketAction::Repeat; }
+    if (string == "Release") { return openspace::interaction::WebsocketAction::Release; }
+
+    throw RuntimeError("Unknown action '" + std::string(string) + "'");
+}
 
 } // namespace ghoul
 

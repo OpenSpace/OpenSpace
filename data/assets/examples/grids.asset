@@ -1,0 +1,98 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local scale = 149597870700 -- 1 AU
+
+local radialGrid = {
+  Identifier = "ExampleRadialGrid",
+  Parent = "Root",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = scale
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 0.6, 1.0, 0.7 },
+    LineWidth = 3.0,
+    GridSegments = { 3, 4 },
+    Radii = { 0.2, 1.0 },
+    Enabled = false
+  },
+  GUI = {
+    Name = "Example Radial Grid",
+    Path = "/Examples/Grids"
+  }
+}
+
+local planarGrid = {
+  Identifier = "ExampleGrid",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = scale
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Color = { 0.0, 1.0, 0.8 },
+    LineWidth = 2.0,
+    Segments = { 5, 10 },
+    Size = { 1, 2 },
+    Enabled = false
+  },
+  GUI = {
+    Name = "Example Grid",
+    Path = "/Examples/Grids"
+  }
+}
+
+local sphericalGrid = {
+  Identifier = "ExampleSphericalGrid",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = scale
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Color = { 1.0, 0.5, 0.2 },
+    LineWidth = 2.0,
+    Segments = 40,
+    Enabled = false
+  },
+  GUI = {
+    Name = "Example Spherical Grid",
+    Path = "/Examples/Grids"
+  }
+}
+
+local boxGrid = {
+  Identifier = "ExampleBoxGrid",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = scale
+    }
+  },
+  Renderable = {
+    Type = "RenderableBoxGrid",
+    Color = { 0.5, 0.0, 1.0 },
+    LineWidth = 2.0,
+    Size = { 2, 2, 2 },
+    Enabled = false
+  },
+  GUI = {
+    Name = "Example Box Grid",
+    Path = "/Examples/Grids"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  radialGrid,
+  planarGrid,
+  sphericalGrid,
+  boxGrid
+})

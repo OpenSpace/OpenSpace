@@ -1,11 +1,12 @@
 openspace.globebrowsing.documentation = {
     {
         Name = "createTemporalGibsGdalXml",
-        Arguments = "string, string, string, string, string, string",
+        Arguments = "string, string, string, string, string, string, [string]",
         Documentation =
             "Creates an XML configuration for a temporal GIBS dataset." ..
             "Arguments are: Name, Start date, end date, time resolution, time format," ..
-            "resolution, file format. For all specifications, see " ..
+            "resolution, file format. The last parameter is the temporal format and " ..
+            "defaults to YYYY-MM-DD. For all specifications, see " ..
             "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
             "Usage:" ..
             "openspace.globebrowsing.addLayer(" ..
@@ -62,13 +63,12 @@ openspace.globebrowsing.documentation = {
         Name = "parseInfoFile",
         Arguments = "string",
         Documentation =
-            "Parses the passed info file and returns two tables. The first return value " ..
-            "contains the table for the color layer of a RenderableGlobe. The second " ..
-            "return value contains the table for the height layer of a RenderableGlobe." ..
-            "Usage: local color, height = openspace.globebrowsing.parseInfoFile(file)" ..
-            "openspace.globebrowsing.addLayer(\"Earth\", \"ColorLayers\", color)" ..
-            "openspace.globebrowsing.addLayer(\"Earth\", \"HeightLayers\", height)"
-
+            "Parses the passed info file and return the table with the information " ..
+            "provided in the info file. The return table contains the optional keys: " ..
+            "'Color', 'Height', 'Node', 'Location', 'Identifier'." ..
+            "Usage: local t = openspace.globebrowsing.parseInfoFile(file)" ..
+            "openspace.globebrowsing.addLayer(\"Earth\", \"ColorLayers\", t.color)" ..
+            "openspace.globebrowsing.addLayer(\"Earth\", \"HeightLayers\", t.height)"
     },
     {
         Name = "addBlendingLayersFromDirectory",
@@ -115,20 +115,21 @@ openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, start
     openspace.globebrowsing.addLayer('Earth', 'ColorLayers', { Identifier = layer,  Type = "TemporalTileLayer", FilePath = xml })
 end
 
-openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
-    temporalTemplate =
+openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format, temporalFormat)
+    temporalFormat = temporalFormat or 'YYYY-MM-DD'
+    local temporalTemplate =
         "<OpenSpaceTemporalGDALDataset>" ..
         "<OpenSpaceTimeStart>" .. startDate .. "</OpenSpaceTimeStart>" ..
         "<OpenSpaceTimeEnd>" .. endDate .. "</OpenSpaceTimeEnd>" ..
         "<OpenSpaceTimeResolution>" .. timeResolution .. "</OpenSpaceTimeResolution>" ..
-        "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
+        "<OpenSpaceTimeIdFormat>" .. temporalFormat .. "</OpenSpaceTimeIdFormat>" ..
         openspace.globebrowsing.createGibsGdalXml(layerName, "${OpenSpaceTimeId}", resolution, format) ..
         "</OpenSpaceTemporalGDALDataset>"
     return temporalTemplate
 end
 
 openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolution, format)
-    tileLevel = 5
+    local tileLevel = 5
     -- These resolutions are defined by GIBS: https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-Script-levelAccessviaGDAL
     if resolution == "2km" then
         tileLevel = 5
@@ -151,7 +152,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         return ""
     end
 
-    rasterCount = 3
+    local rasterCount = 3
     if format == "jpg" then
         if layerName == "ASTER_GDEM_Greyscale_Shaded_Relief" then
             rasterCount = 1
@@ -165,7 +166,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         return ""
     end
 
-    gdalWmsTemplate =
+    local gdalWmsTemplate =
     "<GDAL_WMS>" ..
         "<Service name=\"TMS\">" ..
             "<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/" ..
@@ -196,20 +197,47 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
 end
 
 openspace.globebrowsing.parseInfoFile = function (file)
-    Name = nil
-    Identifier = nil
-    Description = nil
-    ColorFile = nil
-    HeightFile = nil
+    -- We are loading these values from an external info file and since we are switching
+    -- to a strict Lua, we need to predefine these global variables
+    local function declare(name)
+        rawset(_G, name, "")
+    end
+
+    declare("Name")
+    declare("Identifier")
+    declare("Description")
+    declare("ColorFile")
+    declare("HeightFile")
+    declare("Location")
 
     local dir = openspace.directoryForPath(file)
-    dofile(file)
+    local file_func, error = loadfile(file)
+    if file_func then
+        file_func()
+    else
+        openspace.printError('Error loading file "' .. file .. '": '.. error)
+        return nil, nil, nil, nil
+    end
 
+    -- Hoist the global variables into local space
+    local Name = rawget(_G, "Name")
+    local Identifier = rawget(_G, "Identifier")
+    local Description = rawget(_G, "Description")
+    local ColorFile = rawget(_G, "ColorFile")
+    local HeightFile = rawget(_G, "HeightFile")
+    local Location = rawget(_G, "Location")
+
+    -- Now we can start
     local name = Name or Identifier
     local identifier = Identifier or Name
 
+    if name == nil and identifier == nil then
+        openspace.printError('Error loading file "' .. file .. '": No "Name" or "Identifier" found')
+        return nil, nil, nil, nil
+    end
+
     local color = nil
-    if ColorFile then
+    if ColorFile and ColorFile ~= "" then
         color = {
             Identifier = identifier,
             Name = name,
@@ -220,7 +248,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     end
 
     local height = nil
-    if HeightFile then
+    if HeightFile and HeightFile ~= "" then
         height = {
             Identifier = identifier,
             Name = name,
@@ -235,7 +263,13 @@ openspace.globebrowsing.parseInfoFile = function (file)
         location = Location
     end
 
-    return name, color, height, location, identifier
+    return {
+        Color = color,
+        Height = height,
+        Name = name,
+        Location = location,
+        Identifier = identifier
+    }
 end
 
 openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_name)
@@ -247,7 +281,13 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     -- to be walked recursively. This is probably not what the users expects (and it is
     -- also one of the default values in the globebrowsing customization script), so we
     -- ignore the empty string here
-    if dir == '' then
+
+    if dir == nil or dir == '' then
+        openspace.printError("No directory specified")
+        return
+    end
+    if node_name == nil or node_name == '' then
+        openspace.printError("No node name specified")
         return
     end
 
@@ -255,16 +295,14 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
 
     for _, file in pairs(files) do
         if file and file:find('.info') and ends_with(file, '.info') then
-            local c, h
-            _, c, h, _ = openspace.globebrowsing.parseInfoFile(file)
-
-            if c then
-                openspace.printInfo("Adding color layer '" .. c["Identifier"] .. "'")
-                openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
+            local t = openspace.globebrowsing.parseInfoFile(file)
+            if t.Color then
+                openspace.printInfo("Adding color layer '" .. t.Color["Identifier"] .. "'")
+                openspace.globebrowsing.addLayer(node_name, "ColorLayers", t.Color)
             end
-            if h then
-                openspace.printInfo("Adding height layer '" .. h["Identifier"] .. "'")
-                openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
+            if t.Height then
+                openspace.printInfo("Adding height layer '" .. t.Height["Identifier"] .. "'")
+                openspace.globebrowsing.addLayer(node_name, "HeightLayers", t.Height)
             end
         end
     end
@@ -275,19 +313,18 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
-            local n, l
-            n, _, _, l, i = openspace.globebrowsing.parseInfoFile(file)
+            local t = openspace.globebrowsing.parseInfoFile(file)
 
-            if n and l then
+            if t.Node and t.Location then
                 openspace.printInfo("Creating focus node for '" .. n .. "'")
 
-                local lat = l.Center[2]
-                local long = l.Center[1]
+                local lat = t.Location.Center[2]
+                local long = t.Location.Center[1]
                 local a, b, c = openspace.globebrowsing.getGeoPosition(node_name, lat, long, 0.0)
                 local p = { a, b, c }
 
-                local identifier = node_name .. " - " .. i
-                local name = node_name .. " - " .. n
+                local identifier = node_name .. " - " .. t.Identifier
+                local name = node_name .. " - " .. t.Node
 
                 openspace.addSceneGraphNode({
                     Identifier = identifier,

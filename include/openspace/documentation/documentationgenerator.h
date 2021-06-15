@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,14 +93,6 @@ private:
     const std::string _jsonName;
     const std::vector<HandlebarTemplate> _handlebarTemplates;
 };
-
-/**
- * This function takes a \p text and escapes all necessary characters () that JSON
- * does not want in its strings.
- * \param text The text that is to be escaped
- * \return The same text will all required characteres escaped
- */
-std::string escapedJson(const std::string& text);
 
 } // namespace openspace
 

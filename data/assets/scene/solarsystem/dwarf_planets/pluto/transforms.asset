@@ -6,22 +6,30 @@ asset.require("spice/base")
 
 
 local PlutoBarycenter = {
-    Identifier = "PlutoBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO BARYCENTER",
-            Observer = "SUN",
-            Kernels = kernels
-        }
-    },
-    GUI = {
-        Name = "Pluto Barycenter",
-        Path = "/Solar System/Dwarf Planets/Pluto"
+  Identifier = "PlutoBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PLUTO BARYCENTER",
+      Observer = "SUN",
+      Kernels = kernels
     }
+  },
+  GUI = {
+    Name = "Pluto Barycenter",
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })
+
+
+asset.meta = {
+  Name = "Pluto Transforms",
+  Version = "1.0",
+  Description = [[ Pluto Barycenter transform]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

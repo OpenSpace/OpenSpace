@@ -1,14 +1,24 @@
 local Kernels = asset.syncedResource({
-    Name = "Pluto Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "pluto_kernels",
-    Version =  1
+  Name = "Pluto Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_kernels",
+  Version =  1
 })
 
 local PlutoKernels = {
-    Kernels .. "/NavPE_de433_od122.bsp",
-    Kernels .. "/NavSE_plu047_od122.bsp",
-    Kernels .. "/ssd_jpl_nasa_gov_plu043.bsp"
+  Kernels .. "/NavPE_de433_od122.bsp",
+  Kernels .. "/NavSE_plu047_od122.bsp",
+  Kernels .. "/ssd_jpl_nasa_gov_plu043.bsp"
 }
 
 asset.export("PlutoKernels", PlutoKernels)
+
+
+asset.meta = {
+  Name = "Pluto Spice Kernels",
+  Version = "1.0",
+  Description = [[ Generic SPICE kernels for Pluto.]],
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

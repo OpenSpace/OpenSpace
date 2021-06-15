@@ -1,7 +1,0 @@
-asset.require('./default')
-asset.require('scene/solarsystem/planets/jupiter/minor_moons')
-asset.require('scene/solarsystem/planets/saturn/minor_moons')
-asset.require('scene/solarsystem/planets/uranus/minor_moons')
-asset.require('scene/solarsystem/planets/neptune/inner_moons')
-asset.require('scene/solarsystem/planets/neptune/irregular_prograde_moons')
-asset.require('scene/solarsystem/planets/neptune/irregular_retrograde_moons')

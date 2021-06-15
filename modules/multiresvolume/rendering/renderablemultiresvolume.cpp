@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,6 +54,7 @@
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 
@@ -61,19 +62,11 @@ namespace {
     constexpr const char* _loggerCat = "RenderableMultiresVolume";
     constexpr const char* KeyDataSource = "Source";
     constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr const char* KeyHints = "Hints";
     constexpr const char* KeyTransferFunction = "TransferFunction";
 
-    constexpr const char* KeyVolumeName = "VolumeName";
     constexpr const char* KeyBrickSelector = "BrickSelector";
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyEndTime = "EndTime";
-    constexpr const char* GlslHelpersPath =
-        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    constexpr const char* GlslHelperPath =
-        "${MODULES}/multiresvolume/shaders/helper.glsl";
-    constexpr const char* GlslHeaderPath =
-        "${MODULES}/multiresvolume/shaders/header.glsl";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
@@ -177,47 +170,47 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    if (dictionary.hasKeyAndValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
+    if (dictionary.hasValue<std::string>(KeyDataSource)) {
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
     }
     else {
         LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
         return;
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyErrorHistogramsSource)) {
+    if (dictionary.hasValue<std::string>(KeyErrorHistogramsSource)) {
         _errorHistogramsPath = absPath(
             dictionary.value<std::string>(KeyErrorHistogramsSource)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>("ScalingExponent")) {
+    if (dictionary.hasValue<double>("ScalingExponent")) {
         _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
     }
 
-    if (dictionary.hasKeyAndValue<double>("StepSizeCoefficient")) {
+    if (dictionary.hasValue<double>("StepSizeCoefficient")) {
         _stepSizeCoefficient = static_cast<float>(
             dictionary.value<double>("StepSizeCoefficient")
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Scaling")) {
-        _scaling = dictionary.value<glm::vec3>("Scaling");
+    if (dictionary.hasValue<glm::dvec3>("Scaling")) {
+        _scaling = dictionary.value<glm::dvec3>("Scaling");
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Translation")) {
-        _translation = dictionary.value<glm::vec3>("Translation");
+    if (dictionary.hasValue<glm::dvec3>("Translation")) {
+        _translation = dictionary.value<glm::dvec3>("Translation");
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Rotation")) {
-        _rotation = dictionary.value<glm::vec3>("Rotation");
+    if (dictionary.hasValue<glm::dvec3>("Rotation")) {
+        _rotation = dictionary.value<glm::dvec3>("Rotation");
     }
 
-    std::string startTimeString, endTimeString;
-
-    bool hasTimeData = dictionary.getValue(KeyStartTime, startTimeString) &&
-                       dictionary.getValue(KeyEndTime, endTimeString);
-    if (hasTimeData) {
+    if (dictionary.hasValue<std::string>(KeyStartTime) &&
+        dictionary.hasValue<std::string>(KeyEndTime))
+    {
+        std::string startTimeString = dictionary.value<std::string>(KeyStartTime);
+        std::string endTimeString = dictionary.value<std::string>(KeyEndTime);
         _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
         _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
         _loop = false;
@@ -227,10 +220,10 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
+    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
-        );
+        ).string();
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
@@ -262,7 +255,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyBrickSelector)) {
+    if (dictionary.hasValue<std::string>(KeyBrickSelector)) {
         _selectorName = dictionary.value<std::string>(KeyBrickSelector);
     }
 
@@ -428,14 +421,14 @@ void RenderableMultiresVolume::initializeGL() {
     );
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -462,17 +455,14 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
         case Selector::TF:
             if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                     fmt::format(
+                         "{}_{}_errorHistograms",
+                         std::filesystem::path(_filename).stem().string(), nHistograms
+                     ),
+                     ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                std::string errorHistogramsPath = _errorHistogramsPath;
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
@@ -481,12 +471,14 @@ bool RenderableMultiresVolume::initializeSelector() {
                     );
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
                 }
-                else if (_errorHistogramsPath != "") {
+                else if (!_errorHistogramsPath.empty()) {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
+                    success &= _errorHistogramManager->loadFromFile(
+                        _errorHistogramsPath.string()
+                    );
                 }
                 else {
                     // Build histograms from tsp file.
@@ -503,14 +495,11 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::SIMPLE:
             if (_histogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                    fmt::format("{}_{}_histogram",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -537,12 +526,12 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                ghoul::filesystem::File f = _filename;
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                    fmt::format(
+                        "{}_{}_localErrorHistograms",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -637,8 +626,9 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
-        ghoul::filesystem::Directory directory(file.directoryName());
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::path directory =
+            std::filesystem::path(_statsFileName).parent_path();
+        std::filesystem::create_directories(directory);
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 

@@ -1,0 +1,12 @@
+local dataFolder = "D:/dev/exoplanets data config"
+return {
+  {
+    Type = "ExoplanetsDataPreparationTask",
+
+    InputDataFile = dataFolder .. "/exoplanets_data_composite.csv",
+    InputSPECK = "${SYNC}/http/digitaluniverse_exoplanets_speck/1/expl.speck",
+    TeffToBvFile = "${SYNC}/http/exoplanets_data/1/teff_bv.txt",
+    OutputBIN = dataFolder .. "/exoplanets_data.bin",
+    OutputLUT = dataFolder .. "/lookup.txt"
+  }
+}

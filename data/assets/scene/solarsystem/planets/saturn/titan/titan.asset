@@ -1,77 +1,60 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
-
-local map_service_configs = asset.localResource("map_service_configs")
-
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Titan textures",
-    Identifier = "titan_textures",
-    Version = 1
-})
-
 local Titan = {
-    Identifier = "Titan",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "TITAN",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_TITAN",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Titan",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TITAN",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 2576000,
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/titan.jpg",
-                    -- Enabled = true
-                },
-                {
-                    Identifier = "Cassini_ISS_Global_Mosaic_4km_LiU",
-                    Name = "Cassini ISS Global Mosaic [Sweden]",
-                    FilePath = map_service_configs .. "/LiU/ISS_P19658_Mosaic_Global_4km.wms",
-                    Enabled = true
-                }
-            }
-        },
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/titan.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TITAN",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 2576000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/titan.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 5000000.0, 7500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Titan",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[Largest moon of Saturn.]]
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+
+
+asset.meta = {
+  Name = "Titan",
+  Version = "1.0",
+  Description = [[ Titan globe with labels.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Titan"}
+}

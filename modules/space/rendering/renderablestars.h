@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <optional>
@@ -58,6 +59,7 @@ public:
 
     bool isReady() const override;
 
+    void loadPSFTexture();
     void renderPSFToTexture();
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
@@ -73,15 +75,8 @@ private:
         FixedColor = 4
     };
 
-    static const int _psfTextureSize = 64;
-    static const int _convolvedfTextureSize = 257;
-
-    void createDataSlice(ColorOption option);
-
     void loadData();
-    void readSpeckFile();
-    bool loadCachedFile(const std::string& file);
-    void saveCachedFile(const std::string& file) const;
+    std::vector<float> createDataSlice(ColorOption option);
 
     properties::StringProperty _speckFile;
 
@@ -89,22 +84,29 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
-    //properties::StringProperty _shapeTexturePath;
-    //std::unique_ptr<ghoul::opengl::Texture> _shapeTexture;
-    //std::unique_ptr<ghoul::filesystem::File> _shapeTextureFile;
+    properties::PropertyOwner _dataMappingContainer;
+    struct {
+        properties::StringProperty bvColor;
+        properties::StringProperty luminance;
+        properties::StringProperty absoluteMagnitude;
+        properties::StringProperty apparentMagnitude;
+        properties::StringProperty vx;
+        properties::StringProperty vy;
+        properties::StringProperty vz;
+        properties::StringProperty speed;
+    } _dataMapping;
 
     properties::OptionProperty _colorOption;
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
-    properties::Vec4Property _fixedColor;
+    properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    properties::FloatProperty _alphaValue;
     properties::OptionProperty _psfMethodOption;
     properties::OptionProperty _psfMultiplyOption;
     properties::FloatProperty _lumCent;
@@ -123,16 +125,15 @@ private:
     properties::PropertyOwner _userProvidedTextureOwner;
     properties::PropertyOwner _parametersOwner;
     properties::PropertyOwner _moffatMethodOwner;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelMatrix, cameraUp, cameraViewProjectionMatrix,
-        colorOption, magnitudeExponent, eyePosition, psfParamConf,
-        lumCent, radiusCent, brightnessCent, colorTexture,
-        alphaValue, psfTexture, otherDataTexture, otherDataRange,
-        filterOutOfRange, fixedColor
+        modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
+        eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
+        alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
+        fixedColor
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;
@@ -142,25 +143,12 @@ private:
     bool _dataIsDirty = true;
     bool _otherDataColorMapIsDirty = true;
 
-    // Test Grid Enabled
-    bool _enableTestGrid = false;
+    speck::Dataset _dataset;
 
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-
-    int _nValuesPerStar = 0;
     std::string _queuedOtherData;
-    std::vector<std::string> _dataNames;
 
     std::optional<float> _staticFilterValue;
     float _staticFilterReplacementValue = 0.f;
-
-    std::size_t _lumArrayPos = 0;
-    std::size_t _absMagArrayPos = 0;
-    std::size_t _appMagArrayPos = 0;
-    std::size_t _bvColorArrayPos = 0;
-    std::size_t _velocityArrayPos = 0;
-    std::size_t _speedArrayPos = 0;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

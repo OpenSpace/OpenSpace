@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/timeframe.h>
+#include <optional>
 
 namespace openspace {
 
@@ -46,7 +47,10 @@ public:
 private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
-    std::unique_ptr<TimeFrame> _timeFrame;
+    properties::StringProperty _fixedDate;
+
+    ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    std::optional<double> _fixedEphemerisTime;
 };
 
 } // namespace openspace

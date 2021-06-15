@@ -1,0 +1,22 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "Voyager1Distance",
+    GuiName = "Voyager 1 - Earth Distance",
+    SourceType = "Node",
+    SourceNodeName = "Voyager_1",
+    DestinationType = "Node",
+    DestinationNodeName = "Earth"
+  },
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "Voyager2Distance",
+    GuiName = "Voyager 2 - Earth Distance",
+    SourceType = "Node",
+    SourceNodeName = "Voyager_2",
+    DestinationType = "Node",
+    DestinationNodeName = "Earth"
+  }
+})

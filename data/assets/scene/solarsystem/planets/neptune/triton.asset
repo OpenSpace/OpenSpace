@@ -6,25 +6,36 @@ local kernel = asset.require('./kernels').nep081
 
 
 local Triton = {
-    Identifier = "Triton",
-    Parent = {
-        Identifier = transforms.NeptuneBarycenter.Identifier,
-        Spice = "NEPTUNE BARYCENTER"
-    },
-    Spice = "TRITON",
-    Radii = { 2709000, 2706000, 2705000 },
-    Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
-    GUI = {
-        Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
-    },
-    TrailColor = { 0.2, 0.5, 0.75 },
-    OrbitPeriod = 5.877,
-    Kernels = kernel
+  Identifier = "Triton",
+  Parent = {
+    Identifier = transforms.NeptuneBarycenter.Identifier,
+    Spice = "NEPTUNE BARYCENTER"
+  },
+  Spice = "TRITON",
+  Radii = { 2709000, 2706000, 2705000 },
+  Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
+  TrailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune" },
+  GUI = {
+    Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+  },
+  TrailColor = { 0.2, 0.5, 0.75 },
+  OrbitPeriod = 5.877,
+  Kernels = kernel
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes({ Triton })
+  asset,
+  proceduralGlobes.createGlobes({ Triton })
 )
+
+
+asset.meta = {
+  Name = "Triton",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Neptune's moon: Triton.
+    A blank globe and SPICE trail are generated for the moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Triton"}
+}

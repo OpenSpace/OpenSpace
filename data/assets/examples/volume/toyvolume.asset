@@ -4,18 +4,18 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local ToyVolume = {
-    Identifier = "RenderableToyVolume",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableToyVolume",
-        Size = {5, 5, 5},
-        ScalingExponent = 11,
-        StepSize = 0.01,
-        Color = {1, 0, 0, 1}
-    },
-    GUI = {
-        Path = "/Examples"
-    }
+  Identifier = "RenderableToyVolume",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableToyVolume",
+    Size = { 5, 5, 5 },
+    ScalingExponent = 11,
+    StepSize = 0.01,
+    Color = { 1, 0, 0 }
+  },
+  GUI = {
+    Path = "/Examples"
+  }
 }
 
 local objects = { ToyVolume }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +28,12 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <optional>
 #include <vector>
 
 namespace {
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyLineNumber = "LineNumber";
-
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     const std::vector<int> LeapYears = {
@@ -145,9 +144,7 @@ namespace {
 
         // The main overview of this function:
         // 1. Reconstruct the full year from the YY part
-        // 2. Calculate the number of seconds since the beginning of the year
-        // 2.a Get the number of full days since the beginning of the year
-        // 2.b If the year is a leap year, modify the number of days
+        // 2. Calculate the number of days since the beginning of the year
         // 3. Convert the number of days to a number of seconds
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Adjust for the fact the epoch starts on 1st Januaray at 12:00:00, not
@@ -168,20 +165,7 @@ namespace {
         const int daysSince2000 = countDays(year);
 
         // 2.
-        // 2.a
         double daysInYear = std::atof(epochString.substr(2).c_str());
-
-        // 2.b
-        const bool isInLeapYear = std::find(
-            LeapYears.begin(),
-            LeapYears.end(),
-            year
-        ) != LeapYears.end();
-        if (isInLeapYear && daysInYear >= 60) {
-            // We are in a leap year, so we have an effective day more if we are
-            // beyond the end of february (= 31+29 days)
-            --daysInYear;
-        }
 
         // 3
         using namespace std::chrono;
@@ -220,62 +204,40 @@ namespace {
         // mu = G*M_earth
         double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
-        const double pisq = glm::pi<double>() * glm::pi<double>();
+        constexpr const double pisq = glm::pi<double>() * glm::pi<double>();
         double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
 
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
-} // namespace
 
+    struct [[codegen::Dictionary(TLETranslation)]] Parameters {
+        // Specifies the filename of the Two-Line-Element file
+        std::string file;
+
+        // Specifies the line number within the file where the group of 3 TLE lines begins
+        // (1-based). Defaults to 1
+        std::optional<int> lineNumber [[codegen::greater(0)]];
+    };
+#include "tletranslation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation TLETranslation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "TLE Translation",
-        "space_transform_tle",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("TLETranslation"),
-               Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the filename of the Two-Line-Element file"
-            },
-            {
-                KeyLineNumber,
-                new DoubleGreaterVerifier(0),
-                Optional::Yes,
-                "Specifies the line number within the file where the group of 3 TLE "
-                "lines begins (1-based). Defaults to 1."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("space_transform_tle");
 }
 
 TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TLETranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNum = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
-        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
-    }
-    readTLEFile(file, lineNum);
+
+    int lineNum = p.lineNumber.value_or(1);
+    readTLEFile(p.file, lineNum);
 }
 
 void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
-    ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "The filename must exist");
 
     std::ifstream file;
     file.exceptions(std::ofstream::failbit | std::ofstream::badbit);

@@ -9,77 +9,97 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic" }
 local trailColor = { 0.5, 0.3, 0.3 }
-
-local gallicGroup = {
-    {
-        Identifier = "Albiorix",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ALBIORIX",
-        Radii = { 32000, 32000, 32000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 774.58,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Bebhionn",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "BEBHIONN",
-        Radii = { 6000, 6000, 6000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 838.77,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Erriapus",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ERRIAPUS",
-        Radii = { 10000, 10000, 10000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 844.89,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Tarvos",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "TARVOS",
-        Radii = { 15000, 15000, 15000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 944.23,
-        Kernels = kernel
-    },
+local trailTags = { 
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_saturn",
+  "moonTrail_minor"
 }
 
-
+local gallicGroup = {
+  {
+    Identifier = "Albiorix",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ALBIORIX",
+    Radii = { 32000, 32000, 32000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 774.58,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Bebhionn",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "BEBHIONN",
+    Radii = { 6000, 6000, 6000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 838.77,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Erriapus",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ERRIAPUS",
+    Radii = { 10000, 10000, 10000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 844.89,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Tarvos",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "TARVOS",
+    Radii = { 15000, 15000, 15000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 944.23,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(gallicGroup)
 )
+
+
+asset.meta = {
+  Name = "Saturn Gallic Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Saturn's Gallic Group
+    moons: Albiorix, Bebhionn, Erriapus, and Tarvos. Blank globes and SPICE trails are
+    generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

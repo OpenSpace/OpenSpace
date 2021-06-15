@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,22 +33,25 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
-#include <modules/base/rendering/renderableboxgrid.h>
+#include <modules/base/dashboard/dashboarditemtext.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/grids/renderableboxgrid.h>
+#include <modules/base/rendering/grids/renderablegrid.h>
+#include <modules/base/rendering/grids/renderableradialgrid.h>
+#include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
+#include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabels.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphere.h>
-#include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
-#include <modules/base/rendering/modelgeometry.h>
-#include <modules/base/rendering/multimodelgeometry.h>
+#include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -59,6 +62,7 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
+#include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/timelinetranslation.h>
@@ -82,10 +86,6 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
-        "ModelGeometry"
-    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
         "ScreenSpaceRenderable"
@@ -117,6 +117,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         "DashboardItemSimulationIncrement"
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
+    fDashboard->registerClass<DashboardItemText>("DashboardItemText");
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -124,11 +125,15 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
+    fRenderable->registerClass<RenderableDisc>("RenderableDisc");
+    fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabels>("RenderableLabels");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderablePrism>("RenderablePrism");
+    fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
@@ -155,6 +160,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fScale, "Scale factory was not created");
 
     fScale->registerClass<LuaScale>("LuaScale");
+    fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 
@@ -169,10 +175,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fLightSource->registerClass<CameraLightSource>("CameraLightSource");
     fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
-
-    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fGeometry, "Model geometry factory was not created");
-    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -187,17 +189,22 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
-        DashboardItemParallelConnection::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderablePlaneImageLocal::Documentation(),
+        RenderablePlaneImageOnline::Documentation(),
+        RenderableRadialGrid::Documentation(),
+        RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
+        RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 
@@ -212,6 +219,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
+        NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
 
@@ -224,8 +232,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         SceneGraphLightSource::Documentation(),
         CameraLightSource::Documentation(),
-
-        modelgeometry::ModelGeometry::Documentation(),
     };
 }
 

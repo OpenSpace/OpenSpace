@@ -3,51 +3,71 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Sloan Digital Sky Survey Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_sloandss_textures",
-    Version = 2
+  Name = "Sloan Digital Sky Survey Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_sloandss_textures",
+  Version = 2
 })
 
 local speck = asset.syncedResource({
-    Name = "Sloan Digital Sky Survey Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_sloandss_speck",
-    Version = 2
+  Name = "Sloan Digital Sky Survey Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_sloandss_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "SloanDigitalSkySurvey",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = true,
-        Color = { 0.8, 0.8, 1.0 },
-        Opacity = 0.8,
-        ScaleFactor = 520.0,
-        File = speck .. "/SDSSgals.speck",
-        ColorMap = speck .. "/SDSSgals.cmap",
-        ColorOption = { "redshift", "proximity" },
-        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-        Texture = textures .. "/point3A.png",
-        Unit = "Mpc",
-        -- Fade in value in the same unit as "Unit"
-        FadeInDistances = { 220.0, 650.0 },
-        BillboardMaxSize = 50.0,
-        BillboardMinSize = 0.0,
-        CorrectionSizeEndDistance = 20.65,
-        CorrectionSizeFactor = 10.41,
-        TextSize = 14.8,
-        TextMinSize = 10.0,
-        TextMaxSize = 50.0,
-        BillboardMaxSize = 5.5,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Sloan Digital Sky Survey",
-        Path = "/Universe/Galaxies"
-    }
+  Identifier = "SloanDigitalSkySurvey",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = true,
+    Color = { 0.8, 0.8, 1.0 },
+    Opacity = 0.8,
+    ScaleFactor = 520.0,
+    File = speck .. "/SDSSgals.speck",
+    ColorMap = speck .. "/SDSSgals.cmap",
+    ColorOption = { "redshift", "proximity" },
+    ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
+    Texture = textures .. "/point3A.png",
+    Unit = "Mpc",
+    FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 5.5 },
+    CorrectionSizeEndDistance = 20.65,
+    CorrectionSizeFactor = 10.41,
+    TextSize = 14.8,
+    TextMinMaxSize = { 10, 50 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Sloan Digital Sky Survey",
+    Path = "/Universe/Galaxies",
+    Description = [[Census: 2,600,258 galaxies. DU Version 10.6.<br> The Sloan Digital
+      Sky Survey (SDSS) is an ambitious project to image about 35% of the sky, deep
+      into the universe. The survey measured the position and brightness of almost 1
+      billion objects, and obtained spectra to more than 4 million objects. This is
+      not an all-sky survey, so there are large parts of the sky that remain
+      unobserved, which produces the bow tie distribution and the black areas where
+      there surely are galaxies, but we have yet to observe them. These galaxies
+      appear to extend beyond the 2dF survey to distances that exceed 5 billion
+      light years. However, the weblike structure of clusters, filaments, and voids
+      seems to fade by about 2 billion light years. Beyond this distance, the
+      completeness of the survey drops so that only the intrinsically bright
+      galaxies are visible. The weblike cosmic structure is echoed in these data,
+      with orange clusters standing out among the less dense aqua-colored galaxies
+      and the less dense regions of green-colored galaxies. (Description from URL)
+      <br><br> Data Reference: Sloan Digital Sky Survey (http://www.sdss.org/)]]
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "Sloan Digital Sky Survey",
+  Version = "2.0",
+  Description = [[Digital Universe asset for The Sloan Digital Sky Survey (SDSS).]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"SloanDigitalSkySurvey"}
+}

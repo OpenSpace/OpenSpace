@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,25 +37,9 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -101,82 +85,38 @@ namespace {
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the destination for computing the angle."
     };
+
+    struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
+        enum class Type {
+            Node,
+            Focus,
+            Camera
+        };
+
+        // [[codegen::verbatim(SourceTypeInfo.description)]]
+        std::optional<Type> sourceType;
+        // [[codegen::verbatim(SourceNodeNameInfo.description)]]
+        std::optional<std::string> sourceNodeName;
+        // [[codegen::verbatim(ReferenceTypeInfo.description)]]
+        Type referenceType;
+        // [[codegen::verbatim(ReferenceNodeNameInfo.description)]]
+        std::optional<std::string> referenceNodeName;
+        // [[codegen::verbatim(DestinationTypeInfo.description)]]
+        std::optional<Type> destinationType;
+        // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
+        std::optional<std::string> destinationNodeName;
+    };
+#include "dashboarditemangle_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    using namespace documentation;
-
-    return {
-        "DashboardItem Angle",
-        "base_dashboarditem_angle",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemAngle"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SourceTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                SourceTypeInfo.description
-            },
-            {
-                SourceNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SourceNodeNameInfo.description
-            },
-            {
-                ReferenceTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::No,
-                ReferenceTypeInfo.description
-            },
-            {
-                ReferenceNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                ReferenceNodeNameInfo.description
-            },
-            {
-                DestinationTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                DestinationTypeInfo.description
-            },
-            {
-                DestinationNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                DestinationNodeNameInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_dashboarditem_angle");
 }
 
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
+    : DashboardTextItem(dictionary)
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -201,31 +141,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         properties::StringProperty(DestinationNodeNameInfo),
         nullptr
     }
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemAngle"
-    );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
-    _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _source.type.addOptions({
         { Type::Node, "Node" },
@@ -237,16 +154,17 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_source.type == Type::Node)
         );
     });
-    if (dictionary.hasKey(SourceTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(SourceTypeInfo.identifier);
-        if (value == "Node") {
-            _source.type = Type::Node;
-        }
-        else if (value == "Focus") {
-            _source.type = Type::Focus;
-        }
-        else {
-            _source.type = Type::Camera;
+    if (p.sourceType.has_value()) {
+        switch (*p.sourceType) {
+            case Parameters::Type::Node:
+                _source.type = Type::Node;
+                break;
+            case Parameters::Type::Focus:
+                _source.type = Type::Focus;
+                break;
+            default:
+                _source.type = Type::Camera;
+                break;
         }
     }
     else {
@@ -256,10 +174,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
 
     _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node) {
-        if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
-            _source.nodeName = dictionary.value<std::string>(
-                SourceNodeNameInfo.identifier
-            );
+        if (p.sourceNodeName.has_value()) {
+            _source.nodeName = *p.sourceNodeName;
         }
         else {
             LERRORC(
@@ -281,24 +197,23 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_reference.type == Type::Node)
         );
     });
-    std::string value = dictionary.value<std::string>(ReferenceTypeInfo.identifier);
-    if (value == "Node") {
-        _reference.type = Type::Node;
-    }
-    else if (value == "Focus") {
-        _reference.type = Type::Focus;
-    }
-    else {
-        _reference.type = Type::Camera;
+    switch (p.referenceType) {
+        case Parameters::Type::Node:
+            _reference.type = Type::Node;
+            break;
+        case Parameters::Type::Focus:
+            _reference.type = Type::Focus;
+            break;
+        default:
+            _reference.type = Type::Camera;
+            break;
     }
     addProperty(_reference.type);
 
     _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
     if (_reference.type == Type::Node) {
-        if (dictionary.hasKey(ReferenceNodeNameInfo.identifier)) {
-            _reference.nodeName = dictionary.value<std::string>(
-                ReferenceNodeNameInfo.identifier
-            );
+        if (p.referenceNodeName.has_value()) {
+            _reference.nodeName = *p.referenceNodeName;
         }
         else {
             LERRORC(
@@ -319,16 +234,17 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_source.type == Type::Node)
         );
     });
-    if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string type = dictionary.value<std::string>(DestinationTypeInfo.identifier);
-        if (type == "Node") {
-            _destination.type = Type::Node;
-        }
-        else if (type == "Focus") {
-            _destination.type = Type::Focus;
-        }
-        else {
-            _destination.type = Type::Camera;
+    if (p.destinationType.has_value()) {
+        switch (*p.destinationType) {
+            case Parameters::Type::Node:
+                _destination.type = Type::Node;
+                break;
+            case Parameters::Type::Focus:
+                _destination.type = Type::Focus;
+                break;
+            default:
+                _destination.type = Type::Camera;
+                break;
         }
     }
     else {
@@ -337,10 +253,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     addProperty(_destination.type);
     _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node) {
-        if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
-            _destination.nodeName = dictionary.value<std::string>(
-                DestinationNodeNameInfo.identifier
-            );
+        if (p.destinationNodeName.has_value()) {
+            _destination.nodeName = *p.destinationNodeName;
         }
         else {
             LERRORC(
@@ -351,7 +265,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_destination.nodeName);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _buffer.resize(128);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
@@ -359,7 +273,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = global::renderEngine.scene()->sceneGraphNode(comp.nodeName);
+            comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
 
             if (!comp.node) {
                 LERRORC(
@@ -377,20 +291,22 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Focus:
         {
             const SceneGraphNode* node =
-                global::navigationHandler.orbitalNavigator().anchorNode();
+                global::navigationHandler->orbitalNavigator().anchorNode();
             return {
                 node->worldPosition(),
                 "focus"
             };
         }
         case Type::Camera:
-            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
 }
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
     std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
@@ -398,41 +314,39 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Could not compute angle at {} between {} and {}",
-                sourceInfo.second, destinationInfo.second, referenceInfo.second
-            )
+        char* end = fmt::format_to(
+            _buffer.data(),
+            "Could not compute angle at {} between {} and {}",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second
         );
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
     }
     else {
         const double angle = glm::degrees(
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
-        penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Angle at {} between {} and {}: {} degrees",
-                sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
-            )
+        char* end = fmt::format_to(
+            _buffer.data(),
+            "Angle at {} between {} and {}: {} degrees",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
         );
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
     }
 }
 
 glm::vec2 DashboardItemAngle::size() const {
+    ZoneScoped
+
     constexpr const double Angle = 120;
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "Angle: " + std::to_string(Angle)
-    ).boundingBox;
+    return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 
 } // namespace openspace

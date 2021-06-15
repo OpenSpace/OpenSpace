@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,25 @@
  */
 
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long)
+class ULongProperty : public NumericalProperty<unsigned long> {
+public:
+    ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
+        unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
+        unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
+        unsigned long stepValue = 1ul);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<unsigned long>::operator=;
+
+protected:
+    unsigned long fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

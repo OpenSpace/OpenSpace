@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,13 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace::globebrowsing {
@@ -45,7 +45,8 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
-    _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
+    ZoneScoped
+
     performReset(ResetRawTileDataReader::No);
 }
 
@@ -56,6 +57,8 @@ const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
+    ZoneScoped
+
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         auto job = std::make_unique<TileLoadJob>(*_rawTileDataReader, tileIndex);
         _concurrentJobManager.enqueueJob(std::move(job), tileIndex.hashKey());
@@ -94,6 +97,8 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
 }
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
+    ZoneScoped
+
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     const bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
     // Early out so we don't need to check the already enqueued requests
@@ -187,6 +192,8 @@ bool AsyncTileDataProvider::shouldBeDeleted() {
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
+    ZoneScoped
+
     ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Reset raw tile data reader

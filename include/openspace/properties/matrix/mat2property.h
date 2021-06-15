@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,27 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Mat2Property, glm::mat2x2)
+class Mat2Property : public NumericalProperty<glm::mat2x2> {
+public:
+    Mat2Property(Property::PropertyInfo info, glm::mat2x2 value = glm::mat2x2(0.f),
+        glm::mat2x2 minValue =
+            ghoul::createFillMat2x2<float>(std::numeric_limits<float>::lowest()),
+        glm::mat2x2 maxValue =
+            ghoul::createFillMat2x2<float>(std::numeric_limits<float>::max()),
+        glm::mat2x2 stepValue = ghoul::createFillMat2x2<float>(0.01f));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::mat2x2>::operator=;
+
+protected:
+    glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

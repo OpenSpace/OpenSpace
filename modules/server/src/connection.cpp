@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,8 +83,14 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 
     _topicFactory.registerClass(
         AuthenticationTopicKey,
-        [password](bool, const ghoul::Dictionary&) {
-            return new AuthorizationTopic(password);
+        [password](bool, const ghoul::Dictionary&, ghoul::MemoryPoolBase* pool) {
+            if (pool) {
+                void* ptr = pool->allocate(sizeof(AuthorizationTopic));
+                return new (ptr) AuthorizationTopic(password);
+            }
+            else {
+                return new AuthorizationTopic(password);
+            }
         }
     );
 
@@ -133,7 +139,7 @@ void Connection::handleMessage(const std::string& message) {
                 message.end(),
                 sanitizedString.begin(),
                 [](wchar_t c) {
-                    return std::isprint(c, std::locale("")) ? c : ' ';
+                    return std::isprint(c, std::locale("")) ? char(c) : ' ';
                 }
             );
             LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
@@ -178,7 +184,7 @@ void Connection::handleJson(const nlohmann::json& json) {
             return;
         }
 
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
+        std::unique_ptr<Topic> topic = std::unique_ptr<Topic>(_topicFactory.create(type));
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
@@ -201,10 +207,14 @@ void Connection::handleJson(const nlohmann::json& json) {
 }
 
 void Connection::sendMessage(const std::string& message) {
+    ZoneScoped
+
     _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json& json) {
+    ZoneScoped
+
     sendMessage(json.dump());
 }
 

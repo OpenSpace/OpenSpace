@@ -5,27 +5,36 @@ local kernel = asset.require('../kernels').sat375
 
 
 local RheaTrail = {
-    Identifier = "RheaTrail",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "RHEA",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Color = { 0.5, 0.3, 0.3 },
-        Period = 108.0 / 24.0,
-        Resolution = 1000
+  Identifier = "RheaTrail",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "RHEA",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GUI = {
-        Name = "Rhea Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
-    }
+    Color = { 0.5, 0.3, 0.3 },
+    Period = 108.0 / 24.0,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
+  GUI = {
+    Name = "Rhea Trail",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[ Trail of Saturn's moon Rhea as observed by Saturn.]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { RheaTrail })
+
+
+asset.meta = {
+  Name = "Rhea Trail",
+  Version = "1.0",
+  Description = [[ Main trail for Rhea. Data from NASA Spice (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

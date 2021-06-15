@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 #define __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 
-//#include <modules/volume/lrucache.h>
 #include <ghoul/glm.h>
 #include <list>
 #include <iterator>

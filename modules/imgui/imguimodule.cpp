@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,20 +44,20 @@ namespace openspace {
 ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
-    global::callback::initialize.emplace_back([&]() {
+    global::callback::initialize->emplace_back([&]() {
         LDEBUGC("ImGUIModule", "Initializing GUI");
         gui.initialize();
 
         gui._globalProperty.setSource(
             []() {
             std::vector<properties::PropertyOwner*> res = {
-                &global::navigationHandler,
-                &global::sessionRecording,
-                &global::timeManager,
-                &global::renderEngine,
-                &global::parallelPeer,
-                &global::luaConsole,
-                &global::dashboard
+                global::navigationHandler,
+                global::sessionRecording,
+                global::timeManager,
+                global::renderEngine,
+                global::parallelPeer,
+                global::luaConsole,
+                global::dashboard
             };
             return res;
         }
@@ -65,21 +65,21 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
         gui._screenSpaceProperty.setSource(
             []() {
-                return global::screenSpaceRootPropertyOwner.propertySubOwners();
+                return global::screenSpaceRootPropertyOwner->propertySubOwners();
             }
         );
 
         gui._moduleProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> v;
-                v.push_back(&(global::moduleEngine));
+                v.push_back(global::moduleEngine);
                 return v;
             }
         );
 
         gui._sceneProperty.setSource(
             []() {
-                const Scene* scene = global::renderEngine.scene();
+                const Scene* scene = global::renderEngine->scene();
                 const std::vector<SceneGraphNode*>& nodes = scene ?
                     scene->allSceneGraphNodes() :
                     std::vector<SceneGraphNode*>();
@@ -94,7 +94,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._virtualProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> res = {
-                    &global::virtualPropertyManager
+                    global::virtualPropertyManager
                 };
 
                 return res;
@@ -104,7 +104,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._featuredProperties.setSource(
             []() {
                 std::vector<SceneGraphNode*> nodes =
-                    global::renderEngine.scene()->allSceneGraphNodes();
+                    global::renderEngine->scene()->allSceneGraphNodes();
 
                 nodes.erase(
                     std::remove_if(
@@ -130,34 +130,31 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         );
     });
 
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
-    global::callback::deinitializeGL.emplace_back([&]() {
+    global::callback::deinitializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
-    global::callback::draw2D.emplace_back([&]() {
+    global::callback::draw2D->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
-        // TODO emiax: Make sure this is only called for one of the eyes, in the case
-        // of side-by-side / top-bottom stereo.
-
-        WindowDelegate& delegate = global::windowDelegate;
+        WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
@@ -167,36 +164,27 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 return;
             }
 
-            glm::vec2 mousePosition = delegate.mousePosition();
-            uint32_t mouseButtons = delegate.mouseButtons(2);
-
             const double dt = std::max(delegate.averageDeltaTime(), 0.0);
-            if (touchInput.active && mouseButtons == 0) {
-                mouseButtons = touchInput.action;
-                mousePosition = touchInput.pos;
-            }
             // We don't do any collection of immediate mode user interface, so it
             // is fine to open and close a frame immediately
             gui.startFrame(
                 static_cast<float>(dt),
                 glm::vec2(windowSize),
                 resolution / windowSize,
-                mousePosition,
-                mouseButtons
+                _mousePosition,
+                _mouseButtons
             );
 
             gui.endFrame();
         }
     });
 
-    global::callback::keyboard.emplace_back(
+    global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() ||gui._sceneProperty.isEnabled()) {
                 return gui.keyCallback(key, mod, action);
             }
             else {
@@ -205,14 +193,12 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::character.emplace_back(
+    global::callback::character->emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.charCallback(codepoint, modifier);
             }
             else {
@@ -221,14 +207,25 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseButton.emplace_back(
+    global::callback::mousePosition->emplace_back(
+        [&](double x, double y) {
+            _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+        }
+    );
+
+    global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             ZoneScopedN("ImGUI")
 
+            if (action == MouseAction::Press) {
+                _mouseButtons |= (1 << static_cast<int>(button));
+            }
+            else if (action == MouseAction::Release) {
+                _mouseButtons &= ~(1 << static_cast<int>(button));
+            }
+
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.mouseButtonCallback(button, action);
             }
             else {
@@ -237,19 +234,35 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseScrollWheel.emplace_back(
+    global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY) -> bool {
             ZoneScopedN("ImGUI")
 
             // A list of all the windows that can show up by themselves
-            if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._sceneProperty.isEnabled())
-            {
+            if (gui.isEnabled() || gui._sceneProperty.isEnabled()) {
                 return gui.mouseWheelCallback(posY);
             }
             else {
                 return false;
             }
+        }
+    );
+
+    global::callback::touchDetected->emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchDetectedCallback(input);
+        }
+    );
+
+    global::callback::touchUpdated->emplace_back(
+        [&](TouchInput input) -> bool {
+            return gui.touchUpdatedCallback(input);
+        }
+    );
+
+    global::callback::touchExit->emplace_back(
+        [&](TouchInput input) {
+            gui.touchExitCallback(input);
         }
     );
 }

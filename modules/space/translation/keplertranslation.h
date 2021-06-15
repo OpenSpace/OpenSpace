@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,7 @@ public:
      *         be passed to the constructor
      */
     static documentation::Documentation Documentation();
-    
+
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
      * the form YYYY MM DD HH:mm:ss.
@@ -120,7 +120,7 @@ public:
     void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
-    
+
     /// Default construct that initializes all the properties and member variables
     KeplerTranslation();
 

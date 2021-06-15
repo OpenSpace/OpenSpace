@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,8 @@ VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
         glm::vec2(2.f, 1.f)
     )
 {
-    _normal = dictionary.value<glm::vec3>("Normal");
-    _offsets = dictionary.value<glm::vec2>("Offsets");
+    _normal = dictionary.value<glm::dvec3>("Normal");
+    _offsets = dictionary.value<glm::dvec2>("Offsets");
 
     addProperty(_normal);
     addProperty(_offsets);

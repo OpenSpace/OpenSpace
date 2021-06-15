@@ -3,49 +3,68 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "OB Associations Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_obassociations_textures",
-    Version = 1
+  Name = "OB Associations Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_obassociations_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "OB Associations Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_obassociations_speck",
-    Version = 3
+  Name = "OB Associations Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_obassociations_speck",
+  Version = 3
 })
 
 local object = {
-    Identifier = "OBAssociations",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        ColorMap = speck .. "/ob.cmap",
-        ColorOption = { "arm" },
-        SizeOption = {"diameter"},
-        ExactColorMap = true,
-        Opacity = 0.9,
-        File = speck .. "/ob.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 7,
-        LabelFile = speck .. "/ob.label",
-        TextColor = { 0.4, 0.5, 1.0, 1.0 },
-        ScaleFactor = 390.0,
-        TextSize = 17.0,
-        TextMinSize = 5.76,
-        TextMaxSize = 30.0,
-        Unit = "pc",
-        --BillboardMaxSize = 21.0,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "OB Associations",
-        Path = "/Milky Way"
-    }
+  Identifier = "OBAssociations",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 1.0 },
+    ColorMap = speck .. "/ob.cmap",
+    ColorOption = { "arm" },
+    SizeOption = { "diameter" },
+    ExactColorMap = true,
+    Opacity = 0.7,
+    File = speck .. "/ob.speck",
+    Unit = "pc",
+    Texture = textures .. "/point4.png",
+    PolygonSides = 7,
+    LabelFile = speck .. "/ob.label",
+    TextColor = { 0.4, 0.5, 1.0 },
+    ScaleFactor = 390.0,
+    TextSize = 16.24,
+    TextMinMaxSize = { 4, 25 },
+    BillboardMinMaxSize = { 0.0, 450.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "OB Associations",
+    Path = "/Milky Way",
+    Description = [[Census: 61 OB associations. DU Version 2.4. <br> OB associations
+      are young groups of stars that were formed within a giant molecular cloud, but
+      have dispersed after the original gas and dust from the cloud was blown away
+      by the star's radiation pressure. Although an association's stars are no
+      longer gravitationally bound to one another, they share a common motion in
+      space because they were formed from the same cloud. This allows astronomers to
+      easily determine OB association membership stars. These objects are color
+      coded by their spiral arm membership. Blue associations trace the Sagittarius
+      Arm. Purple associations are in the local Orion Spur. Orange associations are
+      in the Perseus Arm (Description from URL) <br><br> Data Reference: New List of
+      OB Associations (Melnik+)]],
+  }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+  Name = "OB Associations",
+  Version = "2.0",
+  Description = [[Digital Universe asset for OB Associations]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"OBAssociations"}
+}

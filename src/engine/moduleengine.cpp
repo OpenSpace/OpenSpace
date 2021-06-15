@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/engine/moduleengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
@@ -45,14 +46,34 @@ void ModuleEngine::initialize(
 {
     ZoneScoped
 
-    for (OpenSpaceModule* m : AllModules()) {
+    std::vector<OpenSpaceModule*> modules = AllModules();
+
+    for (OpenSpaceModule* m : modules) {
+        registerModule(std::unique_ptr<OpenSpaceModule>(m));
+    }
+
+    for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
-        registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
+        try {
+            m->initialize(configuration);
+        }
+        catch (const documentation::SpecificationError& e) {
+            for (const documentation::TestResult::Offense& o : e.result.offenses) {
+                LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
+            }
+            for (const documentation::TestResult::Warning& w : e.result.warnings) {
+                LWARNINGC(e.component, w.offender + ": " + ghoul::to_string(w.reason));
+            }
+            throw;
+        }
+
+        addPropertySubOwner(m);
+
     }
 }
 
@@ -99,9 +120,7 @@ void ModuleEngine::deinitializeGL() {
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
-                                  const ghoul::Dictionary& configuration)
-{
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
     ZoneScoped
 
     ghoul_assert(mod, "Module must not be nullptr");
@@ -121,8 +140,6 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
     }
 
     LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
-    mod->initialize(this, configuration);
-    addPropertySubOwner(mod.get());
     LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
     _modules.push_back(std::move(mod));
 }

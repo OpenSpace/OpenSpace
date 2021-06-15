@@ -1,66 +1,62 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Uranus Textures",
-    Type = "HttpSynchronization",
-    Identifier = "uranus_textures",
-    Version = 1
-})
+asset.require('./trail')
 
 local Uranus = {
-    Identifier = "Uranus",
-    Parent = transforms.UranusBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_URANUS",
-            DestinationFrame = "GALACTIC"
-        }
-    },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 25559000, 25559000, 24973000 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/uranus.jpg",
-                    Enabled = true
-                }
-            }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Path = "/Solar System/Planets/Uranus"
+  Identifier = "Uranus",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_URANUS",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 25559000, 25559000, 24973000 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Uranus",
+    Path = "/Solar System/Planets/Uranus",
+    Description = [[Globe for Uranus.]]
+  }
 }
 
 local UranusLabel = {
-    Identifier = "UranusLabel",
-    Parent = Uranus.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Uranus",
-        FontSize = 100.0,
-        LabelSize = 8.7,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Neptune Label",
-        Path = "/Solar System/Planets/Uranus"
-    }
+  Identifier = "UranusLabel",
+  Parent = Uranus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Uranus",
+    FontSize = 70.0,
+    Size = 8.86,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Uranus Label",
+    Path = "/Solar System/Planets/Uranus",
+    Description = [[ Main planet label for Uranus.]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
+
+
+asset.meta = {
+  Name = "Uranus",
+  Version = "1.0",
+  Description = [[ Uranus globe, and main planet label.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Uranus" , "UranusLabel"}
+}

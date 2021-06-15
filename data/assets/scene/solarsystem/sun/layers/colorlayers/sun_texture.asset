@@ -1,0 +1,23 @@
+local texturesPath = asset.require("./../../sun_textures").TexturesPath
+local globeIdentifier = asset.require("./../../sun").Sun.Identifier
+
+local layer = {
+  Identifier = "Texture",
+  FilePath = texturesPath .. "/sun.jpg",
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+  Name = "Sun Texture",
+  Version = "1.0",
+  Description = [[ Default Sun texture for renderable globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <numeric>
+#include <optional>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
@@ -104,36 +105,33 @@ namespace {
        "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
     };
 
+    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        int resolution;
+
+        enum class RenderableType {
+            Background,
+            Opaque,
+            PreDeferredTransparent,
+            PostDeferredTransparent,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderableTypeInfo.description)]]
+        std::optional<RenderableType> renderableType;
+    };
+#include "renderabletrailorbit_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    using namespace documentation;
-    documentation::Documentation doc {
-        "RenderableTrailOrbit",
-        "base_renderable_renderabletrailorbit",
-        {
-            {
-                PeriodInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                PeriodInfo.description
-            },
-            {
-                ResolutionInfo.identifier,
-                new IntVerifier,
-                Optional::No,
-                ResolutionInfo.description
-            },
-            {
-                RenderableTypeInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                RenderableTypeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
@@ -152,43 +150,42 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     , _period(PeriodInfo, 0.0, 0.0, 1e9)
     , _resolution(ResolutionInfo, 10000, 1, 1000000)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTrailOrbit"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
     // Period is in days
     using namespace std::chrono;
-    const long long sph = duration_cast<seconds>(hours(24)).count();
-    _period = dictionary.value<double>(PeriodInfo.identifier) * sph;
+    _period = p.period * duration_cast<seconds>(hours(24)).count();
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_period);
 
-    _resolution = static_cast<int>(dictionary.value<double>(ResolutionInfo.identifier));
+    _resolution = p.resolution;
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_resolution);
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 
-    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        std::string renderType = dictionary.value<std::string>(
-            RenderableTypeInfo.identifier
-            );
-        if (renderType == "Background") {
-            setRenderBin(Renderable::RenderBin::Background);
-        }
-        else if (renderType == "Opaque") {
-            setRenderBin(Renderable::RenderBin::Opaque);
-        }
-        else if (renderType == "Transparent") {
-            setRenderBin(Renderable::RenderBin::Transparent);
-        }
-        else if (renderType == "Overlay") {
-            setRenderBin(Renderable::RenderBin::Overlay);
+    if (p.renderableType.has_value()) {
+        switch (*p.renderableType) {
+            case Parameters::RenderableType::Background:
+                setRenderBin(Renderable::RenderBin::Background);
+                break;
+            case Parameters::RenderableType::Opaque:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case Parameters::RenderableType::PreDeferredTransparent:
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+                break;
+            case Parameters::RenderableType::PostDeferredTransparent:
+                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+                break;
+            case Parameters::RenderableType::Overlay:
+                setRenderBin(Renderable::RenderBin::Overlay);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
@@ -234,8 +231,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     const glm::vec3 p = _translation->position({
         {},
         data.time,
-        Time(0.0),
-        false
+        Time(0.0)
     });
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
@@ -373,7 +369,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
 
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.0);
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
@@ -431,8 +427,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_lastPointTime),
-                Time(0.0),
-                false
+                Time(0.0)
             });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
@@ -471,8 +466,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_firstPointTime),
-                Time(0.0),
-                false
+                Time(0.0)
             });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
@@ -514,7 +508,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = _period / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; ++i) {
-        const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0), false });
+        const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;

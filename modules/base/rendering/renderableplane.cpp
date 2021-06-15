@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,18 +34,20 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "Plane";
 
-    enum BlendMode {
-        BlendModeNormal = 0,
-        BlendModeAdditive
+    enum class BlendMode {
+        Normal = 0,
+        Additive
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
@@ -67,70 +69,66 @@ namespace {
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the plane's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images."
+    };
+
+    struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
+        // [[codegen::verbatim(BillboardInfo.description)]]
+        std::optional<bool> billboard;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        enum class BlendMode {
+            Normal,
+            Additive
+        };
+        // [[codegen::verbatim(BlendModeInfo.description)]]
+        std::optional<BlendMode> blendMode;
+
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+    };
+#include "renderableplane_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlane::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane",
-        "base_renderable_plane",
-        {
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                BillboardInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                BillboardInfo.description
-            },
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({ "Normal", "Additive" }),
-                Optional::Yes,
-                BlendModeInfo.description, // + " The default value is 'Normal'.",
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_plane");
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
-    , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlane"
-    );
+    Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-
-    if (dictionary.hasKey(BillboardInfo.identifier)) {
-        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
-    }
+    _size = p.size;
+    _billboard = p.billboard.value_or(_billboard);
 
     _blendMode.addOptions({
-        { BlendModeNormal, "Normal" },
-        { BlendModeAdditive, "Additive"}
+        { static_cast<int>(BlendMode::Normal), "Normal" },
+        { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([&]() {
         switch (_blendMode) {
-            case BlendModeNormal:
+            case static_cast<int>(BlendMode::Normal):
                 setRenderBinFromOpacity();
                 break;
-            case BlendModeAdditive:
-                setRenderBin(Renderable::RenderBin::Transparent);
+            case static_cast<int>(BlendMode::Additive):
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -138,25 +136,30 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
 
     _opacity.onChange([&]() {
-        if (_blendMode == BlendModeNormal) {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
             setRenderBinFromOpacity();
         }
     });
 
-    if (dictionary.hasKey(BlendModeInfo.identifier)) {
-        const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
-        if (v == "Normal") {
-            _blendMode = BlendModeNormal;
+    if (p.blendMode.has_value()) {
+        if (*p.blendMode == Parameters::BlendMode::Normal) {
+            _blendMode = static_cast<int>(BlendMode::Normal);
         }
-        else if (v == "Additive") {
-            _blendMode = BlendModeAdditive;
+        else if (*p.blendMode == Parameters::BlendMode::Additive) {
+            _blendMode = static_cast<int>(BlendMode::Additive);
         }
     }
 
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+
     addProperty(_billboard);
 
+    _size.setExponent(15.f);
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
+
+    addProperty(_multiplyColor);
 
     setBoundingSphere(_size);
 }
@@ -166,6 +169,8 @@ bool RenderablePlane::isReady() const {
 }
 
 void RenderablePlane::initializeGL() {
+    ZoneScoped
+
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -173,7 +178,7 @@ void RenderablePlane::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
@@ -183,6 +188,8 @@ void RenderablePlane::initializeGL() {
 }
 
 void RenderablePlane::deinitializeGL() {
+    ZoneScoped
+
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -192,15 +199,16 @@ void RenderablePlane::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _shader = nullptr;
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
-    _shader->activate();
+    ZoneScoped
 
+    _shader->activate();
     _shader->setUniform("opacity", _opacity);
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
@@ -245,17 +253,23 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("texture1", unit);
 
-    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
+    _shader->setUniform("multiplyColor", _multiplyColor);
+
+    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
+        _shader->setUniform(
+            "additiveBlending",
+            _blendMode == static_cast<int>(BlendMode::Additive)
+        );
     }
 
-    bool additiveBlending = (_blendMode == BlendModeAdditive) && usingFramebufferRenderer;
+    bool additiveBlending =
+        (_blendMode == static_cast<int>(BlendMode::Additive)) && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -263,6 +277,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
     if (additiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -277,6 +292,8 @@ void RenderablePlane::bindTexture() {}
 void RenderablePlane::unbindTexture() {}
 
 void RenderablePlane::update(const UpdateData&) {
+    ZoneScoped
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }
@@ -313,6 +330,7 @@ void RenderablePlane::createPlane() {
         sizeof(GLfloat) * 6,
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
+    glBindVertexArray(0);
 }
 
 } // namespace openspace

@@ -3,19 +3,32 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local VenusBarycenter = {
-    Identifier = "VenusBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VENUS BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Venus Barycenter",
-        Path = "/Solar System/Planets/Venus"
+  Identifier = "VenusBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VENUS BARYCENTER",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "Venus Barycenter",
+    Path = "/Solar System/Planets/Venus",
+    Hidden = true,
+    Description = "Position for Venus Barycenter"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })
+
+
+asset.meta = {
+  Name = "Venus Transforms",
+  Version = "1.0",
+  Description = [[ Spice translation for Venus Barycenter]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"VenusBarycenter"}
+}

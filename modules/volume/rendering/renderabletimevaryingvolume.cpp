@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/histogram.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -43,21 +44,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
-} // namespace
-
-namespace {
 
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySourceDirectory = "SourceDirectory";
-
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeySecondsBefore = "SecondsBefore";
-    const char* KeySecondsAfter = "SecondsAfter";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
@@ -128,44 +122,31 @@ namespace {
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
+
+    struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
+        // Specifies the path to load timesteps from
+        std::string sourceDirectory;
+
+        // Specifies the transfer function file path
+        std::string transferFunction;
+
+        // Specifies the number of seconds to show the the first timestep before its
+        // actual time. The default value is 0
+        std::optional<float> secondsBefore;
+
+        // Specifies the number of seconds to show the the last timestep after its 
+        // actual time
+        float secondsAfter;
+
+        std::optional<ghoul::Dictionary> clipPlanes;
+    };
+#include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
 
 namespace openspace::volume {
 
-    documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTimevaryingVolume",
-        "volume_renderable_timevaryingvolume",
-        {
-            {
-                KeySourceDirectory,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the path to load timesteps from"
-            },
-            {
-                KeyTransferFunction,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the transfer function file path"
-            },
-            {
-                KeySecondsBefore,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the number of seconds to show the the first timestep before "
-                "its actual time. The default value is 0."
-            },
-            {
-                KeySecondsAfter,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the number of seconds to show the the last timestep after its "
-                "actual time"
-            }
-        }
-    };
+documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+    return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
@@ -183,14 +164,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTimeVaryingVolume"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
-    _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
+    _sourceDirectory = absPath(p.sourceDirectory).string();
+    _transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
@@ -202,22 +179,19 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasKeyAndValue<float>(KeyStepSize)) {
-        _stepSize = dictionary.value<float>(KeyStepSize);
+    if (dictionary.hasValue<double>(KeyStepSize)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
     }
 
-    if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
-        _secondsBefore = dictionary.value<float>(KeySecondsBefore);
-    }
-    _secondsAfter = dictionary.value<float>(KeySecondsAfter);
+    _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
+    _secondsAfter = p.secondsAfter;
 
-    ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+    ghoul::Dictionary clipPlanesDictionary = p.clipPlanes.value_or(ghoul::Dictionary());
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
         );
@@ -230,32 +204,26 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
+    std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
         return;
     }
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
-        ghoul::filesystem::File currentFile(path);
-        std::string extension = currentFile.fileExtension();
-        if (extension == "dictionary") {
-            loadTimestepMetadata(path);
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
+            loadTimestepMetadata(e.path().string());
         }
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        std::string path = FileSys.pathByAppendingComponent(
-            _sourceDirectory, t.baseName
-        ) + ".rawvolume";
+        std::string path = fmt::format(
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+        );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read();
 
@@ -298,13 +266,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
     );
 
     _raycaster->initialize();
-    global::raycasterManager.attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster.get());
     onEnabledChange([&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
         }
     });
 
@@ -355,7 +323,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     Timestep t;
     t.metadata = metadata;
-    t.baseName = ghoul::filesystem::File(path).baseName();
+    t.baseName = std::filesystem::path(path).stem().string();
     t.inRam = false;
     t.onGpu = false;
 
@@ -366,7 +334,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     if (_volumeTimesteps.empty()) {
         return nullptr;
     }
-    double currentTime = global::timeManager.time().j2000Seconds();
+    double currentTime = global::timeManager->time().j2000Seconds();
 
     // Get the first item with time > currentTime
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
@@ -427,7 +395,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
 void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     Timestep* t = timestepFromIndex(target);
     if (t) {
-        global::timeManager.setTimeNextFrame(Time(t->metadata.time));
+        global::timeManager->setTimeNextFrame(Time(t->metadata.time));
     }
 }
 
@@ -487,7 +455,7 @@ bool RenderableTimeVaryingVolume::isReady() const {
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

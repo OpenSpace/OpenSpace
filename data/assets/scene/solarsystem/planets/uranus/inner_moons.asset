@@ -8,222 +8,254 @@ local kernel = asset.require('./kernels').ura091
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner" }
-local trailColor = { 0.60, 0.65, 0.84 }
 
-local innerMoons = {
-    {
-        Identifier = "Cordelia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CORDELIA",
-        Radii = { 40000, 40000, 40000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.335034,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Ophelia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "OPHELIA",
-        Radii = { 43000, 43000, 43000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.376400,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Bianca",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "BIANCA",
-        Radii = { 51000, 51000, 51000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.434579,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Cressida",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CRESSIDA",
-        Radii = { 80000, 80000, 80000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.463570,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Desdemona",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "DESDEMONA",
-        Radii = { 64000, 64000, 64000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.473650,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Juliet",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "JULIET",
-        Radii = { 94000, 94000, 94000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.493065,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Portia",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PORTIA",
-        Radii = { 135000, 135000, 135000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.513196,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Rosalind",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ROSALIND",
-        Radii = { 72000, 72000, 72000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.558460,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Cupid",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CUPID",
-        Radii = { 18000, 18000, 18000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.618,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Belinda",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "BELINDA",
-        Radii = { 90000, 90000, 90000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.623527,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Perdita",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PERDITA",
-        Radii = { 30000, 30000, 30000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.638,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Puck",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PUCK",
-        Radii = { 162000, 162000, 162000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.761833,
-        Kernels = kernel
-    },
-    {
-        Identifier = "Mab",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "MAB",
-        Radii = { 25000, 25000, 25000 },
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.923,
-        Kernels = kernel
-    }
+local trailColor = { 0.60, 0.65, 0.84 }
+local trailTags = { 
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_uranus",
+  "moonTrail_minor"
 }
 
 
+local innerMoons = {
+  {
+    Identifier = "Cordelia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CORDELIA",
+    Radii = { 40000, 40000, 40000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.335034,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ophelia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "OPHELIA",
+    Radii = { 43000, 43000, 43000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.376400,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Bianca",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "BIANCA",
+    Radii = { 51000, 51000, 51000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.434579,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Cressida",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CRESSIDA",
+    Radii = { 80000, 80000, 80000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.463570,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Desdemona",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "DESDEMONA",
+    Radii = { 64000, 64000, 64000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.473650,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Juliet",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "JULIET",
+    Radii = { 94000, 94000, 94000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.493065,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Portia",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PORTIA",
+    Radii = { 135000, 135000, 135000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.513196,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Rosalind",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ROSALIND",
+    Radii = { 72000, 72000, 72000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.558460,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Cupid",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CUPID",
+    Radii = { 18000, 18000, 18000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.618,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Belinda",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "BELINDA",
+    Radii = { 90000, 90000, 90000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.623527,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Perdita",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PERDITA",
+    Radii = { 30000, 30000, 30000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.638,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Puck",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PUCK",
+    Radii = { 162000, 162000, 162000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.761833,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Mab",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "MAB",
+    Radii = { 25000, 25000, 25000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.923,
+    Kernels = kernel
+  }
+}
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(innerMoons)
+  asset,
+  proceduralGlobes.createGlobes(innerMoons)
 )
+
+
+asset.meta = {
+  Name = "Uranus Irregular Retrograde Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Uranus' irregular retrograde
+    moons: Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind,
+    Cupid, Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are
+    generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

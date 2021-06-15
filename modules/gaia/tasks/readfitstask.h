@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,11 @@
 #define __OPENSPACE_MODULE_GAIA___READFITSTASK___H__
 
 #include <openspace/util/task.h>
+
 #include <openspace/util/threadpool.h>
 #include <openspace/util/concurrentjobmanager.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <filesystem>
 
 namespace openspace {
 
@@ -67,8 +69,8 @@ private:
     int writeOctantToFile(const std::vector<float>& data, int index,
         std::vector<bool>& isFirstWrite, int nValuesPerStar);
 
-    std::string _inFileOrFolderPath;
-    std::string _outFileOrFolderPath;
+    std::filesystem::path _inFileOrFolderPath;
+    std::filesystem::path _outFileOrFolderPath;
     bool _singleFileProcess = false;
     size_t _threadsToUse = 1;
     int _firstRow = 0;

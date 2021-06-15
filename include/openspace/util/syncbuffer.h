@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
+#include <ghoul/glm.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -48,6 +49,10 @@ public:
     T decode();
 
     void decode(std::string& s);
+    void decode(glm::quat& value);
+    void decode(glm::dquat& value);
+    void decode(glm::vec3& value);
+    void decode(glm::dvec3& value);
 
     template <typename T>
     void decode(T& value);
@@ -57,14 +62,14 @@ public:
     //void write();
     //void read();
 
-    void setData(std::vector<char> data);
-    std::vector<char> data();
+    void setData(std::vector<std::byte> data);
+    std::vector<std::byte> data();
 
 private:
     size_t _n;
     size_t _encodeOffset = 0;
     size_t _decodeOffset = 0;
-    std::vector<char> _dataStream;
+    std::vector<std::byte> _dataStream;
 };
 
 } // namespace openspace

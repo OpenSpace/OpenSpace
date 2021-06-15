@@ -1,0 +1,161 @@
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local asset_helper = asset.require('util/asset_helper')
+local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local models = asset.require('./boulder_models').models
+
+local LightSources = {
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sun_transforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
+}
+
+
+local Station6Frag1Holder = {
+  Identifier = "Station_6_Fragment1",
+  Parent = moon_asset.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+30.80068,
+      Latitude = 20.2903,
+      Altitude = -2562.6,
+      UseHeightmap = false
+    }
+  },
+  GUI = {
+    Name = "Station 6 Fragment 1",
+    Path = "/Solar System/Missions/Apollo/17/Station 6"
+  }
+}
+
+local Station6Frag1Model = {
+  Identifier = "Station6Frag1Model",
+  Parent = Station6Frag1Holder.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+30.8007,
+      Latitude = 20.2903,
+      Altitude = -2562.6,
+      UseHeightmap = false
+    }
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.1
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Geometry = {{
+      Type = "MultiModelGeometry",
+      GeometryFile = models .. "/A17-S6-frag1.obj",
+      ColorTexture = models .. "/A17-S6-frag1.png"
+    }},
+    RotationVector = { 235.909088,165.000000,286.299194 },
+    LightSources = LightSources,
+    PerformShading = false,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Station 6 Fragment 1 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 6"
+  }
+}
+
+
+
+local Station6Frag23Holder = {
+  Identifier = "Station_6_Fragments_2_3",
+  Parent = moon_asset.Moon.Identifier,
+  GUI = {
+    Name = "Station 6 Fragments 2 & 3 Holder",
+    Path = "/Solar System/Missions/Apollo/17/Station 6"
+  }
+}
+
+
+local Station6Frag2Model = {
+  Identifier = "A17S6F5",
+  Parent = Station6Frag23Holder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.14
+    },
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+30.80055,
+      Latitude = 20.289808,
+      Altitude = -2566.5,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Geometry = {{
+      Type = "MultiModelGeometry",
+      GeometryFile = models .. "/station6_boulder_frag2.obj",
+      ColorTexture = models .. "/frag2crop_u1_v1.jpeg"
+    }},
+    RotationVector = { 336.959991,210.239990,325.984253 },
+    LightSources = LightSources,
+    PerformShading = false,
+    DisableFaceCulling = true,
+  },
+  GUI = {
+    Name = "Station 6 Fragment 2 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 6"
+  }
+}
+
+local Station6Frag3Model = {
+  Identifier = "A17S6F3",
+  Parent = Station6Frag23Holder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.14
+    },
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+30.80053,
+      Latitude = 20.29030,
+      Altitude = -2563.0,
+      UseHeightMap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Geometry = {{
+      Type = "MultiModelGeometry",
+      GeometryFile = models .. "/station6_boulder_frag3.obj",
+      ColorTexture = models .. "/frag3crop_u1_v1.jpeg"
+    }},
+    RotationVector = { 293.181824,255.000000,4.090910 },
+    LightSources = LightSources,
+    PerformShading = false,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Station 6 Fragment 3 Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 6"
+  }
+}
+
+asset_helper.registerSceneGraphNodesAndExport(asset, {
+  Station6Frag1Holder, Station6Frag1Model, Station6Frag23Holder, Station6Frag2Model, Station6Frag3Model,
+})

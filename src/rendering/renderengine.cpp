@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,6 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
-#include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -44,19 +42,25 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/io/model/modelreader.h>
+#include <ghoul/io/model/modelreaderassimp.h>
+#include <ghoul/io/model/modelreaderbinary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #ifdef GHOUL_USE_DEVIL
@@ -87,15 +91,6 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo PerformanceInfo = {
-        "PerformanceMeasurements",
-        "Performance Measurements",
-        "If this value is enabled, detailed performance measurements about the updates "
-        "and rendering of the scene graph nodes are collected each frame. These values "
-        "provide some information about the impact of individual nodes on the overall "
-        "performance."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
         "ShowOverlayOnSlaves",
         "Show Overlay Information on Slaves",
@@ -109,6 +104,13 @@ namespace {
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
         "log."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VerticalLogOffsetInfo = {
+        "VerticalLogOffset",
+        "Vertical Log Offset",
+        "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
+        "is scaled with the vertical resolution"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
@@ -134,20 +136,19 @@ namespace {
         "interface."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
+        "ScreenshotUseDate",
+        "Screenshot Folder uses Date",
+        "If this value is set to 'true', screenshots will be saved to a folder that "
+        "contains the time at which this value was enabled"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window."
     };
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    constexpr openspace::properties::Property::PropertyInfo SaveFrameInfo = {
-        "SaveFrameInformation",
-        "Save Frame Information",
-        "Saves the frame information to disk"
-    };
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
@@ -223,6 +224,13 @@ namespace {
         "Value"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
+        "FramerateLimit",
+        "Framerate Limit",
+        "If set to a value bigger than 0, the framerate will be limited to that many "
+        "frames per second without using V-Sync"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal Field of View",
@@ -245,21 +253,18 @@ namespace {
     };
 } // namespace
 
-
 namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _doPerformanceMeasurements(PerformanceInfo)
     , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
+    , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
+    , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    , _saveFrameInformation(SaveFrameInfo, false)
-#endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
@@ -269,6 +274,7 @@ RenderEngine::RenderEngine()
     , _hue(HueInfo, 0.f, 0.f, 360.f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
+    , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -289,21 +295,11 @@ RenderEngine::RenderEngine()
         glm::vec3(glm::pi<float>())
     )
 {
-    _doPerformanceMeasurements.onChange([this](){
-        global::performanceManager.setEnabled(_doPerformanceMeasurements);
-    });
-    addProperty(_doPerformanceMeasurements);
-
     addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
+    addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
-
-    // @TODO (maci 2019-08-23) disabling FXAA on
-    // MacOS for now until we have fix or MSAA option.
-#ifdef __APPLE__
-    _enableFXAA = false;
-#endif
 
     _enableFXAA.onChange([this]() {
         if (_renderer) {
@@ -319,14 +315,13 @@ RenderEngine::RenderEngine()
     });
     addProperty(_disableHDRPipeline);
 
-    
     _hdrExposure.onChange([this]() {
         if (_renderer) {
             _renderer->setHDRExposure(_hdrExposure);
         }
     });
     addProperty(_hdrExposure);
-    
+
     _gamma.onChange([this]() {
         if (_renderer) {
             _renderer->setGamma(_gamma);
@@ -342,7 +337,7 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_hue);
-    
+
     _saturation.onChange([this]() {
         if (_renderer) {
             _renderer->setSaturation(_saturation);
@@ -350,7 +345,7 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_saturation);
-    
+
     _value.onChange([this]() {
         if (_renderer) {
             _renderer->setValue(_value);
@@ -362,23 +357,56 @@ RenderEngine::RenderEngine()
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
 
+    _screenshotUseDate.onChange([this]() {
+        // If there is no screenshot folder, don't bother with handling the change
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
+            return;
+        }
+
+        if (_screenshotUseDate) {
+            // Going from 'false' -> 'true'
+            // We might need to create the folder first
+
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTime = std::localtime(&now);
+            char date[128];
+            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+
+            std::filesystem::path newFolder = absPath(
+                "${STARTUP_SCREENSHOT}/" + std::string(date)
+            );
+            if (!std::filesystem::is_directory(newFolder)) {
+                std::filesystem::create_directory(newFolder);
+            }
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                newFolder,
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        else {
+            // Going from 'true' -> 'false'
+            // We reset the screenshot folder back to what it was in the beginning
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                absPath("${STARTUP_SCREENSHOT}"),
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}").string());
+    });
+    addProperty(_screenshotUseDate);
+
     _horizFieldOfView.onChange([this]() {
-        if (global::windowDelegate.isMaster()) {
-            global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        if (global::windowDelegate->isMaster()) {
+            global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
         }
     });
     addProperty(_horizFieldOfView);
 
     addProperty(_showFrameInformation);
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    _saveFrameInformation.onChange([&]() {
-        if (_saveFrameInformation) {
-            _frameInfo.lastSavedFrame = frameNumber();
-        }
-    });
-    addProperty(_saveFrameInformation);
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 
+    addProperty(_framerateLimit);
     addProperty(_globalRotation);
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
@@ -388,6 +416,8 @@ RenderEngine::RenderEngine()
 RenderEngine::~RenderEngine() {} // NOLINT
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    ZoneScoped
+
     _rendererImplementation = rendererFromString(renderingMethod);
 
     std::unique_ptr<Renderer> newRenderer = nullptr;
@@ -413,11 +443,11 @@ void RenderEngine::initialize() {
 
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
-    _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
+    _globalRotation = static_cast<glm::vec3>(global::configuration->globalRotation);
     _screenSpaceRotation =
-        static_cast<glm::vec3>(global::configuration.screenSpaceRotation);
-    _masterRotation = static_cast<glm::vec3>(global::configuration.masterRotation);
-    _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
+        static_cast<glm::vec3>(global::configuration->screenSpaceRotation);
+    _masterRotation = static_cast<glm::vec3>(global::configuration->masterRotation);
+    _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
@@ -446,6 +476,32 @@ void RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
+
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderAssimp>()
+    );
+
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderBinary>()
+    );
+
+    _versionString = OPENSPACE_VERSION_STRING_FULL;
+    if (global::versionChecker->hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
+
+        VersionChecker::SemanticVersion current{
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (current < latest) {
+            _versionString += fmt::format(
+                " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
+            );
+        }
+    }
+
+    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 }
 
 void RenderEngine::initializeGL() {
@@ -453,7 +509,7 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
-    std::string renderingMethod = global::configuration.renderingMethod;
+    std::string renderingMethod = global::configuration->renderingMethod;
     if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
 
@@ -469,31 +525,46 @@ void RenderEngine::initializeGL() {
     setRendererFromString(renderingMethod);
 
 
-
-    // TODO:    Fix the power scaled coordinates in such a way that these
-    //            values can be set to more realistic values
-
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
+    global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
+    _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
-    constexpr const float FontSizeFrameinfo = 32.f;
-    _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
-    constexpr const float FontSizeTime = 15.f;
-    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
-    constexpr const float FontSizeMono = 10.f;
-    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
-    constexpr const float FontSizeLight = 8.f;
-    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+    {
+        ZoneScopedN("Font: Mono")
+        TracyGpuZone("Font: Mono")
+        constexpr const float FontSizeFrameinfo = 32.f;
+        _fontFrameInfo = global::fontManager->font(KeyFontMono, FontSizeFrameinfo);
+    }
+    {
+        ZoneScopedN("Font: Date")
+        TracyGpuZone("Font: Date")
+        constexpr const float FontSizeTime = 15.f;
+        _fontDate = global::fontManager->font(KeyFontMono, FontSizeTime);
+    }
+    {
+        ZoneScopedN("Font: Info")
+        TracyGpuZone("Font: Info")
+        constexpr const float FontSizeMono = 10.f;
+        _fontInfo = global::fontManager->font(KeyFontMono, FontSizeMono);
+    }
+    {
+        ZoneScopedN("Font: Log")
+        TracyGpuZone("Font: Log")
+        constexpr const float FontSizeLight = 8.f;
+        _fontLog = global::fontManager->font(KeyFontLight, FontSizeLight);
+    }
 
-    LINFO("Initializing Log");
-    std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
-    _log = log.get();
-    ghoul::logging::LogManager::ref().addLog(std::move(log));
+    {
+        ZoneScopedN("Log")
+        LINFO("Initializing Log");
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        _log = log.get();
+        ghoul::logging::LogManager::ref().addLog(std::move(log));
+    }
 
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
@@ -514,14 +585,13 @@ void RenderEngine::updateScene() {
 
     _scene->updateInterpolations();
 
-    const Time& currentTime = global::timeManager.time();
-    const Time& integrateFromTime = global::timeManager.integrateFromTime();
+    const Time& currentTime = global::timeManager->time();
+    const Time& integrateFromTime = global::timeManager->integrateFromTime();
 
     _scene->update({
-        { glm::dvec3(0.0), glm::dmat3(1.0), 1.0 },
+        TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
         currentTime,
-        integrateFromTime,
-        _doPerformanceMeasurements
+        integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -545,7 +615,7 @@ void RenderEngine::updateShaderPrograms() {
 void RenderEngine::updateRenderer() {
     ZoneScoped
 
-    const bool windowResized = global::windowDelegate.windowHasResized();
+    const bool windowResized = global::windowDelegate->windowHasResized();
 
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
@@ -555,7 +625,7 @@ void RenderEngine::updateRenderer() {
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         //Override the aspect ratio property value to match that of resized window
         _horizFieldOfView =
-            static_cast<float>(global::windowDelegate.getHorizFieldOfView());
+            static_cast<float>(global::windowDelegate->getHorizFieldOfView());
     }
 
     _renderer->update();
@@ -564,22 +634,22 @@ void RenderEngine::updateRenderer() {
 void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
         ssr->update();
     }
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    return global::windowDelegate.currentDrawBufferResolution();
+    return global::windowDelegate->currentDrawBufferResolution();
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
-    const std::string& value = global::configuration.onScreenTextScaling;
+    const std::string& value = global::configuration->onScreenTextScaling;
     if (value == "framebuffer") {
-        return global::windowDelegate.currentViewportSize();
+        return global::windowDelegate->currentViewportSize();
     }
     else {
-        return global::windowDelegate.currentSubwindowSize();
+        return global::windowDelegate->currentSubwindowSize();
     }
 }
 
@@ -604,7 +674,7 @@ glm::mat4 RenderEngine::screenSpaceRotation() const {
 }
 
 glm::mat4 RenderEngine::nodeRotation() const {
-    if (!global::windowDelegate.isMaster()) {
+    if (!global::windowDelegate->isMaster()) {
         return glm::mat4(1.f);
     }
     glm::vec3 rot = _masterRotation;
@@ -627,7 +697,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     LTRACE("RenderEngine::render(begin)");
 
-    const WindowDelegate& delegate = global::windowDelegate;
+    const WindowDelegate& delegate = *global::windowDelegate;
 
     const glm::mat4 globalRot = globalRotation();
     const glm::mat4 nodeRot = nodeRotation();
@@ -640,6 +710,16 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
+    }
+
+    const int fpsLimit = _framerateLimit;
+    if (fpsLimit > 0) {
+        // Using a sleep here is not optimal, but we are not looking for FPS-perfect
+        // limiting
+        std::this_thread::sleep_until(_lastFrameTime);
+        const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
+        auto now = std::chrono::high_resolution_clock::now();
+        _lastFrameTime = now + std::chrono::microseconds(static_cast<int>(delta));
     }
 
     const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
@@ -660,23 +740,24 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
 
         std::string fn = std::to_string(_frameNumber);
-        WindowDelegate::Frustum frustum = global::windowDelegate.frustumMode();
-        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
-            switch (frustum) {
-                case WindowDelegate::Frustum::Mono: return "";
-                case WindowDelegate::Frustum::LeftEye: return "(left)";
+        WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
+        std::string fr = [](WindowDelegate::Frustum f) -> std::string {
+            switch (f) {
+                case WindowDelegate::Frustum::Mono:     return "";
+                case WindowDelegate::Frustum::LeftEye:  return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
-                default: throw std::logic_error("Unhandled case label");
+                default:                              throw ghoul::MissingCaseException();
             }
         }(frustum);
 
-        std::string sgFn = std::to_string(global::windowDelegate.swapGroupFrameNumber());
-        std::string dt = std::to_string(global::windowDelegate.deltaTime());
-        std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
+        std::string sgFn = std::to_string(global::windowDelegate->swapGroupFrameNumber());
+        std::string dt = std::to_string(global::windowDelegate->deltaTime());
+        std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
-        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
-                          "Swap group frame: " + sgFn + '\n' +
-                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        std::string res = fmt::format(
+            "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+            fn, fr, sgFn, dt, avgDt
+        );
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
@@ -684,9 +765,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         ZoneScopedN("Render Screenspace Renderable")
 
         std::vector<ScreenSpaceRenderable*> ssrs;
-        ssrs.reserve(global::screenSpaceRenderables.size());
+        ssrs.reserve(global::screenSpaceRenderables->size());
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-            global::screenSpaceRenderables)
+            *global::screenSpaceRenderables)
         {
             if (ssr->isEnabled() && ssr->isReady()) {
                 ssrs.push_back(ssr.get());
@@ -724,9 +805,9 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
         constexpr const char* ToggleRotationFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleRotationFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -736,9 +817,9 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
         constexpr const char* ToggleZoomFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleZoomFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -748,9 +829,9 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
         constexpr const char* ToggleRollFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleRollFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -763,7 +844,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
 
-    const bool isMaster = global::windowDelegate.isMaster();
+    const bool isMaster = global::windowDelegate->isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
         renderVersionInformation();
@@ -790,20 +871,15 @@ void RenderEngine::renderEndscreen() {
         glm::vec4(0.f, 0.f, 0.f, 0.5f)
     );
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    using FR = ghoul::fontrendering::FontRenderer;
-    using BBox = FR::BoundingBoxInformation;
-    BBox size = FR::defaultRenderer().boundingBox(
-        *_fontDate,
-        "Shutting down"
-    );
+    const glm::vec2 size = _fontDate->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x / 2 - size.boundingBox.x / 2,
-        fontResolution().y / 2 - size.boundingBox.y / 2
+        fontResolution().x / 2 - size.x / 2,
+        fontResolution().y / 2 - size.y / 2
     );
     RenderFont(*_fontDate, penPosition, "Shutting down");
 }
@@ -813,15 +889,13 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     timer = std::max(timer, 0.f);
 
-    using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
-    BBox size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_fontDate,
+    const glm::vec2 size = _fontDate->boundingBox(
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x - size.boundingBox.x - 10,
-        fontResolution().y - size.boundingBox.y
+        fontResolution().x - size.x - 10,
+        fontResolution().y - size.y
     );
 
     RenderFont(
@@ -844,20 +918,13 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 void RenderEngine::renderDashboard() {
     ZoneScoped
 
-    std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::performanceManager.isEnabled()) {
-        perf = std::make_unique<performance::PerformanceMeasurement>(
-            "Main Dashboard::render"
-        );
-    }
-
-    glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
+    glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
-        dashboardStart.y + fontResolution().y - global::luaConsole.currentHeight()
+        dashboardStart.y + fontResolution().y - global::luaConsole->currentHeight()
     );
 
-    global::dashboard.render(penPosition);
+    global::dashboard->render(penPosition);
 
 #ifdef REALTIME_CAMERA_POS_DISPLAY
     penPosition += glm::vec2(0.f, -50.f);
@@ -879,41 +946,6 @@ void RenderEngine::postDraw() {
     ZoneScoped
 
     ++_frameNumber;
-
-    if (global::performanceManager.isEnabled()) {
-        global::performanceManager.storeScenePerformanceMeasurements(
-            scene()->allSceneGraphNodes()
-        );
-    }
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    if (_saveFrameInformation) {
-        _frameInfo.frames.push_back({
-            frameNumber(),
-            global::windowDelegate.deltaTime(),
-            global::windowDelegate.averageDeltaTime()
-        });
-    }
-
-    const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-    const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
-    if (shouldSave) {
-        std::string filename = fmt::format(
-            "_inst_renderengine_{}_{}.txt",
-            _frameInfo.lastSavedFrame, _frameInfo.saveEveryNthFrame
-        );
-        std::ofstream file(absPath("${BIN}/" + filename));
-        for (const FrameInfo& i : _frameInfo.frames) {
-            std::string line = fmt::format(
-                "{}\t{}\t{}", i.iFrame, i.deltaTime, i.avgDeltaTime
-            );
-            file << line << '\n';
-        }
-
-        _frameInfo.frames.clear();
-        _frameInfo.lastSavedFrame = frameNumber();
-    }
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 }
 
 Scene* RenderEngine::scene() {
@@ -934,6 +966,13 @@ const Renderer& RenderEngine::renderer() const {
 
 RenderEngine::RendererImplementation RenderEngine::rendererImplementation() const {
     return _rendererImplementation;
+}
+
+ghoul::opengl::OpenGLStateCache& RenderEngine::openglStateCache() {
+    if (_openglStateCache == nullptr) {
+        _openglStateCache = ghoul::opengl::OpenGLStateCache::instance();
+    }
+    return *_openglStateCache;
 }
 
 float RenderEngine::globalBlackOutFactor() {
@@ -957,8 +996,8 @@ bool RenderEngine::isHdrDisabled() const {
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -968,7 +1007,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -989,9 +1028,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
-                                                                const std::string& csPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
+                                                      const std::filesystem::path& csPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -1000,7 +1039,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -1069,41 +1108,28 @@ void RenderEngine::takeScreenshot() {
     // screenshot folder everytime we start OpenSpace even when we are not taking any
     // screenshots. So the first time we actually take one, we create the folder:
 
-    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-        FileSys.createDirectory(
-            absPath("${SCREENSHOTS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
+        std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
-    _latestScreenshotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
 }
 
-/**
- * Get the latest screenshot filename
- */
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
 
-/**
- * Set raycasting uniforms on the program object, and setup raycasting.
- */
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->preRaycast(programObject);
 }
 
-/**
- * Tear down raycasting for the specified program object.
- */
 void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->postRaycast(programObject);
 }
 
-/**
- * Set renderer
- */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
+    ZoneScoped
+
     if (_renderer) {
         _renderer->deinitialize();
     }
@@ -1159,11 +1185,11 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     const std::string identifier = s->identifier();
 
     if (std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
             return ssr->identifier() == identifier;
-        }) != global::screenSpaceRenderables.end()
+        }) != global::screenSpaceRenderables->end()
     ) {
         LERROR(fmt::format(
             "Cannot add scene space renderable. "
@@ -1176,22 +1202,22 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     s->initialize();
     s->initializeGL();
 
-    global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
-    global::screenSpaceRenderables.push_back(std::move(s));
+    global::screenSpaceRootPropertyOwner->addPropertySubOwner(s.get());
+    global::screenSpaceRenderables->push_back(std::move(s));
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     const auto it = std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [s](const std::unique_ptr<ScreenSpaceRenderable>& r) { return r.get() == s; }
     );
 
-    if (it != global::screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables->end()) {
         s->deinitialize();
-        global::screenSpaceRootPropertyOwner.removePropertySubOwner(s);
+        global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
 
-        global::screenSpaceRenderables.erase(it);
+        global::screenSpaceRenderables->erase(it);
     }
 }
 
@@ -1206,14 +1232,14 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
                                                             const std::string& identifier)
 {
     const auto it = std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& s) {
             return s->identifier() == identifier;
         }
     );
 
-    if (it != global::screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables->end()) {
         return it->get();
     }
     else {
@@ -1222,10 +1248,10 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
 }
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
-    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables.size());
+    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables->size());
     std::transform(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         res.begin(),
         [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
     );
@@ -1260,67 +1286,59 @@ void RenderEngine::renderCameraInformation() {
     const glm::vec4 EnabledColor  = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
     const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
-    using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Rotation"
-    );
+    const glm::vec2 rotationBox = _fontInfo->boundingBox("Rotation");
 
-    float penPosY = fontResolution().y - rotationBox.boundingBox.y;
+    float penPosY = fontResolution().y - rotationBox.y;
 
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
     const interaction::OrbitalNavigator& nav =
-        global::navigationHandler.orbitalNavigator();
+        global::navigationHandler->orbitalNavigator();
+
+    using FR = ghoul::fontrendering::FontRenderer;
 
     _cameraButtonLocations.rotation = {
-        fontResolution().x - rotationBox.boundingBox.x - XSeparation,
+        fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rotationBox.boundingBox.x,
-        rotationBox.boundingBox.y
+        rotationBox.x,
+        rotationBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
         "Rotation",
         nav.hasRotationalFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= rotationBox.boundingBox.y + YSeparation;
+    penPosY -= rotationBox.y + YSeparation;
 
-    FR::BoundingBoxInformation zoomBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Zoom"
-    );
+    const glm::vec2 zoomBox = _fontInfo->boundingBox("Zoom");
 
     _cameraButtonLocations.zoom = {
-        fontResolution().x - zoomBox.boundingBox.x - XSeparation,
+        fontResolution().x - zoomBox.x - XSeparation,
         fontResolution().y - penPosY,
-        zoomBox.boundingBox.x,
-        zoomBox.boundingBox.y
+        zoomBox.x,
+        zoomBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
         "Zoom",
         nav.hasZoomFriction() ? EnabledColor : DisabledColor
     );
-    penPosY -= zoomBox.boundingBox.y + YSeparation;
+    penPosY -= zoomBox.y + YSeparation;
 
-    FR::BoundingBoxInformation rollBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        "Roll"
-    );
+    const glm::vec2 rollBox = _fontInfo->boundingBox("Roll");
 
     _cameraButtonLocations.roll = {
-        fontResolution().x - rollBox.boundingBox.x - XSeparation,
+        fontResolution().x - rollBox.x - XSeparation,
         fontResolution().y - penPosY,
-        rollBox.boundingBox.x,
-        rollBox.boundingBox.y
+        rollBox.x,
+        rollBox.y
     };
     FR::defaultRenderer().render(
         *_fontInfo,
-        glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
+        glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),
         "Roll",
         nav.hasRollFriction() ? EnabledColor : DisabledColor
     );
@@ -1333,62 +1351,55 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
-    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
-
-    if (global::versionChecker.hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latestVersion =
-            global::versionChecker.latestVersion();
-
-        VersionChecker::SemanticVersion currentVersion {
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
-        };
-        if (currentVersion < latestVersion) {
-            versionString += fmt::format(
-                " [Available: {}.{}.{}]",
-                latestVersion.major, latestVersion.minor, latestVersion.patch
-            );
-        }
-    }
-
     using FR = ghoul::fontrendering::FontRenderer;
-    const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        versionString
-    );
-
-    const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
-        *_fontInfo,
-        fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
-    );
+    const glm::vec2 versionBox = _fontInfo->boundingBox(_versionString);
+    const glm::vec2 commitBox = _fontInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(
-            fontResolution().x - versionBox.boundingBox.x - 10.f,
+            fontResolution().x - versionBox.x - 10.f,
             5.f
         ),
-        versionString,
+        _versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
-    if (!std::string(OPENSPACE_GIT_COMMIT).empty()) {
+    if (!std::string_view(OPENSPACE_GIT_COMMIT).empty()) {
         // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
         // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
         // checking for that is a bit brittle)
         FR::defaultRenderer().render(
             *_fontInfo,
-            glm::vec2(
-                fontResolution().x - commitBox.boundingBox.x - 10.f,
-                versionBox.boundingBox.y + 5.f
-            ),
+            glm::vec2(fontResolution().x - commitBox.x - 10.f, versionBox.y + 5.f),
             OPENSPACE_GIT_FULL,
             glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
     }
+
+#ifdef TRACY_ENABLE
+    {
+        // If we have Tracy enabled, we should inform the user about it that the
+        // application will crash after a while if no profiler is attached
+
+        ZoneScopedN("Tracy Information")
+
+        const glm::vec2 tracyBox = _fontInfo->boundingBox("TRACY PROFILING ENABLED");
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x - tracyBox.x - 10.f,
+            versionBox.y + commitBox.y + 5.f
+        );
+        FR::defaultRenderer().render(
+            *_fontInfo,
+            penPosition,
+            "TRACY PROFILING ENABLED",
+            glm::vec4(0.8f, 0.2f, 0.15f, 1.f)
+        );
+    }
+#endif // TRACY_ENABLE
+
 }
 
 void RenderEngine::renderScreenLog() {
@@ -1400,30 +1411,29 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const int MaxNumberMessages = 10;
+    constexpr const size_t MaxNumberMessages = 20;
     constexpr const int CategoryLength = 30;
-    constexpr const int MessageLength = 140;
+    constexpr const int MessageLength = 280;
     constexpr const std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
-    auto lastEntries =
-        entries.size() > MaxNumberMessages ?
-        std::make_pair(entries.rbegin(), entries.rbegin() + MaxNumberMessages) :
-        std::make_pair(entries.rbegin(), entries.rend());
+    const glm::ivec2 fontRes = fontResolution();
 
-    size_t nr = 1;
+    size_t nRows = 1;
     const auto now = std::chrono::steady_clock::now();
-    for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
-        const ScreenLog::LogEntry* e = &(*it);
+    for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i += 1) {
+        ZoneScopedN("Entry")
 
-        std::chrono::duration<double> diff = now - e->timeStamp;
+        const ScreenLog::LogEntry& it = entries[entries.size() - i];
+
+        const std::chrono::duration<double> diff = now - it.timeStamp;
 
         float alpha = 1.f;
-        std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
+        const std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
         if (diff > ttf) {
-            double d = (diff - ttf).count();
-            float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
-            float p = 0.8f - t;
+            const double d = (diff - ttf).count();
+            const float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
+            const float p = 0.8f - t;
             alpha = (p <= 0.f) ? 0.f : pow(p, 0.4f);
         }
 
@@ -1431,58 +1441,75 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.f) {
             break;
         }
-
-        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
-        const std::string& message = e->message.substr(0, MessageLength);
-        nr += std::count(message.begin(), message.end(), '\n');
+        std::string_view message = std::string_view(it.message).substr(0, MessageLength);
+        nRows += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
-        RenderFont(
-            *_fontLog,
-            glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
-            fmt::format(
+        std::array<char, 15 + 1 + CategoryLength + 3> buf;
+        {
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(
+                buf.data(),
                 "{:<15} {}{}",
-                e->timeString,
-                e->category.substr(0, CategoryLength),
-                e->category.length() > CategoryLength ? "..." : ""
-            ),
-            white
-        );
+                it.timeString,
+                std::string_view(it.category).substr(0, CategoryLength),
+                it.category.length() > CategoryLength ? "..." : ""
+            );
+            std::string_view text = std::string_view(buf.data(), end - buf.data());
 
-        glm::vec4 color = glm::vec4(0.f);
-        switch (e->level) {
-            case ghoul::logging::LogLevel::Debug:
-                color = glm::vec4(0.f, 1.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Warning:
-                color = glm::vec4(1.f, 1.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Error:
-                color = glm::vec4(1.f, 0.f, 0.f, alpha);
-                break;
-            case ghoul::logging::LogLevel::Fatal:
-                color = glm::vec4(0.3f, 0.3f, 0.85f, alpha);
-                break;
-            default:
-                color = white;
-                break;
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10.f,
+                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
+                ),
+                text,
+                white
+            );
+        }
+
+        {
+            const glm::vec4 color = [alpha, white](ScreenLog::LogLevel level) {
+                switch (level) {
+                    case ghoul::logging::LogLevel::Debug:
+                        return glm::vec4(0.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Warning:
+                        return glm::vec4(1.f, 1.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Error:
+                        return glm::vec4(1.f, 0.f, 0.f, alpha);
+                    case ghoul::logging::LogLevel::Fatal:
+                        return glm::vec4(0.3f, 0.3f, 0.85f, alpha);
+                    default:
+                        return white;
+                }
+            }(it.level);
+
+            const std::string_view lvl = ghoul::to_string(it.level);
+            std::fill(buf.begin(), buf.end(), char(0));
+            char* end = fmt::format_to(buf.data(), "({})", lvl);
+            std::string_view levelText = std::string_view(buf.data(), end - buf.data());
+            RenderFont(
+                *_fontLog,
+                glm::vec2(
+                    10 + (30 + 3) * _fontLog->pointSize(),
+                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
+                ),
+                levelText,
+                color
+            );
         }
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 30 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
-            lvl,
-            color
-        );
-
-        RenderFont(
-            *_fontLog,
-            glm::vec2(10 + 41 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(
+                10 + 44 * _fontLog->pointSize(),
+                _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
+            ),
             message,
             white
         );
-        ++nr;
+        ++nRows;
     }
 }
 

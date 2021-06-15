@@ -3,20 +3,32 @@ local sun_transforms_asset = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local NeptuneBarycenter = {
-    Identifier = "NeptuneBarycenter",
-    Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NEPTUNE BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Neptune Barycenter",
-        Path = "/Solar System/Planets/Neptune",
-        Hidden = true
+  Identifier = "NeptuneBarycenter",
+  Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEPTUNE BARYCENTER",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "Neptune Barycenter",
+    Path = "/Solar System/Planets/Neptune",
+    Hidden = true,
+    Description = [[ Neptune Barycenter position]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneBarycenter })
+
+
+asset.meta = {
+  Name = "Neptune Transforms",
+  Version = "1.0",
+  Description = [[ Neptune Barycenter transform]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"NeptuneBarycenter"}
+}

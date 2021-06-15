@@ -5,59 +5,89 @@ asset.require("spice/base")
 
 
 local EarthBarycenter = {
-    Identifier = "EarthBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "EARTH",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Earth Barycenter",
-        Path = "/Solar System/Planets/Earth",
-        Hidden = true
+  Identifier = "EarthBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EARTH BARYCENTER",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "Earth Barycenter",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+local EarthCenter = {
+  Identifier = "EarthCenter",
+  Parent = EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "EARTH",
+      Observer = "EARTH BARYCENTER"
+    }
+  },
+  GUI = {
+    Name = "Earth Center",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
 }
 
 local EarthInertial = {
-    -- The default reference frame for Earth-orbiting satellites
-    Identifier = "EarthInertial",
-    Parent = EarthBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "J2000",
-            DestinationFrame = "GALACTIC",
-        }
-    },
-    GUI = {
-        Name = "Earth Inertial",
-        Path = "/Solar System/Planets/Earth",
-        Hidden = true
+  -- The default reference frame for Earth-orbiting satellites
+  Identifier = "EarthInertial",
+  Parent = EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "J2000",
+      DestinationFrame = "GALACTIC",
     }
+  },
+  GUI = {
+    Name = "Earth Inertial",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
 }
 
 local EarthIAU = {
-    Identifier = "EarthIAU",
-    Parent = EarthBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_EARTH",
-            DestinationFrame = "GALACTIC",
-        }
-    },
-    GUI = {
-        Name = "Earth IAU",
-        Path = "/Solar System/Planets/Earth",
-        Hidden = true
+  Identifier = "EarthIAU",
+  Parent = EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_EARTH",
+      DestinationFrame = "GALACTIC",
     }
+  },
+  GUI = {
+    Name = "Earth IAU",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    EarthBarycenter,
-    EarthInertial,
-    EarthIAU
+  EarthBarycenter,
+  EarthCenter,
+  EarthInertial,
+  EarthIAU
 })
+
+
+asset.meta = {
+  Name = "Earth Transforms",
+  Version = "1.0",
+  Description = [[ Earth transforms: Earth Barycenter, Earth Center, Earth Inertial, 
+    Earth IAU. A scene graph node is created for each transform.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"EarthBarycenter", "EarthCenter", "EarthInertial", "EarthIAU"}
+}

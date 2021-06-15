@@ -1,4 +1,15 @@
-asset.request('./minor/gallic_group')
-asset.request('./minor/inuit_group')
-asset.request('./minor/norse_group')
-asset.request('./minor/other_group')
+asset.require('./minor/gallic_group')
+asset.require('./minor/inuit_group')
+asset.require('./minor/norse_group')
+asset.require('./minor/other_group')
+
+
+asset.meta = {
+  Name = "Saturn Minor Moons",
+  Version = "1.0",
+  Description = [[ Meta asset containing four moon groups: Gallic, Inuit, Norse and
+    Other]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

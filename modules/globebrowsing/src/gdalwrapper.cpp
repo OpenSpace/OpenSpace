@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <cpl_conv.h>
 #include <gdal.h>
 
@@ -83,14 +84,6 @@ GdalWrapper& GdalWrapper::ref() {
     return *_singleton;
 }
 
-int64_t GDALCacheUsed() {
-    return GDALGetCacheUsed64();
-}
-
-int64_t GDALMaximumCacheSize() {
-    return GDALGetCacheMax64();
-}
-
 bool GdalWrapper::logGdalErrors() const {
     return _logGdalErrors;
 }
@@ -106,12 +99,17 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
+    ZoneScoped
+
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
-    CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
-    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").c_str());
+    CPLSetConfigOption(
+        "GDAL_DATA",
+        absPath("${MODULE_GLOBEBROWSING}/gdal_data").string().c_str()
+    );
+    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").string().c_str());
     CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
 
     CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
@@ -129,12 +127,12 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 }
 
 void GdalWrapper::setGdalProxyConfiguration() {
-    if (global::configuration.httpProxy.usingHttpProxy) {
-        const std::string address = global::configuration.httpProxy.address;
-        const unsigned int port = global::configuration.httpProxy.port;
-        const std::string user = global::configuration.httpProxy.user;
-        const std::string password = global::configuration.httpProxy.password;
-        std::string auth = global::configuration.httpProxy.authentication;
+    if (global::configuration->httpProxy.usingHttpProxy) {
+        const std::string address = global::configuration->httpProxy.address;
+        const unsigned int port = global::configuration->httpProxy.port;
+        const std::string user = global::configuration->httpProxy.user;
+        const std::string password = global::configuration->httpProxy.password;
+        std::string auth = global::configuration->httpProxy.authentication;
         std::transform(
             auth.begin(),
             auth.end(),

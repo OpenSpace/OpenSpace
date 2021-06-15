@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    global::callback::preSync.emplace_back([this]() {
+    global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule")
 
         preSync();
@@ -84,10 +84,10 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     }
     ghoul::Dictionary interfaces = configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-    for (const std::string& key : interfaces.keys()) {
+    for (std::string_view key : interfaces.keys()) {
         ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
 
-        // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the 
+        // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the
         // openspace.cfg file not corrupt the heap and cause a potential crash at shutdown
         // (see ticket https://github.com/OpenSpace/OpenSpace/issues/982)
         // The AllowAddresses are specified externally and are injected here
@@ -100,7 +100,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             ServerInterface::createFromDictionary(interfaceDictionary);
 
 
-        if (global::windowDelegate.isMaster()) {
+        if (global::windowDelegate->isMaster()) {
             serverInterface->initialize();
         }
 
@@ -113,7 +113,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
-    if (!global::windowDelegate.isMaster()) {
+    if (!global::windowDelegate->isMaster()) {
         return;
     }
 
@@ -185,7 +185,7 @@ void ServerModule::disconnectAll() {
     ZoneScoped
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
-        if (global::windowDelegate.isMaster()) {
+        if (global::windowDelegate->isMaster()) {
             serverInterface->deinitialize();
         }
     }
@@ -204,8 +204,9 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     ZoneScoped
 
     std::string messageString;
+    messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        std::lock_guard<std::mutex> lock(_messageQueueMutex);
+        std::lock_guard lock(_messageQueueMutex);
         _messageQueue.push_back({ connection, std::move(messageString) });
     }
 }
@@ -213,7 +214,7 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 void ServerModule::consumeMessages() {
     ZoneScoped
 
-    std::lock_guard<std::mutex> lock(_messageQueueMutex);
+    std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
         if (std::shared_ptr<Connection> c = m.connection.lock()) {

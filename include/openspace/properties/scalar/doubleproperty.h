@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,24 @@
  */
 
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double)
+class DoubleProperty : public NumericalProperty<double> {
+public:
+    DoubleProperty(Property::PropertyInfo info, double value = 0.0,
+        double minValue = std::numeric_limits<double>::lowest(),
+        double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<double>::operator=;
+
+protected:
+    double fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

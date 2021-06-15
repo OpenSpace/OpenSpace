@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,21 +38,19 @@ struct InitializeData {};
 struct TransformData {
     glm::dvec3 translation = glm::dvec3(0.0);
     glm::dmat3 rotation = glm::dmat3(1.0);
-    double scale = 0.0;
+    glm::dvec3 scale = glm::dvec3(1.0);
 };
 
 struct UpdateData {
     TransformData modelTransform;
     const Time time;
     const Time previousFrameTime;
-    const bool doPerformanceMeasurement;
 };
 
 struct RenderData {
     const Camera& camera;
     const Time time;
-    bool doPerformanceMeasurement = false;
-    int renderBinMask = -1;
+    int8_t renderBinMask = -1;
     TransformData modelTransform;
 };
 
