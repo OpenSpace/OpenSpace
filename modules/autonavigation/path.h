@@ -58,16 +58,17 @@ public:
     CameraPose interpolatedPose(double distance) const;
 
 private:
-    double speedAtTime(double time) const;
     glm::dquat interpolateRotation(double u) const;
+    double speedAlongPath(double traveledDistance);
 
     Waypoint _start;
     Waypoint _end;
     double _duration;
     CurveType _curveType;
 
-    SpeedFunction _speedFunction;
     std::unique_ptr<PathCurve> _curve;
+
+    double _speedFactorFromDuration = 1.0;
 
     // Playback variables
     double _traveledDistance = 0.0;

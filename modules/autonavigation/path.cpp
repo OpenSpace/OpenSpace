@@ -61,8 +61,6 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
             throw ghoul::MissingCaseException();
     }
 
-    _speedFunction = SpeedFunction(SpeedFunction::Type::DampenedQuintic);
-
     const auto defaultDuration = [](double pathlength) {
         auto module = global::moduleEngine->module<AutoNavigationModule>();
         const double speedScale = module->AutoNavigationHandler().speedScale();
@@ -70,6 +68,21 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
     };
 
     _duration = duration.value_or(defaultDuration(pathLength()));
+
+    // Compute speed factor to match the generated path length and duration, by
+    // traversing the path and computing how much faster/slower it should be
+    const int nSteps = 500;
+    const double dt = (_duration / nSteps) > 0.01 ? (_duration / nSteps) : 0.01;
+
+    while (!hasReachedEnd()) {
+        traversePath(dt);
+    }
+
+    _speedFactorFromDuration = _progressedTime / _duration;
+
+    // Reset playback variables
+    _traveledDistance = 0.0;
+    _progressedTime = 0.0;
 }
 
 Waypoint Path::startPoint() const { return _start; }
@@ -85,14 +98,8 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 }
 
 CameraPose Path::traversePath(double dt) {
-    const int resolution = 50;
-
-    double displacement = helpers::simpsonsRule(
-        _progressedTime,
-        _progressedTime + dt,
-        resolution,
-        [this](double t) { return speedAtTime(t); }
-    );
+    const double speed = _speedFactorFromDuration * speedAlongPath(_traveledDistance);
+    const double displacement =  dt * speed;
 
     _progressedTime += dt;
     _traveledDistance += displacement;
@@ -107,10 +114,6 @@ std::string Path::currentAnchor() const {
 
 bool Path::hasReachedEnd() const {
     return (_traveledDistance / pathLength()) >= 1.0;
-}
-
-double Path::speedAtTime(double time) const {
-    return _speedFunction.scaledValue(time, _duration, pathLength());
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
@@ -174,6 +177,47 @@ glm::dquat Path::interpolateRotation(double t) const {
         default:
             throw ghoul::MissingCaseException();
     }
+}
+
+double Path::speedAlongPath(double traveledDistance) {
+    const glm::dvec3 endNodePos = _end.node()->worldPosition();
+    const glm::dvec3 startNodePos = _start.node()->worldPosition();
+
+    const CameraPose prevPose = interpolatedPose(_traveledDistance);
+    const double distanceToEndNode = glm::distance(prevPose.position, endNodePos);
+    const double distanceToStartNode = glm::distance(prevPose.position, startNodePos);
+
+    // Decide which is the closest node
+    SceneGraphNode* closestNode = _start.node();
+    glm::dvec3 closestPos = startNodePos;
+
+    if (distanceToEndNode < distanceToStartNode) {
+        closestPos = endNodePos;
+        closestNode = _end.node();
+    }
+
+    const double distanceToClosestNode = glm::distance(closestPos, prevPose.position);
+    double speed = distanceToClosestNode;
+
+    // Dampen speed in beginning of path
+    const double startUpDistance = 2.0 * _start.node()->boundingSphere();
+    if (_traveledDistance < startUpDistance) {
+        speed *= _traveledDistance / startUpDistance + 0.01;
+    }
+
+    // Dampen speed in end of path
+    // Note: this leads to problems when the full length of the path is really big
+    const double closeUpDistance = 2.0 * _end.node()->boundingSphere();
+    if (_traveledDistance > (pathLength() - closeUpDistance)) {
+        const double remainingDistance = pathLength() - _traveledDistance;
+        speed *= remainingDistance / closeUpDistance + 0.01;
+    }
+
+    // TODO: also dampen speed based on curvature, or make sure the curve has a rounder shape
+
+    // TODO: check for when path is shorter than the starUpDistance or closeUpDistance variables
+
+    return speed;
 }
 
 } // namespace openspace::autonavigation
