@@ -91,7 +91,7 @@ private:
         filterLower, filterUpper, scalingMode, colorTableRange, domainLimZ, nodeSkip,
         nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
         nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
-        distanceThreshold, enhanceMethod, flowColor, usingParticles, //activeStreamNumber
+        distanceThreshold, enhanceMethod, flowColor, usingParticles,
         usingInterestingStreams, particleSize, particleSpacing, particleSpeed)
         _uniformCache;
     UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
@@ -102,48 +102,14 @@ private:
 
     // ------------------------------------ STRINGS ------------------------------------//
     std::string _binarySourceFolderPath;
-    // ------------------------------------- FLAGS -------------------------------------//
-    // Used for 'runtime-states'. True when loading a new state from disk on another
-    // thread.
-    bool _isLoadingStateFromDisk = false;
-    // False => states are stored in RAM (using 'in-RAM-states'), True => states are
-    // loaded from disk during runtime (using 'runtime-states')
-    bool _loadingStatesDynamically = false;
-    // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk.
-    // False => the previous frame's state should still be shown
-    bool _mustLoadNewStateFromDisk = true;
-    // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
-    // False => the previous frame's state should still be shown
-    bool _needsUpdate = false;
-
-    // Used for changing energybins during runtime, as to prevent loading and update issue
-    // in render. 
-    bool _isLoadingNewEnergyBin = false;
-
-    //can be used when loading in emin03 files for the first time. 
-    bool _shouldwritecacheforemin03 = false;
-    //Used for reading directly from sync-folder
-    bool _shouldreadBinariesDirectly = true;
-    bool _shouldloademin03directly = true;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
-    // Active index of _states. If(==-1)=>no state available for current time. Always the
-    // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else
-    // always = 0
-    int _activeStateIndex = -1;
+
     // Active index of _startTimes
     int _activeTriggerTimeIndex = -1;
     // Number of states in the sequence
     uint32_t _nStates = 0;
 
-    // 383 for lower resolution, 863 for higher resolution.
-    //const int _numberofStreams = 383;
-    //const int _numberofStreams = 863;
-    const int _numberofStreams = 3;
-
-    // In setup it is used to scale JSON coordinates. During runtime it is used to scale
-    // domain limits.
-    float _scalingFactor = 1.f;
     // Estimated end of sequence.
     double _sequenceEndTime;
     // OpenGL Vertex Array Object
@@ -157,8 +123,6 @@ private:
     GLuint _vertexFilteringBuffer = 0;
     // OpenGL Vertex Buffer Object containing the index of nodes
     GLuint _vertexindexBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the stream number for every node. 
-    GLuint _vertexStreamNumberBuffer = 0;
 
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
@@ -172,16 +136,10 @@ private:
     std::unique_ptr<TransferFunction> _transferFunctionEarth;
     // Transfer function used to color line flow
     std::unique_ptr<TransferFunction> _transferFunctionFlow;
-    // Transfer function used to color illuminance for nodes close to the Earth
-    //std::unique_ptr<TransferFunction> _transferFunctionIlluminance;
-    // Transfer function used to color illuminance for nodes close to the Earth2
-    //std::unique_ptr<TransferFunction> _transferFunctionIlluminance2;
 
     // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'ColorFlux'
     std::vector<std::string> _colorTablePaths;
-    // Values represents min & max values represented in the color table
-    std::vector<glm::vec2> _colorTableRanges;
     // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions
@@ -196,10 +154,6 @@ private:
     std::vector<std::vector<float>> _statesColor;
     // Stores the states radius
     std::vector<std::vector<float>> _statesRadius;
-    //used to show vertexes dependent on specific streams
-    std::vector<int> _vertexStreamnumber;
-    // vector storing "interesting streams", read in by a json file.
-    std::vector<int> _interestingStreams;
 
     // ---------------------------------- Properties ---------------------------------- //   
     // Group to hold properties regarding distance to earth
@@ -311,25 +265,17 @@ private:
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     void definePropertyCallbackFunctions();
-    //std::vector<std::string> LoadJsonfile(std::string filepath);
     void populateStartTimes();
     void computeSequenceEndTime();
     void setModelDependentConstants();
     void setupProperties();
     void updateActiveTriggerTimeIndex(double currentTime);
 
-    //void writeCachedFile() const;
-    //bool readCachedFile(const std::string& file, const std::string& energybin);
-    //bool loadFilesIntoRam();
-    void loadNodeData();
-    //void createStreamnumberVector();
-    bool loadBinaryfilesDirectly(const std::string& energybin);
+    void loadNodeData(const int& energybinOption);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexFilteringBuffer();
-    //void updateVertexStreamNumberBuffer();
-    //void updateArrow();
 
     // ----------------------TEMPORARY VARIABLES ------------------
     //properties::StringProperty _spriteTexturePath;

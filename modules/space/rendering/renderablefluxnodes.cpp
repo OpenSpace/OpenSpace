@@ -43,13 +43,9 @@
 #include <functional> 
 #include <fstream>
 #include <thread>
-#include <openspace/json.h>
 #include <openspace/query/query.h>
 #include <sys/stat.h>
 #include <optional>
-
-// This is a call to use the nlohmann json file
-using json = nlohmann::json;
 
 namespace {
     // log category
@@ -59,8 +55,6 @@ namespace {
     constexpr const GLuint VaPosition   = 0;    // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaColor      = 1;    // MUST CORRESPOND TO THE SHADER PROGRAM
     constexpr const GLuint VaFiltering  = 2;    // MUST CORRESPOND TO THE SHADER PROGRAM
-    //constexpr const GLuint VaStreamnumber = 3;  // MUST CORRESPOND TO THE SHADER PROGRAM
-   // constexpr const GLuint Arrow = 4;           // MUST CORRESPOND TO THE SHADER PROGRAM
 
     constexpr int8_t CurrentCacheVersion = 2;
     
@@ -71,7 +65,7 @@ namespace {
         "nodeSkip", "nodeSkipDefault", "nodeSkipEarth", "nodeSkipMethod", 
         "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold", "fluxColorAlpha", 
         "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", 
-        "enhanceMethod", "flowColor", "usingParticles", // "activeStreamNumber",
+        "enhanceMethod", "flowColor", "usingParticles", 
         "usingInterestingStreams","particleSize", "particleSpacing", "particleSpeed"
     };
     constexpr const std::array<const char*, 14> UniformNames2 = {
@@ -86,7 +80,7 @@ namespace {
         "GoesEnergy",
         "Goes Energy",
         "Select which energy bin you want to show. Emin01 is values > 10 Mev,"
-        "Emin03 is values > 100 Mev."
+        "Default is Emin03 where values > 100 Mev."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
         "colorMode",
@@ -176,8 +170,7 @@ namespace {
         "The value of alpha for the flux color mode."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-    FluxColorAlphaIlluminanceInfo = 
-    {
+                                                        FluxColorAlphaIlluminanceInfo = {
         "fluxColorAlphaIlluminance",
         "Flux Color Alpha for illuminance",
         "The value of alpha for the flux color mode."
@@ -188,8 +181,7 @@ namespace {
         "Select nodes to skip depending on flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-    RadiusNodeSkipThresholdInfo = 
-    {
+                                                          RadiusNodeSkipThresholdInfo = {
         "skippingNodesByRadius",
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
@@ -209,11 +201,6 @@ namespace {
         "Threshold for distance between planet",
         "Enhance the size of nodes dependent on distance to planet."
     };
-    //constexpr openspace::properties::Property::PropertyInfo ActiveStreamNumberInfo = {
-    //    "activeStreamNumber",
-    //    "activeStream",
-    //    "The active stream to show"
-    //};
     constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
         "misalignedIndex",
         "Index to shift sequence number",
@@ -265,19 +252,13 @@ namespace {
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance."
     };
-    /*constexpr openspace::properties::Property::PropertyInfo MinNodeDistanceSizeInfo = {
-        "minNodeDistanceSize",
-        "Min Node Distance Size",
-        "The minimum size of the nodes at a certin distance"
-    };*/
     constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
         "nodeDistanceThreshold",
         "Node Distance Threshold",
         "Threshold for where to interpolate between the max and min node distance."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-    CameraPerspectiveEnabledInfo = 
-    {
+                                                        CameraPerspectiveEnabledInfo = {
         "cameraPerspectiveEnabled",
         "Use Camera perspective",
         "Camera perspective changes the size of the nodes dependent on "
@@ -300,16 +281,14 @@ namespace {
 
     };
     constexpr openspace::properties::Property::PropertyInfo 
-    RadiusPerspectiveEnabledInfo = 
-    {
+                                                        RadiusPerspectiveEnabledInfo = {
         "radiusPerspectiveEnabled",
         "Include radius with cameraperspective",
         "If false, then nodes closer to the sun will not be larger "
         "regardless of distance to camera."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-    PerspectiveDistanceFactorInfo = 
-    {
+                                                        PerspectiveDistanceFactorInfo = {
         "perspectiveDistanceFactor",
         "Perspective Distance factor",
         "This value decides how far away the camera must be to start "
@@ -362,6 +341,8 @@ namespace {
         std::optional<std::vector<std::string>> colorTablePaths;
         // [[codegen::verbatim(LineWidthInfo.description)]]
         //float lineWidth;
+        // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
+        std::optional<int> energyBin;
     };
 #include "renderablefluxnodes_codegen.cpp"
 
@@ -420,7 +401,6 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _pEarthdistGroup({ "Earthfocus" })
     , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1.0f)
-    //, _pActiveStreamNumber(ActiveStreamNumberInfo, 0, 0, _numberofStreams)
     , _pMisalignedIndex(MisalignedIndexInfo, 0, -5, 20)
     , _pFlowColor(
         FlowColorInfo,
@@ -436,7 +416,6 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _pUseFlowColor(UseFlowColorInfo, false)
     , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
-    //, _pMinNodeDistanceSize(MinNodeDistanceSizeInfo, 1.f, 1.f, 7.f)
     , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
     , _pCameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
@@ -451,11 +430,11 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _pPulseEnabled(pulseEnabledInfo, false)
     , _pGaussianPulseEnabled(gaussianPulseEnabledInfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
-    //, _pTestChange(TestChangeInfo, 0.5f, 0.0f, 1.f)
 
 {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
 
     if (p.colorTablePaths.has_value()) {
         _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
@@ -467,6 +446,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         _transferFunctionFlow =
             std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]).string());
     }
+    _pColorTablePath = _colorTablePaths[0];
 
     _binarySourceFolderPath = p.binarySourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
@@ -494,12 +474,52 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
             _binarySourceFolderPath
         ));
     }
-    
 
+    // --------------------- Add Options to OptionProperties --------------------- //
+    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
+    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
+    _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+    _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+
+    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
+    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
+    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
+    _pScalingmethod.addOption(
+        static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
+    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
+
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
+    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
+    _pNodeskipMethod.addOption(
+        static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
+
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
+
+    if (p.energyBin.has_value()) {
+        _pGoesEnergyBins.setValue(p.energyBin.value());
+    }
+    else { // default int 1 == Emin03 == MeV>100
+        LWARNING("Assuming default value 1, meaning Emin03");
+        _pGoesEnergyBins.setValue(1);
+    }
 }
 
 void RenderableFluxNodes::initialize() {
+    setModelDependentConstants();
 
+    populateStartTimes();
+
+    loadNodeData(_pGoesEnergyBins.option().value);
+
+    computeSequenceEndTime();
 }
     
 void RenderableFluxNodes::initializeGL() {
@@ -518,28 +538,12 @@ void RenderableFluxNodes::initializeGL() {
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, UniformNames2);
-
-    setModelDependentConstants();
-       
-    populateStartTimes();
-
-    //createStreamnumberVector();
-    // Either we load in the data dynamically or statically at the start. 
-    // If we should load in everything to Ram this if statement is true.
-    if (!_loadingStatesDynamically) {
-        loadNodeData();
-    }
-    computeSequenceEndTime();   
-
-    // If we are loading in states dynamically we would read new states during runtime, 
-    // parsing json files pretty slowly.
+    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, UniformNames2); 
       
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
     glGenBuffers(1, &_vertexFilteringBuffer);
-    //glGenBuffers(1, &_vertexStreamNumberBuffer);
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
@@ -555,25 +559,7 @@ void RenderableFluxNodes::definePropertyCallbackFunctions() {
     });
 
     _pGoesEnergyBins.onChange([this] {
-        if (_pGoesEnergyBins.option().value == 1) {  // 1 == Emin03 == Mev > 100
-            if (_shouldreadBinariesDirectly) {
-                // empty string == emin03 for default
-                bool success = loadBinaryfilesDirectly("");
-                if (success) return;
-            }
-        }
-        else if (_pGoesEnergyBins.option().value == 0) {  // 0 == Emin01 == Mev > 10
-            if (_shouldreadBinariesDirectly) {
-                bool success = loadBinaryfilesDirectly("_emin01");
-                if (success) return;
-            }
-        }
-        // Emin01 = >10 MeV. Emin03 = >100 Mev
-        else {
-            throw ghoul::RuntimeError(
-                "Error: Unknown EnergyBin. Supports 0=Emin01 and 1=Emin03");
-            return;
-        }
+        loadNodeData(_pGoesEnergyBins.option().value);
     });
 }
 
@@ -592,228 +578,21 @@ void RenderableFluxNodes::setModelDependentConstants() {
     _pDomainZ = glm::vec2(limitZMin, limitZMax);
 }
 
-void RenderableFluxNodes::loadNodeData() {
-
-    if (_shouldreadBinariesDirectly) {
-        bool success = false;
-        if(_shouldloademin03directly){
-            success = loadBinaryfilesDirectly("");
-            //_pGoesEnergyBins.addOption(1,"");
-        }
-        else {
-            success = loadBinaryfilesDirectly("_emin01");
-        }
-        if(success) return;
-    }
-    //std::string _file = "StreamnodesCachePositionv3";
-    //std::string _file2 = "StreamnodesCacheColorv3";
-    //std::string _file3 = "StreamnodesCacheRadiusv3";
-    //if (_shouldwritecacheforemin03) {
-    //    _file = "StreamnodesCachePosition_emin03";
-    //    _file2 = "StreamnodesCacheColor_emin03";
-    //    _file3 = "StreamnodesCacheRadius_emin03";
-    //}
-    ////if the files doesn't exist we create them, this is just so that we then can 
-    //// cache the actual binary files
-    //if (!std::filesystem::is_regular_file(_file)) {
-    //    std::ofstream fileStream(_file, std::ofstream::binary);
-    //    std::ofstream fileStream2(_file2, std::ofstream::binary);
-    //    std::ofstream fileStream3(_file3, std::ofstream::binary);
-
-    //    fileStream.write(
-    //        reinterpret_cast<const char*>(&CurrentCacheVersion),
-    //        sizeof(int8_t)
-    //    );
-    //    fileStream2.write(
-    //        reinterpret_cast<const char*>(&CurrentCacheVersion),
-    //        sizeof(int8_t)
-    //    );
-    //    fileStream3.write(
-    //        reinterpret_cast<const char*>(&CurrentCacheVersion),
-    //        sizeof(int8_t)
-    //    );
-    //}
-
-    //std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file);
-    // //Check if we have a cached binary file for the data
-    //bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
-
-    //if (hasCachedFile) {
-    //    LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
-    //        cachedFile, _file
-    //    ));
-    //     //Read in the data from the cached file
-    //    bool success = loadBinaryfilesDirectly(""); //readCachedFile(cachedfile, "")
-    //    if (!success) {
-    //        // If something went wrong it is probably because we changed 
-    //        // the cache version or some file was not found.
-    //        LWARNING("Cache file removed, something went wrong loading it.");
-    //        // If thats the case we want to load in the files from json format 
-    //        // and then write new cached files. 
-    //        loadFilesIntoRam(); //~40min
-    //        writeCachedFile();
-    //    }
-    //}
-    //else {
-    //     //We could not find the cachedfiles, parse the data statically 
-    //     //instead and write it to binary format.
-    //    loadFilesIntoRam();
-    //    writeCachedFile();
-    //}
-
-}
-
-//void RenderableFluxNodes::createStreamnumberVector() {
-//    int nPoints = 1999;
-//    int lineStartIdx = 0;
-//    
-//    for (int i = 0; i < _numberofStreams; ++i) {
-//        for (int k = 0; k < nPoints; ++k) {
-//                
-//            _vertexStreamnumber.push_back(i);
-//            //lineStartIdx++;
-//        }
-//            
-//        _lineCount.push_back(static_cast<GLsizei>(nPoints));
-//        _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-//        lineStartIdx += nPoints;
-//    }
-//}
-
-//bool RenderableFluxNodes::loadFilesIntoRam() {
-//    LDEBUG("Did not find cached file," 
-//        "loading in data and converting only for this run,"
-//        "this step wont be needed next time you run Openspace ");
-//    // Loop through all the files dependent on how many states we would like to read in
-//    for (size_t j = 0; j < _nStates; ++j) {
-//            
-//        std::ifstream streamdata(_sourceFiles[j]);
-//        if (!streamdata.is_open())
-//        {
-//            LDEBUG("did not read the data.json file");
-//            return false;
-//        }
-//        json jsonobj = json::parse(streamdata);
-//           
-//        size_t lineStartIdx = 0;
-//        //const int _numberofStreams = 383;
-//       // const int _numberofStreams = 863;
-//        constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
-//            
-//        // Clear all the vectors in order to not have old states information in them
-//        _vertexPositions.clear();
-//        _lineCount.clear();
-//        _lineStart.clear();
-//        _vertexRadius.clear();
-//        _vertexColor.clear();
-//
-//        const size_t nPoints = 1;
-//
-//        // Loop through all the streams
-//        for (int i = 0; i < _numberofStreams; ++i) {
-//
-//            // Make an iterator at stream number i, then loop through that stream 
-//            // by iterating forward
-//            for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
-//                lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
-//                    
-//                //get all the nodepositional values and Flux value
-//                std::string r = (*lineIter)["R"].get<std::string>();
-//                std::string phi = (*lineIter)["Phi"].get<std::string>();
-//                std::string theta = (*lineIter)["Theta"].get<std::string>();
-//                std::string flux = (*lineIter)["Flux"].get<std::string>();
-//                          
-//                // Convert the values to float
-//                float rValue = stringToFloat(r);
-//                float phiValue = stringToFloat(phi);
-//                float thetaValue = stringToFloat(theta);
-//                float fluxValue = stringToFloat(flux);
-//
-//                // Push back values in order to be able to filter and color nodes 
-//                // by different threshold etc.
-//                float rTimesFluxValue = fluxValue;
-//                _vertexColor.push_back(rTimesFluxValue);
-//                _vertexRadius.push_back(rValue);
-//                rValue = rValue * AuToMeter;
-//
-//                glm::vec3 sphericalcoordinates = glm::vec3(rValue, phiValue, thetaValue);
-//
-//                // Convert the position from spherical coordinates to cartesian.
-//                glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
-//                  
-//                _vertexPositions.push_back(position);
-//              
-//                _lineCount.push_back(static_cast<GLsizei>(nPoints));
-//                _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-//                lineStartIdx += nPoints;
-//            }
-//        }
-//        LDEBUG("Loaded in: " + std::to_string(_statesPos.size()) + 
-//            " frames of nodedata out of " + std::to_string(_nStates) + " total.");
-//           
-//        // Push back the vectors into our statesvectors
-//        _statesPos.push_back(_vertexPositions);     
-//        _statesColor.push_back(_vertexColor);
-//        _statesRadius.push_back(_vertexRadius);
-//    }    
-//    return true;
-//}
-
-//void RenderableFluxNodes::writeCachedFile() const {
-//    // Todo, write all of the vertexobjects into here 
-//    std::string _file = "StreamnodesCachePositionv3";
-//    std::string _file2 = "StreamnodesCacheColorv3";
-//    std::string _file3 = "StreamnodesCacheRadiusv3";
-//
-//    if(_shouldwritecacheforemin03){
-//        _file = "StreamnodesCachePosition_emin03";
-//        _file2 = "StreamnodesCacheColor_emin03";
-//        _file3 = "StreamnodesCacheRadius_emin03";
-//    }
-//    std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file);
-//    std::ofstream fileStream(cachedFile, std::ofstream::binary);
-//
-//    if (!fileStream.good()) {
-//        LERROR(fmt::format("Error opening file '{}' for save cache file", 
-//            cachedFile
-//        ));
-//        return;
-//    }
-//
-//    fileStream.write(
-//        reinterpret_cast<const char*>(&CurrentCacheVersion),
-//        sizeof(int8_t)
-//    );
-//        
-//    std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(_file2);
-//    std::ofstream fileStream2(cachedFile2, std::ofstream::binary);
-//
-//    std::string cachedFile3 = FileSys.cacheManager()->cachedFilename(_file3);
-//    std::ofstream fileStream3(cachedFile3, std::ofstream::binary);
-//
-//    int32_t nValues = static_cast<int32_t>(_vertexRadius.size());
-//    if (nValues == 0) {
-//        throw ghoul::RuntimeError("Error writing cache: No values were loaded");
-//        return;
-//    }
-//
-//    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-//
-//    for(unsigned int i = 0; i < _nStates; ++i){
-//        fileStream.write(reinterpret_cast<const char*>(_statesPos[i].data()),
-//            nValues * sizeof(glm::vec3));
-//        fileStream2.write(reinterpret_cast<const char*>(_statesColor[i].data()), 
-//            nValues * sizeof(float));
-//        fileStream3.write(reinterpret_cast<const char*>(_statesRadius[i].data()), 
-//            nValues * sizeof(float));
-//    }
-//}
-
-bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) {
+void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
     constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
 
     LDEBUG("Loading in binary files directly from sync folder");
-    
+
+    std::string energybin;
+    switch (energybinOption) {
+    case 0:
+        energybin = "_emin01";
+    break;
+    case 1:
+        energybin = "_emin03";
+    break;
+    }
+
     std::string _file = _binarySourceFolderPath + "\\positions" + energybin;
     std::string _file2 = _binarySourceFolderPath + "\\fluxes" + energybin;
     std::string _file3 = _binarySourceFolderPath + "\\radiuses" + energybin;
@@ -823,8 +602,8 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
     std::ifstream fileStream3(_file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        _isLoadingNewEnergyBin = false;
-        return false;
+        LERROR(fmt::format("Could not read file '{}'", _file));
+        return;
     }
 
     uint32_t nNodesPerTimestep = 0;
@@ -833,6 +612,12 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
     uint32_t nTimeSteps = 0;
     fileStream.read(reinterpret_cast<char*>(&nTimeSteps), sizeof(uint32_t));
     _nStates = nTimeSteps;
+
+    if (_nStates != _startTimes.size()) {
+        LERROR("number of states, _nStates, and number of start times, _startTimes, "
+            "dont match");
+        return;
+    }
 
     _statesColor.clear();
     _statesPos.clear();
@@ -865,11 +650,6 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
         _statesRadius.push_back(_vertexRadius);
         _vertexRadius.clear();
     }
-
-    _isLoadingNewEnergyBin = false;
-    bool success = fileStream.good();
-
-    return success;
 }
 
 void RenderableFluxNodes::setupProperties() {
@@ -910,8 +690,6 @@ void RenderableFluxNodes::setupProperties() {
     _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
     _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
     _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
-    //_pNodesamountGroup.addProperty(_pActiveStreamNumber);
-    //_pNodesamountGroup.addProperty(_pMinNodeDistanceSize);
     _pNodesamountGroup.addProperty(_pMaxNodeDistanceSize);
     _pNodesamountGroup.addProperty(_pNodeDistanceThreshold);
 
@@ -926,36 +704,6 @@ void RenderableFluxNodes::setupProperties() {
     _pFlowGroup.addProperty(_pFlowSpeed);
     _pFlowGroup.addProperty(_pUseFlowColor);
 
-   // _pStreamGroup.addProperty(_pTestChange);
-
-    // --------------------- Add Options to OptionProperties --------------------- //
-    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
-    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
-    _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
-    _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
-    _pScalingmethod.addOption(
-        static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
-        
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
-    _pNodeskipMethod.addOption(
-        static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
-
-    _pEnhancemethod.addOption(
-        static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
-    _pEnhancemethod.addOption(
-        static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
-    _pEnhancemethod.addOption(
-        static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
-    _pEnhancemethod.addOption(
-        static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
-
     _pCameraPerspectiveGroup.addProperty(_pCameraPerspectiveEnabled);
     _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
     _pCameraPerspectiveGroup.addProperty(_pDrawingCircles);
@@ -969,8 +717,6 @@ void RenderableFluxNodes::setupProperties() {
     _pCameraPerspectiveGroup.addProperty(_pPulseAlways);
 
     definePropertyCallbackFunctions();
-    // Set default
-    _pColorTablePath = _colorTablePaths[0];
 }
 
 void RenderableFluxNodes::deinitializeGL() {
@@ -986,23 +732,9 @@ void RenderableFluxNodes::deinitializeGL() {
     glDeleteBuffers(1, &_vertexFilteringBuffer);
     _vertexFilteringBuffer = 0;
 
-    //glDeleteBuffers(1, &_vertexStreamNumberBuffer);
-    //_vertexStreamNumberBuffer = 0;
-
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
-    }
-
-    // Stall main thread until thread that's loading states is done!
-    bool printedWarning = false;
-    while (_isLoadingStateFromDisk) {
-        if (!printedWarning) {
-            LWARNING("Trying to destroy class when an active thread is still using it");
-            printedWarning = true;
-        }
-        // TODO Replace sleep, (at least this is not during runtime)
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
@@ -1126,7 +858,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform("modelViewProjection",
             data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
-        //glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
         glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
     
@@ -1155,8 +886,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
             _pFluxColorAlphaIlluminance);
         _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
         _shaderProgram->setUniform(_uniformCache.distanceThreshold, _pDistanceThreshold);
-        //_shaderProgram->setUniform(_uniformCache.activeStreamNumber,
-        //    _pActiveStreamNumber);
         _shaderProgram->setUniform(_uniformCache.enhanceMethod, _pEnhancemethod);
         _shaderProgram->setUniform(_uniformCache.flowColor, _pFlowColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pFlowEnabled);
@@ -1165,14 +894,11 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform(_uniformCache.particleSize, _pFlowParticleSize);
         _shaderProgram->setUniform(_uniformCache.particleSpacing, _pFlowParticleSpacing);
         _shaderProgram->setUniform(_uniformCache.particleSpeed, _pFlowSpeed);
-        
         _shaderProgram->setUniform(_uniformCache2.time,
             global::windowDelegate->applicationTime() * -1);
         _shaderProgram->setUniform(_uniformCache2.flowColoring, _pUseFlowColor);
-        //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
         _shaderProgram->setUniform(_uniformCache2.maxNodeDistanceSize, 
             _pMaxNodeDistanceSize);
-        //_shaderProgram->setUniform("nodeDistanceThreshold", _pNodeDistanceThreshold);
         _shaderProgram->setUniform(_uniformCache2.usingCameraPerspective, 
             _pCameraPerspectiveEnabled);
         _shaderProgram->setUniform(_uniformCache2.drawCircles, _pDrawingCircles);
@@ -1182,7 +908,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
             _pRadiusPerspectiveEnabled);
         _shaderProgram->setUniform(_uniformCache2.perspectiveDistanceFactor, 
             _pPerspectiveDistanceFactor);
-        //_shaderProgram->setUnifor("testChange", _pTestChange);
         _shaderProgram->setUniform(_uniformCache2.maxNodeSize, _pMaxNodeSize);
         _shaderProgram->setUniform(_uniformCache2.minNodeSize, _pMinNodeSize);
         _shaderProgram->setUniform(_uniformCache2.usingPulse, _pPulseEnabled);
@@ -1256,6 +981,7 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }
+    bool needsUpdate = true;
     //Everything below is for updating depending on time
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
@@ -1273,60 +999,28 @@ void RenderableFluxNodes::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime);
 
-            // _mustLoadNewStateFromDisk = true;
-
-            _needsUpdate = true;
-            _activeStateIndex = _activeTriggerTimeIndex;
+            needsUpdate = true;
 
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
-        //not in interval => set everything to false
-        //LDEBUG("not in interval");
         _activeTriggerTimeIndex = -1;
-        _needsUpdate = false;
+        needsUpdate = false;
     }
 
-    if (_needsUpdate) {
-        if(_loadingStatesDynamically){
-            if (!_isLoadingStateFromDisk) {
-                _isLoadingStateFromDisk = true;
-                if (_activeTriggerTimeIndex > _pMisalignedIndex) {
-                    _activeTriggerTimeIndex += -_pMisalignedIndex;
-                }
-                LDEBUG("triggertime: " + std::to_string(_activeTriggerTimeIndex));
+    if (needsUpdate) {
 
-                std::string filePath = _binarySourceFiles[_activeTriggerTimeIndex];
-                //std::thread readBinaryThread([this, f = std::move(filePath)]{
-                //    //auto vec = LoadJsonfile(f);
-                //});
-                //readBinaryThread.detach();
-            }
-        
-            _needsUpdate = false;
-
-            if(_vertexPositions.size() > 5800){ //TODO urgent. 
-                updatePositionBuffer();
-                updateVertexColorBuffer();
-                updateVertexFilteringBuffer();
-                //updateVertexStreamNumberBuffer();
-                //updateArrow();
-            }
-        }
-        // Needs fix, right now it stops cuz it cant find the states
-        else if(!_statesPos[_activeTriggerTimeIndex].empty()) { 
-            //&& !_isLoadingNewEnergyBin){
-            if (_activeTriggerTimeIndex > _pMisalignedIndex) {
-                _activeTriggerTimeIndex += -_pMisalignedIndex;
-            }
+        if(!_statesPos[_activeTriggerTimeIndex].empty()) {
+            //if (_activeTriggerTimeIndex > _pMisalignedIndex) {
+            //    _activeTriggerTimeIndex += -_pMisalignedIndex;
+            //}
             _vertexPositions = _statesPos[_activeTriggerTimeIndex];//TODO urgent. 
             _vertexColor = _statesColor[_activeTriggerTimeIndex];  //access violation
             _vertexRadius = _statesRadius[_activeTriggerTimeIndex];
-            _needsUpdate = false;
+            needsUpdate = false;
             updatePositionBuffer();
             updateVertexColorBuffer();
             updateVertexFilteringBuffer();
-            //updateVertexStreamNumberBuffer();
         }
     }
 
@@ -1339,69 +1033,6 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     }
 }
 
-//std::vector<std::string> RenderableFluxNodes::LoadJsonfile(std::string filepath) {
-//       
-//    std::ifstream streamdata(filepath);
-//    if (!streamdata.is_open())
-//    {
-//        LDEBUG("did not read the data.json file");
-//    }
-//    json jsonobj = json::parse(streamdata);
-//
-//
-//    size_t lineStartIdx = 0;
-//
-//    //Loop through all the nodes
-//    constexpr const float AuToMeter = 149597870700.f;
-//        _vertexPositions.clear();
-//        _lineCount.clear();
-//        _lineStart.clear();
-//        _vertexRadius.clear();
-//        _vertexColor.clear();
-//    int counter = 0;
-//        
-//    const size_t nPoints = 1;
-//    for (int i = 0; i < _numberofStreams; ++i) {
-//            
-//        for (json::iterator lineIter = jsonobj["stream" + std::to_string(i)].begin();
-//            lineIter != jsonobj["stream" + std::to_string(i)].end(); ++lineIter) {
-//            std::string r = (*lineIter)["R"].get<std::string>();
-//            std::string phi = (*lineIter)["Phi"].get<std::string>();
-//            std::string theta = (*lineIter)["Theta"].get<std::string>();
-//            std::string flux = (*lineIter)["Flux"].get<std::string>();
-//
-//            float rValue = stringToFloat(r);
-//            float phiValue = stringToFloat(phi);
-//            float thetaValue = stringToFloat(theta);
-//            float fluxValue = stringToFloat(flux);
-//            const float pi = 3.14159265359f;
-//            float rTimesFluxValue = fluxValue;
-//            _vertexColor.push_back(rTimesFluxValue);
-//            _vertexRadius.push_back(rValue);
-//            rValue = rValue * AuToMeter;
-//                
-//            glm::vec3 sphericalcoordinates =
-//                glm::vec3(rValue, phiValue, thetaValue);
-//
-//            glm::vec3 position = sphericalToCartesianCoord(sphericalcoordinates);
-//
-//            _vertexPositions.push_back(position);
-//            ++counter;
-//        
-//
-//            _lineCount.push_back(static_cast<GLsizei>(nPoints));
-//            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-//            lineStartIdx += nPoints;
-//
-//        }
-//    }
-//    LDEBUG("vertPos size:" + std::to_string(_vertexPositions.size()));
-//    LDEBUG("counter for how many times we push back" + std::to_string(counter));
-//
-//    _isLoadingStateFromDisk = false;
-//
-//    return std::vector<std::string>();
-//}
 void RenderableFluxNodes::updatePositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
@@ -1457,22 +1088,4 @@ void RenderableFluxNodes::updateVertexFilteringBuffer() {
 
         unbindGL();
 }
-//void RenderableFluxNodes::updateVertexStreamNumberBuffer() {
-//    glBindVertexArray(_vertexArrayObject);
-//    glBindBuffer(GL_ARRAY_BUFFER, _vertexStreamNumberBuffer);
-//
-//    const std::vector<int>& vertexStreamnumber = _vertexStreamnumber;
-//
-//    glBufferData(
-//        GL_ARRAY_BUFFER,
-//        vertexStreamnumber.size() * sizeof(float),
-//        vertexStreamnumber.data(),
-//        GL_STATIC_DRAW
-//    );
-//
-//    glEnableVertexAttribArray(VaStreamnumber);
-//    glVertexAttribPointer(VaStreamnumber, 1, GL_FLOAT, GL_FALSE, 0, 0);
-//
-//    unbindGL();
-//}
 } // namespace openspace

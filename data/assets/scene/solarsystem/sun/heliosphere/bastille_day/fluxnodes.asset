@@ -23,8 +23,6 @@ local fluxnodesBinaries = asset.syncedResource({
     Version = 1
 })
 
-local sunRadius = 6.957E8
-
 -- Fluxnodes from binaries
 local Fluxnodes = {
     Identifier = "MAS_MHD_FluxNodes",
@@ -36,7 +34,6 @@ local Fluxnodes = {
         Type = "RenderableFluxNodes",
         --SourceFolder = fluxnodesDirectory,
         BinarySourceFolder = fluxnodesBinaries,
-        -- interestingStreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
         -- InputFileType = "json",

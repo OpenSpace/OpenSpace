@@ -25,8 +25,6 @@
 #version __CONTEXT__
 #include "PowerScaling/powerScalingMath.hglsl"
 // General Uniforms that's always needed
-uniform vec4      lineColor;
-//old not in use atm
 uniform mat4      modelViewProjection;
 
 // Uniforms needed to color by quantity
@@ -35,8 +33,6 @@ uniform sampler1D colorTable;
 uniform sampler1D colorTableCMR;
 uniform sampler1D colorTableEarth;
 uniform sampler1D colorTableFlow;
-//uniform sampler1D colorTableIlluminance;
-//uniform sampler1D colorTableIlluminance2;
 uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow
@@ -76,11 +72,8 @@ uniform float   fluxColorAlpha;
 uniform float   fluxColorAlphaIlluminance;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
-// uniform int     activeStreamNumber;
-uniform bool    firstRender;
 uniform int     enhanceMethod;
 uniform double  time;
-uniform bool    usingInterestingStreams;
 
 //uniform float interestingStreams[4];
 
@@ -93,11 +86,6 @@ uniform float nodeDistanceThreshold;
 //uniform mat4 cameraViewProjectionMatrix;
 //uniform dmat4 modelMatrix;
 
-uniform float correctionSizeFactor;
-//uniform float correctionSizeEndDistance;
-//uniform vec3 up;
-//uniform vec3 right;
-uniform vec3    cameraLookUp;   // in world space (no SGCT View was considered)
 uniform vec3    cameraPos;
 //uniform vec2 screenSize;
 uniform bool    usingCameraPerspective;
@@ -120,18 +108,6 @@ layout(location = 1) in float fluxValue;
 layout(location = 2)
 in float rValue;
 
-// The vertex index of every node. Location must correspond to 
-// _VA_INDEX in renderableFluxNodes.h
-//Using built in gl_vertexID in stead. 
-//layout(location = 3)
-//in int nodeIndex;
-// The vertex streamnumber of every node. Location must correspond to 
-// VaStreamnumber in renderableFluxNodes.h
-// layout(location = 3)
-// in int Streamnumber;
-layout(location = 4) 
-in vec2 in_st;
-
 //layout(location = 5) 
 //in vec2 arrow;
 
@@ -142,7 +118,6 @@ const int uniformColor     = 1;
 const int uniformskip = 0;
 const int fluxSkip = 1;
 const int radiusSkip = 2;
-// const int streamNumberSkip = 3;
 
 const int fluxMode = 0;
 const int RFlux = 1;
@@ -193,8 +168,6 @@ vec4 getTransferFunctionColor(sampler1D InColorTable) {
 
 bool CheckvertexIndex(){
     int nodeIndex = gl_VertexID;
-   // nodeIndex = gl_VertexIndex;
-    //if(enhanceMethod == 3) return false;
 
     if(nodeSkipMethod == uniformskip){
         if(mod(nodeIndex, nodeSkip) == 0){
@@ -217,12 +190,6 @@ bool CheckvertexIndex(){
             return true;
         }
     }
-    // else if(nodeSkipMethod == streamNumberSkip){
-    //     if(Streamnumber == activeStreamNumber){
-    //         //vs_color = vec4(0);
-    //         return true;
-    //     }
-    // }
     return false;
 }
 //todo fix gl_VertexID
@@ -240,12 +207,6 @@ void DecidehowtoshowClosetoEarth(){
        // vec4 fluxColor = getTransferFunctionColor(colorTable);
        vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
-    /*    float tempR = rValue + 0.4; 
-        if(tempR > 1.5){
-            tempR = 1.5;
-        }
-            gl_PointSize = tempR * tempR * tempR * gl_PointSize * 5;
-            return;*/
     }
     // ColorTables
     if(enhanceMethod == colorTables){
@@ -265,7 +226,6 @@ void DecidehowtoshowClosetoEarth(){
     }
     // Illuminance
     if(enhanceMethod == illuminance){
-        //vec4 fluxColor1 = getTransferFunctionColor(colorTableIlluminance);
         vec4 fluxColor1 = getTransferFunctionColor(colorTableCMR);
         vs_color = vec4(fluxColor1.xyz, fluxColor1.a);
     }
@@ -317,7 +277,6 @@ void CheckdistanceMethod() {
 }
 
 void main() {
-    //vs_color = streamColor;
     // Default gl_PointSize if it is not set anywhere else.
     gl_PointSize = 2;
     // Checking if we should render the vertex dependent on the vertexindex, 
@@ -353,31 +312,6 @@ void main() {
         vs_color = vec4(0);
     }
 
-    if(usingInterestingStreams){
-        // Draw every other line grey
-        //vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
-
-        vs_color = vec4(0);
-      
-        // Close to Earth (384 nodes)
-        //float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
-        //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
-        //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
-        //float interestingStreams[3] = float[](37, 154, 210);
-
-        // Close to Earth (863 nodes)
-        float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
-        //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
-        //float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
-
-        // for(int i = 0; i < interestingStreams.length(); i++){
-        //     if(Streamnumber == interestingStreams[i] && CheckvertexIndex()){
-        //         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-        //         vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
-        //     }
-        // }
-    }
-
     if(usingParticles && isParticle() && rValue > 0.f){
         int modulusResult = int(double(particleSpeed) * time + gl_VertexID) 
         % particleSpacing;
@@ -386,11 +320,9 @@ void main() {
             if(flowColoring){
                 vec4 fluxColor3 = getTransferFunctionColor(colorTable);
                 vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
-                //vs_color = vec4(1,1,1,1);
             }
             else{
                 vs_color = vec4(0.9,0.9,0.9,0.5);
-                //vs_color = flowColor;
             }
         }
         else{
@@ -419,9 +351,7 @@ void main() {
         }
 
         if(distanceVec < maxDistance){
-        //vs_closeToEarth = 0;
             float distScale = 1 - smoothstep(0, maxDistance, distanceVec);
-            //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distanceVec);
             float factorS = 1.0;
             if(usingRadiusPerspective){
                 factorS = pow(distScale, 9) * 500.0 * pow(rtemp, 2);
@@ -431,89 +361,25 @@ void main() {
             }
             gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
         }
-           // else{
-           // gl_PointSize = nodeSize;
-           // }
+        // else{
+        // gl_PointSize = nodeSize;
+        // }
 
-            if(gl_PointSize > maxNodeSize){
-                gl_PointSize = maxNodeSize;
-            }
-           
-           if(gl_PointSize < minNodeSize){
-                gl_PointSize = minNodeSize;
-            }           
+        if(gl_PointSize > maxNodeSize){
+            gl_PointSize = maxNodeSize;
         }
-
-
-
-        vs_time = time;
-        vec4 position_in_meters = vec4(in_position, 1);
-        vec4 positionClipSpace = modelViewProjection * position_in_meters;
-        //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-      
-        gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
-        vs_depth = gl_Position.w;
-       
         
-}
-
-//------------ OLD CODE, MAYBE USEFUL FOR CAMERAPERSPECTIVE
- /*
-    if(distance(in_position, cameraPos) < 100000000000.f){
-        gl_PointSize = nodeSize * 5;
-     }
-    else{
-        gl_PointSize = nodeSize;
+        if(gl_PointSize < minNodeSize){
+            gl_PointSize = minNodeSize;
+        }           
     }
-    */
-    //test for camera perspective:: 
-    /*
-    dvec4 dpos = dvec4(in_position, 1.0);
-    dpos = modelMatrix * dpos;
 
-    float scaleMultiply = exp(scaleFactor * 0.10f);
-
-    //vec3 scaledRight    = vec3(0.f);
-    //vec3 scaledUp       = vec3(0.f);
-
-    /////vec3 normal   = vec3(normalize(cameraPos - dpos.xyz));
-    /////vec3 newRight = normalize(cross(cameraLookUp, normal));
-    /////vec3 newUp    = cross(normal, newRight);
-
-     double distCamera = length(cameraPos - dpos.xyz);
-     float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
-     float factorVar = pow(10.f, correctionSizeFactor);
-     scaleMultiply *= 1.f / (1.f + factorVar * exp(expVar));
-     */
-    //vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
-      //  vec2 topRight = crossCorner.xy/crossCorner.w;
-       // vec2 bottomLeft = initialPosition.xy/initialPosition.w;
-        
-        // width and height
-        //vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-        //float ta = 1.0f;
-    /*
-    if (sizes.x < 2.0f * minNodeDistanceSize) {
-                float maxVar = 2.0f * minNodeDistanceSize;
-                float minVar = minNodeDistanceSize;
-                float var    = (sizes.y + sizes.x);
-                ta = ( (var - minVar)/(maxVar - minVar) );
-               
-                if (ta == 0.0f)
-                    return;
-            }
-             gl_PointSize = ta;
-        }
-        */
-      /* 
-    vec3 scaledRight = scaleMultiply * right * 0.5f;
-    vec3 scaledUp    = scaleMultiply * up * 0.5f;
-
-    vec4 dposClip = cameraViewProjectionMatrix * vec4(dpos);
-    vec4 scaledRightClip = cameraViewProjectionMatrix * vec4(scaledRight, 0.0);
-    vec4 scaledUpClip = cameraViewProjectionMatrix * vec4(scaledUp, 0.0);
-
-    vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
-    gl_Position = initialPosition;
-    vs_depth = initialPosition.w;
-    */
+    vs_time = time;
+    vec4 position_in_meters = vec4(in_position, 1);
+    vec4 positionClipSpace = modelViewProjection * position_in_meters;
+    //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+    
+    gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+    vs_depth = gl_Position.w;
+    
+}
