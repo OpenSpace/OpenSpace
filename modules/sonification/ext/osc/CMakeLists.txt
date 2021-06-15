@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(Oscpack)
 message(STATUS "Generating oscpack project")
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # separate versions of NetworkingUtils.cpp and UdpSocket.cpp are provided for Win32 and POSIX
 # the IpSystemTypePath selects the correct ones based on the current platform
 
 IF(WIN32)
 	set(IpSystemTypePath ip/win32)
-	set(LIBS ${LIBS} Ws2_32 winmm)
 ELSE(WIN32)
 	set(IpSystemTypePath ip/posix)
 ENDIF(WIN32)
@@ -36,6 +33,12 @@ ADD_LIBRARY(oscpack
 	osc/OscOutboundPacketStream.h
 	osc/OscOutboundPacketStream.cpp
 )
+
+TARGET_INCLUDE_DIRECTORIES(oscpack PUBLIC ${CMAKE_SOURCE_DIR})
+
+IF(WIN32)
+	target_link_libraries(oscpack PUBLIC Ws2_32 winmm)
+ENDIF(WIN32)
 
 if(MSVC)
 	# Force to always compile with W4
