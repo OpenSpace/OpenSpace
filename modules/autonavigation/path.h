@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_AUTONAVIGATION___PATH___H__
 
 #include <modules/autonavigation/pathcurve.h>
-#include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/waypoint.h>
 
 namespace openspace::autonavigation {

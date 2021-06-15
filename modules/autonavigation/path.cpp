@@ -27,7 +27,6 @@
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcurve.h>
-#include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/curves/avoidcollisioncurve.h>
 #include <modules/autonavigation/curves/zoomoutoverviewcurve.h>
 #include <openspace/engine/globals.h>
