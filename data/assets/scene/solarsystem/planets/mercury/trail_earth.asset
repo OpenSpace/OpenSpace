@@ -12,7 +12,7 @@ local MercuryTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY BARYCENTER",
+      Target = "MERCURY",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },

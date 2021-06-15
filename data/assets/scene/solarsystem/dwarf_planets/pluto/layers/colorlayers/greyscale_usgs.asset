@@ -14,7 +14,7 @@ asset.export("layer", layer)
 
 
 asset.meta = {
-  Name = "Pluto Black & White & White [USGS]",
+  Name = "Pluto Black & White [USGS]",
   Version = "1.0",
   Description = [[ This detailed, high-quality global mosaic of Pluto was assembled from
     nearly all of the highest-resolution images obtained by the Long-Range

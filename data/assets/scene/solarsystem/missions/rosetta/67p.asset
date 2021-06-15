@@ -33,7 +33,7 @@ local Barycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CHURYUMOV-GERASIMENKO",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -118,7 +118,7 @@ local Trail67P = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CHURYUMOV-GERASIMENKO",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.1, 0.9, 0.2 },
     StartTime = "2014 JAN 01 00:00:00.000",

@@ -1995,7 +1995,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         // Getting source and caster:
         glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
             shadowConf.source.first,
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),
@@ -2004,7 +2004,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         sourcePos *= KM_TO_M; // converting to meters
         glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
             shadowConf.caster.first,
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),
@@ -2056,7 +2056,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
             "SUN",
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),

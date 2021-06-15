@@ -12,7 +12,7 @@ local MercuryTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "MERCURY",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.6, 0.5, 0.5 },
     Period = 87.968,
