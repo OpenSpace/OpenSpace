@@ -9,6 +9,11 @@ local Saturn = {
   Identifier = "Saturn",
   Parent = transforms.SaturnBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SATURN",
+      Observer = "SATURN BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_SATURN",

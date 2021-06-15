@@ -8,8 +8,8 @@ local MercuryBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "SUN"
+      Target = "MERCURY BARYCENTER",
+      Observer = "SSB"
     }
   },
   GUI = {

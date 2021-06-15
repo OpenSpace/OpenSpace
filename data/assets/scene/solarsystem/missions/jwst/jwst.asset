@@ -165,7 +165,7 @@ local JWSTSunTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JWST",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
     },
     Color = { 0.0, 0.9, 0.9 },

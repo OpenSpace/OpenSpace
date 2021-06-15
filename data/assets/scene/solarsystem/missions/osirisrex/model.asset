@@ -36,7 +36,7 @@ local OsirisRex = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = OsirisRexKernels
     },
     Rotation = {

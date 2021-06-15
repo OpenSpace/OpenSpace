@@ -325,6 +325,11 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
+    if (id == 0) {
+        return true;
+    }
+
     const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
