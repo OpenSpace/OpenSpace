@@ -165,7 +165,7 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::st
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _disableMouseInputs(KeyDisableMouseInputInfo, false)
-    , _disableJoystickInputs(KeyDisableJoystickInputInfo, true)
+    , _disableJoystickInputs(KeyDisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);
