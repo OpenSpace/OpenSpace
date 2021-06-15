@@ -183,7 +183,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     camera()->setPositionVec3(newPose.position);
     camera()->setRotation(newPose.rotation);
 
-    // TODO: make this work again
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached end of path");
         _isPlaying = false;
@@ -279,7 +278,6 @@ void AutoNavigationHandler::continuePath() {
     _isPlaying = true;
 }
 
-// TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const {
     if (!hasCurrentPath()) {
@@ -299,7 +297,6 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const 
     return positions;
 }
 
-// TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) const {
     if (!hasCurrentPath()) {
@@ -321,7 +318,6 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) con
 }
 
 
-// TODO: remove when not needed or combined into pose version
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) const {
     if (!hasCurrentPath()) {
@@ -348,7 +344,6 @@ std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) c
     return viewDirections;
 }
 
-// TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() const {
     if (!hasCurrentPath()) {
