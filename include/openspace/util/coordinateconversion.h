@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___COORDINATECONVERSION___H__
 
 #include <ghoul/glm.h>
+#include <string>
 
 namespace openspace {
 
@@ -38,6 +39,14 @@ namespace openspace {
  *         distance parameter.
  */
 glm::dvec3 icrsToGalacticCartesian(float ra, float dec, double distance);
+
+/**
+ * Converts from ICRS (hms and dms) coordinates to decimal degrees.
+ * \param ra Right ascension, given as a string in format "XXhYYmZZs"
+ * \param dec Declination, given as a string in format "+XXdYYmZZs" or "-XXdYYmZZs"
+ * \return The decimal degrees coordinate
+ */
+glm::dvec2 icrsToDecimalDegrees(std::string ra, std::string dec);
 
 } // namespace openspace
 

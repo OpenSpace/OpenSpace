@@ -28,6 +28,8 @@
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 
+#include <openspace/util/coordinateconversion.h>
+
 namespace openspace {
 
 namespace {
@@ -943,6 +945,23 @@ int worldRotation(lua_State* L) {
 
     glm::dmat3 rot = node->worldRotationMatrix();
     ghoul::lua::push(L, rot);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int convertRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertRaDec");
+
+    std::string ra = ghoul::lua::value<std::string>(L, 1);
+    std::string dec = ghoul::lua::value<std::string>(L, 2);
+    float distance = ghoul::lua::value<float>(L, 3);
+    lua_settop(L, 0);
+
+    glm::dvec2 degrees = icrsToDecimalDegrees(ra, dec);
+    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
+
+    ghoul::lua::push(L, pos);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

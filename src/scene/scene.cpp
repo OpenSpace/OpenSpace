@@ -731,6 +731,13 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 {},
                 "string",
                 "Returns the world rotation matrix of the scene graph node with the given string as identifier"
+            },
+            {
+                "convertRaDec",
+                &luascriptfunctions::convertRaDec,
+                {},
+                "string, string, float",
+                "Returns the cartesian world position of a ra dec coordinate with distance"
             }
         }
     };
