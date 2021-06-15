@@ -747,7 +747,7 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
     }
 
     if (_oldCompareFirst != "") {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('Scene." +
             _oldCompareFirst + ".Scale.Scale', 1);",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -755,7 +755,7 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
     }
 
     if (value.value != 0) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('Scene." +
             value.description + ".Scale.Scale', 2000);",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -795,7 +795,7 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
     }
 
     if (_oldCompareSecond != "") {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('Scene." +
             _oldCompareSecond + ".Scale.Scale', 1);",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -803,7 +803,7 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
     }
 
     if (value.value != 0) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('Scene." +
             value.description + ".Scale.Scale', 2000);",
             scripting::ScriptEngine::RemoteScripting::Yes
@@ -1708,7 +1708,7 @@ void SonificationModule::setAllPlanetaryProperties(bool value) {
 }
 
 void SonificationModule::checkTimeSpeed(double& ts) {
-    double timeSpeed = global::timeManager.deltaTime() / NUM_SEC_PER_DAY;
+    double timeSpeed = global::timeManager->deltaTime() / NUM_SEC_PER_DAY;
     if (abs(ts - timeSpeed) > _timePrecision) {
         ts = timeSpeed;
 
@@ -1789,7 +1789,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                                                glm::proj(nodePosition, cameraUpVector)),
                                            glm::normalize(cameraUpVector));
             }
-            
+
             //Check if this data is new, otherwise dont send the data
             if (abs(_planets[i].distance - distance) > _distancePrecision ||
                 abs(_planets[i].angle - angle) > _anglePrecision ||
@@ -1823,7 +1823,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
 }
 
 void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
-    
+
     Scene* scene = nullptr;
     Camera* camera = nullptr;
     glm::dvec3 cameraDirection, cameraPosition, cameraUpVector;
@@ -1832,11 +1832,11 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
 
-        scene = global::renderEngine.scene();
+        scene = global::renderEngine->scene();
         if (scene && scene->root()->children().size() > 0) {
-           
+
             camera = scene->camera();
-            
+
             if (camera) {
                 cameraPosition = camera->positionVec3();
                 cameraDirection = camera->viewDirectionWorldSpace();
@@ -1844,16 +1844,16 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
                 //Complete scene initialized, start extracting data
                 if (cameraPosition != glm::dvec3(1.0, 1.0, 1.0)) {
-                    
+
                     //Which node is in focus?
                     focusNode =
-                        global::navigationHandler.orbitalNavigator().anchorNode();
+                        global::navigationHandler->orbitalNavigator().anchorNode();
                     if (!focusNode) continue;
-                    
+
                     //Check if focus has changed
                     if (!previousFocusNode || previousFocusNode->identifier()
                         .compare(focusNode->identifier()) != 0)
-                    {                        
+                    {
                         //Update
                         previousFocusNode = focusNode;
 
@@ -1886,7 +1886,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 
                     //Extract data from all the planets
                     for (int i = 0; i < NUM_PLANETS; ++i) {
-                        
+
                         //Only send data if something new has happened
                         //If the node is in focus, increase sensitivity
                         if (focusNode->identifier().compare(_planets[i].identifier) == 0)
@@ -1911,7 +1911,7 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
 void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 {
     //Mkae sure that only the master computer runs the sonification module
-    if (global::windowDelegate.isMaster()) {
+    if (global::windowDelegate->isMaster()) {
         //start a thread to extract data to the sonification
         _thread = std::thread([this]() { threadMain(std::ref(_isRunning)); });
     }
