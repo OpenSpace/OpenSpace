@@ -246,8 +246,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
-    , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
+    , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 10.f, 1e10f)
+    , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5, 1E-3)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
     , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
@@ -269,7 +269,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
 {
-
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
             return;
@@ -385,6 +384,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_velocitySensitivity);
+    _flightDestinationDistance.setExponent(5.f);
     addProperty(_flightDestinationDistance);
     addProperty(_flightDestinationFactor);
     addProperty(_applyLinearFlight);
