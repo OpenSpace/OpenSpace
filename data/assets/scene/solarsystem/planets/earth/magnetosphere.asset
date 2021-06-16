@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../transforms')
+local transforms = asset.require('../../planets/earth/transforms_magnetosphere')
 
 --local fieldlinesDirectory = "C:/Users/elono/Documents/OpenSpace/data/earthMagnetoSphere"
 local fieldlinesDirectory = asset.syncedResource({
@@ -8,8 +8,6 @@ local fieldlinesDirectory = asset.syncedResource({
     Identifier = "magnetosphere_2012_event",
     Version = 1
 })
-
-local earthRadius = 6378137
 
 -- Fieldlies from binaries
 local earthMagnetosphere = {
@@ -20,19 +18,12 @@ local earthMagnetosphere = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
         -- FlowEnabled = false,
-        LineWidth = 2.0,
+        LineWidth = 3.0,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",    -- openspace Field lines Sequence
-        --ColorTablePaths = {
-        --    masDensityColorTable,
-        --    masVelocityColorTable,
-        --},
-        --ColorTableMinMax = {
-        --    { 0, 1000000 },
-        --    { 100, 2000 }
-        --},
-        MaskingEnabled = true,
-        MaskingRanges = {{0.0, 0.0}}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
+
+        --maskingEnabled = true,
+        --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60*365*100,
@@ -43,15 +34,9 @@ local earthMagnetosphere = {
         }
     },
     GUI = {
-        Path = "/Solar System/Planets/Earth/Magnetosphere",
+        Path = "/Solar System/Planets/Earth",
         Name = "Magnetosphere"
     },
-    --Transform = {
-    --    Scale = {
-    --        Type = "StaticScale",
-    --        Scale = earthRadius
-    --    } 
-    --}
 } 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
@@ -60,7 +45,7 @@ asset.meta = {
     Name = "",
     Version = "1.0",
     Description = " Magnetic fieldlines for the bastille day CME event ",
-    Author = "OpenSpace team",
+    Author = "CCMC",
     URL = "",
     License = ""
 }

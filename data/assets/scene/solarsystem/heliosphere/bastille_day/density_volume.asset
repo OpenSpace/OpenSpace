@@ -8,35 +8,17 @@ local densityDirectory = asset.syncedResource({
     Version = 1
 })
 
---local mirrorVolumeMatrix = {
-    --1.0, 0.0, 0.0,
-    --0.0, 1.0, 0.0,
-    --0.0, 0.0, 1.0
-
-
---    -1.0, 0.0, 0.0,
---    0.0, 1.0, 0.0,
---    0.0, 0.0, -1.0
-    
-    --0.0, 1.0, 0.0,
-    --1.0, 0.0, 0.0,
-    --0.0, 0.0, 1.0
---}
-
 local sunRadius = 6.957E8
 
 local densityVolume = {
-    Identifier = "MAS_MHD_density",
-    -- wrong     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    -- right 
+    Identifier = "MAS_MHD_density", 
     Parent = sunTransforms.SunIAU.Identifier,
-    -- wrong Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
         StepSize = 0.004,
         --Enabled = false,
         Opacity = 0.3,
-        TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"), --test1
+        TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
         SourceDirectory = densityDirectory,
         --LowerValueBound = 0,
         --UpperValueBound = 1,
@@ -53,13 +35,10 @@ local densityVolume = {
         },
         Rotation = {
             --Type = "StaticRotation", --LuaRotation
-            --Rotation = mirrorVolumeMatrix
             Type = "FixedRotation",
                 XAxis = {-1.0, 0.0, 0.0},
                 YAxis = {0.0, 1.0, 0.0},
                 ZAxis = {0.0, 0.0, -1.0}
-                
-            --Script = asset.localResource("kernels/carringtonRotation.lua")
         }       
     },
     GUI = {
@@ -74,7 +53,7 @@ asset.meta = {
     Name = "Predictive Science Inc. Volume Rendering Bastille Day",
     Version = "1.0",
     Description = " Volumetric rendering for the bastille day CME event ",
-    Author = "OpenSpace team",
+    Author = "CCMC, OpenSpace team",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }

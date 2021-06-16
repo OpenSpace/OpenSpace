@@ -1,8 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
---local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 asset.require("spice/base")
-
-local HNMKernel = asset.localResource("./kernels/HNM.tf")
 
 -- Barycenter of the solar system, expressed in the Galactic frame
 local SolarSystemBarycenter = {
@@ -68,33 +65,16 @@ local SunECLIPJ2000 = {
   }
 }
 
-local HNMReferenceFrame = {
-    Identifier = "HNMReferenceFrame",
-    Parent = SolarSystemBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "HEEQ180",
-            DestinationFrame = "GALACTIC",
-            Kernels = HNMKernel
-        }
-    },
-    GUI = {
-        Name = "HNM Reference Frame",
-        Path = "/Solar System/Sun",
-        Hidden = true
-    }
-}
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000, HNMReferenceFrame })
+assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000 })
 
 
 asset.meta = {
   Name = "Sun Transforms",
   Version = "1.0",
-  Description = [[ Sun transforms: Solar System Barycenter, SUN IAU, SUN J2000 and HNM]],
+  Description = [[ Sun transforms: Solar System Barycenter, SUN IAU and
+   SUN J2000]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"SolarSystemBarycenter", "SunIAU", "SunECLIPJ2000", "HNMReferenceFrame"}
+  Identifiers = {"SolarSystemBarycenter", "SunIAU", "SunECLIPJ2000"}
 }

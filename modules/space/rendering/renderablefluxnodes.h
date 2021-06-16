@@ -92,7 +92,7 @@ private:
         nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
         nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
         distanceThreshold, enhanceMethod, flowColor, usingParticles,
-        usingInterestingStreams, particleSize, particleSpacing, particleSpeed)
+        particleSize, particleSpacing, particleSpeed)
         _uniformCache;
     UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
         drawCircles, drawHollow, useGaussian, usingRadiusPerspective, 
@@ -138,8 +138,6 @@ private:
     std::unique_ptr<TransferFunction> _transferFunctionFlow;
 
     // ------------------------------------ VECTORS ----------------------------------- //
-    // Paths to color tables. One for each 'ColorFlux'
-    std::vector<std::string> _colorTablePaths;
     // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions

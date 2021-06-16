@@ -50,11 +50,6 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 
-    const char* KeyStepSize = "StepSize";
-    const char* KeyGridType = "GridType";
-    const char* KeyOpacity = "Opacity";
-    const char* KeyTransferFunction = "TransferFunction";
-
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
 
@@ -151,6 +146,9 @@ namespace {
 
         std::optional<float> opacity;
 
+        std::optional<double> stepSize;
+
+        std::optional<std::string> gridType;
 
         std::optional<ghoul::Dictionary> clipPlanes;
     };
@@ -197,13 +195,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasValue<double>(KeyStepSize)) {
-        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
-    }
+    _stepSize = p.stepSize.value_or(_stepSize);
     
-    if (dictionary.hasValue<double>(KeyOpacity)) {
-        _opacity = static_cast<float>(dictionary.value<double>(KeyOpacity) 
-                 * VolumeMaxOpacity);
+    if (p.opacity.has_value()) {
+        _opacity = *p.opacity * VolumeMaxOpacity;
     }
 
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
@@ -214,10 +209,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
-        VolumeGridType gridType = volume::parseGridType(
-           dictionary.value<std::string>(KeyGridType)
-        );
+    if (p.gridType.has_value()) {
+        VolumeGridType gridType = volume::parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
     

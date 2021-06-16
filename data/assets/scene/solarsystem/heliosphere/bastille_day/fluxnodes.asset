@@ -1,57 +1,48 @@
 local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
+local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
-local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+local fluxnodeColorTable = transferFunctions .. "/flux_nodes.txt"
+local fluxnodeColorTableCMR = transferFunctions .. "/CMR.txt"
+local fluxnodeColorTableEarth = transferFunctions .. "/flux_nodes_grey_scale.txt"
+local fluxnodeColorTableFlow = transferFunctions .. "/flux_nodes_flow.txt"
 
-local fieldlinesDirectory = asset.syncedResource({
-    Name = "Bastille Day MAS Fieldlines",
+local fluxnodesBinaries = asset.syncedResource({
+    Name = "Bastille day Flux nodes binaries",
     Type = "HttpSynchronization",
-    Identifier = "bastille_day_mas_fieldlines",
-    Version = 2
+    Identifier = "bastille_day_streamnodes_binaries",
+    Version = 1
 })
 
-local sunRadius = 6.957E8
+-- Fluxnodes from binaries
+local Fluxnodes = {
+    Identifier = "MAS_MHD_FluxNodes",
+    Parent = heliosphereTransforms.HNMReferenceFrame.Identifier,
 
--- Fieldlies from binaries
-local fieldlines = {
-    Identifier = "MAS_MHD_Fieldlines",
-    Parent = sunTransforms.HNMReferenceFrame.Identifier,
-    --wrong Parent = sunTransforms.SunIAU.Identifier,
     Renderable = {
-        Type = "RenderableFieldlinesSequence",
-        SourceFolder = fieldlinesDirectory,
-        -- FlowEnabled = false,
-        -- LineWidth = 1.0;
-        AlphaBlendlingEnabled = false,
-        InputFileType = "osfls",
-        ColorTablePaths = {
-            masDensityColorTable,
-            masVelocityColorTable,
+        Type = "RenderableFluxNodes",
+        SourceFolder = fluxnodesBinaries,
+        ColorTablePaths = {  
+        	Standard = fluxnodeColorTable,
+        	CMR = fluxnodeColorTableCMR,
+        	Earth = fluxnodeColorTableEarth,
+        	Flow = fluxnodeColorTableFlow,
         },
-        ColorTableMinMax = {
-            { 0, 1000000 },
-            { 100, 2000 }
-        },
+
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
-        SimulationModel = "mas",
-        Color = {
-            Uniform = {0, 0.725, 0.75, 1}
-        }
+        Enabled = false
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "MAS Fieldlines"
+        Name = "Fluxnodes"
     },
     Transform = {
         Scale = {
             Type = "StaticScale",
-            Scale = sunRadius
+            Scale = 1
         },
 	Rotation = {
         --This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
@@ -71,13 +62,13 @@ local fieldlines = {
     }
 } 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Fluxnodes })
 
 asset.meta = {
-    Name = "Predictive Science Inc. Fieldlines Bastille Day",
+    Name = "Predictive Science Inc. Flux nodes Bastille Day",
     Version = "1.0",
-    Description = " Magnetic fieldlines for the bastille day CME event ",
-    Author = "Jonathan Grangien, Matthias Berg",
+    Description = " Flux nodes for the bastille day CME event ",
+    Author = "CCMC, Christian Adamsson, Emilie Ho",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""
 }

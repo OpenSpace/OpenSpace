@@ -75,16 +75,9 @@ uniform float   distanceThreshold;
 uniform int     enhanceMethod;
 uniform double  time;
 
-//uniform float interestingStreams[4];
-
 // Speicific uniforms for cameraperspective
-//uniform float scaleFactor;
-//uniform float minNodeDistanceSize;
 uniform float maxNodeDistanceSize;
 uniform float nodeDistanceThreshold;
-
-//uniform mat4 cameraViewProjectionMatrix;
-//uniform dmat4 modelMatrix;
 
 uniform vec3    cameraPos;
 //uniform vec2 screenSize;
@@ -95,21 +88,18 @@ uniform float   perspectiveDistanceFactor;
 uniform float   maxNodeSize;
 uniform float   minNodeSize;
 uniform bool    usingPulse;
+
 // Inputs
-// Should be provided in meters
+// Should be provided in meters VaPosition
 layout(location = 0) in vec3 in_position;
 
-// The extra value used to color lines. Location must correspond to _VA_COLOR in 
-// renderablefieldlinessequence.h
+// The extra value used to color lines. Location must correspond to VaColor in 
+// renderablefluxnodes.h
 layout(location = 1) in float fluxValue;
 
 // The extra value used to mask out parts of lines. Location must correspond to 
-// _VA_MASKING in renderablefieldlinessequence.h
-layout(location = 2)
-in float rValue;
-
-//layout(location = 5) 
-//in vec2 arrow;
+// VaFiltering in renderablefluxnodes.h
+layout(location = 2) in float rValue;
 
 // These should correspond to the enum 'ColorMode' in renderablefluxnodes.cpp
 const int colorByFluxValue  = 0;
@@ -138,7 +128,6 @@ varying out float   camera_IsCloseEnough;
 varying out float   vs_closeToEarth;
 varying out double  vs_time;
 varying out vec3    vs_camerapos;
-//out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor(sampler1D InColorTable) {
     // Remap the color scalar to a [0,1] range
@@ -203,8 +192,7 @@ return false;
 //function for showing nodes different depending on distance to earth
 void DecidehowtoshowClosetoEarth(){
         // SizeScaling
-    if(enhanceMethod == sizeScaling){
-       // vec4 fluxColor = getTransferFunctionColor(colorTable);
+    if(enhanceMethod == sizeScaling || enhanceMethod == illuminance){
        vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
         vs_color = vec4(fluxColor.xyz, fluxColor.a);
     }
@@ -224,11 +212,6 @@ void DecidehowtoshowClosetoEarth(){
         }
         gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
     }
-    // Illuminance
-    if(enhanceMethod == illuminance){
-        vec4 fluxColor1 = getTransferFunctionColor(colorTableCMR);
-        vs_color = vec4(fluxColor1.xyz, fluxColor1.a);
-    }
 }
 
 void CheckdistanceMethod() { 
@@ -238,15 +221,13 @@ void CheckdistanceMethod() {
 
         vs_closeToEarth = 0;
 
-       //if(distancevec < maxdist){
-          if(distancevec < AUtoMeter * distanceThreshold && usingPulse){ 
-                vs_closeToEarth = 1;
-                gl_PointSize = gl_PointSize * 5;
-                vec4 fluxColor = getTransferFunctionColor(colorTable);
-                vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-                //vs_color = vec4(streamColor.xyz, fluxColorAlpha); // HÄR
-            }
-        //}
+        if(distancevec < AUtoMeter * distanceThreshold && usingPulse){ 
+            vs_closeToEarth = 1;
+            gl_PointSize = gl_PointSize * 5;
+            vec4 fluxColor = getTransferFunctionColor(colorTable);
+            vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+        }
+        
         if(enhanceMethod == colorTables || enhanceMethod == sizeAndColor){
              vec4 fluxColor2 = getTransferFunctionColor(colorTableEarth);
              vs_color = vec4(fluxColor2.xyz, fluxColorAlpha);
@@ -381,5 +362,5 @@ void main() {
     
     gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
     vs_depth = gl_Position.w;
-    
+
 }

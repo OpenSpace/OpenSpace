@@ -1,19 +1,19 @@
 {
   "assets": [
     "base",
-    "util/default_dashboard",
+    "dashboard/default_dashboard",
     "scene/solarsystem/sun/sun_textures",
     "scene/solarsystem/sun/EUV_layer",
-    "scene/solarsystem/sun/heliosphere/bastille_day/bastille_day_sun_textures",
-    "scene/solarsystem/sun/heliosphere/bastille_day/density_volume",
-    "scene/solarsystem/sun/heliosphere/bastille_day/fieldlines",
-    "scene/solarsystem/sun/heliosphere/bastille_day/focuspoint",
-    "scene/solarsystem/sun/heliosphere/bastille_day/lightindicator",
-    "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram",
-    "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram_textures",
-    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodes",
-    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodescutplane",
-    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodeslegend",
+    "scene/solarsystem/heliosphere/bastille_day/bastille_day_sun_textures",
+    "scene/solarsystem/heliosphere/bastille_day/density_volume",
+    "scene/solarsystem/heliosphere/bastille_day/fieldlines",
+    "scene/solarsystem/heliosphere/bastille_day/focuspoint",
+    "scene/solarsystem/heliosphere/bastille_day/lightindicator",
+    "scene/solarsystem/heliosphere/bastille_day/magnetogram",
+    "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodescutplane",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodeslegend",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
@@ -226,14 +226,6 @@
       "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
     },
     {
-      "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+V",
-      "name": "Starts from 10:03, delta time 15 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
-    },
-    {
       "documentation": "Turn on sun glare, reset field line line width, change layer on the Sun to Orange",
       "gui_path": "/CCMC/Nodes",
       "is_local": false,
@@ -259,10 +251,10 @@
     "ISS"
   ],
   "meta": {
-    "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
+    "author": "CCMC",
+    "description": "This profile is showing the Coronal mass ejection of the bastille day 2000-07-14. The profile is data heavy and will require a powerful GPU.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Bastille day",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },

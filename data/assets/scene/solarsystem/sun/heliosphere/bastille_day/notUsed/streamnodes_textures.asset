@@ -1,8 +1,0 @@
-local TexturesPath = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Streamnodes textures",
-    Identifier = "streamnodes_legend",
-    Version = 4
-})
-
-asset.export("TexturesPath", TexturesPath)

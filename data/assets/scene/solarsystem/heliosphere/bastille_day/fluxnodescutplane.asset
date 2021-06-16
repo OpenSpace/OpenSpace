@@ -1,6 +1,6 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 --15 cmr emin01, 16 cmr emin03
 local TexturesPathEquitorial = asset.syncedResource({
 Type = "HttpSynchronization",

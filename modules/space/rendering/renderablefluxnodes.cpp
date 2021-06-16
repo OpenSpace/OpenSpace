@@ -59,14 +59,14 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 2;
     
     //streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, 
-    constexpr const std::array<const char*, 27> UniformNames = {
+    constexpr const std::array<const char*, 26> UniformNames = {
         "streamColor", "nodeSize", "nodeSizeLargerFlux", "thresholdFlux", "colorMode",
         "filterLower", "filterUpper", "scalingMode", "colorTableRange", "domainLimZ",
         "nodeSkip", "nodeSkipDefault", "nodeSkipEarth", "nodeSkipMethod", 
         "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold", "fluxColorAlpha", 
         "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", 
         "enhanceMethod", "flowColor", "usingParticles", 
-        "usingInterestingStreams","particleSize", "particleSpacing", "particleSpeed"
+        "particleSize", "particleSpacing", "particleSpeed"
     };
     constexpr const std::array<const char*, 14> UniformNames2 = {
         "time", "flowColoring", "maxNodeDistanceSize", "usingCameraPerspective",
@@ -336,9 +336,16 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
         // path to source folder with the 3 binary files in it
-        std::string binarySourceFolder;
+        std::string sourceFolder;
+        //
+        struct TransferFunctions {
+            std::string standard;
+            std::string flow;
+            std::string earth;
+            std::string cmr [[codegen::key("CMR")]];
+        };
         // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        std::optional<std::vector<std::string>> colorTablePaths;
+        TransferFunctions colorTablePaths;
         // [[codegen::verbatim(LineWidthInfo.description)]]
         //float lineWidth;
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
@@ -435,20 +442,18 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _transferFunction = 
+        std::make_unique<TransferFunction>(p.colorTablePaths.standard);
+    _transferFunctionCMR =
+        std::make_unique<TransferFunction>(p.colorTablePaths.cmr);
+    _transferFunctionEarth =
+        std::make_unique<TransferFunction>(p.colorTablePaths.earth);
+    _transferFunctionFlow = 
+        std::make_unique<TransferFunction>(p.colorTablePaths.flow);
+    
+    _pColorTablePath = p.colorTablePaths.standard;
 
-    if (p.colorTablePaths.has_value()) {
-        _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
-        _transferFunction = std::make_unique<TransferFunction>(_colorTablePaths[0]);
-        _transferFunctionCMR =
-            std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]).string());
-        _transferFunctionEarth =
-            std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]).string());
-        _transferFunctionFlow =
-            std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]).string());
-    }
-    _pColorTablePath = _colorTablePaths[0];
-
-    _binarySourceFolderPath = p.binarySourceFolder;
+    _binarySourceFolderPath = p.sourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
         // Extract all file paths from the provided folder
         _binarySourceFiles.clear();
@@ -507,7 +512,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         _pGoesEnergyBins.setValue(p.energyBin.value());
     }
     else { // default int 1 == Emin03 == MeV>100
-        LWARNING("Assuming default value 1, meaning Emin03");
+        LINFO("Assuming default value 1, meaning Emin03");
         _pGoesEnergyBins.setValue(1);
     }
 }
@@ -555,7 +560,6 @@ void RenderableFluxNodes::definePropertyCallbackFunctions() {
 
     _pColorTablePath.onChange([this] {
         _transferFunction->setPath(_pColorTablePath);
-        _colorTablePaths[0] = _pColorTablePath;
     });
 
     _pGoesEnergyBins.onChange([this] {
@@ -889,8 +893,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform(_uniformCache.enhanceMethod, _pEnhancemethod);
         _shaderProgram->setUniform(_uniformCache.flowColor, _pFlowColor);
         _shaderProgram->setUniform(_uniformCache.usingParticles, _pFlowEnabled);
-        _shaderProgram->setUniform(_uniformCache.usingInterestingStreams, 
-            _pInterestingStreamsEnabled);
         _shaderProgram->setUniform(_uniformCache.particleSize, _pFlowParticleSize);
         _shaderProgram->setUniform(_uniformCache.particleSpacing, _pFlowParticleSpacing);
         _shaderProgram->setUniform(_uniformCache.particleSpeed, _pFlowSpeed);
