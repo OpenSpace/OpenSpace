@@ -955,7 +955,7 @@ int convertRaDec(lua_State* L) {
 
     std::string ra = ghoul::lua::value<std::string>(L, 1);
     std::string dec = ghoul::lua::value<std::string>(L, 2);
-    float distance = ghoul::lua::value<float>(L, 3);
+    double distance = ghoul::lua::value<double>(L, 3);
     lua_settop(L, 0);
 
     glm::dvec2 degrees = icrsToDecimalDegrees(ra, dec);

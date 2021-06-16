@@ -736,7 +736,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "convertRaDec",
                 &luascriptfunctions::convertRaDec,
                 {},
-                "string, string, float",
+                "string, string, double",
                 "Returns the cartesian world position of a ra dec coordinate with distance"
             }
         }
