@@ -1423,7 +1423,7 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
 {
     const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1));
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
     const SurfacePositionHandle posHandle =
         node.calculateSurfacePositionHandle(cameraPositionModelSpace);
 
