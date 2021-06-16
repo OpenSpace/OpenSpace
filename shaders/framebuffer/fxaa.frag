@@ -34,12 +34,13 @@ const float[12] QUALITY = float[](1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 
 //                             18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 
 //                             18.f, 18.f};
 
+in vec2 texCoord;
 layout (location = 0) out vec4 aaFinalColor;
 
 uniform vec2 inverseScreenSize;
 uniform sampler2D renderedTexture;
-
-in vec2 texCoord;
+uniform vec4 Viewport;
+uniform vec2 Resolution;
 
 // Relative luminance
 float getLum(vec3 rgb){
@@ -47,17 +48,28 @@ float getLum(vec3 rgb){
 }
 
 void main() {
-    vec4 colorCenter = texture(renderedTexture,texCoord);
+    // Modify the texCoord based on the Viewport and Resolution. This modification is
+    // necessary in case of side-by-side stereo as we only want to access the part of the
+    // feeding texture that we are currently responsible for.  Otherwise we would map the
+    // entire feeding texture into our half of the result texture, leading to a doubling
+    // of the "missing" half.  If you don't believe me, load a configuration file with the
+    // side_by_side stereo mode enabled, disable FXAA, and remove this modification
+    // The same calculation is done in the HDR resolving shader
+    vec2 st = texCoord;
+    st.x = st.x / (Resolution.x / Viewport[2]) + (Viewport[0] / Resolution.x);
+    st.y = st.y / (Resolution.y / Viewport[3]) + (Viewport[1] / Resolution.y);
+
+    vec4 colorCenter = texture(renderedTexture, st);
 
     // ============================
     // Detecting where to apply AA:
     // ============================
 
     float pixelLumCenter = getLum(colorCenter.rgb);
-    float pixelLumDown   = getLum(textureOffset(renderedTexture, texCoord, ivec2(0,-1)).rgb);
-    float pixelLumUp     = getLum(textureOffset(renderedTexture, texCoord, ivec2(0,1)).rgb);
-    float pixelLumLeft   = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,0)).rgb);
-    float pixelLumRight  = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,0)).rgb);
+    float pixelLumDown   = getLum(textureOffset(renderedTexture, st, ivec2(0,-1)).rgb);
+    float pixelLumUp     = getLum(textureOffset(renderedTexture, st, ivec2(0,1)).rgb);
+    float pixelLumLeft   = getLum(textureOffset(renderedTexture, st, ivec2(-1,0)).rgb);
+    float pixelLumRight  = getLum(textureOffset(renderedTexture, st, ivec2(1,0)).rgb);
     
     float pixelLumMin = min(pixelLumCenter, min(min(pixelLumDown, pixelLumUp), min(pixelLumLeft, pixelLumRight)));
     float pixelLumMax = max(pixelLumCenter, max(max(pixelLumDown, pixelLumUp), max(pixelLumLeft, pixelLumRight)));
@@ -75,10 +87,10 @@ void main() {
     // ============================
     // Estimating the gradient:
     // ============================
-    float pixelLumDownLeft  = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,-1)).rgb);
-    float pixelLumUpRight   = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,1)).rgb);
-    float pixelLumUpLeft    = getLum(textureOffset(renderedTexture, texCoord, ivec2(-1,1)).rgb);
-    float pixelLumDownRight = getLum(textureOffset(renderedTexture, texCoord, ivec2(1,-1)).rgb);
+    float pixelLumDownLeft  = getLum(textureOffset(renderedTexture, st, ivec2(-1,-1)).rgb);
+    float pixelLumUpRight   = getLum(textureOffset(renderedTexture, st, ivec2(1,1)).rgb);
+    float pixelLumUpLeft    = getLum(textureOffset(renderedTexture, st, ivec2(-1,1)).rgb);
+    float pixelLumDownRight = getLum(textureOffset(renderedTexture, st, ivec2(1,-1)).rgb);
 
     float pixelLumDownUp       = pixelLumDown + pixelLumUp;
     float pixelLumLeftRight    = pixelLumLeft + pixelLumRight;
@@ -119,7 +131,7 @@ void main() {
         pixelLumLocalAverage = 0.5 * (pixelLum2 + pixelLumCenter);
     }
 
-    vec2 currentUv = texCoord;
+    vec2 currentUv = st;
     if (isHorizontal) {
         currentUv.y += stepLength * 0.5;
     } else {
@@ -189,8 +201,8 @@ void main() {
     // ============================
     // Estimating the offset:
     // ============================
-    float distance1 = isHorizontal ? (texCoord.x - uv1.x) : (texCoord.y - uv1.y);
-    float distance2 = isHorizontal ? (uv2.x - texCoord.x) : (uv2.y - texCoord.y);
+    float distance1 = isHorizontal ? (st.x - uv1.x) : (st.y - uv1.y);
+    float distance2 = isHorizontal ? (uv2.x - st.x) : (uv2.y - st.y);
 
     bool isDirection1 = distance1 < distance2;
     float distanceFinal = min(distance1, distance2);
@@ -222,7 +234,7 @@ void main() {
     // Biggest of the two offsets.
     finalOffset = max(finalOffset, subPixelOffsetFinal);
 
-    vec2 finalUV = texCoord;
+    vec2 finalUV = st;
     if (isHorizontal) {
         finalUV.y += finalOffset * stepLength;
     } else {

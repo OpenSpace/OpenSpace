@@ -215,7 +215,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     addProperty(_orientation);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;

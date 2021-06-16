@@ -87,18 +87,11 @@ namespace {
         "objects being rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+        "TextMinMaxSize",
+        "Text Min/Max Size",
+        "The minimum and maximum size (in pixels) of the text for the labels for the "
+        "astronomical objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -162,11 +155,8 @@ namespace {
         // [[codegen::verbatim(LabelFileInfo.description)]]
         std::optional<std::string> labelFile;
 
-        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
-        std::optional<float> textMinSize;
-
-        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
-        std::optional<float> textMaxSize;
+        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -190,8 +180,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
-    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
+    , _textMinMaxSize(
+        LabelMinMaxSizeInfo,
+        glm::ivec2(8, 500),
+        glm::ivec2(0),
+        glm::ivec2(1000)
+    )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
@@ -250,12 +244,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _drawLabels = p.drawLabels.value_or(_drawLabels);
-    addProperty(_drawLabels);
-
     if (p.labelFile.has_value()) {
         _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
+
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
 
         _textColor = p.textColor.value_or(_textColor);
         _hasLabel = p.textColor.has_value();
@@ -269,11 +263,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        _textMinSize = p.textMinSize.value_or(_textMinSize);
-        addProperty(_textMinSize);
-
-        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
-        addProperty(_textMaxSize);
+        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
+        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_textMinMaxSize);
     }
 
     if (p.meshColor.has_value()) {
@@ -417,8 +409,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinMaxSize.value().x;
+    labelInfo.maxSize = _textMinMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;

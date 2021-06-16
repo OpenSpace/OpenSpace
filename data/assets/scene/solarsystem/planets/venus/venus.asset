@@ -8,6 +8,11 @@ local Venus = {
   Identifier = "Venus",
   Parent = transforms.VenusBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VENUS",
+      Observer = "VENUS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_VENUS",
@@ -26,22 +31,16 @@ local Venus = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
+      Enabled = false,
       FileName = labelsPath .. "/venus.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 40.0,
-      LabelsSize = 10.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 7000000.0,
-      FadeOutStartingDistance = 2000000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 4000000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 11.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 2000000.0, 7000000.0 },
+      DistanceEPS = 4000000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial" },
@@ -53,25 +52,24 @@ local Venus = {
 }
 
 local VenusLabel = {
-    Identifier = "VenusLabel",
-    Parent = Venus.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Venus",
-        FontSize = 100.0,
-        LabelSize = 8.4,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Venus Label",
-        Path = "/Solar System/Planets/Venus",
-        Description = "Label for Venus, viewable within the solar system."
-    }
+  Identifier = "VenusLabel",
+  Parent = Venus.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Venus",
+    FontSize = 70.0,
+    Size = 8.54,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+      Name = "Venus Label",
+      Path = "/Solar System/Planets/Venus",
+      Description = "Label for Venus, viewable within the solar system."
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })

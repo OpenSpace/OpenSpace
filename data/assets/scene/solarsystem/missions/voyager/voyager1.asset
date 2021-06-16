@@ -47,7 +47,7 @@ local Voyager1 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Rotation = {
@@ -83,7 +83,7 @@ local Voyager1Main = {
 }
 
 local Voyager1Antenna = {
-  Identifier = "Voyager_1_Antanna",
+  Identifier = "Voyager_1_Antenna",
   Parent = Voyager1.Identifier,
   Renderable = {
     Type = "RenderableModel",
@@ -92,7 +92,7 @@ local Voyager1Antenna = {
     LightSources = LightSources
   },
   GUI = {
-    Name = "Voyager 1 Antanna",
+    Name = "Voyager 1 Antenna",
     Path = "/Solar System/Missions/Voyager 1"
   }
 }
@@ -108,7 +108,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
@@ -130,7 +130,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
@@ -153,7 +153,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -176,7 +176,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -199,7 +199,7 @@ local VoyagerTrailCruiseSaturnInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 1",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,

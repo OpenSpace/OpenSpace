@@ -25,11 +25,11 @@ local object = {
     Opacity = 0.99,
     ScaleFactor = 410.0,
     File = speck .. "/kepler.speck",
+    Unit = "pc",
     Texture = textures .. "/halo.png",
     CorrectionSizeEndDistance = 15.86,
     CorrectionSizeFactor = 8.59,
-    Unit = "pc",
-    BillboardMaxSize = 30.0,
+    BillboardMinMaxSize = { 0.0, 30.0 },
     EnablePixelSizeControl = true
   },
   GUI = {

@@ -5,7 +5,7 @@ local HNMKernel = asset.localResource("./kernels/HNM.tf")
 
 local HNMReferenceFrame = {
     Identifier = "HNMReferenceFrame",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Parent = sunTransforms.SunIAU.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",

@@ -325,6 +325,11 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
+    if (id == 0) {
+        return true;
+    }
+
     const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
@@ -678,7 +683,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!to.empty(), "To must not be empty");
 
     // get rotation matrix from frame A - frame B
-    glm::dmat3 transform;
+    glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
         to.c_str(),
@@ -851,7 +856,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     pxform_c(
         sourceFrame.c_str(),
         destinationFrame.c_str(),
@@ -883,7 +888,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
 
     pxfrm2_c(
         sourceFrame.c_str(),
@@ -1362,10 +1367,30 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             },
             {
                 "getCkCoverage",
-                & luascriptfunctions::ckCoverage,
+                &luascriptfunctions::ckCoverage,
                 {},
                 "{string [, printValues]}",
                 "Returns a list of CK coverage intervals for the target."
+            },
+            {
+                "rotationMatrix",
+                &luascriptfunctions::rotationMatrix,
+                {},
+                "{string, string, string}",
+                "Returns the rotationMatrix for a given body in a frame of reference at a specific"
+                "time. The first agument is the target body, the second is the frame of reference,"
+                " the third is the time. Example: openspace.spice.rotationMatrix('"
+                "INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')."
+            },
+            {
+                "position",
+                &luascriptfunctions::position,
+                {},
+                "{string, string, string, string}",
+                "Returns the position for a target by an observer in a frame of reference at a specific"
+                "time. The first agument is the target body, the second is the observer body, the third"
+                "is the frame of reference, and the fourth is the time. Example: openspace.spice."
+                "position('INSIGHT','MARS','GALACTIC', '2018 NOV 26 19:45:34')."
             },
             {
                 "getSpiceBodies",

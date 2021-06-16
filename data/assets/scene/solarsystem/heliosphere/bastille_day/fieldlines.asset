@@ -53,7 +53,7 @@ local fieldlines = {
             Type = "StaticScale",
             Scale = sunRadius
         },
-	Rotation = {
+	    Rotation = {
         --This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
         --which is what the renderables paretn transforms.HNMReferenceFrame.Identifier is
         --refering to. At the referens time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington

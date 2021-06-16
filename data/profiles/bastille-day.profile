@@ -2,22 +2,22 @@
   "assets": [
     "base",
     "dashboard/default_dashboard",
-    "scene/solarsystem/sun/sun_textures",
-    "scene/solarsystem/sun/EUV_layer",
     "scene/solarsystem/heliosphere/bastille_day/bastille_day_sun_textures",
     "scene/solarsystem/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/heliosphere/bastille_day/fieldlines",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodescutplane",
+    "scene/solarsystem/heliosphere/bastille_day/fluxnodeslegend",
     "scene/solarsystem/heliosphere/bastille_day/focuspoint",
     "scene/solarsystem/heliosphere/bastille_day/lightindicator",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",
-    "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
-    "scene/solarsystem/heliosphere/bastille_day/fluxnodescutplane",
-    "scene/solarsystem/heliosphere/bastille_day/fluxnodeslegend",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/magnetosphere",
+    "scene/solarsystem/planets/earth/satellites/misc/iss",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/planets/earth/satellites/misc/iss"
+    "scene/solarsystem/sun/EUV_layer",
+    "scene/solarsystem/sun/sun_textures"
   ],
   "camera": {
     "altitude": 3400000000.0,

@@ -55,6 +55,7 @@
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
+#include <ghoul/io/model/modelreaderbinary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
@@ -252,7 +253,6 @@ namespace {
     };
 } // namespace
 
-
 namespace openspace {
 
 RenderEngine::RenderEngine()
@@ -375,9 +375,7 @@ RenderEngine::RenderEngine()
             std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date)
             );
-            if (!std::filesystem::is_directory(newFolder)) {
-                std::filesystem::create_directory(newFolder);
-            }
+
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
                 newFolder,
@@ -479,6 +477,10 @@ void RenderEngine::initialize() {
 
     ghoul::io::ModelReader::ref().addReader(
         std::make_unique<ghoul::io::ModelReaderAssimp>()
+    );
+
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderBinary>()
     );
 
     _versionString = OPENSPACE_VERSION_STRING_FULL;

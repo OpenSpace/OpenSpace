@@ -67,7 +67,7 @@ namespace {
         "than using the mouse interaction."
     };
 
-    struct [[codegen::Dictionary(NavigationHandler)]] Parameters {
+    struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
         std::string anchor;
 
@@ -165,7 +165,7 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::st
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _disableMouseInputs(KeyDisableMouseInputInfo, false)
-    , _disableJoystickInputs(KeyDisableJoystickInputInfo, true)
+    , _disableJoystickInputs(KeyDisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);

@@ -460,9 +460,6 @@ void KeybindingsDialog::listItemRemove() {
 }
 
 void KeybindingsDialog::transitionToEditMode() {
-    _list->setDisabled(true);
-    _addButton->setDisabled(true);
-    _removeButton->setDisabled(true);
     _saveButton->setDisabled(true);
     _cancelButton->setDisabled(true);
     _buttonBox->setDisabled(true);

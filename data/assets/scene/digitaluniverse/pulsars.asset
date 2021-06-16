@@ -27,13 +27,12 @@ local object = {
     Texture = textures .. "/point4.png",
     PolygonSides = 4,
     LabelFile = speck .. "/pulsar.label",
+    Unit = "pc",
     TextColor = { 0.7, 0.2, 0.2 },
     ScaleFactor = 424,
     TextSize = 15.77,
-    TextMinSize = 4,
-    TextMaxSize = 20.0,
-    Unit = "pc",
-    BillboardMaxSize = 500,
+    TextMinMaxSize = { 4, 20 },
+    BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = false
   },
   GUI = {

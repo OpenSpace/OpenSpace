@@ -52,6 +52,7 @@
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
 #include <modules/base/rendering/renderableplanetimevaryingimage.h>
+#include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
@@ -134,6 +135,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>("RenderablePlaneTimeVaryingImage");
+    fRenderable->registerClass<RenderablePrism>("RenderablePrism");
     fRenderable->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");

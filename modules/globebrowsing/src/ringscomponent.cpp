@@ -122,10 +122,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings.Each of the two values is a "
-        "value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
-        "extent at the radius. If this value is, for example {0.5, 1.0}, the ring is "
-        "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
+        "This value is used to limit the width of the rings. Each of the two values is "
+        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
+        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
@@ -249,7 +249,7 @@ void RingsComponent::initialize() {
 
     addProperty(_enabled);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
@@ -305,6 +305,7 @@ void RingsComponent::initialize() {
     }
 
     _offset = p.offset.value_or(_offset);
+    _offset.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_offset);
 
     _nightFactor = p.nightFactor.value_or(_nightFactor);
