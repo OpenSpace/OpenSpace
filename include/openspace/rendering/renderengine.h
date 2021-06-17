@@ -233,8 +233,9 @@ private:
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {

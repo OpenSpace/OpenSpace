@@ -69,6 +69,22 @@ namespace {
         // font
         std::optional<std::map<std::string, std::string>> fonts;
 
+        struct FontSizes {
+            // The font size (in pt) used for printing optional information about the
+            // currently rendered frame
+            float frameInfo;
+            // The font size (in pt) used for rendering the shutdown text
+            float shutdown;
+            // The font size (in pt) used for rendering the screen log
+            float log;
+            // The font size (in pt) used for printing the camera friction state
+            float cameraInfo;
+            // The font size (in pt) used for printing the version information
+            float versionInfo;
+        };
+        // Information about the hardcoded fontsizes used by the rendering engine itself
+        FontSizes fontSize;
+
         struct Logging {
             // List from logmanager.cpp::levelFromString
             enum class Level {
@@ -368,6 +384,11 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
+    c.fontSize.frameInfo = p.fontSize.frameInfo;
+    c.fontSize.shutdown = p.fontSize.shutdown;
+    c.fontSize.log = p.fontSize.log;
+    c.fontSize.cameraInfo = p.fontSize.cameraInfo;
+    c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
