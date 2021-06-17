@@ -375,9 +375,7 @@ RenderEngine::RenderEngine()
             std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date)
             );
-            if (!std::filesystem::is_directory(newFolder)) {
-                std::filesystem::create_directory(newFolder);
-            }
+
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
                 newFolder,

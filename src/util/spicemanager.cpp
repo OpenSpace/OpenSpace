@@ -612,7 +612,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             );
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
@@ -1150,7 +1150,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             throw SpiceException(fmt::format("No position for '{}' at any time", target));
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
 
