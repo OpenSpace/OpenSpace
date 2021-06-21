@@ -27,7 +27,7 @@
 
 #include <modules/autonavigation/pathcurve.h>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 struct WayPoint;
 
@@ -41,6 +41,6 @@ private:
     std::vector<SceneGraphNode*> _relevantNodes;
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__

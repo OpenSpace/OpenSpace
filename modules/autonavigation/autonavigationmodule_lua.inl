@@ -38,17 +38,17 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    constexpr const char* _loggerCat = "AutoNavigation";
+    constexpr const char* _loggerCat = "PathNavigation";
     constexpr const double Epsilon = 1e-12;
 } // namespace
 
-namespace openspace::autonavigation::luascriptfunctions {
+namespace openspace::pathnavigation::luascriptfunctions {
 
 int isFlying(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isFlying");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    bool hasFinished = module->AutoNavigationHandler().hasFinished();
+    bool hasFinished = module->PathNavigationHandler().hasFinished();
 
     ghoul::lua::push(L, !hasFinished);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
@@ -59,7 +59,7 @@ int continuePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().continuePath();
+    module->PathNavigationHandler().continuePath();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -69,7 +69,7 @@ int pausePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::pausePath");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().pausePath();
+    module->PathNavigationHandler().pausePath();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -79,7 +79,7 @@ int stopPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().abortPath();
+    module->PathNavigationHandler().abortPath();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -154,10 +154,10 @@ int goTo(lua_State* L) {
     }
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(insDict);
+    module->PathNavigationHandler().createPath(insDict);
 
-    if (module->AutoNavigationHandler().hasCurrentPath()) {
-        module->AutoNavigationHandler().startPath();
+    if (module->PathNavigationHandler().hasCurrentPath()) {
+        module->PathNavigationHandler().startPath();
     }
 
     lua_settop(L, 0);
@@ -191,10 +191,10 @@ int goToHeight(lua_State* L) {
     }
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(insDict);
+    module->PathNavigationHandler().createPath(insDict);
 
-    if (module->AutoNavigationHandler().hasCurrentPath()) {
-        module->AutoNavigationHandler().startPath();
+    if (module->PathNavigationHandler().hasCurrentPath()) {
+        module->PathNavigationHandler().startPath();
     }
 
     lua_settop(L, 0);
@@ -248,10 +248,10 @@ int goToGeo(lua_State* L) {
     }
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(insDict);
+    module->PathNavigationHandler().createPath(insDict);
 
-    if (module->AutoNavigationHandler().hasCurrentPath()) {
-        module->AutoNavigationHandler().startPath();
+    if (module->PathNavigationHandler().hasCurrentPath()) {
+        module->PathNavigationHandler().startPath();
     }
 
     lua_settop(L, 0);
@@ -266,10 +266,10 @@ int generatePath(lua_State* L) {
     ghoul::lua::luaDictionaryFromState(L, dictionary);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(dictionary);
+    module->PathNavigationHandler().createPath(dictionary);
 
-    if (module->AutoNavigationHandler().hasCurrentPath()) {
-        module->AutoNavigationHandler().startPath();
+    if (module->PathNavigationHandler().hasCurrentPath()) {
+        module->PathNavigationHandler().startPath();
     }
 
     lua_settop(L, 0);
@@ -286,7 +286,7 @@ int getPathPositions(lua_State* L) {
 
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    PathNavigationHandler& handler = module->PathNavigationHandler();
     std::vector<glm::dvec3> points = handler.curvePositions(pointsPerSegment);
 
     // Push the points to the Lua stack:
@@ -321,7 +321,7 @@ int getPathOrientations(lua_State* L) {
 
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    PathNavigationHandler& handler = module->PathNavigationHandler();
     std::vector<glm::dquat> orientations = handler.curveOrientations(pointsPerSegment);
 
     // Push the rotation to the Lua stack:
@@ -358,7 +358,7 @@ int getPathViewDirections(lua_State* L) {
 
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    PathNavigationHandler& handler = module->PathNavigationHandler();
     std::vector<glm::dvec3> viewDirections = handler.curveViewDirections(pointsPerSegment);
 
     // Push the points to the Lua stack:
@@ -392,7 +392,7 @@ int getControlPoints(lua_State* L) {
 
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    PathNavigationHandler& handler = module->PathNavigationHandler();
     std::vector<glm::dvec3> points = handler.controlPoints();
 
     // Push the points to the Lua stack:
@@ -418,4 +418,4 @@ int getControlPoints(lua_State* L) {
     return 1;
 }
 
-} // namespace openspace::autonavigation::luascriptfunctions
+} // namespace openspace::pathnavigation::luascriptfunctions

@@ -37,7 +37,7 @@ namespace {
     constexpr const int NrSamplesPerSegment = 100;
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 PathCurve::~PathCurve() {}
 
@@ -232,4 +232,4 @@ LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     initializeParameterData();
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

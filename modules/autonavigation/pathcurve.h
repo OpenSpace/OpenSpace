@@ -29,7 +29,7 @@
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 class PathCurve {
 public:
@@ -75,6 +75,6 @@ public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__

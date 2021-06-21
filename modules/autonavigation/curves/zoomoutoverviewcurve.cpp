@@ -40,7 +40,7 @@ namespace {
     constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 // Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
@@ -101,4 +101,4 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     initializeParameterData();
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

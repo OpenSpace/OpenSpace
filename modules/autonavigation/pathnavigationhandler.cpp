@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/autonavigationhandler.h>
+#include <modules/autonavigation/pathnavigationhandler.h>
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcreator.h>
@@ -36,7 +36,7 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "AutoNavigationHandler";
+    constexpr const char* _loggerCat = "PathNavigationHandler";
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultCurveOption",
@@ -79,10 +79,10 @@ namespace {
     };
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
-AutoNavigationHandler::AutoNavigationHandler()
-    : properties::PropertyOwner({ "AutoNavigationHandler" })
+PathNavigationHandler::PathNavigationHandler()
+    : properties::PropertyOwner({ "PathNavigationHandler" })
     , _defaultCurveOption(
         DefaultCurveOptionInfo, 
         properties::OptionProperty::DisplayType::Dropdown
@@ -119,25 +119,25 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_orbitSpeedFactor);
 }
 
-AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
+PathNavigationHandler::~PathNavigationHandler() {} // NOLINT
 
-Camera* AutoNavigationHandler::camera() const {
+Camera* PathNavigationHandler::camera() const {
     return global::navigationHandler->camera();
 }
 
-const SceneGraphNode* AutoNavigationHandler::anchor() const {
+const SceneGraphNode* PathNavigationHandler::anchor() const {
     return global::navigationHandler->anchorNode();
 }
 
-double AutoNavigationHandler::speedScale() const {
+double PathNavigationHandler::speedScale() const {
     return _speedScale;
 }
 
-bool AutoNavigationHandler::hasCurrentPath() const {
+bool PathNavigationHandler::hasCurrentPath() const {
     return _currentPath != nullptr;
 }
 
-bool AutoNavigationHandler::hasFinished() const {
+bool PathNavigationHandler::hasFinished() const {
     if (!hasCurrentPath()) {
         return true;
     }
@@ -145,7 +145,7 @@ bool AutoNavigationHandler::hasFinished() const {
     return _currentPath->hasReachedEnd();
 }
 
-void AutoNavigationHandler::updateCamera(double deltaTime) {
+void PathNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!_isPlaying) {
@@ -190,7 +190,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::createPath(const ghoul::Dictionary& dictionary) {
+void PathNavigationHandler::createPath(const ghoul::Dictionary& dictionary) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
@@ -208,12 +208,12 @@ void AutoNavigationHandler::createPath(const ghoul::Dictionary& dictionary) {
     LINFO("Successfully generated camera path");
 }
 
-void AutoNavigationHandler::clearPath() {
+void PathNavigationHandler::clearPath() {
     LINFO("Clearing path...");
     _currentPath = nullptr;
 }
 
-void AutoNavigationHandler::startPath() {
+void PathNavigationHandler::startPath() {
     if (!hasCurrentPath()) {
         LERROR("There is no path to start");
         return;
@@ -229,7 +229,7 @@ void AutoNavigationHandler::startPath() {
     _isPlaying = true;
 }
 
-void AutoNavigationHandler::abortPath() {
+void PathNavigationHandler::abortPath() {
     if (!_isPlaying) {
         LWARNING("No camera path is playing");
         return;
@@ -238,7 +238,7 @@ void AutoNavigationHandler::abortPath() {
     LINFO("Aborted camera path");
 }
 
-void AutoNavigationHandler::pausePath() {
+void PathNavigationHandler::pausePath() {
     if (hasFinished()) {
         LERROR("No path to pause (path is empty or has finished).");
         return;
@@ -253,7 +253,7 @@ void AutoNavigationHandler::pausePath() {
     _isPlaying = false;
 }
 
-void AutoNavigationHandler::continuePath() {
+void PathNavigationHandler::continuePath() {
     if (hasFinished()) {
         LERROR("No path to resume (path is empty or has finished).");
         return;
@@ -269,7 +269,7 @@ void AutoNavigationHandler::continuePath() {
 }
 
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const {
+std::vector<glm::dvec3> PathNavigationHandler::curvePositions(int nSteps) const {
     if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
@@ -288,7 +288,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const 
 }
 
 // Created for debugging
-std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) const {
+std::vector<glm::dquat> PathNavigationHandler::curveOrientations(int nSteps) const {
     if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
@@ -309,7 +309,7 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) con
 
 
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) const {
+std::vector<glm::dvec3> PathNavigationHandler::curveViewDirections(int nSteps) const {
     if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
@@ -335,7 +335,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) c
 }
 
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() const {
+std::vector<glm::dvec3> PathNavigationHandler::controlPoints() const {
     if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
@@ -348,7 +348,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() const {
     return points;
 }
 
-void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
+void PathNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
     const glm::dvec3 anchorPos = anchor()->worldPosition();
     const glm::dvec3 cameraDir = glm::normalize(
         pose.rotation * Camera::ViewDirectionCameraSpace
@@ -364,7 +364,7 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
     pose.rotation = rollFreeRotation;
 }
 
-void AutoNavigationHandler::applyStopBehavior(double deltaTime) {
+void PathNavigationHandler::applyStopBehavior(double deltaTime) {
     switch (_stopBehavior) {
         case StopBehavior::None:
             // Do nothing
@@ -377,7 +377,7 @@ void AutoNavigationHandler::applyStopBehavior(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::orbitAnchorNode(double deltaTime) {
+void PathNavigationHandler::orbitAnchorNode(double deltaTime) {
     ghoul_assert(anchor() != nullptr, "Node to orbit must be set!");
 
     const glm::dvec3 prevPosition = camera()->positionVec3();
@@ -420,4 +420,4 @@ void AutoNavigationHandler::orbitAnchorNode(double deltaTime) {
     camera()->setRotation(newRotation);
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

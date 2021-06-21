@@ -28,7 +28,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <ghoul/glm.h>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 struct CameraPose {
     glm::dvec3 position;
@@ -55,6 +55,6 @@ struct Waypoint {
     double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___WAYPOINT___H__

@@ -28,7 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
-#include <modules/autonavigation/autonavigationhandler.h>
+#include <modules/autonavigation/pathnavigationhandler.h>
 
 namespace openspace {
 
@@ -39,7 +39,7 @@ public:
     AutoNavigationModule();
     virtual ~AutoNavigationModule() = default;
 
-    autonavigation::AutoNavigationHandler& AutoNavigationHandler();
+    pathnavigation::PathNavigationHandler& PathNavigationHandler();
     double minValidBoundingSphere() const;
     const std::vector<SceneGraphNode*>& relevantNodes();
 
@@ -49,7 +49,7 @@ private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void findRelevantNodes();
 
-    autonavigation::AutoNavigationHandler _autoNavigationHandler;
+    pathnavigation::PathNavigationHandler _pathNavigationHandler;
 
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;

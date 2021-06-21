@@ -27,7 +27,7 @@
 
 #include <modules/autonavigation/path.h>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 class Waypoint;
 
@@ -54,6 +54,6 @@ private:
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCREATOR___H__

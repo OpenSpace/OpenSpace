@@ -28,7 +28,7 @@
 #include <modules/autonavigation/pathcurve.h>
 #include <modules/autonavigation/waypoint.h>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 class Path {
 public:
@@ -74,6 +74,6 @@ private:
     double _progressedTime = 0.0; // Time since playback started
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATH___H__

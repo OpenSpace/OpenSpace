@@ -33,7 +33,7 @@
 #include <functional>
 #include <vector>
 
-namespace openspace::autonavigation::helpers {
+namespace openspace::pathnavigation::helpers {
 
     // Make interpolator parameter t [0,1] progress only inside a subinterval
     double shiftAndScale(double t, double newStart, double newEnd);
@@ -51,9 +51,9 @@ namespace openspace::autonavigation::helpers {
 
     double fivePointGaussianQuadrature(double t0, double t1,
         std::function<double(double)> f);
-} // namespace openspace::autonavigation::helpers
+} // namespace openspace::pathnavigation::helpers
 
-namespace openspace::autonavigation::interpolation {
+namespace openspace::pathnavigation::interpolation {
 
     glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t);
 
@@ -79,5 +79,5 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
         const std::vector<double>& tKnots);
 
-} // namespace openspace::autonavigation::interpolation 
+} // namespace openspace::pathnavigation::interpolation 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___HELPERFUNCTIONS___H__

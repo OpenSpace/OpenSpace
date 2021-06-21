@@ -56,7 +56,7 @@ AutoNavigationModule::AutoNavigationModule()
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
-    addPropertySubOwner(_autoNavigationHandler);
+    addPropertySubOwner(_pathNavigationHandler);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -67,8 +67,8 @@ AutoNavigationModule::AutoNavigationModule()
     addProperty(_relevantNodeTags);
 }
 
-autonavigation::AutoNavigationHandler& AutoNavigationModule::AutoNavigationHandler() {
-    return _autoNavigationHandler;
+pathnavigation::PathNavigationHandler& AutoNavigationModule::PathNavigationHandler() {
+    return _pathNavigationHandler;
 }
 
 double AutoNavigationModule::minValidBoundingSphere() const {
@@ -132,35 +132,35 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     res.functions = {
         {
             "isFlying",
-            &autonavigation::luascriptfunctions::isFlying,
+            &pathnavigation::luascriptfunctions::isFlying,
             {},
             "",
             "Returns true if a camera path is currently running, and false otherwise."
         },
         {
             "continuePath",
-            &autonavigation::luascriptfunctions::continuePath,
+            &pathnavigation::luascriptfunctions::continuePath,
             {},
             "",
             "Continue playing a paused camera path."
         },
         {
             "pausePath",
-            &autonavigation::luascriptfunctions::pausePath,
+            &pathnavigation::luascriptfunctions::pausePath,
             {},
             "",
             "Pause a playing camera path."
         },
         {
             "stopPath",
-            &autonavigation::luascriptfunctions::stopPath,
+            &pathnavigation::luascriptfunctions::stopPath,
             {},
             "",
             "Stops a path, if one is being played."
         },
         {
             "goTo",
-            &autonavigation::luascriptfunctions::goTo,
+            &pathnavigation::luascriptfunctions::goTo,
             {},
             "string [, bool, double]",
             "Move the camera to the node with the specified name. The optional double "
@@ -170,7 +170,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
         {
             "goToHeight",
-            &autonavigation::luascriptfunctions::goToHeight,
+            &pathnavigation::luascriptfunctions::goToHeight,
             {},
             "string, double [, bool, double]",
             "Move the camera to the node with the specified name. The second input "
@@ -181,7 +181,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
         {
             "goToGeo",
-            &autonavigation::luascriptfunctions::goToGeo,
+            &pathnavigation::luascriptfunctions::goToGeo,
             {},
             "string, double, double, double [, bool, double]",
             "Move the camera to the globe with the name given by the input string. "
@@ -192,14 +192,14 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
         {
             "generatePath",
-            &autonavigation::luascriptfunctions::generatePath,
+            &pathnavigation::luascriptfunctions::generatePath,
             {},
             "table",
             "Generate the path as described by the lua table input argument. "
         },
         {
             "getPathPositions",
-            &autonavigation::luascriptfunctions::getPathPositions,
+            &pathnavigation::luascriptfunctions::getPathPositions,
             {},
             "number",
             "FOR DEBUG. Sample positions along the path. The input argument is the "
@@ -207,7 +207,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
         {
             "getPathOrientations",
-            &autonavigation::luascriptfunctions::getPathOrientations,
+            &pathnavigation::luascriptfunctions::getPathOrientations,
             {},
             "number",
             "FOR DEBUG. Sample orientations along the path. The input argument is the "
@@ -215,7 +215,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
          {
             "getPathViewDirections",
-            &autonavigation::luascriptfunctions::getPathViewDirections,
+            &pathnavigation::luascriptfunctions::getPathViewDirections,
             {},
             "number",
             "FOR DEBUG. Sample view directions along the path. The input argument is "
@@ -223,7 +223,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
         },
         {
             "getControlPoints",
-            &autonavigation::luascriptfunctions::getControlPoints,
+            &pathnavigation::luascriptfunctions::getControlPoints,
             {},
             "",
             "FOR DEBUG. Get control point positions from all pathsegments"
@@ -234,7 +234,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
 
 void AutoNavigationModule::internalInitialize(const ghoul::Dictionary&) {
     global::callback::preSync->emplace_back([this]() {
-        _autoNavigationHandler.updateCamera(global::windowDelegate->deltaTime());
+        _pathNavigationHandler.updateCamera(global::windowDelegate->deltaTime());
     });
 }
 

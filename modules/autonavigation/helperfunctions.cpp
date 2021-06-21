@@ -31,7 +31,7 @@ namespace {
     const double Epsilon = 1E-7;
 } // namespace
 
-namespace openspace::autonavigation::helpers {
+namespace openspace::pathnavigation::helpers {
 
     // Shift and scale to a subinterval [start,end]
     double shiftAndScale(double t, double start, double end) {
@@ -151,7 +151,7 @@ namespace openspace::autonavigation::helpers {
 
 } // helpers
 
-namespace openspace::autonavigation::interpolation {
+namespace openspace::pathnavigation::interpolation {
 
     glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t) {
         double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);

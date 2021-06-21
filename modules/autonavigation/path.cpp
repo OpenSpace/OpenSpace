@@ -39,7 +39,7 @@ namespace {
     constexpr const char* _loggerCat = "Path";
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 Path::Path(Waypoint start, Waypoint end, CurveType type,
            std::optional<double> duration)
@@ -62,7 +62,7 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
 
     const auto defaultDuration = [](double pathlength) {
         auto module = global::moduleEngine->module<AutoNavigationModule>();
-        const double speedScale = module->AutoNavigationHandler().speedScale();
+        const double speedScale = module->PathNavigationHandler().speedScale();
         return std::log(pathlength) / speedScale;
     };
 
@@ -219,4 +219,4 @@ double Path::speedAlongPath(double traveledDistance) {
     return speed;
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

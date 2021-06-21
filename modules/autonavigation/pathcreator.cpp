@@ -76,7 +76,7 @@ namespace {
 #include "pathinstruction_codegen.cpp"
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 using NavigationState = interaction::NavigationHandler::NavigationState;
 
@@ -243,4 +243,4 @@ SceneGraphNode* PathCreator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

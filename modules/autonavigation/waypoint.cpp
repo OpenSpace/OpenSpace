@@ -35,7 +35,7 @@ namespace {
     constexpr const char* _loggerCat = "Waypoint";
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
     : nodeIdentifier(ref)
@@ -140,4 +140,4 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
     return bs;
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

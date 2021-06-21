@@ -25,12 +25,12 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.h
   ${CMAKE_CURRENT_SOURCE_DIR}/path.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcreator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathnavigationhandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/avoidcollisioncurve.h
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/zoomoutoverviewcurve.h
@@ -38,13 +38,13 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/path.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcreator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathnavigationhandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/avoidcollisioncurve.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/zoomoutoverviewcurve.cpp

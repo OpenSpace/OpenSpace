@@ -27,7 +27,7 @@
 
 #include <modules/autonavigation/pathcurve.h>
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 struct WayPoint;
 
@@ -36,6 +36,6 @@ public:
     ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end);
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
 #endif // __OPENSPACE_MODULE_AUTONAVIGATION___ZOOMOUTOVERVIEWCURVE___H__

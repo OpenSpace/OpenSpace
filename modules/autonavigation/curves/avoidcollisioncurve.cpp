@@ -45,7 +45,7 @@ namespace {
     constexpr const int MaxAvoidCollisionSteps = 10;
 } // namespace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
     _relevantNodes = 
@@ -187,4 +187,4 @@ void AvoidCollisionCurve::removeCollisions(int step) {
     }
 }
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation

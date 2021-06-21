@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHNAVIGATIONHANDLER___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHNAVIGATIONHANDLER___H__
 
 #include <modules/autonavigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -35,17 +35,17 @@ namespace openspace {
     class Camera;
 } // namespace openspace
 
-namespace openspace::autonavigation {
+namespace openspace::pathnavigation {
 
-class AutoNavigationHandler : public properties::PropertyOwner {
+class PathNavigationHandler : public properties::PropertyOwner {
 public:
     enum StopBehavior {
         None = 0,
         Orbit
     };
 
-    AutoNavigationHandler();
-    ~AutoNavigationHandler();
+    PathNavigationHandler();
+    ~PathNavigationHandler();
 
     // Accessors
     Camera* camera() const;
@@ -87,6 +87,6 @@ private:
     properties::OptionProperty _stopBehavior;
 };
 
-} // namespace openspace::autonavigation
+} // namespace openspace::pathnavigation
 
-#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHNAVIGATIONHANDLER___H__
