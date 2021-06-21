@@ -182,7 +182,7 @@ double Path::speedAlongPath(double traveledDistance) {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
 
-    const CameraPose prevPose = interpolatedPose(_traveledDistance);
+    const CameraPose prevPose = interpolatedPose(traveledDistance);
     const double distanceToEndNode = glm::distance(prevPose.position, endNodePos);
     const double distanceToStartNode = glm::distance(prevPose.position, startNodePos);
 
@@ -200,15 +200,15 @@ double Path::speedAlongPath(double traveledDistance) {
 
     // Dampen speed in beginning of path
     const double startUpDistance = 2.0 * _start.node()->boundingSphere();
-    if (_traveledDistance < startUpDistance) {
-        speed *= _traveledDistance / startUpDistance + 0.01;
+    if (traveledDistance < startUpDistance) {
+        speed *= traveledDistance / startUpDistance + 0.01;
     }
 
     // Dampen speed in end of path
     // Note: this leads to problems when the full length of the path is really big
     const double closeUpDistance = 2.0 * _end.node()->boundingSphere();
-    if (_traveledDistance > (pathLength() - closeUpDistance)) {
-        const double remainingDistance = pathLength() - _traveledDistance;
+    if (traveledDistance > (pathLength() - closeUpDistance)) {
+        const double remainingDistance = pathLength() - traveledDistance;
         speed *= remainingDistance / closeUpDistance + 0.01;
     }
 
