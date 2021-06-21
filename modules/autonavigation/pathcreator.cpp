@@ -80,7 +80,9 @@ namespace openspace::pathnavigation {
 
 using NavigationState = interaction::NavigationHandler::NavigationState;
 
-Path PathCreator::createPath(const ghoul::Dictionary& dictionary, Path::CurveType curveType) {
+Path PathCreator::createPath(const ghoul::Dictionary& dictionary, 
+                             Path::CurveType curveType) 
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::optional<float> duration = p.duration;
@@ -97,7 +99,9 @@ Path PathCreator::createPath(const ghoul::Dictionary& dictionary, Path::CurveTyp
                 throw ghoul::RuntimeError("A navigation state is required");
             }
 
-            const NavigationState navigationState = NavigationState(p.navigationState.value());
+            const NavigationState navigationState = 
+                NavigationState(p.navigationState.value());
+
             waypoints = { Waypoint(navigationState) };
             break;
         }
