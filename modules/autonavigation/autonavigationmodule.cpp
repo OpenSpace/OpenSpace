@@ -123,13 +123,6 @@ void AutoNavigationModule::findRelevantNodes() {
     _relevantNodes = resultingNodes;
 }
 
-
-std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
-    return {
-        autonavigation::PathInstruction::Documentation()
-    };
-}
-
 scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "autonavigation";

@@ -37,8 +37,6 @@ namespace openspace {
 
 namespace openspace::autonavigation {
 
-class PathInstruction;
-
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
     enum StopBehavior {
@@ -58,7 +56,7 @@ public:
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);
-    void createPath(PathInstruction& spec);
+    void createPath(const ghoul::Dictionary& dictionary);
     void clearPath();
     void startPath();
     void abortPath();

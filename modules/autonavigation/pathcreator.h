@@ -22,23 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHINSTRUCTION___H__
-#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHINSTRUCTION___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCREATOR___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCREATOR___H__
 
-#include <modules/autonavigation/waypoint.h>
-#include <optional>
+#include <modules/autonavigation/path.h>
 
 namespace openspace::autonavigation {
 
-class PathInstruction {
+class Waypoint;
+
+class PathCreator {
 public:
-    PathInstruction(const ghoul::Dictionary& dictionary);
-
-    Waypoint startPoint() const;
-    std::vector<Waypoint> waypoints() const;
-    std::optional<double> duration() const;
-
-    static documentation::Documentation Documentation();
+    // Create a path from a dictionary containing the instruction
+    static Path createPath(const ghoul::Dictionary& dictionary, 
+        Path::CurveType curveType);
 
 private:
     struct NodeInfo {
@@ -48,15 +45,15 @@ private:
         bool useTargetUpDirection;
     };
 
-    Waypoint waypointFromCamera() const;
-    Waypoint computeDefaultWaypoint(const NodeInfo& info) const;
-    SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) const;
+    static Waypoint waypointFromCamera();
+    static Waypoint computeDefaultWaypoint(const NodeInfo& info,
+        const Waypoint& startPoint);
 
-    Waypoint _startPoint;
-    std::vector<Waypoint> _waypoints;
-    std::optional<double> _duration;
+    // Test if the node lies within a given proximity radius of any relevant node 
+    // in the scene
+    static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 };
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHINSTRUCTION___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCREATOR___H__

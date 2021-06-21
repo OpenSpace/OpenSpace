@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/pathinstruction.h>
+#include <modules/autonavigation/pathcreator.h>
 
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
-#include <openspace/documentation/verifier.h>
+#include <modules/autonavigation/waypoint.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -36,10 +36,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "PathInstruction";
+    constexpr const char* _loggerCat = "PathCreator";
     constexpr const float Epsilon = 1e-5f;
 
-    struct [[codegen::Dictionary(Instruction)]] Parameters {
+    // TODO: where should this documentation be?
+    struct [[codegen::Dictionary(PathInstruction)]] Parameters {
         enum class Type {
             Node,
             NavigationState
@@ -79,26 +80,25 @@ namespace openspace::autonavigation {
 
 using NavigationState = interaction::NavigationHandler::NavigationState;
 
-documentation::Documentation PathInstruction::Documentation() {
-    return codegen::doc<Parameters>("autonavigation_pathinstruction");
-}
-
-PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
+Path PathCreator::createPath(const ghoul::Dictionary& dictionary, Path::CurveType curveType) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _duration = p.duration;
+    std::optional<float> duration = p.duration;
 
     bool hasStart = p.startState.has_value();
-    _startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
+    Waypoint startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
 
+    // TODO: also handle curve type here
+    
+    std::vector<Waypoint> waypoints;
     switch (p.type) {
         case Parameters::Type::NavigationState: {
             if (!p.navigationState.has_value()) {
                 throw ghoul::RuntimeError("A navigation state is required");
             }
 
-            NavigationState navigationState = NavigationState(p.navigationState.value());
-            _waypoints = { Waypoint(navigationState) };
+            const NavigationState navigationState = NavigationState(p.navigationState.value());
+            waypoints = { Waypoint(navigationState) };
             break;
         }
         case Parameters::Type::Node: {
@@ -106,7 +106,7 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
                 throw ghoul::RuntimeError("A target node is required");
             }
 
-            std::string nodeIdentifier = p.target.value();
+            const std::string nodeIdentifier = p.target.value();
             const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
             if (!targetNode) {
@@ -122,30 +122,22 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
                 p.useTargetUpDirection.value_or(false)
             };
 
-            _waypoints = { computeDefaultWaypoint(info) };
+            waypoints = { computeDefaultWaypoint(info, startPoint) };
             break;
         }
         default: {
             LERROR(fmt::format("Uknown instruciton type: {}", p.type));
             throw ghoul::MissingCaseException();
-            break;
         }
     }
+
+    // TODO: allow for an instruction to represent a list of waypoints
+    Waypoint waypointToAdd = waypoints[0];
+
+    return Path(startPoint, waypointToAdd, curveType, duration);
 }
 
-Waypoint PathInstruction::startPoint() const {
-    return _startPoint;
-}
-
-std::vector<Waypoint> PathInstruction::waypoints() const {
-    return _waypoints;
-}
-
-std::optional<double> PathInstruction::duration() const {
-    return _duration;
-}
-
-Waypoint PathInstruction::waypointFromCamera() const {
+Waypoint PathCreator::waypointFromCamera() {
     Camera* camera = global::navigationHandler->camera();
     const glm::dvec3 pos = camera->positionVec3();
     const glm::dquat rot = camera->rotationQuaternion();
@@ -153,9 +145,9 @@ Waypoint PathInstruction::waypointFromCamera() const {
     return Waypoint{ pos, rot, node };
 }
 
-// OBS! The desired default waypoint may vary between curve types.
-// TODO: let the curves update the default position if no exact position is required
-Waypoint PathInstruction::computeDefaultWaypoint(const NodeInfo& info) const {
+Waypoint PathCreator::computeDefaultWaypoint(const NodeInfo& info, 
+                                             const Waypoint& startPoint) 
+{
     const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
     if (!targetNode) {
         LERROR(fmt::format("Could not find target node '{}'", info.identifier));
@@ -188,7 +180,7 @@ Waypoint PathInstruction::computeDefaultWaypoint(const NodeInfo& info) const {
         else {
             // Go to a point that is being lit up by the sun, slightly offsetted from sun
             // direction
-            const glm::dvec3 prevPos = _startPoint.position();
+            const glm::dvec3 prevPos = startPoint.position();
             const glm::dvec3 targetToPrev = prevPos - nodePos;
             const glm::dvec3 targetToSun = sunPos - nodePos;
 
@@ -221,8 +213,7 @@ Waypoint PathInstruction::computeDefaultWaypoint(const NodeInfo& info) const {
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
-// Test if the node lies within a given proximity radius of any relevant node in the scene
-SceneGraphNode* PathInstruction::findNodeNearTarget(const SceneGraphNode* node) const {
+SceneGraphNode* PathCreator::findNodeNearTarget(const SceneGraphNode* node) {
     const std::vector<SceneGraphNode*>& relevantNodes =
         global::moduleEngine->module<AutoNavigationModule>()->relevantNodes();
 

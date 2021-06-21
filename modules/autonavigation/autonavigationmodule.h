@@ -43,7 +43,6 @@ public:
     double minValidBoundingSphere() const;
     const std::vector<SceneGraphNode*>& relevantNodes();
 
-    std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
 
 private:

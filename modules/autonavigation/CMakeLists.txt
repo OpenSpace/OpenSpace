@@ -29,8 +29,8 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.h
   ${CMAKE_CURRENT_SOURCE_DIR}/path.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathcreator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/pathinstruction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/avoidcollisioncurve.h
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/zoomoutoverviewcurve.h
@@ -43,8 +43,8 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/path.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathcreator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/pathinstruction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/avoidcollisioncurve.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/curves/zoomoutoverviewcurve.cpp

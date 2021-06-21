@@ -25,7 +25,7 @@
 #include <modules/autonavigation/autonavigationhandler.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <modules/autonavigation/pathinstruction.h>
+#include <modules/autonavigation/pathcreator.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -190,30 +190,20 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::createPath(PathInstruction& instruction) {
-    clearPath();
-
-    std::vector<Waypoint> waypoints = instruction.waypoints();
-    Waypoint waypointToAdd;
-
-    if (waypoints.empty()) {
-        LWARNING("No path was created from instruction. Failed creating waypoints");
-        return;
-    }
-    else {
-        // TODO: allow for an instruction to represent a list of waypoints
-        waypointToAdd = waypoints[0];
-    }
-
+void AutoNavigationHandler::createPath(const ghoul::Dictionary& dictionary) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    _currentPath = std::make_unique<Path>(
-        instruction.startPoint(),
-        waypointToAdd,
-        Path::CurveType(curveType),
-        instruction.duration()
-    );
+    clearPath();
+    try {
+        _currentPath = std::make_unique<Path>(
+            PathCreator::createPath(dictionary, Path::CurveType(curveType))
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERROR("Could not create path");
+        return;
+    }
 
     LINFO("Successfully generated camera path");
 }

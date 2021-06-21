@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/pathinstruction.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/engine/globals.h>
@@ -154,10 +153,8 @@ int goTo(lua_State* L) {
         }
     }
 
-    PathInstruction instruction(insDict);
-
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(instruction);
+    module->AutoNavigationHandler().createPath(insDict);
 
     if (module->AutoNavigationHandler().hasCurrentPath()) {
         module->AutoNavigationHandler().startPath();
@@ -193,10 +190,8 @@ int goToHeight(lua_State* L) {
         }
     }
 
-    PathInstruction instruction(insDict);
-
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(instruction);
+    module->AutoNavigationHandler().createPath(insDict);
 
     if (module->AutoNavigationHandler().hasCurrentPath()) {
         module->AutoNavigationHandler().startPath();
@@ -252,10 +247,8 @@ int goToGeo(lua_State* L) {
         }
     }
 
-    PathInstruction instruction(insDict);
-
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(instruction);
+    module->AutoNavigationHandler().createPath(insDict);
 
     if (module->AutoNavigationHandler().hasCurrentPath()) {
         module->AutoNavigationHandler().startPath();
@@ -271,10 +264,9 @@ int generatePath(lua_State* L) {
 
     ghoul::Dictionary dictionary;
     ghoul::lua::luaDictionaryFromState(L, dictionary);
-    PathInstruction instruction(dictionary);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(instruction);
+    module->AutoNavigationHandler().createPath(dictionary);
 
     if (module->AutoNavigationHandler().hasCurrentPath()) {
         module->AutoNavigationHandler().startPath();
