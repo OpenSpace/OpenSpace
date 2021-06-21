@@ -48,8 +48,8 @@ namespace {
 namespace openspace::pathnavigation {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
-    _relevantNodes = 
-        global::moduleEngine->module<AutoNavigationModule>()->relevantNodes();
+    auto module = global::moduleEngine->module<AutoNavigationModule>();
+    _relevantNodes = module->PathNavigationHandler().relevantNodes();
 
     const glm::dvec3 startNodeCenter = start.node()->worldPosition();
     const glm::dvec3 endNodeCenter = end.node()->worldPosition();

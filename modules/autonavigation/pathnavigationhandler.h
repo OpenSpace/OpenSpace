@@ -25,10 +25,14 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHNAVIGATIONHANDLER___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___PATHNAVIGATIONHANDLER___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <modules/autonavigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
 
 namespace openspace {
@@ -69,7 +73,12 @@ public:
     std::vector<glm::dvec3> curveViewDirections(int nSteps) const;
     std::vector<glm::dvec3> controlPoints() const;
 
+    double minValidBoundingSphere() const;
+    const std::vector<SceneGraphNode*>& relevantNodes();
+
 private:
+    void findRelevantNodes();
+
     void removeRollRotation(CameraPose& pose, double deltaTime);
     void applyStopBehavior(double deltaTime);
 
@@ -85,6 +94,12 @@ private:
 
     properties::BoolProperty _applyStopBehaviorWhenIdle;
     properties::OptionProperty _stopBehavior;
+
+    properties::DoubleProperty _minValidBoundingSphere;
+    properties::StringListProperty _relevantNodeTags;
+
+    std::vector<SceneGraphNode*> _relevantNodes;
+    bool _hasInitializedRelevantNodes = false;
 };
 
 } // namespace openspace::pathnavigation

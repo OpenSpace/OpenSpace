@@ -214,8 +214,9 @@ Waypoint PathCreator::computeDefaultWaypoint(const NodeInfo& info,
 }
 
 SceneGraphNode* PathCreator::findNodeNearTarget(const SceneGraphNode* node) {
+    auto module = global::moduleEngine->module<AutoNavigationModule>();
     const std::vector<SceneGraphNode*>& relevantNodes =
-        global::moduleEngine->module<AutoNavigationModule>()->relevantNodes();
+        module->PathNavigationHandler().relevantNodes();
 
     for (SceneGraphNode* n : relevantNodes) {
         if (n->identifier() == node->identifier()) {

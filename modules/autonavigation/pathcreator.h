@@ -29,7 +29,7 @@
 
 namespace openspace::pathnavigation {
 
-class Waypoint;
+struct Waypoint;
 
 class PathCreator {
 public:

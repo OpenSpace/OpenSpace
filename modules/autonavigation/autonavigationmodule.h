@@ -27,7 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/autonavigation/pathnavigationhandler.h>
 
 namespace openspace {
@@ -40,22 +39,13 @@ public:
     virtual ~AutoNavigationModule() = default;
 
     pathnavigation::PathNavigationHandler& PathNavigationHandler();
-    double minValidBoundingSphere() const;
-    const std::vector<SceneGraphNode*>& relevantNodes();
 
     scripting::LuaLibrary luaLibrary() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
-    void findRelevantNodes();
 
     pathnavigation::PathNavigationHandler _pathNavigationHandler;
-
-    properties::DoubleProperty _minValidBoundingSphere;
-    properties::StringListProperty _relevantNodeTags;
-
-    std::vector<SceneGraphNode*> _relevantNodes;
-    bool _hasInitializedRelevantNodes = false;
 };
 
 } // namespace openspace

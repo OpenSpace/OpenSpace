@@ -106,8 +106,10 @@ SceneGraphNode* Waypoint::node() const {
 
 double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
     double bs = static_cast<double>(node->boundingSphere());
-    const double minValidBoundingSphere =
-        global::moduleEngine->module<AutoNavigationModule>()->minValidBoundingSphere();
+
+    auto module = global::moduleEngine->module<AutoNavigationModule>();
+    const double minValidBoundingSphere = 
+        module->PathNavigationHandler().minValidBoundingSphere();
 
     if (bs < minValidBoundingSphere) {
         // If the bs of the target is too small, try to find a good value in a child node.

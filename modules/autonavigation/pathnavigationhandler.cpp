@@ -28,6 +28,8 @@
 #include <modules/autonavigation/pathcreator.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
@@ -77,6 +79,21 @@ namespace {
         "Orbit Speed Factor",
         "Controls the speed of the orbiting around an anchor."
     };
+
+    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
+        "MinimalValidBoundingSphere",
+        "Minimal Valid Bounding Sphere",
+        "The minimal allowed value for a bounding sphere, in meters. Used for "
+        "computation of target positions and path generation, to avoid issues when "
+        "there is no bounding sphere."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
+        "RelevantNodeTags",
+        "Relevant Node Tags",
+        "List of tags for the nodes that are relevant for path creation, for example "
+        "when avoiding collisions."
+    };
 } // namespace
 
 namespace openspace::pathnavigation {
@@ -95,6 +112,8 @@ PathNavigationHandler::PathNavigationHandler()
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _orbitSpeedFactor(OrbitSpeedFactorInfo, 0.5, 0.0, 20.0)
+    , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
+    , _relevantNodeTags(RelevantNodeTagsInfo)
 {
     _defaultCurveOption.addOptions({
         { Path::CurveType::AvoidCollision, "AvoidCollision" },
@@ -117,6 +136,15 @@ PathNavigationHandler::PathNavigationHandler()
     addProperty(_stopBehavior);
 
     addProperty(_orbitSpeedFactor);
+
+    addProperty(_minValidBoundingSphere);
+
+    _relevantNodeTags = std::vector<std::string>{
+        "planet_solarSystem",
+        "moon_solarSystem"
+    };;
+    _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
+    addProperty(_relevantNodeTags);
 }
 
 PathNavigationHandler::~PathNavigationHandler() {} // NOLINT
@@ -346,6 +374,58 @@ std::vector<glm::dvec3> PathNavigationHandler::controlPoints() const {
     points.insert(points.end(), curvePoints.begin(), curvePoints.end());
 
     return points;
+}
+
+double PathNavigationHandler::minValidBoundingSphere() const {
+    return _minValidBoundingSphere;
+}
+
+const std::vector<SceneGraphNode*>& PathNavigationHandler::relevantNodes() {
+    if (!_hasInitializedRelevantNodes) {
+        findRelevantNodes();
+        _hasInitializedRelevantNodes = true;
+    }
+
+    return _relevantNodes;
+}
+
+void PathNavigationHandler::findRelevantNodes() {
+    const std::vector<SceneGraphNode*>& allNodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+
+    const std::vector<std::string> relevantTags = _relevantNodeTags;
+
+    if (allNodes.empty() || relevantTags.empty()) {
+        _relevantNodes = std::vector<SceneGraphNode*>();
+        return;
+    }
+
+    auto isRelevant = [&](const SceneGraphNode* node) {
+        const std::vector<std::string> tags = node->tags();
+        auto result = std::find_first_of(
+            relevantTags.begin(),
+            relevantTags.end(),
+            tags.begin(),
+            tags.end()
+        );
+
+        // does not match any tags => not interesting
+        if (result == relevantTags.end()) {
+            return false;
+        }
+
+        return node->renderable() && (node->boundingSphere() > 0.0);
+    };
+
+    std::vector<SceneGraphNode*> resultingNodes;
+    std::copy_if(
+        allNodes.begin(),
+        allNodes.end(),
+        std::back_inserter(resultingNodes),
+        isRelevant
+    );
+
+    _relevantNodes = resultingNodes;
 }
 
 void PathNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
