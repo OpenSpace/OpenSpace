@@ -27,7 +27,7 @@
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcreator.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>

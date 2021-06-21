@@ -28,12 +28,13 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
@@ -59,9 +60,7 @@ namespace openspace {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
-    engine.addDocumentation(
-        interaction::NavigationHandler::NavigationState::Documentation()
-    );
+    engine.addDocumentation(interaction::NavigationState::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
@@ -89,6 +88,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
+    engine.addLibrary(interaction::PathNavigator::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
     engine.addLibrary(interaction::ShortcutManager::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());

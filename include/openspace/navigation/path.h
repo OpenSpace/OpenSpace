@@ -22,70 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
-#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#ifndef __OPENSPACE_CORE___PATH___H__
+#define __OPENSPACE_CORE___PATH___H__
 
-#include <openspace/util/timeline.h>
-#include <openspace/network/messagestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <glm/gtx/quaternion.hpp>
+#include <openspace/navigation/pathcurve.h>
+#include <openspace/navigation/waypoint.h>
+#include <optional>
+#include <vector>
 
-namespace openspace {
-    class Camera;
-    class TimeManager;
+namespace openspace { 
+    struct CameraPose; 
 } // namespace openspace
 
 namespace openspace::interaction {
 
-enum class KeyframeTimeRef {
-    Relative_applicationStart,
-    Relative_recordedStart,
-    Absolute_simTimeJ2000
-};
-
-class KeyframeNavigator {
+class Path {
 public:
-    BooleanType(Inclusive);
-
-    struct CameraPose {
-        glm::dvec3 position = glm::dvec3(0.0);
-        glm::quat rotation = glm::quat(0.f, 0.f, 0.f, 0.f);
-        std::string focusNode;
-        float scale = 1.f;
-        bool followFocusNodeRotation = false;
-
-        CameraPose() = default;
-        CameraPose(datamessagestructures::CameraKeyframe&& kf);
+    enum CurveType {
+        AvoidCollision,
+        Linear,
+        ZoomOutOverview
     };
 
-    /**
-    * Update camera position using the next camera pose keyframe from the timeline.
-    * Returns true if camera was set to a pose from the next keyframe.
-    * Returns false if no keyframes are available after the current time.
-    * \param camera A reference to the camera object to have its pose updated.
-    * \param ignoreFutureKeyframes true if only past keyframes are to be used.
-    * \returns true only if a new future keyframe is available to set camera pose.
-    */
-    bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
-    static bool updateCamera(Camera* camera, const CameraPose prevPose,
-        const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
+    Path(Waypoint start, Waypoint end, CurveType type,
+        std::optional<double> duration = std::nullopt);
 
-    Timeline<CameraPose>& timeline();
-    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
-    double currentTime() const;
-    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
+    Waypoint startPoint() const;
+    Waypoint endPoint() const;
+    double duration() const;
+    double pathLength() const;
+
+    std::vector<glm::dvec3> controlPoints() const;
+
+    CameraPose traversePath(double dt);
+    std::string currentAnchor() const;
+    bool hasReachedEnd() const;
+
+    CameraPose interpolatedPose(double distance) const;
 
 private:
-    Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
-    double _referenceTimestamp = 0.0;
+    glm::dquat interpolateRotation(double u) const;
+    double speedAlongPath(double traveledDistance);
+
+    Waypoint _start;
+    Waypoint _end;
+    double _duration;
+    CurveType _curveType;
+
+    std::unique_ptr<PathCurve> _curve;
+
+    double _speedFactorFromDuration = 1.0;
+
+    // Playback variables
+    double _traveledDistance = 0.0;
+    double _progressedTime = 0.0; // Time since playback started
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#endif // __OPENSPACE_CORE___PATH___H__

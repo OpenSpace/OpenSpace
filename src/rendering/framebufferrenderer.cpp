@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -33,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>

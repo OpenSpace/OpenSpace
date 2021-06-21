@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___WAYPOINT___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___WAYPOINT___H__
 
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/glm.h>
 
 namespace openspace::pathnavigation {

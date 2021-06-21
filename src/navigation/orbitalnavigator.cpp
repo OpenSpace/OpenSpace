@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/camera/camerapose.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
@@ -643,8 +644,7 @@ glm::dquat OrbitalNavigator::composeCameraRotation(
     return decomposition.globalRotation * decomposition.localRotation;
 }
 
-Camera* OrbitalNavigator::camera() const
-{
+Camera* OrbitalNavigator::camera() const {
     return _camera;
 }
 
@@ -909,9 +909,8 @@ OrbitalNavigator::CameraRotationDecomposition
     return { localCameraRotation, globalCameraRotation };
 }
 
-OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
-                                                         glm::dvec3 cameraToAnchor,
-                                                         Displacement anchorToAim)
+CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
+                                       Displacement anchorToAim)
 {
     CameraRotationDecomposition anchorDecomp =
         decomposeCameraRotation(pose, pose.position + cameraToAnchor);

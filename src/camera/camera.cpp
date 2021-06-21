@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 
 #include <sstream>
 

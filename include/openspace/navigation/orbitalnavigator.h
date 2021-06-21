@@ -46,6 +46,7 @@
 namespace openspace {
     class SceneGraphNode;
     class Camera;
+    struct CameraPose;
     struct SurfacePositionHandle;
 } // namespace
 
@@ -102,11 +103,6 @@ private:
     struct CameraRotationDecomposition {
         glm::dquat localRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
         glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-    };
-
-    struct CameraPose {
-        glm::dvec3 position = glm::dvec3(0.0);
-        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;

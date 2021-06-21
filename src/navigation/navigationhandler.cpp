@@ -22,16 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 
+#include <openspace/camera/camera.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/network/parallelpeer.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/network/parallelpeer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -66,101 +66,11 @@ namespace {
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction."
     };
-
-    struct [[codegen::Dictionary(NavigationHandler)]] Parameters {
-        // The identifier of the anchor node
-        std::string anchor;
-
-        // The identifier of the aim node, if used
-        std::optional<std::string> aim;
-
-        // The identifier of the scene graph node to use as reference frame. If not
-        // specified, this will be the same as the anchor
-        std::optional<std::string> referenceFrame;
-
-        // The position of the camera relative to the anchor node, expressed in meters in
-        // the specified reference frame
-        glm::dvec3 position;
-
-        // The up vector expressed in the coordinate system of the reference frame
-        std::optional<glm::dvec3> up;
-
-        // The yaw angle in radians. Positive angle means yawing camera to the right
-        std::optional<double> yaw;
-
-        // The pitch angle in radians. Positive angle means pitching camera upwards
-        std::optional<double> pitch;
-    };
-#include "navigationhandler_codegen.cpp"
 } // namespace
 
 #include "navigationhandler_lua.inl"
 
 namespace openspace::interaction {
-
-ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
-    constexpr const char* KeyAnchor = "Anchor";
-    constexpr const char* KeyAim = "Aim";
-    constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyUp = "Up";
-    constexpr const char* KeyYaw = "Yaw";
-    constexpr const char* KeyPitch = "Pitch";
-    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
-
-    ghoul::Dictionary cameraDict;
-    cameraDict.setValue(KeyPosition, position);
-    cameraDict.setValue(KeyAnchor, anchor);
-
-    if (anchor != referenceFrame) {
-        cameraDict.setValue(KeyReferenceFrame, referenceFrame);
-    }
-    if (!aim.empty()) {
-        cameraDict.setValue(KeyAim, aim);
-    }
-    if (up.has_value()) {
-        cameraDict.setValue(KeyUp, *up);
-
-        if (std::abs(yaw) > Epsilon) {
-            cameraDict.setValue(KeyYaw, yaw);
-        }
-        if (std::abs(pitch) > Epsilon) {
-            cameraDict.setValue(KeyPitch, pitch);
-        }
-    }
-
-    return cameraDict;
-}
-
-NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    anchor = p.anchor;
-    position = p.position;
-
-    referenceFrame = p.referenceFrame.value_or(anchor);
-    aim = p.aim.value_or(aim);
-
-    if (p.up.has_value()) {
-        up = *p.up;
-
-        yaw = p.yaw.value_or(yaw);
-        pitch = p.pitch.value_or(pitch);
-    }
-}
-
-NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::string aim_,
-                                                    std::string referenceFrame_,
-                                                    glm::dvec3 position_,
-                                                    std::optional<glm::dvec3> up_,
-                                                    double yaw_, double pitch_)
-    : anchor(std::move(anchor_))
-    , aim(std::move(aim_))
-    , referenceFrame(std::move(referenceFrame_))
-    , position(std::move(position_))
-    , up(std::move(up_))
-    , yaw(yaw_)
-    , pitch(pitch_)
-{}
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
@@ -169,6 +79,7 @@ NavigationHandler::NavigationHandler()
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);
+    addPropertySubOwner(_pathNavigator);
 
     addProperty(_disableMouseInputs);
     addProperty(_disableJoystickInputs);
@@ -210,8 +121,7 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(
-    NavigationHandler::NavigationState state)
+void NavigationHandler::setNavigationStateNextFrame(NavigationState state)
 {
     _pendingNavigationState = std::move(state);
 }
@@ -226,6 +136,10 @@ const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
 
 KeyframeNavigator& NavigationHandler::keyframeNavigator() {
     return _keyframeNavigator;
+}
+
+PathNavigator& NavigationHandler::pathNavigator() {
+    return _pathNavigator;
 }
 
 bool NavigationHandler::isKeyFrameInteractionEnabled() const {
@@ -252,6 +166,9 @@ void NavigationHandler::updateCamera(double deltaTime) {
         if (_useKeyFrameInteraction) {
             _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
         }
+        else if (_pathNavigator.isPlayingPath()) {
+            _pathNavigator.updateCamera(deltaTime);
+        }
         else {
             if (_disableJoystickInputs) {
                 std::fill(
@@ -264,67 +181,21 @@ void NavigationHandler::updateCamera(double deltaTime) {
             _orbitalNavigator.updateCameraStateFromStates(deltaTime);
         }
     }
+
+    // If session recording (playback mode) was started in the midst of a camera path, 
+    // abort the path
+    if (_playbackModeEnabled && _pathNavigator.isPlayingPath()) {
+        _pathNavigator.abortPath();
+    }
 }
 
-void NavigationHandler::applyNavigationState(const NavigationHandler::NavigationState& ns)
-{
-    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    const SceneGraphNode* anchor = sceneGraphNode(ns.anchor);
-
-    if (!anchor) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", ns.referenceFrame
-        ));
-        return;
-    }
-    if (!ns.aim.empty() && !sceneGraphNode(ns.aim)) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as aim.", ns.referenceFrame
-        ));
-        return;
-    }
-    if (!referenceFrame) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
-            ns.referenceFrame)
-        );
-        return;
-    }
-
-    const glm::dvec3 anchorWorldPosition = anchor->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
-
+void NavigationHandler::applyNavigationState(const NavigationState& ns) {
     _orbitalNavigator.setAnchorNode(ns.anchor);
     _orbitalNavigator.setAimNode(ns.aim);
 
-    const SceneGraphNode* anchorNode = _orbitalNavigator.anchorNode();
-    const SceneGraphNode* aimNode = _orbitalNavigator.aimNode();
-    if (!aimNode) {
-        aimNode = anchorNode;
-    }
-
-    const glm::dvec3 cameraPositionWorld = anchorWorldPosition +
-        referenceFrameTransform * glm::dvec4(ns.position, 1.0);
-
-    glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(referenceFrameTransform * *ns.up) :
-        glm::dvec3(0.0, 1.0, 0.0);
-
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
-    glm::dvec3 neutralView =
-        glm::normalize(aimNode->worldPosition() - cameraPositionWorld);
-
-    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
-        glm::dvec3(0.0),
-        neutralView,
-        up
-    )));
-
-    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.0, 0.0, 0.0));
-    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.0, -1.0, 0.0));
-
-    _camera->setPositionVec3(cameraPositionWorld);
-    _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
+    CameraPose pose = ns.cameraPose();
+    _camera->setPositionVec3(pose.position);
+    _camera->setRotation(pose.rotation);
     _orbitalNavigator.clearPreviousState();
 }
 
@@ -383,7 +254,7 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState.keyboardCallback(key, modifier, action);
 }
 
-NavigationHandler::NavigationState NavigationHandler::navigationState() const {
+NavigationState NavigationHandler::navigationState() const {
     const SceneGraphNode* referenceFrame = _orbitalNavigator.followingAnchorRotation() ?
         _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
@@ -395,7 +266,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState() const {
     return navigationState(*referenceFrame);
 }
 
-NavigationHandler::NavigationState NavigationHandler::navigationState(
+NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
     const SceneGraphNode* anchor = _orbitalNavigator.anchorNode();
@@ -441,7 +312,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    NavigationHandler::NavigationState state;
+    NavigationState state;
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
@@ -558,10 +429,6 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator.joystickStates().buttonCommand(button);
-}
-
-documentation::Documentation NavigationHandler::NavigationState::Documentation() {
-    return codegen::doc<Parameters>("core_navigation_state");
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
