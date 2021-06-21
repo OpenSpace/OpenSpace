@@ -49,6 +49,24 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance);
  */
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
 
+/**
+ * Converts from galactic cartesian coordinates to ICRS coordinates in decimal degrees
+ * and distance.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \param z Z coordinate
+ * \return A vector with the ra and dec decimal degrees and distance.
+ */
+glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);
+
+/**
+ * Converts from ICRS (decimal degrees) coordinates to ICRS (hms and dms) coordinates.
+ * \param ra Right ascension, given in decimal degrees
+ * \param dec Declination, given in decimal degrees
+ * \return A pair with the ra and dec strings in hms and dms format.
+ */
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___COORDINATECONVERSION___H__

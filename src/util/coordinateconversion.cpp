@@ -174,7 +174,7 @@ namespace openspace {
 // into Galactic coordinates (l, b)
 glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     // Reference:
-    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
+    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
 
     // (Ra, Dec) -> (a, d)
     double a = glm::radians(ra);
@@ -202,9 +202,11 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     return distance * rGalactic;
 }
 
-// ra format "XXhYYmZZs" or "XhYmZs"
-// dec format "XXdYYmZZs", "-XXdYYmZZs", "XdYmZs" or "-XdYmZs"
+// Ra format "XXhYYmZZs" or "XhYmZs"
+// Dec format "XXdYYmZZs", "-XXdYYmZZs", "XdYmZs" or "-XdYmZs"
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
+    // Reference:
+    // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
     if (ra.size() > 9 || ra.size() < 6 || dec.size() > 10 || dec.size() < 6) {
         throw(ghoul::lua::LuaRuntimeException(fmt::format(
             "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XXhYYmZZs' "
@@ -224,8 +226,8 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     if (!isRaDecValid(ra_hours, ra_minutes, ra_seconds, dec_degrees, dec_minutes,
         dec_seconds))
     {
-        LWARNING(fmt::format("Ra '{}' or Dec '{}' is outside the allowed range",
-            ra, dec)
+        LWARNING(fmt::format("Ra '{}' or Dec '{}' is outside the allowed range, "
+            "result may be incorrect", ra, dec)
         );
     }
 
@@ -240,6 +242,91 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
         (dec_seconds / 3600.0)) * sign;
 
     return glm::dvec2(ra_deg, dec_deg);
+}
+
+// Convert Galactic coordinates (x, y, z) or (l, b) into
+// Equatorial coordinates ICRS right ascension and declination (a, d) plus distance
+glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
+    // References:
+    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
+    // https://en.wikipedia.org/wiki/Celestial_coordinate_system
+
+    // Normalize
+    double distance = sqrt(x * x + y * y + z * z);
+    double n_x = x / distance;
+    double n_y = y / distance;
+    double n_z = z / distance;
+
+    // Convert from cartesian
+    // (x, y, z) -> (l, b)
+    double l = atan2(n_y, n_x);
+    double b = asin(n_z);
+
+    // J2000 Galactic reference frame
+    constexpr double a0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
+    constexpr double d0 = glm::radians(27.1284);
+    constexpr double l0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
+
+    // Convert to equatorial reference frame
+    double a = atan2(
+        cos(b) * sin(l0 - l),
+        sin(b) * cos(d0) - cos(b) * sin(d0) * cos(l0 - l)
+    ) + a0;
+    double d = asin(sin(b) * sin(d0) + cos(b) * cos(d0) * cos(l0 - l));
+
+    glm::dvec3 rEquatorial = glm::dvec3(a, d, distance);
+
+    return rEquatorial;
+}
+
+// Return a pair with two formatted strings from the decimal degrees ra and dec
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
+    // References:
+    // https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
+    // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
+
+    // Radians to degrees
+    double ra_deg = glm::degrees(ra);
+    double dec_deg = glm::degrees(dec);
+
+    // Check input
+    if (ra_deg < 0 || ra_deg > 360 || dec_deg < -90 || dec_deg > 90) {
+        LWARNING(fmt::format("Given Ra '{}' or Dec '{}' is outside the allowed range, "
+            "result may be incorrect", ra, dec)
+        );
+    }
+
+    // Calculate Ra
+    int ra_hours = std::trunc(ra_deg) / 15.0;
+    double ra_minutes_full = (ra_deg - ra_hours * 15.0) * 60.0 / 15.0;
+    int ra_minutes = std::trunc(ra_minutes_full);
+    double ra_seconds = (ra_minutes_full - ra_minutes) * 60.0;
+
+    // Calculate Dec
+    int dec_degrees = std::trunc(dec_deg);
+    double dec_minutes_full = (abs(dec_deg) - abs(dec_degrees)) * 60.0;
+    int dec_minutes = std::trunc(dec_minutes_full);
+    double dec_seconds = (dec_minutes_full - dec_minutes) * 60.0;
+
+    // Construct strings
+    std::pair<std::string, std::string> result;
+    result.first = std::to_string(ra_hours) + 'h' +
+        std::to_string(ra_minutes) + 'm' +
+        std::to_string(ra_seconds) + 's';
+
+    result.second = std::to_string(dec_degrees) + 'd' +
+        std::to_string(dec_minutes) + 'm' +
+        std::to_string(dec_seconds) + 's';
+
+    // Check results
+    if (!isRaDecValid(ra_hours, ra_minutes, ra_seconds, dec_degrees, dec_minutes,
+        dec_seconds))
+    {
+        LWARNING(fmt::format("Resulting Ra '{}' or Dec '{}' is outside the allowed range, "
+            "result may be incorrect", result.first, result.second)
+        );
+    }
+    return result;
 }
 
 } // namespace openspace
