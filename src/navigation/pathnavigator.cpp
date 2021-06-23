@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/pathcreator.h>
 #include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
