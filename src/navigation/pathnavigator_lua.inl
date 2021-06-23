@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//#include <modules/globebrowsing/globebrowsingmodule.h> // TODO: remove dependancy
-//#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -39,7 +37,7 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    constexpr const double Epsilon = 1e-12;
+    constexpr const double Epsilon = 1e-5;
 } // namespace
 
 namespace openspace::luascriptfunctions {
@@ -195,62 +193,6 @@ int goToHeight(lua_State* L) {
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
-
-//// @TODO (emmbr 2020-11-06) Ideally, this module shouldn't depend on things from
-//// Globebrowsing, but we want it for an istallation. Later on, move this functionality
-//// somewhere else. Maybe combine with the existing "goToGeo" in globebrowsing?
-//int goToGeo(lua_State* L) {
-//    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 4, 6 }, "lua::goToGeo");
-//
-//    const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
-//    const SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
-//    if (!n) {
-//        lua_settop(L, 0);
-//        return ghoul::lua::luaError(L, "Unknown globe name: " + nodeIdentifier);
-//    }
-//
-//    const double latitude = ghoul::lua::value<double>(L, 2);
-//    const double longitude = ghoul::lua::value<double>(L, 3);
-//    const double altitude = ghoul::lua::value<double>(L, 4);
-//
-//    using RenderableGlobe = openspace::globebrowsing::RenderableGlobe;
-//    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
-//    if (!globe) {
-//        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
-//    }
-//
-//    // Compute the relative position based on the input values
-//    glm::dvec3 positionModelCoords = global::moduleEngine->module<GlobeBrowsingModule>()
-//        ->cartesianCoordinatesFromGeo(
-//        *globe,
-//        latitude,
-//        longitude,
-//        altitude
-//    );
-//
-//    using namespace std::string_literals;
-//    ghoul::Dictionary insDict;
-//    insDict.setValue("Type", "Node"s);
-//    insDict.setValue("Target", nodeIdentifier);
-//    insDict.setValue("Position", positionModelCoords);
-//
-//    if (nArguments > 4) {
-//        int result = handleOptionalGoToParameters(L, 5, nArguments, insDict);
-//        if (result != 0) {
-//            return result; // An error occurred
-//        }
-//    }
-//
-//    global::navigationHandler->pathNavigator().createPath(insDict);
-//
-//    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
-//        global::navigationHandler->pathNavigator().startPath();
-//    }
-//
-//    lua_settop(L, 0);
-//    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-//    return 0;
-//}
 
 int generatePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePath");

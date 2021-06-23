@@ -572,17 +572,6 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "the target up vector for camera is set based on the target node. Either of "
                 "the optional parameters can be left out."
             },
-            //{
-            //    "goToGeo",
-            //    &luascriptfunctions::goToGeo,
-            //    {},
-            //    "string, double, double, double [, bool, double]",
-            //    "Move the camera to the globe with the name given by the input string. "
-            //    "The next three input parameters are latitude, longitude and altitude. "
-            //    "The optional double specifies the duration of the motion. If the optional "
-            //    "bool is set to true the target up vector for camera is set based on the "
-            //    "target node. Either of the optional parameters can be left out."
-            //},
             {
                 "generatePath",
                 &luascriptfunctions::generatePath,

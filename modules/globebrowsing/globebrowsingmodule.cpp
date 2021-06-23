@@ -399,6 +399,20 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "the surface of the specified globe."
         },
         {
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            "flyToGeo", 
+            &globebrowsing::luascriptfunctions::flyToGeo,
+            {},
+            "[string], number, number, number, [number]",
+            "Fly the camera to geographic coordinates of a globe, using the path "
+            "navigation system. The first (optional) argument is the identifier of a "
+            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
+            "current anchor will be used. The second and third argument is latitude "
+            "and longitude (degrees). The fourth argument is the altitude, in meters. "
+            "The last (optional) parameter is a duration for the motion"
+        },
+        {
             "getGeoPosition",
             &globebrowsing::luascriptfunctions::getGeoPosition,
             {},
