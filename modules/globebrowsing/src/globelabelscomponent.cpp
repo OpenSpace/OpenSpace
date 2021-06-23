@@ -202,17 +202,17 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
 GlobeLabelsComponent::GlobeLabelsComponent()
     : properties::PropertyOwner({ "Labels" })
     , _enabled(EnabledInfo, false)
-    , _fontSize(FontSizeInfo, 30, 1, 300)
+    , _fontSize(FontSizeInfo, 30.f, 1.f, 300.f)
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(1, 1000), glm::ivec2(1), glm::ivec2(1000))
     , _size(SizeInfo, 2.5, 0, 30)
-    , _heightOffset(HeightOffsetInfo, 100.0, 0.0, 10000.0)
+    , _heightOffset(HeightOffsetInfo, 100.f, 0.f, 10000.f)
     , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _fadeDistances(
         FadeDistancesInfo,
-        glm::vec2(1e4, 1e6),
+        glm::vec2(1e4f, 1e6f),
         glm::vec2(1.f),
-        glm::vec2(1e8)
+        glm::vec2(1e8f)
     )
     , _fadeInEnabled(FadeInEnabledInfo, false)
     , _fadeOutEnabled(FadeOutEnabledInfo, false)

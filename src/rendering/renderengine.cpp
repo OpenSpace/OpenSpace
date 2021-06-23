@@ -375,9 +375,7 @@ RenderEngine::RenderEngine()
             std::filesystem::path newFolder = absPath(
                 "${STARTUP_SCREENSHOT}/" + std::string(date)
             );
-            if (!std::filesystem::is_directory(newFolder)) {
-                std::filesystem::create_directory(newFolder);
-            }
+
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
                 newFolder,
@@ -534,28 +532,44 @@ void RenderEngine::initializeGL() {
     _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
     {
-        ZoneScopedN("Font: Mono")
-        TracyGpuZone("Font: Mono")
-        constexpr const float FontSizeFrameinfo = 32.f;
-        _fontFrameInfo = global::fontManager->font(KeyFontMono, FontSizeFrameinfo);
+        ZoneScopedN("Font: FrameInfo")
+        TracyGpuZone("Font: FrameInfo")
+        _fontFrameInfo = global::fontManager->font(
+            KeyFontMono,
+            global::configuration->fontSize.frameInfo
+        );
     }
     {
-        ZoneScopedN("Font: Date")
-        TracyGpuZone("Font: Date")
-        constexpr const float FontSizeTime = 15.f;
-        _fontDate = global::fontManager->font(KeyFontMono, FontSizeTime);
+        ZoneScopedN("Font: Shutdown")
+        TracyGpuZone("Font: Shutdown")
+        _fontShutdown = global::fontManager->font(
+            KeyFontMono,
+            global::configuration->fontSize.shutdown
+        );
     }
     {
-        ZoneScopedN("Font: Info")
-        TracyGpuZone("Font: Info")
-        constexpr const float FontSizeMono = 10.f;
-        _fontInfo = global::fontManager->font(KeyFontMono, FontSizeMono);
+        ZoneScopedN("Font: CameraInfo")
+        TracyGpuZone("Font: CameraInfo")
+        _fontCameraInfo = global::fontManager->font(
+            KeyFontMono,
+            global::configuration->fontSize.cameraInfo
+        );
+    }
+    {
+        ZoneScopedN("Font: VersionInfo")
+        TracyGpuZone("Font: VersionInfo")
+        _fontVersionInfo = global::fontManager->font(
+            KeyFontMono,
+            global::configuration->fontSize.versionInfo
+        );
     }
     {
         ZoneScopedN("Font: Log")
         TracyGpuZone("Font: Log")
-        constexpr const float FontSizeLight = 8.f;
-        _fontLog = global::fontManager->font(KeyFontLight, FontSizeLight);
+        _fontLog = global::fontManager->font(
+            KeyFontLight,
+            global::configuration->fontSize.log
+        );
     }
 
     {
@@ -876,12 +890,12 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    const glm::vec2 size = _fontDate->boundingBox("Shutting down");
+    const glm::vec2 size = _fontShutdown->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
         fontResolution().y / 2 - size.y / 2
     );
-    RenderFont(*_fontDate, penPosition, "Shutting down");
+    RenderFont(*_fontShutdown, penPosition, "Shutting down");
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
@@ -889,7 +903,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     timer = std::max(timer, 0.f);
 
-    const glm::vec2 size = _fontDate->boundingBox(
+    const glm::vec2 size = _fontShutdown->boundingBox(
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
@@ -899,14 +913,14 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     );
 
     RenderFont(
-        *_fontDate,
+        *_fontShutdown,
         penPosition,
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime),
         ghoul::fontrendering::CrDirection::Down
     );
 
     RenderFont(
-        *_fontDate,
+        *_fontShutdown,
         penPosition,
         // Important: length of this string is the same as the shutdown time text
         // to make them align
@@ -925,21 +939,6 @@ void RenderEngine::renderDashboard() {
     );
 
     global::dashboard->render(penPosition);
-
-#ifdef REALTIME_CAMERA_POS_DISPLAY
-    penPosition += glm::vec2(0.f, -50.f);
-
-    glm::dvec3 p = _camera->positionVec3();
-    glm::dquat rot = _camera->rotationQuaternion();
-    std::string fc = global::navigationHandler.focusNode()->identifier();
-    RenderFont(
-        *_fontInfo,
-        penPosition,
-        fmt::format("Pos: {} {} {}\nOrientation: {} {} {} {}\nFocus: {}",
-            p.x, p.y, p.z, rot[0], rot[1], rot[2], rot[3], fc
-            )
-    );
-#endif
 }
 
 void RenderEngine::postDraw() {
@@ -1286,7 +1285,7 @@ void RenderEngine::renderCameraInformation() {
     const glm::vec4 EnabledColor  = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
     const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
-    const glm::vec2 rotationBox = _fontInfo->boundingBox("Rotation");
+    const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
 
     float penPosY = fontResolution().y - rotationBox.y;
 
@@ -1305,14 +1304,14 @@ void RenderEngine::renderCameraInformation() {
         rotationBox.y
     };
     FR::defaultRenderer().render(
-        *_fontInfo,
+        *_fontCameraInfo,
         glm::vec2(fontResolution().x - rotationBox.x - XSeparation, penPosY),
         "Rotation",
         nav.hasRotationalFriction() ? EnabledColor : DisabledColor
     );
     penPosY -= rotationBox.y + YSeparation;
 
-    const glm::vec2 zoomBox = _fontInfo->boundingBox("Zoom");
+    const glm::vec2 zoomBox = _fontCameraInfo->boundingBox("Zoom");
 
     _cameraButtonLocations.zoom = {
         fontResolution().x - zoomBox.x - XSeparation,
@@ -1321,14 +1320,14 @@ void RenderEngine::renderCameraInformation() {
         zoomBox.y
     };
     FR::defaultRenderer().render(
-        *_fontInfo,
+        *_fontCameraInfo,
         glm::vec2(fontResolution().x - zoomBox.x - XSeparation, penPosY),
         "Zoom",
         nav.hasZoomFriction() ? EnabledColor : DisabledColor
     );
     penPosY -= zoomBox.y + YSeparation;
 
-    const glm::vec2 rollBox = _fontInfo->boundingBox("Roll");
+    const glm::vec2 rollBox = _fontCameraInfo->boundingBox("Roll");
 
     _cameraButtonLocations.roll = {
         fontResolution().x - rollBox.x - XSeparation,
@@ -1337,7 +1336,7 @@ void RenderEngine::renderCameraInformation() {
         rollBox.y
     };
     FR::defaultRenderer().render(
-        *_fontInfo,
+        *_fontCameraInfo,
         glm::vec2(fontResolution().x - rollBox.x - XSeparation, penPosY),
         "Roll",
         nav.hasRollFriction() ? EnabledColor : DisabledColor
@@ -1352,27 +1351,27 @@ void RenderEngine::renderVersionInformation() {
     }
 
     using FR = ghoul::fontrendering::FontRenderer;
-    const glm::vec2 versionBox = _fontInfo->boundingBox(_versionString);
-    const glm::vec2 commitBox = _fontInfo->boundingBox(OPENSPACE_GIT_FULL);
+    const glm::vec2 versionBox = _fontVersionInfo->boundingBox(_versionString);
+    const glm::vec2 commitBox = _fontVersionInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     FR::defaultRenderer().render(
-        *_fontInfo,
+        *_fontVersionInfo,
         glm::vec2(
             fontResolution().x - versionBox.x - 10.f,
             5.f
         ),
         _versionString,
-        glm::vec4(0.5, 0.5, 0.5, 1.f)
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
     );
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
     if (!std::string_view(OPENSPACE_GIT_COMMIT).empty()) {
-        // We check OPENSPACE_GIT_COMMIT but puse OPENSPACE_GIT_FULL on purpose since
+        // We check OPENSPACE_GIT_COMMIT but use OPENSPACE_GIT_FULL on purpose since
         // OPENSPACE_GIT_FULL will never be empty (always will contain at least @, but
         // checking for that is a bit brittle)
         FR::defaultRenderer().render(
-            *_fontInfo,
+            *_fontVersionInfo,
             glm::vec2(fontResolution().x - commitBox.x - 10.f, versionBox.y + 5.f),
             OPENSPACE_GIT_FULL,
             glm::vec4(0.5, 0.5, 0.5, 1.f)
@@ -1386,15 +1385,15 @@ void RenderEngine::renderVersionInformation() {
 
         ZoneScopedN("Tracy Information")
 
-        const glm::vec2 tracyBox = _fontInfo->boundingBox("TRACY PROFILING ENABLED");
+        const glm::vec2 tracyBox = _fontVersionInfo->boundingBox("TRACY PROFILING");
         const glm::vec2 penPosition = glm::vec2(
             fontResolution().x - tracyBox.x - 10.f,
             versionBox.y + commitBox.y + 5.f
         );
         FR::defaultRenderer().render(
-            *_fontInfo,
+            *_fontVersionInfo,
             penPosition,
-            "TRACY PROFILING ENABLED",
+            "TRACY PROFILING",
             glm::vec4(0.8f, 0.2f, 0.15f, 1.f)
         );
     }

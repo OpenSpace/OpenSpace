@@ -2103,7 +2103,7 @@ std::vector<std::string> SessionRecording::playbackList() const {
             DWORD attributes = GetFileAttributes(e.path().string().c_str());
             bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-            bool isHidden = filename.rfind(".", 0) != 0;
+            bool isHidden = filename.find(".") == 0;
 #endif // WIN32
             if (!isHidden) {
                 // Don't add hidden files

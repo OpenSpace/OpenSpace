@@ -171,9 +171,9 @@ void HorizonsTranslation::readHorizonsTextFile() {
         std::stringstream str(line);
         std::string date;
         std::string time;
-        float range = 0;
-        float gLon = 0;
-        float gLat = 0;
+        double range = 0;
+        double gLon = 0;
+        double gLat = 0;
 
         // File is structured by:
         // YYYY-MM-DD

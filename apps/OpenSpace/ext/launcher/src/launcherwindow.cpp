@@ -265,7 +265,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
-            bool isUserProfile = selectedIndex <= _userAssetCount;
+            bool isUserProfile = selectedIndex < _userAssetCount;
             openProfileEditor(selection, isUserProfile);
         }
     );

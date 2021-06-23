@@ -256,7 +256,10 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for Base shape
-    ghoul_assert(_nShapeSegments.value <= std::numeric_limit<uint8_t>::max(), "Too many shape segments")
+    ghoul_assert(
+        _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
+        "Too many shape segments"
+    );
     for (uint8_t i = 0; i < _nShapeSegments; ++i) {
         _indexArray.push_back(i);
     }
@@ -329,7 +332,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePrism::update(const UpdateData&) {
+void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
@@ -337,6 +340,7 @@ void RenderablePrism::update(const UpdateData&) {
     if (_prismIsDirty) {
         updateVertexData();
         updateBufferData();
+        setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _prismIsDirty = false;
     }
 }

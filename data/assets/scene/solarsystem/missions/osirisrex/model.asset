@@ -36,7 +36,7 @@ local OsirisRex = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "OSIRIS-REX",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = OsirisRexKernels
     },
     Rotation = {
@@ -130,34 +130,36 @@ local PolyCamFov = {
   }
 }
 
-local RexisFov = {
-  Identifier = "REXIS FOV",
-  Parent = Rexis.Identifier,
-  Renderable = {
-    Type = "RenderableFov",
-    Body = "OSIRIS-REX",
-    Frame = "ORX_REXIS",
-    RGB = { 0.8, 0.7, 0.7 },
-    Instrument = {
-      Name = "ORX_REXIS",
-      Method = "ELLIPSOID",
-      Aberration = "NONE"
-    },
-    PotentialTargets = { BENNU_BODY },
-    FrameConversions = {
-      [BENNU_BODY] = "IAU_BENNU"
-    }
-  },
-  GUI = {
-    Name = "REXIS FOV",
-    Path = "/Solar System/Missions/OSIRIS REx/Instruments"
-  }
-}
+-- Commenting this out as REXIS' shape is circle, which is currently not supported in
+-- the RenderableFOV class
+-- local RexisFov = {
+--   Identifier = "REXIS FOV",
+--   Parent = Rexis.Identifier,
+--   Renderable = {
+--     Type = "RenderableFov",
+--     Body = "OSIRIS-REX",
+--     Frame = "ORX_REXIS",
+--     RGB = { 0.8, 0.7, 0.7 },
+--     Instrument = {
+--       Name = "ORX_REXIS",
+--       Method = "ELLIPSOID",
+--       Aberration = "NONE"
+--     },
+--     PotentialTargets = { BENNU_BODY },
+--     FrameConversions = {
+--       [BENNU_BODY] = "IAU_BENNU"
+--     }
+--   },
+--   GUI = {
+--     Name = "REXIS FOV",
+--     Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+--   }
+-- }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   OsirisRex,
   PolyCam,
   Rexis,
   PolyCamFov,
-  RexisFov
+  -- RexisFov
 })

@@ -82,7 +82,7 @@ namespace {
 
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
-        glm::vec3( 1.f,  1.f, 1e35)
+        glm::vec3( 1.f,  1.f, 1e35f)
     };
     constexpr const float DefaultHeight = 0.f;
 
@@ -464,7 +464,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
             cornerGeodetic.geodetic2.lat += latDiff;
         }
 
-        corners[i] = glm::dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
+        corners[i] = glm::dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1.0);
     }
 
     return corners;
@@ -567,7 +567,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             for (const Parameters::ShadowGroup::Caster& caster : p.shadowGroup->casters) {
                 Ellipsoid::ShadowConfiguration sc;
                 sc.source = std::pair<std::string, double>(source.name, source.radius);
-                sc.caster = std::pair<std::string, double>(source.name, source.radius);
+                sc.caster = std::pair<std::string, double>(caster.name, caster.radius);
                 shadowConfArray.push_back(sc);
             }
         }
@@ -1357,7 +1357,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
         cornersModelSpace[i] = cornerModelSpace;
         const glm::dvec3 cornerCameraSpace = glm::dvec3(
-            modelViewTransform * glm::dvec4(cornerModelSpace, 1)
+            modelViewTransform * glm::dvec4(cornerModelSpace, 1.0)
         );
         cornersCameraSpace[i] = cornerCameraSpace;
     }
@@ -1995,7 +1995,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         // Getting source and caster:
         glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
             shadowConf.source.first,
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),
@@ -2004,7 +2004,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         sourcePos *= KM_TO_M; // converting to meters
         glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
             shadowConf.caster.first,
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),
@@ -2056,7 +2056,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
         const glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
             "SUN",
-            "SUN",
+            "SSB",
             "GALACTIC",
             {},
             data.time.j2000Seconds(),
@@ -2311,11 +2311,11 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
     // position needs to be transformed with the inverse model matrix
     const GeodeticPatch& patch = chunk.surfacePatch;
     const float maxHeight = heights.max;
-    const glm::dvec3 globePos = glm::dvec3(0, 0, 0); // In model space it is 0
+    const glm::dvec3 globePos = glm::dvec3(0.0, 0.0, 0.0); // In model space it is 0
     const double minimumGlobeRadius = _ellipsoid.minimumRadius();
 
     const glm::dvec3 cameraPos = glm::dvec3(
-        _cachedInverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1)
+        _cachedInverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1.0)
     );
 
     const glm::dvec3 globeToCamera = cameraPos;

@@ -54,8 +54,8 @@ namespace documentation { struct Documentation; }
 class ShadowComponent : public properties::PropertyOwner {
 public:
     struct ShadowMapData {
-        glm::dmat4 shadowMatrix;
-        GLuint shadowDepthTexture;
+        glm::dmat4 shadowMatrix = glm::dmat4(1.0);
+        GLuint shadowDepthTexture = 0;
     };
 
     ShadowComponent(const ghoul::Dictionary& dictionary);

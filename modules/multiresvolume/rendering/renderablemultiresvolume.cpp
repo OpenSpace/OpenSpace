@@ -231,8 +231,8 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         return;
     }
 
-    //_pscOffset = psc(glm::vec4(0.0));
-    //_boxScaling = glm::vec3(1.0);
+    //_pscOffset = psc(glm::vec4(0.f));
+    //_boxScaling = glm::vec3(1.f);
 
 
     /*if (dictionary.hasKey(KeyBoxScaling)) {

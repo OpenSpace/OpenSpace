@@ -142,7 +142,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
 
     // Linear interpolation
     t = std::max(0.0, std::min(1.0, t));
-    glm::dvec3 nowCameraPosition = prevKeyframeCameraPosition * (1 - t) +
+    glm::dvec3 nowCameraPosition = prevKeyframeCameraPosition * (1.0 - t) +
                                    nextKeyframeCameraPosition * t;
     glm::dquat nowCameraRotation = glm::slerp(
         prevKeyframeCameraRotation,
@@ -160,7 +160,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
         const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
         const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
         const float interpolatedInvScaleExp = static_cast<float>(
-            prevInvScaleExp * (1 - t) + nextInvScaleExp * t
+            prevInvScaleExp * (1.0 - t) + nextInvScaleExp * t
             );
         camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
