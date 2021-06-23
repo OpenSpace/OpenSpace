@@ -262,13 +262,6 @@ double Path::speedAlongPath(double traveledDistance) {
     return speed;
 }
 
-struct NodeInfo {
-    std::string identifier;
-    std::optional<glm::dvec3> position;
-    std::optional<double> height;
-    bool useTargetUpDirection;
-};
-
 Waypoint waypointFromCamera() {
     Camera* camera = global::navigationHandler->camera();
     const glm::dvec3 pos = camera->positionVec3();
@@ -306,6 +299,13 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
 
     return nullptr;
 }
+
+struct NodeInfo {
+    std::string identifier;
+    std::optional<glm::dvec3> position;
+    std::optional<double> height;
+    bool useTargetUpDirection;
+};
 
 Waypoint computeDefaultWaypoint(const NodeInfo& info,
     const Waypoint& startPoint)
@@ -389,45 +389,45 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     std::vector<Waypoint> waypoints;
     switch (p.type) {
-    case Parameters::Type::NavigationState: {
-        if (!p.navigationState.has_value()) {
-            throw ghoul::RuntimeError("A navigation state is required");
+        case Parameters::Type::NavigationState: {
+            if (!p.navigationState.has_value()) {
+                throw ghoul::RuntimeError("A navigation state is required");
+            }
+
+            const NavigationState navigationState =
+                NavigationState(p.navigationState.value());
+
+            waypoints = { Waypoint(navigationState) };
+            break;
         }
+        case Parameters::Type::Node: {
+            if (!p.target.has_value()) {
+                throw ghoul::RuntimeError("A target node is required");
+            }
 
-        const NavigationState navigationState =
-            NavigationState(p.navigationState.value());
+            const std::string nodeIdentifier = p.target.value();
+            const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
-        waypoints = { Waypoint(navigationState) };
-        break;
-    }
-    case Parameters::Type::Node: {
-        if (!p.target.has_value()) {
-            throw ghoul::RuntimeError("A target node is required");
+            if (!targetNode) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not find target node '{}'", nodeIdentifier
+                ));
+            }
+
+            NodeInfo info {
+                nodeIdentifier,
+                p.position,
+                p.height,
+                p.useTargetUpDirection.value_or(false)
+            };
+
+            waypoints = { computeDefaultWaypoint(info, startPoint) };
+            break;
         }
-
-        const std::string nodeIdentifier = p.target.value();
-        const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
-
-        if (!targetNode) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Could not find target node '{}'", nodeIdentifier
-            ));
+        default: {
+            LERROR(fmt::format("Uknown instruciton type: {}", p.type));
+            throw ghoul::MissingCaseException();
         }
-
-        NodeInfo info{
-            nodeIdentifier,
-            p.position,
-            p.height,
-            p.useTargetUpDirection.value_or(false)
-        };
-
-        waypoints = { computeDefaultWaypoint(info, startPoint) };
-        break;
-    }
-    default: {
-        LERROR(fmt::format("Uknown instruciton type: {}", p.type));
-        throw ghoul::MissingCaseException();
-    }
     }
 
     // TODO: allow for an instruction to represent a list of waypoints
