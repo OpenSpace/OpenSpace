@@ -72,7 +72,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/navigation/navigationstate.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp
-  ${OPENSPACE_BASE_DIR}/src/navigation/pathcreator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathcurve.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathhelperfunctions.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
@@ -253,7 +252,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/path.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcreator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurve.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathhelperfunctions.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathnavigator.h

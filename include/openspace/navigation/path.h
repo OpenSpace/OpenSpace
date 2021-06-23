@@ -27,6 +27,7 @@
 
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/waypoint.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <vector>
 
@@ -77,6 +78,9 @@ private:
     double _traveledDistance = 0.0;
     double _progressedTime = 0.0; // Time since playback started
 };
+
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary, 
+    Path::CurveType curveType);
 
 } // namespace openspace::interaction
 

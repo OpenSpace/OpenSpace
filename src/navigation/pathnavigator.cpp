@@ -246,7 +246,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
     try {
         _currentPath = std::make_unique<Path>(
-            PathCreator::createPath(dictionary, Path::CurveType(curveType))
+            createPathFromDictionary(dictionary, Path::CurveType(curveType))
         );
     }
     catch (const ghoul::RuntimeError& e) {
