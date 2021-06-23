@@ -33,6 +33,7 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <sstream>
 
 AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
                                                  QWidget* parent)
