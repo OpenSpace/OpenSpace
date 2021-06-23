@@ -183,7 +183,7 @@ namespace {
         "RenderAtDistance",
         "Render at Distance",
         "Tells the rendering engine not to perform distance based performance culling"
-        "for this globe. Turning this propery on will all the globe to be seen at far"
+        "for this globe. Turning this propery on will let the globe to be seen at far"
         " away distances when normally it would be hidden."
     };
 
@@ -726,7 +726,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     constexpr int res = 2880;
     const double distance = res * boundingSphere() / tfov;
 
-    if ( (distanceToCamera < distance) || (_generalProperties.renderAtDistance) ) {
+    if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
             // Before Shadows
             _globeLabelsComponent.draw(data);
