@@ -31,26 +31,7 @@
 namespace {
     constexpr const char* _loggerCat = "Coordinateconversion";
 
-    bool isStringNumber(const std::string& str) {
-        for (size_t i = 0; i < str.size(); ++i) {
-            if (!isdigit(str[i])) {
-                if (i == 0 && str.size() > 1) {
-                    if (str[i] == '-' || str[i] == '+') {
-                        continue;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                else {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    void parseString(const std::string& str, double& hours_or_degrees, double& minutes,
+    void parseString(const std::string& str, int& hours_or_degrees, int& minutes,
                      double& seconds)
     {
         // Find hms or dms indicies
@@ -67,56 +48,73 @@ namespace {
             s_index == std::string::npos)
         {
             throw(ghoul::lua::LuaRuntimeException(fmt::format(
-                "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XXhYYmZZs' "
-                "or 'XhYmZs', and Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'",
-                str)
-            ));
+                "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
+                "and Dec 'XdYmZs'", str))
+            );
         }
 
         // Construct the number strings
         std::string s_hours_or_degrees = str.substr(0, h_or_d_index);
         std::string s_minutes = str.substr(h_or_d_index + 1, m_index - h_or_d_index - 1);
         std::string s_seconds = str.substr(m_index + 1, s_index - m_index - 1);
-        if (!isStringNumber(s_hours_or_degrees) || !isStringNumber(s_minutes) ||
-            !isStringNumber(s_seconds))
-        {
-            throw(ghoul::lua::LuaRuntimeException(fmt::format(
-                "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XXhYYmZZs' "
-                "or 'XhYmZs', and Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'",
-                str)
-            ));
-        }
 
         // Convert the strings to numbers
-        hours_or_degrees = std::stod(s_hours_or_degrees);
-        minutes = std::stod(s_minutes);
-        seconds = std::stod(s_seconds);
+        try {
+            // Hours or degrees must be an integer
+            double temp = std::stod(s_hours_or_degrees);
+            std::cout << "double h: " << temp << std::endl;
+            if (std::floor(temp) != temp) {
+                throw(ghoul::lua::LuaRuntimeException(fmt::format(
+                    "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
+                    "and Dec 'XdYmZs', where X must be an integer", str))
+                );
+            }
+            hours_or_degrees = std::stoi(s_hours_or_degrees);
+
+            // Minutes must be an integer
+            temp = std::stod(s_minutes);
+            std::cout << "double m: " << temp << std::endl;
+            if (std::floor(temp) != temp) {
+                throw(ghoul::lua::LuaRuntimeException(fmt::format(
+                    "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
+                    "and Dec 'XdYmZs', where Y must be an integer", str))
+                    );
+            }
+            minutes = std::stoi(s_minutes);
+
+            // Seconds is a double
+            seconds = std::stod(s_seconds);
+        } catch (const std::invalid_argument& ia) {
+            throw(ghoul::lua::LuaRuntimeException(fmt::format(
+                "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
+                "and Dec 'XdYmZs'", str))
+            );
+        }
     }
 
-    void parseRa(const std::string& ra, double& hours, double& minutes, double& seconds) {
+    void parseRa(const std::string& ra, int& hours, int& minutes, double& seconds) {
         if (ra.find('d') != std::string::npos) {
             throw(ghoul::lua::LuaRuntimeException(fmt::format(
-                "Ra '{}' format is incorrect. Correct format is: Ra 'XXhYYmZZs' or "
-                "'XhYmZs'", ra)
-            ));
+                "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra))
+            );
         }
         parseString(ra, hours, minutes, seconds);
     }
 
-    void parseDec(const std::string& dec, double& degrees, double& minutes,
+    void parseDec(const std::string& dec, int& degrees, int& minutes,
                   double& seconds)
     {
         if (dec.find('h') != std::string::npos) {
             throw(ghoul::lua::LuaRuntimeException(fmt::format(
                 "Dec '{}' format is incorrect. Correct format is: "
-                "Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'", dec)
-            ));
+                "Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'", dec))
+            );
         }
         parseString(dec, degrees, minutes, seconds);
     }
 
-    bool isRaDecValid(double ra_h, double ra_m, double ra_s, double dec_d,
-                      double dec_m, double dec_s)
+    bool isRaDecValid(int ra_h, int ra_m, double ra_s, int dec_d,
+                      int dec_m, double dec_s)
     {
         // Ra
         if (ra_h < 0.0 || ra_h >= 24.0) {
@@ -207,20 +205,21 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     // Reference:
     // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
-    if (ra.size() > 9 || ra.size() < 6 || dec.size() > 10 || dec.size() < 6) {
+    if (ra.size() < 6 || dec.size() < 6) {
         throw(ghoul::lua::LuaRuntimeException(fmt::format(
-            "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XXhYYmZZs' "
-            "or 'XhYmZs', and Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'",
-            ra, dec)
+            "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
+            "and Dec 'XdYmZs'", ra, dec)
         ));
     }
 
     // Parse right ascension
-    double ra_hours, ra_minutes, ra_seconds;
+    int ra_hours, ra_minutes;
+    double ra_seconds;
     parseRa(ra, ra_hours, ra_minutes, ra_seconds);
 
     // Parse declination
-    double dec_degrees, dec_minutes, dec_seconds;
+    int dec_degrees, dec_minutes;
+    double dec_seconds;
     parseDec(dec, dec_degrees, dec_minutes, dec_seconds);
 
     if (!isRaDecValid(ra_hours, ra_minutes, ra_seconds, dec_degrees, dec_minutes,
@@ -232,7 +231,7 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     }
 
     // Convert from hours, minutes, seconds to decimal degrees
-    double sign = signbit(dec_degrees) ? -1.0 : 1.0;
+    double sign = signbit(static_cast<float>(dec_degrees)) ? -1.0 : 1.0;
     double ra_deg = (ra_hours * 15.0) +
         (ra_minutes * 15.0 / 60.0) +
         (ra_seconds * 15.0 / 3600.0);
