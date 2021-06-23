@@ -33,7 +33,7 @@
 #include <functional>
 #include <vector>
 
-namespace openspace::interaction::helpers {
+namespace openspace::helpers {
 
     // Make interpolator parameter t [0,1] progress only inside a subinterval
     double shiftAndScale(double t, double newStart, double newEnd);
@@ -51,11 +51,12 @@ namespace openspace::interaction::helpers {
 
     double fivePointGaussianQuadrature(double t0, double t1,
         std::function<double(double)> f);
-} // namespace openspace::interaction::helpers
-
-namespace openspace::interaction::interpolation {
 
     glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t);
+
+} // namespace openspace::helpers
+
+namespace openspace::splines {
 
     // TODO: make all these into template functions.
     // Alternatively, add cubicBezier interpolation in ghoul and only use
@@ -79,5 +80,5 @@ namespace openspace::interaction::interpolation {
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
         const std::vector<double>& tKnots);
 
-} // namespace openspace::interaction::interpolation 
+} // namespace openspace::splines 
 #endif // __OPENSPACE_CORE___PATHHELPERFUNCTIONS___H__

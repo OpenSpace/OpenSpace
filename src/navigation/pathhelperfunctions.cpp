@@ -32,7 +32,7 @@ namespace {
     const double Epsilon = 1E-7;
 } // namespace
 
-namespace openspace::interaction::helpers {
+namespace openspace::helpers {
 
     // Shift and scale to a subinterval [start,end]
     double shiftAndScale(double t, double start, double end) {
@@ -150,15 +150,15 @@ namespace openspace::interaction::helpers {
         return 0.5 * (b - a) * sum;
     }
 
-} // helpers
-
-namespace openspace::interaction::interpolation {
-
     glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t) {
         double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);
         tScaled = ghoul::sineEaseInOut(tScaled);
         return glm::slerp(q1, q2, tScaled);
     }
+
+} // namespace openspace::helpers
+
+namespace openspace::splines {
 
     // Based on implementation by Mika Rantanen
     // https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
@@ -218,7 +218,7 @@ namespace openspace::interaction::interpolation {
         const double t2 = t * t;
         const double t3 = t2 * t;
 
-        // calculate basis functions
+        // Calculate basis functions
         double const a0 = (2.0 * t3) - (3.0 * t2) + 1.0;
         double const a1 = (-2.0 * t3) + (3.0 * t2);
         double const b0 = t3 - (2.0 * t2) + t;
@@ -227,7 +227,7 @@ namespace openspace::interaction::interpolation {
         return (a0 * p1) + (a1 * p2) + (b0 * tangent1) + (b1 * tangent2);
     }
 
-    // uniform if tKnots are equally spaced, or else non uniform
+    // Uniform if tKnots are equally spaced, or else non uniform
     glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
                                     const std::vector<double>& tKnots)
     {
@@ -248,7 +248,7 @@ namespace openspace::interaction::interpolation {
         if (t <= 0.0) return points.front();
         if (t >= 1.0) return points.back();
 
-        // compute current segment index
+        // Compute current segment index
         std::vector<double>::const_iterator segmentEndIt =
             std::lower_bound(tKnots.begin(), tKnots.end(), t);
         unsigned int segmentIdx = (segmentEndIt - 1) - tKnots.begin();
@@ -260,7 +260,7 @@ namespace openspace::interaction::interpolation {
         unsigned int idx = segmentIdx * 3;
 
         // Interpolate using De Casteljau's algorithm
-        return interpolation::cubicBezier(
+        return cubicBezier(
             tScaled,
             points[idx],
             points[idx + 1],
@@ -289,7 +289,7 @@ namespace openspace::interaction::interpolation {
         double segmentDuration = (tKnots[idx + 1] - tKnots[idx]);
         double tScaled = (t - segmentStart) / segmentDuration;
 
-        return interpolation::linear(tScaled, points[idx], points[idx + 1]);
+        return linear(tScaled, points[idx], points[idx + 1]);
     }
 
-} // interpolation
+} // namespace openspace::splines 

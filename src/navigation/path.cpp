@@ -129,7 +129,7 @@ glm::dquat Path::interpolateRotation(double t) const {
     switch (_curveType) {
         case CurveType::AvoidCollision:
         case CurveType::Linear:
-            return interpolation::easedSlerp(_start.rotation(), _end.rotation(), t);
+            return helpers::easedSlerp(_start.rotation(), _end.rotation(), t);
         case CurveType::ZoomOutOverview:
         {
             const double t1 = 0.2;

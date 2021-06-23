@@ -215,7 +215,7 @@ glm::dvec3 PathCurve::interpolate(double u) {
     double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     double uSegment = (u - segmentStart) / segmentDuration;
 
-    return interpolation::catmullRom(
+    return splines::catmullRom(
         uSegment,
         _points[index],
         _points[index + 1],
