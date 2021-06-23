@@ -61,6 +61,7 @@ public:
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
+    const Path* currentPath() const;
     double speedScale() const;
 
     bool hasCurrentPath() const;
@@ -74,12 +75,6 @@ public:
     void abortPath();
     void pausePath();
     void continuePath();
-
-    // TODO: remove functions for debugging
-    std::vector<glm::dvec3> curvePositions(int nSteps) const;
-    std::vector<glm::dquat> curveOrientations(int nSteps) const;
-    std::vector<glm::dvec3> curveViewDirections(int nSteps) const;
-    std::vector<glm::dvec3> controlPoints() const;
 
     double minValidBoundingSphere() const;
     const std::vector<SceneGraphNode*>& relevantNodes();

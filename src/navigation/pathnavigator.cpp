@@ -163,6 +163,10 @@ const SceneGraphNode* PathNavigator::anchor() const {
     return global::navigationHandler->anchorNode();
 }
 
+const Path* PathNavigator::currentPath() const {
+    return _currentPath.get();
+}
+
 double PathNavigator::speedScale() const {
     return _speedScale;
 }
@@ -313,86 +317,6 @@ void PathNavigator::continuePath() {
 
     LINFO("Continuing path...");
     _isPlaying = true;
-}
-
-// Created for debugging
-std::vector<glm::dvec3> PathNavigator::curvePositions(int nSteps) const {
-    if (!hasCurrentPath()) {
-        LERROR("There is no current path to sample points from.");
-        return {};
-    }
-
-    std::vector<glm::dvec3> positions;
-    const double du = 1.0 / nSteps;
-    const double length = _currentPath->pathLength();
-    for (double u = 0.0; u < 1.0; u += du) {
-        glm::dvec3 position = _currentPath->interpolatedPose(u * length).position;
-        positions.push_back(position);
-    }
-    positions.push_back(_currentPath->endPoint().position());
-
-    return positions;
-}
-
-// Created for debugging
-std::vector<glm::dquat> PathNavigator::curveOrientations(int nSteps) const {
-    if (!hasCurrentPath()) {
-        LERROR("There is no current path to sample points from.");
-        return {};
-    }
-
-    std::vector<glm::dquat> orientations;
-    const double du = 1.0 / nSteps;
-    const double length = _currentPath->pathLength();
-    for (double u = 0.0; u <= 1.0; u += du) {
-        const glm::dquat orientation = 
-            _currentPath->interpolatedPose(u * length).rotation;
-        orientations.push_back(orientation);
-    }
-    orientations.push_back(_currentPath->endPoint().rotation());
-
-    return orientations;
-}
-
-
-// Created for debugging
-std::vector<glm::dvec3> PathNavigator::curveViewDirections(int nSteps) const {
-    if (!hasCurrentPath()) {
-        LERROR("There is no current path to sample points from.");
-        return {};
-    }
-
-    std::vector<glm::dvec3> viewDirections;
-    const double du = 1.0 / nSteps;
-    for (double u = 0.0; u < 1.0; u += du) {
-        const glm::dquat orientation = _currentPath->interpolatedPose(u).rotation;
-        const glm::dvec3 direction = glm::normalize(
-            orientation * glm::dvec3(0.0, 0.0, -1.0)
-        );
-        viewDirections.push_back(direction);
-    }
-
-    const glm::dquat orientation = _currentPath->interpolatedPose(1.0).rotation;
-    const glm::dvec3 direction = glm::normalize(
-        orientation * glm::dvec3(0.0, 0.0, -1.0)
-    );
-    viewDirections.push_back(direction);
-
-    return viewDirections;
-}
-
-// Created for debugging
-std::vector<glm::dvec3> PathNavigator::controlPoints() const {
-    if (!hasCurrentPath()) {
-        LERROR("There is no current path to sample points from.");
-        return {};
-    }
-
-    std::vector<glm::dvec3> points;
-    const std::vector<glm::dvec3> curvePoints = _currentPath->controlPoints();
-    points.insert(points.end(), curvePoints.begin(), curvePoints.end());
-
-    return points;
 }
 
 double PathNavigator::minValidBoundingSphere() const {
