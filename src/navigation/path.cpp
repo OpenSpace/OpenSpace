@@ -104,9 +104,7 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
     }
 
     const auto defaultDuration = [](double pathlength) {
-        const double speedScale = 
-            global::navigationHandler->pathNavigator().speedScale();
-        return std::log(pathlength) / speedScale;
+        return std::log(pathlength);
     };
 
     _duration = duration.value_or(defaultDuration(pathLength()));
@@ -139,8 +137,9 @@ std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
-CameraPose Path::traversePath(double dt) {
-    const double speed = _speedFactorFromDuration * speedAlongPath(_traveledDistance);
+CameraPose Path::traversePath(double dt, float speedScale) {
+    double speed = _speedFactorFromDuration * speedAlongPath(_traveledDistance);
+    speed *= static_cast<double>(speedScale);
     const double displacement =  dt * speed;
 
     _progressedTime += dt;

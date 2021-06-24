@@ -55,7 +55,7 @@ public:
 
     std::vector<glm::dvec3> controlPoints() const;
 
-    CameraPose traversePath(double dt);
+    CameraPose traversePath(double dt, float speedScale = 1.f);
     std::string currentAnchor() const;
     bool hasReachedEnd() const;
 

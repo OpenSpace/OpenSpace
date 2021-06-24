@@ -73,7 +73,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
-        "Scale factor that affects the default speed for a camera path."
+        "Scale factor that the speed will be mulitplied with during path traversal. "
+        "Can be used to speed up or slow down the camera motion, depending on if the "
+        "value is larger than or smaller than one."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
@@ -208,7 +210,7 @@ void PathNavigator::updateCamera(double deltaTime) {
         LINFO("Cannot start simulation time during camera motion");
     }
 
-    CameraPose newPose = _currentPath->traversePath(deltaTime);
+    CameraPose newPose = _currentPath->traversePath(deltaTime, _speedScale);
     const std::string newAnchor = _currentPath->currentAnchor();
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
