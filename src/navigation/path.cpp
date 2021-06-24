@@ -241,14 +241,22 @@ double Path::speedAlongPath(double traveledDistance) {
     double speed = distanceToClosestNode;
 
     // Dampen speed in beginning of path
-    const double startUpDistance = 2.0 * _start.node()->boundingSphere();
+    double startUpDistance = 2.0 * _start.node()->boundingSphere();
+    if (startUpDistance < Epsilon) { // zero bounding sphere
+        startUpDistance = glm::distance(_start.position(), startNodePos);
+    }
+
     if (traveledDistance < startUpDistance) {
         speed *= traveledDistance / startUpDistance + 0.01;
     }
 
     // Dampen speed in end of path
     // Note: this leads to problems when the full length of the path is really big
-    const double closeUpDistance = 2.0 * _end.node()->boundingSphere();
+    double closeUpDistance = 2.0 * _end.node()->boundingSphere();
+    if (closeUpDistance < Epsilon) { // zero bounding sphere
+        closeUpDistance = glm::distance(_end.position(), endNodePos);
+    }
+
     if (traveledDistance > (pathLength() - closeUpDistance)) {
         const double remainingDistance = pathLength() - traveledDistance;
         speed *= remainingDistance / closeUpDistance + 0.01;
