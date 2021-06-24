@@ -184,7 +184,7 @@ bool PathNavigator::hasFinished() const {
 }
 
 bool PathNavigator::isPlayingPath() const {
-    return !hasFinished();
+    return hasCurrentPath() && _isPlaying;
 }
 
 void PathNavigator::updateCamera(double deltaTime) {
