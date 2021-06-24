@@ -194,6 +194,8 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
+    LINFO(fmt::format("dt: {}", deltaTime));
+
     if (!_isPlaying) {
         //// TODO: Determine how this should work
         //// OBS! Stop behavior is broken as of core merge
@@ -201,6 +203,14 @@ void PathNavigator::updateCamera(double deltaTime) {
         //    applyStopBehavior(deltaTime);
         //}
         return;
+    }
+
+    // Prevent long delta times due to e.g. computations from other actions to cause 
+    // really big jumps in the motion along the path
+    // OBS! Causes problems if the general FPS is lower than 10, but then the user should
+    // probably not use the camera paths anyways
+    if (deltaTime > 0.1) {
+        deltaTime = 0.01;
     }
 
     // If for some reason the time is no longer paused, pause it again
