@@ -1,0 +1,854 @@
+local assetHelper = asset.require('util/asset_helper')
+-- local transforms = asset.require('./transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+
+local model = asset.syncedResource({
+  Name = "JUICE Model",
+  Type = "HttpSynchronization",
+  Identifier = "juice_model",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "JUICE Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "juice_kernels",
+  Version = 1
+})
+
+local Kernels = {
+  kernels .. '/ck/juice_sc_sat_crema_3_0_default_20220601_20330604_f20160326_v04.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_comms_20220601_20330604_f20160326_v03.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_conjctn_20220601_20330604_f20160326_v01.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_flybys_20220601_20330604_f20160326_v05.bc',
+  kernels .. '/ck/juice_lpbooms_f20160326_v01.bc',
+  kernels .. '/ck/juice_magboom_f20160326_v03.bc',
+  kernels .. '/ck/juice_mga_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_majis_scan_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_swi_scan_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_sa_crema_3_0_default_f20160326_v01.bc',
+
+  kernels .. '/fk/juice_v22.tf',
+  kernels .. '/fk/juice_sci_v08.tf',
+  kernels .. '/fk/juice_ops_v07.tf',
+  kernels .. '/fk/juice_dsk_surfaces_v03.tf',
+  kernels .. '/fk/juice_roi_v01.tf',
+  kernels .. '/fk/rssd0002.tf',
+  kernels .. '/fk/earth_topo_050714.tf',
+  kernels .. '/fk/earthfixediau.tf',
+  kernels .. '/fk/estrack_v03.tf',
+
+  kernels .. '/ik/juice_gala_v03.ti',
+  kernels .. '/ik/juice_janus_v06.ti',
+  kernels .. '/ik/juice_jmc_v02.ti',
+  kernels .. '/ik/juice_majis_v05.ti',
+  kernels .. '/ik/juice_navcam_v01.ti',
+  kernels .. '/ik/juice_pep_v09.ti',
+  kernels .. '/ik/juice_rime_v04.ti',
+  kernels .. '/ik/juice_rpwi_v02.ti',
+  kernels .. '/ik/juice_str_v01.ti',
+  kernels .. '/ik/juice_swi_v07.ti',
+  kernels .. '/ik/juice_uvs_v03.ti',
+
+  kernels .. '/pck/pck00010.tpc',
+  kernels .. '/pck/de-403-masses.tpc',
+  kernels .. '/pck/gm_de431.tpc',
+  kernels .. '/pck/juice_jup006.tpc',
+  kernels .. '/pck/juice_roi_v00.tpc',
+  kernels .. '/sclk/juice_fict_20160326.tsc',
+  kernels .. '/spk/juice_mat_crema_3_0_20220601_20330604_v01.bsp',
+  kernels .. '/spk/juice_struct_v10.bsp',
+  kernels .. '/spk/juice_cog_v00.bsp',
+  kernels .. '/spk/juice_roi_v01.bsp',
+  kernels .. '/spk/de430.bsp',
+  kernels .. '/spk/mar085_20200101_20400101.bsp',
+  kernels .. '/spk/earthstns_fx_050714.bsp',
+  kernels .. '/spk/estrack_v03.bsp',
+  kernels .. '/spk/jup310_20200101_20500101.bsp',
+  kernels .. '/spk/jup343_20200101_20500101.bsp',
+  kernels .. '/spk/noe-5-2010-gal-a2_20200101_20380902.bsp'
+}
+
+local JuiceId = '-28'
+
+local Juice = {
+  Identifier = "Juice",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = JuiceId,
+      Observer = "EARTH BARYCENTER",
+      -- Kernels = kernels .. "/mk/juice_crema_4_2_N56_Pp5_Q19.tm"
+      Kernels = Kernels
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "JUICE_SPACECRAFT",
+      DestinationFrame = "GALACTIC",
+      Kernels = Kernels
+    },
+  },
+  GUI = {
+    Name = "Juice",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+-- local RotationMatrix = {
+--   0, 1, 0,
+--   0, 0, 1,
+--   1, 0, 0
+-- }
+
+local JuiceModel = {
+  Identifier = "JuiceModel",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      -- Offset numbers found by eyeballing
+      Position = { 4.5, 0.0, -1.0 }
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 3.141592654 / 2.0, 0.0, 0.0 }
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.01
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "JUICE",
+    GeometryFile = model .. "/juice.fbx",
+    -- ModelTransform = RotationMatrix,
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 0.3
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
+    }
+  },
+  GUI = {
+    Name = "Juice Model",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+local Gala = {
+  Identifier = "JuiceGala",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_GALA_RXT",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Gala FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local JMC1 = {
+  Identifier = "JuiceJMC1",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0,0,0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_JMC-1",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local JMC2 = {
+  Identifier = "JuiceJMC2",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0,0,0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_JMC-2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local UVS = {
+  Identifier = "JuiceUVS",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_UVS",
+      Method     = "POLYGON",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "UVS FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnir = {
+  Identifier = "JuiceMajisVisnir",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnirB2 = {
+  Identifier = "JuiceMajisVisnirB2",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR_B2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnirB4 = {
+  Identifier = "JuiceMajisVisnirB4",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR_B4",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIr = {
+  Identifier = "JuiceMajisIr",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB2 = {
+  Identifier = "JuiceMajisIrB2",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR_B2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB4 = {
+  Identifier = "JuiceMajisIrB4",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR_B4",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Majis = {
+  Identifier = "JuiceMajis",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local RimeBase = {
+  Identifier = "JuiceRimeBase",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_RIME_BASE",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime Base FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Rime = {
+  Identifier = "JuiceRime",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_RIME",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Janus = {
+  Identifier = "JuiceJanus",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.44,0.33,0.9 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_JANUS",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Janus FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local NavCam = {
+  Identifier = "JuiceNavCam",
+  Parent = Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_NAVCAM-1",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "NavCam FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local StarOh1 = {
+  Identifier = "JuiceStarOH1",
+  Parent = Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH1",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local StarOh2 = {
+  Identifier = "JuiceStarOH2",
+  Parent = Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local StarOh3 = {
+  Identifier = "JuiceStarOH3",
+  Parent = Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH3",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH3 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local SwiCh2 = {
+  Identifier = "JuiceSwiCH2",
+  Parent = Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_SWI_CH2",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI CH2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local SwiFull = {
+  Identifier = "JuiceSwiFull",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.465,- 0.1, 0.95 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_SWI_FULL",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI Full FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local SwiFullGCO500 = {
+  Identifier = "JuiceSwiFullGCO500",
+  Parent = Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.465,- 0.1, 0.95 }
+    }
+  },  
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_SWI_FULL_GCO500",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "SWI Full GCO500 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+
+local JuiceTrailEarth = {
+  Identifier = "JuiceTrailEarth",
+  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = JuiceId,
+      Observer = "EARTH BARYCENTER",
+      Kernels = Kernels
+    },
+    Color = { 0.30, 0.70, 0.20 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail (Earth)",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+local JuiceTrail = {
+  Identifier = "JuiceTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = JuiceId,
+      Observer = "SSB",
+      Kernels = Kernels
+    },
+    Color = { 0.30, 0.370, 0.70 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+local JuiceTrailJupiter = {
+  Identifier = "JuiceTrailJupiter",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = JuiceId,
+      Observer = "JUPITER BARYCENTER",
+      Kernels = Kernels
+    },
+    Color = { 0.70, 0.370, 0.45 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail (Jupiter)",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+-- Hack for now;  should split Ganymede into Ganymede inertial and Ganymede w/ rotation
+
+local GanymedeBarycenter = {
+  Identifier = "GanymedeBarycenter",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GANYMEDE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Jupiter/Moons"
+  }
+}
+
+local JuiceTrailGanymede = {
+  Identifier = "JuiceTrailGanymede",
+  Parent = GanymedeBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = JuiceId,
+      Observer = "GANYMEDE BARYCENTER",
+      Kernels = Kernels
+    },
+    Color = { 0.70, 0.770, 0.35 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail (Ganymede)",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  Juice, JuiceModel,
+  NavCam,
+  Janus,
+  -- Gala,
+  JMC1,
+  JMC2,
+  UVS,
+  MajisVisnir,
+  MajisVisnirB2,
+  MajisVisnirB4,
+  MajisIr,
+  MajisIrB2,
+  MajisIrB4,
+  Majis,
+  -- Rime, RimeBase,
+  StarOh1, StarOh2, StarOh3,
+  -- SwiCh2,
+  SwiFull, SwiFullGCO500,
+  JuiceTrailEarth, JuiceTrail, JuiceTrailJupiter, GanymedeBarycenter, JuiceTrailGanymede
+})
