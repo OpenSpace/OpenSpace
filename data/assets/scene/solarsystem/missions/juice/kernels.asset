@@ -1,0 +1,131 @@
+local kernels = asset.syncedResource({
+  Name = "JUICE Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "juice_kernels",
+  Version = 1
+})
+
+-- From the 4_2b22_1_cruise meta kernel
+-- local Kernels = {
+--   kernels .. '/ck/juice_sc_sat_crema_150l0a_conjctn_20241029_20301212_f20160326_v01.bc',
+--   kernels .. '/ck/juice_sc_sat_crema_150l0a_default_20220903_20310717_f20160326_v01.bc',
+--   kernels .. '/ck/juice_sc_sat_crema_150l0a_flybys_20240822_20290118_f20160326_v01.bc',
+--   kernels .. '/ck/juice_lpbooms_f20160326_v01.bc',
+--   kernels .. '/ck/juice_magboom_f20160326_v03.bc',
+--   kernels .. '/ck/juice_mga_zero_f20160326_v02.bc',
+--   kernels .. '/ck/juice_majis_scan_zero_f20160326_v02.bc',
+--   kernels .. '/ck/juice_swi_scan_zero_f20160326_v02.bc',
+--   kernels .. '/ck/juice_sa_crema_150l0a_default_f20160326_v01.bc',
+
+--   kernels .. '/fk/juice_v23.tf',
+--   kernels .. '/fk/juice_sci_v08.tf',
+--   kernels .. '/fk/juice_ops_v07.tf',
+--   kernels .. '/fk/juice_dsk_surfaces_v03.tf',
+--   kernels .. '/fk/juice_roi_v01.tf',
+--   kernels .. '/fk/rssd0002.tf',
+--   kernels .. '/fk/earth_topo_050714.tf',
+--   kernels .. '/fk/earthfixediau.tf',
+--   kernels .. '/fk/estrack_v03.tf',
+
+--   kernels .. '/ik/juice_gala_v03.ti',
+--   kernels .. '/ik/juice_janus_v06.ti',
+--   kernels .. '/ik/juice_jmc_v02.ti',
+--   kernels .. '/ik/juice_majis_v05.ti',
+--   kernels .. '/ik/juice_navcam_v01.ti',
+--   kernels .. '/ik/juice_pep_v09.ti',
+--   kernels .. '/ik/juice_rime_v04.ti',
+--   kernels .. '/ik/juice_rpwi_v02.ti',
+--   kernels .. '/ik/juice_str_v01.ti',
+--   kernels .. '/ik/juice_swi_v07.ti',
+--   kernels .. '/ik/juice_uvs_v03.ti',
+--   kernels .. '/ik/juice_aux_v00.ti',
+
+--   kernels .. '/lsk/naif0012.tls',
+
+--   kernels .. '/pck/pck00010.tpc',
+--   kernels .. '/pck/de-403-masses.tpc',
+--   kernels .. '/pck/gm_de431.tpc',
+--   kernels .. '/pck/juice_jup006.tpc',
+--   kernels .. '/pck/juice_roi_v00.tpc',
+
+--   kernels .. '/sclk/juice_fict_20160326.tsc',
+
+--   kernels .. '/spk/juice_struct_v10.bsp',
+--   kernels .. '/spk/juice_cog_v00.bsp',
+--   kernels .. '/spk/juice_roi_v01.bsp',
+--   kernels .. '/spk/mar085_20200101_20400101.bsp',
+--   kernels .. '/spk/earthstns_fx_050714.bsp',
+--   kernels .. '/spk/estrack_v03.bsp',
+--   kernels .. '/spk/jup310_20200101_20500101.bsp',
+--   kernels .. '/spk/jup343_20200101_20500101.bsp',
+--   kernels .. '/spk/de432s.bsp',
+--   kernels .. '/spk/noe-5-2017-gal-a-reduced_20200101_20380902.bsp',
+
+--   kernels .. '/spk/juice_mat_150l0a_20220904_20310717_v01.bsp',
+
+--   kernels .. '/dsk/juice_io_plasma_torus_v04.bds',
+--   kernels .. '/dsk/juice_sc_bus_v03.bds',
+--   kernels .. '/dsk/juice_sc_mag_v03.bds',
+--   kernels .. '/dsk/juice_sc_mga_apm_v03.bds',
+--   kernels .. '/dsk/juice_sc_mga_dish_v03.bds',
+--   kernels .. '/dsk/juice_sc_sa+y_v03.bds',
+--   kernels .. '/dsk/juice_sc_sa-y_v03.bds'
+-- }
+
+local Kernels = {
+  kernels .. '/ck/juice_sc_sat_crema_3_0_default_20220601_20330604_f20160326_v04.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_comms_20220601_20330604_f20160326_v03.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_conjctn_20220601_20330604_f20160326_v01.bc',
+  kernels .. '/ck/juice_sc_sat_crema_3_0_flybys_20220601_20330604_f20160326_v05.bc',
+  kernels .. '/ck/juice_lpbooms_f20160326_v01.bc',
+  kernels .. '/ck/juice_magboom_f20160326_v03.bc',
+  kernels .. '/ck/juice_mga_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_majis_scan_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_swi_scan_zero_f20160326_v02.bc',
+  kernels .. '/ck/juice_sa_crema_3_0_default_f20160326_v01.bc',
+
+  kernels .. '/fk/juice_v22.tf',
+  kernels .. '/fk/juice_sci_v08.tf',
+  kernels .. '/fk/juice_ops_v07.tf',
+  kernels .. '/fk/juice_dsk_surfaces_v03.tf',
+  kernels .. '/fk/juice_roi_v01.tf',
+  kernels .. '/fk/rssd0002.tf',
+  kernels .. '/fk/earth_topo_050714.tf',
+  kernels .. '/fk/earthfixediau.tf',
+  kernels .. '/fk/estrack_v03.tf',
+
+  kernels .. '/ik/juice_gala_v03.ti',
+  kernels .. '/ik/juice_janus_v06.ti',
+  kernels .. '/ik/juice_jmc_v02.ti',
+  kernels .. '/ik/juice_majis_v05.ti',
+  kernels .. '/ik/juice_navcam_v01.ti',
+  kernels .. '/ik/juice_pep_v09.ti',
+  kernels .. '/ik/juice_rime_v04.ti',
+  kernels .. '/ik/juice_rpwi_v02.ti',
+  kernels .. '/ik/juice_str_v01.ti',
+  kernels .. '/ik/juice_swi_v07.ti',
+  kernels .. '/ik/juice_uvs_v03.ti',
+
+  kernels .. '/pck/pck00010.tpc',
+  kernels .. '/pck/de-403-masses.tpc',
+  kernels .. '/pck/gm_de431.tpc',
+  kernels .. '/pck/juice_jup006.tpc',
+  kernels .. '/pck/juice_roi_v00.tpc',
+  kernels .. '/sclk/juice_fict_20160326.tsc',
+  kernels .. '/spk/juice_mat_crema_3_0_20220601_20330604_v01.bsp',
+  kernels .. '/spk/juice_struct_v10.bsp',
+  kernels .. '/spk/juice_cog_v00.bsp',
+  kernels .. '/spk/juice_roi_v01.bsp',
+  kernels .. '/spk/de430.bsp',
+  kernels .. '/spk/mar085_20200101_20400101.bsp',
+  kernels .. '/spk/earthstns_fx_050714.bsp',
+  kernels .. '/spk/estrack_v03.bsp',
+  kernels .. '/spk/jup310_20200101_20500101.bsp',
+  kernels .. '/spk/jup343_20200101_20500101.bsp',
+  kernels .. '/spk/noe-5-2010-gal-a2_20200101_20380902.bsp'
+}
+
+asset.export("Kernels", Kernels)
+
+local JuiceId = '-28'
+asset.export("JuiceId", JuiceId)

@@ -1,0 +1,63 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+local JMC1 = {
+  Identifier = "JuiceJMC1",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0,0,0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_JMC-1",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local JMC2 = {
+  Identifier = "JuiceJMC2",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0,0,0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_JMC-2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "JUICE_JMC-2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { JMC1, JMC2 })

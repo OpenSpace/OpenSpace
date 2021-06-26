@@ -1,28 +1,27 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local kernels = asset.require('./kernels')
+local kernels = asset.require('../kernels')
 
-local Juice = {
-  Identifier = "Juice",
+local JuiceTrailEarth = {
+  Identifier = "JuiceTrailEarth",
   Parent = earthTransforms.EarthBarycenter.Identifier,
-  Transform = {
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.JuiceId,
       Observer = "EARTH BARYCENTER",
       Kernels = kernels.Kernels
     },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "JUICE_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels.Kernels
-    },
+    Color = { 0.30, 0.70, 0.20 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
   },
   GUI = {
-    Name = "Juice",
+    Name = "Juice Trail (Earth)",
     Path = "/Solar System/Missions/Juice"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Juice })
+assetHelper.registerSceneGraphNodesAndExport(asset, { JuiceTrailEarth })

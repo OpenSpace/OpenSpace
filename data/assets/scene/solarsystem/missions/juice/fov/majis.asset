@@ -1,0 +1,216 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+local MajisVisnir = {
+  Identifier = "JuiceMajisVisnir",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnirB2 = {
+  Identifier = "JuiceMajisVisnirB2",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR_B2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisVisnirB4 = {
+  Identifier = "JuiceMajisVisnirB4",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_VISNIR_B4",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis Visnir B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIr = {
+  Identifier = "JuiceMajisIr",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB2 = {
+  Identifier = "JuiceMajisIrB2",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR_B2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local MajisIrB4 = {
+  Identifier = "JuiceMajisIrB4",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS_IR_B4",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis IR B4 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Majis = {
+  Identifier = "JuiceMajis",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_MAJIS",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Majis FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  MajisVisnir,
+  MajisVisnirB2,
+  MajisVisnirB4,
+  MajisIr,
+  MajisIrB2,
+  MajisIrB4,
+  Majis
+})

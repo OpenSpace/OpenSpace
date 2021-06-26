@@ -1,0 +1,74 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+local StarOh1 = {
+  Identifier = "JuiceStarOH1",
+  Parent = transforms.Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH1",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH1 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local StarOh2 = {
+  Identifier = "JuiceStarOH2",
+  Parent = transforms.Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH2",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH2 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local StarOh3 = {
+  Identifier = "JuiceStarOH3",
+  Parent = transforms.Juice.Identifier,
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.0, 0.0, 0.0 },
+    Instrument = {
+      Name       = "JUICE_STR-OH3",
+      Method     = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Star Tracker OH3 FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { StarOh1, StarOh2, StarOh3 })

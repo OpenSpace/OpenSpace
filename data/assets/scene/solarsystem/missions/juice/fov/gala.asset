@@ -1,0 +1,34 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+local Gala = {
+  Identifier = "JuiceGala",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_GALA_RXT",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Gala FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Gala })

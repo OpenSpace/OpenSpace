@@ -1,0 +1,28 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('../kernels')
+
+local JuiceTrail = {
+  Identifier = "JuiceTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.JuiceId,
+      Observer = "SSB",
+      Kernels = kernels.Kernels
+    },
+    Color = { 0.30, 0.370, 0.70 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { JuiceTrail })
+  

@@ -1,0 +1,63 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels')
+
+local RimeBase = {
+  Identifier = "JuiceRimeBase",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_RIME_BASE",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime Base FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+local Rime = {
+  Identifier = "JuiceRime",
+  Parent = transforms.Juice.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0,0.0,0.0 }
+    }
+  },
+  Renderable = {
+    Type  = "RenderableFov",
+    Body  = kernels.JuiceId,
+    Frame = "JUICE_JANUS",
+    RGB   = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name       = "JUICE_RIME",
+      Method     = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "Rime FOV",
+    Path = "/Solar System/Missions/Juice/Instruments"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Rime, RimeBase })

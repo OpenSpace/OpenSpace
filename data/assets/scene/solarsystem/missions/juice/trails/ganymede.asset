@@ -1,0 +1,45 @@
+local assetHelper = asset.require('util/asset_helper')
+local jupiterTransforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+local kernels = asset.require('../kernels')
+
+-- Hack for now;  should split Ganymede into Ganymede inertial and Ganymede w/ rotation
+local GanymedeBarycenter = {
+  Identifier = "GanymedeBarycenter",
+  Parent = jupiterTransforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "GANYMEDE",
+      Observer = "JUPITER BARYCENTER"
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Jupiter/Moons"
+  }
+}
+
+local JuiceTrailGanymede = {
+  Identifier = "JuiceTrailGanymede",
+  Parent = GanymedeBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.JuiceId,
+      Observer = "GANYMEDE BARYCENTER",
+      Kernels = kernels.Kernels
+    },
+    Color = { 0.70, 0.770, 0.35 },
+    StartTime = "2022 MAY 31",
+    EndTime = "2033 JUN 04 02:51:00.546",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "Juice Trail (Ganymede)",
+    Path = "/Solar System/Missions/Juice"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  GanymedeBarycenter, JuiceTrailGanymede
+})

@@ -20,7 +20,9 @@
   ],
   "assets": [
     "base",
+    "scene/solarsystem/missions/juice/fov",
     "scene/solarsystem/missions/juice/model",
+    "scene/solarsystem/missions/juice/trail",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
