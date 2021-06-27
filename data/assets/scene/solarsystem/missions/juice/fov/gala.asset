@@ -2,6 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+-- Circle shapes are not support
 local Gala = {
   Identifier = "JuiceGala",
   Parent = transforms.Juice.Identifier,
@@ -13,8 +14,8 @@ local Gala = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_GALA_RXT",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_GALA_RXT",
@@ -31,4 +32,6 @@ local Gala = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Gala })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  -- Gala
+})

@@ -8,7 +8,7 @@ local Juice = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.JuiceId,
+      Target = "JUICE",
       Observer = "EARTH BARYCENTER",
       Kernels = kernels.Kernels
     },

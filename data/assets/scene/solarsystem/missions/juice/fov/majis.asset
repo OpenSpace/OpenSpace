@@ -13,8 +13,8 @@ local MajisVisnir = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_VISNIR",
@@ -42,8 +42,8 @@ local MajisVisnirB2 = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR_B2",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_VISNIR_B2",
@@ -71,8 +71,8 @@ local MajisVisnirB4 = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_VISNIR_B4",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_VISNIR_B4",
@@ -100,8 +100,8 @@ local MajisIr = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_IR",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_IR",
@@ -129,8 +129,8 @@ local MajisIrB2 = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_IR_B2",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_IR_B2",
@@ -158,8 +158,8 @@ local MajisIrB4 = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS_IR_B4",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS_IR_B4",
@@ -187,8 +187,8 @@ local Majis = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_MAJIS",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_MAJIS",

@@ -2,13 +2,14 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+-- Circle shapes are not support
 local SwiCh2 = {
   Identifier = "JuiceSwiCH2",
   Parent = transforms.Juice.Identifier,
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_SWI_CH2",
     RGB   = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name       = "JUICE_SWI_CH2",
@@ -36,8 +37,8 @@ local SwiFull = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_SWI_FULL",
     RGB   = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name       = "JUICE_SWI_FULL",
@@ -54,6 +55,8 @@ local SwiFull = {
   }
 }
 
+-- This frame throws an error as the JUICE_SWI_FULL_GCO500 is not a recognized frame in
+-- the kernel set version 5
 local SwiFullGCO500 = {
   Identifier = "JuiceSwiFullGCO500",
   Parent = transforms.Juice.Identifier,
@@ -65,8 +68,8 @@ local SwiFullGCO500 = {
   },  
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_SWI_FULL_GCO500",
     RGB   = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name       = "JUICE_SWI_FULL_GCO500",
@@ -85,5 +88,6 @@ local SwiFullGCO500 = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   -- SwiCh2,
-  SwiFull, SwiFullGCO500
+  SwiFull,
+  -- SwiFullGCO500
 })

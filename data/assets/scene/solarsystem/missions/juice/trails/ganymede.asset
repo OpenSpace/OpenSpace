@@ -25,8 +25,8 @@ local JuiceTrailGanymede = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.JuiceId,
-      Observer = "GANYMEDE BARYCENTER",
+      Target = "JUICE",
+      Observer = "GANYMEDE",
       Kernels = kernels.Kernels
     },
     Color = { 0.70, 0.770, 0.35 },

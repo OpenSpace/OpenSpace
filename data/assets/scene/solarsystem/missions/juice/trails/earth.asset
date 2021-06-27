@@ -9,7 +9,7 @@ local JuiceTrailEarth = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.JuiceId,
+      Target = "JUICE",
       Observer = "EARTH BARYCENTER",
       Kernels = kernels.Kernels
     },

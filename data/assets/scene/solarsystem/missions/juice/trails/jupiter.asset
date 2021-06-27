@@ -9,7 +9,7 @@ local JuiceTrailJupiter = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels.JuiceId,
+      Target = "JUICE",
       Observer = "JUPITER BARYCENTER",
       Kernels = kernels.Kernels
     },

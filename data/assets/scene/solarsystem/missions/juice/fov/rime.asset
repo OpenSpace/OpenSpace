@@ -2,6 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels')
 
+-- Circle shapes are not support
 local RimeBase = {
   Identifier = "JuiceRimeBase",
   Parent = transforms.Juice.Identifier,
@@ -13,8 +14,8 @@ local RimeBase = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_RIME_BASE",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_RIME_BASE",
@@ -31,6 +32,7 @@ local RimeBase = {
   }
 }
 
+-- Circle shapes are not support
 local Rime = {
   Identifier = "JuiceRime",
   Parent = transforms.Juice.Identifier,
@@ -42,8 +44,8 @@ local Rime = {
   },
   Renderable = {
     Type  = "RenderableFov",
-    Body  = kernels.JuiceId,
-    Frame = "JUICE_JANUS",
+    Body  = "JUICE",
+    Frame = "JUICE_RIME",
     RGB   = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name       = "JUICE_RIME",
@@ -60,4 +62,7 @@ local Rime = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Rime, RimeBase })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  -- Rime,
+  -- RimeBase
+})
