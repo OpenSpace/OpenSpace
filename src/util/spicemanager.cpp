@@ -1011,8 +1011,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1070,8 +1070,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
