@@ -1,21 +1,5 @@
 {
   "additional_scripts": [
-    "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.MinimumAllowedDistance\", 0.000000)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceJMC1.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceJMC2.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajis.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisIrB2.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisIrB4.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisIr.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisVisnirB2.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisVisnirB4.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceMajisVisnir.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceStarOH1.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceStarOH2.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceStarOH3.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceSwiFull.Renderable.Enabled\", false)",
-    "openspace.setPropertyValueSingle(\"Scene.JuiceUVS.Renderable.Enabled\", false)",
-    "",
     ""
   ],
   "assets": [
@@ -99,6 +83,106 @@
     {
       "name": "{earth_satellites}.Renderable.Enabled",
       "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.MinimumAllowedDistance",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
+    },
+    {
+      "name": "Scene.JuiceJMC1.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceJMC2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajis.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisIrB2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisIrB4.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisIr.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisVisnirB2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisVisnirB4.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceMajisVisnir.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceStarOH1.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceStarOH2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceStarOH3.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceSwiFull.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceUVS.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceTrailEarth.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceTrailJupiter.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceTrailGanymede.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceJanus.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JuiceNavCam.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
       "value": "false"
     }
   ],

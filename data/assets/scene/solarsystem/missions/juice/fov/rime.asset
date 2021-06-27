@@ -62,7 +62,7 @@ local Rime = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  -- Rime,
-  -- RimeBase
-})
+-- assetHelper.registerSceneGraphNodesAndExport(asset, {
+--   Rime,
+--   RimeBase
+-- })

@@ -36,7 +36,7 @@ local JuiceModel = {
         Type = "SceneGraphLightSource",
         Identifier = "Sun",
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 0.3
+        Intensity = 0.08
       },
       {
         Identifier = "Camera",

@@ -32,6 +32,6 @@ local Gala = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  -- Gala
-})
+-- assetHelper.registerSceneGraphNodesAndExport(asset, {
+--   Gala
+-- })
