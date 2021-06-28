@@ -649,9 +649,7 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format(
-                "Using script log of type '{}' to file '{}'", _logType, _logFilename
-            ));
+            LDEBUG(fmt::format("Using script log file '{}'", _logFilename));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);

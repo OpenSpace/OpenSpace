@@ -53,6 +53,15 @@ struct Configuration {
     };
     std::map<std::string, std::string> fonts;
 
+    struct FontSizes {
+        float frameInfo;
+        float shutdown;
+        float log;
+        float cameraInfo;
+        float versionInfo;
+    };
+    FontSizes fontSize;
+
     struct Logging {
         std::string level = "Info";
         bool forceImmediateFlush = false;
