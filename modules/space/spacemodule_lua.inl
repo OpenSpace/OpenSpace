@@ -22,35 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/easing.h>
+#include <openspace/util/coordinateconversion.h>
 
-#include <openspace/util/openspacemodule.h>
+namespace openspace::space::luascriptfunctions {
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/opengl/programobjectmanager.h>
+int convertFromRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
-namespace openspace {
+    std::string ra = ghoul::lua::value<std::string>(L, 1);
+    std::string dec = ghoul::lua::value<std::string>(L, 2);
+    double distance = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
 
-class SpaceModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Space";
+    glm::dvec2 degrees = icrsToDecimalDegrees(ra, dec);
+    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
 
-    SpaceModule();
-    virtual ~SpaceModule() = default;
-    std::vector<documentation::Documentation> documentations() const override;
+    ghoul::lua::push(L, pos);
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-    scripting::LuaLibrary luaLibrary() const override;
+int convertToRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertToRaDec");
 
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
+    double x = ghoul::lua::value<double>(L, 1);
+    double y = ghoul::lua::value<double>(L, 2);
+    double z = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
 
-    properties::BoolProperty _showSpiceExceptions;
-};
+    glm::dvec3 degrees = galacticCartesianToIcrs(x, y, z);
+    std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(degrees.x, degrees.y);
 
-} // namespace openspace
+    ghoul::lua::push(L, raDecPair.first);  // Ra
+    ghoul::lua::push(L, raDecPair.second); // Dec
+    ghoul::lua::push(L, degrees.z);        // Distance
 
-#endif // __OPENSPACE_MODULE_SPACE___SPACEMODULE___H__
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
+    return 3;
+}
+
+}  // namespace openspace::space::luascriptfunctions
