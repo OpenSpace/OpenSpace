@@ -244,7 +244,7 @@ Ray calculateRayRenderableGlobe(vec2 st) {
  * attenuation := out of transmittance T(x,x0). This will be used later when calculating
  *                the reflectance R[L]
  */
-vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor, vec3 v, vec3 s,
+vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3 v, vec3 s,
                        out float r, out float mu, out vec3 attenuation, vec3 fragPosObj,
                        out bool groundHit, double maxLength, double pixelDepth,
                        vec4 spaceColor, float sunIntensity)
