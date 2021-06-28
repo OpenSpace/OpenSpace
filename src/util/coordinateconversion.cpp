@@ -62,7 +62,6 @@ namespace {
         try {
             // Hours or degrees must be an integer
             double temp = std::stod(s_hours_or_degrees);
-            std::cout << "double h: " << temp << std::endl;
             if (std::floor(temp) != temp) {
                 throw(ghoul::lua::LuaRuntimeException(fmt::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
@@ -73,7 +72,6 @@ namespace {
 
             // Minutes must be an integer
             temp = std::stod(s_minutes);
-            std::cout << "double m: " << temp << std::endl;
             if (std::floor(temp) != temp) {
                 throw(ghoul::lua::LuaRuntimeException(fmt::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
@@ -170,13 +168,15 @@ namespace openspace {
 
 // Convert Equatorial coordinates ICRS right ascension and declination (a, d)
 // into Galactic coordinates (l, b)
-glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
+glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance,
+                                   bool isDegrees)
+{
     // Reference:
     // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
 
     // (Ra, Dec) -> (a, d)
-    double a = glm::radians(ra);
-    double d = glm::radians(dec);
+    double a = isDegrees ? glm::radians(ra) : ra;
+    double d = isDegrees ? glm::radians(dec) : dec;
 
     // J2000 Galactic reference frame
     constexpr double a0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
@@ -273,20 +273,21 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     ) + a0;
     double d = asin(sin(b) * sin(d0) + cos(b) * cos(d0) * cos(l0 - l));
 
-    glm::dvec3 rEquatorial = glm::dvec3(a, d, distance);
-
+    glm::dvec3 rEquatorial = glm::dvec3(glm::degrees(a), glm::degrees(d), distance);
     return rEquatorial;
 }
 
 // Return a pair with two formatted strings from the decimal degrees ra and dec
-std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec,
+                                                         bool isDegrees)
+{
     // References:
     // https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
     // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
 
     // Radians to degrees
-    double ra_deg = glm::degrees(ra);
-    double dec_deg = glm::degrees(dec);
+    double ra_deg = isDegrees ? ra : glm::degrees(ra);
+    double dec_deg = isDegrees ? dec : glm::degrees(dec);
 
     // Check input
     if (ra_deg < 0 || ra_deg > 360 || dec_deg < -90 || dec_deg > 90) {
