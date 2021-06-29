@@ -31,17 +31,17 @@
 namespace {
     constexpr const char* _loggerCat = "Coordinateconversion";
 
+    // J2000 Galactic reference frame
+    constexpr double A0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
+    constexpr double D0 = glm::radians(27.1284);
+    constexpr double L0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
+
     void parseString(const std::string& str, int& hours_or_degrees, int& minutes,
                      double& seconds)
     {
         // Find hms or dms indicies
-        size_t h_or_d_index;
-        if (str.find('h') != std::string::npos) {
-            h_or_d_index = str.find('h');
-        }
-        else {
-            h_or_d_index = str.find('d');
-        }
+        size_t h_or_d_index =
+            (str.find('h') != std::string::npos) ? str.find('h') : str.find('d');
         size_t m_index = str.find('m');
         size_t s_index = str.find('s');
         if (h_or_d_index == std::string::npos || m_index == std::string::npos ||
@@ -104,8 +104,7 @@ namespace {
     {
         if (dec.find('h') != std::string::npos) {
             throw(ghoul::lua::LuaRuntimeException(fmt::format(
-                "Dec '{}' format is incorrect. Correct format is: "
-                "Dec 'XXdYYmZZs', '-XXdYYmZZs', 'XdYmZs' or '-XdYmZs'", dec))
+                "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec))
             );
         }
         parseString(dec, degrees, minutes, seconds);
@@ -178,17 +177,12 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance,
     double a = isDegrees ? glm::radians(ra) : ra;
     double d = isDegrees ? glm::radians(dec) : dec;
 
-    // J2000 Galactic reference frame
-    constexpr double a0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
-    constexpr double d0 = glm::radians(27.1284);
-    constexpr double l0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
-
     // Convert to galactic reference frame
-    double l = l0 - atan2(
-        cos(d) * sin(a - a0),
-        sin(d) * cos(d0) - cos(d) * sin(d0) * cos(a - a0)
+    double l = L0 - atan2(
+        cos(d) * sin(a - A0),
+        sin(d) * cos(D0) - cos(d) * sin(D0) * cos(a - A0)
     );
-    double b = asin(sin(d) * sin(d0) + cos(d) * cos(d0) * cos(a - a0));
+    double b = asin(sin(d) * sin(D0) + cos(d) * cos(D0) * cos(a - A0));
 
     // Convert to cartesian
     glm::dvec3 rGalactic = glm::dvec3(
@@ -200,8 +194,9 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance,
     return distance * rGalactic;
 }
 
-// Ra format "XXhYYmZZs" or "XhYmZs"
-// Dec format "XXdYYmZZs", "-XXdYYmZZs", "XdYmZs" or "-XdYmZs"
+// Ra format 'XhYmZs', where X and Y are positive integers and Z is a positive double
+// Dec format 'XdYmZs', where X is a signed integer, Y is a positive integer and Z is a
+// positive double
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     // Reference:
     // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
@@ -230,7 +225,7 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
         );
     }
 
-    // Convert from hours, minutes, seconds to decimal degrees
+    // Convert from hours/degrees, minutes, seconds to decimal degrees
     double sign = signbit(static_cast<float>(dec_degrees)) ? -1.0 : 1.0;
     double ra_deg = (ra_hours * 15.0) +
         (ra_minutes * 15.0 / 60.0) +
@@ -243,15 +238,15 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     return glm::dvec2(ra_deg, dec_deg);
 }
 
-// Convert Galactic coordinates (x, y, z) or (l, b) into
-// Equatorial coordinates ICRS right ascension and declination (a, d) plus distance
+// Convert Galactic coordinates (x, y, z) or (l, b) into Equatorial coordinates ICRS
+// right ascension and declination in decimal degrees (a, d) plus distance
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     // References:
     // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
     // https://en.wikipedia.org/wiki/Celestial_coordinate_system
 
     // Normalize
-    double distance = sqrt(x * x + y * y + z * z);
+    double distance = sqrt(x*x + y*y + z*z);
     double n_x = x / distance;
     double n_y = y / distance;
     double n_z = z / distance;
@@ -261,20 +256,14 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
     double l = atan2(n_y, n_x);
     double b = asin(n_z);
 
-    // J2000 Galactic reference frame
-    constexpr double a0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
-    constexpr double d0 = glm::radians(27.1284);
-    constexpr double l0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
-
     // Convert to equatorial reference frame
     double a = atan2(
-        cos(b) * sin(l0 - l),
-        sin(b) * cos(d0) - cos(b) * sin(d0) * cos(l0 - l)
-    ) + a0;
-    double d = asin(sin(b) * sin(d0) + cos(b) * cos(d0) * cos(l0 - l));
+        cos(b) * sin(L0 - l),
+        sin(b) * cos(D0) - cos(b) * sin(D0) * cos(L0 - l)
+    ) + A0;
+    double d = asin(sin(b) * sin(D0) + cos(b) * cos(D0) * cos(L0 - l));
 
-    glm::dvec3 rEquatorial = glm::dvec3(glm::degrees(a), glm::degrees(d), distance);
-    return rEquatorial;
+    return glm::dvec3(glm::degrees(a), glm::degrees(d), distance);
 }
 
 // Return a pair with two formatted strings from the decimal degrees ra and dec

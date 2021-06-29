@@ -31,27 +31,27 @@
 namespace openspace {
 
 /**
- * Converts from ICRS coordinates to galactic cartesian coordinates.
+ * Converts from ICRS decimal degrees coordinates to galactic cartesian coordinates.
  * \param ra Right ascension, given in decimal degrees
  * \param dec Declination, given in decimal degrees
  * \param distance The distance, or radius, to the position given in any unit.
- * \param boolean to say if the incoming ra and dec are in degrees or radians
+ * \param isDegrees Boolean to say if the incoming ra and dec are in degrees or radians
  * \return A position in galactic cartesian coordinates, given in the same unit as the
  *         distance parameter.
  */
-glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance, bool isDegrees = true);
+glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance,
+    bool isDegrees = true);
 
 /**
  * Converts from ICRS (hms and dms) coordinates to decimal degrees.
- * \param ra Right ascension, given as a string in format "XXhYYmZZs"
- * \param dec Declination, given as a string in format "XXdYYmZZs", "-XXdYYmZZs",
- *        "XdYmZs" or "-XdYmZs"
+ * \param ra Right ascension, given as a string in format 'XhYmZs'
+ * \param dec Declination, given as a string in format 'XdYmZs'
  * \return The decimal degrees coordinate in degrees
  */
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
 
 /**
- * Converts from galactic cartesian coordinates to ICRS coordinates in decimal degrees
+ * Converts from galactic cartesian coordinates to ICRS decimal degrees coordinates
  * and distance.
  * \param x X coordinate
  * \param y Y coordinate
@@ -61,13 +61,14 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);
 
 /**
- * Converts from ICRS (decimal degrees) coordinates to ICRS (hms and dms) coordinates.
+ * Converts from ICRS decimal degrees coordinates to ICRS hms and dms coordinates.
  * \param ra Right ascension, given in decimal degrees
  * \param dec Declination, given in decimal degrees
- * \param boolean to say if the incoming ra and dec are in degrees or radians
+ * \param isDegrees Boolean to say if the incoming ra and dec are in degrees or radians
  * \return A pair with the ra and dec strings in hms and dms format.
  */
-std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec, bool isDegrees = true);
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec,
+    bool isDegrees = true);
 
 } // namespace openspace
 
