@@ -1775,7 +1775,7 @@ void SessionRecording::moveAheadInTime() {
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime_interpolation +=
                 _saveRenderingDeltaTime_interpolation_usec;
-            saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
             global::renderEngine->takeScreenshot();
         }
     }
