@@ -22,11 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/easing.h>
 #include <openspace/util/coordinateconversion.h>
 
 namespace openspace::space::luascriptfunctions {
