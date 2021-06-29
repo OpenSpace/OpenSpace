@@ -1773,12 +1773,10 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            if (!paused) {
-                _saveRenderingCurrentRecordedTime_interpolation +=
-                    _saveRenderingDeltaTime_interpolation_usec;
-               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-                global::renderEngine->takeScreenshot();
-            }
+            _saveRenderingCurrentRecordedTime_interpolation +=
+                _saveRenderingDeltaTime_interpolation_usec;
+            saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+            global::renderEngine->takeScreenshot();
         }
     }
 }
