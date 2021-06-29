@@ -347,9 +347,9 @@ void RenderablePoints::update(const UpdateData&) {
                 absPath(_spriteTexturePath).string()
             );
             if (_spriteTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",absPath(_spriteTexturePath)
-                ));
+                LDEBUG(
+                    fmt::format("Loaded texture from {}", absPath(_spriteTexturePath))
+                );
                 _spriteTexture->uploadTexture();
             }
             _spriteTexture->setFilter(

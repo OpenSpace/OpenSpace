@@ -99,23 +99,23 @@ namespace {
             std::is_same_v<T, openspace::speck::ColorMap>
         );
 
-        std::string cachePath = FileSys.cacheManager()->cachedFilename(speckPath);
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(speckPath);
 
-        if (std::filesystem::exists(cachePath)) {
+        if (std::filesystem::exists(cached)) {
             LINFOC(
                 "SpeckLoader",
                 fmt::format(
-                    "Cached file '{}' used for file {}", cachePath, speckPath
+                    "Cached file {} used for file {}", cached, speckPath
                 )
             );
 
-            std::optional<T> dataset = loadCacheFunction(cachePath);
+            std::optional<T> dataset = loadCacheFunction(cached);
             if (dataset.has_value()) {
                 // We could load the cache file and we are now done with this
                 return *dataset;
             }
             else {
-                FileSys.cacheManager()->removeCacheFile(cachePath);
+                FileSys.cacheManager()->removeCacheFile(cached);
             }
         }
         LINFOC("SpeckLoader", fmt::format("Loading file {}", speckPath));
@@ -123,7 +123,7 @@ namespace {
 
         if (!dataset.entries.empty()) {
             LINFOC("SpeckLoader", "Saving cache");
-            saveCacheFunction(dataset, cachePath);
+            saveCacheFunction(dataset, cached);
         }
         return dataset;
     }

@@ -2131,9 +2131,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
-                ));
+                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 

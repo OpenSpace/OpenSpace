@@ -118,7 +118,7 @@ void HorizonsTranslation::loadData() {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(file);
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
@@ -202,7 +202,7 @@ void HorizonsTranslation::readHorizonsTextFile() {
     fileStream.close();
 }
 
-bool HorizonsTranslation::loadCachedFile(const std::string& file) {
+bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
@@ -241,7 +241,7 @@ bool HorizonsTranslation::loadCachedFile(const std::string& file) {
     return fileStream.good();
 }
 
-void HorizonsTranslation::saveCachedFile(const std::string& file) const {
+void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));

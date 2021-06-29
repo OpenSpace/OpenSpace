@@ -234,7 +234,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     std::filesystem::path p = std::filesystem::path(path).parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
+    LINFO(fmt::format("Loading SPICE kernel {}", path));
     // Load the kernel
     furnsh_c(path.string().c_str());
 

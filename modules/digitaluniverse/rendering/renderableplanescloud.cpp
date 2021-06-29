@@ -634,7 +634,7 @@ void RenderablePlanesCloud::loadTextures() {
             ghoul::io::TextureReader::ref().loadTexture(path.string());
 
         if (t) {
-            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture '{}'", path));
+            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
             t->uploadTexture();
             t->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             t->purgeFromRAM();

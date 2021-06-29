@@ -502,7 +502,7 @@ bool Asset::initialize() {
         LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
         return false;
     }
-    LDEBUG(fmt::format("Initializing asset {}", id()));
+    LDEBUG(fmt::format("Initializing asset '{}'", id()));
 
     // 1. Initialize requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
