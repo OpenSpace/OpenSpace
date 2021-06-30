@@ -113,17 +113,15 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 }
 
 void HorizonsTranslation::loadData() {
-    std::string file = _horizonsTextFile;
-    if (!std::filesystem::is_regular_file(absPath(file))) {
+    std::filesystem::path file = absPath(_horizonsTextFile.value());
+    if (!std::filesystem::is_regular_file(file)) {
         return;
     }
 
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Horizon file '{}'", cachedFile, file
-        ));
+        LINFO(fmt::format("Cached file {} used for Horizon file {}", cachedFile, file));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -136,9 +134,9 @@ void HorizonsTranslation::loadData() {
         }
     }
     else {
-        LINFO(fmt::format("Cache for Horizon file '{}' not found", file));
+        LINFO(fmt::format("Cache for Horizon file {} not found", file));
     }
-    LINFO(fmt::format("Loading Horizon file '{}'", file));
+    LINFO(fmt::format("Loading Horizon file {}", file));
 
     readHorizonsTextFile();
 
@@ -147,12 +145,11 @@ void HorizonsTranslation::loadData() {
 }
 
 void HorizonsTranslation::readHorizonsTextFile() {
-    std::ifstream fileStream(_horizonsTextFile);
+    std::filesystem::path f = absPath(_horizonsTextFile);
+    std::ifstream fileStream(f);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _horizonsTextFile
-        ));
+        LERROR(fmt::format("Failed to open Horizons text file {}", f));
         return;
     }
 
