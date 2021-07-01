@@ -74,8 +74,8 @@ namespace {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
         "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
         "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
-        "dInverseModelTransformMatrix", "dModelTransformMatrix",
-        "dSgctProjectionToModelTransformMatrix", "dSGCTViewToWorldMatrix", "dCamPosObj",
+        "inverseModelTransformMatrix", "modelTransformMatrix",
+        "projectionToModelTransformMatrix", "viewToWorldMatrix", "camPosObj",
         "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
         "inscatterTexture"
     };
@@ -309,41 +309,33 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
             program.setUniform(
-                _uniformCache.dInverseModelTransformMatrix,
-                inverseModelMatrix
+                _uniformCache.inverseModelTransformMatrix, inverseModelMatrix
             );
-            program.setUniform(_uniformCache.dModelTransformMatrix, _modelTransform);
+            program.setUniform(_uniformCache.modelTransformMatrix, _modelTransform);
 
-            // Eye Space in SGCT to Eye Space in OS (SGCT View to OS Camera Rig)
-//            glm::dmat4 dSgctEye2OSEye = glm::inverse(
-//                glm::dmat4(renderData.camera.viewMatrix()));
-
-            glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(
+            glm::dmat4 viewToWorldMatrix = glm::inverse(
                 renderData.camera.combinedViewMatrix()
             );
 
-            // Eye Space in SGCT to OS World Space
-            program.setUniform(
-                _uniformCache.dSGCTViewToWorldMatrix,
-                dSGCTViewToWorldMatrix
-            );
+            // Eye Space to World Space
+            program.setUniform(_uniformCache.viewToWorldMatrix, viewToWorldMatrix);
 
-            // SGCT Projection to SGCT Eye Space
+            // Projection to Eye Space
             glm::dmat4 dInverseProjection = glm::inverse(
                 glm::dmat4(renderData.camera.projectionMatrix())
             );
 
             glm::dmat4 inverseWholeMatrixPipeline =
-                inverseModelMatrix * dSGCTViewToWorldMatrix * dInverseProjection;
+                inverseModelMatrix * viewToWorldMatrix * dInverseProjection;
 
             program.setUniform(
-                _uniformCache.dSgctProjectionToModelTransformMatrix,
+                _uniformCache.projectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline
             );
 
             glm::dvec4 camPosObjCoords =
                 inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
-            program.setUniform(_uniformCache.dCamPosObj, camPosObjCoords);
+            program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
@@ -354,8 +346,17 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 _time,
                 lt
             );
-            glm::dvec4 sunPosObj;
+            //glm::dvec3 sunPos22 = SpiceManager::ref().targetPosition(
+            //    "SUN", "SUN", "GALACTIC", {}, _time, lt
+            //);
 
+            glm::dvec3 sunPos23 = SpiceManager::ref().targetPosition(
+                "SUN", "EARTH", "GALACTIC", {}, _time, lt
+            );
+
+            glm::dvec4 sunPosObj;
+            //glm::dvec4 sunPosObj2;
+            //glm::dvec4 sunPosObj3;
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {
                 sunPosObj = inverseModelMatrix * glm::dvec4(
@@ -365,7 +366,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
             else {
                 sunPosObj = inverseModelMatrix *
-                    glm::dvec4(sunPosWorld - renderData.modelTransform.translation, 1.0);
+                    glm::dvec4(glm::normalize(sunPosWorld) - glm::normalize(renderData.modelTransform.translation), 1.0);
+                //sunPosObj2 = inverseModelMatrix *
+                //    glm::dvec4(sunPos22 - renderData.modelTransform.translation, 1.0);
+                //sunPosObj3 = inverseModelMatrix * glm::dvec4(sunPos23, 1.0);
             }
 
             // Sun Position in Object Space
@@ -373,6 +377,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 _uniformCache.sunDirectionObj,
                 glm::normalize(glm::dvec3(sunPosObj))
             );
+            //program.setUniform("sunDirection2", glm::normalize(glm::dvec3(sunPosObj2)));
+            //program.setUniform("sunDirection3", glm::normalize(glm::dvec3(sunPosObj3)));
+
+            glm::dvec3 ddd = renderData.camera.viewDirectionWorldSpace();
+            program.setUniform("viewDirWorld", glm::normalize(ddd));
+            program.setUniform("sunWorld", glm::normalize(sunPosWorld));
+            ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames);
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
