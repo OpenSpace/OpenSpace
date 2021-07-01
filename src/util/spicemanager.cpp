@@ -204,13 +204,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
-        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
+        fmt::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
-            "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), std::filesystem::path(filePath).parent_path().string()
+            "File {} exists, but directory {} does not",
+            absPath(filePath), std::filesystem::path(filePath).parent_path()
         )
     );
 
@@ -234,7 +234,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     std::filesystem::path p = std::filesystem::path(path).parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
+    LINFO(fmt::format("Loading SPICE kernel {}", path));
     // Load the kernel
     furnsh_c(path.string().c_str());
 
@@ -273,7 +273,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", it->path));
             unload_c(it->path.c_str());
             _loadedKernels.erase(it);
         }
@@ -299,7 +299,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                fmt::format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("{} did not correspond to a loaded kernel", path)
             );
         }
         else {
@@ -309,7 +309,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", path));
             unload_c(path.string().c_str());
             _loadedKernels.erase(it);
         }

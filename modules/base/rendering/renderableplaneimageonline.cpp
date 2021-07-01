@@ -96,52 +96,54 @@ void RenderablePlaneImageOnline::bindTexture() {
 }
 
 void RenderablePlaneImageOnline::update(const UpdateData&) {
-    if (_textureIsDirty) {
-        if (!_imageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
-                _texturePath
+    if (!_textureIsDirty) {
+        return;
+    }
+
+    if (!_imageFuture.valid()) {
+        std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+            _texturePath
+        );
+        if (future.valid()) {
+            _imageFuture = std::move(future);
+        }
+    }
+
+    if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
+        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+
+        if (imageFile.corrupted) {
+            LERRORC(
+                "ScreenSpaceImageOnline",
+                fmt::format("Error loading image from URL '{}'", _texturePath)
             );
-            if (future.valid()) {
-                _imageFuture = std::move(future);
-            }
+            return;
         }
 
-        if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
-
-            if (imageFile.corrupted) {
-                LERRORC(
-                    "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath)
+        try {
+            std::unique_ptr<ghoul::opengl::Texture> texture =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    reinterpret_cast<void*>(imageFile.buffer),
+                    imageFile.size,
+                    imageFile.format
                 );
-                return;
-            }
 
-            try {
-                std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        reinterpret_cast<void*>(imageFile.buffer),
-                        imageFile.size,
-                        imageFile.format
-                    );
+            if (texture) {
+                // Images don't need to start on 4-byte boundaries, for example if the
+                // image is only RGB
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                if (texture) {
-                    // Images don't need to start on 4-byte boundaries, for example if the
-                    // image is only RGB
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                texture->purgeFromRAM();
 
-                    texture->uploadTexture();
-                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                    texture->purgeFromRAM();
-
-                    _texture = std::move(texture);
-                    _textureIsDirty = false;
-                }
-            }
-            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+                _texture = std::move(texture);
                 _textureIsDirty = false;
-                LERRORC(e.component, e.message);
             }
+        }
+        catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
+            _textureIsDirty = false;
+            LERRORC(e.component, e.message);
         }
     }
 }
