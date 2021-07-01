@@ -41,6 +41,8 @@ public:
 
     void scaleflowline(float scale);
 
+    void scaleFieldlines(float scale);
+
     void computeTimes();
 
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
@@ -60,15 +62,16 @@ public:
     double triggerTime() const;
     const std::vector<glm::vec3>& vertexPositions() const;
 
-    const std::vector<std::vector<glm::vec3>>& vertexPaths() const;
+    const std::vector<glm::vec3>& vertexPath() const;
 
-    const std::vector<std::vector<float>>& vertexVelocities() const;
+    const std::vector<float>& vertexVelocities() const;
 
-    const std::vector<std::vector<float>>& vertexTimes() const;
+    const std::vector<float>& vertexTimes() const;
+
+    const std::vector<std::vector<glm::vec3>>& fieldLines() const;
 
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
-
 
     void setModel(fls::Model m);
     void setTriggerTime(double t);
@@ -79,9 +82,11 @@ public:
 
     void moveLine( double dt);
 
-    void addVertexPath(std::vector<glm::vec3> path);
+    void addPath(std::vector<glm::vec3> path);
 
-    void addVertexVelocities(std::vector<float> path);
+    void addFieldLine(std::vector<glm::vec3> fieldLine);
+
+    void addVelocities(std::vector<float> path);
 
 
 private:
@@ -98,12 +103,12 @@ private:
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
 
-    std::vector<size_t>_vertexIndex;
-    std::vector<float>_timeSinceLastVertex;
-    std::vector< std::vector<glm::vec3> > _vertexPaths;
-    std::vector< std::vector<float> > _vertexVelocities;
-    std::vector< std::vector<float> > _vertexTimes;
-
+    size_t _vertexIndex = 0;
+    float _timeSinceLastVertex = 0.0f;
+    std::vector<glm::vec3> _vertexPath;
+    std::vector<std::vector<glm::vec3>> _fieldLines;
+    std::vector<float> _vertexVelocities;
+    std::vector<float> _vertexTimes;
 };
 
 } // namespace openspace

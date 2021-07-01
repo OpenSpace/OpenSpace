@@ -918,7 +918,7 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
         );
 
 
-        //std::vector< std::vector<float> > vels = newState.vertexVelocities();
+        std::vector<float> vels = newState.vertexVelocities();
         //std::vector<float> maxVels;
         //for (auto velocity : vels) {
         //    float it = *std::max_element(std::begin(velocity), std::end(velocity));
@@ -928,9 +928,10 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 
         //LINFO(fmt::format("MaxVel: {}", maxVel));
 
-        //std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
+        std::vector< std::vector<glm::vec3> > verts = newState.fieldLines();
 
-        //std::vector< std::vector<float> > times = newState.vertexTimes();
+
+        std::vector<float> times = newState.vertexTimes();
 
         if (isSuccessful) {
             addStateToSequence(newState);

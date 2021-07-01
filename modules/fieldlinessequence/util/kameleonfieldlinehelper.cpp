@@ -71,6 +71,7 @@ namespace openspace::fls {
     void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::vector<std::string>& extraScalarVars, std::vector<std::string>& extraMagVars,
         FieldlinesState& state);
+
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
     // ------------------------------------------------------------------------------------ //
 
@@ -114,10 +115,12 @@ namespace openspace::fls {
             // Before we scale to meters (and maybe cartesian) we must extract
             // the extraQuantites, as the iterpolator needs the unaltered positions
             addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
+            //computeFieldLineTimes(kameleon.get(), extraVars, extraMagVars, state);
             switch (state.model()) {
             case fls::Model::Batsrus:
                 state.scalePositions(fls::ReToMeter);
                 state.scaleflowline(fls::ReToMeter);
+                state.scaleFieldlines(fls::ReToMeter);
                 state.computeTimes();
                 break;
             case fls::Model::Enlil:
@@ -178,8 +181,8 @@ namespace openspace::fls {
         std::string mainTraceVar;
         std::string secondaryTraceVar;
 
-        mainTraceVar = "b";
-        secondaryTraceVar = tracingVar;
+        mainTraceVar = tracingVar;
+        secondaryTraceVar = "b";
 
         LINFO("Tracing field lines!");
         // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
@@ -193,33 +196,34 @@ namespace openspace::fls {
             ccmc::Tracer tracer(kameleon, interpolator.get());
             tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-            //traces with "u" need unidirectionalTrace, while "b" needs bidirectionalTrace
-            ccmc::Fieldline fieldline;
+            //traces with "u" and "uperpb" need unidirectionalTrace, 
+            //while "b" needs bidirectionalTrace
+            ccmc::Fieldline pathline;
 
-            fieldline = tracer.bidirectionalTrace(
+            pathline = tracer.unidirectionalTrace(
                 mainTraceVar,
                 seed.x,
                 seed.y,
                 seed.z);
 
-            std::vector<ccmc::Point3f> positions = fieldline.getPositions();
+            //necessary to interpolate fieldlines to a certain amount of vertices
+            pathline.getDs();
+            pathline.measure();
+            pathline.integrate();
 
-            //remove the last two vertices since they seem to be at the edge
-            //of the boundary. This should be fixed in the tracer later.
+            ccmc::Fieldline interpolatedPath = pathline.interpolate(1, 100);
 
-            positions.pop_back();
-            positions.pop_back();
-            positions.erase(positions.begin());
+            std::vector<ccmc::Point3f> positions = interpolatedPath.getPositions();
 
             const size_t nLinePoints = positions.size();
-            std::vector<glm::vec3> line;
-
+            std::vector<glm::vec3> path;
+            int i = 0;
             for (const ccmc::Point3f& p : positions) {
                 std::vector<glm::vec3> vertices;
                 //vertices.emplace_back(p.component1, p.component2, p.component3);
 
-                //add vertices to initial fieldline so it can be rendered as well
-                line.emplace_back(p.component1, p.component2, p.component3);
+                //add vertices to path line
+                path.emplace_back(p.component1, p.component2, p.component3);
 
                 std::unique_ptr<ccmc::Interpolator> interpolator2 =
                     std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
@@ -228,26 +232,36 @@ namespace openspace::fls {
 
                 //traces with "u" or "u_perp_b" need unidirectioalTrace, while "b" needs 
                 //bidirectionalTrace.
-                ccmc::Fieldline flowLine;
-                flowLine = tracer2.unidirectionalTrace(
+                ccmc::Fieldline fieldline;
+                fieldline = tracer2.bidirectionalTrace(
                     secondaryTraceVar,
                     p.component1,
                     p.component2,
                     p.component3
                 );
 
-                const std::vector<ccmc::Point3f>& positions2 = flowLine.getPositions();
+                //necessary to map fieldlines to a certain amount of vertices
+                fieldline.getDs();
+                fieldline.measure();
+                fieldline.integrate();
+                ccmc::Fieldline mapped = fieldline.interpolate(1, 100);
 
+                const std::vector<ccmc::Point3f>& positions2 = mapped.getPositions();
                 for (const ccmc::Point3f& p2 : positions2) {
-
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
                 }
-                state.addVertexPath(vertices);
-                //state.addLine(vertices);
+                //add all the field lines, will be used for interpolation
+                state.addFieldLine(vertices);
 
+                //addLine will render the field line, we only want to render the first one
+                if (i == 0) {
+                    state.addLine(vertices);
+                }
+                i++;
             }
-            //add the initial fieldlines to the state
-            state.addLine(line);
+            //the flow line from the seed point, 
+            //used to compute how fast the field lines move
+            state.addPath(path);
 
             success |= (nLinePoints > 0);
 
@@ -290,51 +304,31 @@ namespace openspace::fls {
 
         if (state.extraQuantityNames()[nXtraScalars] == "u_perp_b") {
 
-            for (const std::vector<glm::vec3> i : state.vertexPaths()) {
-                std::vector<float> velocities;
-                for (const glm::vec3 p : i) {
-                    //compute u_perp_b with variables u and b
-                    //normalized b vector
-                    const glm::vec3 normBVec = glm::normalize(glm::vec3(
-                        interpolator->interpolate("bx", p.x, p.y, p.z),
-                        interpolator->interpolate("by", p.x, p.y, p.z),
-                        interpolator->interpolate("bz", p.x, p.y, p.z)));
+            std::vector<float> velocities;
+            for (const glm::vec3 p : state.vertexPath()) {
+                //compute u_perp_b with variables u and b
+                //normalized b vector
+                const glm::vec3 normBVec = glm::normalize(glm::vec3(
+                    interpolator->interpolate("bx", p.x, p.y, p.z),
+                    interpolator->interpolate("by", p.x, p.y, p.z),
+                    interpolator->interpolate("bz", p.x, p.y, p.z)));
 
-                    const glm::vec3 uVec = glm::vec3(
-                        interpolator->interpolate("ux", p.x, p.y, p.z),
-                        interpolator->interpolate("uy", p.x, p.y, p.z),
-                        interpolator->interpolate("uz", p.x, p.y, p.z));
+                const glm::vec3 uVec = glm::vec3(
+                    interpolator->interpolate("ux", p.x, p.y, p.z),
+                    interpolator->interpolate("uy", p.x, p.y, p.z),
+                    interpolator->interpolate("uz", p.x, p.y, p.z));
 
-                    float u_dot_b = glm::dot(normBVec, uVec);
+                float u_dot_b = glm::dot(normBVec, uVec);
 
-                    //multiply by 1000 since the data is in km/s and openspace uses m/s
-                    glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b))*1000.0f;
+                //multiply by 1000 since the data is in km/s and openspace uses m/s
+                glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b)) * 1000.0f;
 
-                    float magnitude = glm::length(u_perp_b);
+                float magnitude = glm::length(u_perp_b);
 
-                    velocities.push_back(magnitude);
-                }
-                state.addVertexVelocities(velocities);
+                velocities.push_back(magnitude);
             }
-
-        }
-        else if (state.extraQuantityNames()[nXtraScalars] == "u") {
-
-            for (const std::vector<glm::vec3> i : state.vertexPaths()) {
-                std::vector<float> velocities;
-                for (const glm::vec3 p : i) {
-
-                    const glm::vec3 uVec = glm::vec3(
-                        interpolator->interpolate("ux", p.x, p.y, p.z),
-                        interpolator->interpolate("uy", p.x, p.y, p.z),
-                        interpolator->interpolate("uz", p.x, p.y, p.z));
-                    //multiply by 1000 since the data is in km/s and openspace uses m/s
-                    float magnitude = glm::length(uVec*1000.0f);
-
-                    velocities.push_back(magnitude);
-                }
-                state.addVertexVelocities(velocities);
-            }
+            state.addVelocities(velocities);
+                
         }
         
         // ------ Extract all the extraQuantities from kameleon and store in state! //
