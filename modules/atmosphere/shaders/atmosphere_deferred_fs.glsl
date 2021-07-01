@@ -62,7 +62,6 @@
 in vec2 texCoord;
 out vec4 renderTarget;
 
-uniform int nAaSamples;
 uniform int cullAtmosphere;
 
 uniform sampler2D irradianceTexture;
@@ -84,6 +83,7 @@ uniform dvec3 sunDirectionObj;
 
 uniform dvec3 sunWorld;
 uniform dvec3 viewDirWorld;
+uniform dvec3 sunModel;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -459,7 +459,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
  */
 vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
   // v = normalize(vec3(inverseModelTransformMatrix * dvec4(sunWorld, 1.0)));
-  float angle2 = dot(v, s);
+  float angle = dot(v, s);
 
   // JCC: Change this function to a impostor texture with gaussian decay color weighted
   // by the sunRadiance, transmittance and irradianceColor (11/03/2017)
@@ -472,7 +472,7 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
   const float p1 = cos(SunAngularSize);
   const float p2 = cos(SunAngularSize * FuzzyFactor);
 
-  float t = (angle2 - p1) / (p2 - p1);
+  float t = (angle - p1) / (p2 - p1);
   float scale = clamp(t, 0.0, 1.0);
   return scale * transmittance(r, mu) * sunRadiance * (1.0 - irradianceFactor);
 }

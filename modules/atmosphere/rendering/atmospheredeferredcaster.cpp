@@ -337,26 +337,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
             program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
 
-            double lt;
-            glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
-                "SUN",
-                "SSB",
-                "GALACTIC",
-                {},
-                _time,
-                lt
-            );
-            //glm::dvec3 sunPos22 = SpiceManager::ref().targetPosition(
-            //    "SUN", "SUN", "GALACTIC", {}, _time, lt
-            //);
-
-            glm::dvec3 sunPos23 = SpiceManager::ref().targetPosition(
-                "SUN", "EARTH", "GALACTIC", {}, _time, lt
-            );
+            SceneGraphNode* node = sceneGraph()->sceneGraphNode("Sun");
+            glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
 
             glm::dvec4 sunPosObj;
-            //glm::dvec4 sunPosObj2;
-            //glm::dvec4 sunPosObj3;
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {
                 sunPosObj = inverseModelMatrix * glm::dvec4(
@@ -366,10 +350,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
             else {
                 sunPosObj = inverseModelMatrix *
-                    glm::dvec4(glm::normalize(sunPosWorld) - glm::normalize(renderData.modelTransform.translation), 1.0);
-                //sunPosObj2 = inverseModelMatrix *
-                //    glm::dvec4(sunPos22 - renderData.modelTransform.translation, 1.0);
-                //sunPosObj3 = inverseModelMatrix * glm::dvec4(sunPos23, 1.0);
+                    glm::dvec4(
+                        (sunPosWorld - renderData.modelTransform.translation) * 1000.0,
+                        1.0
+                    );
             }
 
             // Sun Position in Object Space
@@ -377,12 +361,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 _uniformCache.sunDirectionObj,
                 glm::normalize(glm::dvec3(sunPosObj))
             );
-            //program.setUniform("sunDirection2", glm::normalize(glm::dvec3(sunPosObj2)));
-            //program.setUniform("sunDirection3", glm::normalize(glm::dvec3(sunPosObj3)));
 
-            glm::dvec3 ddd = renderData.camera.viewDirectionWorldSpace();
-            program.setUniform("viewDirWorld", glm::normalize(ddd));
-            program.setUniform("sunWorld", glm::normalize(sunPosWorld));
             ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames);
 
             // Shadow calculations..
@@ -395,6 +374,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     // TO REMEMBER: all distances and lengths in world coordinates are in
                     // meters!!! We need to move this to view space...
                     // Getting source and caster:
+                    double lt;
                     glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
                         shadowConf.source.first,
                         "SSB",
