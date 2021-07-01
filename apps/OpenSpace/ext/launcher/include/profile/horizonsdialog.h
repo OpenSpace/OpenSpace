@@ -46,13 +46,26 @@ public:
 private slots:
     void openHorizonsFile();
     void openSaveDirectory();
-    void sendHorizonsRequest();
-    void handleReply(QNetworkReply *reply);
     void approved();
 
 private:
+    enum class HorizonsResult {
+        Valid = 1,
+        Empty,
+        ErrorConnect,
+        ErrorObserver,
+        ErrorTaget,
+        ErrorStartTime,
+        ErrorEndTime,
+        ErrorStepSize,
+        UnknownError
+    };
+
     void createWidgets();
-    void sendRequest(const std::string url);
+    bool sendHorizonsRequest();
+    HorizonsResult sendRequest(const std::string url);
+    HorizonsResult handleReply(QNetworkReply* reply);
+    HorizonsResult isValidHorizonsFile(const std::string& file) const;
 
     std::string _horizonsFile;
     QNetworkAccessManager* _manager;

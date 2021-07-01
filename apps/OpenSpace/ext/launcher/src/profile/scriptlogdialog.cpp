@@ -38,7 +38,7 @@ ScriptlogDialog::ScriptlogDialog(QWidget* parent)
 {
     setWindowTitle("Scriptlog");
     createWidgets();
- 
+
     QFile file(QString::fromStdString(absPath("${LOGS}/scriptLog.txt").string()));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
@@ -65,7 +65,7 @@ void ScriptlogDialog::createWidgets() {
     _scriptlogList = new QListWidget;
     _scriptlogList->setSelectionMode(QAbstractItemView::SelectionMode::MultiSelection);
     layout->addWidget(_scriptlogList);
-    
+
     layout->addWidget(new Line);
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
