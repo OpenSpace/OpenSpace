@@ -211,9 +211,9 @@ namespace openspace::fls {
             pathline.measure();
             pathline.integrate();
 
-            ccmc::Fieldline interpolatedPath = pathline.interpolate(1, 100);
+            ccmc::Fieldline mappedPath = pathline.interpolate(1, 100);
 
-            std::vector<ccmc::Point3f> positions = interpolatedPath.getPositions();
+            std::vector<ccmc::Point3f> positions = mappedPath.getPositions();
 
             const size_t nLinePoints = positions.size();
             std::vector<glm::vec3> path;
