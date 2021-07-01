@@ -268,8 +268,8 @@ void RenderablePrism::updateVertexData() {
     _indexArray.push_back(255);
 
     // Indices for Top shape
-    for (uint8_t i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
-        _indexArray.push_back(i);
+    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
+        _indexArray.push_back(static_cast<uint8_t>(i));
     }
 
     // Indices for connecting lines
@@ -277,8 +277,8 @@ void RenderablePrism::updateVertexData() {
         // Reset
         _indexArray.push_back(255);
 
-        _indexArray.push_back(2 * _nShapeSegments + k);
-        _indexArray.push_back(2 * _nShapeSegments + k + 1);
+        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
+        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
     }
 }
 

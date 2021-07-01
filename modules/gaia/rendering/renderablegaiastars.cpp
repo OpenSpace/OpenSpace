@@ -2298,7 +2298,7 @@ int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading raw binary file!", filePath
+            "Error opening file '{}' for loading raw binary file", filePath
         ));
         return nReadStars;
     }
@@ -2316,7 +2316,7 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& fileP
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", filePath
+            "Error opening file '{}' for loading binary Octree file", filePath
         ));
         return nReadStars;
     }
@@ -2337,7 +2337,7 @@ int RenderableGaiaStars::readBinaryOctreeStructureFile(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", indexFile
+            "Error opening file '{}' for loading binary Octree file", indexFile
         ));
         return nReadStars;
     }

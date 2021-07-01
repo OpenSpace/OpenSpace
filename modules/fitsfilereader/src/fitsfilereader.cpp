@@ -247,7 +247,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
     );
 
     if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", filePath));
+        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file {}", filePath));
     }
 
     int nStars = table->readRows - firstRow + 1;
@@ -530,7 +530,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
     std::ifstream fileStream(filePath);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", filePath));
+        LERROR(fmt::format("Failed to open Speck file {}", filePath));
         return fullData;
     }
 

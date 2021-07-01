@@ -214,15 +214,11 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
     return true;
 }
 
-bool ScriptEngine::runScriptFile(const std::string& filename) {
+bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped
 
-    if (filename.empty()) {
-        LWARNING("Filename was empty");
-        return false;
-    }
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(fmt::format("Script with name {} did not exist", filename));
         return false;
     }
 

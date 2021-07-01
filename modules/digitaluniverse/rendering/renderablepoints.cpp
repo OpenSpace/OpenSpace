@@ -135,7 +135,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.file).string();
+    _speckFile = absPath(p.file);
 
     if (p.unit.has_value()) {
         switch (*p.unit) {
@@ -185,7 +185,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     }
 
     if (p.colorMap.has_value()) {
-        _colorMapFile = absPath(*p.colorMap).string();
+        _colorMapFile = absPath(*p.colorMap);
         _hasColorMapFile = true;
     }
 
@@ -369,7 +369,7 @@ void RenderablePoints::readColorMapFile() {
     std::ifstream file(_colorMapFile);
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format(
-            "Failed to open Color Map file '{}'", _colorMapFile
+            "Failed to open Color Map file {}", _colorMapFile
         ));
     }
 
@@ -396,7 +396,7 @@ void RenderablePoints::readColorMapFile() {
         }
         else if (file.eof()) {
             throw ghoul::RuntimeError(fmt::format(
-                "Failed to load colors from Color Map file '{}'", _colorMapFile
+                "Failed to load colors from Color Map file {}", _colorMapFile
             ));
         }
     }

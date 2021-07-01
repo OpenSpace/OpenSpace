@@ -204,13 +204,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
-        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
+        fmt::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
-            "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), std::filesystem::path(filePath).parent_path().string()
+            "File {} exists, but directory {} does not",
+            absPath(filePath), std::filesystem::path(filePath).parent_path()
         )
     );
 
@@ -299,7 +299,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                fmt::format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("{} did not correspond to a loaded kernel", path)
             );
         }
         else {

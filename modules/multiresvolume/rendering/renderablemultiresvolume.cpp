@@ -510,7 +510,7 @@ bool RenderableMultiresVolume::initializeSelector() {
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open '{}'", cached));
+                    LWARNING(fmt::format("Failed to open {}", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms

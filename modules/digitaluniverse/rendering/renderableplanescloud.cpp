@@ -272,7 +272,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     addProperty(_opacity);
 
     if (p.file.has_value()) {
-        _speckFile = absPath(*p.file).string();
+        _speckFile = absPath(*p.file);
         _hasSpeckFile = true;
         _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
@@ -320,7 +320,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile).string();
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -368,7 +368,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         }
     }
 
-    _texturesPath = absPath(p.texturePath).string();
+    _texturesPath = absPath(p.texturePath);
 
     _luminosityVar = p.luminosity.value_or(_luminosityVar);
     _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
@@ -403,7 +403,7 @@ void RenderablePlanesCloud::initialize() {
     }
 
     if (!_labelFile.empty()) {
-        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
+        LINFO(fmt::format("Loading Label file {}", _labelFile));
         _labelset = speck::label::loadFileWithCache(_labelFile);
         for (speck::Labelset::Entry& e : _labelset.entries) {
             e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
@@ -612,7 +612,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
 void RenderablePlanesCloud::loadTextures() {
     for (const speck::Dataset::Texture& tex : _dataset.textures) {
-        std::filesystem::path fullPath = absPath(_texturesPath + '/' + tex.file);
+        std::filesystem::path fullPath = absPath(_texturesPath.string() + '/' + tex.file);
         std::filesystem::path pngPath = fullPath;
         pngPath.replace_extension(".png");
 
