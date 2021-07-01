@@ -1270,7 +1270,6 @@ void OpenSpaceEngine::drawOverlays() {
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D")
-
         func();
     }
 

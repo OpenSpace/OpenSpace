@@ -57,6 +57,7 @@
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
@@ -65,7 +66,7 @@
 
 #ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
-#endif //GHOUL_USE_DEVIL
+#endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
@@ -74,7 +75,7 @@
 #include <ghoul/io/texture/texturereadersoil.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewritersoil.h>
-#endif //GHOUL_USE_SOIL
+#endif // GHOUL_USE_SOIL
 
 #ifdef GHOUL_USE_STB_IMAGE
 #include <ghoul/io/texture/texturereaderstb.h>
@@ -863,14 +864,9 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
         renderScreenLog();
         renderVersionInformation();
         renderDashboard();
+        renderCameraInformation();
 
-        if (!shutdownInfo.inShutdown) {
-            // We render the camera information in the same location as the shutdown info
-            // and we won't need this if we are shutting down
-            renderCameraInformation();
-        }
-        else {
-            // If we are in shutdown mode, we can display the remaining time
+        if (shutdownInfo.inShutdown) {
             renderShutdownInformation(shutdownInfo.timer, shutdownInfo.waitTime);
         }
     }
@@ -903,13 +899,35 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     timer = std::max(timer, 0.f);
 
-    const glm::vec2 size = _fontShutdown->boundingBox(
+    // Render progressive overlay
+    glEnable(GL_BLEND);
+
+    // t = 1.f -> start of shutdown counter    t = 0.f -> timer has reached shutdown
+    float t = 1.f - (timer / fullTime);
+
+    // We want the screen to be black after 75% of the shutdown timer ...
+    t = glm::clamp(t / 0.75f, 0.f, 1.f);
+    // ... and to make it a bit smooth
+    t = ghoul::cubicEaseIn(t);
+    rendering::helper::renderBox(
+        glm::vec2(0.f),
+        glm::vec2(1.f),
+        glm::vec4(0.f, 0.f, 0.f, t)
+    );
+
+    // No need to print the text if we are just about to finish since otherwise we'll be
+    // overplotting the actual "shutdown in progress" text
+    if (timer == 0.f) {
+        return;
+    }
+
+    const glm::vec2 size1 = _fontShutdown->boundingBox(
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
-        fontResolution().x - size.x - 10,
-        fontResolution().y - size.y
+        fontResolution().x / 2 - size1.x / 2,
+        fontResolution().y / 2 - size1.y / 2
     );
 
     RenderFont(
@@ -919,13 +937,14 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         ghoul::fontrendering::CrDirection::Down
     );
 
+    const glm::vec2 size2 = _fontShutdown->boundingBox("Press ESC again to abort");
+    penPosition.x = fontResolution().x / 2 - size2.x / 2;
     RenderFont(
         *_fontShutdown,
         penPosition,
         // Important: length of this string is the same as the shutdown time text
         // to make them align
-        "Press ESC again to abort",
-        ghoul::fontrendering::CrDirection::Down
+        "Press ESC again to abort"
     );
 }
 
