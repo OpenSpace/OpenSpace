@@ -5,59 +5,55 @@ asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Rhea = {
-    Identifier = "Rhea",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "RHEA",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_RHEA",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Rhea",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "RHEA",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 765000,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/rhea.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Name = "Rhea",
-        Path = "/Solar System/Planets/Saturn/Moons",
-        Description = [[Second largest moon of Saturn.]]
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_RHEA",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 765000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/rhea.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 500000.0, 2500000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Rhea",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[Second largest moon of Saturn.]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
 
 
 asset.meta = {
-    Name = "Rhea",
-    Version = "1.0",
-    Description = [[ Rhea globe with labels.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Rhea",
+  Version = "1.0",
+  Description = [[ Rhea globe with labels.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

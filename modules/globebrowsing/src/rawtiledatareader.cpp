@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -450,7 +451,7 @@ void RawTileDataReader::initialize() {
     if (module.isWMSCachingEnabled()) {
         ZoneScopedN("WMS Caching")
         std::string c;
-        if (FileSys.fileExists(_datasetFilePath)) {
+        if (std::filesystem::is_regular_file(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
             // caching
             std::ifstream t(_datasetFilePath);
@@ -486,7 +487,7 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.wmsCacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).string().c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
@@ -949,7 +950,8 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
 
     bool allIsMissing = true;
     for (int y = 0; y < region.numPixels.y; ++y) {
-        const size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+        const size_t yi =
+            (static_cast<unsigned long long>(region.numPixels.y) - 1 - y) * bytesPerLine;
         size_t i = 0;
         for (int x = 0; x < region.numPixels.x; ++x) {
             for (size_t raster = 0; raster < _initData.nRasters; ++raster) {

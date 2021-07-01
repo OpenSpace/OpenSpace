@@ -54,8 +54,8 @@ namespace documentation { struct Documentation; }
 class ShadowComponent : public properties::PropertyOwner {
 public:
     struct ShadowMapData {
-        glm::dmat4 shadowMatrix;
-        GLuint shadowDepthTexture;
+        glm::dmat4 shadowMatrix = glm::dmat4(1.0);
+        GLuint shadowDepthTexture = 0;
     };
 
     ShadowComponent(const ghoul::Dictionary& dictionary);
@@ -76,8 +76,6 @@ public:
     bool isEnabled() const;
 
     ShadowComponent::ShadowMapData shadowMapData() const;
-
-    void setViewDepthMap(bool enable);
 
     GLuint dDepthTexture() const;
 
@@ -105,8 +103,6 @@ private:
     properties::IntProperty _distanceFraction;
     properties::BoolProperty _enabled;
 
-    ghoul::Dictionary _shadowMapDictionary;
-
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
@@ -125,14 +121,6 @@ private:
     GLboolean _depthIsEnabled;
     GLboolean _blendIsEnabled = false;
 
-    GLenum _faceToCull;
-    GLenum _depthFunction;
-
-    GLfloat _polygonOffSetFactor;
-    GLfloat _polygonOffSetUnits;
-    GLfloat _colorClearValue[4];
-    GLfloat _depthClearValue;
-
     glm::vec3 _sunPosition = glm::vec3(0.f);
 
     glm::dmat4 _shadowMatrix = glm::dmat4(1.0);
@@ -147,9 +135,6 @@ private:
 
     // DEBUG
     bool _executeDepthTextureSave = false;
-    bool _viewDepthMap = false;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _renderDMProgram;
-    GLuint _quadVAO = 0u;
 };
 
 } // namespace openspace

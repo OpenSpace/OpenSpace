@@ -36,6 +36,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
 
 namespace {
     constexpr const std::array<const char*, 6> UniformNames = {
@@ -59,10 +60,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings.Each of the two values is a "
-        "value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
-        "extent at the radius. If this value is, for example {0.5, 1.0}, the ring is "
-        "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
+        "This value is used to limit the width of the rings. Each of the two values is "
+        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
+        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
@@ -79,53 +80,30 @@ namespace {
         "This value affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out."
     };
+
+    struct [[codegen::Dictionary(RenderableRings)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string texture;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        // [[codegen::verbatim(OffsetInfo.description)]]
+        std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(NightFactorInfo.description)]]
+        std::optional<float> nightFactor;
+
+        // [[codegen::verbatim(ColorFilterInfo.description)]]
+        std::optional<float> colorFilter;
+    };
+#include "renderablerings_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableRings::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Rings",
-        "space_renderable_rings",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableRings"),
-                Optional::No
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                OffsetInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                OffsetInfo.description
-            },
-            {
-                NightFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                NightFactorInfo.description
-            },
-            {
-                ColorFilterInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ColorFilterInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("space_renderable_rings");
 }
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
@@ -138,42 +116,29 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableRings"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
+    _size = p.size;
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<File>(_texturePath);
+    _texturePath = absPath(p.texture).string();
+    _textureFile = std::make_unique<File>(_texturePath.value());
 
-    if (dictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
-    }
+    _offset = p.offset.value_or(_offset);
+    _offset.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_offset);
 
     _texturePath.onChange([&]() { loadTexture(); });
     addProperty(_texturePath);
 
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
-    if (dictionary.hasValue<double>(NightFactorInfo.identifier)) {
-        _nightFactor = static_cast<float>(
-            dictionary.value<double>(NightFactorInfo.identifier)
-        );
-    }
+    _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
 
-    if (dictionary.hasValue<double>(ColorFilterInfo.identifier)) {
-        _colorFilter = static_cast<float>(
-            dictionary.value<double>(ColorFilterInfo.identifier)
-        );
-    }
+    _colorFilter = p.colorFilter.value_or(_colorFilter);
     addProperty(_colorFilter);
 }
 
@@ -270,23 +235,23 @@ void RenderableRings::loadTexture() {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
 
         if (texture) {
             LDEBUGC(
                 "RenderableRings",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            _textureFile = std::make_unique<ghoul::filesystem::File>(
+                _texturePath.value()
             );
+            _textureFile->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 }

@@ -125,7 +125,6 @@ private:
     // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logType;
     std::string _logFilename;
 };
 

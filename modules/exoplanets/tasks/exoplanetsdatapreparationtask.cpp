@@ -34,39 +34,53 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <charconv>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInputDataFile = "InputDataFile";
-    constexpr const char* KeyInputSpeck = "InputSPECK";
-    constexpr const char* KeyOutputBin = "OutputBIN";
-    constexpr const char* KeyOutputLut = "OutputLUT";
-    constexpr const char* KeyTeffToBv = "TeffToBvFile";
-
     constexpr const char* _loggerCat = "ExoplanetsDataPreparationTask";
+
+    struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
+        // The csv file to extract data from
+        std::filesystem::path inputDataFile;
+
+        // The speck file with star locations
+        std::filesystem::path inputSPECK;
+
+        // The bin file to export data into
+        std::string outputBIN [[codegen::annotation("A valid filepath")]];
+
+        // The txt file to write look-up table into
+        std::string outputLUT [[codegen::annotation("A valid filepath")]];
+
+        // The path to a teff to bv conversion file. Should be a txt file where each line
+        // has the format 'teff,bv'
+        std::filesystem::path teffToBvFile;
+    };
+#include "exoplanetsdatapreparationtask_codegen.cpp"
 } // namespace
 
 namespace openspace::exoplanets {
 
+documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
+    return codegen::doc<Parameters>("exoplanets_data_preparation_task");
+}
+
 ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
                                                       const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ExoplanetsDataPreparationTask"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inputDataPath = absPath(dictionary.value<std::string>(KeyInputDataFile));
-    _inputSpeckPath = absPath(dictionary.value<std::string>(KeyInputSpeck));
-    _outputBinPath = absPath(dictionary.value<std::string>(KeyOutputBin));
-    _outputLutPath = absPath(dictionary.value<std::string>(KeyOutputLut));
-    _teffToBvFilePath = absPath(dictionary.value<std::string>(KeyTeffToBv));
+    _inputDataPath = absPath(p.inputDataFile.string());
+    _inputSpeckPath = absPath(p.inputSPECK.string());
+    _outputBinPath = absPath(p.outputBIN);
+    _outputLutPath = absPath(p.outputLUT);
+    _teffToBvFilePath = absPath(p.teffToBvFile.string());
 }
 
 std::string ExoplanetsDataPreparationTask::description() {
     return fmt::format(
-        "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
+        "Extract data about exoplanets from file {} and write as bin to {}. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
         "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/).",
         _inputDataPath, _outputBinPath
@@ -78,7 +92,7 @@ void ExoplanetsDataPreparationTask::perform(
 {
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
+        LERROR(fmt::format("Failed to open input file {}", _inputDataPath));
         return;
     }
 
@@ -407,7 +421,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower;
+    float teffLower = 0.f;
     float teffUpper;
     std::string row;
     while (std::getline(teffToBvFile, row)) {
@@ -439,52 +453,6 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
         }
     }
     return bv;
-}
-
-documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
-    using namespace documentation;
-    return {
-        "ExoplanetsDataPreparationTask",
-        "exoplanets_data_preparation_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("ExoplanetsDataPreparationTask"),
-                Optional::No,
-                ""
-            },
-            {
-                KeyInputDataFile,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The csv file to extract data from"
-            },
-            {
-                KeyInputSpeck,
-                new StringAnnotationVerifier("A file path to a speck file"),
-                Optional::No,
-                "The speck file with star locations"
-            },
-            {
-                KeyOutputBin,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The bin file to export data into"
-            },
-            {
-                KeyOutputLut,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The txt file to write look-up table into"
-            },
-            {
-                KeyTeffToBv,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The path to a teff to bv conversion file"
-            }
-        }
-    };
 }
 
 } // namespace openspace::exoplanets

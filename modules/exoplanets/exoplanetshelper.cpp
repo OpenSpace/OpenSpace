@@ -24,6 +24,9 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 
+#include <modules/exoplanets/exoplanetsmodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -36,8 +39,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "ExoplanetsModule";
-
-    constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
 }
 
 namespace openspace::exoplanets {
@@ -56,20 +57,38 @@ bool hasSufficientData(const ExoplanetDataEntry& p) {
     return validStarPosition && hasSemiMajorAxis && hasOrbitalPeriod;
 }
 
-glm::vec3 starColor(float bv) {
-    std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
+glm::vec3 computeStarColor(float bv) {
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+    const std::string bvColormapPath = module->bvColormapPath();
+
+    std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
         LERROR(fmt::format(
             "Failed to open colormap data file: '{}'",
-            absPath(BvColormapPath)
+            absPath(bvColormapPath)
         ));
-        return glm::vec3(0.f, 0.f, 0.f);
+        return glm::vec3(0.f);
     }
 
-    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
+    // Interpret the colormap cmap file
+    std::string line;
+    while (std::getline(colorMap, line)) {
+        if (line.empty() || (line[0] == '#')) {
+            continue;
+        }
+        break;
+    }
+
+    // The first line is the width of the image, i.e number of values
+    std::istringstream ss(line);
+    int nValues;
+    ss >> nValues;
+
+    // Find the line matching the input B-V value (B-V is in [-0.4,2.0])
+    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
-    for (int i = 0; i < t + 12; i++) {
+    for (int i = 0; i < t + 1; i++) {
         getline(colorMap, color);
     }
     colorMap.close();
@@ -134,50 +153,6 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
         starToSunVec.y,
         starToSunVec.z
     );
-}
-
-glm::vec2 computeHabitableZone(float teff, float luminosity) {
-    // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
-    // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries
-    if (teff > 8000.f || teff < 2000.f) {
-        // For the other stars, use a method by Tom E. Morris:
-        // https://www.planetarybiology.com/calculating_habitable_zone.html
-        float inner = std::sqrt(luminosity / 1.1f);
-        float outer = std::sqrt(luminosity / 0.53f);
-        return glm::vec2(inner, outer);
-    }
-
-    struct Coefficients {
-        float seffSun;
-        float a;
-        float b;
-        float c;
-        float d;
-    };
-
-    // Coefficients for planets of 1 Earth mass. Received from:
-    // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
-    constexpr const Coefficients coefficients[] = {
-        // Inner boundary - Runaway greenhouse
-        {1.10700E+00f, 1.33200E-04f, 1.58000E-08f, -8.30800E-12f, -1.93100E-15f},
-        // Outer boundary - Maximum greenhouse
-        {3.56000E-01f, 6.17100E-05f, 1.69800E-09f, -3.19800E-12f, -5.57500E-16f}
-    };
-
-    const float tstar = teff - 5780.f;
-    const float tstar2 = tstar * tstar;
-
-    glm::vec2 distances;
-    for (int i = 0; i < 2; ++i) {
-        const Coefficients& coeffs = coefficients[i];
-        float seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
-                     (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
-
-        distances[i] = std::pow(luminosity / seff, 0.5f);
-    }
-
-    return distances;
 }
 
 std::string createIdentifier(std::string name) {

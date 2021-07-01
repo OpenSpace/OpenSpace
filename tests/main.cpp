@@ -38,25 +38,45 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/ghoul.h>
+#include <filesystem>
 #include <iostream>
 
 int main(int argc, char** argv) {
     using namespace openspace;
+
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Info,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     ghoul::initialize();
     global::create();
-    
+
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::string configFile = configuration::findConfiguration();
-    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+    std::filesystem::path configFile = configuration::findConfiguration();
+    // Register the base path as the directory where 'filename' lives
+    std::filesystem::path base = configFile.parent_path();
+    constexpr const char* BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken, base);
+
+    *global::configuration = configuration::loadConfigurationFromFile(
+        configFile.string(),
+        ""
+    );
     global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
+
+    ghoul::logging::LogManager::deinitialize();
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Info,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
 
     FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
 

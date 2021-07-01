@@ -36,40 +36,28 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(Rotation)]] Parameters {
+        // The type of the rotation that is described in this element. The available types
+        // of rotations depend on the configuration of the application and can be written
+        // to disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid Rotation type")]];
+    };
+#include "rotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Rotation::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Transformation Rotation",
-        "core_transform_rotation",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Rotation type."),
-                Optional::No,
-                "The type of the rotation that is described in this element. The "
-                "available types of rotations depend on the configuration of the "
-                "application and can be written to disk on application startup into the "
-                "FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_transform_rotation");
 }
 
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& rotationType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<Rotation>();
-    Rotation* result = factory->create(
-        rotationType,
+    Rotation* result = FactoryManager::ref().factory<Rotation>()->create(
+        p.type,
         dictionary,
         &global::memoryManager->PersistentMemory
     );
@@ -78,6 +66,8 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
 
 Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
 
+// @TODO (abock, 2021-03-25)  This constructor can probably die since it doesn't do any
+// above the default constructor
 Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "Rotation" })
 {}

@@ -25,56 +25,13 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/deferredcastermanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
-#include <memory>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#endif // WIN32
 #include <math.h>
 
 namespace {
-    static const char* _loggerCat = "RenderableAtmosphere";
-
-    constexpr const char* KeyShadowGroup  = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
-
-    constexpr const char* KeyPlanetRadius = "PlanetRadius";
-    constexpr const char* KeyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    constexpr const char* KeyRayleigh = "Rayleigh";
-    constexpr const char* KeyRayleighHeightScale = "H_R";
-    constexpr const char* KeyOzone = "Ozone";
-    constexpr const char* KeyOzoneHeightScale = "H_O";
-    constexpr const char* KeyMie = "Mie";
-    constexpr const char* KeyMieHeightScale = "H_M";
-    constexpr const char* KeyMiePhaseConstant = "G";
-    constexpr const char* KeyImage = "Image";
-    constexpr const char* KeyToneMappingOp = "ToneMapping";
-    constexpr const char* KeyATMDebug = "Debug";
-    constexpr const char* KeyTextureScale = "PreCalculatedTextureScale";
-    constexpr const char* KeySaveTextures = "SaveCalculatedTextures";
-
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
@@ -89,7 +46,7 @@ namespace {
         "phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
@@ -174,257 +131,115 @@ namespace {
         "Enable Hard Shadows for Eclipses",
         "Enable/Disables hard shadows through the atmosphere"
     };
+
+
+    struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
+        struct ShadowGroup {
+            // Individual light sources
+            struct SourceElement {
+                // The scene graph node name of the source
+                std::string name;
+                // The radius of the object in meters
+                double radius;
+            };
+            // A list of light sources
+            std::vector<SourceElement> sources;
+
+            // Individual shadow casters
+            struct CasterElement {
+                // The scene graph node name of the source
+                std::string name;
+                // The radius of the object in meters
+                double radius;
+            };
+
+            // A list of objects that cast light on this atmosphere
+            std::vector<CasterElement> casters;
+        };
+        // Declares shadow groups, meaning which nodes are considered in shadow
+        // calculations
+        std::optional<ShadowGroup> shadowGroup;
+
+        // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
+        float atmosphereHeight;
+
+        // The radius of the planet in meters
+        float planetRadius;
+
+        float planetAverageGroundReflectance;
+
+        // [[codegen::verbatim(SunIntensityInfo.description)]]
+        std::optional<float> sunIntensity;
+
+        // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
+        std::optional<float> mieScatteringExtinctionPropCoefficient;
+
+        // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
+        float groundRadianceEmission;
+
+        struct Rayleigh {
+            struct Coefficients {
+                glm::dvec3 wavelengths;
+                glm::dvec3 scattering;
+            };
+            Coefficients coefficients;
+            float heightScale [[codegen::key("H_R")]];
+        };
+        Rayleigh rayleigh;
+
+        struct Ozone {
+            struct Coefficients {
+                std::optional<glm::vec3> extinction;
+            };
+            std::optional<Coefficients> coefficients;
+            std::optional<float> heightScale [[codegen::key("H_O")]];
+        };
+        std::optional<Ozone> ozone;
+
+        struct Mie {
+            struct Coefficients {
+                glm::dvec3 scattering;
+                glm::dvec3 extinction;
+            };
+            Coefficients coefficients;
+            float heightScale [[codegen::key("H_M")]];
+            float phaseConstant [[codegen::key("G"), codegen::inrange(-1.0, 1.0)]];
+        };
+        Mie mie;
+
+        struct ATMDebug {
+            std::optional<float> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
+            std::optional<bool> saveCalculatedTextures;
+        };
+        std::optional<ATMDebug> debug;
+    };
+#include "renderableatmosphere_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
-    using namespace documentation;
-
-    TableVerifier* shadowGroupTable = new TableVerifier({
-        {
-            "Sources",
-            new TableVerifier({
-                {
-                    "*",
-                    new TableVerifier({
-                        {
-                            "Name",
-                            new StringVerifier,
-                            Optional::No,
-                            "The scene graph node name of the source"
-                        },
-                        {
-                            "Radius",
-                            new DoubleVerifier,
-                            Optional::No,
-                            "The radius of the object in meters"
-                        }
-                    }),
-                    Optional::Yes,
-                    "Individual light sources"
-                }
-            }),
-            Optional::No,
-            "A list of light sources"
-        },
-        {
-            "Casters",
-            new TableVerifier({
-                {
-                    "*",
-                    new TableVerifier({
-                        {
-                            "Name",
-                            new StringVerifier,
-                            Optional::No,
-                            "The scene graph node name of the caster"
-                        },
-                        {
-                            "Radius",
-                            new DoubleVerifier,
-                            Optional::No,
-                            "The radius of the object in meters"
-                        }
-                    }),
-                    Optional::Yes,
-                    "Individual shadow casters"
-                }
-            }),
-            Optional::No,
-            "A list of objects that cast light on this atmosphere"
-        }
-    });
-
-    TableVerifier* rayleighTable = new TableVerifier({
-        {
-            "Coefficients",
-            new TableVerifier({
-                {
-                    "Wavelengths",
-                    new DoubleVector3Verifier,
-                    Optional::Yes,
-                    ""
-                },
-                {
-                    "Scattering",
-                    new DoubleVector3Verifier,
-                    Optional::No,
-                    ""
-                }
-            }),
-            Optional::No,
-            ""
-        },
-        {
-            KeyRayleighHeightScale,
-            new DoubleVerifier,
-            Optional::No,
-            ""
-        },
-    });
-
-    TableVerifier* ozoneTable = new TableVerifier({
-        {
-            KeyOzoneHeightScale,
-            new DoubleVerifier,
-            Optional::Yes,
-            ""
-        },
-        {
-            "Coefficients",
-            new TableVerifier({
-                {
-                    "Extinction",
-                    new DoubleVector4Verifier,
-                    Optional::Yes,
-                    ""
-                }
-            }),
-            Optional::Yes,
-            ""
-        }
-    });
-
-    TableVerifier* mieTable = new TableVerifier({
-        {
-            KeyMieHeightScale,
-            new DoubleVerifier,
-            Optional::No,
-            ""
-        },
-        {
-            "Coefficients",
-            new TableVerifier({
-                {
-                    "Scattering",
-                    new DoubleVector3Verifier,
-                    Optional::No,
-                    ""
-                },
-                {
-                    "Extinction",
-                    new DoubleVector3Verifier,
-                    Optional::No,
-                    ""
-                }
-            }),
-            Optional::No,
-            ""
-        },
-        {
-            KeyMiePhaseConstant,
-            new DoubleInRangeVerifier(-1.0, 1.0),
-            Optional::No,
-            ""
-        }
-    });
-
-    return {
-        "RenderableAtmosphere",
-        "atmosphere_renderable_atmosphere",
-        {
-            {
-                KeyShadowGroup,
-                shadowGroupTable,
-                Optional::Yes,
-                "Declares shadow groups, meaning which nodes are considered in shadow "
-                "calculations"
-            },
-            {
-                AtmosphereHeightInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                AtmosphereHeightInfo.description
-            },
-            {
-                KeyPlanetRadius,
-                new DoubleVerifier,
-                Optional::No,
-                "The radius of the planet in meters"
-            },
-            {
-                KeyAverageGroundReflectance,
-                new DoubleVerifier,
-                Optional::No,
-                ""
-            },
-            {
-                SunIntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SunIntensityInfo.description
-            },
-            {
-                MieScatteringExtinctionPropCoeffInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MieScatteringExtinctionPropCoeffInfo.description
-            },
-            {
-                GroundRadianceEmittioninfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                GroundRadianceEmittioninfo.description
-            },
-            {
-                KeyRayleigh,
-                rayleighTable,
-                Optional::No,
-                ""
-            },
-            {
-                KeyOzone,
-                ozoneTable,
-                Optional::Yes,
-                ""
-            },
-            {
-                KeyMie,
-                mieTable,
-                Optional::No,
-                ""
-            },
-            {
-                KeyATMDebug,
-                new TableVerifier({
-                    {
-                        KeyTextureScale,
-                        new DoubleInRangeVerifier(0.0, 1.0),
-                        Optional::Yes,
-                        ""
-                    },
-                    {
-                        KeySaveTextures,
-                        new BoolVerifier,
-                        Optional::Yes,
-                        ""
-                    }
-                }),
-                Optional::Yes,
-                ""
-            }
-        }
-    };
+    return codegen::doc<Parameters>("atmosphere_renderable_atmosphere");
 }
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
-    , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
-    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
+    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
         glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.1f)
     )
     , _ozoneEnabled(OzoneLayerInfo, false)
-    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _ozoneCoeff(
         OzoneLayerCoeffInfo,
         glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.001f)
     )
-    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _mieScatteringCoeff(
         MieScatteringCoeffInfo,
         glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
@@ -438,176 +253,80 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
  {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableAtmosphere"
-    );
+    auto updateWithCalculation = [this]() {
+        _deferredCasterNeedsUpdate = true;
+        _deferredCasterNeedsCalculation = true;
+    };
+    auto updateWithoutCalculation = [this]() { _deferredCasterNeedsUpdate = true; };
 
-    //================================================================
-    //======== Reads Shadow (Eclipses) Entries in asset file =========
-    //================================================================
-    if (dictionary.hasKey(KeyShadowGroup)) {
-        ghoul::Dictionary shadowDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-        std::vector<std::pair<std::string, double>> sourceArray;
-        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
-        for (std::string_view k : sources.keys()) {
-            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
-
-            std::string name = source.value<std::string>("Name");
-            double radius = source.value<double>("Radius");
-            sourceArray.emplace_back(name, radius);
-        }
-
-        std::vector<std::pair<std::string, double>> casterArray;
-        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
-        for (std::string_view k : casters.keys()) {
-            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
-
-            std::string name = caster.value<std::string>("Name");
-            double radius = caster.value<double>("Radius");
-            casterArray.emplace_back(name, radius);
-        }
-
-        _shadowEnabled = !sourceArray.empty() && !casterArray.empty();
-        for (const std::pair<std::string, double>& source : sourceArray) {
-            for (const std::pair<std::string, double>& caster : casterArray) {
+    _shadowEnabled = p.shadowGroup.has_value();
+    if (_shadowEnabled) {
+        for (const Parameters::ShadowGroup::SourceElement& s : p.shadowGroup->sources) {
+            for (const Parameters::ShadowGroup::CasterElement& c :
+                 p.shadowGroup->casters)
+            {
                 ShadowConfiguration sc;
-                sc.source = source;
-                sc.caster = caster;
+                sc.source = std::pair(s.name, s.radius);
+                sc.caster = std::pair(c.name, c.radius);
                 _shadowConfArray.push_back(sc);
             }
         }
     }
 
-    //================================================================
-    //========== Reads Atmosphere Entries from asset file ============
-    //================================================================
-    _atmosphereHeight = static_cast<float>(
-        dictionary.value<double>(AtmosphereHeightInfo.identifier)
-    );
-    _planetRadius = static_cast<float>(dictionary.value<double>(KeyPlanetRadius));
-    _groundAverageReflectance = static_cast<float>(
-        dictionary.value<double>(KeyAverageGroundReflectance)
-    );
-    _groundRadianceEmission = static_cast<float>(
-        dictionary.value<double>(GroundRadianceEmittioninfo.identifier)
-    );
-
-    if (dictionary.hasKey(SunIntensityInfo.identifier)) {
-        _sunIntensity = static_cast<float>(
-            dictionary.value<double>(SunIntensityInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
-        _mieScattExtPropCoefProp = static_cast<float>(
-            dictionary.value<double>(MieScatteringExtinctionPropCoeffInfo.identifier)
-        );
-    }
-
-    {
-        ghoul::Dictionary rayleighDict = dictionary.value<ghoul::Dictionary>(KeyRayleigh);
-
-        ghoul::Dictionary coeffs = rayleighDict.value<ghoul::Dictionary>("Coefficients");
-        _rayleighScatteringCoeff = coeffs.value<glm::dvec3>("Scattering");
-
-        _rayleighHeightScale = static_cast<float>(
-            rayleighDict.value<double>(KeyRayleighHeightScale)
-        );
-    }
-
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyOzone)) {
-        ghoul::Dictionary ozoneDict = dictionary.value<ghoul::Dictionary>(KeyOzone);
-
-        if (ozoneDict.hasValue<double>(KeyOzoneHeightScale)) {
-            _ozoneHeightScale = static_cast<float>(
-                ozoneDict.value<double>(KeyOzoneHeightScale)
-            );
-            _ozoneEnabled = true;
-        }
-
-        if (ozoneDict.hasValue<ghoul::Dictionary>("Coefficients")) {
-            ghoul::Dictionary coeff = ozoneDict.value<ghoul::Dictionary>("Coefficients");
-            if (coeff.hasValue<glm::dvec3>("Extinction")) {
-                _ozoneCoeff = coeff.value<glm::dvec3>("Extinction");
-            }
-        }
-    }
-
-    {
-        ghoul::Dictionary mieDict = dictionary.value<ghoul::Dictionary>(KeyMie);
-        _mieHeightScale = static_cast<float>(mieDict.value<double>(KeyMieHeightScale));
-
-        ghoul::Dictionary coeffs = mieDict.value<ghoul::Dictionary>("Coefficients");
-
-        _mieScatteringCoeff = coeffs.value<glm::dvec3>("Scattering");
-        _mieExtinctionCoeff = coeffs.value<glm::dvec3>("Extinction");
-
-        _miePhaseConstant = static_cast<float>(
-            mieDict.value<double>(KeyMiePhaseConstant)
-        );
-    }
-
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyATMDebug)) {
-        ghoul::Dictionary debugDict = dictionary.value<ghoul::Dictionary>(KeyATMDebug);
-        if (debugDict.hasKey(KeyTextureScale)) {
-            _preCalculatedTexturesScale = static_cast<float>(
-                debugDict.value<double>(KeyTextureScale)
-            );
-            LDEBUG(fmt::format(
-                "Atmosphere Texture Scaled to {}", _preCalculatedTexturesScale
-            ));
-        }
-
-        if (debugDict.hasKey(KeySaveTextures)) {
-            _saveCalculationsToTexture = debugDict.value<bool>(KeySaveTextures);
-            LDEBUG("Saving Precalculated Atmosphere Textures");
-        }
-    }
-
-    //========================================================
-    //============== Atmosphere Properties ===================
-    //========================================================
-    auto updateWithCalculation = [this]() {
-        _deferredCasterNeedsUpdate = true;
-        _deferredCasterNeedsCalculation = true;
-    };
-    auto updateWithoutCalculation = [this]() {
-        _deferredCasterNeedsUpdate = true;
-    };
-
+    _atmosphereHeight = p.atmosphereHeight;
     _atmosphereHeight.onChange(updateWithCalculation);
     addProperty(_atmosphereHeight);
 
+    _planetRadius = p.planetRadius;
+
+    _groundAverageReflectance = p.planetAverageGroundReflectance;
     _groundAverageReflectance.onChange(updateWithCalculation);
     addProperty(_groundAverageReflectance);
 
-    _groundRadianceEmission.onChange(updateWithoutCalculation);
-    addProperty(_groundRadianceEmission);
+    _sunIntensity = p.sunIntensity.value_or(_sunIntensity);
+    _sunIntensity.onChange(updateWithoutCalculation);
+    addProperty(_sunIntensity);
 
-    _rayleighHeightScale.onChange(updateWithCalculation);
-    addProperty(_rayleighHeightScale);
+    _mieScattExtPropCoefProp =
+        p.mieScatteringExtinctionPropCoefficient.value_or(_mieScattExtPropCoefProp);
 
+    _rayleighScatteringCoeff = p.rayleigh.coefficients.scattering;
     _rayleighScatteringCoeff.onChange(updateWithCalculation);
     addProperty(_rayleighScatteringCoeff);
 
+    _rayleighHeightScale = p.rayleigh.heightScale;
+    _rayleighHeightScale.onChange(updateWithCalculation);
+    addProperty(_rayleighHeightScale);
+
+    if (p.ozone.has_value()) {
+        _ozoneHeightScale = p.ozone->heightScale.value_or(_ozoneHeightScale);
+        _ozoneEnabled = p.ozone->heightScale.has_value();
+
+        if (p.ozone->coefficients.has_value()) {
+            _ozoneCoeff = p.ozone->coefficients->extinction.value_or(_ozoneCoeff);
+        }
+    }
     _ozoneEnabled.onChange(updateWithCalculation);
     addProperty(_ozoneEnabled);
-
     _ozoneHeightScale.onChange(updateWithCalculation);
     addProperty(_ozoneHeightScale);
-
     _ozoneCoeff.onChange(updateWithCalculation);
     addProperty(_ozoneCoeff);
 
+    _mieHeightScale = p.mie.heightScale;
     _mieHeightScale.onChange(updateWithCalculation);
     addProperty(_mieHeightScale);
 
+    _mieScatteringCoeff = p.mie.coefficients.scattering;
     _mieScatteringCoeff.onChange(updateWithCalculation);
     addProperty(_mieScatteringCoeff);
+
+    _mieExtinctionCoeff = p.mie.coefficients.extinction;
+    _miePhaseConstant = p.mie.phaseConstant;
+    _miePhaseConstant.onChange(updateWithCalculation);
+    addProperty(_miePhaseConstant);
 
     _mieScatteringExtinctionPropCoefficient =
         _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
@@ -616,11 +335,17 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
     addProperty(_mieScatteringExtinctionPropCoefficient);
 
-    _miePhaseConstant.onChange(updateWithCalculation);
-    addProperty(_miePhaseConstant);
+    if (p.debug.has_value()) {
+        _preCalculatedTexturesScale =
+            p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);
 
-    _sunIntensity.onChange(updateWithoutCalculation);
-    addProperty(_sunIntensity);
+        _saveCalculationsToTexture =
+            p.debug->saveCalculatedTextures.value_or(_saveCalculationsToTexture);
+    }
+
+    _groundRadianceEmission = p.groundRadianceEmission;
+    _groundRadianceEmission.onChange(updateWithoutCalculation);
+    addProperty(_groundRadianceEmission);
 
     _sunFollowingCameraEnabled.onChange(updateWithoutCalculation);
     addProperty(_sunFollowingCameraEnabled);
@@ -629,6 +354,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _hardShadowsEnabled.onChange(updateWithoutCalculation);
         addProperty(_hardShadowsEnabled);
     }
+
+    setBoundingSphere(_planetRadius * 1000.0);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -638,33 +365,12 @@ void RenderableAtmosphere::deinitializeGL() {
 
 void RenderableAtmosphere::initializeGL() {
     _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
-    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
-    _deferredcaster->setPlanetRadius(_planetRadius);
-    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
-    _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-    _deferredcaster->enableOzone(_ozoneEnabled);
-    _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
-    _deferredcaster->setMieHeightScale(_mieHeightScale);
-    _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
-    _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
-    _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-    _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
-    //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-    _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
-
-    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
-    if (_saveCalculationsToTexture)
-        _deferredcaster->enablePrecalculationTexturesSaving();
+    updateAtmosphereParameters();
 
     if (_shadowEnabled) {
         _deferredcaster->setShadowConfigArray(_shadowConfArray);
         // We no longer need it
         _shadowConfArray.clear();
-        _deferredcaster->setHardShadows(_hardShadowsEnabled);
     }
 
     _deferredcaster->initialize();
@@ -680,8 +386,8 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
                                                        const TransformData& transformData)
 {
     // scale the planet to appropriate size since the planet is a unit sphere
-    return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
-        glm::dmat4(transformData.rotation) *  // Spice rotation
+    return glm::translate(glm::dmat4(1.0), transformData.translation) *
+        glm::dmat4(transformData.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 }
 
@@ -715,7 +421,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
     _deferredcaster->setPlanetRadius(_planetRadius);
     _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
+    _deferredcaster->setPlanetGroundRadianceEmission(_groundRadianceEmission);
     _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
     _deferredcaster->enableOzone(_ozoneEnabled);
     _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
@@ -727,7 +433,13 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
     _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
     _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
+    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
     //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+
+    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+    if (_saveCalculationsToTexture) {
+        _deferredcaster->enablePrecalculationTexturesSaving();
+    }
 
     if (_shadowEnabled) {
         _deferredcaster->setHardShadows(_hardShadowsEnabled);

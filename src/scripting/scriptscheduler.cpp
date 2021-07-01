@@ -33,67 +33,46 @@
 #include "scriptscheduler_lua.inl"
 
 namespace {
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyForwardScript = "ForwardScript";
-    constexpr const char* KeyBackwardScript = "BackwardScript";
-    constexpr const char* KeyUniversalScript = "Script";
+    struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
+        // The time at which, when the in game time passes it, the two scripts will
+        // be executed. If the traversal is forwards (towards + infinity), the
+        // ForwardScript will be executed, otherwise the BackwardScript will be
+        // executed instead
+        std::string time;
+
+        // The Lua script that will be executed when the specified time is passed 
+        // independent of its direction. This script will be executed before the
+        // specific scripts if both versions are specified
+        std::optional<std::string> script;
+
+        // The Lua script that is executed when OpenSpace passes the time in a
+        // forward direction
+        std::optional<std::string> forwardScript;
+
+        // The Lua script that is executed when OpenSpace passes the time in a
+        // backward direction
+        std::optional<std::string> backwardScript;
+    };
+#include "scriptscheduler_codegen.cpp"
 } // namespace
 
 namespace openspace::scripting {
 
 documentation::Documentation ScriptScheduler::Documentation() {
-    using namespace openspace::documentation;
-
-    using TimeVerifier = StringVerifier;
-    using LuaScriptVerifier = StringVerifier;
-
-    return {
-        "Scheduled Scripts",
-        "core_scheduledscript",
-        {
-            {
-                "*",
-                new TableVerifier({
-                    {
-                        KeyTime,
-                        new TimeVerifier,
-                        Optional::No,
-                        "The time at which, when the in game time passes it, the two "
-                        "scripts will be executed. If the traversal is forwards (towards "
-                        "+ infinity), the ForwardScript will be executed, otherwise the "
-                        "BackwardScript will be executed instead."
-                    },
-                    {
-                        KeyUniversalScript,
-                        new LuaScriptVerifier,
-                        Optional::Yes,
-                        "The Lua script that will be executed when the specified time is "
-                        "passed independent of its direction. This script will be "
-                        "executed before the specific scripts if both versions are "
-                        "specified"
-                    },
-                    {
-                        KeyForwardScript,
-                        new LuaScriptVerifier,
-                        Optional::Yes,
-                        "The Lua script that is executed when OpenSpace passes the time "
-                        "in a forward direction."
-                    },
-                    {
-                        KeyBackwardScript,
-                        new LuaScriptVerifier,
-                        Optional::Yes,
-                        "The Lua script that is executed when OpenSpace passes the time "
-                        "in a backward direction."
-                    }
-                }),
-                Optional::No
-            }
-        }
-    };
+    // @TODO (abock, 2021-03-25)  This is not really correct. This function currently
+    // returns the documentation for the ScheduledScript, not for the ScriptScheduler
+    // itself. This should be cleaned up a bit
+    return codegen::doc<Parameters>("core_scheduledscript");
 }
 
-using namespace openspace::interaction;
+ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
+
+    time = Time::convertTime(p.time);
+    forwardScript = p.forwardScript.value_or(forwardScript);
+    backwardScript = p.backwardScript.value_or(backwardScript);
+    universalScript = p.script.value_or(universalScript);
+}
 
 void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts) {
     // Sort scripts by time; use a stable_sort as the user might have had an intention
@@ -203,7 +182,7 @@ ScriptScheduler::progressTo(double newTime)
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType) {
+void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType) {
     _timeframeMode = refType;
 }
 
@@ -233,15 +212,15 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
 }
 
 void ScriptScheduler::setModeApplicationTime() {
-    _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
+    _timeframeMode = interaction::KeyframeTimeRef::Relative_applicationStart;
 }
 
 void ScriptScheduler::setModeRecordedTime() {
-    _timeframeMode = KeyframeTimeRef::Relative_recordedStart;
+    _timeframeMode = interaction::KeyframeTimeRef::Relative_recordedStart;
 }
 
 void ScriptScheduler::setModeSimulationTime() {
-    _timeframeMode = KeyframeTimeRef::Absolute_simTimeJ2000;
+    _timeframeMode = interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 }
 
 LuaLibrary ScriptScheduler::luaLibrary() {

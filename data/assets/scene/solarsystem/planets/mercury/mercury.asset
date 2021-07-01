@@ -6,75 +6,76 @@ asset.require("spice/base")
 asset.require('./trail')
 
 local Mercury = {
-    Identifier = "Mercury",
-    Parent = transforms.MercuryBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_MERCURY",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Mercury",
+  Parent = transforms.MercuryBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MERCURY",
+      Observer = "MERCURY BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 2439700,
-        Frame = "IAU_MERCURY",
-        Body = "MERCURY",
-        CameraMinHeight = 300,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/Mercury.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 40.0,
-            LabelsSize = 10.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            FadeInStartingDistance = 40000000.0,
-            FadeOutStartingDistance = 80000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1500000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GUI = {
-        Path = "/Solar System/Planets/Mercury"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_MERCURY",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 2439700,
+    Frame = "IAU_MERCURY",
+    Body = "MERCURY",
+    CameraMinHeight = 300,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/Mercury.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 10.1,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 1800000.0, 5000000.0 },
+      DistanceEPS = 1500000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Path = "/Solar System/Planets/Mercury"
+  }
 }
 
 local MercuryLabel = {
-    Identifier = "MercuryLabel",
-    Parent = Mercury.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Mercury",
-        FontSize = 100.0,
-        LabelSize = 8.3,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Mercury Label",
-        Path = "/Solar System/Planets/Mercury",
-    }
+  Identifier = "MercuryLabel",
+  Parent = Mercury.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Mercury",
+    FontSize = 70.0,
+    Size = 8.46,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Mercury Label",
+    Path = "/Solar System/Planets/Mercury",
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
 
 
 asset.meta = {
-    Name = "Mercury",
-    Version = "1.0",
-    Description = [[ Mercury globe with labels, and main planet label.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Mercury" , "MercuryLabel"}
+  Name = "Mercury",
+  Version = "1.0",
+  Description = [[ Mercury globe with labels, and main planet label.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Mercury" , "MercuryLabel"}
 }

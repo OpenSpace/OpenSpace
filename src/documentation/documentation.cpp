@@ -71,14 +71,18 @@ std::string to_string(const openspace::documentation::TestResult& value) {
     }
     else {
         std::stringstream stream;
-        stream << "Failure." << '\n';
+        stream << "Specification Failure. ";
 
         for (const TestResult::Offense& offense : value.offenses) {
-            stream << "  " << ghoul::to_string(offense) << '\n';
+            stream << fmt::format(" {}", ghoul::to_string(offense));
+            if (!offense.explanation.empty()) {
+                stream << fmt::format(" ({})", offense.explanation);
+            }
+            stream << '\n';
         }
 
         for (const TestResult::Warning& warning : value.warnings) {
-            stream << "  " << ghoul::to_string(warning) << '\n';
+            stream << fmt::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -87,7 +91,14 @@ std::string to_string(const openspace::documentation::TestResult& value) {
 
 template <>
 std::string to_string(const openspace::documentation::TestResult::Offense& value) {
-    return value.offender + ": " + ghoul::to_string(value.reason);
+    std::stringstream stream;
+    stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << fmt::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
 }
 
 template <>
@@ -134,12 +145,6 @@ SpecificationError::SpecificationError(TestResult res, std::string comp)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-
-    message += " (";
-    for (const TestResult::Offense& o : result.offenses) {
-        message += o.offender + ',';
-    }
-    message.back() = ')';
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
@@ -239,7 +244,7 @@ void testSpecificationAndThrow(const Documentation& documentation,
     // Perform testing against the documentation/specification
     TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
-        throw SpecificationError(std::move(testResult), std::move(component));
+        throw SpecificationError(testResult, component);
     }
 }
 

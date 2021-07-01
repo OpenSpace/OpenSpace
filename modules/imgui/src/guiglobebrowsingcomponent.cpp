@@ -59,7 +59,9 @@ void GuiGlobeBrowsingComponent::render() {
 
     bool e = _isEnabled;
 
-    ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
+    ImGui::SetNextWindowSize(WindowSize, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("Globe Browsing", &e);
     _isEnabled = e;
     _isCollapsed = ImGui::IsWindowCollapsed();
     defer { ImGui::End(); };

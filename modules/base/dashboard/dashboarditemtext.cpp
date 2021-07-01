@@ -31,6 +31,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
@@ -38,44 +39,26 @@ namespace {
         "Text",
         "The text to be displayed"
     };
+
+    struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
+        // [[codegen::verbatim(TextInfo.description)]]
+        std::optional<std::string> text;
+    };
+#include "dashboarditemtext_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemText::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Text",
-        "base_dashboarditem_text",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemText"),
-                Optional::No
-            },
-            {
-                TextInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_dashboarditem_text");
 }
 
 DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _text(TextInfo, "")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemText"
-    );
-
-    if (dictionary.hasKey(TextInfo.identifier)) {
-        _text = dictionary.value<std::string>(TextInfo.identifier);
-    };
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _text = p.text.value_or(_text);
     addProperty(_text);
 }
 

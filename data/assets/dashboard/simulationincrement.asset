@@ -1,0 +1,13 @@
+local item = {
+  Type = "DashboardItemSimulationIncrement",
+  Identifier = "SimulationIncrement",
+  GuiName = "Simulation Increment"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(item.Identifier)
+end)

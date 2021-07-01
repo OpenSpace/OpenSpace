@@ -24,6 +24,7 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
@@ -39,45 +40,43 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModule";
+    constexpr const char _loggerCat[] = "ExoplanetsModule";
+
+    constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
+
+    // Lua cannot handle backslashes, so replace these with forward slashes
+    std::string formatPathToLua(const std::string& path) {
+        std::string resPath = path;
+        std::replace(resPath.begin(), resPath.end(), '\\', '/');
+        return resPath;
+    }
 } // namespace
 
 namespace openspace::exoplanets::luascriptfunctions {
 
-constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
-
-constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/2/lookup.txt";
-constexpr const char* ExoplanetsDataPath =
-    "${SYNC}/http/exoplanets_data/2/exoplanets_data.bin";
-
-constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
-constexpr const char* NoDataTextureFile =
-    "${SYNC}/http/exoplanets_textures/1/grid-32.png";
-constexpr const char* DiscTextureFile =
-    "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
-
 constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
-constexpr const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
+constexpr const float JupiterRadius =
+    static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
-    ExoplanetSystem system;
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
-    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
+    const std::string binPath = module->exoplanetsDataPath();
+    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(fmt::format(
-            "Failed to open exoplanets data file: '{}'", absPath(ExoplanetsDataPath)
-        ));
+        LERROR(fmt::format("Failed to open exoplanets data file: '{}'", binPath));
         return ExoplanetSystem();
     }
 
-    std::ifstream lut(absPath(LookUpTablePath));
+    const std::string lutPath = module->lookUpTablePath();
+    std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
-        LERROR(fmt::format(
-            "Failed to open exoplanets look-up table: '{}'", absPath(LookUpTablePath)
-        ));
+        LERROR(fmt::format("Failed to open exoplanets look-up table: '{}'", lutPath));
         return ExoplanetSystem();
     }
+
+    ExoplanetSystem system;
 
     // 1. search lut for the starname and return the corresponding location
     // 2. go to that location in the data file
@@ -165,6 +164,8 @@ void createExoplanetSystem(const std::string& starName) {
         return;
     }
 
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+
     const glm::dvec3 starPos =
         static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
@@ -176,32 +177,33 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     std::string colorLayers;
+    std::optional<glm::vec3> starColor = std::nullopt;
     const float bv = system.starData.bv;
 
     if (!std::isnan(bv)) {
-        const glm::vec3 color = starColor(bv);
+        starColor = computeStarColor(bv);
+        const std::string starTexture = module->starTexturePath();
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
                 "Type = 'SolidColor',"
-                "Color = " + ghoul::to_string(color) + ","
+                "Color = " + ghoul::to_string(*starColor) + ","
                 "BlendMode = 'Normal',"
                 "Enabled = true"
             "},"
             "{"
                 "Identifier = 'StarTexture',"
-                "FilePath = " +
-                    fmt::format("openspace.absPath('{}')", StarTextureFile) + ","
+                "FilePath = openspace.absPath('" + formatPathToLua(starTexture) + "'),"
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
     }
     else {
+        const std::string noDataTexture = module->noDataTexturePath();
         colorLayers =
             "{"
                 "Identifier = 'NoDataStarTexture',"
-                "FilePath = " +
-                    fmt::format("openspace.absPath('{}')", NoDataTextureFile) + ","
+                "FilePath = openspace.absPath('" + formatPathToLua(noDataTexture) + "'),"
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
@@ -311,7 +313,6 @@ void createExoplanetSystem(const std::string& starName) {
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
             "Parent = '" + starIdentifier + "',"
-            "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Enabled = " + enabled + ","
@@ -340,7 +341,6 @@ void createExoplanetSystem(const std::string& starName) {
         const std::string planetTrailNode = "{"
             "Identifier = '" + planetIdentifier + "_Trail',"
             "Parent = '" + starIdentifier + "',"
-            "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableTrailOrbit',"
                 "Period = " + std::to_string(planet.per) + ","
@@ -374,20 +374,23 @@ void createExoplanetSystem(const std::string& starName) {
             const float lowerOffset = static_cast<float>(planet.aLower / planet.a);
             const float upperOffset = static_cast<float>(planet.aUpper / planet.a);
 
+            const std::string discTexture = module->orbitDiscTexturePath();
+
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
                 "Parent = '" + starIdentifier + "',"
-                "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableOrbitDisc',"
-                    "Texture = openspace.absPath('" + DiscTextureFile + "'),"
+                    "Texture = openspace.absPath('" +
+                        formatPathToLua(discTexture) +
+                    "'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
                         std::to_string(lowerOffset) + ", " +
                         std::to_string(upperOffset) +
                     "}," //min / max extend
-                    "Opacity = 0.3"
+                    "Opacity = 0.25"
                 "},"
                 "Transform = {"
                     "Rotation = {"
@@ -408,29 +411,54 @@ void createExoplanetSystem(const std::string& starName) {
         }
     }
 
+    float meanInclination = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        meanInclination += p.i;
+    }
+    meanInclination /= static_cast<float>(system.planetsData.size());
+    const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
+    const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
+
+    bool isCircleEnabled = module->showComparisonCircle();
+    const std::string isCircleEnabledString = isCircleEnabled ? "true" : "false";
+
+    // 1 AU Size Comparison Circle
+    const std::string circle = "{"
+        "Identifier = '" + starIdentifier + "_1AU_Circle',"
+        "Parent = '" + starIdentifier + "',"
+        "Renderable = {"
+            "Type = 'RenderableRadialGrid',"
+            "Enabled = " + isCircleEnabledString + ","
+            "Radii = { 0.0, 1.0 },"
+            "CircleSegments = 64,"
+            "LineWidth = 2.0,"
+        "},"
+        "Transform = {"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "},"
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(AU) + ""
+            "}"
+        "},"
+        "GUI = {"
+            "Name = '1 AU Size Comparison Circle',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + circle + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
     // Habitable Zone
     bool hasTeff = !std::isnan(system.starData.teff);
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        const glm::vec2 zone = computeHabitableZone(
-            system.starData.teff,
-            system.starData.luminosity
-        );
-
-        float meanInclination = 0.f;
-        for (const ExoplanetDataEntry& p : system.planetsData) {
-            meanInclination += p.i;
-        }
-        meanInclination /= static_cast<float>(system.planetsData.size());
-        const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
-        const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
-
-        glm::vec2 limitsInMeter = zone * AU;
-        float half = 0.5f * (limitsInMeter[1] - limitsInMeter[0]);
-        float center = limitsInMeter[0] + half;
-        float relativeOffset = half / center;
-
         constexpr const char* description =
             "The habitable zone is the region around a star in which an Earth-like "
             "planet can potentially have liquid water on its surface."
@@ -441,27 +469,32 @@ void createExoplanetSystem(const std::string& starName) {
             "the greenhouse effect would not be able to maintain surface temperature "
             "above freezing anywhere on the planet.";
 
+        const std::string hzTexture = module->habitableZoneTexturePath();
+
+        bool isHzEnabled = module->showHabitableZone();
+        const std::string isHzEnabledString = isHzEnabled ? "true" : "false";
+
+        bool useOptimistic = module->useOptimisticZone();
+        const std::string useOptimisticString = useOptimistic ? "true" : "false";
+
+        float opacity = module->habitableZoneOpacity();
+
         const std::string zoneDiscNode = "{"
             "Identifier = '" + starIdentifier + "_HZ_Disc',"
             "Parent = '" + starIdentifier + "',"
-            "Enabled = true,"
             "Renderable = {"
-                "Type = 'RenderableOrbitDisc',"
-                "Texture = openspace.absPath("
-                    "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
-                "),"
-                "Size = " + std::to_string(center) + ","
-                "Eccentricity = 0,"
-                "Offset = { " +
-                    std::to_string(relativeOffset) + ", " +
-                    std::to_string(relativeOffset) +
-                "}," //min / max extend
-                "Opacity = 0.05"
+                "Type = 'RenderableHabitableZone',"
+                "Enabled = " + isHzEnabledString + ","
+                "Texture = openspace.absPath('" + formatPathToLua(hzTexture) + "'),"
+                "Luminosity = " + std::to_string(system.starData.luminosity) + ","
+                "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
+                "Optimistic = " + useOptimisticString + ","
+                "Opacity = " + std::to_string(opacity) + ""
             "},"
             "Transform = {"
                 "Rotation = {"
                     "Type = 'StaticRotation',"
-                    "Rotation = " + ghoul::to_string(rotationMat3) + ""
+                    "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
                 "}"
             "},"
             "GUI = {"
@@ -475,6 +508,48 @@ void createExoplanetSystem(const std::string& starName) {
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+
+        // Star glare
+        if (starColor.has_value()) {
+            // This is a little magic to make the size of the glare dependent on the
+            // size and the temperature of the star. It's kind of based on the fact that
+            // the luminosity of a star is proportional to: (radius^2)*(temperature^4)
+            // Maybe a better option would be to compute the size based on the aboslute
+            // magnitude or star luminosity, but for now this looks good enough.
+            double size = 59.0 * radiusInMeter;
+            if (hasTeff) {
+                constexpr const float sunTeff = 5780.f;
+                size *= std::pow(system.starData.teff / sunTeff, 2.0);
+            }
+
+            const std::string glareTexture = module->starGlareTexturePath();
+
+            const std::string starGlare = "{"
+                "Identifier = '" + starIdentifier + "_Glare',"
+                "Parent = '" + starIdentifier + "',"
+                "Renderable = {"
+                    "Type = 'RenderablePlaneImageLocal',"
+                    "Size = " + ghoul::to_string(size) + ","
+                    "Origin = 'Center',"
+                    "Billboard = true,"
+                    "Texture = openspace.absPath('"
+                        + formatPathToLua(glareTexture) +
+                    "'),"
+                    "BlendMode = 'Additive',"
+                    "Opacity = 0.65,"
+                    "MultiplyColor = " + ghoul::to_string(*starColor) + ""
+                "},"
+                "GUI = {"
+                    "Name = '" + sanitizedStarName + " Glare',"
+                    "Path = '" + guiPath + "'"
+                "}"
+            "}";
+
+            openspace::global::scriptEngine->queueScript(
+                "openspace.addSceneGraphNode(" + starGlare + ");",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
     }
 }
 
@@ -528,20 +603,24 @@ int removeExoplanetSystem(lua_State* L) {
 }
 
 std::vector<std::string> hostStarsWithSufficientData() {
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+
+    const std::string lutPath = module->lookUpTablePath();
+    std::ifstream lookupTableFile(absPath(lutPath));
+    if (!lookupTableFile.good()) {
+        LERROR(fmt::format("Failed to open lookup table file '{}'", lutPath));
+        return {};
+    }
+
+    const std::string binPath = module->exoplanetsDataPath();
+    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
+    if (!data.good()) {
+        LERROR(fmt::format("Failed to open data file '{}'", binPath));
+        return {};
+    }
+
     std::vector<std::string> names;
     std::string line;
-
-    std::ifstream lookupTableFile(absPath(LookUpTablePath));
-    if (!lookupTableFile.good()) {
-        LERROR(fmt::format("Failed to open lookup table file '{}'", LookUpTablePath));
-        return {};
-    }
-
-    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
-    if (!data.good()) {
-        LERROR(fmt::format("Failed to open data file '{}'", ExoplanetsDataPath));
-        return {};
-    }
 
     // Read number of lines
     int nExoplanets = 0;

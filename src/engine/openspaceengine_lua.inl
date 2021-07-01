@@ -193,7 +193,7 @@ int setScreenshotFolder(lua_State* L) {
     std::string arg = ghoul::lua::value<std::string>(L);
     lua_pop(L, 0);
 
-    std::string folder = FileSys.absolutePath(arg);
+    std::filesystem::path folder = absPath(arg);
     if (!std::filesystem::exists(folder)) {
         std::filesystem::create_directory(folder);
     }
@@ -204,7 +204,7 @@ int setScreenshotFolder(lua_State* L) {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    global::windowDelegate->setScreenshotFolder(folder);
+    global::windowDelegate->setScreenshotFolder(folder.string());
     return 0;
 }
 
@@ -266,10 +266,14 @@ int removeTag(lua_State* L) {
 * Downloads a file from Lua interpreter
 */
 int downloadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
+    int n = ghoul::lua::checkArgumentsAndThrow(L, {2, 3}, "lua::addTag");
 
     const std::string& uri = ghoul::lua::value<std::string>(L, 1);
     const std::string& savePath = ghoul::lua::value<std::string>(L, 2);
+    bool waitForComplete = false;
+    if (n == 3) {
+        waitForComplete = ghoul::lua::value<bool>(L, 3);
+    }
     lua_settop(L, 0);
 
     LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
@@ -281,6 +285,14 @@ int downloadFile(lua_State* L) {
             DownloadManager::FailOnError::Yes,
             5
         );
+
+    if (waitForComplete) {
+        while (!future->isFinished && future->errorMessage.empty() ) {
+            //just wait
+            LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
+        }
+    }
+
     if (!future || !future->isFinished) {
         return ghoul::lua::luaError(
             L,
@@ -294,22 +306,22 @@ int downloadFile(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* createPixelImage():
-* Creates a one pixel image with a given color and returns the p
+* createSingleColorImage():
+* Creates a one pixel image with a given color and returns the path to the cached file
 */
-int createPixelImage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createPixelImage");
+int createSingleColorImage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingleColorImage");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
+    lua_settop(L, 0);
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
-    using namespace openspace::documentation;
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, d);
-    TestResult res = DoubleVector3Verifier()(colorDict, key);
+    documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
 
     if (!res.success) {
         return ghoul::lua::luaError(
@@ -320,13 +332,8 @@ int createPixelImage(lua_State* L) {
 
     const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
 
-    const std::string& fileName = FileSys.cacheManager()->cachedFilename(
-        fmt::format("{}.ppm", name),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    const bool hasCachedFile = FileSys.fileExists(fileName);
+    std::string fileName = FileSys.cacheManager()->cachedFilename(name + ".ppm", "");
+    const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
         ghoul::lua::push(L, fileName);

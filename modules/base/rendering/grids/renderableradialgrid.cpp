@@ -28,20 +28,20 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -49,7 +49,7 @@ namespace {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        " direction respectively"
+        "direction respectively"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
@@ -65,110 +65,61 @@ namespace {
         "This value specifies the line width of the spherical grid."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OuterRadiusInfo = {
-        "OuterRadius",
-        "Outer Radius",
-        "The outer radius of the circular grid, i.e. its size."
+    constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
+        "Radii",
+        "Inner and Outer Radius",
+        "The radii values that determine the size of the circular grid. The first value "
+        "is the radius of the inmost ring and the second is the radius of the outmost "
+        "ring."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InnerRadiusInfo = {
-        "InnerRadius",
-        "Inner Radius",
-        "The inner radius of the circular grid, that is the radius of the inmost ring. "
-        "Must be smaller than the outer radius."
+    struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(GridSegmentsInfo.description)]]
+        std::optional<glm::ivec2> gridSegments;
+
+        // [[codegen::verbatim(CircleSegmentsInfo.description)]]
+        std::optional<int> circleSegments;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(RadiiInfo.description)]]
+        std::optional<glm::vec2> radii;
     };
+#include "renderableradialgrid_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableRadialGrid::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableRadialGrid",
-        "base_renderable_radialgrid",
-        {
-            {
-                GridColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                GridColorInfo.description
-            },
-            {
-                GridSegmentsInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                GridSegmentsInfo.description
-            },
-            {
-                CircleSegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                CircleSegmentsInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                OuterRadiusInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                OuterRadiusInfo.description
-            },
-            {
-                InnerRadiusInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                InnerRadiusInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_radialgrid");
 }
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(
-        GridSegmentsInfo,
-        glm::ivec2(1, 1),
-        glm::ivec2(1),
-        glm::ivec2(200)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
-    , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
-    , _minRadius(InnerRadiusInfo, 0.f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
+    , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableRadialGrid"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
-    }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color = p.color.value_or(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
-    if (dictionary.hasKey(GridSegmentsInfo.identifier)) {
-        _gridSegments = static_cast<glm::ivec2>(
-            dictionary.value<glm::dvec2>(GridSegmentsInfo.identifier)
-        );
-    }
+    _gridSegments = p.gridSegments.value_or(_gridSegments);
     _gridSegments.onChange([&]() { _gridIsDirty = true; });
     addProperty(_gridSegments);
 
-    if (dictionary.hasKey(CircleSegmentsInfo.identifier)) {
-        _circleSegments = static_cast<int>(
-            dictionary.value<double>(CircleSegmentsInfo.identifier)
-        );
-    }
+    _circleSegments = p.circleSegments.value_or(_circleSegments);
     _circleSegments.onChange([&]() {
         if (_circleSegments.value() % 2 == 1) {
             _circleSegments = _circleSegments - 1;
@@ -177,40 +128,14 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     });
     addProperty(_circleSegments);
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    if (dictionary.hasKey(OuterRadiusInfo.identifier)) {
-        _maxRadius = static_cast<float>(
-            dictionary.value<double>(OuterRadiusInfo.identifier)
-        );
-    }
+    _radii = p.radii.value_or(_radii);
+    _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _radii.onChange([&]() { _gridIsDirty = true; });
 
-    if (dictionary.hasKey(InnerRadiusInfo.identifier)) {
-        _minRadius = static_cast<float>(
-            dictionary.value<double>(InnerRadiusInfo.identifier)
-        );
-    }
-
-    _maxRadius.setMinValue(_minRadius);
-    _minRadius.setMaxValue(_maxRadius);
-
-    _maxRadius.onChange([&]() {
-        _gridIsDirty = true;
-        _minRadius.setMaxValue(_maxRadius);
-    });
-
-    _minRadius.onChange([&]() {
-        _gridIsDirty = true;
-        _maxRadius.setMinValue(_minRadius);
-    });
-
-    addProperty(_maxRadius);
-    addProperty(_minRadius);
+    addProperty(_radii);
 }
 
 bool RenderableRadialGrid::isReady() const {
@@ -243,8 +168,6 @@ void RenderableRadialGrid::deinitializeGL() {
 void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -258,20 +181,19 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    float adjustedLineWidth = 1.f;
-
+    // Change GL state:
 #ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
 #endif
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     for (GeometryData& c : _circles) {
         c.render();
@@ -281,9 +203,10 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
@@ -291,12 +214,15 @@ void RenderableRadialGrid::update(const UpdateData&) {
         return;
     }
 
+    const float innerRadius = _radii.value().x;
+    const float outerRadius = _radii.value().y;
+
     // Circles
     const int nRadialSegments = _gridSegments.value()[0];
     const float fnCircles = static_cast<float>(nRadialSegments);
-    const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
+    const float deltaRadius = (outerRadius - innerRadius) / fnCircles;
 
-    const bool hasInnerRadius = _minRadius > 0;
+    const bool hasInnerRadius = innerRadius > 0.f;
     const int nCircles = hasInnerRadius ? nRadialSegments : nRadialSegments + 1;
 
     _circles.clear();
@@ -313,11 +239,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
 
     // add an extra inmost circle
     if (hasInnerRadius) {
-        addRing(_circleSegments, _minRadius);
+        addRing(_circleSegments, innerRadius);
     }
 
     for (int i = 0; i < nRadialSegments; ++i) {
-        const float ri = static_cast<float>(i + 1) * deltaRadius + _minRadius;
+        const float ri = static_cast<float>(i + 1) * deltaRadius + innerRadius;
         addRing(_circleSegments, ri);
     }
 
@@ -330,10 +256,10 @@ void RenderableRadialGrid::update(const UpdateData&) {
 
     if (nLines > 1) {
         std::vector<rendering::helper::Vertex> outerVertices =
-            rendering::helper::createRing(nLines, _maxRadius);
+            rendering::helper::createRing(nLines, outerRadius);
 
         std::vector<rendering::helper::Vertex> innerVertices =
-            rendering::helper::createRing(nLines, _minRadius);
+            rendering::helper::createRing(nLines, innerRadius);
 
         for (int i = 0; i < nLines; ++i) {
             const rendering::helper::VertexXYZ vOut =

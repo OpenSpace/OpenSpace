@@ -3,50 +3,50 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('./kernels')
 
 local PlutoBarycenterAccurate = {
-    Identifier = "PlutoBarycenterAccurate",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    TimeFrame = {
-        Type = "TimeFrameInterval",
-        Start = "2015-JAN-01",
-        End = "2015-AUG-01"
-    },
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO BARYCENTER",
-            Observer = "SUN",
-            Kernels = kernels.PlutoKernels
-        },
-    },
-    GUI = {
-        Name = "Pluto Barycenter Accurate",
-        Path = "/Solar System/Dwarf Planets/Pluto"
+  Identifier = "PlutoBarycenterAccurate",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2015-JAN-01",
+    End = "2015-AUG-01"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PLUTO BARYCENTER",
+      Observer = "SSB",
+      Kernels = kernels.PlutoKernels
     }
+  },
+  GUI = {
+    Name = "Pluto Barycenter Accurate",
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
 local NewHorizonsPosition = {
-    Identifier = "NewHorizonsPosition",
-    Parent = PlutoBarycenterAccurate.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NEW HORIZONS",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = kernels.NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "NH_SPACECRAFT",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "NewHorizonsPosition",
+  Parent = PlutoBarycenterAccurate.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEW HORIZONS",
+      Observer = "PLUTO BARYCENTER",
+      Kernels = kernels.NewHorizonsKernels
     },
-    GUI = {
-        Name = "New Horizons Position",
-        Path = "/Solar System/Missions/New Horizons"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "NH_SPACECRAFT",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  GUI = {
+    Name = "New Horizons Position",
+    Path = "/Solar System/Missions/New Horizons"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    PlutoBarycenterAccurate,
-    NewHorizonsPosition 
+  PlutoBarycenterAccurate,
+  NewHorizonsPosition 
 })

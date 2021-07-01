@@ -43,10 +43,11 @@ public:
      * \param profile The #openspace::Profile object containing all data of the
      *                new or imported profile.
      * \param assetBasePath The path to the folder in which all of the assets are living
+     * \param userAssetBasePath The path to the folder in which the users' assets are living
      * \param parent Pointer to parent Qt widget
      */
     AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-        QWidget* parent);
+        const std::string& userAssetBasePath, QWidget* parent);
 
 private slots:
     void parseSelections();

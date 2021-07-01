@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <filesystem>
 
 #include "missionmanager_lua.inl"
 
@@ -58,7 +59,10 @@ bool MissionManager::hasCurrentMission() const {
 std::string MissionManager::loadMission(const std::string& filename) {
     ghoul_assert(!filename.empty(), "filename must not be empty");
     ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(FileSys.fileExists(filename), "filename " + filename + " must exist");
+    ghoul_assert(
+        std::filesystem::is_regular_file(filename),
+        "filename " + filename + " must exist"
+    );
 
     // Changing the values might invalidate the _currentMission iterator
     std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";

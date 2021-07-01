@@ -35,9 +35,10 @@
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -66,8 +67,8 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeBrowsingModule";
-    constexpr const char* _factoryName = "TileProvider";
+    constexpr const char _loggerCat[] = "GlobeBrowsingModule";
+    constexpr const char _factoryName[] = "TileProvider";
 
     constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
@@ -123,12 +124,16 @@ namespace {
             int iDataset = -1;
             std::array<char, 256> IdentifierBuffer;
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
-            sscanf(
+            int ret = sscanf(
                 subDatasets[i],
                 "SUBDATASET_%i_%256[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );
+            if (ret != 2) {
+                LERROR("Error parsing dataset");
+                continue;
+            }
 
 
             if (iDataset != currentLayerNumber) {
@@ -158,6 +163,29 @@ namespace {
 
         return result;
     }
+
+    struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
+        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
+        std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
+
+        // [[codegen::verbatim(OfflineModeInfo.description)]]
+        std::optional<bool> offlineMode;
+
+        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
+        std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
+
+        // [[codegen::verbatim(WMSCacheSizeInfo.description)]]
+        std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
+
+        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
+        std::optional<int> tileCacheSize;
+
+        // If you know what you are doing and you have WMS caching *disabled* but offline
+        // mode *enabled*, you can set this value to 'true' to silence a warning that you
+        // would otherwise get at startup
+        std::optional<bool> noWarning;
+    };
+#include "globebrowsingmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -180,30 +208,13 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasValue<bool>(WMSCacheEnabledInfo.identifier)) {
-        _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
-    }
-    if (dict.hasValue<bool>(OfflineModeInfo.identifier)) {
-        _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
-    }
-    if (dict.hasValue<std::string>(WMSCacheLocationInfo.identifier)) {
-        _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
-    }
-    if (dict.hasValue<double>(WMSCacheSizeInfo.identifier)) {
-        _wmsCacheSizeMB = static_cast<int>(
-            dict.value<double>(WMSCacheSizeInfo.identifier)
-        );
-    }
-    if (dict.hasValue<double>(TileCacheSizeInfo.identifier)) {
-        _tileCacheSizeMB = static_cast<int>(
-            dict.value<double>(TileCacheSizeInfo.identifier)
-        );
-    }
-
-    // Sanity check
-    const bool noWarning = dict.hasValue<bool>("NoWarning") ?
-        dict.value<bool>("NoWarning") :
-        false;
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
+    _offlineMode = p.offlineMode.value_or(_offlineMode);
+    _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
+    _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
+    _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
+    const bool noWarning = p.noWarning.value_or(false);
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
         LWARNINGC(
@@ -446,7 +457,11 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
-        GlobeLabelsComponent::Documentation()
+        globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::RenderableGlobe::Documentation(),
+        GlobeLabelsComponent::Documentation(),
+        RingsComponent::Documentation(),
+        ShadowComponent::Documentation()
     };
 }
 

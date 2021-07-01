@@ -294,7 +294,6 @@ public:
     // Generate JSON for documentation
     std::string generateJson() const override;
 
-
 protected:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;

@@ -1,0 +1,302 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+asset.require('spice/base')
+asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_points')
+local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+
+local JWSTKernel = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 1
+})
+
+--[[local JWSTHorizons = asset.syncedResource({
+  Name = "JWST Horizons",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_horizons",
+  Version = 1
+})]]--
+
+local model = asset.syncedResource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 1
+})
+
+local band = asset.syncedResource({
+  Name = "JWST band texture",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_band_texture",
+  Version = 1
+})
+
+local JWSTPosition = {
+  Identifier = "JWSTPosition",
+  Parent = transforms.L2.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JWST",
+      Observer = "392", -- L2
+      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
+    },
+  },
+  GUI = {
+    Name = "JWST Position",
+    Path = "/Solar System/Missions/JWST",
+    Hidden = true,
+  }
+}
+
+local JWSTRotation = {
+  Identifier = "JWSTRotation",
+  Parent = JWSTPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTRotation",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = true,
+      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  GUI = {
+    Name = "JWST Rotation",
+    Path = "/Solar System/Missions/JWST",
+    Hidden = true,
+  }
+}
+
+local JWSTBand = {
+  Identifier = "JWSTBand",
+  Parent = JWSTPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTBand",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableSphere",
+    Texture = band .. "/JWST-band.png",
+    Size = 9.2E15,
+    Segments = 50,
+    DisableFadeInOut = true,
+    Orientation = "Inside",
+    Opacity = 0.05,
+    UseAdditiveBlending = true,
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Safe Viewing Band",
+    Path = "/Solar System/Missions/JWST"
+  }
+}
+
+local JWSTModel = {
+  Identifier = "JWSTModel",
+  Parent = JWSTRotation.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2020 JAN 01",
+    End = "2024 JAN 01"
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "/JWSTFBX.osmodel",
+    ModelScale = "Foot",
+    InvertModelScale = true,
+    EnableAnimation = true,
+    AnimationStartTime = "2018 10 01 14:05:52",
+    AnimationMode = "Once",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      }
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "James Webb Space Telescope Model",
+    Path = "/Solar System/Missions/JWST",
+  }
+}
+
+local JWSTTrail = {
+  Identifier = "JWSTTrail",
+  Parent = transforms.L2.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JWST",
+      Observer = "392", -- L2
+      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    Period = 91.3105,
+    Resolution = 100
+  },
+  GUI = {
+    Name = "JWST Trail",
+    Path = "/Solar System/Missions/JWST"
+  }
+}
+
+local JWSTSunTrail = {
+  Identifier = "JWSTSunTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JWST",
+      Observer = "SSB",
+      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
+    },
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 365.242,
+    Resolution = 1000
+  },
+  GUI = {
+    Name = "JWST Sun Trail",
+    Path = "/Solar System/Missions/JWST"
+  }
+}
+
+local JWSTFov = {
+  Identifier = "JWSTFov",
+  Parent = JWSTModel.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderablePrism",
+    Segments = 6,
+    Lines = 3,
+    Radius = 3.25,
+    LineWidth = 1.0,
+    Color = { 1.0, 1.0, 1.0 },
+    Length = 9.2E15
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.rad(30) }
+    },
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Field of View",
+    Path = "/Solar System/Missions/JWST",
+  }
+}
+
+-- Launch, coming soon
+--[[local JWSTLaunchPosition = {
+  Identifier = "JWSTLaunchPosition",
+  Parent = transforms.L2.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
+    },
+  },
+  GUI = {
+    Name = "JWST Launch Position",
+    Path = "/Solar System/Missions/JWST",
+    Hidden = true,
+  }
+}
+
+local JWSTLaunchModel = {
+  Identifier = "JWSTLaunchModel",
+  Parent = JWSTLaunchPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:05:52",
+    End = "2019 OCT 01"
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTRotation",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = true,
+      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "/JWSTFBX.osmodel",
+    ModelScale = "Foot",
+    InvertModelScale = true,
+    EnableAnimation = true,
+    AnimationStartTime = "2018 10 01 14:05:52",
+    AnimationMode = "Once",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      }
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "JWST Launch Model",
+    Path = "/Solar System/Missions/JWST",
+  }
+}
+
+local JWSTLaunchTrail = {
+  Identifier = "JWSTLaunchTrail",
+  Parent = transforms.L2.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 13:18:00",
+    End = "2019 OCT 01"
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "2018 OCT 01 13:18:00",
+    EndTime = "2019 OCT 01",
+    SampleInterval = 600
+  },
+  GUI = {
+    Name = "JWST Launch Trail",
+    Path = "/Solar System/Missions/JWST"
+  }
+}]]--
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  JWSTTrail,
+  JWSTSunTrail,
+  --JWSTLaunchTrail,
+  JWSTPosition,
+  --JWSTLaunchPosition,
+  JWSTRotation,
+  JWSTBand,
+  JWSTModel,
+  --JWSTLaunchModel,
+  JWSTFov
+})

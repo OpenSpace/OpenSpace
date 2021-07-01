@@ -3,60 +3,60 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Abell Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_abell_textures",
-    Version = 2
+  Name = "Abell Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_abell_textures",
+  Version = 2
 })
 
 local speck = asset.syncedResource({
-    Name = "Abell Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_abell_speck",
-    Version = 2
+  Name = "Abell Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_abell_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "Abell",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 0.4, 0.2 },
-        Opacity = 1.0,
-        --ColorMap = speck .. "/abell.cmap",
-        File = speck .. "/abell.speck",
-        Texture = textures .. "/point3A.png",
-        LabelFile = speck .. "/abell.label",
-        TextColor = { 0.0, 0.8, 0.0 },
-        TextSize = 22,
-        TextMinSize = 10.0,
-        Unit = "Mpc",
-        TransformationMatrix = {
-            -0.7357425748,    0.67726129641,  0.0,           0.0,
-            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-            0.0,              0.0,            0.0,           1.0
-        },
-        ScaleFactor = 520.0,
-        BillboardMaxSize = 7.0,
-        EnablePixelSizeControl = true
+  Identifier = "Abell",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 0.4, 0.2 },
+    Opacity = 1.0,
+    --ColorMap = speck .. "/abell.cmap",
+    File = speck .. "/abell.speck",
+    Texture = textures .. "/point3A.png",
+    LabelFile = speck .. "/abell.label",
+    Unit = "Mpc",
+    TextColor = { 0.0, 0.8, 0.0 },
+    TextSize = 22,
+    TextMinMaxSize = { 10, 12 },
+    TransformationMatrix = {
+      -0.7357425748,    0.67726129641,  0.0,           0.0,
+      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+      0.0,              0.0,            0.0,           1.0
     },
-    GUI = {
-        Name = "Abell Galaxy Clusters",
-        Path = "/Universe/Galaxies",
-        Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
-            includes all the nearby, and not so nearby, galaxy clusters. The northern
-            hemisphere survey, published in 1958, was compiled by George Abell (1927–1983)
-            from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
-            was published posthumously in 1989. Further analysis by Brent Tully determined
-            their distance and three-dimensional distribution. Each point in this data set
-            represents a cluster of tens to hundreds (possibly even thousands) of
-            galaxies, similar to the Virgo or Fornax Clusters. You will notice some points
-            are assigned colors while most are gray. The data set also has an arbitrary
-            cut-off for completeness, resulting in the rectangular shape of the data set.
-            (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
-            Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
-    }
+    ScaleFactor = 520.0,
+    BillboardMinMaxSize = { 0.0, 7.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Abell Galaxy Clusters",
+    Path = "/Universe/Galaxies",
+    Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
+        includes all the nearby, and not so nearby, galaxy clusters. The northern
+        hemisphere survey, published in 1958, was compiled by George Abell (1927–1983)
+        from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
+        was published posthumously in 1989. Further analysis by Brent Tully determined
+        their distance and three-dimensional distribution. Each point in this data set
+        represents a cluster of tens to hundreds (possibly even thousands) of
+        galaxies, similar to the Virgo or Fornax Clusters. You will notice some points
+        are assigned colors while most are gray. The data set also has an arbitrary
+        cut-off for completeness, resulting in the rectangular shape of the data set.
+        (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
+        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
+  }
 }
 
 
@@ -64,11 +64,11 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Abell Galaxy Clusters",
-    Version = "2.0",
-    Description = [[Digital Universe asset for The Abell catalog]],
-    Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"Abell"}
+  Name = "Abell Galaxy Clusters",
+  Version = "2.0",
+  Description = [[Digital Universe asset for The Abell catalog]],
+  Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"Abell"}
 }

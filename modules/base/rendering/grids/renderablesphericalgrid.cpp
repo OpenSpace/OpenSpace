@@ -27,20 +27,20 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -56,69 +56,43 @@ namespace {
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
+
+    struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        std::optional<int> segments;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+    };
+#include "renderablesphericalgrid_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSphericalGrid::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSphericalGrid",
-        "base_renderable_sphericalgrid",
-        {
-            {
-                GridColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                GridColorInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                SegmentsInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_sphericalgrid");
 }
-
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableSphericalGrid"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
-    }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color = p.color.value_or(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
-    if (dictionary.hasKey(SegmentsInfo.identifier)) {
-        _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    }
+    _segments = p.segments.value_or(_segments);
     _segments.onChange([&]() {
         if (_segments.value() % 2 == 1) {
             _segments = _segments - 1;
@@ -127,11 +101,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     });
     addProperty(_segments);
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 }
 
@@ -186,8 +156,6 @@ void RenderableSphericalGrid::deinitializeGL() {
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -201,20 +169,19 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    float adjustedLineWidth = 1.f;
-
+    // Change GL state:
 #ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
 #endif
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
@@ -223,9 +190,10 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
@@ -262,11 +230,11 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                     normal = glm::normalize(normal);
                 }
 
-                glm::vec4 tmp(x, y, z, 1);
+                glm::vec4 tmp(x, y, z, 1.f);
                 glm::mat4 rot = glm::rotate(
-                    glm::mat4(1),
+                    glm::mat4(1.f),
                     glm::half_pi<float>(),
-                    glm::vec3(1, 0, 0)
+                    glm::vec3(1.f, 0.f, 0.f)
                 );
                 tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
 

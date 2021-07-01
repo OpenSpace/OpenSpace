@@ -74,56 +74,31 @@ namespace {
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'."
     };
+
+    struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
+        // [[codegen::verbatim(GlobeInfo.description)]]
+        std::string globe
+            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
+
+        // [[codegen::verbatim(LongitudeInfo.description)]]
+        std::optional<double> longitude;
+
+        // [[codegen::verbatim(LatitudeInfo.description)]]
+        std::optional<double> latitude;
+
+        // [[codegen::verbatim(AltitudeInfo.description)]]
+        std::optional<double> altitude;
+
+        // [[codegen::verbatim(UseHeightmapInfo.description)]]
+        std::optional<bool> useHeightmap;
+    };
+#include "globetranslation_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Globe Translation",
-        "space_translation_globetranslation",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("GlobeTranslation"),
-                Optional::No
-            },
-            {
-                GlobeInfo.identifier,
-                new StringAnnotationVerifier(
-                    "A valid scene graph node with a RenderableGlobe"
-                ),
-                Optional::No,
-                GlobeInfo.description
-            },
-            {
-                LongitudeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LongitudeInfo.description
-            },
-            {
-                LatitudeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LatitudeInfo.description,
-            },
-            {
-                AltitudeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                AltitudeInfo.description
-            },
-            {
-                UseHeightmapInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseHeightmapInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("space_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
@@ -133,39 +108,29 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "GlobeTranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _globe = dictionary.value<std::string>(GlobeInfo.identifier);
-    if (dictionary.hasKey(LongitudeInfo.identifier)) {
-        _longitude = dictionary.value<double>(LongitudeInfo.identifier);
-    }
-    if (dictionary.hasKey(LatitudeInfo.identifier)) {
-        _latitude = dictionary.value<double>(LatitudeInfo.identifier);
-    }
-    if (dictionary.hasKey(AltitudeInfo.identifier)) {
-        _altitude = dictionary.value<double>(AltitudeInfo.identifier);
-    }
-    if (dictionary.hasKey(UseHeightmapInfo.identifier)) {
-        _useHeightmap = dictionary.value<bool>(UseHeightmapInfo.identifier);
-    }
-
+    _globe = p.globe;
     _globe.onChange([this]() {
         fillAttachedNode();
         _positionIsDirty = true;
     });
 
+    _longitude = p.longitude.value_or(_longitude);
     _longitude.onChange([this]() { _positionIsDirty = true; });
-    _latitude.onChange([this]() { _positionIsDirty = true; });
-    _altitude.onChange([this]() { _positionIsDirty = true; });
-    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
-
     addProperty(_longitude);
+
+    _latitude = p.latitude.value_or(_latitude);
+    _latitude.onChange([this]() { _positionIsDirty = true; });
     addProperty(_latitude);
+
+    _altitude = p.altitude.value_or(_altitude);
+    _altitude.setExponent(8.f);
+    _altitude.onChange([this]() { _positionIsDirty = true; });
     addProperty(_altitude);
+
+    _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
+    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
     addProperty(_useHeightmap);
 }
 

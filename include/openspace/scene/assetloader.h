@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/asset.h>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
@@ -169,7 +170,7 @@ private:
     void tearDownAssetLuaTable(Asset* asset);
 
     std::shared_ptr<Asset> getAsset(const std::string& name);
-    ghoul::filesystem::Directory currentDirectory() const;
+    std::filesystem::path currentDirectory() const;
 
     void setCurrentAsset(Asset* asset);
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);

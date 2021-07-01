@@ -38,6 +38,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "Sphere";
@@ -117,86 +118,58 @@ namespace {
         "Sets the current sphere rendering as a background rendering type",
         "Enables/Disables background rendering."
     };
+
+    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        int segments;
+
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string texture;
+
+        enum class Orientation {
+            Outside,
+            Inside,
+            Both
+        };
+
+        // [[codegen::verbatim(OrientationInfo.description)]]
+        std::optional<Orientation> orientation;
+
+        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
+        std::optional<bool> useAdditiveBlending;
+
+        // [[codegen::verbatim(MirrorTextureInfo.description)]]
+        std::optional<bool> mirrorTexture;
+
+        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
+        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim(FadeInThresholdInfo.description)]]
+        std::optional<float> fadeInThreshold;
+
+        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
+        std::optional<bool> disableFadeInOut;
+
+        // [[codegen::verbatim(BackgroundInfo.description)]]
+        std::optional<bool> background;
+    };
+#include "renderablesphere_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSphere::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSphere",
-        "base_renderable_sphere",
-        {
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                OrientationInfo.identifier,
-                new StringInListVerifier({ "Inside", "Outside", "Both" }),
-                Optional::Yes,
-                OrientationInfo.description
-            },
-            {
-                UseAdditiveBlendingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseAdditiveBlendingInfo.description
-            },
-            {
-                MirrorTextureInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                MirrorTextureInfo.description
-            },
-            {
-                FadeOutThresholdInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::Yes,
-                FadeOutThresholdInfo.description
-            },
-            {
-                FadeInThresholdInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInThresholdInfo.description
-            },
-            {
-                DisableFadeInOutInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInOutInfo.description
-            },
-            {
-                BackgroundInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                BackgroundInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("base_renderable_sphere");
 }
-
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _size(SizeInfo, 1.f, 0.f, 1e35f)
+    , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
@@ -205,18 +178,14 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableSphere"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _size = p.size;
+    _segments = p.segments;
+    _texturePath = p.texture;
 
     _orientation.addOptions({
         { static_cast<int>(Orientation::Outside), "Outside" },
@@ -224,19 +193,19 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         { static_cast<int>(Orientation::Both), "Both" }
     });
 
-    if (dictionary.hasKey(OrientationInfo.identifier)) {
-        const std::string& v = dictionary.value<std::string>(OrientationInfo.identifier);
-        if (v == "Inside") {
-            _orientation = static_cast<int>(Orientation::Inside);
-        }
-        else if (v == "Outside") {
-            _orientation = static_cast<int>(Orientation::Outside);
-        }
-        else if (v == "Both") {
-            _orientation = static_cast<int>(Orientation::Both);
-        }
-        else {
-            throw ghoul::MissingCaseException();
+    if (p.orientation.has_value()) {
+        switch (*p.orientation) {
+            case Parameters::Orientation::Inside:
+                _orientation = static_cast<int>(Orientation::Inside);
+                break;
+            case Parameters::Orientation::Outside:
+                _orientation = static_cast<int>(Orientation::Outside);
+                break;
+            case Parameters::Orientation::Both:
+                _orientation = static_cast<int>(Orientation::Both);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
@@ -244,8 +213,12 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     addProperty(_orientation);
 
+    _size.setExponent(15.f);
+    _size.onChange([this]() {
+        setBoundingSphere(_size);
+        _sphereIsDirty = true;
+    });
     addProperty(_size);
-    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
     _segments.onChange([this]() { _sphereIsDirty = true; });
@@ -256,46 +229,37 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_mirrorTexture);
     addProperty(_useAdditiveBlending);
 
+    _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
+    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
 
-    if (dictionary.hasKey(MirrorTextureInfo.identifier)) {
-       _mirrorTexture = dictionary.value<bool>(MirrorTextureInfo.identifier);
-    }
-    if (dictionary.hasKey(UseAdditiveBlendingInfo.identifier)) {
-        _useAdditiveBlending = dictionary.value<bool>(UseAdditiveBlendingInfo.identifier);
-
-        if (_useAdditiveBlending) {
-            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-        }
+    if (_useAdditiveBlending) {
+        setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     }
 
-    if (dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
-        _fadeOutThreshold = static_cast<float>(
-            dictionary.value<double>(FadeOutThresholdInfo.identifier)
-        );
+    bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
+    if (hasGivenFadeOut) {
+        _fadeOutThreshold = *p.fadeOutThreshold;
         addProperty(_fadeOutThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThresholdInfo.identifier)) {
-        _fadeInThreshold = static_cast<float>(
-            dictionary.value<double>(FadeInThresholdInfo.identifier)
-        );
+    bool hasGivenFadeIn = p.fadeInThreshold.has_value();
+    if (hasGivenFadeIn) {
+        _fadeInThreshold = *p.fadeInThreshold;
         addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThresholdInfo.identifier) ||
-        dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
-        _disableFadeInDistance.set(false);
+    if (hasGivenFadeIn || hasGivenFadeOut) {
+        _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
 
-    if (dictionary.hasKey(BackgroundInfo.identifier)) {
-        _backgroundRendering = dictionary.value<bool>(BackgroundInfo.identifier);
+    _backgroundRendering = p.background.value_or(_backgroundRendering);
 
-        if (_backgroundRendering) {
-            setRenderBin(Renderable::RenderBin::Background);
-        }
+    if (_backgroundRendering) {
+        setRenderBin(Renderable::RenderBin::Background);
     }
 
+    setBoundingSphere(_size);
     setRenderBinFromOpacity();
 }
 

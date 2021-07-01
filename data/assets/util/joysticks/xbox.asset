@@ -1,0 +1,116 @@
+local propertyHelper = asset.require('../property_helper')
+local joystickHelper = asset.require('./joystick_helper')
+
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+-- Sixth parameter is the sensitivity for the axis
+
+local XBoxController = {
+  LeftThumbStick = { 0 , 1 },
+  RightThumbStick = { 2, 3 },
+  LeftTrigger = 4,
+  RightTrigger = 5,
+  A = 0,
+  B = 1,
+  X = 2,
+  Y = 3,
+  LB = 4,
+  RB = 5,
+  Select = 6,
+  Start = 7,
+  LeftStickButton = 8,
+  RightStickButton = 9,
+  DPad = {
+    Up = 10,
+    Right = 11,
+    Down = 12,
+    Left = 13
+  }
+}
+
+asset.onInitialize(function()
+  local controller = XBoxController;
+
+  openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.15)
+  openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[2], 0.15)
+  openspace.navigation.setAxisDeadZone(controller.RightThumbStick[1], 0.15)
+  openspace.navigation.setAxisDeadZone(controller.RightThumbStick[2], 0.15)
+
+  openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
+  openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
+  openspace.navigation.bindJoystickAxis(controller.RightThumbStick[1], "Pan X", true);
+  openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y", true);
+  openspace.navigation.bindJoystickAxis(controller.LeftTrigger, "Zoom Out", false, true);
+  openspace.navigation.bindJoystickAxis(controller.RightTrigger, "Zoom In", false, true);
+
+  openspace.navigation.bindJoystickButton(
+    controller.LB,
+    joystickHelper.bindLocalRoll(controller.RightThumbStick[1]),
+    "Switch to local roll mode"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.LB,
+    joystickHelper.unbindRoll(controller.RightThumbStick[1]),
+    "Switch back to normal mode",
+    "Release"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.RB,
+    joystickHelper.bindGlobalRoll(controller.RightThumbStick[1]),
+    "Switch to global roll mode"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.RB,
+    joystickHelper.unbindRoll(controller.RightThumbStick[1]),
+    "Switch back to normal mode",
+    "Release"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    controller.A,
+    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+    "Toggle zoom friction"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.B,
+    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+    "Toggle rotational friction"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.DPad.Left,
+    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+    "Toggle roll friction"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    controller.X,
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+    "Switch target to Earth"
+  )
+  openspace.navigation.bindJoystickButton(
+    controller.Y,
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Mars');" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+    "Switch target to Mars"
+  )
+end)

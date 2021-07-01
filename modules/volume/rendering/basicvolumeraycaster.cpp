@@ -135,8 +135,8 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
-    program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
-    program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
+    program.setUniform("clipNormals_" + id, clipNormals);
+    program.setUniform("clipOffsets_" + id, clipOffsets);
     program.setUniform("opacity_" + id, _opacity);
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
@@ -162,21 +162,20 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
 }
 
 std::string BasicVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath);
+    return absPath(GlslBoundsVsPath).string();
 }
 
 std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath);
+    return absPath(GlslBoundsFsPath).string();
 }
 
 std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath);
+    return absPath(GlslRaycastPath).string();
 }
 
 std::string BasicVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath);
+    return absPath(GlslHelperPath).string();
 }
-
 
 void BasicVolumeRaycaster::setTransferFunction(
                             std::shared_ptr<openspace::TransferFunction> transferFunction)

@@ -1,341 +1,326 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local models = asset.require("./model" ).modelFolder;
 
-
-
-local models = asset.syncedResource({
-    Name = "Voyager 2 Models",
-    Type = "HttpSynchronization",
-    Identifier = "voyager2_model",
-    Version = 1
-})
 
 local kernels = asset.syncedResource({
-    Name = "Voyager 2 Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "voyager2_spice",
-    Version = 1
+  Name = "Voyager 2 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "voyager2_spice",
+  Version = 1
 })
 
 local Kernels = {
-    kernels .. '/vg2_v02.tf',
-    kernels .. '/vg200022.tsc',
-    kernels .. '/Voyager_2.m05016u.merged.bsp',
-    kernels .. '/voyager_2.ST+1992_m05208u.merged.bsp',
-    kernels .. '/vgr2_jup230.bsp',
-    kernels .. '/vgr2_sat337.bsp',
-    kernels .. '/vgr2_ura083.bsp',
-    kernels .. '/vgr2_nep081.bsp',
-    kernels .. '/vgr2_super.bc',
-    kernels .. '/vgr2_super_v2.bc'
+  kernels .. '/vg2_v02.tf',
+  kernels .. '/vg200022.tsc',
+  kernels .. '/Voyager_2.m05016u.merged.bsp',
+  kernels .. '/voyager_2.ST+1992_m05208u.merged.bsp',
+  kernels .. '/vgr2_jup230.bsp',
+  kernels .. '/vgr2_sat337.bsp',
+  kernels .. '/vgr2_ura083.bsp',
+  kernels .. '/vgr2_nep081.bsp',
+  kernels .. '/vgr2_super.bc',
+  kernels .. '/vgr2_super_v2.bc'
 }
 
 local RotationMatrix = {
-    -1, 0, 0,
-    0, 0, -1,
-    0, -1, 0
+  -1, 0, 0,
+  0, 0, -1,
+  0, -1, 0
 }
 
 
 local LightSources = {
-    {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-    },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
 }
 
 local Voyager2 = {
-    Identifier = "Voyager_2",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "VG2_SC_BUS",
-            DestinationFrame = "GALACTIC",
-            TimeFrame = {
-                Type = "TimeFrameInterval",
-                Start = "1977-AUG-20 16:07:06.535",
-                End = "2027-DEC-27"
-            }
-        }
+  Identifier = "Voyager_2",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2",
-        Path = "/Solar System/Missions/Voyager 2"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "VG2_SC_BUS",
+      DestinationFrame = "GALACTIC",
+      TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "1977-AUG-20 16:07:06.535",
+        End = "2027-DEC-27"
+      }
     }
+  },
+  GUI = {
+    Name = "Voyager 2",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local Voyager2Main = {
-    Identifier = "Voyager_2_Main",
-    Parent = Voyager2.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj",
-            ColorTexture = models .. "/voyager-main.jpg"
-        }},
-        ModelTransform = RotationMatrix,
-        LightSources = LightSources
-    },
-    GUI = {
-        Name = "Voyager 2 Main",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+  Identifier = "Voyager_2_Main",
+  Parent = Voyager2.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "/voyager-main.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = LightSources
+  },
+  GUI = {
+    Name = "Voyager 2 Main",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local Voyager2Antenna = {
-    Identifier = "Voyager_2_Antanna",
-    Parent = Voyager2.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-antenna.obj",
-            ColorTexture = models .. "/voyager-antenna.png"
-        }},
-        ModelTransform = RotationMatrix,
-        LightSources = LightSources
-    },
-    GUI = {
-        Name = "Voyager 2 Antanna",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+  Identifier = "Voyager_2_Antenna",
+  Parent = Voyager2.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "/voyager-antenna.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = LightSources
+  },
+  GUI = {
+    Name = "Voyager 2 Antenna",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
     -- The trails are organized as follows.  The cruise phases can be resolved in relatively
     -- low resolution since they are just straight lines
     -- The encounter phases should be much higher resolution or otherwise artifacts would appear
 local VoyagerTrailCruiseEarthJupiter = {
-    Identifier = "Voyager_2_Trail_Cruise_Earth_Jupiter",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1977 SEP 05",
-        EndTime = "1979 JUL 06",
-        SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
+  Identifier = "Voyager_2_Trail_Cruise_Earth_Jupiter",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Cruise Earth-Jupiter",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1977-AUG-20 16:07:06.535",
+    EndTime = "1979 JUL 06",
+    SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Cruise Earth-Jupiter",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailEncounterJupiter = {
-    Identifier = "Voyager_2_Trail_Encounter_Jupiter",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        Color = { 0.70, 0.50, 0.20 },
-        EnableFade = false,
-        StartTime = "1979 JUL 05 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-        EndTime = "1979 JUL 15",
-        SampleInterval = 100
+  Identifier = "Voyager_2_Trail_Encounter_Jupiter",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Encounter Jupiter",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    Color = { 0.70, 0.50, 0.20 },
+    EnableFade = false,
+    StartTime = "1979 JUL 05 23:24:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+    EndTime = "1979 JUL 15",
+    SampleInterval = 100
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Encounter Jupiter",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailCruiseJupiterSaturn = {
-    Identifier = "Voyager_2_Trail_Cruise_Jupiter_Saturn",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1979 JUL 15",
-        EndTime = "1981 AUG 23",
-        SampleInterval = 770 * 2  -- 770 is the number of days between the Start and End time
+  Identifier = "Voyager_2_Trail_Cruise_Jupiter_Saturn",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1979 JUL 15",
+    EndTime = "1981 AUG 23",
+    SampleInterval = 770 * 2  -- 770 is the number of days between the Start and End time
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailEncounterSaturn = {
-    Identifier = "Voyager_2_Trail_Encounter_Saturn",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1981 AUG 22 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-        EndTime = "1981 AUG 30",
-        SampleInterval = 100
+  Identifier = "Voyager_2_Trail_Encounter_Saturn",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Encounter Saturn",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1981 AUG 22 23:08:30",  -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+    EndTime = "1981 AUG 30",
+    SampleInterval = 100
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Encounter Saturn",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailCruiseSaturnUranus = {
-    Identifier = "Voyager_2_Trail_Cruise_Saturn_Uranus",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1981 AUG 30",
-        EndTime = "1986 JAN 22",
-        SampleInterval = 1971  * 2  -- 1971 is the number of days between the Start and End time
+  Identifier = "Voyager_2_Trail_Cruise_Saturn_Uranus",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Cruise Saturn-Uranus",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1981 AUG 30",
+    EndTime = "1986 JAN 22",
+    SampleInterval = 1971  * 2  -- 1971 is the number of days between the Start and End time
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Cruise Saturn-Uranus",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailEncounterUranus = {
-    Identifier = "Voyager_2_Trail_Encounter_Uranus",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1986 JAN 21 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-        EndTime = "1986 JAN 27",
-        SampleInterval = 100
+  Identifier = "Voyager_2_Trail_Encounter_Uranus",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Encounter Uranus",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1986 JAN 21 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+    EndTime = "1986 JAN 27",
+    SampleInterval = 100
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Encounter Uranus",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailCruiseUranusNeptune = {
-    Identifier = "Voyager_2_Trail_Cruise_Uranus_Neptune",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1986 JAN 27",
-        EndTime = "1989 AUG 24",
-        SampleInterval = 1305  * 2  -- 1305 is the number of days between the Start and End time
+  Identifier = "Voyager_2_Trail_Cruise_Uranus_Neptune",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Cruise Uranus-Neptune",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1986 JAN 27",
+    EndTime = "1989 AUG 24",
+    SampleInterval = 1305  * 2  -- 1305 is the number of days between the Start and End time
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Cruise Uranus-Neptune",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailEncounterNeptune = {
-    Identifier = "Voyager_2_Trail_Encounter_Neptune",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1989 AUG 23 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-        EndTime = "1989 AUG 26",
-        SampleInterval = 100
+  Identifier = "Voyager_2_Trail_Encounter_Neptune",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Encounter Neptune",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1989 AUG 23 23:30:00", -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
+    EndTime = "1989 AUG 26",
+    SampleInterval = 100
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Encounter Neptune",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 local VoyagerTrailCruiseNeptuneInf = {
-    Identifier = "Voyager_2_Trail_Cruise_Neptune_Inf",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 2",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        EnableFade = false,
-        Color = { 0.70, 0.50, 0.20 },
-        StartTime = "1989 AUG 26",
-        EndTime = "2021 JAN 01",
-        SampleInterval = 11451 * 2  -- 11451 is the number of days between the Start and End time
+  Identifier = "Voyager_2_Trail_Cruise_Neptune_Inf",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VOYAGER 2",
+      Observer = "SSB",
+      Kernels = Kernels
     },
-    GUI = {
-        Name = "Voyager 2 Trail Cruise Neptune-Inf",
-        Path = "/Solar System/Missions/Voyager 2"
-    }
+    EnableFade = false,
+    Color = { 0.70, 0.50, 0.20 },
+    StartTime = "1989 AUG 26",
+    EndTime = "2021 JAN 01",
+    SampleInterval = 11451 * 2  -- 11451 is the number of days between the Start and End time
+  },
+  GUI = {
+    Name = "Voyager 2 Trail Cruise Neptune-Inf",
+    Path = "/Solar System/Missions/Voyager 2"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Voyager2,
-    Voyager2Main,
-    Voyager2Antenna,
-    VoyagerTrailCruiseEarthJupiter,
-    VoyagerTrailEncounterJupiter,
-    VoyagerTrailCruiseJupiterSaturn,
-    VoyagerTrailEncounterSaturn,
-    VoyagerTrailCruiseSaturnUranus,
-    VoyagerTrailEncounterUranus,
-    VoyagerTrailCruiseUranusNeptune,
-    VoyagerTrailEncounterNeptune,
-    VoyagerTrailCruiseNeptuneInf
+  Voyager2,
+  Voyager2Main,
+  Voyager2Antenna,
+  VoyagerTrailCruiseEarthJupiter,
+  VoyagerTrailEncounterJupiter,
+  VoyagerTrailCruiseJupiterSaturn,
+  VoyagerTrailEncounterSaturn,
+  VoyagerTrailCruiseSaturnUranus,
+  VoyagerTrailEncounterUranus,
+  VoyagerTrailCruiseUranusNeptune,
+  VoyagerTrailEncounterNeptune,
+  VoyagerTrailCruiseNeptuneInf
 })

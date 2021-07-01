@@ -107,13 +107,15 @@ linux_gcc_make: {
       }
       stage('linux-gcc-make/build') {
           def cmakeCompileOptions = moduleCMakeFlags();
-          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
+          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-DGLM_ENABLE_EXPERIMENTAL"';
+          cmakeCompileOptions += ' -DOpenGL_GL_PREFERENCE:STRING=GLVND -DASSIMP_BUILD_MINIZIP=1';
           // Not sure why the linking of OpenSpaceTest takes so long
           compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
       stage('linux-gcc-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        // testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -134,6 +136,7 @@ linux_gcc_ninja: {
       }
       stage('linux-gcc-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        // testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -155,6 +158,7 @@ linux_clang_make: {
       }
       stage('linux-clang-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        // testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -175,6 +179,7 @@ linux_clang_ninja: {
       }
       stage('linux-clang-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        // testHelper.runUnitTests('bin/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -194,6 +199,7 @@ windows_msvc: {
       stage('windows-msvc/test') {
         // Currently, the unit tests are failing on Windows
         // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        testHelper.runUnitTests('bin\\Debug\\codegentest')
       }
       cleanWs()
     } // node('windows')

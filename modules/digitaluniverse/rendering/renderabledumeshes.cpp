@@ -43,8 +43,10 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
-#include <fstream>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableDUMeshes";
@@ -54,20 +56,9 @@ namespace {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
-
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
 
-    constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
@@ -96,18 +87,11 @@ namespace {
         "objects being rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+        "TextMinMaxSize",
+        "Text Min/Max Size",
+        "The minimum and maximum size (in pixels) of the text for the labels for the "
+        "astronomical objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -139,84 +123,54 @@ namespace {
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
+
+    struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
+        // The path to the SPECK file that contains information about the astronomical
+        // object being rendered
+        std::string file;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        enum class Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            MegaParsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyears [[codegen::key("Gly")]]
+        };
+        std::optional<Unit> unit;
+
+        // [[codegen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor [[codegen::color()]];
+
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
+        std::optional<float> textOpacity;
+
+        // [[codegen::verbatim(TextSizeInfo.description)]]
+        std::optional<float> textSize;
+
+        // [[codegen::verbatim(LabelFileInfo.description)]]
+        std::optional<std::string> labelFile;
+
+        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> textMinMaxSize;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(MeshColorInfo.description)]]
+        std::optional<std::vector<glm::vec3>> meshColor;
+    };
+#include "renderabledumeshes_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableDUMeshes",
-        "digitaluniverse_renderabledumeshes",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableDUMeshes"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                DrawLabelInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DrawLabelInfo.description
-            },
-            {
-                TextColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                TextColorInfo.description
-            },
-            {
-                TextOpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextOpacityInfo.description
-            },
-            {
-                TextSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextSizeInfo.description
-            },
-            {
-                LabelFileInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelFileInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                MeshColorInfo.identifier,
-                new Vector3ListVerifier<double>,
-                Optional::No,
-                MeshColorInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -226,29 +180,29 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
-    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
-    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
+    , _textMinMaxSize(
+        LabelMinMaxSizeInfo,
+        glm::ivec2(8, 500),
+        glm::ivec2(0),
+        glm::ivec2(1000)
+    )
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableDUMeshes"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(KeyFile)) {
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-        _hasSpeckFile = true;
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
-        addProperty(_drawElements);
-    }
+    _speckFile = absPath(p.file).string();
+    _hasSpeckFile = true;
+    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    addProperty(_drawElements);
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
+    // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
+    // doing it based on the fisheye rendering seems a bit brittle?
     if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
     }
@@ -257,103 +211,74 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     }
     addProperty(_renderOption);
 
-    if (dictionary.hasKey(keyUnit)) {
-        std::string unit = dictionary.value<std::string>(keyUnit);
-        if (unit == MeterUnit) {
-            _unit = Meter;
+    if (p.unit.has_value()) {
+        switch (*p.unit) {
+            case Parameters::Unit::Meter:
+                _unit = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _unit = Kilometer;
+                break;
+            case Parameters::Unit::Parsec:
+                _unit = Parsec;
+                break;
+            case Parameters::Unit::Kiloparsec:
+                _unit = Kiloparsec;
+                break;
+            case Parameters::Unit::MegaParsec:
+                _unit = Megaparsec;
+                break;
+            case Parameters::Unit::Gigaparsec:
+                _unit = Gigaparsec;
+                break;
+            case Parameters::Unit::Gigalightyears:
+                _unit = GigalightYears;
+                break;
         }
-        else if (unit == KilometerUnit) {
-            _unit = Kilometer;
-        }
-        else if (unit == ParsecUnit) {
-            _unit = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _unit = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _unit = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _unit = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _unit = GigalightYears;
-        }
-        else {
-            LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
-            _unit = Meter;
-        }
+    }
+    else {
+        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
+        _unit = Meter;
     }
 
-    if (dictionary.hasValue<double>(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    if (dictionary.hasKey(DrawLabelInfo.identifier)) {
-        _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
-    }
-    addProperty(_drawLabels);
-
-    if (dictionary.hasKey(LabelFileInfo.identifier)) {
-        _labelFile = absPath(dictionary.value<std::string>(LabelFileInfo.identifier));
+    if (p.labelFile.has_value()) {
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
-        if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
-            _hasLabel = true;
-        }
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
+        addProperty(_drawLabels);
+
+        _textColor = p.textColor.value_or(_textColor);
+        _hasLabel = p.textColor.has_value();
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
-        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = static_cast<float>(
-                dictionary.value<double>(TextOpacityInfo.identifier)
-            );
-        }
+        _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);
 
-        if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = static_cast<float>(
-                dictionary.value<double>(TextSizeInfo.identifier)
-            );
-        }
+        _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<float>(
-                floor(dictionary.value<double>(LabelMinSizeInfo.identifier))
-            );
-        }
-        addProperty(_textMinSize);
-
-        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<float>(
-                floor(dictionary.value<double>(LabelMaxSizeInfo.identifier))
-            );
-        }
-        addProperty(_textMaxSize);
+        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
+        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_textMinMaxSize);
     }
 
-    if (dictionary.hasKey(MeshColorInfo.identifier)) {
-        ghoul::Dictionary colorDict = dictionary.value<ghoul::Dictionary>(
-            MeshColorInfo.identifier
-        );
-        for (int i = 0; i < static_cast<int>(colorDict.size()); ++i) {
-            _meshColorMap.insert(
-                { i + 1, colorDict.value<glm::dvec3>(std::to_string(i + 1)) }
-            );
+    if (p.meshColor.has_value()) {
+        std::vector<glm::vec3> ops = *p.meshColor;
+        for (size_t i = 0; i < ops.size(); ++i) {
+            _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
 }
 
 bool RenderableDUMeshes::isReady() const {
     return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelData.empty()));
+        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
 void RenderableDUMeshes::initializeGL() {
@@ -484,8 +409,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinMaxSize.value().x;
+    labelInfo.maxSize = _textMinMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -496,13 +421,13 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
-    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        glm::vec3 scaledPos(pair.first);
+    for (const speck::Labelset::Entry& e : _labelset.entries) {
+        glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
-            pair.second,
+            e.text,
             textColor,
             labelInfo
         );
@@ -559,31 +484,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _speckFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile <<
-        //         "' used for Speck file '" << _speckFile << "'"
-        //     );
-
-        //     success = loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_speckFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else
-        // {
-        //     LINFO("Cache for Speck file '" << _speckFile << "' not found");
         LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -592,35 +493,7 @@ bool RenderableDUMeshes::loadData() {
 
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     labelFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile << "' used for Label file '" <<
-        //         labelFile << "'"
-        //     );
-
-        //     success &= loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(labelFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else {
-        //     LINFO("Cache for Label file '" << labelFile << "' not found");
-        LINFO(fmt::format("Loading Label file '{}'", labelFile));
-
-        success &= readLabelFile();
-        if (!success) {
-            return false;
-        }
-
-        // }
+        _labelset = speck::label::loadFileWithCache(_labelFile);
     }
 
     return success;
@@ -751,158 +624,6 @@ bool RenderableDUMeshes::readSpeckFile() {
     }
 
     return true;
-}
-
-bool RenderableDUMeshes::readLabelFile() {
-    std::ifstream file(_labelFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Label file '{}'", _labelFile));
-        return false;
-    }
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 9) != "textcolor") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            continue;
-        }
-
-        if (line.substr(0, 9) == "textcolor") {
-            // textcolor lines are structured as follows:
-            // textcolor # description
-            // where # is color text defined in configuration file
-            std::stringstream str(line);
-
-            // TODO: handle cases of labels with different colors
-            break;
-        }
-    }
-
-    do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty()) {
-            continue;
-        }
-
-        std::stringstream str(line);
-
-        glm::vec3 position = glm::vec3(0.f);
-        for (int j = 0; j < 3; ++j) {
-            str >> position[j];
-        }
-
-        std::string dummy;
-        str >> dummy; // text keyword
-
-        std::string label;
-        str >> label;
-        dummy.clear();
-
-        while (str >> dummy) {
-            label += " " + dummy;
-            dummy.clear();
-        }
-
-        _labelData.emplace_back(std::make_pair(position, label));
-
-    } while (!file.eof());
-
-    return true;
-}
-
-bool RenderableDUMeshes::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
-    }
-
-    int8_t version = 0;
-    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-    if (version != CurrentCacheVersion) {
-        LINFO("The format of the cached file has changed: deleting old cache");
-        fileStream.close();
-        FileSys.deleteFile(file);
-        return false;
-    }
-
-    int32_t nValues = 0;
-    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-    fileStream.read(
-        reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    _fullData.resize(nValues);
-    fileStream.read(
-        reinterpret_cast<char*>(&_fullData[0]),
-        nValues * sizeof(_fullData[0])
-    );
-
-    bool success = fileStream.good();
-    return success;
-}
-
-bool RenderableDUMeshes::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return false;
-    }
-
-    fileStream.write(
-        reinterpret_cast<const char*>(&CurrentCacheVersion),
-        sizeof(int8_t)
-    );
-
-    const int32_t nValues = static_cast<int32_t>(_fullData.size());
-    if (nValues == 0) {
-        LERROR("Error writing cache: No values were loaded");
-        return false;
-    }
-    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-    const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-        _nValuesPerAstronomicalObject
-    );
-    fileStream.write(
-        reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    const size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-    const bool success = fileStream.good();
-    return success;
 }
 
 void RenderableDUMeshes::createMeshes() {

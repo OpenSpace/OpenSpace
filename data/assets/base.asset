@@ -7,11 +7,10 @@ asset.require('./base_blank')
 -- Specifying which other assets should be loaded in this scene
 asset.require('scene/solarsystem/sun/sun')
 asset.require('scene/solarsystem/sun/glare')
+asset.require('scene/solarsystem/sun/habitablezone')
 asset.require('scene/solarsystem/sun/default_layers')
 asset.require('scene/solarsystem/planets/planets')
 asset.require('scene/solarsystem/planets/default_layers')
-asset.require('scene/solarsystem/planets/mars/moons/phobos')
-asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
 asset.require('scene/solarsystem/dwarf_planets/pluto/default_layers')
 asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
@@ -21,9 +20,11 @@ asset.require('scene/milkyway/constellations/constellation_keybinds')
 asset.require('scene/milkyway/objects/orionnebula/orionnebula')
 asset.require('util/launcher_images')
 
-local assetHelper = asset.require('util/asset_helper')
+-- For exoplanet system visualizations
 asset.require('scene/milkyway/exoplanets/exoplanets_data')
 asset.require('scene/milkyway/exoplanets/exoplanets_textures')
+
+local assetHelper = asset.require('util/asset_helper')
 asset.require('scene/digitaluniverse/2dF')
 asset.require('scene/digitaluniverse/2mass')
 asset.require('scene/digitaluniverse/6dF')
@@ -66,7 +67,7 @@ asset.require('scene/digitaluniverse/voids')
 asset.require('customization/globebrowsing')
 
 asset.onInitialize(function ()
-    openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    )
+  openspace.globebrowsing.loadWMSServersFromFile(
+    openspace.absPath("${DATA}/globebrowsing_servers.lua")
+  )
 end)

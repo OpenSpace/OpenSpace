@@ -32,14 +32,12 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 
 namespace {
     constexpr const char* _loggerCat = "HttpSynchronization";
-
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyVersion = "Version";
 
     constexpr const char* TempSuffix = ".tmp";
 
@@ -47,30 +45,21 @@ namespace {
     constexpr const char* QueryKeyFileVersion = "file_version";
     constexpr const char* QueryKeyApplicationVersion = "application_version";
     constexpr const int ApplicationVersion = 1;
+
+    struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
+        // A unique identifier for this resource
+        std::string identifier;
+
+        // The version of this resource
+        int version;
+    };
+#include "httpsynchronization_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation HttpSynchronization::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "HttpSynchronization",
-        "http_synchronization",
-    {
-        {
-            KeyIdentifier,
-            new StringVerifier,
-            Optional::No,
-            "A unique identifier for this resource"
-        },
-        {
-            KeyVersion,
-            new IntVerifier,
-            Optional::No,
-            "The version of this resource"
-        }
-    }
-    };
+    return codegen::doc<Parameters>("http_synchronization");
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
@@ -81,14 +70,10 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
     , _synchronizationRoot(std::move(synchronizationRoot))
     , _synchronizationRepositories(std::move(synchronizationRepositories))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dict,
-        "HttpSynchronization"
-    );
+    const Parameters p = codegen::bake<Parameters>(dict);
 
-    _identifier = dict.value<std::string>(KeyIdentifier);
-    _version = static_cast<int>(dict.value<double>(KeyVersion));
+    _identifier = p.identifier;
+    _version = p.version;
 }
 
 HttpSynchronization::~HttpSynchronization() {
@@ -99,17 +84,10 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::string HttpSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        "http" +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        std::to_string(_version)
+    std::string d = fmt::format(
+        "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
-
-    return FileSys.absPath(d);
+    return absPath(d).string();
 }
 
 void HttpSynchronization::start() {
@@ -171,7 +149,7 @@ void HttpSynchronization::createSyncFile() {
     const std::string& directoryName = directory();
     const std::string& filepath = directoryName + ".ossync";
 
-    FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(directoryName);
 
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
@@ -180,7 +158,7 @@ void HttpSynchronization::createSyncFile() {
 
 bool HttpSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
@@ -223,9 +201,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         size_t lastSlash = line.find_last_of('/');
         std::string filename = line.substr(lastSlash + 1);
 
-        std::string fileDestination = directory() +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            filename + TempSuffix;
+        std::string fileDestination = fmt::format(
+            "{}/{}{}", directory(), filename, TempSuffix
+        );
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));
@@ -292,7 +270,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 tempName.size() - strlen(TempSuffix)
             );
 
-            FileSys.deleteFile(originalName);
+            if (std::filesystem::is_regular_file(originalName)) {
+                std::filesystem::remove(originalName);
+            }
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
                 LERROR(fmt::format(

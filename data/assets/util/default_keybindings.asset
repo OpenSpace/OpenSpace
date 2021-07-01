@@ -2,154 +2,154 @@ local sceneHelper = asset.require('./scene_helper')
 local propertyHelper = asset.require('./property_helper')
 
 local Keybindings = {
-    {
-        Key = "F1",
-        Name = "Show Native GUI",
-        Command = propertyHelper.invert('Modules.ImGUI.Main.Enabled'),
-        Documentation = "Shows or hides the native UI",
-        GuiPath = "/Native GUI",
-        Local = true
-    },
-    {
-        Key = "ESC",
-        Name = "Toggle Shutdown",
-        Command = "openspace.toggleShutdown()",
-        Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period.",
-        Local = true
-    },
-    {
-        Key = "PRINT_SCREEN",
-        Name = "Take Screenshot",
-        Command = "openspace.takeScreenshot()",
-        Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
-        GuiPath = "/Rendering",
-        Local = true
-    },
-    {
-        Key = "F12",
-        Name = "Take Screenshot",
-        Command = "openspace.takeScreenshot()",
-        Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
-        GuiPath = "/Rendering",
-        Local = true
-    },
-    {
-        Key = "SPACE",
-        Name = "Toggle Pause (Interpolated)",
-        Command = "openspace.time.interpolateTogglePause()",
-        Documentation = "Smoothly starts and stops the simulation time.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    },
-    {
-        Key = "Shift+SPACE",
-        Name = "Toggle Pause (Immediate)",
-        Command = "openspace.time.togglePause()",
-        Documentation = "Immediately starts and stops the simulation time.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    },
-    {
-        Key = "f",
-        Name = "Toggle Rotation friction",
-        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
-        Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
-        GuiPath = "/Navigation",
-        Local = false
-    },
-    {
-        Key = "Shift+f",
-        Name = "Toggle Zoom Friction",
-        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
-        Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
-        GuiPath = "/Navigation",
-        Local = false
-    },
-    {
-        Key = "Ctrl+f",
-        Name = "Toggle Roll Friction",
-        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
-        Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
-        GuiPath = "/Navigation",
-        Local = false
-    },
-    {
-        Key = "w",
-        Name = "Fade to/from black",
-        Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
-        Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "Tab",
-        Name = "Toggle main GUI",
-        Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
-        Documentation = "Toggles the main GUI",
-        GuiPath = "/GUI",
-        Local = true
-    },
-    {
-        Key = "Shift+Tab",
-        Name = "Toggle dashboard and overlays",
-        Command =
+  {
+    Key = "F1",
+    Name = "Show Native GUI",
+    Command = propertyHelper.invert('Modules.ImGUI.Main.Enabled'),
+    Documentation = "Shows or hides the native UI",
+    GuiPath = "/Native GUI",
+    Local = true
+  },
+  {
+    Key = "ESC",
+    Name = "Toggle Shutdown",
+    Command = "openspace.toggleShutdown()",
+    Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period.",
+    Local = true
+  },
+  {
+    Key = "PRINT_SCREEN",
+    Name = "Take Screenshot",
+    Command = "openspace.takeScreenshot()",
+    Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
+    GuiPath = "/Rendering",
+    Local = true
+  },
+  {
+    Key = "F12",
+    Name = "Take Screenshot",
+    Command = "openspace.takeScreenshot()",
+    Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
+    GuiPath = "/Rendering",
+    Local = true
+  },
+  {
+    Key = "SPACE",
+    Name = "Toggle Pause (Interpolated)",
+    Command = "openspace.time.pauseToggleViaKeyboard()",
+    Documentation = "Smoothly starts and stops the simulation time.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  },
+  {
+    Key = "Shift+SPACE",
+    Name = "Toggle Pause (Immediate)",
+    Command = "openspace.time.togglePause()",
+    Documentation = "Immediately starts and stops the simulation time.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  },
+  {
+    Key = "f",
+    Name = "Toggle Rotation friction",
+    Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+    Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
+    GuiPath = "/Navigation",
+    Local = false
+  },
+  {
+    Key = "Shift+f",
+    Name = "Toggle Zoom Friction",
+    Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+    Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
+    GuiPath = "/Navigation",
+    Local = false
+  },
+  {
+    Key = "Ctrl+f",
+    Name = "Toggle Roll Friction",
+    Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+    Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
+    GuiPath = "/Navigation",
+    Local = false
+  },
+  {
+    Key = "w",
+    Name = "Fade to/from black",
+    Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
+    Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
+    GuiPath = "/Rendering",
+    Local = false
+  },
+  {
+    Key = "Tab",
+    Name = "Toggle main GUI",
+    Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
+    Documentation = "Toggles the main GUI",
+    GuiPath = "/GUI",
+    Local = true
+  },
+  {
+    Key = "Shift+Tab",
+    Name = "Toggle dashboard and overlays",
+    Command =
 [[local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');
 openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
-        Documentation = "Toggles the dashboard and overlays",
-        GuiPath = "/GUI",
-        Local = true
-    },
-    {
-        Key = "Alt+R",
-        Name = "Toggle rendering on master",
-        Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
-        Documentation = "Toggles the rendering on master",
-        GuiPath = "/Rendering",
-        Local = true
-    },
-    {
-        Key = "Right",
-        Name = "Next Delta Time Step (Interpolate)",
-        Command = "openspace.time.interpolateNextDeltaTimeStep()",
-        Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    },
-    {
-        Key = "Shift+Right",
-        Name = "Next Delta Time Step (Immediate)",
-        Command = "openspace.time.setNextDeltaTimeStep()",
-        Documentation = "Immediately set the simulation speed to the next delta time step, if one exists.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    },
-    {
-        Key = "Left",
-        Name = "Previous Delta Time Step (Interpolate)",
-        Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
-        Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    },
-    {
-        Key = "Shift+Left",
-        Name = "Previous Delta Time Step (Immediate)",
-        Command = "openspace.time.setPreviousDeltaTimeStep()",
-        Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
-        GuiPath = "/Simulation Speed",
-        Local = true
-    }
+    Documentation = "Toggles the dashboard and overlays",
+    GuiPath = "/GUI",
+    Local = true
+  },
+  {
+    Key = "Alt+R",
+    Name = "Toggle rendering on master",
+    Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
+    Documentation = "Toggles the rendering on master",
+    GuiPath = "/Rendering",
+    Local = true
+  },
+  {
+    Key = "Right",
+    Name = "Next Delta Time Step (Interpolate)",
+    Command = "openspace.time.interpolateNextDeltaTimeStep()",
+    Documentation = "Smoothly interpolates the simulation speed to the next delta time step, if one exists.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  },
+  {
+    Key = "Shift+Right",
+    Name = "Next Delta Time Step (Immediate)",
+    Command = "openspace.time.setNextDeltaTimeStep()",
+    Documentation = "Immediately set the simulation speed to the next delta time step, if one exists.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  },
+  {
+    Key = "Left",
+    Name = "Previous Delta Time Step (Interpolate)",
+    Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
+    Documentation = "Smoothly interpolates the simulation speed to the previous delta time step, if one exists.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  },
+  {
+    Key = "Shift+Left",
+    Name = "Previous Delta Time Step (Immediate)",
+    Command = "openspace.time.setPreviousDeltaTimeStep()",
+    Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
+    GuiPath = "/Simulation Speed",
+    Local = true
+  }
 }
 
 asset.onInitialize(function()
-    sceneHelper.bindKeys(Keybindings)
+  sceneHelper.bindKeys(Keybindings)
 end)
 
 asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
+  sceneHelper.unbindKeys(Keybindings)
 end)
 
 asset.export("DefaultKeybindings", Keybindings)

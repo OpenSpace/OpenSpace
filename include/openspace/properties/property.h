@@ -44,8 +44,7 @@ class PropertyOwner;
  * used as a URI. This class is an abstract base class and each subclass (most notable
  * TemplateProperty) needs to implement the methods Property::className, Property::get,
  * Property::set, Property::type(), Property::getLuaValue, Property::setLuaValue,
- * Property::getStringValue, Property::setStringValue and Property::typeLua to make full
- * use of the infrastructure.
+ * Property::getStringValue, and Property::typeLua to make full use of the infrastructure.
  * The most common types can be implemented by creating a specialized instantiation of
  * TemplateProperty, which provides default implementations for these methods.
  *
@@ -217,8 +216,7 @@ public:
     /**
      * This method encodes the encapsulated \p value of this Property as a
      * <code>std::string</code>. The specific details of this serialization is up to the
-     * property developer. The implementation has to be synchronized with the
-     * Property::setStringValue method. The default implementation is a no-op.
+     * property developer. The default implementation is a no-op.
      *
      * \param value The value to which the Property will be encoded
      * \return \p true if the encoding succeeded, \p false otherwise
@@ -234,18 +232,6 @@ public:
      * \throw ghoul::RuntimeError If value could not be fetched
      */
     std::string getStringValue() const;
-
-    /**
-     * This method sets the value encapsulated by this Property by deserializing the
-     * passed <code>std::string</code>. The specific details of the deserialization are up
-     * to the Property developer. The implementation has to be synchronized with the
-     * Property::getLuaValue method. The default implementation is a no-op.
-     *
-     * \param value The value from which the Property will be decoded
-     * \return \c true if the decoding and setting of the value succeeded, \c false
-     *         otherwise
-     */
-    virtual bool setStringValue(std::string value);
 
     /**
      * This method registers a \p callback function that will be called every time if
@@ -385,9 +371,9 @@ public:
     /**
      * This method determines if this Property should be read-only in external
      * applications. This setting is only a hint and does not need to be followed by GUI
-     * applications and does not have any effect on the Property::set,
-     * Property::setLuaValue, or Property::setStringValue methods. The value is stored in
-     * the metaData Dictionary with the key: \c isReadOnly. The default value is \c false.
+     * applications and does not have any effect on the Property::set or
+     * Property::setLuaValue methods. The value is stored in the metaData Dictionary
+     * with the key: \c isReadOnly. The default value is \c false.
      *
      * \param state \c true if the Property should be read only, \c false otherwise
      */
@@ -395,22 +381,22 @@ public:
 
     /**
     * Default view options that can be used in the Property::setViewOption method. The
-    * values are: Property::ViewOptions::Color = \c color,
-    * Property::ViewOptions::LightPosition = \c lightPosition
+    * values are:
+    * - Property::ViewOptions::Color = \c Color (Intended for Vec3 and Vec4),
+    * - Property::ViewOptions::MinMaxRange = \c MinMaxRange (Intended for Vec2)
     */
     struct ViewOptions {
         static const char* Color;
-        static const char* LightPosition;
+        static const char* MinMaxRange;
     };
 
     /**
      * This method allows the developer to give hints to the GUI about different
      * representations for the GUI. The same Property (for example Vec4Property) can be
      * used in different ways, each requiring a different input method. These values are
-     * stored in the metaData object using the <code>views.</code> prefix in front of the
-     * <code>option</code> parameter. See Property::ViewOptions for a default list of
-     * possible options. As these are only hints, the GUI is free to ignore any suggestion
-     * by the developer.
+     * stored in the metaData object under <code>ViewOptions</code>.
+     * See Property::ViewOptions for a default list of possible options. As these are
+     * only hints, the GUI is free to ignore any suggestion by the developer.
      * \param option The view option that should be modified
      * \param value Determines if the view option should be active (<code>true</code>) or
      * deactivated (<code>false</code>)
@@ -456,7 +442,6 @@ public:
     /// Interpolation methods
     virtual void setInterpolationTarget(std::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
-    virtual void setStringInterpolationTarget(std::string value);
 
     virtual void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunction = nullptr);

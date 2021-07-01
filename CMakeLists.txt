@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 16)
-set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-8")
+set(OPENSPACE_VERSION_MINOR 17)
+set(OPENSPACE_VERSION_PATCH -1)
+set(OPENSPACE_VERSION_STRING "Beta-10 [RC1]")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
@@ -134,16 +134,43 @@ endif ()
 
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 
-if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
+if (UNIX)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
+  else ()
+    if(NOT CMAKE_BUILD_TYPE)
+      #Can set to "RelWithDebInfo" or "Debug" also, but problems occur if this is blank by default
+      set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
+    endif()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
+    set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
+    set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
+  endif ()
 endif ()
 
-# Add external dependencies
-add_subdirectory(${OPENSPACE_BASE_DIR}/ext)
+add_subdirectory(ext)
 
-# include(src/CMakeLists.txt)
 add_subdirectory(src)
+
+add_subdirectory(support/coding/codegen)
+# It is important that the __codegen.h do not actually exist so
+# that this target is never considered as finished
+add_custom_target(
+  run_codegen
+  ALL DEPENDS
+    "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+)
+add_dependencies(run_codegen codegen)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+  COMMAND codegen ARGS "${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_BASE_DIR}/src"
+  VERBATIM
+)
+set_folder_location(codegen-lib "support")
+set_folder_location(codegen "support")
+set_folder_location(run_codegen "support")
+
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -176,9 +203,21 @@ begin_header("Configuring Modules")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
+
+add_subdirectory(support/coding/codegen/tests)
+set_folder_location(run_test_codegen "Unit Tests/support")
+set_folder_location(codegentest "Unit Tests")
+
+
 begin_header("Configuring Applications")
 add_subdirectory("${OPENSPACE_APPS_DIR}")
 end_header("End: Configuring Applications")
+
+
+if (MSVC AND TARGET OpenSpace)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
+endif()
+
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)

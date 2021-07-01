@@ -38,34 +38,23 @@ namespace {
         "The time frame is active when any of the contained time frames are, "
         "but not in gaps between contained time frames."
     };
+
+    struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
+        // [[codegen::verbatim(TimeFramesInfo.description)]]
+        std::vector<ghoul::Dictionary> timeFrames
+            [[codegen::reference("core_time_frame")]];
+    };
+#include "timeframeunion_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Time Frame Union",
-        "base_time_frame_union",
-        {
-            {
-                TimeFramesInfo.identifier,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("core_time_frame"),
-                        Optional::Yes
-                    }
-                }),
-                Optional::No,
-                TimeFramesInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("base_time_frame_union");
 }
 
 bool TimeFrameUnion::isActive(const Time& time) const {
-    for (const auto& tf : _timeFrames) {
+    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         if (tf->isActive(time)) {
             return true;
         }
@@ -76,9 +65,10 @@ bool TimeFrameUnion::isActive(const Time& time) const {
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
     : TimeFrame()
 {
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "TimeFrameUnion");
+    // I don't know how we can actually help the reference attribute properly. Since the
+    // Parameter list only contains the monostate, there is no need to actually create
+    // the object here
+    codegen::bake<Parameters>(dictionary);
 
     ghoul::Dictionary frames =
         dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);

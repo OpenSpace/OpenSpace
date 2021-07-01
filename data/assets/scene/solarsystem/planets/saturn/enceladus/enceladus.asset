@@ -5,49 +5,45 @@ asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Enceladus = {
-    Identifier = "Enceladus",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "ENCELADUS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
-            DestinationFrame = "GALACTIC"
-        }
-    },    
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 252000,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/enceladus.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
+  Identifier = "Enceladus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "ENCELADUS",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Name = "Enceladus",
-        Path = "/Solar System/Planets/Saturn/Moons",
-        Description = [[ Enceladus globe with labels]],
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_ENCELADUS",
+      DestinationFrame = "GALACTIC"
     }
+  },    
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 252000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/enceladus.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.1,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 300000.0, 1000000.0 },
+      DistanceEPS = 100000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Enceladus",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[ Enceladus globe with labels]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })

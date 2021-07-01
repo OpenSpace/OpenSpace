@@ -34,40 +34,26 @@ namespace {
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent."
     };
+
+    struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
+        // [[codegen::verbatim(PositionInfo.description)]]
+        glm::dvec3 position;
+    };
+#include "statictranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation StaticTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Static Translation",
-        "base_transform_translation_static",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("StaticTranslation"),
-                Optional::No
-            },
-            {
-                PositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                PositionInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_transform_translation_static");
 }
 
-
 StaticTranslation::StaticTranslation()
-    : _position(
-        PositionInfo,
-        glm::dvec3(0.0),
-        glm::dvec3(-std::numeric_limits<double>::max()),
-        glm::dvec3(std::numeric_limits<double>::max())
-    )
+    : _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
 {
+    // @TODO (2021-06-24, emmbr) The exponential sliders do not handle ranges with
+    // negative values very well. When they do, this line can be uncommented
+    //_position.setExponent(20.f);
     addProperty(_position);
 
     _position.onChange([this]() {
@@ -79,13 +65,8 @@ StaticTranslation::StaticTranslation()
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     : StaticTranslation()
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticTranslation"
-    );
-
-    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _position = p.position;
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

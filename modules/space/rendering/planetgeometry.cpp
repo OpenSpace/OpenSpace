@@ -30,40 +30,27 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(PlanetGeometry)]] Parameters {
+        // The type of the PlanetGeometry that will can be constructed
+        std::string type;
+    };
+#include "planetgeometry_codegen.cpp"
 } // namespace
 
 namespace openspace::planetgeometry {
 
 documentation::Documentation PlanetGeometry::Documentation() {
-    using namespace documentation;
-    return {
-        "Planet Geometry",
-        "space_geometry_planet",
-        {
-            {
-                KeyType,
-                new StringVerifier,
-                Optional::No,
-                "The type of the PlanetGeometry that will can be constructed."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("space_geometry_planet");
 }
 
 std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "PlanetGeometry"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string geometryType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    PlanetGeometry* result = factory->create(p.type, dictionary);
     return std::unique_ptr<PlanetGeometry>(result);
 }
 

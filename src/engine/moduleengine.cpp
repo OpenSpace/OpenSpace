@@ -24,6 +24,7 @@
 
 #include <openspace/engine/moduleengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
@@ -58,7 +59,19 @@ void ModuleEngine::initialize(
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
-        m->initialize(configuration);
+        try {
+            m->initialize(configuration);
+        }
+        catch (const documentation::SpecificationError& e) {
+            for (const documentation::TestResult::Offense& o : e.result.offenses) {
+                LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
+            }
+            for (const documentation::TestResult::Warning& w : e.result.warnings) {
+                LWARNINGC(e.component, w.offender + ": " + ghoul::to_string(w.reason));
+            }
+            throw;
+        }
+
         addPropertySubOwner(m);
 
     }

@@ -51,8 +51,6 @@ int saveSettingsToProfile(lua_State* L) {
 
     std::string saveFilePath;
     if (n == 0) {
-        const ghoul::filesystem::File f = global::configuration->profile;
-
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
@@ -66,12 +64,17 @@ int saveSettingsToProfile(lua_State* L) {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::string newFile = fmt::format("{}_{}", f.fullBaseName(), time);
-        std::string sourcePath =
-            absPath("${PROFILES}") + '/' + global::configuration->profile + ".profile";
-        std::string destPath =
-            absPath("${PROFILES}") + '/' + newFile + ".profile";
-
+        std::filesystem::path path = global::configuration->profile;
+        path.replace_extension();
+        std::string newFile = fmt::format("{}_{}", path.string(), time);
+        std::string sourcePath = fmt::format("{}/{}.profile",
+            absPath("${USER_PROFILES}").string(), global::configuration->profile);
+        std::string destPath = fmt::format("{}/{}.profile",
+            absPath("${PROFILES}").string(), global::configuration->profile);
+        if (!std::filesystem::is_regular_file(sourcePath)) {
+            sourcePath = absPath("${USER_PROFILES}").string()
+                + '/' + global::configuration->profile + ".profile";
+        }
         LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
@@ -99,11 +102,15 @@ int saveSettingsToProfile(lua_State* L) {
     else if (saveFilePath.find('.') != std::string::npos) {
         return luaL_error(L, "Only provide the filename to save without file extension");
     }
-    const std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
 
+    std::string absFilename = fmt::format("{}/{}.profile",
+        absPath("${PROFILES}").string(), saveFilePath);
+    if (!std::filesystem::is_regular_file(absFilename)) {
+        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile").string();
+    }
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
-    if (FileSys.fileExists(absFilename) && !overwrite) {
+    if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
         return luaL_error(
             L,
             fmt::format(

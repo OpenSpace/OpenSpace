@@ -41,24 +41,31 @@ namespace {
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed."
     };
+
+    struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string url [[codegen::key("URL")]];
+    };
+#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Online",
-        "base_renderable_plane_image_online",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_plane_image_online"
+    );
+
+    // @TODO cleanup
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderablePlane::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+    return doc;
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(
@@ -66,20 +73,10 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageOnline"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
-    addProperty(_texturePath);
-
-    std::string texturePath;
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
-    }
-
+    _texturePath = p.url;
     addProperty(_texturePath);
 }
 

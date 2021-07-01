@@ -62,6 +62,7 @@ public:
     ~BrowserInstance();
 
     void loadUrl(std::string url);
+
     /**
      * Load a local file.
      *
@@ -79,14 +80,14 @@ public:
     void reshape(const glm::ivec2& windowSize);
 
     /**
-     * encapsulate renderHandler's draw method
+     * Encapsulate renderHandler's draw method
      */
     void draw();
     void close(bool force = false);
 
 #ifdef WIN32
     void sendTouchEvent(const CefTouchEvent& event) const;
-#endif
+#endif // WIN32
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
@@ -96,7 +97,7 @@ public:
     bool sendMouseMoveEvent(const CefMouseEvent& event);
 
     /**
-     * send scroll wheel event to browser
+     * Send scroll wheel event to browser
      *
      * \param event Key event with position
      * \param delta The scroll amount in pixels
@@ -104,10 +105,7 @@ public:
      */
     bool sendMouseWheelEvent(const CefMouseEvent& event, const glm::ivec2& delta);
 
-    /**
-     * Set the browser zoom level.
-     * 1.0 = default, 2.0 = double, etc.
-     */
+    /// Set the browser zoom level. 1.0 = default, 2.0 = double, etc.
     void setZoom(float ratio);
 
     void reloadBrowser();
@@ -116,7 +114,7 @@ public:
 
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
-    bool hasContent(int x, int y);
+    bool hasContent(const glm::ivec2& pos) const;
 
     bool _shouldReshape = false;
 

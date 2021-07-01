@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
@@ -34,30 +35,18 @@ namespace {
         "Intensity",
         "The intensity of this light source"
     };
+
+    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
+        // [[codegen::verbatim(IntensityInfo.description)]]
+        std::optional<float> intensity;
+    };
+#include "cameralightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation CameraLightSource::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Camera Light Source",
-        "base_camera_light_source",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("CameraLightSource"),
-                Optional::No,
-                "The type of this light source"
-            },
-            {
-                IntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                IntensityInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_camera_light_source");
 }
 
 CameraLightSource::CameraLightSource()
@@ -70,18 +59,9 @@ CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
-
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "CameraLightSource");
-
-
-    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
-        _intensity = static_cast<float>(
-            dictionary.value<double>(IntensityInfo.identifier)
-        );
-    }
 }
 
 float CameraLightSource::intensity() const {

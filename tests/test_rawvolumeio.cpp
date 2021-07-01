@@ -43,14 +43,14 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
     vol.set({ 0, 0, 0 }, value);
     REQUIRE(vol.get({ 0, 0, 0 }) == value);
 
-    std::string volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
+    std::filesystem::path volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
     // Write the 1x1x1 volume to disk
-    RawVolumeWriter<float> writer(volumePath);
+    RawVolumeWriter<float> writer(volumePath.string());
     writer.write(vol);
 
     // Read the 1x1x1 volume and make sure the value is the same.
-    RawVolumeReader<float> reader(volumePath, dims);
+    RawVolumeReader<float> reader(volumePath.string(), dims);
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     REQUIRE(storedVolume->get({ 0, 0, 0 }) == value);
 }
@@ -68,14 +68,14 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
 
     vol.forEachVoxel([&value](glm::uvec3 x, float v) { REQUIRE(v == value(x)); });
 
-    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+    std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 
     // Write the 2x4x8 volume to disk
-    RawVolumeWriter<float> writer(volumePath);
+    RawVolumeWriter<float> writer(volumePath.string());
     writer.write(vol);
 
     // Read the 2x4x8 volume and make sure the value is the same.
-    RawVolumeReader<float> reader(volumePath, dims);
+    RawVolumeReader<float> reader(volumePath.string(), dims);
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     vol.forEachVoxel([&value](glm::uvec3 x, float v) {
         REQUIRE(v == value(x));

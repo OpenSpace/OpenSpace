@@ -37,6 +37,7 @@
 #include <filesystem>
 #include <iostream>
 #include <random>
+#include <QStandardItemModel>
 
 using namespace openspace;
 
@@ -140,10 +141,16 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
-    , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) + '/')
-    , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
-    , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
+    , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")).string() + '/')
+    , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")).string() + '/')
+    , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string() + '/')
+    , _userConfigPath(absPath(globalConfig.pathTokens.at("USER_CONFIG")).string() + '/')
+    , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")).string() + '/')
+    , _userProfilePath(
+        absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
+    )
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
+    , _sgctConfigName(sgctConfigName)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -168,18 +175,19 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
     setCentralWidget(createCentralWidget());
 
-
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
-    populateWindowConfigsList(sgctConfigName);
+    populateWindowConfigsList(_sgctConfigName);
     _windowConfigBox->setEnabled(sgctConfigEnabled);
 
 
-    std::string p = absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images");
+    std::filesystem::path p = absPath(
+        globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"
+    );
     if (std::filesystem::exists(p)) {
         try {
-            setBackgroundImage(p);
+            setBackgroundImage(p.string());
         }
         catch (const std::exception& e) {
             std::cerr << "Error occurrred while reading background images: " << e.what();
@@ -242,7 +250,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         newButton, &QPushButton::released,
         [this]() {
-            openProfileEditor("");
+            openProfileEditor("", true);
         }
     );
     newButton->setObjectName("small");
@@ -254,7 +262,9 @@ QWidget* LauncherWindow::createCentralWidget() {
         editButton, &QPushButton::released,
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
-            openProfileEditor(selection);
+            int selectedIndex = _profileBox->currentIndex();
+            bool isUserProfile = selectedIndex < _userAssetCount;
+            openProfileEditor(selection, isUserProfile);
         }
     );
     editButton->setObjectName("small");
@@ -310,6 +320,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     namespace fs = std::filesystem;
     
     _profileBox->clear();
+    _userAssetCount = 0;
 
     if (!std::filesystem::exists(_profilePath)) {
         LINFOC(
@@ -318,6 +329,26 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         );
         return;
     }
+
+    _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    model->item(_userAssetCount)->setEnabled(false);
+    ++_userAssetCount;
+
+    // Add all the files with the .profile extension to the dropdown
+    for (const fs::directory_entry& p : fs::directory_iterator(_userProfilePath)) {
+        if (p.path().extension() != ".profile") {
+            continue;
+        }
+        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        ++_userAssetCount;
+    }
+
+    _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
+    model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    model->item(_userAssetCount)->setEnabled(false);
+    ++_userAssetCount;
+
     // Add all the files with the .profile extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
         if (p.path().extension() != ".profile") {
@@ -330,7 +361,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     const int idx = _profileBox->findText(QString::fromStdString(std::move(preset)));
     if (idx != -1) {
         _profileBox->setCurrentIndex(idx);
-
     }
 }
 
@@ -338,6 +368,24 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     namespace fs = std::filesystem;
 
     _windowConfigBox->clear();
+
+    _userConfigCount = 0;
+    _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+    model->item(_userConfigCount)->setEnabled(false);
+    ++_userConfigCount;
+    // Add all the files with the .xml extension to the dropdown
+    for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
+        if (p.path().extension() != ".xml") {
+            continue;
+        }
+        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+         ++_userConfigCount;
+    }
+    _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
+    model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+    model->item(_userConfigCount)->setEnabled(false);
+
     if (std::filesystem::exists(_configPath)) {
         // Add all the files with the .xml extension to the dropdown
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
@@ -368,8 +416,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openProfileEditor(const std::string& profile) {
+void LauncherWindow::openProfileEditor(const std::string& profile, const bool isUserProfile) {
     std::optional<Profile> p;
+    std::string saveProfilePath = isUserProfile ? _userProfilePath : _profilePath;
     if (profile.empty()) {
         // If the requested profile is the empty string, then we want to create a new one
 
@@ -378,17 +427,20 @@ void LauncherWindow::openProfileEditor(const std::string& profile) {
     else {
         // Otherwise, we want to load that profile
 
-        std::string fullProfilePath = _profilePath + profile + ".profile";
+        std::string fullProfilePath = saveProfilePath + profile + ".profile";
         p = loadProfileFromFile(this, fullProfilePath);
         if (!p.has_value()) {
             return;
         }
     }
 
-    ProfileEdit editor(*p, profile, _assetPath, _profilePath, _readOnlyProfiles, this);
+    ProfileEdit editor(*p, profile, _assetPath, _userAssetPath, saveProfilePath, _readOnlyProfiles, this);
     editor.exec();
     if (editor.wasSaved()) {
-        const std::string path = _profilePath + editor.specifiedFilename() + ".profile";
+        if (editor.specifiedFilename() != profile) {
+            saveProfilePath = _userProfilePath;
+        }
+        const std::string path = saveProfilePath + editor.specifiedFilename() + ".profile";
         saveProfile(this, path, *p);
         populateProfilesList(editor.specifiedFilename());
     }
@@ -407,5 +459,13 @@ std::string LauncherWindow::selectedProfile() const {
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    return _windowConfigBox->currentText().toStdString();
+    int idx = _windowConfigBox->currentIndex();
+    if (idx == 0) {
+        return _sgctConfigName;
+    } else if (idx > _userAssetCount) {
+        return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
+    }
+    else {
+        return "${USER_CONFIG}/" + _windowConfigBox->currentText().toStdString();
+    }
 }

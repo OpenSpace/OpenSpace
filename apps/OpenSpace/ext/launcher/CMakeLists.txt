@@ -36,6 +36,7 @@ set(HEADER_FILES
   include/profile/deltatimesdialog.h
   include/profile/horizonsdialog.h
   include/profile/keybindingsdialog.h
+  include/profile/scriptlogdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
@@ -57,6 +58,7 @@ set(SOURCE_FILES
   src/profile/deltatimesdialog.cpp
   src/profile/horizonsdialog.cpp
   src/profile/keybindingsdialog.cpp
+  src/profile/scriptlogdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
   src/profile/metadialog.cpp
@@ -81,6 +83,7 @@ qt5_wrap_cpp(
   include/profile/deltatimesdialog.h
   include/profile/horizonsdialog.h
   include/profile/keybindingsdialog.h
+  include/profile/scriptlogdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
   include/profile/modulesdialog.h
@@ -97,3 +100,11 @@ set_openspace_compile_settings(openspace-ui-launcher)
 target_include_directories(openspace-ui-launcher PUBLIC include)
 target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets openspace-core)
 
+if (MSVC)
+set(MSVC_WARNINGS
+  "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
+  "/wd4946"   # reinterpret_cast used between related classes: 
+)
+target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
+
+endif ()

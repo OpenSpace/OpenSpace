@@ -25,8 +25,10 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+  speckloader.h
   rendering/planetgeometry.h
   rendering/renderableconstellationbounds.h
+  rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
   rendering/renderablesatellites.h
@@ -42,8 +44,10 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  speckloader.cpp
   rendering/planetgeometry.cpp
   rendering/renderableconstellationbounds.cpp
+  rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
   rendering/renderablesatellites.cpp
@@ -63,6 +67,8 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/debrisViz_fs.glsl
   shaders/debrisViz_vs.glsl
+  shaders/habitablezone_vs.glsl
+  shaders/habitablezone_fs.glsl
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
   shaders/star_fs.glsl

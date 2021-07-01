@@ -8,20 +8,19 @@ asset.require('spice/base')
 
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 local spheres = asset.require('examples/spheres')
 
 debugHelper.registerCartesianAxes(asset, {
-    Parent = "Root",
-    Scale = 10
+  Parent = "Root",
+  Scale = 10
 })
 
 asset.onInitialize(function ()   
-    openspace.navigation.setNavigationState({
-        Anchor = "Root",
-        Position = { 20, 20, 20 },
-        Up = {0, 1, 0},
-    })
+  openspace.navigation.setNavigationState({
+    Anchor = "Root",
+    Position = { 20, 20, 20 },
+    Up = {0, 1, 0},
+  })
 end)

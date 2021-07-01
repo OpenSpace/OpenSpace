@@ -86,6 +86,7 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
+    void handleDragDrop(const std::string& file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
@@ -98,6 +99,7 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
+    void createUserDirectoriesIfNecessary();
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -123,7 +125,7 @@ private:
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
-    glm::vec2 _mousePosition;
+    glm::vec2 _mousePosition = glm::vec2(0.f);
 
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
@@ -138,5 +140,12 @@ private:
 };
 
 } // namespace openspace
+
+// Lua functions - exposed for testing
+namespace openspace::luascriptfunctions {
+
+int createSingleColorImage(lua_State* L);
+
+} // openspace::luascriptfunctions
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

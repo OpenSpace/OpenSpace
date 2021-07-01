@@ -68,7 +68,7 @@ function(download_cef platform version download_dir)
     set(CEF_DOWNLOAD_FILENAME "${CEF_DISTRIBUTION}.tar.bz2")
     set(CEF_DOWNLOAD_PATH "${CEF_DOWNLOAD_DIR}/${CEF_DOWNLOAD_FILENAME}")
     if (NOT EXISTS "${CEF_DOWNLOAD_PATH}")
-      string(REPLACE "+" "%2B" CEF_DOWNLOAD_URL "http://opensource.spotify.com/cefbuilds/${CEF_DOWNLOAD_FILENAME}")
+      string(REPLACE "+" "%2B" CEF_DOWNLOAD_URL "http://cef-builds.spotifycdn.com/${CEF_DOWNLOAD_FILENAME}")
 
       # Download the SHA1 hash for the binary distribution.
       message(STATUS "Downloading CEF: ${CEF_DOWNLOAD_PATH}.sha1...")

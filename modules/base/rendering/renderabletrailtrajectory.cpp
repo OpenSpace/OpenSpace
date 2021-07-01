@@ -29,6 +29,7 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 // This class creates the entire trajectory at once and keeps it in memory the entire
 // time. This means that there is no need for updating the trail at runtime, but also that
@@ -81,49 +82,32 @@ namespace {
         "If this value is set to 'true', the entire trail will be rendered; if it is "
         "'false', only the trail until the current time in the application will be shown."
     };
+
+    struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
+        // [[codegen::verbatim(StartTimeInfo.description)]]
+        std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+
+        // [[codegen::verbatim(EndTimeInfo.description)]]
+        std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+
+        // [[codegen::verbatim(SampleIntervalInfo.description)]]
+        double sampleInterval;
+
+        // [[codegen::verbatim(TimeSubSampleInfo.description)]]
+        std::optional<int> timeStampSubsampleFactor;
+
+        // [[codegen::verbatim(RenderFullPathInfo.description)]]
+        std::optional<bool> showFullTrail;
+    };
+#include "renderabletrailtrajectory_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrailTrajectory::Documentation() {
-    using namespace documentation;
-
-    documentation::Documentation doc {
-        "RenderableTrailTrajectory",
-        "base_renderable_renderabletrailtrajectory",
-        {
-            {
-                StartTimeInfo.identifier,
-                new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                Optional::No,
-                StartTimeInfo.description
-            },
-            {
-                EndTimeInfo.identifier,
-                new StringAnnotationVerifier("A valid date in ISO 8601 format"),
-                Optional::No,
-                EndTimeInfo.description
-            },
-            {
-                SampleIntervalInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SampleIntervalInfo.description
-            },
-            {
-                TimeSubSampleInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                TimeSubSampleInfo.description
-            },
-            {
-                RenderFullPathInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                RenderFullPathInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_renderabletrailtrajectory"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
@@ -146,37 +130,28 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTrailTrajectory"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
-    _startTime = dictionary.value<std::string>(StartTimeInfo.identifier);
+    _startTime = p.startTime;
     _startTime.onChange([this] { _needsFullSweep = true; });
     addProperty(_startTime);
 
-    _endTime = dictionary.value<std::string>(EndTimeInfo.identifier);
+    _endTime = p.endTime;
     _endTime.onChange([this] { _needsFullSweep = true; });
     addProperty(_endTime);
 
-    _sampleInterval = dictionary.value<double>(SampleIntervalInfo.identifier);
+    _sampleInterval = p.sampleInterval;
     _sampleInterval.onChange([this] { _needsFullSweep = true; });
     addProperty(_sampleInterval);
 
-    if (dictionary.hasValue<double>(TimeSubSampleInfo.identifier)) {
-        _timeStampSubsamplingFactor = static_cast<int>(
-            dictionary.value<double>(TimeSubSampleInfo.identifier)
-        );
-    }
+    _timeStampSubsamplingFactor =
+        p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    if (dictionary.hasValue<bool>(RenderFullPathInfo.identifier)) {
-        _renderFullTrail = dictionary.value<bool>(RenderFullPathInfo.identifier);
-    }
+    _renderFullTrail = p.showFullTrail.value_or(_renderFullTrail);
     addProperty(_renderFullTrail);
 
     // We store the vertices with ascending temporal order

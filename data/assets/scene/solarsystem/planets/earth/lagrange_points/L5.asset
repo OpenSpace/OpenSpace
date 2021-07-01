@@ -1,0 +1,59 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local circle = asset.require('util/circle').circle
+local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
+asset.require('spice/base')
+
+local L5 = {
+  Identifier = "L5",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderablePlaneImageLocal",
+    RenderableType = "Opaque",
+    Billboard = true,
+    Size = 800E6,
+    Texture = circle .. "/circle.png",
+    BlendMode = "Additive"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "395", -- L5
+      Observer = "SSB",
+      Kernels = kernels .. "/L5_de431.bsp"
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+  }
+}
+
+local L5Label = {
+  Identifier = "L5Label",
+  Parent = L5.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "L5",
+    FontSize = 20,
+    Size = 8.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5 Label",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Description = "Main label for L5"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  L5,
+  L5Label
+})

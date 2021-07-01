@@ -32,6 +32,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 #include <unordered_set>
 
 namespace openspace {
@@ -520,9 +521,8 @@ bool Asset::initialize() {
         loader()->callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format(
-            "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
-        ));
+        LERROR(fmt::format("Failed to initialize asset {}", id()));
+        LERROR(fmt::format("{}: {}", e.component, e.message));
         // TODO: rollback;
         setState(State::InitializationFailed);
         return false;
@@ -674,7 +674,7 @@ bool Asset::hasAssetFile() const {
 }
 
 std::string Asset::assetDirectory() const {
-    return ghoul::filesystem::File(_assetPath).directoryName();
+    return std::filesystem::path(_assetPath).parent_path().string();
 }
 
 const std::string& Asset::assetName() const {

@@ -39,18 +39,12 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <filesystem>
 #include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "NavigationHandler";
 
-    constexpr const char* KeyAnchor = "Anchor";
-    constexpr const char* KeyAim = "Aim";
-    constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyUp = "Up";
-    constexpr const char* KeyYaw = "Yaw";
-    constexpr const char* KeyPitch = "Pitch";
-    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
 
     using namespace openspace;
@@ -73,6 +67,31 @@ namespace {
         "than using the mouse interaction."
     };
 
+    struct [[codegen::Dictionary(NavigationState)]] Parameters {
+        // The identifier of the anchor node
+        std::string anchor;
+
+        // The identifier of the aim node, if used
+        std::optional<std::string> aim;
+
+        // The identifier of the scene graph node to use as reference frame. If not
+        // specified, this will be the same as the anchor
+        std::optional<std::string> referenceFrame;
+
+        // The position of the camera relative to the anchor node, expressed in meters in
+        // the specified reference frame
+        glm::dvec3 position;
+
+        // The up vector expressed in the coordinate system of the reference frame
+        std::optional<glm::dvec3> up;
+
+        // The yaw angle in radians. Positive angle means yawing camera to the right
+        std::optional<double> yaw;
+
+        // The pitch angle in radians. Positive angle means pitching camera upwards
+        std::optional<double> pitch;
+    };
+#include "navigationhandler_codegen.cpp"
 } // namespace
 
 #include "navigationhandler_lua.inl"
@@ -80,6 +99,14 @@ namespace {
 namespace openspace::interaction {
 
 ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
+    constexpr const char* KeyAnchor = "Anchor";
+    constexpr const char* KeyAim = "Aim";
+    constexpr const char* KeyPosition = "Position";
+    constexpr const char* KeyUp = "Up";
+    constexpr const char* KeyYaw = "Yaw";
+    constexpr const char* KeyPitch = "Pitch";
+    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
+
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, position);
     cameraDict.setValue(KeyAnchor, anchor);
@@ -105,36 +132,19 @@ ghoul::Dictionary NavigationHandler::NavigationState::dictionary() const {
 }
 
 NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
-    const bool hasAnchor = dictionary.hasValue<std::string>(KeyAnchor);
-    const bool hasPosition = dictionary.hasValue<glm::dvec3>(KeyPosition);
-    if (!hasAnchor || !hasPosition) {
-        throw ghoul::RuntimeError(
-            "Position and Anchor need to be defined for navigation dictionary."
-        );
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    anchor = dictionary.value<std::string>(KeyAnchor);
-    position = dictionary.value<glm::dvec3>(KeyPosition);
+    anchor = p.anchor;
+    position = p.position;
 
-    if (dictionary.hasValue<std::string>(KeyReferenceFrame)) {
-        referenceFrame = dictionary.value<std::string>(KeyReferenceFrame);
-    }
-    else {
-        referenceFrame = anchor;
-    }
-    if (dictionary.hasValue<std::string>(KeyAim)) {
-        aim = dictionary.value<std::string>(KeyAim);
-    }
+    referenceFrame = p.referenceFrame.value_or(anchor);
+    aim = p.aim.value_or(aim);
 
-    if (dictionary.hasValue<glm::dvec3>(KeyUp)) {
-        up = dictionary.value<glm::dvec3>(KeyUp);
+    if (p.up.has_value()) {
+        up = *p.up;
 
-        if (dictionary.hasValue<double>(KeyYaw)) {
-            yaw = dictionary.value<double>(KeyYaw);
-        }
-        if (dictionary.hasValue<double>(KeyPitch)) {
-            pitch = dictionary.value<double>(KeyPitch);
-        }
+        yaw = p.yaw.value_or(yaw);
+        pitch = p.pitch.value_or(pitch);
     }
 }
 
@@ -142,8 +152,7 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::st
                                                     std::string referenceFrame_,
                                                     glm::dvec3 position_,
                                                     std::optional<glm::dvec3> up_,
-                                                    double yaw_,
-                                                    double pitch_)
+                                                    double yaw_, double pitch_)
     : anchor(std::move(anchor_))
     , aim(std::move(aim_))
     , referenceFrame(std::move(referenceFrame_))
@@ -156,7 +165,7 @@ NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::st
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _disableMouseInputs(KeyDisableMouseInputInfo, false)
-    , _disableJoystickInputs(KeyDisableJoystickInputInfo, true)
+    , _disableJoystickInputs(KeyDisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);
@@ -449,26 +458,29 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
     }
 
     if (!filepath.empty()) {
-        std::string absolutePath = absPath(filepath);
+        std::filesystem::path absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        std::ofstream ofs(absolutePath.c_str());
+        std::ofstream ofs(absolutePath);
         ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::string absolutePath = absPath(filepath);
+    const std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
 
-    if (!FileSys.fileExists(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
+    if (!std::filesystem::is_regular_file(absolutePath)) {
+        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
     ghoul::Dictionary navigationStateDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absolutePath, navigationStateDictionary);
+        ghoul::lua::loadDictionaryFromFile(
+            absolutePath.string(),
+            navigationStateDictionary
+        );
         openspace::documentation::testSpecificationAndThrow(
             NavigationState::Documentation(),
             navigationStateDictionary,
@@ -484,13 +496,17 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 void NavigationHandler::setJoystickAxisMapping(int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize)
+                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                               bool isSticky,
+                                               double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize
+        shouldNormalize,
+        isSticky,
+        sensitivity
     );
 }
 
@@ -545,60 +561,7 @@ std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) co
 }
 
 documentation::Documentation NavigationHandler::NavigationState::Documentation() {
-    using namespace documentation;
-
-    return {
-        "Navigation State",
-        "core_navigation_state",
-        {
-            {
-                KeyAnchor,
-                new StringVerifier,
-                Optional::No,
-                "The identifier of the anchor node."
-            },
-            {
-                KeyAim,
-                new StringVerifier,
-                Optional::Yes,
-                "The identifier of the aim node, if used."
-            },
-            {
-                KeyReferenceFrame,
-                new StringVerifier,
-                Optional::Yes,
-                "The identifier of the scene graph node to use as reference frame. "
-                "If not specified, this will be the same as the anchor."
-            },
-            {
-                KeyPosition,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "The position of the camera relative to the anchor node, "
-                "expressed in meters in the specified reference frame."
-            },
-            {
-                KeyUp,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "The up vector expressed in the coordinate system of the reference frame."
-            },
-            {
-                KeyYaw,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The yaw angle in radians. "
-                "Positive angle means yawing camera to the right."
-            },
-            {
-                KeyPitch,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The pitch angle in radians. "
-                "Positive angle means pitching camera upwards."
-            },
-        }
-    };
+    return codegen::doc<Parameters>("core_navigation_state");
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

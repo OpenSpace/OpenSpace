@@ -83,8 +83,10 @@ public:
     void setDisableHDR(bool disable) override;
 
     void update() override;
-    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
-    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
+    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+        const glm::ivec4& viewport);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
+        const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
@@ -109,11 +111,11 @@ private:
     >;
 
     void resolveMSAA(float blackoutFactor);
-    void applyTMO(float blackoutFactor);
-    void applyFXAA();
+    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures();
     void updateExitVolumeTextures();
-    void writeDownscaledVolume();
+    void writeDownscaledVolume(const glm::ivec4& viewport);
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -129,10 +131,11 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 Hue, Saturation, Value) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
-    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth)
-        _writeDownscaledVolumeUniformCache;
+        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, Viewport,
+        Resolution) _fxaaUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
+        resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;

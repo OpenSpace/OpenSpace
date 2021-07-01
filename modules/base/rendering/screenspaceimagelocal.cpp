@@ -32,6 +32,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
@@ -42,42 +44,31 @@ namespace {
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane."
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
+        // Specifies the GUI name of the ScreenspaceImage
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(TexturePathInfo.description)]]
+        std::optional<std::string> texturePath;
+    };
+#include "screenspaceimagelocal_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageLocal::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Local Image",
-        "base_screenspace_image_local",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TexturePathInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TexturePathInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("base_screenspace_image_local");
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceImageLocal"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
+    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -89,7 +80,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     setIdentifier(identifier);
 
     _texturePath.onChange([this]() {
-        if (!FileSys.fileExists(FileSys.absolutePath(_texturePath))) {
+        if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
                 fmt::format("Image {} did not exist for {}", _texturePath, _identifier)
@@ -101,16 +92,15 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     });
     addProperty(_texturePath);
 
-    if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        std::string path = dictionary.value<std::string>(TexturePathInfo.identifier);
-        if (!FileSys.fileExists(FileSys.absolutePath(path))) {
-            LWARNINGC(
-                "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", path, _identifier)
-            );
+    if (p.texturePath.has_value()) {
+        if (std::filesystem::is_regular_file(absPath(*p.texturePath))) {
+            _texturePath = absPath(*p.texturePath).string();
         }
         else {
-            _texturePath = path;
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
+            );
         }
     }
 }
@@ -124,7 +114,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string());
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the
