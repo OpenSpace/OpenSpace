@@ -51,7 +51,7 @@ Fragment getFragment() {
       textureColor = texture(baseTexture, vs_st);
   }
   else {
-      textureColor.rgb = baseColor;
+      textureColor = vec4(baseColor, 1.0);
   }
   vec4 projectionColor = texture(projectionTexture, vs_st);
   if (projectionColor.a > 0.0) {
