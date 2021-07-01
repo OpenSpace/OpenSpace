@@ -27,21 +27,17 @@
 namespace openspace::space::luascriptfunctions {
 
 int convertFromRaDec(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 4 }, "lua::convertFromRaDec");
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
     glm::dvec2 degrees = glm::dvec2(0.0);
-    bool isDegrees = true;
     if (lua_type(L, 1) == LUA_TSTRING && lua_type(L, 2) == LUA_TSTRING) {
-        std::string s_ra = ghoul::lua::value<std::string>(L, 1);
-        std::string s_dec = ghoul::lua::value<std::string>(L, 2);
-        degrees = icrsToDecimalDegrees(s_ra, s_dec);
+        std::string ra = ghoul::lua::value<std::string>(L, 1);
+        std::string dec = ghoul::lua::value<std::string>(L, 2);
+        degrees = icrsToDecimalDegrees(ra, dec);
     }
     else if (lua_type(L, 1) == LUA_TNUMBER && lua_type(L, 2) == LUA_TNUMBER) {
         degrees.x = ghoul::lua::value<double>(L, 1);
         degrees.y = ghoul::lua::value<double>(L, 2);
-        if (lua_gettop(L) >= 4) {
-            isDegrees = ghoul::lua::value<bool>(L, 4);
-        }
     }
     else {
         throw ghoul::lua::LuaRuntimeException("lua::convertFromRaDec: Ra and Dec have to "
@@ -52,7 +48,7 @@ int convertFromRaDec(lua_State* L) {
     double distance = ghoul::lua::value<double>(L, 3);
     lua_settop(L, 0);
 
-    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance, isDegrees);
+    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
     ghoul::lua::push(L, pos);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
