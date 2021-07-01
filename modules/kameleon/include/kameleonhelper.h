@@ -39,7 +39,7 @@ namespace openspace::kameleonHelper {
  * \return \c nullptr if the file fails to open
  */
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath);
-double getTime(ccmc::Kameleon* kameleon);
+double getTime(ccmc::Kameleon* kameleon, double manualOffset);
 
 } //namespace openspace::kameleonHelper
 

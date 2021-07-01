@@ -50,9 +50,6 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 
-    const char* KeyStepSize = "StepSize";
-    const char* KeyGridType = "GridType";
-
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
 
@@ -111,6 +108,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "opacity",
+        "Opacity",
+        "" // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "rNormalization",
         "Radius normalization",
@@ -138,6 +141,15 @@ namespace {
         // actual time
         float secondsAfter;
 
+        // Specifies if you want to invert the volume data at it z-axis.
+        std::optional<bool> invertDataAtZ;
+
+        std::optional<float> opacity;
+
+        std::optional<double> stepSize;
+
+        std::optional<std::string> gridType;
+
         std::optional<ghoul::Dictionary> clipPlanes;
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
@@ -154,6 +166,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _opacity(OpacityInfo, 10.0f, 0.f, VolumeMaxOpacity)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -163,6 +176,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
+    , _invertDataAtZ(false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -172,6 +186,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
     );
+    
+    _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
@@ -179,8 +195,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasValue<double>(KeyStepSize)) {
-        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
+    _stepSize = p.stepSize.value_or(_stepSize);
+    
+    if (p.opacity.has_value()) {
+        _opacity = *p.opacity * VolumeMaxOpacity;
     }
 
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
@@ -191,13 +209,11 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
-        VolumeGridType gridType = volume::parseGridType(
-           dictionary.value<std::string>(KeyGridType)
-        );
+    if (p.gridType.has_value()) {
+        VolumeGridType gridType = volume::parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
-
+    
     addProperty(_opacity);
 }
 
@@ -225,7 +241,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read();
+        t.rawVolume = reader.read(_invertDataAtZ);
 
         float min = t.metadata.minValue;
         float diff = t.metadata.maxValue - t.metadata.minValue;
@@ -238,7 +254,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             t.histogram->add(data[i]);
         }
-
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -248,7 +263,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             GL_FLOAT,
             ghoul::opengl::Texture::FilterMode::Linear,
             ghoul::opengl::Texture::WrappingMode::Clamp
-        );
+            );
 
         t.texture->setPixelData(
             reinterpret_cast<void*>(data),
@@ -263,7 +278,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         nullptr,
         _transferFunction,
         _clipPlanes
-    );
+        );
 
     _raycaster->initialize();
     global::raycasterManager->attachRaycaster(*_raycaster.get());
@@ -276,9 +291,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
     });
 
-    _triggerTimeJump.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
+    _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
-    _jumpToTimestep.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
+    _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
     const int lastTimestep = !_volumeTimesteps.empty() ?
         static_cast<int>(_volumeTimesteps.size() - 1) :
@@ -301,7 +316,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
         _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-    });
+        });
 
     _transferFunctionPath.onChange([this] {
         _transferFunction = std::make_shared<openspace::TransferFunction>(
@@ -317,7 +332,8 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     try {
         ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
         metadata = RawVolumeMetadata::createFromDictionary(dictionary);
-    } catch (...) {
+    }
+    catch (...) {
         return;
     }
 
@@ -437,7 +453,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity * VolumeMaxOpacity);
+        _raycaster->setOpacity(_opacity);
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

@@ -60,7 +60,7 @@ void FieldlinesState::scalePositions(float scale) {
         p *= scale;
     }
 }
-
+#pragma optimize("", off)
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {
@@ -296,6 +296,8 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
         ofs.write(reinterpret_cast<char*>(vec.data()), sizeof(float) * nPoints);
     }
     ofs.write(allExtraQuantityNamesInOne.c_str(), nStringBytes);
+
+    ofs.close();
 }
 
 // TODO: This should probably be rewritten, but this is the way the files were structured

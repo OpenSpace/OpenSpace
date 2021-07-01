@@ -1,0 +1,34 @@
+local assetHelper = asset.require('util/asset_helper')
+local sun = asset.require('scene/solarsystem/sun/sun')
+
+-- synced directories
+local textureDirectory = asset.require('./bastille_day_sun_textures').TexturesPath;
+local magnetogramDirectory = asset.require('./magnetogram').TexturesPath;
+
+-- lists of paths 
+local magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
+local textures = openspace.walkDirectoryFiles(textureDirectory);
+
+-- put elements from textures into magnetograms
+for _, v in ipairs(textures) do
+    table.insert(magnetograms, v)
+end
+
+asset.onInitialize(function ()
+    -- add all all elements in magnetograms as layers
+    for i, imagename in ipairs(magnetograms) do
+   
+        openspace.globebrowsing.addLayer(
+            'Sun',
+            'ColorLayers',
+            {
+                Identifier = "magnetogram-" .. i,
+                Name = imagename,   --"Magnetogram-" .. i,
+                Description = "",
+                FilePath = imagename,
+                Enabled = false
+            }
+        )
+    end
+
+end)
