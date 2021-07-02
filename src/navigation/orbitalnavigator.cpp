@@ -853,9 +853,7 @@ OrbitalNavigator::CameraRotationDecomposition
                                                      const SceneGraphNode& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-
-    const glm::dvec3 cameraViewDirection =
-        cameraPose.rotation * glm::dvec3(0.0, 0.0, -1.0);
+    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
 
     const glm::dmat4 modelTransform = reference.modelTransform();
     const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
@@ -872,14 +870,12 @@ OrbitalNavigator::CameraRotationDecomposition
     );
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraUp)
     );
-    const glm::dquat globalCameraRotation = glm::normalize(
-        glm::inverse(glm::quat_cast(lookAtMat))
-    );
+
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
@@ -891,19 +887,15 @@ OrbitalNavigator::CameraRotationDecomposition
                                               glm::dvec3 reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-
-    const glm::dvec3 cameraViewDirection = cameraPose.rotation *
-        glm::dvec3(0.0, 0.0, -1.0);
+    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         reference - cameraPose.position,
         normalize(cameraViewDirection + cameraUp)
     );
-    const glm::dquat globalCameraRotation = glm::normalize(
-        glm::inverse(glm::quat_cast(lookAtMat))
-    );
+
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
@@ -1075,14 +1067,10 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         const glm::dvec3 localUp =
             localCameraRotation * Camera::UpDirectionCameraSpace;
 
-        const glm::dmat4 lookAtMat = glm::lookAt(
+        const glm::dquat targetRotation = helpers::lookAtQuaternion(
             glm::dvec3(0.0),
             Camera::ViewDirectionCameraSpace,
             normalize(localUp)
-        );
-
-        const glm::dquat targetRotation = glm::normalize(
-            glm::inverse(glm::quat_cast(lookAtMat))
         );
 
         const glm::dquat result = glm::slerp(
@@ -1307,15 +1295,14 @@ glm::dquat OrbitalNavigator::rotateGlobally(const glm::dquat& globalCameraRotati
     const glm::dvec3 directionFromSurfaceToCamera =
         glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection;
 
-    const glm::dvec3 lookUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
+    const glm::dvec3 cameraUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
         globalCameraRotation * Camera::UpDirectionCameraSpace;
 
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    return helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
-        lookUpWhenFacingSurface
+        cameraUpWhenFacingSurface
     );
-    return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 }
 
 glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
