@@ -886,12 +886,13 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    const glm::vec2 size = _fontShutdown->boundingBox("Shutting down");
+    constexpr const std::string_view Text = "Shutting down";
+    const glm::vec2 size = _fontShutdown->boundingBox(Text);
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
         fontResolution().y / 2 - size.y / 2
     );
-    RenderFont(*_fontShutdown, penPosition, "Shutting down");
+    RenderFont(*_fontShutdown, penPosition, Text);
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
@@ -905,14 +906,10 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     // t = 1.f -> start of shutdown counter    t = 0.f -> timer has reached shutdown
     float t = 1.f - (timer / fullTime);
 
-    // We want the screen to be black after 75% of the shutdown timer ...
-    t = glm::clamp(t / 0.75f, 0.f, 1.f);
-    // ... and to make it a bit smooth
-    t = ghoul::cubicEaseIn(t);
     rendering::helper::renderBox(
         glm::vec2(0.f),
         glm::vec2(1.f),
-        glm::vec4(0.f, 0.f, 0.f, t)
+        glm::vec4(0.f, 0.f, 0.f, ghoul::circularEaseOut(t))
     );
 
     // No need to print the text if we are just about to finish since otherwise we'll be
@@ -921,8 +918,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         return;
     }
 
+    constexpr const std::string_view FirstLine = "Shutdown in: {:.2f}s/{:.2f}s";
     const glm::vec2 size1 = _fontShutdown->boundingBox(
-        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
+        fmt::format(FirstLine, timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
@@ -933,19 +931,11 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     RenderFont(
         *_fontShutdown,
         penPosition,
-        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime),
+        fmt::format(FirstLine, timer, fullTime),
         ghoul::fontrendering::CrDirection::Down
     );
-
-    const glm::vec2 size2 = _fontShutdown->boundingBox("Press ESC again to abort");
-    penPosition.x = fontResolution().x / 2 - size2.x / 2;
-    RenderFont(
-        *_fontShutdown,
-        penPosition,
-        // Important: length of this string is the same as the shutdown time text
-        // to make them align
-        "Press ESC again to abort"
-    );
+    // Important: Length of this string is the same as the first line to make them align
+    RenderFont(*_fontShutdown, penPosition, "Press ESC again to abort");
 }
 
 void RenderEngine::renderDashboard() {
