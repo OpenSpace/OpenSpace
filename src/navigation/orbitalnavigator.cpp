@@ -374,9 +374,7 @@ OrbitalNavigator::OrbitalNavigator()
         _websocketStates.setSensitivity(_websocketSensitivity);
     });
 
-
     addPropertySubOwner(_friction);
-
 
     addProperty(_anchor);
     addProperty(_aim);
@@ -397,7 +395,15 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
+
+    _followRotationInterpolationTime.onChange([&]() {
+        _followRotationInterpolator.setInterpolationTime(
+            _followRotationInterpolationTime
+        );
+    });
+    _followRotationInterpolator.setInterpolationTime(_followRotationInterpolationTime);
     addProperty(_followRotationInterpolationTime);
+
     _invertMouseButtons.onChange(
         [this]() { _mouseStates.setInvertMouseButton(_invertMouseButtons); }
     );
@@ -418,7 +424,6 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
     );
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
-
 
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
@@ -444,14 +449,12 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
-    if (!(_anchorNode)) {
-        // Bail out if the anchor node is not set.
+    if (!_anchorNode) {
+        // Bail out if the anchor node is not set
         return;
     }
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-
-    SurfacePositionHandle posHandle;
 
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = _previousAnchorNodePosition.has_value() ?
@@ -474,11 +477,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Make the approximation delta size depending on the flight distance
         double arrivalThreshold = _flightDestinationDistance * _flightDestinationFactor;
 
+        const double distToDestination =
+            std::fabs(distFromCameraToFocus - _flightDestinationDistance);
+
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) >
-            arrivalThreshold)
-        {
+        if (distToDestination > arrivalThreshold) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
@@ -522,17 +526,18 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     _previousAnchorNodePosition = _anchorNode->worldPosition();
 
     // Calculate a position handle based on the camera position in world space
-    posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
+    SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
     // Decompose camera rotation so that we can handle global and local rotation
     // individually. Then we combine them again when finished.
     // Compensate for relative movement of aim node,
-    // in order to maintain the old global/local rotation.
+    // in order to maintain the old global/local rotation
     CameraRotationDecomposition camRot =
         decomposeCameraRotationSurface(pose, *_anchorNode);
 
     // Rotate with the object by finding a differential rotation from the previous
-    // to the current rotation.
+    // to the current rotation
     glm::dquat anchorRotation =
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
@@ -546,7 +551,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // only if close enough
     anchorNodeRotationDiff = interpolateRotationDifferential(
         deltaTime,
-        _followRotationInterpolationTime,
         pose.position,
         anchorNodeRotationDiff
     );
@@ -575,15 +579,13 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Recalculate posHandle since horizontal position changed
     posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
-
     // Rotate globally to keep camera rotation fixed
-    // in the rotating reference frame of the anchor object.
+    // in the rotating reference frame of the anchor object
     camRot.globalRotation = rotateGlobally(
         camRot.globalRotation,
         anchorNodeRotationDiff,
         posHandle
     );
-
 
     // Rotate around the surface out direction based on user input
     camRot.globalRotation = rotateHorizontally(
@@ -819,7 +821,6 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     return distanceToCamera < maximumDistanceForRotation;
 }
 
-
 bool OrbitalNavigator::followingAnchorRotation() const {
     if (_aimNode != nullptr && _aimNode != _anchorNode) {
         return false;
@@ -924,9 +925,8 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAncho
     if (distanceRatio > DistanceRatioAimThreshold) {
         // Divide the action of following the aim into two actions:
         // 1. Rotating camera around anchor, based on the aim's projection onto a sphere
-        //    around the anchor, with radius = distance(camera, anchor).
+        //    around the anchor, with radius = distance(camera, anchor)
         // 2. Adjustment of the camera to account for radial displacement of the aim
-
 
         // Step 1 (Rotation around anchor based on aim's projection)
         glm::dvec3 newAnchorToProjectedAim =
@@ -972,10 +972,9 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAncho
         // CorrectionFactorExponent = 50.0 is picked arbitrarily,
         // and gives a smooth result.
         ratio = glm::clamp(ratio, -1.0, 1.0);
-        double CorrectionFactorExponent = 50.0;
-        double correctionFactor =
+        const double CorrectionFactorExponent = 50.0;
+        const double correctionFactor =
             glm::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
-
 
         // newCameraAnchorAngle has two solutions, depending on whether the camera is
         // in the half-space closest to the anchor or aim.
@@ -1066,7 +1065,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-    const glm::dquat& localCameraRotation)
+                                                   const glm::dquat& localCameraRotation)
 {
     if (_retargetAnchorInterpolator.isInterpolating()) {
         const double t = _retargetAnchorInterpolator.value();
@@ -1104,11 +1103,10 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     }
 }
 
-OrbitalNavigator::Displacement OrbitalNavigator::interpolateRetargetAim(
-    double deltaTime,
-    CameraPose pose,
-    glm::dvec3 prevCameraToAnchor,
-    Displacement anchorToAim)
+OrbitalNavigator::Displacement
+OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
+                                         glm::dvec3 prevCameraToAnchor,
+                                         Displacement anchorToAim)
 {
 
     if (_retargetAimInterpolator.isInterpolating()) {
@@ -1393,7 +1391,6 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
-                                                                 double interpolationTime,
                                                           const glm::dvec3 cameraPosition,
                                                            const glm::dquat& rotationDiff)
 {
@@ -1401,9 +1398,6 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     const double interpolationSign =
         shouldFollowAnchorRotation(cameraPosition) ? 1.0 : -1.0;
 
-    _followRotationInterpolator.setInterpolationTime(static_cast<float>(
-        interpolationTime
-    ));
     _followRotationInterpolator.setDeltaTime(static_cast<float>(
         interpolationSign * deltaTime
     ));

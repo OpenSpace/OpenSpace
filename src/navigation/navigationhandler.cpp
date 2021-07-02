@@ -182,7 +182,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
         }
     }
 
-    // If session recording (playback mode) was started in the midst of a camera path, 
+    // If session recording (playback mode) was started in the midst of a camera path,
     // abort the path
     if (_playbackModeEnabled && _pathNavigator.isPlayingPath()) {
         _pathNavigator.abortPath();
