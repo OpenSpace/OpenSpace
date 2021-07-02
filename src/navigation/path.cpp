@@ -59,14 +59,14 @@ namespace {
         // (Node): The target node of the camera path. Not optional for 'Node' instructions
         std::optional<std::string> target;
 
-        // (Node): An optional position in relation to the target node, in model 
+        // (Node): An optional position in relation to the target node, in model
         // coordinates (meters)
         std::optional<glm::dvec3> position;
 
         // (Node): An optional height in relation to the target node, in meters
         std::optional<double> height;
 
-        // (Node): If true, the up direction of the node is taken into account when 
+        // (Node): If true, the up direction of the node is taken into account when
         // computing the wayopoint for this instruction
         std::optional<bool> useTargetUpDirection;
 
@@ -169,7 +169,12 @@ glm::dquat Path::interpolateRotation(double t) const {
     switch (_curveType) {
         case CurveType::AvoidCollision:
         case CurveType::Linear:
-            return helpers::easedSlerp(_start.rotation(), _end.rotation(), t);
+        {
+            // Eased slerp rotation between t = 0.1 and t = 0.9
+            double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);
+            tScaled = ghoul::sineEaseInOut(tScaled);
+            return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
+        }
         case CurveType::ZoomOutOverview:
         {
             const double t1 = 0.2;
@@ -188,7 +193,7 @@ glm::dquat Path::interpolateRotation(double t) const {
                 const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
                 const double tScaled = ghoul::cubicEaseInOut(t / t1);
-                lookAtPos = 
+                lookAtPos =
                     ghoul::interpolateLinear(tScaled, inFrontOfStart, startNodePos);
             }
             else if (t <= t2) {
@@ -370,9 +375,9 @@ Waypoint computeDefaultWaypoint(const NodeInfo& info,
 
     glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
     if (info.useTargetUpDirection) {
-        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
-        // which is where it matters the most. A better solution would be to make each 
-        // sgn aware of its own 'up' and query 
+        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth,
+        // which is where it matters the most. A better solution would be to make each
+        // sgn aware of its own 'up' and query
         up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
     }
 
@@ -382,8 +387,8 @@ Waypoint computeDefaultWaypoint(const NodeInfo& info,
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary, 
-                              Path::CurveType curveType) 
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
+                              Path::CurveType curveType)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

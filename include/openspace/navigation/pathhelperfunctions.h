@@ -38,29 +38,56 @@ namespace openspace::helpers {
     // Make interpolator parameter t [0,1] progress only inside a subinterval
     double shiftAndScale(double t, double newStart, double newEnd);
 
+    /*
+     * Compute a quaternion that represents the rotation looking from \p eye to
+     * \p center, with the specified \p up direction
+     */
     glm::dquat lookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
 
+    /*
+     * Compute a view direction vector from a quaternion representing a rotation
+     */
     glm::dvec3 viewDirection(const glm::dquat& q);
 
-    bool lineSphereIntersection(glm::dvec3 linePoint1, glm::dvec3 linePoint2,
-        glm::dvec3 sphereCenter, double spehereRadius, glm::dvec3& intersectionPoint);
+    /*
+     * Calculate the intersection of a line and a sphere.
+     * The line segment is defined from \p p1 to \p p2.
+     * The sphere is defined by the radius \p r and center point \p center.
+     * The resulting intersection point is stored in the \p intersectionPoint parameter.
+     *
+     * In the case of two intersection points, only care anout the first one.
+     *
+     * \return True if the line between \p p1 and \p p2 intersects the sphere given by
+     *         \p r and \p center, and false otherwise
+     */
+    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
+        double r, glm::dvec3& intersectionPoint);
 
+    /*
+     * Check if the point p is inside of the sphere defined by radius r and center
+     * point c
+     */
     bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 
+    /*
+     * Approximate integral of function f over inteval [t0, t1] using Simpson's rule.
+     * The integer n is the number of partitions and must be an even number.
+     */
     double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f);
 
+    /*
+     * Approximate integral of function f over inteval [t0, t1] using
+     * 5-point Gauss-Legendre quadrature
+     * https://en.wikipedia.org/wiki/Gaussian_quadrature
+     */
     double fivePointGaussianQuadrature(double t0, double t1,
         std::function<double(double)> f);
-
-    glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t);
 
 } // namespace openspace::helpers
 
 namespace openspace::splines {
 
-    // TODO: make all these into template functions.
-    // Alternatively, add cubicBezier interpolation in ghoul and only use
-    // ghoul's interpolator methods
+    // TODO: Move these to ghoul's interpolator file (and make template versions)
 
     // Centripetal version alpha = 0, uniform for alpha = 0.5 and chordal for alpha = 1
     glm::dvec3 catmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
@@ -71,14 +98,5 @@ namespace openspace::splines {
 
     glm::dvec3 linear(double t, const glm::dvec3& cp1, const glm::dvec3& cp2);
 
-    glm::dvec3 hermite(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2,
-        const glm::dvec3 &tangent1, const glm::dvec3 &tangent2);
-
-    glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
-        const std::vector<double>& tKnots);
-
-    glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
-        const std::vector<double>& tKnots);
-
-} // namespace openspace::splines 
+} // namespace openspace::splines
 #endif // __OPENSPACE_CORE___PATHHELPERFUNCTIONS___H__
