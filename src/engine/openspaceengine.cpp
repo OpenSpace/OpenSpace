@@ -1092,7 +1092,7 @@ void OpenSpaceEngine::preSynchronization() {
     global::memoryManager->TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
-        LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
+        LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
         global::profile->setIgnoreUpdates(true);
         loadSingleAsset(_scheduledAssetPathToLoad);
         global::profile->setIgnoreUpdates(false);

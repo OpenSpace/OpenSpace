@@ -65,8 +65,7 @@ glm::vec3 computeStarColor(float bv) {
 
     if (!colorMap.good()) {
         LERROR(fmt::format(
-            "Failed to open colormap data file: '{}'",
-            absPath(bvColormapPath)
+            "Failed to open colormap data file: {}", absPath(bvColormapPath)
         ));
         return glm::vec3(0.f);
     }
