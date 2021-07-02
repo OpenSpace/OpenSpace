@@ -60,9 +60,9 @@ public:
 
 private:
     void loadData();
-    void readHorizonsTextFile(const std::string& file);
-    bool loadCachedFile(const std::string& file);
-    void saveCachedFile(const std::string& file) const;
+    void readHorizonsTextFile(const std::filesystem::path& file);
+    bool loadCachedFile(const std::filesystem::path& file);
+    void saveCachedFile(const std::filesystem::path& file) const;
 
     properties::StringListProperty _horizonsTextFiles;
     ghoul::lua::LuaState _state;

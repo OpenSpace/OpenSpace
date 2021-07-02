@@ -166,7 +166,9 @@ bool LabelParser::create() {
         std::ifstream file(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", path));
+            LERROR(fmt::format(
+                "Failed to open label file {}", std::filesystem::path(path)
+            ));
             return false;
         }
 

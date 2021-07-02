@@ -126,9 +126,9 @@ private:
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
-        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, dInverseModelTransformMatrix, 
-        dModelTransformMatrix, dSgctProjectionToModelTransformMatrix,
-        dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj, hardShadows,
+        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
+        modelTransformMatrix, projectionToModelTransformMatrix,
+        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows,
         transmittanceTexture, irradianceTexture, inscatterTexture) _uniformCache;
 
     GLuint _transmittanceTableTexture = 0;
