@@ -161,11 +161,9 @@ namespace openspace {
 
 // Convert Equatorial coordinates ICRS right ascension and declination (a, d)
 // into Galactic coordinates (l, b)
-glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance)
-{
-    // Reference:
-    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
-
+// Reference:
+// https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php
+glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
     // (Ra, Dec) -> (a, d)
     double a = glm::radians(ra);
     double d = glm::radians(dec);
@@ -190,9 +188,9 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance)
 // Ra format 'XhYmZs', where X and Y are positive integers and Z is a positive double
 // Dec format 'XdYmZs', where X is a signed integer, Y is a positive integer and Z is a
 // positive double
+// Reference:
+// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
-    // Reference:
-    // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
     if (ra.size() < 6 || dec.size() < 6) {
         throw ghoul::lua::LuaRuntimeException(fmt::format(
             "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
@@ -238,11 +236,10 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
 
 // Convert Galactic coordinates (x, y, z) or (l, b) into Equatorial coordinates ICRS
 // right ascension and declination in decimal degrees (a, d) plus distance
+// References:
+// https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
+// https://en.wikipedia.org/wiki/Celestial_coordinate_system
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
-    // References:
-    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
-    // https://en.wikipedia.org/wiki/Celestial_coordinate_system
-
     // Normalize
     double distance = sqrt(x*x + y*y + z*z);
     double nX = x / distance;
@@ -265,12 +262,10 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
 }
 
 // Return a pair with two formatted strings from the decimal degrees ra and dec
-std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec)
-{
-    // References:
-    // https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
-    // https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
-
+// References:
+// https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
+// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
+std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
     // Radians to degrees
     double raDeg = ra;
     double decDeg = dec;
