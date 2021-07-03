@@ -182,9 +182,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
         "RenderAtDistance",
         "Render at Distance",
-        "Tells the rendering engine not to perform distance based performance culling"
-        "for this globe. Turning this propery on will let the globe to be seen at far"
-        " away distances when normally it would be hidden."
+        "Tells the rendering engine not to perform distance based performance culling "
+        "for this globe. Turning this property on will let the globe to be seen at far "
+        "away distances when normally it would be hidden."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
