@@ -152,7 +152,7 @@ void HorizonsTranslation::loadData() {
             ));
 
             if (loadCachedFile(cachedFile)) {
-                return;
+                continue;
             }
             else {
                 FileSys.cacheManager()->removeCacheFile(file);
