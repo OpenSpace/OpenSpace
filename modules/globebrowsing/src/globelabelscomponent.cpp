@@ -306,15 +306,15 @@ void GlobeLabelsComponent::initializeFonts() {
     );
 }
 
-bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+bool GlobeLabelsComponent::loadLabelsData(const std::filesystem::path& file) {
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(
         file,
         "GlobeLabelsComponent|" + identifier()
     );
 
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for labels file: {}", cachedFile, file));
+        LINFO(fmt::format("Cached file {} used for labels file {}", cachedFile, file));
 
         const bool hasCache = loadCachedFile(cachedFile);
         if (hasCache) {
@@ -327,9 +327,9 @@ bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
         }
     }
     else {
-        LINFO(fmt::format("Cache for labels file '{}' not found", file));
+        LINFO(fmt::format("Cache for labels file {} not found", file));
     }
-    LINFO(fmt::format("Loading labels file '{}'", file));
+    LINFO(fmt::format("Loading labels file {}", file));
 
     bool success = readLabelsFile(file);
     if (success) {
@@ -338,11 +338,11 @@ bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
     return success;
 }
 
-bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
+bool GlobeLabelsComponent::readLabelsFile(const std::filesystem::path& file) {
     try {
         std::fstream csvLabelFile(file);
         if (!csvLabelFile.good()) {
-            LERROR(fmt::format("Failed to open labels file '{}'", file));
+            LERROR(fmt::format("Failed to open labels file {}", file));
             return false;
         }
         if (!csvLabelFile.is_open()) {
@@ -427,16 +427,16 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
         return true;
     }
     catch (const std::fstream::failure& e) {
-        LERROR(fmt::format("Failed reading labels file '{}'", file));
+        LERROR(fmt::format("Failed reading labels file {}", file));
         LERROR(e.what());
         return false;
     }
 }
 
-bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
+bool GlobeLabelsComponent::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(fmt::format("Error opening file {} for loading cache file", file));
         return false;
     }
 
@@ -463,10 +463,10 @@ bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
     return fileStream.good();
 }
 
-bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
+bool GlobeLabelsComponent::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        LERROR(fmt::format("Error opening file {} for save cache file", file));
         return false;
     }
     fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
