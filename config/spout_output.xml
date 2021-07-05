@@ -7,7 +7,7 @@
       <Viewport name="Spout">
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
-        <SpoutOutputProjection quality="1.5k">
+        <SpoutOutputProjection quality="1k" mappingSpoutName="OpenSpace">
           <Background r="0.1" g="0.1" b="0.1" a="1.0" />
         </SpoutOutputProjection>
       </Viewport>
