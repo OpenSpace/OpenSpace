@@ -206,7 +206,7 @@ namespace openspace::fls {
                 seed.y,
                 seed.z);
 
-            //necessary to interpolate fieldlines to a certain amount of vertices
+            //necessary to map fieldlines to a certain amount of vertices
             pathline.getDs();
             pathline.measure();
             pathline.integrate();

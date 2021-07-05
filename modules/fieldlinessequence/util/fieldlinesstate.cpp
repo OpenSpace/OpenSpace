@@ -468,21 +468,23 @@ void FieldlinesState::moveLine(double dt) {
 
                 //check if at end after increasing index
                 
-                //size - 10 as a margin to avoid bugs
+                //size - 3 as a margin to avoid bugs
                 if (_vertexIndex == _vertexPath.size() - 3) {
-                    //vertex = _vertexPaths[i][_vertexIndex[i]];
+                    _timeSinceLastVertex = _vertexTimes[_vertexIndex-1];
+                    vertex = _fieldLines[_vertexIndex][i];
                     vertexEnd = true;
                     break;
                 }
             }
+            
+            if (vertexEnd) continue;
 
             //linear interpolation
-            
             //normalize t to [0,1]
             float t = _timeSinceLastVertex / _vertexTimes[_vertexIndex];
             glm::vec3 a = _fieldLines[_vertexIndex][i];
             glm::vec3 b = _fieldLines[_vertexIndex+1][i];
-
+            
             vertex = lerp(a, b, t);
 
         }
@@ -493,22 +495,20 @@ void FieldlinesState::moveLine(double dt) {
             //the inital position, end condition
             if (_vertexIndex == 0) continue;
 
-            bool stop = false;
             while (_timeSinceLastVertex < FLT_EPSILON) {
                 _vertexIndex--;
                 _timeSinceLastVertex += _vertexTimes[_vertexIndex];
 
                 //check if at end after decreasing index and updating timeSinceLastVertex
                 if (_vertexIndex == 0 && _timeSinceLastVertex < FLT_EPSILON) {
-                    vertex = _vertexPath[0];
+                    vertex = _fieldLines[_vertexIndex][i];
                     _timeSinceLastVertex = 0.0f;
                     vertexStart = true;
-                    stop = true;
                     break;
                 }
             }
 
-            if (stop) continue;
+            if (vertexStart) continue;
 
             //linear interpolation
             float t = _timeSinceLastVertex / _vertexTimes[_vertexIndex];
