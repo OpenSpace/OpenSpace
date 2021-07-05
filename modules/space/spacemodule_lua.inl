@@ -22,50 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___COORDINATECONVERSION___H__
-#define __OPENSPACE_CORE___COORDINATECONVERSION___H__
+#include <openspace/util/coordinateconversion.h>
 
-#include <ghoul/glm.h>
-#include <string>
+namespace openspace::space::luascriptfunctions {
 
-namespace openspace {
+int convertFromRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
-/**
- * Converts from ICRS decimal degrees coordinates to galactic cartesian coordinates.
- * \param ra Right ascension, given in decimal degrees
- * \param dec Declination, given in decimal degrees
- * \param distance The distance, or radius, to the position given in any unit.
- * \return A position in galactic cartesian coordinates, given in the same unit as the
- *         distance parameter.
- */
-glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance);
+    glm::dvec2 degrees = glm::dvec2(0.0);
+    if (lua_type(L, 1) == LUA_TSTRING && lua_type(L, 2) == LUA_TSTRING) {
+        std::string ra = ghoul::lua::value<std::string>(L, 1);
+        std::string dec = ghoul::lua::value<std::string>(L, 2);
+        degrees = icrsToDecimalDegrees(ra, dec);
+    }
+    else if (lua_type(L, 1) == LUA_TNUMBER && lua_type(L, 2) == LUA_TNUMBER) {
+        degrees.x = ghoul::lua::value<double>(L, 1);
+        degrees.y = ghoul::lua::value<double>(L, 2);
+    }
+    else {
+        throw ghoul::lua::LuaRuntimeException("lua::convertFromRaDec: Ra and Dec have to "
+            "be of the same type, either String or Number"
+        );
+    }
 
-/**
- * Converts from ICRS (hms and dms) coordinates to decimal degrees.
- * \param ra Right ascension, given as a string in format 'XhYmZs'
- * \param dec Declination, given as a string in format 'XdYmZs'
- * \return The decimal degrees coordinate in degrees
- */
-glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
+    double distance = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
 
-/**
- * Converts from galactic cartesian coordinates to ICRS decimal degrees coordinates
- * and distance.
- * \param x X coordinate
- * \param y Y coordinate
- * \param z Z coordinate
- * \return A vector with the ra and dec decimal degrees in degrees and distance.
- */
-glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);
+    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
+    ghoul::lua::push(L, pos);
 
-/**
- * Converts from ICRS decimal degrees coordinates to ICRS hms and dms coordinates.
- * \param ra Right ascension, given in decimal degrees
- * \param dec Declination, given in decimal degrees
- * \return A pair with the ra and dec strings in hms and dms format.
- */
-std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-} // namespace openspace
+int convertToRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertToRaDec");
 
-#endif // __OPENSPACE_CORE___COORDINATECONVERSION___H__
+    double x = ghoul::lua::value<double>(L, 1);
+    double y = ghoul::lua::value<double>(L, 2);
+    double z = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
+
+    glm::dvec3 degrees = galacticCartesianToIcrs(x, y, z);
+    std::pair<std::string, std::string> raDecPair
+        = decimalDegreesToIcrs(degrees.x, degrees.y);
+
+    ghoul::lua::push(L, raDecPair.first);  // Ra
+    ghoul::lua::push(L, raDecPair.second); // Dec
+    ghoul::lua::push(L, degrees.z);        // Distance
+
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
+    return 3;
+}
+
+}  // namespace openspace::space::luascriptfunctions
