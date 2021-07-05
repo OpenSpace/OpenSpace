@@ -98,7 +98,7 @@ void main() {
   levelWeights = getLevelWeights(distToVertexOnEllipsoid);
 
   // Get the height value and apply skirts
-  float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
+  float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength() * 100.0;
   
   // Translate the point along normal
   p += patchNormalCameraSpace * height;

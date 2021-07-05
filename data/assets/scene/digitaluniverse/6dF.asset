@@ -24,14 +24,14 @@ local object = {
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 1.0,
     File = speck .. "/6dF.speck",
+    Unit = "Mpc",
     Texture = textures .. "/point3A.png",
     ColorMap = speck .. "/6dF.cmap",
     ColorOption = { "redshift", "proximity" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
-    Unit = "Mpc",
     ScaleFactor = 534.0,
-    BillboardMaxSize = 9.0,
-    EnablePixelSizeControl = true,
+    BillboardMinMaxSize = { 0.0, 9.0 },
+    EnablePixelSizeControl = true
   },
   GUI = {
     Name = "6dF Galaxies",

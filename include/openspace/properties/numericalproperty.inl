@@ -23,8 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/util/json_helper.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <glm/ext/matrix_common.hpp>
+#include <cmath>
+#include <type_traits>
 
 namespace openspace::properties {
 
@@ -88,6 +91,36 @@ float NumericalProperty<T>::exponent() const {
 
 template <typename T>
 void NumericalProperty<T>::setExponent(float exponent) {
+    ghoul_assert(std::abs(exponent) > 0.f, "Exponent for property input cannot be zero");
+
+    auto isValidRange = [](const T& minValue, const T& maxValue) {
+        if constexpr (ghoul::isGlmVector<T>() || ghoul::isGlmMatrix<T>()) {
+            return glm::all(glm::greaterThanEqual(minValue, T(0))) &&
+                   glm::all(glm::greaterThanEqual(maxValue, T(0)));
+        }
+        else {
+            return (minValue >= T(0) && maxValue >= T(0));
+        }
+    };
+
+    // While the exponential slider does not support ranges with negative values,
+    // prevent setting the exponent for such ranges
+    // @ TODO (2021-06-30, emmbr), remove this check when no longer needed
+    if (!std::is_unsigned<T>::value) {
+        if (!isValidRange(_minimumValue, _maximumValue)) {
+            LWARNINGC(
+                "NumericalProperty: setExponent",
+                fmt::format(
+                    "Setting exponent for properties with negative values in "
+                    "[min, max] range is not yet supported. Property: {}",
+                    this->fullyQualifiedIdentifier()
+                )
+            );
+            _exponent = 1.f;
+            return;
+        }
+    }
+
     _exponent = exponent;
 }
 

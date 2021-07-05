@@ -3,7 +3,8 @@
     "base",
     "scene/solarsystem/missions/osirisrex/dashboard",
     "scene/solarsystem/missions/osirisrex/model",
-    "scene/solarsystem/missions/osirisrex/osirisrex"
+    "scene/solarsystem/missions/osirisrex/osirisrex",
+    "scene/solarsystem/missions/osirisrex/imageplane"
   ],
   "camera": {
     "aim": "",

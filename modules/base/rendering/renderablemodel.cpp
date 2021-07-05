@@ -157,12 +157,26 @@ namespace {
             Centimeter,
             Decimeter,
             Meter,
-            Kilometer
+            Kilometer,
+
+            // Weird units
+            Thou,
+            Inch,
+            Foot,
+            Yard,
+            Chain,
+            Furlong,
+            Mile
         };
 
         // The scale of the model. For example if the model is in centimeters
         // then ModelScale = Centimeter or ModelScale = 0.01
         std::optional<std::variant<ScaleUnit, double>> modelScale;
+
+        // By default the given ModelScale is used to scale the model down,
+        // by setting this setting to true the model is instead scaled up with the
+        // given ModelScale
+        std::optional<bool> invertModelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
@@ -290,6 +304,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
 
+    _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
+
     if (p.modelScale.has_value()) {
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
             Parameters::ScaleUnit scaleUnit =
@@ -318,16 +334,43 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 case Parameters::ScaleUnit::Kilometer:
                     distanceUnit = DistanceUnit::Kilometer;
                     break;
+
+                // Weired units
+                case Parameters::ScaleUnit::Thou:
+                    distanceUnit = DistanceUnit::Thou;
+                    break;
+                case Parameters::ScaleUnit::Inch:
+                    distanceUnit = DistanceUnit::Inch;
+                    break;
+                case Parameters::ScaleUnit::Foot:
+                    distanceUnit = DistanceUnit::Foot;
+                    break;
+                case Parameters::ScaleUnit::Yard:
+                    distanceUnit = DistanceUnit::Yard;
+                    break;
+                case Parameters::ScaleUnit::Chain:
+                    distanceUnit = DistanceUnit::Chain;
+                    break;
+                case Parameters::ScaleUnit::Furlong:
+                    distanceUnit = DistanceUnit::Furlong;
+                    break;
+                case Parameters::ScaleUnit::Mile:
+                    distanceUnit = DistanceUnit::Mile;
+                    break;
                 default:
                     throw ghoul::MissingCaseException();
             }
-            _modelScale = convertUnit(distanceUnit, DistanceUnit::Meter);
+            _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
             throw ghoul::MissingCaseException();
+        }
+
+        if (_invertModelScale) {
+            _modelScale = 1.0 / _modelScale;
         }
     }
 
@@ -532,7 +575,6 @@ void RenderableModel::initializeGL() {
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 }
 
 void RenderableModel::deinitializeGL() {
@@ -673,6 +715,10 @@ void RenderableModel::update(const UpdateData& data) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
+
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+        glm::compMax(data.modelTransform.scale)
+    );
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;

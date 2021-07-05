@@ -34,10 +34,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
+#include <filesystem>
 #include <functional>
 #include <unordered_map>
 
@@ -115,7 +114,7 @@ private:
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::OptionProperty _blendMode;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _planeMinSize;
     properties::OptionProperty _renderOption;
@@ -129,9 +128,9 @@ private:
     std::unordered_map<int, std::string> _textureFileMap;
     std::unordered_map<int, PlaneAggregate> _planesMap;
 
-    std::string _speckFile;
-    std::string _labelFile;
-    std::string _texturesPath;
+    std::filesystem::path _speckFile;
+    std::filesystem::path _labelFile;
+    std::filesystem::path _texturesPath;
     std::string _luminosityVar;
 
     Unit _unit = Parsec;

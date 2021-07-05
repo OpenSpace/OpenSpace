@@ -12,7 +12,7 @@ local BennuBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = BENNU_BODY,
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {

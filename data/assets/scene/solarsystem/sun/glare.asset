@@ -7,7 +7,7 @@ asset.require("spice/base")
 
 local SunGlare = {
   Identifier = "SunGlare",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 1.3*10^10.5,
@@ -17,13 +17,6 @@ local SunGlare = {
     BlendMode = "Additive",
     Opacity = 0.65,
     RenderableType = "PreDeferredTransparency"
-  },
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "SUN",
-      Observer = "SSB"
-    }
   },
   GUI = {
     Name = "Sun Glare",

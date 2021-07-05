@@ -1202,7 +1202,7 @@ void TouchInteraction::resetToDefault() {
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
-    _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
+    _friction.set(glm::vec4(0.025f, 0.025f, 0.02f, 0.02f));
 }
 
 void TouchInteraction::tap() {

@@ -575,6 +575,7 @@ public:
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
+    properties::BoolProperty _ignoreRecordedScale;
 
     enum class RecordedType {
         Camera = 0,

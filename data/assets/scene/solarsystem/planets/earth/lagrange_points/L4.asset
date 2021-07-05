@@ -1,0 +1,59 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local circle = asset.require('util/circle').circle
+local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
+asset.require('spice/base')
+
+local L4 = {
+  Identifier = "L4",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderablePlaneImageLocal",
+    RenderableType = "Opaque",
+    Billboard = true,
+    Size = 800E6,
+    Texture = circle .. "/circle.png",
+    BlendMode = "Additive"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "394", -- L4
+      Observer = "SSB",
+      Kernels = kernels .. "/L4_de431.bsp"
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
+  GUI = {
+    Name = "L4",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+  }
+}
+
+local L4Label = {
+  Identifier = "L4Label",
+  Parent = L4.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "L4",
+    FontSize = 20,
+    Size = 8.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
+  GUI = {
+    Name = "L4 Label",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Description = "Main label for L4"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  L4,
+  L4Label
+})

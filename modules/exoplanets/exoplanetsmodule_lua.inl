@@ -158,8 +158,8 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}'. "
-            "Could not determine star position", starName
+            "Insufficient data available for exoplanet system: '{}'. Could not determine "
+            "star position", starName
         ));
         return;
     }
@@ -429,7 +429,7 @@ void createExoplanetSystem(const std::string& starName) {
         "Renderable = {"
             "Type = 'RenderableRadialGrid',"
             "Enabled = " + isCircleEnabledString + ","
-            "OuterRadius = " + std::to_string(AU) + ","
+            "Radii = { 0.0, 1.0 },"
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
         "},"
@@ -437,6 +437,10 @@ void createExoplanetSystem(const std::string& starName) {
             "Rotation = {"
                 "Type = 'StaticRotation',"
                 "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "},"
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(AU) + ""
             "}"
         "},"
         "GUI = {"

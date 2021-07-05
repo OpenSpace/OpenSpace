@@ -511,7 +511,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
     , _moffatMethodOwner(MoffatMethodOptionInfo)
-    , _fadeInDistance(
+    , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
@@ -617,6 +617,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _otherDataOption.onChange([&]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
 
+    _otherDataRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
@@ -727,9 +728,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     if (p.fadeInDistances.has_value()) {
         glm::vec2 v = *p.fadeInDistances;
-        _fadeInDistance = v;
+        _fadeInDistances = v;
         _disableFadeInDistance = false;
-        addProperty(_fadeInDistance);
+        _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_fadeInDistances);
         addProperty(_disableFadeInDistance);
     }
 }
@@ -863,7 +865,7 @@ void RenderableStars::loadPSFTexture() {
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -1034,7 +1036,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        const glm::vec2 fadeRange = _fadeInDistance;
+        const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const double funcValue = a * distCamera + b;
@@ -1265,10 +1267,7 @@ void RenderableStars::update(const UpdateData&) {
                 absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_colorTexturePath)
-                ));
+                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 
@@ -1291,7 +1290,7 @@ void RenderableStars::update(const UpdateData&) {
             );
             if (_otherDataColorMapTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
+                    "Loaded texture from {}",
                     absPath(_otherDataColorMapPath)
                 ));
                 _otherDataColorMapTexture->uploadTexture();

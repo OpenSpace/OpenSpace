@@ -50,6 +50,7 @@ set(HEADER_FILES
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
+  rendering/renderableprism.h
   rendering/renderablesphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -101,6 +102,7 @@ set(SOURCE_FILES
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
+  rendering/renderableprism.cpp
   rendering/renderablesphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
@@ -141,6 +143,8 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
+  shaders/prism_fs.glsl
+  shaders/prism_vs.glsl
   shaders/renderabletrail_fs.glsl
   shaders/renderabletrail_vs.glsl
   shaders/screenspace_fs.glsl

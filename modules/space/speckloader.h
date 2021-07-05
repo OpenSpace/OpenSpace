@@ -53,7 +53,7 @@ struct Dataset {
     int orientationDataIndex = -1;
 
     struct Entry {
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         std::vector<float> data;
         std::optional<std::string> comment;
     };
@@ -67,7 +67,7 @@ struct Labelset {
     int textColorIndex = -1;
 
     struct Entry {
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0.f);
         std::string text;
     };
     std::vector<Entry> entries;

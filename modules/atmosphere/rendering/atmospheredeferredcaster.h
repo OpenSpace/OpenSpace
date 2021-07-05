@@ -126,9 +126,9 @@ private:
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
-        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, dInverseModelTransformMatrix, 
-        dModelTransformMatrix, dSgctProjectionToModelTransformMatrix,
-        dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj, hardShadows,
+        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
+        modelTransformMatrix, projectionToModelTransformMatrix,
+        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows,
         transmittanceTexture, irradianceTexture, inscatterTexture) _uniformCache;
 
     GLuint _transmittanceTableTexture = 0;
@@ -161,7 +161,7 @@ private:
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
-    glm::dvec3 _ellipsoidRadii = glm::vec3(0.f);
+    glm::dvec3 _ellipsoidRadii = glm::dvec3(0.0);
 
     // Atmosphere Textures Dimmensions
     glm::ivec2 _transmittanceTableSize = glm::ivec2(256, 64);

@@ -150,6 +150,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
         absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
     )
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
+    , _sgctConfigName(sgctConfigName)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -177,7 +178,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
-    populateWindowConfigsList(sgctConfigName);
+    populateWindowConfigsList(_sgctConfigName);
     _windowConfigBox->setEnabled(sgctConfigEnabled);
 
 
@@ -262,7 +263,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
-            bool isUserProfile = selectedIndex <= _userAssetCount;
+            bool isUserProfile = selectedIndex < _userAssetCount;
             openProfileEditor(selection, isUserProfile);
         }
     );
@@ -458,7 +459,10 @@ std::string LauncherWindow::selectedProfile() const {
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    if (_windowConfigBox->currentIndex() > _userAssetCount) {
+    int idx = _windowConfigBox->currentIndex();
+    if (idx == 0) {
+        return _sgctConfigName;
+    } else if (idx > _userAssetCount) {
         return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
     else {

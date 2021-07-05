@@ -92,7 +92,7 @@ public:
             Relative
         };
 
-        Type type = Type::Absolute;
+        Type type;
         std::string value;
     };
     struct CameraNavState {

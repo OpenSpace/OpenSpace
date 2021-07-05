@@ -246,15 +246,20 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
-    , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
+    , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 10.f, 1e10f)
+    , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5, 1E-3)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
     , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
-    , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
+    , _stereoscopicDepthOfFocusSurface(
+        StereoscopicDepthOfFocusSurfaceInfo,
+        200000,
+        0.25,
+        500000
+    )
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
@@ -264,7 +269,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
 {
-
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
             return;
@@ -380,12 +384,14 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_velocitySensitivity);
+    _flightDestinationDistance.setExponent(5.f);
     addProperty(_flightDestinationDistance);
     addProperty(_flightDestinationFactor);
     addProperty(_applyLinearFlight);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
+    _stereoscopicDepthOfFocusSurface.setExponent(10.f);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
     addProperty(_retargetInterpolationTime);
@@ -1417,7 +1423,7 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
 {
     const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1));
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
     const SurfacePositionHandle posHandle =
         node.calculateSurfacePositionHandle(cameraPositionModelSpace);
 

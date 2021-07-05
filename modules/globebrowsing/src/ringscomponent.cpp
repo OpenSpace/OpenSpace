@@ -122,10 +122,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings.Each of the two values is a "
-        "value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
-        "extent at the radius. If this value is, for example {0.5, 1.0}, the ring is "
-        "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
+        "This value is used to limit the width of the rings. Each of the two values is "
+        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
+        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
@@ -249,7 +249,7 @@ void RingsComponent::initialize() {
 
     addProperty(_enabled);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
@@ -305,6 +305,7 @@ void RingsComponent::initialize() {
     }
 
     _offset = p.offset.value_or(_offset);
+    _offset.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_offset);
 
     _nightFactor = p.nightFactor.value_or(_nightFactor);
@@ -419,7 +420,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
             glm::vec3 sunPositionObjectSpace = glm::normalize(
-                glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.0))
+                glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
             );
 
             _shader->setUniform(
@@ -619,7 +620,7 @@ void RingsComponent::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
@@ -642,7 +643,7 @@ void RingsComponent::loadTexture() {
             LDEBUGC(
                 "RingsComponent",
                 fmt::format(
-                    "Loaded forwards scattering texture from '{}'",
+                    "Loaded forwards scattering texture from {}",
                     absPath(_textureFwrdPath)
                 )
             );
@@ -668,7 +669,7 @@ void RingsComponent::loadTexture() {
             LDEBUGC(
                 "RingsComponent",
                 fmt::format(
-                    "Loaded backwards scattering texture from '{}'",
+                    "Loaded backwards scattering texture from {}",
                     absPath(_textureBckwrdPath)
                 )
             );
@@ -693,10 +694,7 @@ void RingsComponent::loadTexture() {
         if (textureUnlit) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
-                    "Loaded unlit texture from '{}'",
-                    absPath(_textureUnlitPath)
-                )
+                fmt::format("Loaded unlit texture from {}", absPath(_textureUnlitPath))
             );
             _textureUnlit = std::move(textureUnlit);
 
@@ -718,10 +716,7 @@ void RingsComponent::loadTexture() {
         if (textureColor) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
-                    "Loaded color texture from '{}'",
-                    absPath(_textureColorPath)
-                )
+                fmt::format("Loaded color texture from {}", absPath(_textureColorPath))
             );
             _textureColor = std::move(textureColor);
 
@@ -743,10 +738,7 @@ void RingsComponent::loadTexture() {
         if (textureTransparency) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
-                    "Loaded unlit texture from '{}'",
-                    absPath(_textureUnlitPath)
-                )
+                fmt::format("Loaded unlit texture from {}", absPath(_textureUnlitPath))
             );
             _textureTransparency = std::move(textureTransparency);
 

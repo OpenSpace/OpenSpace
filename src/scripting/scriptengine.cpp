@@ -191,29 +191,34 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
         return false;
     }
 
     return true;
 }
 
-bool ScriptEngine::runScriptFile(const std::string& filename) {
+bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped
 
-    if (filename.empty()) {
-        LWARNING("Filename was empty");
-        return false;
-    }
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(fmt::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -641,7 +646,7 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFileExists = true;
 
             LDEBUG(fmt::format(
-                "Using script log of type '{}' to file '{}'", _logType, _logFilename
+                "Using script log file {}", std::filesystem::path(_logFilename)
             ));
 
             // Test file and clear previous input
@@ -649,7 +654,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
 
             if (!file.good()) {
                 LERROR(fmt::format(
-                    "Could not open file '{}' for logging scripts", _logFilename
+                    "Could not open file {} for logging scripts",
+                    std::filesystem::path(_logFilename)
                 ));
 
                 return false;
