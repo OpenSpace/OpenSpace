@@ -40,8 +40,7 @@ namespace {
     constexpr const char _loggerCat[] = "ExoplanetsDataLoader";
 
     // @TODO: naturally, this path should not be hardcoded
-    std::string DataPath =
-        "D:/Exoplanets Experts Paper/Data/Exoplanets/PSCompPars_2021.03.08_05.14.56_nocomments.csv";
+    std::string DataPath = "${MODULES}/exoplanetsexperttool/data/exoplanetsdata.csv";
 
     constexpr const double EarthMass = 5.972e24; // kg
     constexpr const double EarthRadius = 6.3781e6; // meter
