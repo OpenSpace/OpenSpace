@@ -27,9 +27,11 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec4 in_color;
 
 out float vs_depthClipSpace;
 out vec4 vs_positionViewSpace;
+out vec4 vs_color;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 MVPTransform;
@@ -44,6 +46,7 @@ void main() {
 
     vs_depthClipSpace = float(positionClipSpace.w);
     vs_positionViewSpace = vec4(positionViewSpace);
+    vs_color = in_color;
 
     gl_PointSize = size;
     gl_Position = vec4(positionClipSpace);

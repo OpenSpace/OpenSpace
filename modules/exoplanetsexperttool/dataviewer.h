@@ -69,7 +69,7 @@ class DataViewer : public properties::PropertyOwner {
 public:
     DataViewer(std::string identifier, std::string guiName = "");
 
-    void initialize();
+    void initializeGL();
     void render();
 
 private:
@@ -89,20 +89,18 @@ private:
     bool compareColumnValues(ColumnID column, const ExoplanetItem& left,
         const ExoplanetItem& right) const ;
 
-    std::string composePositionIndexList(const std::vector<size_t>& dataIndices);
+    std::string formatIndicesList(const std::vector<size_t>& dataIndices);
 
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(ColumnID id) const;
 
+    glm::vec4 colorFromColormap(const ExoplanetItem& item);
+
+    // Write the information about the rendered points to a file
+    void writeRenderDataToFile();
+
     DataLoader _dataLoader;
     std::vector<ExoplanetItem> _data;
-    std::vector<glm::dvec3> _positions; // TODO: change into star data (with name as well)
-
-    struct TableItem {
-        size_t index;
-        std::optional<size_t> positionIndex = std::nullopt;
-    };
-    std::vector<TableItem> _tableData;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points
 
@@ -112,6 +110,9 @@ private:
     std::vector<const char*> _colormaps;
     int _currentColormapIndex;
     int _columnForColormap; // index
+    float _colorScaleMin;
+    float _colorScaleMax;
+    bool _colormapWasChanged = true;
 
     struct ColumnFilterEntry {
         int columnIndex;

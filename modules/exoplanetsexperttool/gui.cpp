@@ -58,9 +58,7 @@ Gui::Gui(std::string identifier, std::string guiName)
 
 Gui::~Gui() {} // NOLINT
 
-void Gui::initialize() {
-    _dataViewer.initialize();
-}
+void Gui::initialize() {}
 
 void Gui::deinitialize() {
     for (const Context& ctx : _contexts) {
@@ -176,6 +174,10 @@ void Gui::initializeGL() {
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col)) // NOLINT
     );
     glBindVertexArray(0);
+
+    // The dataviewer's initialization requires the imgui/impot contexts,
+    // so do it afterc onstexts have been created
+    _dataViewer.initializeGL();
 }
 
 void Gui::deinitializeGL() {

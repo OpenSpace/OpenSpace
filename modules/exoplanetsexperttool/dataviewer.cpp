@@ -39,11 +39,14 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 #include <implot.h>
 
 namespace {
     constexpr const char _loggerCat[] = "ExoplanetsDataViewer";
+
+    constexpr const char RenderDataFileName[] = "${TEMPORARY}/pointrenderdata.dat";
 
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
         int res = _stricmp(lhs, rhs);
@@ -63,12 +66,16 @@ namespace {
         return lhs < rhs;
     }
 
-    constexpr const glm::dvec3 DefaultPointColor = { 0.9, 1.0, 0.5 };
-    constexpr const glm::dvec3 DefaultSelectedColor = { 0.2, 0.8, 1.0 };
-    constexpr const glm::dvec3 NanPointColor = { 0.3, 0.3, 0.3 };
+    constexpr const glm::vec3 DefaultSelectedColor = { 0.2f, 0.8f, 1.f };
+    constexpr const glm::vec4 NanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
 
     constexpr const float DefaultColorScaleMinValue = 0.f;
     constexpr const float DefaultColorScaleMaxValue = 1000.f;
+
+    // @TODO This can be implemented as a constructor in imconfig.h to enable conversion
+    ImVec4 toImVec4(const glm::vec4& v) {
+        return ImVec4(v.x, v.y, v.z, v.w);
+    }
 }
 
 namespace openspace::exoplanets::gui {
@@ -76,27 +83,15 @@ namespace openspace::exoplanets::gui {
 DataViewer::DataViewer(std::string identifier, std::string guiName)
     : properties::PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _pointsIdentifier("ExoplanetDataPoints")
+    , _colorScaleMin(DefaultColorScaleMinValue)
+    , _colorScaleMax(DefaultColorScaleMaxValue)
 {
     _data = _dataLoader.loadData();
 
-    _tableData.reserve(_data.size());
     _filteredData.reserve(_data.size());
-    _positions.reserve(_data.size());
-
-    int counter = 0;
     for (size_t i = 0; i < _data.size(); i++) {
-        TableItem item;
-        item.index = i;
-
-        if (_data[i].position.has_value()) {
-            _positions.push_back(_data[i].position.value());
-            item.positionIndex = counter;
-            counter++;
-        }
-        _tableData.push_back(item);
         _filteredData.push_back(i);
     }
-    _positions.shrink_to_fit();
 
     _columns = {
         { "Name", ColumnID::Name },
@@ -137,7 +132,8 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         "Spectral",
         "Deep",
         "Dark",
-        "Paired"
+        "Paired",
+        "Pastel"
     };
 
     // TODO: make sure that settings are preserved between sessions?
@@ -145,30 +141,31 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _currentColormapIndex = 0;
 }
 
-void DataViewer::initialize() {
+void DataViewer::initializeGL() {
     initializeRenderables();
 }
 
 void DataViewer::initializeRenderables() {
     using namespace std::string_literals;
 
-    ghoul::Dictionary positions;
-    int counter = 1;
-    for (int i = 0; i < _positions.size(); ++i) {
-        std::string index = fmt::format("[{}]", i + 1);
-        positions.setValue<glm::dvec3>(index, _positions[i]);
+    writeRenderDataToFile();
+
+    if (!std::filesystem::is_regular_file(absPath(RenderDataFileName))) {
+        LWARNING("Count not find data file for points rendering");
+        return;
     }
 
     ghoul::Dictionary gui;
     gui.setValue("Name", "All Exoplanets"s);
     gui.setValue("Path", "/ExoplanetsTool"s);
 
+    std::filesystem::path dataFilePath = absPath(RenderDataFileName);
+
     ghoul::Dictionary renderable;
     renderable.setValue("Type", "RenderablePointData"s);
-    renderable.setValue("Color", DefaultPointColor);
-    renderable.setValue("HighlightColor", DefaultSelectedColor);
+    renderable.setValue("DataFile", dataFilePath.string());
+    renderable.setValue("HighlightColor", glm::dvec3(DefaultSelectedColor));
     renderable.setValue("Size", 10.0);
-    renderable.setValue("Positions", positions);
 
     ghoul::Dictionary node;
     node.setValue("Identifier", _pointsIdentifier);
@@ -188,7 +185,7 @@ void DataViewer::render() {
 }
 
 void DataViewer::renderScatterPlotAndColormap() {
-    int nPoints = static_cast<int>(_filteredData.size());
+    _colormapWasChanged = false;
 
     static const ImVec2 size = { 400, 300 };
     auto plotFlags = ImPlotFlags_NoLegend;
@@ -196,11 +193,11 @@ void DataViewer::renderScatterPlotAndColormap() {
 
     // TODO: make static varaibles and only update data if filter and/or selection changed
 
-    std::vector<double> ra, dec;
+    std::vector<float> ra, dec;
     ra.reserve(_filteredData.size());
     dec.reserve(_filteredData.size());
 
-    for (int i : _filteredData) {
+    for (size_t i : _filteredData) {
         const ExoplanetItem& item = _data[i];
         if (item.ra.hasValue() && item.ra.hasValue()) {
             ra.push_back(item.ra.value);
@@ -208,11 +205,11 @@ void DataViewer::renderScatterPlotAndColormap() {
         }
     }
 
-    std::vector<double> ra_selected, dec_selected;
+    std::vector<float> ra_selected, dec_selected;
     ra_selected.reserve(_selection.size());
     dec_selected.reserve(_selection.size());
 
-    for (int i : _selection) {
+    for (size_t i : _selection) {
         const ExoplanetItem& item = _data[i];
         if (item.ra.hasValue() && item.ra.hasValue()) {
             ra_selected.push_back(item.ra.value);
@@ -233,6 +230,7 @@ void DataViewer::renderScatterPlotAndColormap() {
             const char* name = _columns[i].name;
             if (ImGui::Selectable(name, _columnForColormap == i)) {
                 _columnForColormap = i;
+                _colormapWasChanged = true;
             }
         }
         ImGui::EndCombo();
@@ -245,13 +243,11 @@ void DataViewer::renderScatterPlotAndColormap() {
             const char* name = _colormaps[i];
             if (ImGui::Selectable(name, _currentColormapIndex == i)) {
                 _currentColormapIndex = i;
+                _colormapWasChanged = true;
             }
         }
         ImGui::EndCombo();
     }
-
-    static float colorScaleMin = DefaultColorScaleMinValue;
-    static float colorScaleMax = DefaultColorScaleMaxValue;
 
     const ColumnID colormapColumn = _columns[_columnForColormap].id;
 
@@ -279,17 +275,19 @@ void DataViewer::renderScatterPlotAndColormap() {
             }
         }
 
-        colorScaleMin = newMin;
-        colorScaleMax = newMax;
+        _colorScaleMin = newMin;
+        _colorScaleMax = newMax;
+        _colormapWasChanged = true;
     };
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(200);
-    ImGui::DragFloatRange2("Min / Max", &colorScaleMin, &colorScaleMax, 1.f);
+    if (ImGui::DragFloatRange2("Min / Max", &_colorScaleMin, &_colorScaleMax, 1.f)) {
+        _colormapWasChanged = true;
+    }
 
     ImVec4 selectedColor =
-        { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.0 };
-    ImVec4 nanColor = { NanPointColor.x, NanPointColor.y, NanPointColor.z, 1.0 };
+        { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
 
     static float pointSize = 1.5f;
     ImPlot::PushColormap(_colormaps[_currentColormapIndex]);
@@ -297,31 +295,15 @@ void DataViewer::renderScatterPlotAndColormap() {
     if (ImPlot::BeginPlot("Star Coordinate", "Ra", "Dec", size, plotFlags, axisFlags)) {
         ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, pointSize);
 
-        for (int i : _filteredData) {
+        for (size_t i : _filteredData) {
             const ExoplanetItem& item = _data[i];
 
             if (!item.ra.hasValue() || !item.dec.hasValue()) {
                 continue;
             }
 
-            auto value = valueFromColumn(colormapColumn, item);
-            float fValue = 0.0;
-            if (std::holds_alternative<float>(value)) {
-                fValue = std::get<float>(value);
-            }
-
-            ImVec4 pointColor;
-            if (std::isnan(fValue)) {
-                pointColor = nanColor;
-            }
-            else {
-                // TODO: handle max == min and min > max etc
-                float t = (fValue - colorScaleMin) / (colorScaleMax - colorScaleMin);
-                t = std::clamp(t, 0.f, 1.f);
-                pointColor = ImPlot::SampleColormap(t);
-            }
-
-            ImPlotPoint point = { item.ra.value, item.dec.value };
+            const ImVec4 pointColor = toImVec4(colorFromColormap(item));
+            const ImPlotPoint point = { item.ra.value, item.dec.value };
             const char* label = "Data " + i;
             ImPlot::PushStyleColor(ImPlotCol_MarkerFill, pointColor);
             ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, pointColor);
@@ -338,7 +320,7 @@ void DataViewer::renderScatterPlotAndColormap() {
             "Selected",
             ra_selected.data(),
             dec_selected.data(),
-            ra_selected.size()
+            static_cast<int>(ra_selected.size())
         );
         ImPlot::PopStyleColor();
         ImPlot::PopStyleColor();
@@ -348,8 +330,8 @@ void DataViewer::renderScatterPlotAndColormap() {
         ImGui::SameLine();
         ImPlot::ColormapScale(
             "##ColorScale",
-            colorScaleMin,
-            colorScaleMax,
+            _colorScaleMin,
+            _colorScaleMax,
             ImVec2(60, size.y)
         );
 
@@ -469,20 +451,12 @@ void DataViewer::renderTable() {
         }
         ImGui::EndTable();
 
-        if (filterChanged) {
-            const std::string indices = composePositionIndexList(_filteredData);
-            const std::string uri =
-                fmt::format("Scene.{}.Renderable.Filtered", _pointsIdentifier);
-
-            openspace::global::scriptEngine->queueScript(
-                "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+        if (filterChanged || _colormapWasChanged) {
+            writeRenderDataToFile();
         }
 
-        // Update selection renderable
         if (selectionChanged) {
-            const std::string indices = composePositionIndexList(_selection);
+            const std::string indices = formatIndicesList(_selection);
             const std::string uri =
                 fmt::format("Scene.{}.Renderable.Selection", _pointsIdentifier);
 
@@ -617,10 +591,10 @@ bool DataViewer::renderFilterSettings() {
 
     if (filterChanged) {
         _filteredData.clear();
-        _filteredData.reserve(_tableData.size());
+        _filteredData.reserve(_data.size());
 
-        for (TableItem& f : _tableData) {
-            const ExoplanetItem& d = _data[f.index];
+        for (int i = 0; i < _data.size(); i++) {
+            const ExoplanetItem& d = _data[i];
 
             bool filteredOut = hideNanTsm && std::isnan(d.tsm);
             filteredOut |= hideNanEsm && std::isnan(d.esm);
@@ -641,12 +615,12 @@ bool DataViewer::renderFilterSettings() {
             }
 
             if (!filteredOut) {
-                _filteredData.push_back(f.index);
+                _filteredData.push_back(i);
             }
 
             // If a filteredOut item is selected, remove it from selection
             if (filteredOut) {
-                auto found = std::find(_selection.begin(), _selection.end(), f.index);
+                auto found = std::find(_selection.begin(), _selection.end(), i);
                 const bool itemIsSelected = found != _selection.end();
 
                 if (itemIsSelected) {
@@ -754,14 +728,10 @@ std::variant<const char*, float> DataViewer::valueFromColumn(ColumnID column,
     }
 }
 
-std::string DataViewer::composePositionIndexList(const std::vector<size_t>& dataIndices)
-{
+std::string DataViewer::formatIndicesList(const std::vector<size_t>& indices) {
     std::string result;
-    for (size_t i : dataIndices) {
-        if (_tableData[i].positionIndex.has_value()) {
-            const size_t posIndex = _tableData[i].positionIndex.value();
-            result += std::to_string(posIndex) + ',';
-        }
+    for (size_t i : indices) {
+        result += std::to_string(i) + ',';
     }
     if (!result.empty()) {
         result.pop_back();
@@ -770,9 +740,87 @@ std::string DataViewer::composePositionIndexList(const std::vector<size_t>& data
 }
 
 bool DataViewer::isNumericColumn(ColumnID id) const {
+    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
     std::variant<const char*, float> aValue = valueFromColumn(id, _data.front());
     return std::holds_alternative<float>(aValue);
+}
+
+glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item) {
+    const ColumnID colormapColumn = _columns[_columnForColormap].id;
+
+    std::variant<const char*, float> value = valueFromColumn(colormapColumn, item);
+    float fValue = 0.0;
+    if (std::holds_alternative<float>(value)) {
+        fValue = std::get<float>(value);
+    }
+    else {
+        // text column => cannot be mapped to colormap
+        // OBS! This should not happen
+        return NanPointColor;
+    }
+
+    glm::vec4 pointColor;
+    if (std::isnan(fValue)) {
+        pointColor = NanPointColor;
+    }
+    else {
+        // TODO: handle min > max
+        ImPlot::PushColormap(_colormaps[_currentColormapIndex]);
+
+        float minMaxDiff = std::abs(_colorScaleMax - _colorScaleMin);
+        float t = minMaxDiff > std::numeric_limits<float>::epsilon() ?
+                 (fValue - _colorScaleMin) / minMaxDiff : 0.f;
+
+        t = std::clamp(t, 0.f, 1.f);
+        ImVec4 c = ImPlot::SampleColormap(t);
+        ImPlot::PopColormap();
+        pointColor = { c.x, c.y, c.z, c.w };
+    }
+    return pointColor;
+}
+
+void DataViewer::writeRenderDataToFile() {
+    std::ofstream file(absPath(RenderDataFileName), std::ios::binary);
+    if (!file) {
+        LERROR(fmt::format("Cannot open file '{}' for writing", RenderDataFileName));
+        return;
+    }
+
+    LDEBUG("Writing render data to file");
+
+    // For now, only write the filtered data. Later on we might want to render the
+    // filtered out points somehow and then we should write out the full dataset
+    std::vector<size_t> indicesWithPositions;
+    indicesWithPositions.reserve(_filteredData.size());
+    for (size_t index : _filteredData) {
+        const ExoplanetItem& item = _data[index];
+        if (item.position.has_value()) {
+            indicesWithPositions.push_back(index);
+        }
+    }
+    indicesWithPositions.shrink_to_fit();
+
+    // Write number of points
+    unsigned int nPoints = static_cast<unsigned int>(indicesWithPositions.size());
+    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(unsigned int));
+
+    for (size_t index : indicesWithPositions) {
+        const ExoplanetItem& item = _data[index];
+
+        file.write(reinterpret_cast<const char*>(&index), sizeof(size_t));
+
+        const glm::dvec3 position = *item.position;
+        file.write(reinterpret_cast<const char*>(&position.x), sizeof(double));
+        file.write(reinterpret_cast<const char*>(&position.y), sizeof(double));
+        file.write(reinterpret_cast<const char*>(&position.z), sizeof(double));
+
+        const ImVec4 color = toImVec4(colorFromColormap(item));
+        file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
+    }
 }
 
 } // namespace openspace::gui

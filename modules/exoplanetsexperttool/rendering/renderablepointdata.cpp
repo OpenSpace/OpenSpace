@@ -39,14 +39,8 @@
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "modelViewTransform", "MVPTransform", "color", "opacity", "size",
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "The color of the points."
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewTransform", "MVPTransform", "opacity", "size",
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
@@ -67,28 +61,13 @@ namespace {
         "The scaling factor applied to the size of the higlighted/selected points."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PositionsInfo = {
-        "Positions",
-        "Positions",
-        "Data to use for the positions of the points, given in Parsec."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "Selection",
         "Selection",
         "A list of indices of selected points to be highlighted."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilteredInfo = {
-        "Filtered", // @TODO: a less vague name
-        "Filtered Indices",
-        "A list of indices of filtered points. These are the points that will be rendered."
-    };
-
     struct [[codegen::Dictionary(RenderablePointData)]] Parameters {
-        // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color [[codegen::color()]];
-
         // [[codegen::verbatim(HighlightColorInfo.description)]]
         std::optional<glm::vec3> highlightColor [[codegen::color()]];
 
@@ -98,19 +77,16 @@ namespace {
         // [[codegen::verbatim(SelectedSizeScaleInfo.description)]]
         std::optional<float> selectedSizeScale;
 
-        // [[codegen::verbatim(PositionsInfo.description)]]
-        std::vector<glm::dvec3> positions;
-
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<int>> selection;
 
-        // [[codegen::verbatim(FilteredInfo.description)]]
-        std::optional<std::vector<int>> filtered;
+        //The file to read the point data from
+        std::filesystem::path dataFile;
     };
 #include "renderablepointdata_codegen.cpp"
 } // namespace
 
-namespace openspace {
+namespace openspace::exoplanets {
 
 documentation::Documentation RenderablePointData::Documentation() {
     return codegen::doc<Parameters>("exoplanetsexperttool_renderable_pointdata");
@@ -118,18 +94,12 @@ documentation::Documentation RenderablePointData::Documentation() {
 
 RenderablePointData::RenderablePointData(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _highlightColor(HighlightColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 1.f, 0.f, 150.f)
     , _selectedSizeScale(SelectedSizeScaleInfo, 2.f, 1.f, 5.f)
     , _selectedIndices(SelectionInfo)
-    , _filteredIndices(FilteredInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_color);
 
     _highlightColor = p.highlightColor.value_or(_highlightColor);
     _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -145,15 +115,13 @@ RenderablePointData::RenderablePointData(const ghoul::Dictionary& dictionary)
 
     _selectedIndices = p.selection.value_or(_selectedIndices);
     _selectedIndices.onChange([this]() { _selectionChanged = true; });
-    //_selectedIndices.setReadOnly(true);
+    _selectedIndices.setReadOnly(true);
     addProperty(_selectedIndices);
 
-    _filteredIndices = p.filtered.value_or(_filteredIndices);
-    _filteredIndices.onChange([this]() { _isDirty = true; });
-    _filteredIndices.setReadOnly(true);
-    addProperty(_filteredIndices);
+    _dataFile = std::make_unique<ghoul::filesystem::File>(p.dataFile);
+    _dataFile->setCallback([&]() { updateDataFromFile(); });
 
-    initializeData(p.positions);
+    updateDataFromFile();
 }
 
 bool RenderablePointData::isReady() const {
@@ -209,7 +177,6 @@ void RenderablePointData::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
 
-    _shaderProgram->setUniform(_uniformCache.color, _color);
     _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
     _shaderProgram->setUniform(_uniformCache.size, _size);
 
@@ -220,14 +187,12 @@ void RenderablePointData::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
 
     glBindVertexArray(_primaryPointsVAO);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_filteredPointData.size()));
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullPointData.size()));
 
+    // Selected points
     const size_t nSelected = _selectedIndices.value().size();
-
     if (nSelected > 0) {
-        _shaderProgram->setUniform(_uniformCache.color, _highlightColor);
         _shaderProgram->setUniform(_uniformCache.size, _selectedSizeScale * _size);
-
         glBindVertexArray(_selectedPointsVAO);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
     }
@@ -262,37 +227,35 @@ void RenderablePointData::update(const UpdateData&) {
             ));
         }
 
-        // Filter data
-        if (_filteredIndices.value().size() > 0) {
-            _filteredPointData.clear();
-            _filteredPointData.reserve(_filteredIndices.value().size());
-            for (int i : _filteredIndices.value()) {
-                _filteredPointData.push_back(_fullPointData.at(i));
-            }
-        }
-        else {
-            _filteredPointData = _fullPointData;
-        }
-
         glBindVertexArray(_primaryPointsVAO);
         glBindBuffer(GL_ARRAY_BUFFER, _primaryPointsVBO);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _filteredPointData.size() * _nValuesPerPoint * sizeof(float),
-            _filteredPointData.data(),
+            _fullPointData.size() * sizeof(Point),
+            _fullPointData.data(),
             GL_STATIC_DRAW
         );
 
         GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
-
         glEnableVertexAttribArray(positionAttribute);
         glVertexAttribPointer(
             positionAttribute,
             3,
             GL_FLOAT,
             GL_FALSE,
-            0,
+            _nValuesPerPoint * sizeof(float),
             nullptr
+        );
+
+        GLint colorAttribute = _shaderProgram->attributeLocation("in_color");
+        glEnableVertexAttribArray(colorAttribute);
+        glVertexAttribPointer(
+            colorAttribute,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            _nValuesPerPoint * sizeof(float),
+            reinterpret_cast<void*>(3 * sizeof(float))
         );
 
         glBindVertexArray(0);
@@ -310,13 +273,24 @@ void RenderablePointData::update(const UpdateData&) {
             ));
         }
 
-        const int nSelected = _selectedIndices.value().size();
+        const glm::vec3 color = _highlightColor;
+
+        const int nSelected = static_cast<int>(_selectedIndices.value().size());
         std::vector<Point> selectedPoints;
         selectedPoints.reserve(nSelected);
 
+        // For each of the selected indices, find the corresponding point
         for (int i : _selectedIndices.value()) {
-            if (i >= 0 && i < _fullPointData.size()) {
-                selectedPoints.push_back(_fullPointData.at(i));
+            std::vector<int>::iterator pos =
+                std::find(_indices.begin(), _indices.end(), i);
+
+            if (pos != _indices.end()) {
+                const int index = pos - _indices.begin();
+                const Point& p = _fullPointData.at(index);
+                Point newP = {
+                    p.xyz[0], p.xyz[1], p.xyz[2], color.r, color.g, color.b, 1.f
+                };
+                selectedPoints.push_back(newP);
             }
             else {
                 LINFO(fmt::format("Ignoring invalid index '{}' in new selection", i));
@@ -334,15 +308,25 @@ void RenderablePointData::update(const UpdateData&) {
             );
 
             GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
-
             glEnableVertexAttribArray(positionAttribute);
             glVertexAttribPointer(
                 positionAttribute,
                 3,
                 GL_FLOAT,
                 GL_FALSE,
-                0,
+                _nValuesPerPoint * sizeof(float),
                 nullptr
+            );
+
+            GLint colorAttribute = _shaderProgram->attributeLocation("in_color");
+            glEnableVertexAttribArray(colorAttribute);
+            glVertexAttribPointer(
+                colorAttribute,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                _nValuesPerPoint * sizeof(float),
+                reinterpret_cast<void*>(3 * sizeof(float))
             );
 
             glBindVertexArray(0);
@@ -353,15 +337,49 @@ void RenderablePointData::update(const UpdateData&) {
     _selectionChanged = false;
 }
 
-void RenderablePointData::initializeData(const std::vector<glm::dvec3> positions) {
+void RenderablePointData::updateDataFromFile() {
+    LDEBUG(fmt::format("Updating point data from file: {}", _dataFile->path()));
+
+    std::ifstream file(_dataFile->path(), std::ios::binary);
+    if (!file) {
+        LERROR(fmt::format("Could not open file for reading: {}", _dataFile->path()));
+        return;
+    }
+
     _fullPointData.clear();
-    _fullPointData.reserve(3 * positions.size());
-    for (const glm::dvec3& pos : positions) {
-        const glm::vec3 scaledPos = glm::vec3(pos * distanceconstants::Parsec);
-        _fullPointData.push_back({ scaledPos.x, scaledPos.y, scaledPos.z });
+    _indices.clear();
+
+    // Read number of data points
+    unsigned int nPoints;
+    file.read(reinterpret_cast<char*>(&nPoints), sizeof(unsigned int));
+
+    _fullPointData.reserve(nPoints);
+    _indices.reserve(nPoints);
+
+    // OBS: this reading must match the writing in the dataviewer
+    for (int i = 0; i < nPoints; i++) {
+        size_t index;
+        file.read(reinterpret_cast<char*>(&index), sizeof(size_t));
+
+        glm::dvec3 position;
+        file.read(reinterpret_cast<char*>(&position.x), sizeof(double));
+        file.read(reinterpret_cast<char*>(&position.y), sizeof(double));
+        file.read(reinterpret_cast<char*>(&position.z), sizeof(double));
+
+        glm::vec4 color;
+        file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+
+        const glm::vec3 scaledPos = glm::vec3(position * distanceconstants::Parsec);
+        _fullPointData.push_back({
+            scaledPos.x, scaledPos.y, scaledPos.z, color.x, color.y, color.z, color.w
+        });
+        _indices.push_back(static_cast<int>(index));
     }
 
     _isDirty = true;
 }
 
-} // namespace openspace
+} // namespace openspace::exoplanets

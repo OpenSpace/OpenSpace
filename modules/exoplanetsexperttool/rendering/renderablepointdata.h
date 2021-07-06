@@ -38,7 +38,7 @@ namespace openspace::documentation { struct Documentation; }
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace {
+namespace openspace::exoplanets {
 
 class RenderablePointData : public Renderable {
 public:
@@ -52,11 +52,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    /**
-     * Update the points data in this renderable
-     * positions \in Parsec
-     */
-    void initializeData(const std::vector<glm::dvec3> positions);
+    void updateDataFromFile();
 
     static documentation::Documentation Documentation();
 
@@ -66,22 +62,23 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
     UniformCache(modelViewTransform, modelViewProjectionTransform,
-        color, opacity, size) _uniformCache;
+        opacity, size) _uniformCache;
 
-    properties::Vec3Property _color;
     properties::Vec3Property _highlightColor;
     properties::FloatProperty _size;
     properties::FloatProperty _selectedSizeScale;
     properties::IntListProperty _selectedIndices;
-    properties::IntListProperty _filteredIndices;
+
+    std::unique_ptr<ghoul::filesystem::File> _dataFile;
 
     struct Point {
         float xyz[3];
+        float rgba[4];
     };
-    const unsigned int _nValuesPerPoint = 3;
+    const unsigned int _nValuesPerPoint = 7;
 
     std::vector<Point> _fullPointData;
-    std::vector<Point> _filteredPointData;
+    std::vector<int> _indices; // indices of the points in the dataviewer
 
     GLuint _primaryPointsVAO = 0;
     GLuint _primaryPointsVBO = 0;
@@ -90,6 +87,6 @@ private:
     GLuint _selectedPointsVBO = 0;
 };
 
-}// namespace openspace
+}// namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___RENDERABLEPOINTDATA___H__

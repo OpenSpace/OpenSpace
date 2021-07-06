@@ -27,20 +27,22 @@
 
 in float vs_depthClipSpace;
 in vec4 vs_positionViewSpace;
+in vec4 vs_color;
 
-uniform vec3 color;
 uniform float opacity;
 
 Fragment getFragment() {
-
     float radius = 0.5;
     float distance = length(gl_PointCoord - vec2(radius));
 
     if (distance > pow(radius, 2))
         discard;
 
+    vec4 color = vs_color;
+    color.a *= opacity;
+
     Fragment frag;
-    frag.color     = vec4(color, opacity);
+    frag.color     = color;
     frag.depth     = vs_depthClipSpace;
     frag.gPosition = vs_positionViewSpace;
 
