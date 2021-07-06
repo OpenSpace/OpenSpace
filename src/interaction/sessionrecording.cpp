@@ -1770,8 +1770,8 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
-    bool paused = global::timeManager->isPaused();
-    if (_state == SessionState::PlaybackPaused) {
+    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
@@ -1780,7 +1780,7 @@ void SessionRecording::moveAheadInTime() {
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
-    //Unfortunately the first frame is sometimes rendered because globebrowsing reports
+    // Unfortunately the first frame is sometimes rendered because globebrowsing reports
     // that all chunks are rendered when they apparently are not.
     if (_saveRendering_isFirstFrame) {
         _saveRendering_isFirstFrame = false;
@@ -1793,10 +1793,10 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            if (!paused) {
+            if (!playbackPaused) {
                 _saveRenderingCurrentRecordedTime_interpolation +=
                     _saveRenderingDeltaTime_interpolation_usec;
-               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
                 global::renderEngine->takeScreenshot();
             }
         }
