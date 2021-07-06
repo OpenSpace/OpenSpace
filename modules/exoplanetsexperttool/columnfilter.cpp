@@ -56,12 +56,18 @@ namespace {
 
 namespace openspace::exoplanets {
 
+const char* ColumnFilter::TextFilterDescriptionShort = "incl, -excl";
+
 const char* ColumnFilter::TextFilterDescription =
-    "Text filter. Start with '-' for exclusive check \n \n"
+    "Text filter. Start with '-' for exclusive check, otherwise an "
+    "inclusive check against the string is performed. \n \n"
     "Combine multiple conditions with comma";
 
+const char* ColumnFilter::NumericFilterDescriptionShort =
+    ">, >=, <, <=, =, null, !null";
+
 const char* ColumnFilter::NumericFilterDescription =
-    "Numeric filter. Supported operators: \n"
+    "Numeric filter. Supported operators are: \n"
     "\t >, >=, <, <=, =, null, !null \n \n"
     "Combine multiple conditions with comma. Ex: '> 30, !null'";
 

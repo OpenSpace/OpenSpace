@@ -37,7 +37,9 @@ public:
         Text
     };
 
+    static const char* TextFilterDescriptionShort;
     static const char* TextFilterDescription;
+    static const char* NumericFilterDescriptionShort;
     static const char* NumericFilterDescription;
 
     ColumnFilter(std::string query, Type type);

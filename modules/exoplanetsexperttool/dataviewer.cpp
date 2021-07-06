@@ -563,6 +563,13 @@ bool DataViewer::renderFilterSettings() {
 
     bool numeric = isNumericColumn(_columns[filterColIndex].id);
 
+    // Short description
+    ImGui::SameLine();
+    ImGui::TextUnformatted(numeric ?
+        ColumnFilter::NumericFilterDescriptionShort :
+        ColumnFilter::TextFilterDescriptionShort
+    );
+
     // Help marker
     ImGui::SameLine();
     ImGui::TextDisabled("(?)");
@@ -577,7 +584,12 @@ bool DataViewer::renderFilterSettings() {
         ImGui::EndTooltip();
     }
 
+    // Clear the text field
     ImGui::SameLine();
+    if (ImGui::Button("Clear")) {
+        strcpy(queryString, "");
+    }
+
     if (ImGui::Button("Add filter") || inputEntered) {
         ColumnFilter filter = numeric ?
             ColumnFilter(queryString, ColumnFilter::Type::Numeric) :
@@ -588,12 +600,6 @@ bool DataViewer::renderFilterSettings() {
             strcpy(queryString, "");
             filterChanged = true;
         }
-    }
-
-    // Clear the text field
-    ImGui::SameLine();
-    if (ImGui::Button("Clear")) {
-        strcpy(queryString, "");
     }
 
     const std::string filtersHeader = _appliedFilters.empty() ?
