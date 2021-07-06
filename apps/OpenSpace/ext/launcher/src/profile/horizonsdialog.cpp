@@ -55,7 +55,6 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -233,13 +232,14 @@ void HorizonsDialog::createWidgets() {
 }
 
 void HorizonsDialog::openHorizonsFile() {
-    _horizonsFile = QFileDialog::getOpenFileName(
+    std::string filePath = QFileDialog::getOpenFileName(
         this,
         tr("Open Horizons file"),
         "",
         tr("Horiozons file (*.dat)")
     ).toStdString();
-    _fileEdit->setText(_horizonsFile.c_str());
+    _horizonsFile = std::filesystem::absolute(filePath);
+    _fileEdit->setText(QString(_horizonsFile.string().c_str()));
 }
 
 void HorizonsDialog::openSaveDirectory() {
@@ -325,8 +325,11 @@ bool HorizonsDialog::sendHorizonsRequest() {
             std::cout << "No match found for the observer '" << center << "'" <<
                 std::endl;
             break;
-        case HorizonsDialog::HorizonsResult::ErrorTaget:
-            std::cout << "No match found for the target '" << command << "'" << std::endl;
+        case HorizonsDialog::HorizonsResult::ErrorNoTarget:
+            std::cout << "No match found for target '" << command << "'" << std::endl;
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorMultipleTarget:
+            std::cout << "Multiple matches found for target '" << command << "'" << std::endl;
             break;
         case HorizonsDialog::HorizonsResult::ErrorTimeRange:
             std::cout << "The time range '" << startTime << "' to '" << endTime <<
@@ -346,6 +349,8 @@ bool HorizonsDialog::sendHorizonsRequest() {
             std::cout << "Unknown HorizonsResult type" << std::endl;
             break;
     }
+
+    std::filesystem::remove(_horizonsFile);
     return false;
 }
 
@@ -396,7 +401,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply *reply)
 
     file.close();
     std::string fullFilePath = filePath.toStdString();
-    _horizonsFile = std::filesystem::absolute(fullFilePath).string();
+    _horizonsFile = std::filesystem::absolute(fullFilePath);
 
     reply->deleteLater();
     return isValidHorizonsFile(fullFilePath);
@@ -417,10 +422,27 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorObserver;
         }
-        else if (line.find("No ephemeris for target ") && line.find("after A.D.")) {
-            std::cout << "The selected time range is outside the valid range for target" << std::endl;
+        else if (line.find("No ephemeris for target") != std::string::npos) {
+            // Valid time range is several lines before thisn line, harder to parse
+            std::cout << "The selected time range is outside the valid range for target"
+                << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorTimeRange;
+        }
+        else if (line.find("Multiple major-bodies match string") != std::string::npos) {
+            // could parse the matches after this line
+            std::cout << "Target has multiple matches" << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorMultipleTarget;
+        }
+        else if (line.find("No matches found") != std::string::npos) {
+            std::cout << "No matches found for target" << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorNoTarget;
+        }
+        else if (line.find("-- change step-size") != std::string::npos) {
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorStepSize;
         }
 
         std::getline(fileStream, line);
@@ -439,7 +461,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 
 void HorizonsDialog::approved() {
     // Send request of Horizon file if no local file has been specified
-    if (_horizonsFile.empty() && !sendHorizonsRequest()) {
+    if (!std::filesystem::is_regular_file(_horizonsFile) && !sendHorizonsRequest()) {
         _errorMsg->setText(
             "An error occured while generating the Horizons file"
         );

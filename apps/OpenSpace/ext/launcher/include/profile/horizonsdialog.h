@@ -26,6 +26,7 @@
 #define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 
 #include <QDialog>
+#include <filesystem>
 #include <string>
 
 class QComboBox;
@@ -54,7 +55,8 @@ private:
         Empty,
         ErrorConnect,
         ErrorObserver,
-        ErrorTaget,
+        ErrorNoTarget,
+        ErrorMultipleTarget,
         ErrorTimeRange,
         ErrorStepSize,
         UnknownError
@@ -66,7 +68,7 @@ private:
     HorizonsResult handleReply(QNetworkReply* reply);
     HorizonsResult isValidHorizonsFile(const std::string& file) const;
 
-    std::string _horizonsFile;
+    std::filesystem::path _horizonsFile;
     QNetworkAccessManager* _manager;
 
     QLineEdit* _directoryEdit = nullptr;
