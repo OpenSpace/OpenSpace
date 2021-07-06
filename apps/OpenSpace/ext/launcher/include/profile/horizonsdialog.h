@@ -55,8 +55,7 @@ private:
         ErrorConnect,
         ErrorObserver,
         ErrorTaget,
-        ErrorStartTime,
-        ErrorEndTime,
+        ErrorTimeRange,
         ErrorStepSize,
         UnknownError
     };

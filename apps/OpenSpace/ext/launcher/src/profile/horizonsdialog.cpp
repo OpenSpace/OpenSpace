@@ -175,7 +175,7 @@ void HorizonsDialog::createWidgets() {
         QLabel* centerLabel = new QLabel("Observer Location:", this);
         container->addWidget(centerLabel);
 
-        _centerEdit = new QLineEdit(QString::fromStdString("500@4"), this);
+        _centerEdit = new QLineEdit(QString::fromStdString("500@499"), this);
         container->addWidget(_centerEdit);
 
         layout->addLayout(container);
@@ -318,25 +318,26 @@ bool HorizonsDialog::sendHorizonsRequest() {
             std::cout << "The generated horizons file is empty" << std::endl;
             break;
         case HorizonsDialog::HorizonsResult::ErrorConnect:
-            std::cout << "A connection error occured while sending the request" << std::endl;
+            std::cout << "A connection error occured while sending the request" <<
+                std::endl;
             break;
         case HorizonsDialog::HorizonsResult::ErrorObserver:
-            std::cout << "No match found for the observer '" << center << "'" << std::endl;
+            std::cout << "No match found for the observer '" << center << "'" <<
+                std::endl;
             break;
         case HorizonsDialog::HorizonsResult::ErrorTaget:
             std::cout << "No match found for the target '" << command << "'" << std::endl;
             break;
-        case HorizonsDialog::HorizonsResult::ErrorStartTime:
-            std::cout << "Start time '" << startTime << "' is outside the allowed range "
-                "for target '" << command << "'" << std::endl;
-            break;
-        case HorizonsDialog::HorizonsResult::ErrorEndTime:
-            std::cout << "End time '" << endTime << "' is outside the allowed range for target '" << command << "'" << std::endl;
+        case HorizonsDialog::HorizonsResult::ErrorTimeRange:
+            std::cout << "The time range '" << startTime << "' to '" << endTime <<
+                "' is outside the valid time range for target '" << command << "'" <<
+                std::endl;
             break;
         case HorizonsDialog::HorizonsResult::ErrorStepSize:
             std::cout << "The selected time range with step size '" <<
                 _stepEdit->text().toStdString() << "' results in a too big file, "
-                "try to make the step size bigger or make the time range shorter" << std::endl;
+                "try to make the step size bigger or make the time range shorter" <<
+                std::endl;
             break;
         case HorizonsDialog::HorizonsResult::UnknownError:
             std::cout << "An unknown error occured" << std::endl;
@@ -415,6 +416,11 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             std::cout << "No matching observer found" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorObserver;
+        }
+        else if (line.find("No ephemeris for target ") && line.find("after A.D.")) {
+            std::cout << "The selected time range is outside the valid range for target" << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
         }
 
         std::getline(fileStream, line);
