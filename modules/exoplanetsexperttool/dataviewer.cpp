@@ -535,15 +535,18 @@ bool DataViewer::renderFilterSettings() {
     static bool hideNanTsm = false;
     static bool hideNanEsm = false;
     static bool showOnlyMultiPlanetSystems = false;
+    static bool showOnlyHasPosition = false;
 
     bool filterChanged = false;
 
     // Filtering
-    filterChanged |= ImGui::Checkbox("Hide nan TSM", &hideNanTsm);
+    filterChanged |= ImGui::Checkbox("Hide null TSM", &hideNanTsm);
     ImGui::SameLine();
-    filterChanged |= ImGui::Checkbox("Hide nan ESM", &hideNanEsm);
+    filterChanged |= ImGui::Checkbox("Hide null ESM", &hideNanEsm);
     ImGui::SameLine();
     filterChanged |= ImGui::Checkbox("Only multi-planet", &showOnlyMultiPlanetSystems);
+    ImGui::SameLine();
+    filterChanged |= ImGui::Checkbox("Must have positional data (3D)", &showOnlyHasPosition);
 
     // Per-column filtering
     static int filterColIndex = 0;
@@ -670,6 +673,7 @@ bool DataViewer::renderFilterSettings() {
             bool filteredOut = hideNanTsm && std::isnan(d.tsm);
             filteredOut |= hideNanEsm && std::isnan(d.esm);
             filteredOut |= showOnlyMultiPlanetSystems && !d.multiSystemFlag;
+            filteredOut |= showOnlyHasPosition && !d.position.has_value();
 
             for (const ColumnFilterEntry& f : _appliedFilters) {
                 std::variant<const char*, float> value =
