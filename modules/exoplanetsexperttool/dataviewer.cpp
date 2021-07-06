@@ -76,6 +76,18 @@ namespace {
     ImVec4 toImVec4(const glm::vec4& v) {
         return ImVec4(v.x, v.y, v.z, v.w);
     }
+
+    // @TODO this could be a temoplated helper function for lists. Used a lot
+    std::string formatIndicesList(const std::vector<size_t>& indices) {
+        std::string result;
+        for (size_t i : indices) {
+            result += std::to_string(i) + ',';
+        }
+        if (!result.empty()) {
+            result.pop_back();
+        }
+        return result;
+    }
 }
 
 namespace openspace::exoplanets::gui {
@@ -514,14 +526,7 @@ void DataViewer::renderTable() {
         }
 
         if (selectionChanged) {
-            const std::string indices = formatIndicesList(_selection);
-            const std::string uri =
-                fmt::format("Scene.{}.Renderable.Selection", _pointsIdentifier);
-
-            openspace::global::scriptEngine->queueScript(
-                "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+            updateSelectionInRenderable();
         }
     }
 }
@@ -653,6 +658,8 @@ bool DataViewer::renderFilterSettings() {
         ImGui::Unindent();
     }
 
+    bool selectionChanged = false;
+
     if (filterChanged) {
         _filteredData.clear();
         _filteredData.reserve(_data.size());
@@ -689,11 +696,15 @@ bool DataViewer::renderFilterSettings() {
 
                 if (itemIsSelected) {
                     _selection.erase(found);
-                    // TODO: should also update selection changed?
+                    selectionChanged = true;
                 }
             }
         }
         _filteredData.shrink_to_fit();
+
+        if (selectionChanged) {
+            updateSelectionInRenderable();
+        }
     }
 
     return filterChanged;
@@ -792,17 +803,6 @@ std::variant<const char*, float> DataViewer::valueFromColumn(ColumnID column,
     }
 }
 
-std::string DataViewer::formatIndicesList(const std::vector<size_t>& indices) {
-    std::string result;
-    for (size_t i : indices) {
-        result += std::to_string(i) + ',';
-    }
-    if (!result.empty()) {
-        result.pop_back();
-    }
-    return result;
-}
-
 bool DataViewer::isNumericColumn(ColumnID id) const {
     ghoul_assert(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
@@ -885,6 +885,17 @@ void DataViewer::writeRenderDataToFile() {
         file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
         file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
     }
+}
+
+void DataViewer::updateSelectionInRenderable() {
+    const std::string indices = formatIndicesList(_selection);
+    const std::string uri =
+        fmt::format("Scene.{}.Renderable.Selection", _pointsIdentifier);
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 } // namespace openspace::gui

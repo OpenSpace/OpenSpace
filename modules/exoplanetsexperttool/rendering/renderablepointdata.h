@@ -78,7 +78,7 @@ private:
     const unsigned int _nValuesPerPoint = 7;
 
     std::vector<Point> _fullPointData;
-    std::vector<int> _indices; // indices of the points in the dataviewer
+    std::vector<int> _pointIndices; // indices of the points in the dataviewer
 
     GLuint _primaryPointsVAO = 0;
     GLuint _primaryPointsVBO = 0;

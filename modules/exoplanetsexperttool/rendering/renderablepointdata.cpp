@@ -277,25 +277,31 @@ void RenderablePointData::update(const UpdateData&) {
 
         const int nSelected = static_cast<int>(_selectedIndices.value().size());
         std::vector<Point> selectedPoints;
+        std::vector<int> newIndices;
         selectedPoints.reserve(nSelected);
+        newIndices.reserve(nSelected);
 
         // For each of the selected indices, find the corresponding point
         for (int i : _selectedIndices.value()) {
             std::vector<int>::iterator pos =
-                std::find(_indices.begin(), _indices.end(), i);
+                std::find(_pointIndices.begin(), _pointIndices.end(), i);
 
-            if (pos != _indices.end()) {
-                const int index = pos - _indices.begin();
+            if (pos != _pointIndices.end()) {
+                const int index = pos - _pointIndices.begin();
                 const Point& p = _fullPointData.at(index);
                 Point newP = {
                     p.xyz[0], p.xyz[1], p.xyz[2], color.r, color.g, color.b, 1.f
                 };
                 selectedPoints.push_back(newP);
+                newIndices.push_back(i);
             }
             else {
-                LINFO(fmt::format("Ignoring invalid index '{}' in new selection", i));
+                LINFO(fmt::format("No 3D point matching selected index '{}'", i));
             }
         }
+        selectedPoints.shrink_to_fit();
+
+        _selectedIndices = newIndices;
 
         if (selectedPoints.size() > 0) {
             glBindVertexArray(_selectedPointsVAO);
@@ -347,14 +353,14 @@ void RenderablePointData::updateDataFromFile() {
     }
 
     _fullPointData.clear();
-    _indices.clear();
+    _pointIndices.clear();
 
     // Read number of data points
     unsigned int nPoints;
     file.read(reinterpret_cast<char*>(&nPoints), sizeof(unsigned int));
 
     _fullPointData.reserve(nPoints);
-    _indices.reserve(nPoints);
+    _pointIndices.reserve(nPoints);
 
     // OBS: this reading must match the writing in the dataviewer
     for (int i = 0; i < nPoints; i++) {
@@ -376,7 +382,7 @@ void RenderablePointData::updateDataFromFile() {
         _fullPointData.push_back({
             scaledPos.x, scaledPos.y, scaledPos.z, color.x, color.y, color.z, color.w
         });
-        _indices.push_back(static_cast<int>(index));
+        _pointIndices.push_back(static_cast<int>(index));
     }
 
     _isDirty = true;

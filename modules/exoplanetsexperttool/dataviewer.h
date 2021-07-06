@@ -89,8 +89,6 @@ private:
     bool compareColumnValues(ColumnID column, const ExoplanetItem& left,
         const ExoplanetItem& right) const ;
 
-    std::string formatIndicesList(const std::vector<size_t>& dataIndices);
-
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(ColumnID id) const;
 
@@ -98,6 +96,8 @@ private:
 
     // Write the information about the rendered points to a file
     void writeRenderDataToFile();
+
+    void updateSelectionInRenderable();
 
     DataLoader _dataLoader;
     std::vector<ExoplanetItem> _data;
