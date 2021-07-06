@@ -214,15 +214,11 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
     return true;
 }
 
-bool ScriptEngine::runScriptFile(const std::string& filename) {
+bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped
 
-    if (filename.empty()) {
-        LWARNING("Filename was empty");
-        return false;
-    }
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(fmt::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -649,14 +645,17 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format("Using script log file '{}'", _logFilename));
+            LDEBUG(fmt::format(
+                "Using script log file {}", std::filesystem::path(_logFilename)
+            ));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
                 LERROR(fmt::format(
-                    "Could not open file '{}' for logging scripts", _logFilename
+                    "Could not open file {} for logging scripts",
+                    std::filesystem::path(_logFilename)
                 ));
 
                 return false;

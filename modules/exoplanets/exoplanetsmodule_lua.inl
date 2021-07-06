@@ -158,8 +158,8 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}'. "
-            "Could not determine star position", starName
+            "Insufficient data available for exoplanet system: '{}'. Could not determine "
+            "star position", starName
         ));
         return;
     }
