@@ -118,22 +118,25 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         { "Distance (pc)", ColumnID::Distance, "%.2f" }
     };
 
-    // Must match names in implot
+    // Must match names in implot and customly added ones
     _colormaps = {
         "Viridis",
         "Plasma",
         "Hot",
         "Cool",
+        "Autumn", // custom
+        "Spring", // custom
+        "Summer", // custom
+        "Winter", // custom
         "Jet",
-        "Twilight",
+        "Spectral",
         "RdBu",
         "BrBG",
         "PiYG",
-        "Spectral",
+        "Twilight",
         "Deep",
         "Dark",
         "Paired",
-        "Pastel"
     };
 
     // TODO: make sure that settings are preserved between sessions?
@@ -143,6 +146,56 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
 void DataViewer::initializeGL() {
     initializeRenderables();
+
+    // Intilize custom color maps (generated from matplotlib)
+    const ImVec4 autumn[] = {
+        ImVec4(1.f, 0.f,         0.f, 1.f),
+        ImVec4(1.f, 0.14117647f, 0.f, 1.f),
+        ImVec4(1.f, 0.28627451f, 0.f, 1.f),
+        ImVec4(1.f, 0.42745098f, 0.f, 1.f),
+        ImVec4(1.f, 0.57254902f, 0.f, 1.f),
+        ImVec4(1.f, 0.71372549f, 0.f, 1.f),
+        ImVec4(1.f, 0.85882353f, 0.f, 1.f),
+        ImVec4(1.f, 1.f,         0.f, 1.f)
+    };
+
+    const ImVec4 spring[] = {
+        ImVec4(1.f, 0.f,         1.f,         1.f),
+        ImVec4(1.f, 0.14117647f, 0.85882353f, 1.f),
+        ImVec4(1.f, 0.28627451f, 0.71372549f, 1.f),
+        ImVec4(1.f, 0.42745098f, 0.57254902f, 1.f),
+        ImVec4(1.f, 0.57254902f, 0.42745098f, 1.f),
+        ImVec4(1.f, 0.71372549f, 0.28627451f, 1.f),
+        ImVec4(1.f, 0.85882353f, 0.14117647f, 1.f),
+        ImVec4(1.f, 1.f,         0.f,         1.f)
+    };
+
+    const ImVec4 summer[] = {
+        ImVec4(0.f,         0.5f,        0.4f, 1.f),
+        ImVec4(0.14117647f, 0.57058824f, 0.4f, 1.f),
+        ImVec4(0.28627451f, 0.64313725f, 0.4f, 1.f),
+        ImVec4(0.42745098f, 0.71372549f, 0.4f, 1.f),
+        ImVec4(0.57254902f, 0.78627451f, 0.4f, 1.f),
+        ImVec4(0.71372549f, 0.85686275f, 0.4f, 1.f),
+        ImVec4(0.85882353f, 0.92941176f, 0.4f, 1.f),
+        ImVec4(1.f,         1.f,         0.4f, 1.f)
+    };
+
+    const ImVec4 winter[] = {
+        ImVec4(0.f, 0.f,         1.f,         1.f),
+        ImVec4(0.f, 0.14117647f, 0.92941176f, 1.f),
+        ImVec4(0.f, 0.28627451f, 0.85686275f, 1.f),
+        ImVec4(0.f, 0.42745098f, 0.78627451f, 1.f),
+        ImVec4(0.f, 0.57254902f, 0.71372549f, 1.f),
+        ImVec4(0.f, 0.71372549f, 0.64313725f, 1.f),
+        ImVec4(0.f, 0.85882353f, 0.57058824f, 1.f),
+        ImVec4(0.f, 1.f,         0.5f,        1.f)
+    };
+
+    ImPlot::AddColormap("Autumn", autumn, 8, false);
+    ImPlot::AddColormap("Spring", spring, 8, false);
+    ImPlot::AddColormap("Summer", summer, 8, false);
+    ImPlot::AddColormap("Winter", winter, 8, false);
 }
 
 void DataViewer::initializeRenderables() {
