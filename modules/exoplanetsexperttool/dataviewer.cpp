@@ -294,6 +294,8 @@ void DataViewer::renderScatterPlotAndColormap() {
     if (ImGui::BeginCombo("Colormap", _colormaps[_currentColormapIndex])) {
         for (int i = 0; i < _colormaps.size(); ++i) {
             const char* name = _colormaps[i];
+            ImPlot::ColormapIcon(ImPlot::GetColormapIndex(name));
+            ImGui::SameLine();
             if (ImGui::Selectable(name, _currentColormapIndex == i)) {
                 _currentColormapIndex = i;
                 _colormapWasChanged = true;
@@ -304,11 +306,19 @@ void DataViewer::renderScatterPlotAndColormap() {
 
     const ColumnID colormapColumn = _columns[_columnForColormap].id;
 
-    if (ImGui::Button("Set range from data")) {
+    // Min/max values for color range
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::DragFloatRange2("Min / Max", &_colorScaleMin, &_colorScaleMax, 1.f)) {
+        _colormapWasChanged = true;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Set from current table data")) {
         float newMin = std::numeric_limits<float>::max();
         float newMax = std::numeric_limits<float>::lowest();
 
-        for (const ExoplanetItem& item : _data) {
+        for (size_t i : _filteredData) {
+            const ExoplanetItem& item = _data[i];
             auto value = valueFromColumn(colormapColumn, item);
             if (std::holds_alternative<float>(value)) {
                 float val = std::get<float>(value);
@@ -333,15 +343,10 @@ void DataViewer::renderScatterPlotAndColormap() {
         _colormapWasChanged = true;
     };
 
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(200);
-    if (ImGui::DragFloatRange2("Min / Max", &_colorScaleMin, &_colorScaleMax, 1.f)) {
-        _colormapWasChanged = true;
-    }
-
     ImVec4 selectedColor =
         { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
 
+    // Scatterplot
     static float pointSize = 1.5f;
     ImPlot::PushColormap(_colormaps[_currentColormapIndex]);
     ImPlot::SetNextPlotLimits(0.0, 360.0, -90.0, 90.0, ImGuiCond_Always);
