@@ -391,7 +391,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
-    _stereoscopicDepthOfFocusSurface.setExponent(10.f);
+    _stereoscopicDepthOfFocusSurface.setExponent(3.f);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
     addProperty(_retargetInterpolationTime);
