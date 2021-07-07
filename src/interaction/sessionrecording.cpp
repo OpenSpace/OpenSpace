@@ -1771,7 +1771,8 @@ void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
     bool paused = global::timeManager->isPaused();
-    if (_state == SessionState::PlaybackPaused) {
+    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
@@ -1793,10 +1794,12 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            _saveRenderingCurrentRecordedTime_interpolation +=
-                _saveRenderingDeltaTime_interpolation_usec;
-            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine->takeScreenshot();
+            if (!playbackPaused) {
+                _saveRenderingCurrentRecordedTime_interpolation +=
+                    _saveRenderingDeltaTime_interpolation_usec;
+                _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                global::renderEngine->takeScreenshot();
+            }
         }
     }
 }
