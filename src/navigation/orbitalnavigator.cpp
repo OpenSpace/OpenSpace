@@ -152,20 +152,6 @@ namespace {
         "'FlightDestinationDistance' while facing the anchor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
-        "ApplyIdleBehavior",
-        "Apply Idle Behavior",
-        "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly. "
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
-        "IdleBehvaior",
-        "Idle Behavior",
-        "The chosen camera behavior that will be applied when 'ApplyIdleBehavior' is "
-        "set to true. Each option represents a predefined camera behavior."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FlightDestinationDistInfo = {
         "FlightDestinationDistance",
         "Flight Destination Distance",
@@ -236,6 +222,27 @@ namespace {
             "point out of the surface of the anchor and the center of the aim node. "
             "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
         };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
+        "ApplyIdleBehavior",
+        "Apply Idle Behavior",
+        "When set to true, the chosen idle behavior will be applied to the camera, "
+        "moving the camera accordingly. "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
+        "IdleBehavior",
+        "Idle Behavior",
+        "The chosen camera behavior that will be triggered when the idle behavior is "
+        "applied. Each option represents a predefined camera behavior."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
+        "SpeedFactor",
+        "Speed Factor",
+        "A factor that can eb used to increase or slow down the speed of an applied "
+        "idle behavior."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -253,6 +260,21 @@ OrbitalNavigator::Friction::Friction()
     addProperty(friction);
 }
 
+OrbitalNavigator::IdleBehavior::IdleBehavior()
+    : properties::PropertyOwner({ "IdleBehavior" })
+    , apply(ApplyIdleBehaviorInfo, false)
+    , chosenBehavior(IdleBehaviorInfo)
+    , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
+{
+    addProperty(apply);
+    chosenBehavior.addOptions({
+        { IdleBehavior::Behavior::Orbit, "Orbit" }
+    });
+    chosenBehavior = IdleBehavior::Behavior::Orbit;
+    addProperty(chosenBehavior);
+    addProperty(speedScale);
+}
+
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _anchor(AnchorInfo)
@@ -264,8 +286,6 @@ OrbitalNavigator::OrbitalNavigator()
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 10.f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5, 1E-3)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _applyIdleBehavior(ApplyIdleBehaviorInfo, false)
-    , _idleBehavior(IdleBehaviorInfo)
     , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
@@ -391,6 +411,7 @@ OrbitalNavigator::OrbitalNavigator()
     });
 
     addPropertySubOwner(_friction);
+    addPropertySubOwner(_idleBehavior);
 
     addProperty(_anchor);
     addProperty(_aim);
@@ -403,14 +424,6 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_flightDestinationDistance);
     addProperty(_flightDestinationFactor);
     addProperty(_applyLinearFlight);
-
-    addProperty(_applyIdleBehavior);
-
-    _idleBehavior.addOptions({
-        { IdleBehavior::Orbit, "Orbit" }
-    });
-    _idleBehavior = IdleBehavior::Orbit;
-    addProperty(_idleBehavior);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -596,7 +609,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
     // is no input from interaction. So, it assumes that all the previous effects from
     // user input resulted in no change
-    if (_applyIdleBehavior) {
+    if (_idleBehavior.apply) {
         applyIdleBehavior(
             deltaTime,
             pose.position,
@@ -1474,8 +1487,6 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
                                          glm::dquat& localRotation,
                                          glm::dquat& globalRotation)
 {
-    const glm::dvec3 posDiff = position - _anchorNode->worldPosition();
-
     SurfacePositionHandle posHandle =
         calculateSurfacePositionHandle(*_anchorNode, position);
 
@@ -1485,7 +1496,8 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
 
     const glm::dvec3 centerToActualSurface = glm::dmat3(_anchorNode->modelTransform()) *
         centerToActualSurfaceModelSpace;
-    const glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
+    const glm::dvec3 centerToCamera = position - _anchorNode->worldPosition();
+    const glm::dvec3 actualSurfaceToCamera = centerToCamera - centerToActualSurface;
 
     const double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
     const double distFromCenterToSurface = glm::length(centerToActualSurface);
@@ -1493,14 +1505,17 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     double speedScale =
         distFromCenterToSurface > 0.0 ?
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
-        1.0;
+        1.0; // same as horizontal translation
 
-    speedScale *= 0.1; // without this scaleing, the motion is way too fast
+    speedScale *= _idleBehavior.speedScale;
+    speedScale *= 0.05; // without this scaling, the motion is way too fast
 
     // Apply the chosen behavior
-    const IdleBehavior chosen = static_cast<IdleBehavior>(_idleBehavior.value());
+    const IdleBehavior::Behavior chosen =
+        static_cast<IdleBehavior::Behavior>(_idleBehavior.chosenBehavior.value());
+
     switch (chosen) {
-        case IdleBehavior::Orbit:
+        case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;
         default:
@@ -1513,16 +1528,9 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
 
-    // Get position on the surface of the node corresponding to current camera position
-    SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
-        *_anchorNode, position);
-
-    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 outDirection = glm::normalize(glm::dmat3(modelTransform) *
-        posHandle.referenceSurfaceOutDirection);
-
-    // Apply a rotation to the right
-    // (Note that we could also let the user decide which direction to rotate)
+    // Apply a rotation to the right, in camera space
+    // (Maybe we should also let the user decide which direction to rotate?
+    // Or provide a few different orbit options)
     const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * deltaTime * speedScale;
     const glm::dquat rotationDiffCameraSpace = glm::dquat(eulerAngles);
 
@@ -1531,11 +1539,10 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
         glm::inverse(globalRotation);
 
     // Rotate to find the difference in position
-    const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-    const double distFromCenterToCamera = glm::length(position - anchorPos);
+    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
     const glm::dvec3 rotationDiffVec3 =
-        (distFromCenterToCamera * outDirection) * rotationDiffWorldSpace -
-        (distFromCenterToCamera * outDirection);
+        anchorCenterToCamera * rotationDiffWorldSpace -
+        anchorCenterToCamera;
 
     position += rotationDiffVec3;
 }
