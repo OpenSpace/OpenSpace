@@ -54,33 +54,12 @@ namespace {
         "If disabled, roll is removed from the interpolation of camera orientation"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StopBehaviorInfo = {
-        "StopBehavior",
-        "Stop Behavior",
-        "A camera motion behavior that is applied when no path is being played"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        ApplyStopBehaviorWhenIdleInfo =
-    {
-        "ApplyStopBehaviorWhenIdle",
-        "Apply Stop Behavior When Idle",
-        "If enabled, the camera is controlled using the set stop behavior when "
-        "no path is playing"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
         "Scale factor that the speed will be mulitplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
         "value is larger than or smaller than one."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
-        "OrbitSpeedFactor",
-        "Orbit Speed Factor",
-        "Controls the speed of the orbiting around an anchor."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -110,13 +89,7 @@ PathNavigator::PathNavigator()
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _includeRoll(IncludeRollInfo, false)
-    , _stopBehavior(
-        StopBehaviorInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
-    , _orbitSpeedFactor(OrbitSpeedFactorInfo, 0.5, 0.0, 20.0)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -129,20 +102,6 @@ PathNavigator::PathNavigator()
 
     addProperty(_includeRoll);
     addProperty(_speedScale);
-
-    // OBS! Stop behavior is broken as of core merge
-    //addProperty(_applyStopBehaviorWhenIdle);
-
-    //// Must be listed in the same order as in enum definition
-    //_stopBehavior.addOptions({
-    //    { StopBehavior::None, "None" },
-    //    { StopBehavior::Orbit, "Orbit" }
-    //});
-    //_stopBehavior = StopBehavior::None;
-    //addProperty(_stopBehavior);
-
-    //addProperty(_orbitSpeedFactor);
-
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -194,11 +153,6 @@ void PathNavigator::updateCamera(double deltaTime) {
     }
 
     if (!_isPlaying) {
-        //// TODO: Determine how this should work
-        //// OBS! Stop behavior is broken as of core merge
-        //if (hasFinished() && _applyStopBehaviorWhenIdle) {
-        //    applyStopBehavior(deltaTime);
-        //}
         return;
     }
 
@@ -393,62 +347,6 @@ void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
         camera()->lookUpVectorWorldSpace()
     );
     pose.rotation = rollFreeRotation;
-}
-
-void PathNavigator::applyStopBehavior(double deltaTime) {
-    switch (_stopBehavior) {
-        case StopBehavior::None:
-            // Do nothing
-            break;
-        case StopBehavior::Orbit:
-            orbitAnchorNode(deltaTime);
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-void PathNavigator::orbitAnchorNode(double deltaTime) {
-    ghoul_assert(anchor() != nullptr, "Node to orbit must be set!");
-
-    const glm::dvec3 prevPosition = camera()->positionVec3();
-    const glm::dquat prevRotation = camera()->rotationQuaternion();
-    const glm::dvec3 nodeCenter = anchor()->worldPosition();
-
-    const double speedFactor = 0.1 * _orbitSpeedFactor;
-
-    // Compute orbit speed based on factor and distance to surface
-    const double orbitRadius = glm::distance(prevPosition, nodeCenter);
-    const double distanceToSurface = orbitRadius - anchor()->boundingSphere();
-    const double orbitSpeed = distanceToSurface * speedFactor;
-
-    // Compute a new position along the orbit
-    const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
-    const glm::dquat lookAtNodeRotation = ghoul::lookAtQuaternion(
-        prevPosition,
-        nodeCenter,
-        up
-    );
-    const glm::dvec3 targetForward = lookAtNodeRotation * glm::dvec3(0.0, 0.0, -1.0);
-    const glm::dvec3 rightOrbitTangent = glm::normalize(glm::cross(targetForward, up));
-
-    glm::dvec3 newPosition = prevPosition + orbitSpeed * deltaTime * rightOrbitTangent;
-
-    // Adjust for numerical error - make sure we stay at the same height
-    const glm::dvec3 nodeToNewPos = newPosition - nodeCenter;
-    const double targetHeight = glm::distance(prevPosition, nodeCenter);
-    const double heightDiff = glm::length(nodeToNewPos) - targetHeight;
-    newPosition -= heightDiff * glm::normalize(nodeToNewPos);
-
-    // Rotate along the orbit, but keep relative orientation with regards to the anchor
-    const glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
-    const glm::dquat newLookAtRotation =
-        ghoul::lookAtQuaternion(newPosition, nodeCenter, up);
-
-    const glm::dquat newRotation = newLookAtRotation * localRotation;
-
-    camera()->setPositionVec3(newPosition);
-    camera()->setRotation(newRotation);
 }
 
 scripting::LuaLibrary PathNavigator::luaLibrary() {

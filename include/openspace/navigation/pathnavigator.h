@@ -50,11 +50,6 @@ class Path;
 
 class PathNavigator : public properties::PropertyOwner {
 public:
-    enum StopBehavior {
-        None = 0,
-        Orbit
-    };
-
     PathNavigator();
     ~PathNavigator();
 
@@ -86,12 +81,12 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    /**
+    * Populate list of nodes that are relevant for collision checks, etc
+    */
     void findRelevantNodes();
 
     void removeRollRotation(CameraPose& pose, double deltaTime);
-    void applyStopBehavior(double deltaTime);
-
-    void orbitAnchorNode(double deltaTime);
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
@@ -99,11 +94,6 @@ private:
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
-    properties::FloatProperty _orbitSpeedFactor;
-
-    properties::BoolProperty _applyStopBehaviorWhenIdle;
-    properties::OptionProperty _stopBehavior;
-
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
 
