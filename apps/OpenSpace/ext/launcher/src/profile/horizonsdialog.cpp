@@ -71,6 +71,48 @@ namespace {
         }
         return result;
     }
+
+    std::map<int, std::string> parseMatchingTargets(std::filesystem::path& file) {
+        std::ifstream fileStream(file);
+
+        if (!fileStream.good()) {
+            return std::map<int, std::string>();
+        }
+
+        // The beginning of a Horizons file has a header with a lot of information about the
+        // query that we do not care about. Ignore everything until head of matching target list
+        std::map<int, std::string> matchingTargets;
+        std::string line;
+        while (fileStream.good() && line.find("Name") == std::string::npos) {
+            std::getline(fileStream, line);
+        }
+
+        if (!fileStream.good()) {
+            return std::map<int, std::string>();
+        }
+
+        // There will be one empty line before the list of matching targets, skip
+        std::getline(fileStream, line);
+        std::getline(fileStream, line);
+        while (fileStream.good()) {
+            if (line.empty() || line == " "|| line.find("Number of matches") != std::string::npos) {
+                return matchingTargets;
+            }
+
+            std::cout << "Matching target: " << line << std::endl;
+            // Matching target format: ID#, Name, Designation, IAU/aliases/other
+            std::stringstream str(line);
+            int id;
+            std::string name;
+
+            str >> id;
+            std::getline(str, name);
+            matchingTargets.insert(std::pair<int, std::string>(id, name));
+
+            std::getline(fileStream, line);
+        }
+
+    }
 } // namespace
 
 HorizonsDialog::HorizonsDialog(QWidget* parent)
@@ -168,6 +210,10 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(_targetEdit);
 
         layout->addLayout(container);
+
+        _chooseTargetCombo = new QComboBox(this);
+        _chooseTargetCombo->hide();
+        layout->addWidget(_chooseTargetCombo);
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
@@ -253,7 +299,15 @@ bool HorizonsDialog::sendHorizonsRequest() {
     std::string url = "";
     url.append(HORIZONS_REQUEST_URL);
 
-    std::string command = _targetEdit->text().toStdString();
+    std::string command, targetName;
+    if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
+        command = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex()).toString().toStdString();
+        targetName = _chooseTargetCombo->currentText().toStdString();
+    }
+    else {
+        command = _targetEdit->text().toStdString();
+        targetName = command;
+    }
     url.append(COMMAND);
     url.append("'");
     url.append(replaceAll(command, " ", SPACE));
@@ -308,48 +362,60 @@ bool HorizonsDialog::sendHorizonsRequest() {
     std::cout << "URL: " << url << std::endl;
 
     HorizonsDialog::HorizonsResult result = sendRequest(url);
-
+    std::string errorMessage;
     switch (result) {
         case HorizonsDialog::HorizonsResult::Valid:
             std::cout << "Valid result" << std::endl;
             return true;
             break;
         case HorizonsDialog::HorizonsResult::Empty:
-            std::cout << "The generated horizons file is empty" << std::endl;
+            errorMessage = "The generated horizons file is empty";
             break;
         case HorizonsDialog::HorizonsResult::ErrorConnect:
-            std::cout << "A connection error occured while sending the request" <<
-                std::endl;
+            errorMessage =
+                "A connection error occured while downloading the horizons file";
             break;
         case HorizonsDialog::HorizonsResult::ErrorObserver:
-            std::cout << "No match found for the observer '" << center << "'" <<
-                std::endl;
+            errorMessage = "No match was found for observer '" + center + "'";
             break;
         case HorizonsDialog::HorizonsResult::ErrorNoTarget:
-            std::cout << "No match found for target '" << command << "'" << std::endl;
+            errorMessage = "No match was found for target '" + targetName + "'";
             break;
-        case HorizonsDialog::HorizonsResult::ErrorMultipleTarget:
-            std::cout << "Multiple matches found for target '" << command << "'" << std::endl;
+        case HorizonsDialog::HorizonsResult::ErrorMultipleTarget: {
+            errorMessage = "Multiple matches was found for target '" + targetName + "'";
+            std::map<int, std::string> matchingTargets = parseMatchingTargets(_horizonsFile);
+            if (matchingTargets.empty()) {
+                errorMessage += ". Could not parse the matching targets";
+                break;
+            }
+            _chooseTargetCombo->clear();
+            _chooseTargetCombo->addItem("Choose Target");
+            for (std::pair matchingTarget : matchingTargets) {
+                _chooseTargetCombo->addItem(matchingTarget.second.c_str(), matchingTarget.first);
+            }
+            _timeTypeCombo->setCurrentIndex(0);
+            _chooseTargetCombo->show();
             break;
+        }
         case HorizonsDialog::HorizonsResult::ErrorTimeRange:
-            std::cout << "The time range '" << startTime << "' to '" << endTime <<
-                "' is outside the valid time range for target '" << command << "'" <<
-                std::endl;
+            errorMessage = "Time range '" + startTime + "' to '" + endTime +
+                "' is outside the valid time range for target '" + targetName + "'";
             break;
         case HorizonsDialog::HorizonsResult::ErrorStepSize:
-            std::cout << "The selected time range with step size '" <<
-                _stepEdit->text().toStdString() << "' results in a too big file, "
-                "try to make the step size bigger or make the time range shorter" <<
-                std::endl;
+            errorMessage = "Time range '" + startTime + "' to '" + endTime +
+                "' with step size '" + _stepEdit->text().toStdString() +
+                "' results in a too big file, try to increase the step size or decrease "
+                "the time range";
             break;
         case HorizonsDialog::HorizonsResult::UnknownError:
-            std::cout << "An unknown error occured" << std::endl;
+            errorMessage = "An unknown error occured";
             break;
         default:
-            std::cout << "Unknown HorizonsResult type" << std::endl;
+            errorMessage = "Unknown Result type";
             break;
     }
 
+    _errorMsg->setText(errorMessage.c_str());
     std::filesystem::remove(_horizonsFile);
     return false;
 }
@@ -423,7 +489,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             return HorizonsDialog::HorizonsResult::ErrorObserver;
         }
         else if (line.find("No ephemeris for target") != std::string::npos) {
-            // Valid time range is several lines before thisn line, harder to parse
+            // Valid time range is several lines before this line, harder to parse
             std::cout << "The selected time range is outside the valid range for target"
                 << std::endl;
             fileStream.close();
@@ -462,9 +528,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 void HorizonsDialog::approved() {
     // Send request of Horizon file if no local file has been specified
     if (!std::filesystem::is_regular_file(_horizonsFile) && !sendHorizonsRequest()) {
-        _errorMsg->setText(
-            "An error occured while generating the Horizons file"
-        );
         return;
     }
 

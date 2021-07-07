@@ -75,6 +75,7 @@ private:
     QLineEdit* _fileEdit = nullptr;
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;
+    QComboBox* _chooseTargetCombo = nullptr;
     QLineEdit* _centerEdit = nullptr;
     QDateTimeEdit* _startEdit;
     QDateTimeEdit* _endEdit;
