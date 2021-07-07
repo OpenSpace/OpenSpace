@@ -72,7 +72,7 @@ namespace {
         return result;
     }
 
-    std::map<int, std::string> parseMatchingTargets(std::filesystem::path& file) {
+    std::map<int, std::string> parseMatchingBodies(std::filesystem::path& file) {
         std::ifstream fileStream(file);
 
         if (!fileStream.good()) {
@@ -80,8 +80,8 @@ namespace {
         }
 
         // The beginning of a Horizons file has a header with a lot of information about the
-        // query that we do not care about. Ignore everything until head of matching target list
-        std::map<int, std::string> matchingTargets;
+        // query that we do not care about. Ignore everything until head of matching body list
+        std::map<int, std::string> matchingBodies;
         std::string line;
         while (fileStream.good() && line.find("Name") == std::string::npos) {
             std::getline(fileStream, line);
@@ -91,23 +91,23 @@ namespace {
             return std::map<int, std::string>();
         }
 
-        // There will be one empty line before the list of matching targets, skip
+        // There will be one empty line before the list of matching bodies, skip
         std::getline(fileStream, line);
         std::getline(fileStream, line);
         while (fileStream.good()) {
             if (line.empty() || line == " "|| line.find("Number of matches") != std::string::npos) {
-                return matchingTargets;
+                return matchingBodies;
             }
 
-            std::cout << "Matching target: " << line << std::endl;
-            // Matching target format: ID#, Name, Designation, IAU/aliases/other
+            std::cout << "Matching body: " << line << std::endl;
+            // Matching body format: ID#, Name, Designation, IAU/aliases/other
             std::stringstream str(line);
             int id;
             std::string name;
 
             str >> id;
             std::getline(str, name);
-            matchingTargets.insert(std::pair<int, std::string>(id, name));
+            matchingBodies.insert(std::pair<int, std::string>(id, name));
 
             std::getline(fileStream, line);
         }
@@ -224,6 +224,10 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(_centerEdit);
 
         layout->addLayout(container);
+
+        _chooseObserverCombo = new QComboBox(this);
+        _chooseObserverCombo->hide();
+        layout->addWidget(_chooseObserverCombo);
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
@@ -311,9 +315,18 @@ bool HorizonsDialog::sendHorizonsRequest() {
     url.append(COMMAND);
     url.append("'");
     url.append(replaceAll(command, " ", SPACE));
-    url.append("'");;
+    url.append("'");
 
-    std::string center = _centerEdit->text().toStdString();
+    std::string center, observerName;
+    if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() != 0) {
+        center = "@" +
+            _chooseObserverCombo->itemData(_chooseObserverCombo->currentIndex()).toString().toStdString();
+        observerName = _chooseObserverCombo->currentText().toStdString();
+    }
+    else {
+        center = _centerEdit->text().toStdString();
+        observerName = center;
+    }
     url.append(CENTER);
     url.append("'");
     url.append(replaceAll(center, " ", SPACE));
@@ -375,15 +388,32 @@ bool HorizonsDialog::sendHorizonsRequest() {
             errorMessage =
                 "A connection error occured while downloading the horizons file";
             break;
-        case HorizonsDialog::HorizonsResult::ErrorObserver:
-            errorMessage = "No match was found for observer '" + center + "'";
+        case HorizonsDialog::HorizonsResult::ErrorNoObserver:
+            errorMessage = "No match was found for observer '" + observerName + "'. "
+                "Use '@body' as observer to list possible matches";
             break;
+        case HorizonsDialog::HorizonsResult::ErrorMultipleObserver: {
+            errorMessage = "Multiple matches was found for observer '" + observerName + "'";
+            std::map<int, std::string> matchingObservers = parseMatchingBodies(_horizonsFile);
+            if (matchingObservers.empty()) {
+                errorMessage += ". Could not parse the matching observers";
+                break;
+            }
+            _chooseObserverCombo->clear();
+            _chooseObserverCombo->addItem("Choose Observer");
+            for (std::pair matchingObserver : matchingObservers) {
+                _chooseObserverCombo->addItem(matchingObserver.second.c_str(), matchingObserver.first);
+            }
+            _chooseObserverCombo->setCurrentIndex(0);
+            _chooseObserverCombo->show();
+            break;
+        }
         case HorizonsDialog::HorizonsResult::ErrorNoTarget:
             errorMessage = "No match was found for target '" + targetName + "'";
             break;
         case HorizonsDialog::HorizonsResult::ErrorMultipleTarget: {
             errorMessage = "Multiple matches was found for target '" + targetName + "'";
-            std::map<int, std::string> matchingTargets = parseMatchingTargets(_horizonsFile);
+            std::map<int, std::string> matchingTargets = parseMatchingBodies(_horizonsFile);
             if (matchingTargets.empty()) {
                 errorMessage += ". Could not parse the matching targets";
                 break;
@@ -393,7 +423,7 @@ bool HorizonsDialog::sendHorizonsRequest() {
             for (std::pair matchingTarget : matchingTargets) {
                 _chooseTargetCombo->addItem(matchingTarget.second.c_str(), matchingTarget.first);
             }
-            _timeTypeCombo->setCurrentIndex(0);
+            _chooseTargetCombo->setCurrentIndex(0);
             _chooseTargetCombo->show();
             break;
         }
@@ -482,11 +512,15 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
     // The header of a Horizons file has a lot of information about the
     // query that we can skip. The line $$SOE indicates start of data.
     std::string line;
+    bool foundTarget = false;
     while (line[0] != '$' && fileStream.good()) {
-        if (line.find("No site matches") != std::string::npos) {
+        if (line.find("Revised") != std::string::npos) {
+            foundTarget = true;
+        }
+        else if (line.find("No site matches") != std::string::npos) {
             std::cout << "No matching observer found" << std::endl;
             fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorObserver;
+            return HorizonsDialog::HorizonsResult::ErrorNoObserver;
         }
         else if (line.find("No ephemeris for target") != std::string::npos) {
             // Valid time range is several lines before this line, harder to parse
@@ -496,10 +530,18 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             return HorizonsDialog::HorizonsResult::ErrorTimeRange;
         }
         else if (line.find("Multiple major-bodies match string") != std::string::npos) {
-            // could parse the matches after this line
-            std::cout << "Target has multiple matches" << std::endl;
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorMultipleTarget;
+            // Target or Observer
+            if (foundTarget) {
+                // If target was found then it is the observer that has multiple matches
+                std::cout << "Observer has multiple matches" << std::endl;
+                fileStream.close();
+                return HorizonsDialog::HorizonsResult::ErrorMultipleObserver;
+            }
+            else {
+                std::cout << "Target has multiple matches" << std::endl;
+                fileStream.close();
+                return HorizonsDialog::HorizonsResult::ErrorMultipleTarget;
+            }
         }
         else if (line.find("No matches found") != std::string::npos) {
             std::cout << "No matches found for target" << std::endl;

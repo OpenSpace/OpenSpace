@@ -54,7 +54,8 @@ private:
         Valid = 1,
         Empty,
         ErrorConnect,
-        ErrorObserver,
+        ErrorNoObserver,
+        ErrorMultipleObserver,
         ErrorNoTarget,
         ErrorMultipleTarget,
         ErrorTimeRange,
@@ -77,6 +78,7 @@ private:
     QLineEdit* _targetEdit = nullptr;
     QComboBox* _chooseTargetCombo = nullptr;
     QLineEdit* _centerEdit = nullptr;
+    QComboBox* _chooseObserverCombo = nullptr;
     QDateTimeEdit* _startEdit;
     QDateTimeEdit* _endEdit;
     QLineEdit* _stepEdit = nullptr;
