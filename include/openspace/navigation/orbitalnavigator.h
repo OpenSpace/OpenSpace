@@ -57,10 +57,6 @@ class InputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
-    enum IdleBehavior {
-        Orbit = 0
-    };
-
     OrbitalNavigator();
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
@@ -149,9 +145,6 @@ private:
     properties::DoubleProperty _flightDestinationFactor;
     properties::BoolProperty _applyLinearFlight;
 
-    properties::BoolProperty _applyIdleBehavior;
-    properties::OptionProperty _idleBehavior;
-
     properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
@@ -186,6 +179,19 @@ private:
     Interpolator<double> _retargetAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
+
+    struct IdleBehavior : public properties::PropertyOwner {
+        enum Behavior {
+            Orbit = 0
+        };
+
+        IdleBehavior();
+
+        properties::BoolProperty apply;
+        properties::OptionProperty chosenBehavior;
+        properties::FloatProperty speedScale;
+    };
+    IdleBehavior _idleBehavior;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -338,14 +344,12 @@ private:
         const glm::dvec3 cameraPositionWorldSpace);
 
     /**
-     * IdleBehavior
      * Apply the currently selected idle behavior to the position and rotations
      */
     void applyIdleBehavior(double deltaTime, glm::dvec3& position,
         glm::dquat& localRotation, glm::dquat& globalRotation);
 
     /**
-     * IdleBehavior
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
      * and global rotation of the camera
      */
