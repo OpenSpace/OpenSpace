@@ -243,6 +243,14 @@ namespace {
         "A factor that can eb used to increase or slow down the speed of an applied "
         "idle behavior."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        AbortOnCameraInteractionInfo = {
+        "AbortOnCameraInteraction",
+        "Abort on Camera Interaction",
+        "If set to true, the idle behavior is aborted on camera interaction. If false, "
+        "the behavior will be reapplied after the interaction."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -265,6 +273,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     , apply(ApplyIdleBehaviorInfo, false)
     , chosenBehavior(IdleBehaviorInfo)
     , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
+    , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
 {
     addProperty(apply);
     chosenBehavior.addOptions({
@@ -273,6 +282,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     chosenBehavior = IdleBehavior::Behavior::Orbit;
     addProperty(chosenBehavior);
     addProperty(speedScale);
+    addProperty(abortOnCameraInteraction);
 }
 
 OrbitalNavigator::OrbitalNavigator()
@@ -413,6 +423,13 @@ OrbitalNavigator::OrbitalNavigator()
     addPropertySubOwner(_friction);
     addPropertySubOwner(_idleBehavior);
 
+    _idleBehavior.apply.onChange([&]() {
+        if (_idleBehavior.apply) {
+            // Reset velocities to ensure that abort on interaction works correctly
+            resetVelocities();
+        }
+    });
+
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
@@ -483,6 +500,18 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
     _joystickStates.updateStateFromInput(inputState, deltaTime);
     _websocketStates.updateStateFromInput(inputState, deltaTime);
     _scriptStates.updateStateFromInput(inputState, deltaTime);
+
+    // Disable idle behavior if camera interaction happened
+    if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
+        bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
+            _joystickStates.hasNonZeroVelocities() ||
+            _websocketStates.hasNonZeroVelocities() ||
+            _scriptStates.hasNonZeroVelocities();
+
+        if (interactionHappened) {
+            _idleBehavior.apply = false;
+        }
+    }
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {

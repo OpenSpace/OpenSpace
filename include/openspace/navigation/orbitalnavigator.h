@@ -190,6 +190,7 @@ private:
         properties::BoolProperty apply;
         properties::OptionProperty chosenBehavior;
         properties::FloatProperty speedScale;
+        properties::BoolProperty abortOnCameraInteraction;
     };
     IdleBehavior _idleBehavior;
 
