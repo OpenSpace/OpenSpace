@@ -33,6 +33,7 @@
 #include <openspace/interaction/mousecamerastates.h>
 #include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -56,6 +57,10 @@ class InputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
+    enum IdleBehavior {
+        Orbit = 0
+    };
+
     OrbitalNavigator();
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
@@ -144,6 +149,9 @@ private:
     properties::DoubleProperty _flightDestinationFactor;
     properties::BoolProperty _applyLinearFlight;
 
+    properties::BoolProperty _applyIdleBehavior;
+    properties::OptionProperty _idleBehavior;
+
     properties::FloatProperty _velocitySensitivity;
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
@@ -193,7 +201,7 @@ private:
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
-     * camera points towards the reference node's origin.
+     * camera points towards the reference position.
      * The local rotation defines the differential from the global to the current total
      * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
      */
@@ -328,6 +336,21 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
+
+    /**
+     * IdleBehavior
+     * Apply the currently selected idle behavior to the position and rotations
+     */
+    void applyIdleBehavior(double deltaTime, glm::dvec3& position,
+        glm::dquat& localRotation, glm::dquat& globalRotation);
+
+    /**
+     * IdleBehavior
+     * Orbit the current anchor node, in a right-bound orbit, by updating the position
+     * and global rotation of the camera
+     */
+    void orbitAnchor(double deltaTime, glm::dvec3& position,
+        glm::dquat& globalRotation, double speedScale);
 };
 
 } // namespace openspace::interaction
