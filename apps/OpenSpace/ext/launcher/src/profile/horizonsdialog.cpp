@@ -76,6 +76,7 @@ namespace {
         std::ifstream fileStream(file);
 
         if (!fileStream.good()) {
+            fileStream.close();
             return std::map<int, std::string>();
         }
 
@@ -88,6 +89,7 @@ namespace {
         }
 
         if (!fileStream.good()) {
+            fileStream.close();
             return std::map<int, std::string>();
         }
 
@@ -95,7 +97,8 @@ namespace {
         std::getline(fileStream, line);
         std::getline(fileStream, line);
         while (fileStream.good()) {
-            if (line.empty() || line == " "|| line.find("Number of matches") != std::string::npos) {
+            if (line == " " || line.empty() || line.find("Number of matches") != std::string::npos) {
+                fileStream.close();
                 return matchingBodies;
             }
 
@@ -112,6 +115,87 @@ namespace {
             std::getline(fileStream, line);
         }
 
+        fileStream.close();
+        return std::map<int, std::string>();
+    }
+
+    std::pair<std::string, std::string> parseValidTimeRange(std::filesystem::path& file) {
+        std::ifstream fileStream(file);
+
+        if (!fileStream.good()) {
+            fileStream.close();
+            return std::pair<std::string, std::string>();
+        }
+
+        // The beginning of a Horizons file has a header with a lot of information about the
+        // query that we do not care about. Ignore everything until head of time range list
+        std::map<int, std::string> matchingBodies;
+        std::string line;
+        while (fileStream.good() && line.find("Trajectory files") == std::string::npos) {
+            std::getline(fileStream, line);
+        }
+
+        if (!fileStream.good()) {
+            fileStream.close();
+            return std::pair<std::string, std::string>();
+        }
+
+        // There will be one empty line before the list of time rnages, skip
+        std::getline(fileStream, line);
+        std::getline(fileStream, line);
+        std::string startTime, endTime;
+
+        // From the first line get the start time
+        if (fileStream.good()) {
+            std::cout << "First time range: " << line << std::endl;
+            std::stringstream str(line);
+            std::string temp;
+            while (str.good()) {
+                size_t idx = temp.find('-');
+                if (idx != std::string::npos && temp.find('-', idx) != std::string::npos) {
+                    startTime = temp; // temp has to be the start date
+                    str >> temp;
+                    startTime += " T " + temp; // Add the start time
+                    break;
+                }
+                str >> temp;
+            }
+        }
+        if (startTime.empty()) {
+            fileStream.close();
+            return std::pair<std::string, std::string>();
+        }
+
+        // Get the end time from the last trajectery
+        while (fileStream.good()) {
+            if (line.find("****") != std::string::npos || line.empty() || line == " ") {
+                fileStream.close();
+                return std::pair<std::string, std::string>(startTime, endTime);
+            }
+
+            std::cout << "Time range: " << line << std::endl;
+            // Time rnage format: Trajectory file name, start, end
+
+            std::stringstream str(line);
+            std::string temp;
+            while (str.good()) {
+                size_t idx = temp.find('-');
+                if (idx != std::string::npos && temp.find('-', idx) != std::string::npos) {
+                    // Have found start date, we want end date
+                    // start time, end date
+                    str >> temp >> temp;
+                    endTime = temp;
+                    str >> temp;
+                    endTime += " T " + temp; // Add the end time
+                    break;
+                }
+                str >> temp;
+            }
+            std::getline(fileStream, line);
+        }
+
+        fileStream.close();
+        return std::pair<std::string, std::string>();
     }
 } // namespace
 
@@ -393,8 +477,10 @@ bool HorizonsDialog::sendHorizonsRequest() {
                 "Use '@body' as observer to list possible matches";
             break;
         case HorizonsDialog::HorizonsResult::ErrorMultipleObserver: {
-            errorMessage = "Multiple matches was found for observer '" + observerName + "'";
-            std::map<int, std::string> matchingObservers = parseMatchingBodies(_horizonsFile);
+            errorMessage = "Multiple matches was found for observer '" +
+                observerName + "'";
+            std::map<int, std::string> matchingObservers =
+                parseMatchingBodies(_horizonsFile);
             if (matchingObservers.empty()) {
                 errorMessage += ". Could not parse the matching observers";
                 break;
@@ -402,7 +488,10 @@ bool HorizonsDialog::sendHorizonsRequest() {
             _chooseObserverCombo->clear();
             _chooseObserverCombo->addItem("Choose Observer");
             for (std::pair matchingObserver : matchingObservers) {
-                _chooseObserverCombo->addItem(matchingObserver.second.c_str(), matchingObserver.first);
+                _chooseObserverCombo->addItem(
+                    matchingObserver.second.c_str(),
+                    matchingObserver.first
+                );
             }
             _chooseObserverCombo->setCurrentIndex(0);
             _chooseObserverCombo->show();
@@ -413,7 +502,8 @@ bool HorizonsDialog::sendHorizonsRequest() {
             break;
         case HorizonsDialog::HorizonsResult::ErrorMultipleTarget: {
             errorMessage = "Multiple matches was found for target '" + targetName + "'";
-            std::map<int, std::string> matchingTargets = parseMatchingBodies(_horizonsFile);
+            std::map<int, std::string> matchingTargets =
+                parseMatchingBodies(_horizonsFile);
             if (matchingTargets.empty()) {
                 errorMessage += ". Could not parse the matching targets";
                 break;
@@ -421,16 +511,27 @@ bool HorizonsDialog::sendHorizonsRequest() {
             _chooseTargetCombo->clear();
             _chooseTargetCombo->addItem("Choose Target");
             for (std::pair matchingTarget : matchingTargets) {
-                _chooseTargetCombo->addItem(matchingTarget.second.c_str(), matchingTarget.first);
+                _chooseTargetCombo->addItem(
+                    matchingTarget.second.c_str(),
+                    matchingTarget.first
+                );
             }
             _chooseTargetCombo->setCurrentIndex(0);
             _chooseTargetCombo->show();
             break;
         }
-        case HorizonsDialog::HorizonsResult::ErrorTimeRange:
-            errorMessage = "Time range '" + startTime + "' to '" + endTime +
-                "' is outside the valid time range for target '" + targetName + "'";
+        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
+            std::pair<std::string, std::string> validTimeRange =
+                parseValidTimeRange(_horizonsFile);
+            if (validTimeRange.first.empty()) {
+                errorMessage = ". Could not parse the valid time range";
+                break;
+            }
+            errorMessage = "Time range is outside the valid time range for target '"
+                + targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
+                validTimeRange.second + "'";
             break;
+        }
         case HorizonsDialog::HorizonsResult::ErrorStepSize:
             errorMessage = "Time range '" + startTime + "' to '" + endTime +
                 "' with step size '" + _stepEdit->text().toStdString() +
