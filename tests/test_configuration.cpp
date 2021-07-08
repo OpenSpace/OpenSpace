@@ -45,8 +45,8 @@ Paths = {}
     Configuration loadConfiguration(const std::string& tag, const std::string& content) {
         std::string filename = fmt::format("test_configuration_{}.cfg", tag);
         std::filesystem::path path = std::filesystem::temp_directory_path();
-        std::string configFile = (path / filename).string();
-        writeConfig(configFile, content);
+        std::filesystem::path configFile = (path / filename);
+        writeConfig(configFile.string(), content);
         Configuration conf = loadConfigurationFromFile(configFile, content);
         std::filesystem::remove(configFile);
         return conf;

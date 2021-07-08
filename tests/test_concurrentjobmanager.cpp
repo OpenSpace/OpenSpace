@@ -86,7 +86,7 @@ TEST_CASE("ConcurrentJobmanager: Basic", "[concurrentjobmanager]") {
 
     auto testJob1 = std::shared_ptr<TestJob>(new TestJob(20));
     auto testJob2 = std::shared_ptr<TestJob>(new TestJob(20));
-    
+
     jobManager.enqueueJob(testJob1);
     jobManager.enqueueJob(testJob2);
 
@@ -98,7 +98,7 @@ TEST_CASE("ConcurrentJobmanager: Basic", "[concurrentjobmanager]") {
     REQUIRE(jobManager.numFinishedJobs() == 1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    REQUIRE(jobManager.numFinishedJobs() == 2); 
+    REQUIRE(jobManager.numFinishedJobs() == 2);
 
     auto finishedJob = jobManager.popFinishedJob();
 

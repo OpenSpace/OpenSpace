@@ -83,7 +83,7 @@ namespace {
             float versionInfo;
         };
         // Information about the hardcoded fontsizes used by the rendering engine itself
-        FontSizes fontSize;
+        std::optional<FontSizes> fontSize;
 
         struct Logging {
             // List from logmanager.cpp::levelFromString
@@ -384,11 +384,21 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
-    c.fontSize.frameInfo = p.fontSize.frameInfo;
-    c.fontSize.shutdown = p.fontSize.shutdown;
-    c.fontSize.log = p.fontSize.log;
-    c.fontSize.cameraInfo = p.fontSize.cameraInfo;
-    c.fontSize.versionInfo = p.fontSize.versionInfo;
+    if (p.fontSize.has_value()) {
+        Parameters::FontSizes fontSizes = p.fontSize.value();
+        c.fontSize.frameInfo = fontSizes.frameInfo;
+        c.fontSize.shutdown = fontSizes.shutdown;
+        c.fontSize.log = fontSizes.log;
+        c.fontSize.cameraInfo = fontSizes.cameraInfo;
+        c.fontSize.versionInfo = fontSizes.versionInfo;
+    }
+    else {
+        c.fontSize.frameInfo = 32.0;
+        c.fontSize.shutdown = 14.0;
+        c.fontSize.log = 8.0;
+        c.fontSize.cameraInfo = 12.0;
+        c.fontSize.versionInfo = 12.0;
+    }
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
