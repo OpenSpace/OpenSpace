@@ -26,28 +26,44 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr const char _loggerCat[] = "Debugging";
+
     constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
     constexpr const char RenderedPointsIdentifier[] = "CurrentPathControlPoints";
     constexpr const char DebuggingGuiPath[] = "/Debugging";
 
     constexpr const glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
     constexpr const glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
+
+    // Conver the input string to a format that is valid as an identifier
+    std::string makeIdentifier(std::string s) {
+        std::replace(s.begin(), s.end(), ' ', '_');
+        std::replace(s.begin(), s.end(), '.', '-');
+        // Remove quotes and apostrophe, since they cause problems
+        // when a string is translated to a script call
+        s.erase(remove(s.begin(), s.end(), '\"'), s.end());
+        s.erase(remove(s.begin(), s.end(), '\''), s.end());
+        return s;
+    }
 } // namespace
 
 namespace openspace::luascriptfunctions {
 
 /**
  * PathNavigation
- * Renders the current camera path 
+ * Renders the current camera path
  */
 int renderCameraPath(lua_State* L) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L, 
-        { 0, 3 }, 
+        L,
+        { 0, 3 },
         "lua::renderCameraPath"
     );
 
@@ -55,28 +71,28 @@ int renderCameraPath(lua_State* L) {
         LWARNINGC("Debugging: PathNavigation", "There is no current path to render");
     }
 
-    const interaction::Path* currentPath = 
+    const interaction::Path* currentPath =
         global::navigationHandler->pathNavigator().currentPath();
 
     const int nSteps = (nArguments > 0) ? ghoul::lua::value<int>(L, 1) : 100;
     bool renderDirections = (nArguments > 1) ? ghoul::lua::value<bool>(L, 2) : false;
 
     constexpr const double defaultLineLength = 6e7;
-    const double directionLineLength = 
+    const double directionLineLength =
         (nArguments > 2) ? ghoul::lua::value<double>(L, 3) : defaultLineLength;
 
     // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
     std::string addParentScript = fmt::format(
-        "if openspace.hasSceneGraphNode('{0}') then " 
+        "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
-        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )", 
+        "openspace.addSceneGraphNode( {{ Identifier = '{0}' }} )",
         RenderedPathIdentifier
     );
 
     openspace::global::scriptEngine->queueScript(
-        addParentScript, 
+        addParentScript,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
@@ -113,10 +129,10 @@ int renderCameraPath(lua_State* L) {
         );
     };
 
-    auto addLineBetweenPoints = [pointIdentifier] (const std::string& id1, 
-                                                   const std::string& id2, 
-                                                   const glm::vec3& color, 
-                                                   float lineWidth) 
+    auto addLineBetweenPoints = [pointIdentifier] (const std::string& id1,
+                                                   const std::string& id2,
+                                                   const glm::vec3& color,
+                                                   float lineWidth)
     {
         const std::string lineNode = "{"
             "Identifier = '" + fmt::format("Line{}", id1) + "',"
@@ -138,7 +154,7 @@ int renderCameraPath(lua_State* L) {
     };
 
     auto addDirectionLine = [addPoint, addLineBetweenPoints, directionLineLength]
-                            (const std::string& pointId, const CameraPose& p) 
+                            (const std::string& pointId, const CameraPose& p)
     {
         const glm::dvec3 dir = glm::normalize(p.rotation * glm::dvec3(0.0, 0.0, -1.0));
         const glm::dvec3 pointPosition = p.position + directionLineLength * dir;
@@ -205,7 +221,7 @@ int renderPathControlPoints(lua_State* L) {
 
     const double radius = (nArguments > 0) ? ghoul::lua::value<int>(L, 1) : 2000000;
 
-    // Parent node. Note that we only render one set of points at a time, 
+    // Parent node. Note that we only render one set of points at a time,
     // so remove any previously rendered ones
     std::string addParentScript = fmt::format(
         "if openspace.hasSceneGraphNode('{0}') then "
@@ -222,10 +238,10 @@ int renderPathControlPoints(lua_State* L) {
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
-    const std::string guiPath = 
+    const std::string guiPath =
         fmt::format("{}/Camera Path Control Points", DebuggingGuiPath);
 
-    const char * colorTexturePath = "openspace.absPath("
+    const char* colorTexturePath = "openspace.absPath("
         "openspace.createSingleColorImage('point_color', { 0.0, 1.0, 0.0 })"
     ")";
 
@@ -271,6 +287,65 @@ int removePathControlPoints(lua_State* L) {
 
     openspace::global::scriptEngine->queueScript(
         fmt::format("openspace.removeSceneGraphNode('{}') ", RenderedPointsIdentifier),
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+/**
+ * Add a set of cartesian axes to the specified scene graph node
+ */
+int addCartesianAxes(lua_State* L) {
+    int nArgs = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::addCartesianAxes");
+
+    const std::string& nodeName = ghoul::lua::value<std::string>(L, 1);
+    const std::string& axesIdentifier = ghoul::lua::value<std::string>(L, 2);
+
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeName);
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown scene graph node: " + nodeName);
+    }
+
+    double scale;
+    if (nArgs > 2) {
+        scale = ghoul::lua::value<double>(L, 3);
+    }
+    else {
+        scale = 2.0 * n->boundingSphere();
+        if (n->boundingSphere() < 1E-3) {
+            LWARNING("Using zero bounding sphere for scale of created axes. You might "
+                "have to set the scale manually for them to be visible");
+            scale += 1.0;
+        }
+    }
+
+    const std::string identifier = makeIdentifier(axesIdentifier);
+    const std::string& axes = "{"
+        "Identifier = '" + identifier + "',"
+        "Parent = '" + nodeName + "',"
+        "Transform = { "
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(scale) + ""
+            "}"
+        "},"
+        "Renderable = {"
+            "Type = 'RenderableCartesianAxes',"
+            "Enabled = true,"
+            "XColor = { 1.0, 0.0, 0.0 },"
+            "YColor = { 0.0, 1.0, 0.0 },"
+            "ZColor = { 0.0, 0.0, 1.0 }"
+        "},"
+        "GUI = {"
+            "Name = '" + identifier + "',"
+            "Path = '" + DebuggingGuiPath + "/Coordiante Systems'"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine->queueScript(
+        fmt::format("openspace.addSceneGraphNode({})", axes),
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 

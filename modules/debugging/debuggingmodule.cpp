@@ -60,7 +60,7 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
             &luascriptfunctions::renderCameraPath,
             {},
             "[number, bool, number]",
-            "Render the current camera path from the path navigation system. The " 
+            "Render the current camera path from the path navigation system. The "
             "first optional argument is the number of samples to take along the path "
             "(defaults to 100). If a second optional argument is included and set to "
             "true, a line indicating the camera view direction along the path will "
@@ -89,6 +89,16 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
             {},
             "",
             "Removes the rendered control points"
+        },
+        {
+            "addCartesianAxes",
+            &luascriptfunctions::addCartesianAxes,
+            {},
+            "string, string [,number]",
+            "Adds a set of Cartesian axes to the scene graph node identified by the "
+            "first string, to illustrate its local coordinate system. The second string "
+            "will be used to set the identifier of the axes. The third (optional) "
+            "argument is a scale value, in meters."
         }
     };
 
