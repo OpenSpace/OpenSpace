@@ -24,6 +24,7 @@
 
 #include <openspace/camera/camerapose.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
