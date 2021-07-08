@@ -222,7 +222,7 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     }
 
     // Convert from hours/degrees, minutes, seconds to decimal degrees
-    double sign = signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
+    double sign = std::signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
     double raDeg = (raHours * 15.0) +
         (raMinutes * 15.0 / 60.0) +
         (raSeconds * 15.0 / 3600.0);
