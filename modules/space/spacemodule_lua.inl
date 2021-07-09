@@ -22,57 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
+#include <openspace/util/coordinateconversion.h>
 
-#include <openspace/util/histogram.h>
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <iosfwd>
-#include <map>
+namespace openspace::space::luascriptfunctions {
 
-namespace openspace {
+int convertFromRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
-class TSP;
+    glm::dvec2 degrees = glm::dvec2(0.0);
+    if (lua_type(L, 1) == LUA_TSTRING && lua_type(L, 2) == LUA_TSTRING) {
+        std::string ra = ghoul::lua::value<std::string>(L, 1);
+        std::string dec = ghoul::lua::value<std::string>(L, 2);
+        degrees = icrsToDecimalDegrees(ra, dec);
+    }
+    else if (lua_type(L, 1) == LUA_TNUMBER && lua_type(L, 2) == LUA_TNUMBER) {
+        degrees.x = ghoul::lua::value<double>(L, 1);
+        degrees.y = ghoul::lua::value<double>(L, 2);
+    }
+    else {
+        throw ghoul::lua::LuaRuntimeException("lua::convertFromRaDec: Ra and Dec have to "
+            "be of the same type, either String or Number"
+        );
+    }
 
-class ErrorHistogramManager {
-public:
-    ErrorHistogramManager(TSP* tsp);
-    ~ErrorHistogramManager() = default;
+    double distance = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
 
-    bool buildHistograms(int numBins);
-    const Histogram* histogram(unsigned int brickIndex) const;
+    glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
+    ghoul::lua::push(L, pos);
 
-    bool loadFromFile(const std::filesystem::path& filename);
-    bool saveToFile(const std::filesystem::path& filename);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-private:
-    TSP* _tsp;
-    std::ifstream* _file;
+int convertToRaDec(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertToRaDec");
 
-    std::vector<Histogram> _histograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
+    double x = ghoul::lua::value<double>(L, 1);
+    double y = ghoul::lua::value<double>(L, 2);
+    double z = ghoul::lua::value<double>(L, 3);
+    lua_settop(L, 0);
 
-    std::map<unsigned int, std::vector<float>> _voxelCache;
+    glm::dvec3 degrees = galacticCartesianToIcrs(x, y, z);
+    std::pair<std::string, std::string> raDecPair
+        = decimalDegreesToIcrs(degrees.x, degrees.y);
 
-    bool buildFromLeaf(unsigned int bstOffset, unsigned int octreeOffset);
-    std::vector<float> readValues(unsigned int brickIndex) const;
+    ghoul::lua::push(L, raDecPair.first);  // Ra
+    ghoul::lua::push(L, raDecPair.second); // Dec
+    ghoul::lua::push(L, degrees.z);        // Distance
 
-    int parentOffset(int offset, int base) const;
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
+    return 3;
+}
 
-    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
-    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(const glm::vec3& coords) const;
-    unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(const glm::ivec3& coords) const;
-
-    float interpolate(const glm::vec3& samplePoint,
-        const std::vector<float>& voxels) const;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
+}  // namespace openspace::space::luascriptfunctions

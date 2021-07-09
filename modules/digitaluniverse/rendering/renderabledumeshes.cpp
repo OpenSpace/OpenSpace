@@ -484,7 +484,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -502,7 +502,9 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+        LERROR(fmt::format(
+            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
+        ));
         return false;
     }
 

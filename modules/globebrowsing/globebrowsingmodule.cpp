@@ -413,20 +413,22 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "The last (optional) parameter is a duration for the motion"
         },
         {
-            "getGeoPosition",
-            &globebrowsing::luascriptfunctions::getGeoPosition,
+            "getLocalPositionFromGeo",
+            &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
             {},
             "string, number, number, number",
-            "Returns the specified surface position on the globe identified by the first "
-            "argument, as three floating point values - latitude, longitude and altitude "
-            "(degrees and meters)."
+            "Returns a position in the local Cartesian coordinate system of the globe "
+            "identified by the first argument, that corresponds to the given geographic "
+            "coordinates: latitude, longitude and altitude (in degrees and meters). In "
+            "the local coordinate system, the position (0,0,0) corresponds to the "
+            "globe's center."
         },
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
             {},
             "void",
-            "Get geographic coordinates of the camera poosition in latitude, "
+            "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
         },
         {

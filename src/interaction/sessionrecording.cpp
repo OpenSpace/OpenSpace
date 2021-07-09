@@ -65,6 +65,13 @@ namespace {
         "recording is rendering to screen"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
+        "IgnoreRecordedScale",
+        "Ignore Recorded Scale",
+        "If this value is enabled, the scale value from a recording is ignored and the "
+        "computed values are used instead"
+    };
+
     constexpr const bool UsingTimeKeyframes = false;
 
 } // namespace
@@ -80,11 +87,13 @@ ConversionError::ConversionError(std::string msg)
 SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
+    , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
 {}
 
 SessionRecording::SessionRecording(bool isGlobal)
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
+    , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
 {
     if (isGlobal) {
         auto fTask = FactoryManager::ref().factory<Task>();
@@ -92,6 +101,7 @@ SessionRecording::SessionRecording(bool isGlobal)
         fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
         fTask->registerClass<ConvertRecFileVersionTask>("ConvertRecFileVersionTask");
         addProperty(_renderPlaybackInformation);
+        addProperty(_ignoreRecordedScale);
     }
 }
 
@@ -980,8 +990,18 @@ void SessionRecording::render() {
         res.x / 2 - 150.f,
         res.y / 4
     );
-    std::string text = std::to_string(currentTime());
-    ghoul::fontrendering::RenderFont(*font, penPosition, text, glm::vec4(1.f));
+    std::string text1 = std::to_string(currentTime());
+    ghoul::fontrendering::RenderFont(
+        *font,
+        penPosition,
+        text1,
+        glm::vec4(1.f),
+        ghoul::fontrendering::CrDirection::Down
+    );
+    std::string text2 = fmt::format(
+        "Scale: {}", global::navigationHandler->camera()->scaling()
+    );
+    ghoul::fontrendering::RenderFont(*font, penPosition, text2, glm::vec4(1.f));
 }
 
 bool SessionRecording::isRecording() const {
@@ -1751,7 +1771,8 @@ void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
     bool paused = global::timeManager->isPaused();
-    if (_state == SessionState::PlaybackPaused) {
+    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
@@ -1773,10 +1794,10 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            if (!paused) {
+            if (!playbackPaused) {
                 _saveRenderingCurrentRecordedTime_interpolation +=
                     _saveRenderingDeltaTime_interpolation_usec;
-               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
                 global::renderEngine->takeScreenshot();
             }
         }
@@ -1968,7 +1989,7 @@ bool SessionRecording::processCameraKeyframe(double now) {
         prevPose,
         nextPose,
         t,
-        false
+        _ignoreRecordedScale
     );
 }
 

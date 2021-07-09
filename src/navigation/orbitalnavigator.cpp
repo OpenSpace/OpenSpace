@@ -258,7 +258,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
-        200000,
+        21500,
         0.25,
         500000
     )
@@ -391,7 +391,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
-    _stereoscopicDepthOfFocusSurface.setExponent(10.f);
+    _stereoscopicDepthOfFocusSurface.setExponent(3.f);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
     addProperty(_retargetInterpolationTime);
