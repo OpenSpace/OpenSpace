@@ -94,6 +94,7 @@ private:
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
+    properties::BoolProperty _applyIdleBehaviorOnFinish;
     properties::DoubleProperty _minValidBoundingSphere;
     properties::StringListProperty _relevantNodeTags;
 

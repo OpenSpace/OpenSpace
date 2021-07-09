@@ -33,6 +33,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
@@ -60,6 +61,13 @@ namespace {
         "Scale factor that the speed will be mulitplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
         "value is larger than or smaller than one."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
+        "ApplyIdleBehaviorOnFishish",
+        "Apply Idle Behavior on Fishish",
+        "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
+        "triggered once the paht has reached its target."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -90,6 +98,7 @@ PathNavigator::PathNavigator()
     )
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
+    , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
@@ -102,6 +111,7 @@ PathNavigator::PathNavigator()
 
     addProperty(_includeRoll);
     addProperty(_speedScale);
+    addProperty(_applyIdleBehaviorOnFinish);
     addProperty(_minValidBoundingSphere);
 
     _relevantNodeTags = std::vector<std::string>{
@@ -191,6 +201,17 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached end of path");
         _isPlaying = false;
+
+        if (_applyIdleBehaviorOnFinish) {
+            constexpr const char* ApplyIdleBehaviorScript = 
+                "local f = 'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior';"
+                "openspace.setPropertyValueSingle(f, true);";
+
+            global::scriptEngine->queueScript(
+                ApplyIdleBehaviorScript, 
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
         return;
     }
 }
