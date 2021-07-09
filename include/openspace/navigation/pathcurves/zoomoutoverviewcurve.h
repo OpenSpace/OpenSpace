@@ -29,7 +29,7 @@
 
 namespace openspace::interaction {
 
-struct WayPoint;
+class WayPoint;
 
 class ZoomOutOverviewCurve : public PathCurve {
 public:

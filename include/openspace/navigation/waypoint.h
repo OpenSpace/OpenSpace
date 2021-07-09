@@ -27,6 +27,7 @@
 
 #include <openspace/camera/camerapose.h>
 #include <ghoul/glm.h>
+#include <string>
 
 namespace openspace { class SceneGraphNode; }
 
@@ -34,20 +35,25 @@ namespace openspace::interaction {
 
 struct NavigationState;
 
-struct Waypoint {
+class Waypoint {
+public:
     Waypoint() = default;
     Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
     Waypoint(const NavigationState& ns);
 
     static double findValidBoundingSphere(const SceneGraphNode* node);
 
+    CameraPose pose() const;
     glm::dvec3 position() const;
     glm::dquat rotation() const;
     SceneGraphNode* node() const;
+    std::string nodeIdentifier() const;
+    double validBoundingSphere() const;
 
-    CameraPose pose;
-    std::string nodeIdentifier;
-    double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
+private:
+    CameraPose _pose;
+    std::string _nodeIdentifier;
+    double _validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
 };
 
 } // namespace openspace::interaction

@@ -43,8 +43,13 @@ namespace openspace::interaction {
 
 // Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
-    const double startNodeRadius = start.validBoundingSphere;
-    const double endNodeRadius = end.validBoundingSphere;
+    const double startNodeRadius = start.validBoundingSphere();
+    const double endNodeRadius = end.validBoundingSphere();
+
+    if (!start.node() || !end.node()) { // guard, but should never happen
+        LERROR("Something went wrong. The start or end node does not exist");
+        return; 
+    }
 
     const double endTangentsLengthFactor = 2.0;
     const double startTangentLength = endTangentsLengthFactor * startNodeRadius;
@@ -61,7 +66,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
     // Zoom out
-    if (start.nodeIdentifier != end.nodeIdentifier) {
+    if (start.nodeIdentifier() != end.nodeIdentifier()) {
         const glm::dvec3 n1 = startTangentDir;
         const glm::dvec3 n2 = endTangentDir;
 

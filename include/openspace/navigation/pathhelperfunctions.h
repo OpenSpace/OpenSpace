@@ -89,12 +89,20 @@ namespace openspace::splines {
 
     // TODO: Move these to ghoul's interpolator file (and make template versions)
 
-    // Centripetal version alpha = 0, uniform for alpha = 0.5 and chordal for alpha = 1
+    /*
+     * Catmull-Rom curve interpolation based on implementation by Mika Rantanen
+     * https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
+     * Centripetal version alpha = 0, uniform for alpha = 0.5 and chordal for alpha = 1
+     */
     glm::dvec3 catmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
         const glm::dvec3& p2, const glm::dvec3& p3, double alpha = 0.5);
 
-    glm::dvec3 cubicBezier(double t, const glm::dvec3& cp1, const glm::dvec3& cp2,
-        const glm::dvec3& cp3, const glm::dvec3& cp4);
+    /*
+     * Compute the interpolation along the cubic Bézier curve defined by the points p0, 
+     * p1, p2, and p3. The curve will pass through p0 and p3
+     */
+    glm::dvec3 cubicBezier(double t, const glm::dvec3& p0, const glm::dvec3& p1,
+        const glm::dvec3& p2, const glm::dvec3& p3);
 
     glm::dvec3 linear(double t, const glm::dvec3& cp1, const glm::dvec3& cp2);
 

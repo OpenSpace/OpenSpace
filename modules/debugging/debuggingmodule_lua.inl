@@ -104,7 +104,7 @@ int renderCameraPath(lua_State* L) {
         const CameraPose p = currentPath->interpolatedPose(u * length);
         poses.push_back(p);
     }
-    poses.push_back(currentPath->endPoint().pose);
+    poses.push_back(currentPath->endPoint().pose());
 
     // Create node lines between the positions
     auto pointIdentifier = [](int i) {

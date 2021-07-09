@@ -40,9 +40,9 @@
 namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
 
-    constexpr const double CloseToNodeThresholdFactor = 5.0;
-    constexpr const double AvoidCollisionDistanceFactor = 3.0;
-    constexpr const double CollisionBufferSizeFactor = 1.0;
+    constexpr const double CloseToNodeThresholdRadiusMultiplier = 5.0;
+    constexpr const double AvoidCollisionDistanceRadiusMultiplier = 3.0;
+    constexpr const double CollisionBufferSizeRadiusMultiplier = 1.0;
     constexpr const int MaxAvoidCollisionSteps = 10;
 } // namespace
 
@@ -51,11 +51,16 @@ namespace openspace::interaction {
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end) {
     _relevantNodes = global::navigationHandler->pathNavigator().relevantNodes();
 
+    if (!start.node() || !end.node()) { // guard, but should never happen
+        LERROR("Something went wrong. The start or end node does not exist");
+        return;
+    }
+
     const glm::dvec3 startNodeCenter = start.node()->worldPosition();
     const glm::dvec3 endNodeCenter = end.node()->worldPosition();
-    const double startNodeRadius = start.validBoundingSphere;
-    const double endNodeRadius = end.validBoundingSphere;
-    const glm::dvec3 startViewDir = start.rotation() * glm::dvec3(0.0, 0.0, -1.0);
+    const double startNodeRadius = start.validBoundingSphere();
+    const double endNodeRadius = end.validBoundingSphere();
+    const glm::dvec3 startViewDir = helpers::viewDirection(start.rotation());
 
     // Add control points for a catmull-rom spline, first and last will not be intersected
     _points.push_back(start.position());
@@ -65,7 +70,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     glm::dvec3 nodeToStart = start.position() - startNodeCenter;
     double distanceToStartNode = glm::length(nodeToStart);
 
-    if (distanceToStartNode < CloseToNodeThresholdFactor * startNodeRadius) {
+    if (distanceToStartNode < CloseToNodeThresholdRadiusMultiplier * startNodeRadius) {
         double distance = startNodeRadius;
         glm::dvec3 newPos = start.position() + distance * glm::normalize(nodeToStart);
         _points.push_back(newPos);
@@ -78,7 +83,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     if (targetInOppositeDirection) {
         const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
-        const glm::dvec3 middleViewDir = midleRot * glm::dvec3(0.0, 0.0, -1.0);
+        const glm::dvec3 middleViewDir = helpers::viewDirection(midleRot);
         const double stepOutDistance = 0.4 * glm::length(startToEnd);
 
         glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
@@ -91,7 +96,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const glm::dvec3 nodeToEnd = end.position() - endNodeCenter;
     const double distanceToEndNode = glm::length(nodeToEnd);
 
-    if (distanceToEndNode < CloseToNodeThresholdFactor * endNodeRadius) {
+    if (distanceToEndNode < CloseToNodeThresholdRadiusMultiplier * endNodeRadius) {
         double distance = endNodeRadius;
         glm::dvec3 newPos = end.position() + distance * glm::normalize(nodeToEnd);
         _points.push_back(newPos);
@@ -131,7 +136,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
 
             // Add a buffer to avoid passing too close to the node.
             // Dont't add it if any point is inside the buffer
-            double buffer = CollisionBufferSizeFactor * node->boundingSphere();
+            double buffer = CollisionBufferSizeRadiusMultiplier * radius;
             bool p1IsInside = helpers::isPointInsideSphere(p1, center, radius + buffer);
             bool p2IsInside = helpers::isPointInsideSphere(p2, center, radius + buffer);
             if (!p1IsInside && !p2IsInside) {
@@ -172,7 +177,8 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
                 const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
-                const double avoidCollisionDistance = AvoidCollisionDistanceFactor * radius;
+                const double avoidCollisionDistance = 
+                    AvoidCollisionDistanceRadiusMultiplier * radius;
 
                 glm::dvec3 extraKnot = collisionPoint -
                     avoidCollisionDistance * glm::normalize(orthogonal);

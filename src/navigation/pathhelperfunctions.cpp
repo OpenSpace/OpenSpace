@@ -29,7 +29,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "Helpers";
-    const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::helpers {
@@ -152,21 +151,23 @@ namespace openspace::helpers {
 
 namespace openspace::splines {
 
-    // Based on implementation by Mika Rantanen
+    // Based on implementation by Mika Rantanen, but without tension 
     // https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
     glm::dvec3 catmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
                           const glm::dvec3& p2, const glm::dvec3& p3, double alpha)
     {
-        glm::dvec3 m01, m02, m23, m13;
+        ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
 
-        double t01 = pow(glm::distance(p0, p1), alpha);
-        double t12 = pow(glm::distance(p1, p2), alpha);
-        double t23 = pow(glm::distance(p2, p3), alpha);
+        double t01 = std::pow(glm::distance(p0, p1), alpha);
+        double t12 = std::pow(glm::distance(p1, p2), alpha);
+        double t23 = std::pow(glm::distance(p2, p3), alpha);
 
-        m01 = (t01 > Epsilon) ? (p1 - p0) / t01 : glm::dvec3{};
-        m23 = (t23 > Epsilon) ? (p3 - p2) / t23 : glm::dvec3{};
-        m02 = (t01 + t12 > Epsilon) ? (p2 - p0) / (t01 + t12) : glm::dvec3{};
-        m13 = (t12 + t23 > Epsilon) ? (p3 - p1) / (t12 + t23) : glm::dvec3{};
+        constexpr const double Epsilon = 1E-7;
+        const glm::dvec3 zero = glm::dvec3(0.0);
+        glm::dvec3 m01 = (t01 > Epsilon) ? (p1 - p0) / t01 : zero;
+        glm::dvec3 m23 = (t23 > Epsilon) ? (p3 - p2) / t23 : zero;
+        glm::dvec3 m02 = (t01 + t12 > Epsilon) ? (p2 - p0) / (t01 + t12) : zero;
+        glm::dvec3 m13 = (t12 + t23 > Epsilon) ? (p3 - p1) / (t12 + t23) : zero;
 
         glm::dvec3 m1 = p2 - p1 + t12 * (m01 - m02);
         glm::dvec3 m2 = p2 - p1 + t12 * (m23 - m13);
@@ -182,16 +183,16 @@ namespace openspace::splines {
             + d;
     }
 
-    glm::dvec3 cubicBezier(double t, const glm::dvec3& cp1, const glm::dvec3& cp2,
-                           const glm::dvec3& cp3, const glm::dvec3& cp4)
+    glm::dvec3 cubicBezier(double t, const glm::dvec3& p0, const glm::dvec3& p1,
+                           const glm::dvec3& p2, const glm::dvec3& p3)
     {
         ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
 
         double a = 1.0 - t;
-        return cp1 * a * a * a
-            + cp2 * t * a * a * 3.0
-            + cp3 * t * t * a * 3.0
-            + cp4 * t * t * t;
+        return p0 * a * a * a
+            + p1 * t * a * a * 3.0
+            + p2 * t * t * a * 3.0
+            + p3 * t * t * t;
     }
 
     glm::dvec3 linear(double t, const glm::dvec3 &cp1, const glm::dvec3 &cp2) {

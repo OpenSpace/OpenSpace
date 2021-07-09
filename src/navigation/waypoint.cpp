@@ -40,16 +40,16 @@ namespace {
 namespace openspace::interaction {
 
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
-    : nodeIdentifier(ref)
+    : _nodeIdentifier(ref)
 {
-    pose = { pos, rot };
+    _pose = { pos, rot };
 
-    const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
+    const SceneGraphNode* node = sceneGraphNode(_nodeIdentifier);
     if (!node) {
-        LERROR(fmt::format("Could not find node '{}'", nodeIdentifier));
+        LERROR(fmt::format("Could not find node '{}'", _nodeIdentifier));
         return;
     }
-    validBoundingSphere = findValidBoundingSphere(node);
+    _validBoundingSphere = findValidBoundingSphere(node);
 }
 
 Waypoint::Waypoint(const NavigationState& ns) {
@@ -60,21 +60,33 @@ Waypoint::Waypoint(const NavigationState& ns) {
         return;
     }
 
-    nodeIdentifier = ns.anchor;
-    validBoundingSphere = findValidBoundingSphere(anchorNode);
-    pose = ns.cameraPose();
+    _nodeIdentifier = ns.anchor;
+    _validBoundingSphere = findValidBoundingSphere(anchorNode);
+    _pose = ns.cameraPose();
+}
+
+CameraPose Waypoint::pose() const {
+    return _pose;
 }
 
 glm::dvec3 Waypoint::position() const {
-    return pose.position;
+    return _pose.position;
 }
 
 glm::dquat Waypoint::rotation() const {
-    return pose.rotation;
+    return _pose.rotation;
 }
 
 SceneGraphNode* Waypoint::node() const {
-    return sceneGraphNode(nodeIdentifier);
+    return sceneGraphNode(_nodeIdentifier);
+}
+
+std::string Waypoint::nodeIdentifier() const {
+    return _nodeIdentifier;
+}
+
+double Waypoint::validBoundingSphere() const {
+    return _validBoundingSphere;
 }
 
 double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
@@ -86,8 +98,8 @@ double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
     if (bs < minValidBoundingSphere) {
         // If the bs of the target is too small, try to find a good value in a child node.
         // Only check the closest children, to avoid deep traversal in the scene graph.
-        // Also, the possibility to find a bounding sphere represents the visual size of
-        // the target well is higher for these nodes.
+        // Alsp. the chance to find a bounding sphere that represents the visual size of
+        // the target well is higher for these nodes
         for (SceneGraphNode* child : node->children()) {
             bs = static_cast<double>(child->boundingSphere());
             if (bs > minValidBoundingSphere) {

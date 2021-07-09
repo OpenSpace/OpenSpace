@@ -30,27 +30,45 @@
 
 namespace openspace::interaction {
 
-struct Waypoint;
+class Waypoint;
 
 class PathCurve {
 public:
     virtual ~PathCurve() = 0;
 
     const double length() const;
+
+    /*
+     * Compute and rteturn the position along the path at the specified relative
+     * distance. The input parameter should be in range [0, 1], where 1 correspond to 
+     * the full length of the path
+     */
     glm::dvec3 positionAt(double relativeDistance);
 
-    // Compute curve parameter u that matches the input arc length s
-    double curveParameter(double s);
-
+    /*
+     * Compute curve parameter u that matches the input arc length s
+     */
     virtual glm::dvec3 interpolate(double u);
 
+    /*
+     * Return the positions defining the control points for the spline interpolation
+     */
     std::vector<glm::dvec3> points();
 
 protected:
-    // Precompute information related to the pspline parameters, that are
-    // needed for arc length reparameterization. Must be called after 
-    // control point creation
+    /*
+     * Precompute information related to the spline parameters, that are
+     * needed for arc length reparameterization. Must be called after 
+     * control point creation
+     */
     void initializeParameterData();
+
+    /*
+     * Compute curve parameter u that matches the input arc length s.
+     * Input s is a length value, in the range [0, _totalLength]. The returned curve
+     * parameter u is in range [0, 1]
+     */
+    double curveParameter(double s);
 
     double approximatedDerivative(double u, double h = 0.0001);
     double arcLength(double limit = 1.0);
