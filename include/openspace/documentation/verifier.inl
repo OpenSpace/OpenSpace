@@ -175,7 +175,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
             r.offenses.push_back(o);
-            return r;            
+            return r;
         }
     }
     else {
@@ -290,7 +290,7 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
             r.offenses.push_back(o);
-            return r;            
+            return r;
         }
     }
     else {
@@ -346,7 +346,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 r.offenses.push_back(o);
-                return r;                    
+                return r;
             }
         }
         else {
@@ -363,7 +363,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
             r.offenses.push_back(o);
-            return r;               
+            return r;
         }
     }
     else {
@@ -405,7 +405,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 r.offenses.push_back(o);
-                return r;                    
+                return r;
             }
         }
         else {
@@ -419,7 +419,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.offender = key;
             o.reason = TestResult::Offense::Reason::Verification;
             r.offenses.push_back(o);
-            return r;                
+            return r;
         }
         else {
             return { true, {}, {} };
