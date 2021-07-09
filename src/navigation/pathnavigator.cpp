@@ -194,8 +194,6 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
-    LINFO(fmt::format("dt: {}", deltaTime));
-
     if (!_isPlaying) {
         //// TODO: Determine how this should work
         //// OBS! Stop behavior is broken as of core merge
