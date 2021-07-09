@@ -12,18 +12,18 @@ local JWSTKernel = asset.syncedResource({
   Version = 1
 })
 
---[[local JWSTHorizons = asset.syncedResource({
+local JWSTHorizons = asset.syncedResource({
   Name = "JWST Horizons",
   Type = "HttpSynchronization",
   Identifier = "jwst_horizons",
   Version = 1
-})]]--
+})
 
 local model = asset.syncedResource({
   Name = "JWST Model",
   Type = "HttpSynchronization",
   Identifier = "jwst_model",
-  Version = 1
+  Version = 2
 })
 
 local band = asset.syncedResource({
@@ -111,11 +111,11 @@ local JWSTModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
-    ModelScale = "Foot",
-    InvertModelScale = true,
+    GeometryFile = model .. "/jwst_2fps_2556000.osmodel",
+    ModelScale = 0.0328,
     EnableAnimation = true,
     AnimationStartTime = "2018 10 01 14:05:52",
+    AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
       {
@@ -203,8 +203,7 @@ local JWSTFov = {
   }
 }
 
--- Launch, coming soon
---[[local JWSTLaunchPosition = {
+local JWSTLaunchPosition = {
   Identifier = "JWSTLaunchPosition",
   Parent = transforms.L2.Identifier,
   Transform = {
@@ -240,11 +239,11 @@ local JWSTLaunchModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
-    ModelScale = "Foot",
-    InvertModelScale = true,
+    GeometryFile = model .. "/jwst_2fps_2556000.osmodel",
+    ModelScale = 0.0328,
     EnableAnimation = true,
     AnimationStartTime = "2018 10 01 14:05:52",
+    AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
       {
@@ -286,17 +285,17 @@ local JWSTLaunchTrail = {
     Name = "JWST Launch Trail",
     Path = "/Solar System/Missions/JWST"
   }
-}]]--
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTTrail,
   JWSTSunTrail,
-  --JWSTLaunchTrail,
+  JWSTLaunchTrail,
   JWSTPosition,
-  --JWSTLaunchPosition,
+  JWSTLaunchPosition,
   JWSTRotation,
   JWSTBand,
   JWSTModel,
-  --JWSTLaunchModel,
+  JWSTLaunchModel,
   JWSTFov
 })
