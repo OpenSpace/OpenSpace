@@ -182,7 +182,8 @@ private:
 
     struct IdleBehavior : public properties::PropertyOwner {
         enum Behavior {
-            Orbit = 0
+            Orbit = 0,
+            OrbitAtConstantLat
         };
 
         IdleBehavior();
@@ -351,10 +352,20 @@ private:
         glm::dquat& localRotation, glm::dquat& globalRotation);
 
     /**
+     * IdleBehavior::Behavior::Orbit
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
      * and global rotation of the camera
      */
     void orbitAnchor(double deltaTime, glm::dvec3& position,
+        glm::dquat& globalRotation, double speedScale);
+
+    /**
+     * IdleBehavior::Behavior::OrbitAtConstantLat
+     * Orbit the current anchor node, but stay on the current latitude band. Note that
+     * this creates a rolling motion if looking at any of the anchor's poles, and should
+     * be used with care
+     */
+    void orbitAtConstantLatitude(double deltaTime, glm::dvec3& position,
         glm::dquat& globalRotation, double speedScale);
 };
 

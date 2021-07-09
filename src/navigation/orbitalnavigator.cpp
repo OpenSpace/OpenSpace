@@ -28,6 +28,7 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 #include <cmath>
@@ -277,7 +278,8 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 {
     addProperty(apply);
     chosenBehavior.addOptions({
-        { IdleBehavior::Behavior::Orbit, "Orbit" }
+        { IdleBehavior::Behavior::Orbit, "Orbit" },
+        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" }
     });
     chosenBehavior = IdleBehavior::Behavior::Orbit;
     addProperty(chosenBehavior);
@@ -1174,7 +1176,6 @@ OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
                                          glm::dvec3 prevCameraToAnchor,
                                          Displacement anchorToAim)
 {
-
     if (_retargetAimInterpolator.isInterpolating()) {
         double t = _retargetAimInterpolator.value();
         _retargetAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
@@ -1547,6 +1548,9 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;
+        case IdleBehavior::Behavior::OrbitAtConstantLat:
+            orbitAtConstantLatitude(deltaTime, position, globalRotation, speedScale);
+            break;
         default:
             throw ghoul::MissingCaseException();
     }
@@ -1570,10 +1574,40 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
     // Rotate to find the difference in position
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
     const glm::dvec3 rotationDiffVec3 =
-        anchorCenterToCamera * rotationDiffWorldSpace -
-        anchorCenterToCamera;
+        anchorCenterToCamera * rotationDiffWorldSpace - anchorCenterToCamera;
 
     position += rotationDiffVec3;
+}
+
+void OrbitalNavigator::orbitAtConstantLatitude(double deltaTime, glm::dvec3& position,
+                                               glm::dquat& globalRotation,
+                                               double speedScale)
+{
+    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
+
+    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
+
+    // Assume north coincides with the local z-direction
+    // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own north/up, so
+    // that we can query this information rather than assuming it
+    const glm::dvec3 northInWorldCoords =
+        glm::dmat3(modelTransform) * glm::dvec3(0.0, 0.0, 1.0);
+
+    // Compute rotation around the north axis to be applied
+    double angle = deltaTime * speedScale;
+    const glm::dquat spinRotation =
+        glm::angleAxis(angle, glm::normalize(northInWorldCoords));
+
+    // Rotate the position vector from the center to camera and update position
+    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
+    const glm::dvec3 rotationDiffVec3 =
+        spinRotation * anchorCenterToCamera - anchorCenterToCamera;
+
+    position += rotationDiffVec3;
+
+    // Also apply the rotation to the global rotation, so the camera up vector is
+    // rotated around the axis as well
+    globalRotation = spinRotation * globalRotation;
 }
 
 } // namespace openspace::interaction
