@@ -28,6 +28,7 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/helpmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -87,6 +88,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
+    engine.addLibrary(interaction::HelpManager::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
