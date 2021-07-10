@@ -30,7 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>

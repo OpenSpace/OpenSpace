@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/interaction/externinteraction.h>
-#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 #include <vector>

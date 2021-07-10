@@ -22,7 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/camera/camerapose.h>
+#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
@@ -373,9 +375,7 @@ OrbitalNavigator::OrbitalNavigator()
         _websocketStates.setSensitivity(_websocketSensitivity);
     });
 
-
     addPropertySubOwner(_friction);
-
 
     addProperty(_anchor);
     addProperty(_aim);
@@ -396,7 +396,15 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
+
+    _followRotationInterpolationTime.onChange([&]() {
+        _followRotationInterpolator.setInterpolationTime(
+            _followRotationInterpolationTime
+        );
+    });
+    _followRotationInterpolator.setInterpolationTime(_followRotationInterpolationTime);
     addProperty(_followRotationInterpolationTime);
+
     _invertMouseButtons.onChange(
         [this]() { _mouseStates.setInvertMouseButton(_invertMouseButtons); }
     );
@@ -417,7 +425,6 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
     );
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
-
 
 void OrbitalNavigator::resetVelocities() {
     _mouseStates.resetVelocities();
@@ -443,14 +450,12 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
-    if (!(_anchorNode)) {
-        // Bail out if the anchor node is not set.
+    if (!_anchorNode) {
+        // Bail out if the anchor node is not set
         return;
     }
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-
-    SurfacePositionHandle posHandle;
 
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = _previousAnchorNodePosition.has_value() ?
@@ -473,11 +478,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Make the approximation delta size depending on the flight distance
         double arrivalThreshold = _flightDestinationDistance * _flightDestinationFactor;
 
+        const double distToDestination =
+            std::fabs(distFromCameraToFocus - _flightDestinationDistance);
+
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) >
-            arrivalThreshold)
-        {
+        if (distToDestination > arrivalThreshold) {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
@@ -521,17 +527,18 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     _previousAnchorNodePosition = _anchorNode->worldPosition();
 
     // Calculate a position handle based on the camera position in world space
-    posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
+    SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
     // Decompose camera rotation so that we can handle global and local rotation
     // individually. Then we combine them again when finished.
     // Compensate for relative movement of aim node,
-    // in order to maintain the old global/local rotation.
+    // in order to maintain the old global/local rotation
     CameraRotationDecomposition camRot =
         decomposeCameraRotationSurface(pose, *_anchorNode);
 
     // Rotate with the object by finding a differential rotation from the previous
-    // to the current rotation.
+    // to the current rotation
     glm::dquat anchorRotation =
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
@@ -545,7 +552,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // only if close enough
     anchorNodeRotationDiff = interpolateRotationDifferential(
         deltaTime,
-        _followRotationInterpolationTime,
         pose.position,
         anchorNodeRotationDiff
     );
@@ -574,15 +580,13 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Recalculate posHandle since horizontal position changed
     posHandle = calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
-
     // Rotate globally to keep camera rotation fixed
-    // in the rotating reference frame of the anchor object.
+    // in the rotating reference frame of the anchor object
     camRot.globalRotation = rotateGlobally(
         camRot.globalRotation,
         anchorNodeRotationDiff,
         posHandle
     );
-
 
     // Rotate around the surface out direction based on user input
     camRot.globalRotation = rotateHorizontally(
@@ -643,8 +647,7 @@ glm::dquat OrbitalNavigator::composeCameraRotation(
     return decomposition.globalRotation * decomposition.localRotation;
 }
 
-Camera* OrbitalNavigator::camera() const
-{
+Camera* OrbitalNavigator::camera() const {
     return _camera;
 }
 
@@ -819,7 +822,6 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     return distanceToCamera < maximumDistanceForRotation;
 }
 
-
 bool OrbitalNavigator::followingAnchorRotation() const {
     if (_aimNode != nullptr && _aimNode != _anchorNode) {
         return false;
@@ -852,9 +854,7 @@ OrbitalNavigator::CameraRotationDecomposition
                                                      const SceneGraphNode& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-
-    const glm::dvec3 cameraViewDirection =
-        cameraPose.rotation * glm::dvec3(0.0, 0.0, -1.0);
+    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
 
     const glm::dmat4 modelTransform = reference.modelTransform();
     const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
@@ -871,14 +871,12 @@ OrbitalNavigator::CameraRotationDecomposition
     );
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraUp)
     );
-    const glm::dquat globalCameraRotation = glm::normalize(
-        glm::inverse(glm::quat_cast(lookAtMat))
-    );
+
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
@@ -890,28 +888,23 @@ OrbitalNavigator::CameraRotationDecomposition
                                               glm::dvec3 reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-
-    const glm::dvec3 cameraViewDirection = cameraPose.rotation *
-        glm::dvec3(0.0, 0.0, -1.0);
+    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         reference - cameraPose.position,
         normalize(cameraViewDirection + cameraUp)
     );
-    const glm::dquat globalCameraRotation = glm::normalize(
-        glm::inverse(glm::quat_cast(lookAtMat))
-    );
+
     const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
         cameraPose.rotation;
 
     return { localCameraRotation, globalCameraRotation };
 }
 
-OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
-                                                         glm::dvec3 cameraToAnchor,
-                                                         Displacement anchorToAim)
+CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
+                                       Displacement anchorToAim)
 {
     CameraRotationDecomposition anchorDecomp =
         decomposeCameraRotation(pose, pose.position + cameraToAnchor);
@@ -925,9 +918,8 @@ OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
     if (distanceRatio > DistanceRatioAimThreshold) {
         // Divide the action of following the aim into two actions:
         // 1. Rotating camera around anchor, based on the aim's projection onto a sphere
-        //    around the anchor, with radius = distance(camera, anchor).
+        //    around the anchor, with radius = distance(camera, anchor)
         // 2. Adjustment of the camera to account for radial displacement of the aim
-
 
         // Step 1 (Rotation around anchor based on aim's projection)
         glm::dvec3 newAnchorToProjectedAim =
@@ -973,10 +965,9 @@ OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
         // CorrectionFactorExponent = 50.0 is picked arbitrarily,
         // and gives a smooth result.
         ratio = glm::clamp(ratio, -1.0, 1.0);
-        double CorrectionFactorExponent = 50.0;
-        double correctionFactor =
+        const double CorrectionFactorExponent = 50.0;
+        const double correctionFactor =
             glm::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
-
 
         // newCameraAnchorAngle has two solutions, depending on whether the camera is
         // in the half-space closest to the anchor or aim.
@@ -1067,7 +1058,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-    const glm::dquat& localCameraRotation)
+                                                   const glm::dquat& localCameraRotation)
 {
     if (_retargetAnchorInterpolator.isInterpolating()) {
         const double t = _retargetAnchorInterpolator.value();
@@ -1077,14 +1068,10 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         const glm::dvec3 localUp =
             localCameraRotation * Camera::UpDirectionCameraSpace;
 
-        const glm::dmat4 lookAtMat = glm::lookAt(
+        const glm::dquat targetRotation = helpers::lookAtQuaternion(
             glm::dvec3(0.0),
             Camera::ViewDirectionCameraSpace,
             normalize(localUp)
-        );
-
-        const glm::dquat targetRotation = glm::normalize(
-            glm::inverse(glm::quat_cast(lookAtMat))
         );
 
         const glm::dquat result = glm::slerp(
@@ -1105,11 +1092,10 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     }
 }
 
-OrbitalNavigator::Displacement OrbitalNavigator::interpolateRetargetAim(
-    double deltaTime,
-    CameraPose pose,
-    glm::dvec3 prevCameraToAnchor,
-    Displacement anchorToAim)
+OrbitalNavigator::Displacement
+OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
+                                         glm::dvec3 prevCameraToAnchor,
+                                         Displacement anchorToAim)
 {
 
     if (_retargetAimInterpolator.isInterpolating()) {
@@ -1310,15 +1296,14 @@ glm::dquat OrbitalNavigator::rotateGlobally(const glm::dquat& globalCameraRotati
     const glm::dvec3 directionFromSurfaceToCamera =
         glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection;
 
-    const glm::dvec3 lookUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
+    const glm::dvec3 cameraUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
         globalCameraRotation * Camera::UpDirectionCameraSpace;
 
-    const glm::dmat4 lookAtMat = glm::lookAt(
+    return helpers::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
-        lookUpWhenFacingSurface
+        cameraUpWhenFacingSurface
     );
-    return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
 }
 
 glm::dvec3 OrbitalNavigator::translateVertically(double deltaTime,
@@ -1394,7 +1379,6 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
-                                                                 double interpolationTime,
                                                           const glm::dvec3 cameraPosition,
                                                            const glm::dquat& rotationDiff)
 {
@@ -1402,9 +1386,6 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     const double interpolationSign =
         shouldFollowAnchorRotation(cameraPosition) ? 1.0 : -1.0;
 
-    _followRotationInterpolator.setInterpolationTime(static_cast<float>(
-        interpolationTime
-    ));
     _followRotationInterpolator.setDeltaTime(static_cast<float>(
         interpolationSign * deltaTime
     ));

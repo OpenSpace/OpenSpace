@@ -46,6 +46,7 @@
 namespace openspace {
     class SceneGraphNode;
     class Camera;
+    struct CameraPose;
     struct SurfacePositionHandle;
 } // namespace
 
@@ -104,11 +105,6 @@ private:
         glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
-    struct CameraPose {
-        glm::dvec3 position = glm::dvec3(0.0);
-        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-    };
-
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
     struct Friction : public properties::PropertyOwner {
@@ -129,12 +125,12 @@ private:
 
     Friction _friction;
 
-    // Anchor: Node to follow and orbit.
+    // Anchor: Node to follow and orbit
     properties::StringProperty _anchor;
 
     // Aim: Node to look at (when camera direction is reset),
     // Empty string means same as anchor.
-    // If these are the same node we call it the `focus` node.
+    // If these are the same node we call it the `focus` node
     properties::StringProperty _aim;
 
     // Reset camera direction to the anchor node.
@@ -318,7 +314,7 @@ private:
     /**
      * Interpolates between rotationDiff and a 0 rotation.
      */
-    glm::dquat interpolateRotationDifferential(double deltaTime, double interpolationTime,
+    glm::dquat interpolateRotationDifferential(double deltaTime,
         const glm::dvec3 cameraPosition, const glm::dquat& rotationDiff);
 
     /**

@@ -24,7 +24,7 @@
 
 #include "catch2/catch.hpp"
 
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -520,7 +520,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
     p1 = 2.f;
     p2 = "test-string";
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     state.anchor = "anchor";
     state.aim = "aim";
     state.referenceFrame = "refFrame";

@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 #define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
+#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/interaction/keyframenavigator.h>
 
 #include <functional>
 #include <queue>
