@@ -127,6 +127,7 @@ private:
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
+    double currentApplicationTimeForInterpolation() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;

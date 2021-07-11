@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
@@ -112,7 +113,7 @@ TimeManager::TimeManager()
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
@@ -129,7 +130,7 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
     const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
     const TimeKeyframeData predictedTime = interpolate(
-        global::windowDelegate->applicationTime() + duration
+        currentApplicationTimeForInterpolation() + duration
     );
     const double targetTime = predictedTime.time.j2000Seconds() + delta;
     interpolateTime(targetTime, durationSeconds);
@@ -262,7 +263,7 @@ void TimeManager::progressTime(double dt) {
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
 
     auto firstFutureKeyframe = std::lower_bound(
@@ -713,7 +714,7 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     Time newTime(
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
@@ -809,7 +810,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
     Time newTime(
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
@@ -824,6 +825,16 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         addKeyframe(now, currentKeyframe);
     }
     addKeyframe(now + interpolationDuration, futureKeyframe);
+}
+
+double TimeManager::currentApplicationTimeForInterpolation() const
+{
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        return global::sessionRecording->currentApplicationInterpolationTime();
+    }
+    else {
+        return global::windowDelegate->applicationTime();
+    }
 }
 
 } // namespace openspace
