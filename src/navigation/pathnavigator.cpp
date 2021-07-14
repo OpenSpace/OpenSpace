@@ -259,6 +259,8 @@ void PathNavigator::startPath() {
 
     LINFO("Starting path...");
     _isPlaying = true;
+
+    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 }
 
 void PathNavigator::abortPath() {

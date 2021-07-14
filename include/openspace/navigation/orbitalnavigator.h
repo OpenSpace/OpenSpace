@@ -64,6 +64,8 @@ public:
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
 
+    void updateOnCameraInteraction();
+
     Camera* camera() const;
     void setCamera(Camera* camera);
     void clearPreviousState();
@@ -180,6 +182,8 @@ private:
     Interpolator<double> _retargetAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
+    Interpolator<double> _idleBehaviorDampenInterpolator;
+    bool _invertIdleBehaviorInterpolation = false;
 
     struct IdleBehavior : public properties::PropertyOwner {
         enum Behavior {
@@ -193,6 +197,7 @@ private:
         properties::OptionProperty chosenBehavior;
         properties::FloatProperty speedScale;
         properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty dampenInterpolationTime;
     };
     IdleBehavior _idleBehavior;
 

@@ -28,6 +28,7 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
@@ -171,7 +172,7 @@ namespace {
             "StereoInterpolationTime",
             "Stereo interpolation time",
             "The time to interpolate to a new stereoscopic depth "
-            "when the anchor node is changed."
+            "when the anchor node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -179,7 +180,7 @@ namespace {
             "RetargetAnchorInterpolationTime",
             "Retarget interpolation time",
             "The time to interpolate the camera rotation "
-            "when the anchor or aim node is changed."
+            "when the anchor or aim node is changed, in seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -228,7 +229,7 @@ namespace {
         "ApplyIdleBehavior",
         "Apply Idle Behavior",
         "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly. "
+        "moving the camera accordingly."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
@@ -250,7 +251,17 @@ namespace {
         "AbortOnCameraInteraction",
         "Abort on Camera Interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
-        "the behavior will be reapplied after the interaction."
+        "the behavior will be reapplied after the interaction. Examples of camera "
+        "interaction are: changing the anchor node, starting a camera path, or "
+        "navigating manually using an input device."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        IdleBehaviorDampenInterpolationTimeInfo = {
+        "DampenInterpolationTime",
+        "Start/End Dampen Interpolation Time",
+        "The time to interpolate to/from full speed when an idle behavior is triggered "
+        "or canceled, in seconds."
     };
 } // namespace
 
@@ -275,6 +286,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     , chosenBehavior(IdleBehaviorInfo)
     , speedScale(IdleBehaviorSpeedInfo, 1.f, 0.01f, 5.f)
     , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
+    , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
 {
     addProperty(apply);
     chosenBehavior.addOptions({
@@ -285,6 +297,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(chosenBehavior);
     addProperty(speedScale);
     addProperty(abortOnCameraInteraction);
+    addProperty(dampenInterpolationTime);
 }
 
 OrbitalNavigator::OrbitalNavigator()
@@ -425,13 +438,26 @@ OrbitalNavigator::OrbitalNavigator()
     addPropertySubOwner(_friction);
     addPropertySubOwner(_idleBehavior);
 
+    _idleBehaviorDampenInterpolator.setTransferFunction(ghoul::quadraticEaseInOut<double>);
+    _idleBehavior.dampenInterpolationTime.onChange([&]() {
+        _idleBehaviorDampenInterpolator.setInterpolationTime(
+            _idleBehavior.dampenInterpolationTime
+        );
+     });
     _idleBehavior.apply.onChange([&]() {
         if (_idleBehavior.apply) {
             // Reset velocities to ensure that abort on interaction works correctly
             resetVelocities();
+            _invertIdleBehaviorInterpolation = false;
         }
+        else {
+            _invertIdleBehaviorInterpolation = true;
+        }
+        _idleBehaviorDampenInterpolator.start();
+        _idleBehaviorDampenInterpolator.setInterpolationTime(
+            _idleBehavior.dampenInterpolationTime
+        );
     });
-
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
@@ -503,16 +529,13 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
     _websocketStates.updateStateFromInput(inputState, deltaTime);
     _scriptStates.updateStateFromInput(inputState, deltaTime);
 
-    // Disable idle behavior if camera interaction happened
-    if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
-            _joystickStates.hasNonZeroVelocities() ||
-            _websocketStates.hasNonZeroVelocities() ||
-            _scriptStates.hasNonZeroVelocities();
+    bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
+        _joystickStates.hasNonZeroVelocities() ||
+        _websocketStates.hasNonZeroVelocities() ||
+        _scriptStates.hasNonZeroVelocities();
 
-        if (interactionHappened) {
-            _idleBehavior.apply = false;
-        }
+    if (interactionHappened) {
+        updateOnCameraInteraction();
     }
 }
 
@@ -640,14 +663,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
     // is no input from interaction. So, it assumes that all the previous effects from
     // user input resulted in no change
-    if (_idleBehavior.apply) {
-        applyIdleBehavior(
-            deltaTime,
-            pose.position,
-            camRot.localRotation,
-            camRot.globalRotation
-        );
-    }
+    applyIdleBehavior(
+        deltaTime,
+        pose.position,
+        camRot.localRotation,
+        camRot.globalRotation
+    );
 
     // Horizontal translation by focus node rotation
     pose.position = followAnchorNodeRotation(
@@ -728,6 +749,15 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     }
 }
 
+void OrbitalNavigator::updateOnCameraInteraction() {
+    // Disable idle behavior if camera interaction happened
+    if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
+        _idleBehavior.apply = false;
+        // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
+        _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
+    }
+}
+
 glm::dquat OrbitalNavigator::composeCameraRotation(
     const CameraRotationDecomposition& decomposition)
 {
@@ -784,6 +814,11 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
     // since the reset behavior depends on the anchor node.
     if (changedAnchor && resetVelocitiesOnChange) {
         resetVelocities();
+    }
+
+    // Mark a changed anchor node as a camera interaction
+    if (changedAnchor) {
+        updateOnCameraInteraction();
     }
 
     if (_anchorNode) {
@@ -869,7 +904,7 @@ void OrbitalNavigator::startRetargetAim() {
     // Minimum is _rotateInterpolationTime seconds. Otherwise proportional to angle.
     _retargetAimInterpolator.setInterpolationTime(static_cast<float>(
         glm::max(angle, 1.0) * _retargetInterpolationTime
-        ));
+    ));
     _retargetAimInterpolator.start();
 
     _cameraToSurfaceDistanceInterpolator.setInterpolationTime(_stereoInterpolationTime);
@@ -1525,6 +1560,13 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
                                          glm::dquat& localRotation,
                                          glm::dquat& globalRotation)
 {
+    _idleBehaviorDampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+    _idleBehaviorDampenInterpolator.step();
+
+    if (!(_idleBehavior.apply || _idleBehaviorDampenInterpolator.isInterpolating())) {
+        return;
+    }
+
     SurfacePositionHandle posHandle =
         calculateSurfacePositionHandle(*_anchorNode, position);
 
@@ -1547,6 +1589,10 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
 
     speedScale *= _idleBehavior.speedScale;
     speedScale *= 0.05; // without this scaling, the motion is way too fast
+
+    // Interpolate so that the start and end are smooth
+    double s = _idleBehaviorDampenInterpolator.value();
+    speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
     // Apply the chosen behavior
     const IdleBehavior::Behavior chosen =
