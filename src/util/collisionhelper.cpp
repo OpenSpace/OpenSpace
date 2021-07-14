@@ -22,78 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PATHCURVE___H__
-#define __OPENSPACE_CORE___PATHCURVE___H__
+#include <openspace/util/collisionhelper.h>
 
-#include <ghoul/glm.h>
-#include <vector>
+namespace openspace::collision {
 
-namespace openspace::interaction {
+// Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
+                            double r, glm::dvec3& intersectionPoint)
+{
+    long double a, b, c;
+    const glm::dvec3 diffp = p2 - p1;
 
-class Waypoint;
+    a = diffp.x * diffp.x + diffp.y * diffp.y + diffp.z * diffp.z;
+    b = 2.0 * (diffp.x * (p1.x - center.x) + diffp.y * (p1.y - center.y) +
+        diffp.z * (p1.z - center.z));
+    c = center.x * center.x + center.y * center.y + center.z * center.z;
+    c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+    c -= 2.0 * (center.x * p1.x + center.y * p1.y + center.z * p1.z);
+    c -= r * r;
 
-class PathCurve {
-public:
-    virtual ~PathCurve() = 0;
+    long double intersectionTest = b * b - 4.0 * a * c;
 
-    const double length() const;
+    // No intersection
+    if (std::abs(a) < 0 || intersectionTest < 0.0) {
+        return false;
+    }
+    // Intersection
+    else {
+        // Only care about the first intersection point if we have two
+        const double t = static_cast<double>(
+            (-b - std::sqrt(intersectionTest)) / (2.0 * a)
+        );
 
-    /*
-     * Compute and rteturn the position along the path at the specified relative
-     * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path
-     */
-    glm::dvec3 positionAt(double relativeDistance);
+        // Check if utside of line segment between p1 and p2
+        if (t <= 0 || t >= 1.0) {
+            return false;
+        }
 
-    /*
-     * Compute curve parameter u that matches the input arc length s
-     */
-    virtual glm::dvec3 interpolate(double u);
+        intersectionPoint = p1 + t * diffp;
+        return true;
+    }
+}
 
-    /*
-     * Return the positions defining the control points for the spline interpolation
-     */
-    std::vector<glm::dvec3> points();
+bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
+    const glm::dvec3 v = c - p;
+    const long double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+    const long double squaredRadius = r * r;
 
-protected:
-    /*
-     * Precompute information related to the spline parameters, that are
-     * needed for arc length reparameterization. Must be called after
-     * control point creation
-     */
-    void initializeParameterData();
+    return (squaredDistance <= squaredRadius);
+}
 
-    /*
-     * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value, in the range [0, _totalLength]. The returned curve
-     * parameter u is in range [0, 1]
-     */
-    double curveParameter(double s);
-
-    double approximatedDerivative(double u, double h = 0.0001);
-    double arcLength(double limit = 1.0);
-    double arcLength(double lowerLimit, double upperLimit);
-
-    std::vector<glm::dvec3> _points;
-    unsigned int _nSegments = 0;
-
-    std::vector<double> _curveParameterSteps; // per segment
-    std::vector<double> _lengthSums; // per segment
-    double _totalLength = 0.0;
-
-    struct ParameterPair {
-        double u; // curve parameter
-        double s; // arc length parameter
-    };
-
-    std::vector<ParameterPair> _parameterSamples;
-};
-
-class LinearCurve : public PathCurve {
-public:
-    LinearCurve(const Waypoint& start, const Waypoint& end);
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___PATHCURVE___H__
+}  // namespace openspace::collision

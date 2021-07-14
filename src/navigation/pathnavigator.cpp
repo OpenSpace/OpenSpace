@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -61,8 +60,8 @@ namespace {
         "A camera motion behavior that is applied when no path is being played"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo 
-        ApplyStopBehaviorWhenIdleInfo = 
+    constexpr openspace::properties::Property::PropertyInfo
+        ApplyStopBehaviorWhenIdleInfo =
     {
         "ApplyStopBehaviorWhenIdle",
         "Apply Stop Behavior When Idle",
@@ -107,12 +106,12 @@ namespace openspace::interaction {
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator" })
     , _defaultCurveOption(
-        DefaultCurveOptionInfo, 
+        DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _includeRoll(IncludeRollInfo, false)
     , _stopBehavior(
-        StopBehaviorInfo, 
+        StopBehaviorInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
@@ -203,7 +202,7 @@ void PathNavigator::updateCamera(double deltaTime) {
         return;
     }
 
-    // Prevent long delta times due to e.g. computations from other actions to cause 
+    // Prevent long delta times due to e.g. computations from other actions to cause
     // really big jumps in the motion along the path
     // OBS! Causes problems if the general FPS is lower than 10, but then the user should
     // probably not use the camera paths anyways
@@ -388,7 +387,7 @@ void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
     const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
     const double notTooCloseDistance = deltaTime * anchorToPosDistance;
     glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
-    glm::dquat rollFreeRotation = helpers::lookAtQuaternion(
+    glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
         pose.position,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
@@ -414,7 +413,7 @@ void PathNavigator::orbitAnchorNode(double deltaTime) {
 
     const glm::dvec3 prevPosition = camera()->positionVec3();
     const glm::dquat prevRotation = camera()->rotationQuaternion();
-    const glm::dvec3 nodeCenter = anchor()->worldPosition(); 
+    const glm::dvec3 nodeCenter = anchor()->worldPosition();
 
     const double speedFactor = 0.1 * _orbitSpeedFactor;
 
@@ -425,7 +424,7 @@ void PathNavigator::orbitAnchorNode(double deltaTime) {
 
     // Compute a new position along the orbit
     const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
-    const glm::dquat lookAtNodeRotation = helpers::lookAtQuaternion(
+    const glm::dquat lookAtNodeRotation = ghoul::lookAtQuaternion(
         prevPosition,
         nodeCenter,
         up
@@ -444,7 +443,7 @@ void PathNavigator::orbitAnchorNode(double deltaTime) {
     // Rotate along the orbit, but keep relative orientation with regards to the anchor
     const glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
     const glm::dquat newLookAtRotation =
-        helpers::lookAtQuaternion(newPosition, nodeCenter, up);
+        ghoul::lookAtQuaternion(newPosition, nodeCenter, up);
 
     const glm::dquat newRotation = newLookAtRotation * localRotation;
 

@@ -73,7 +73,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathcurve.cpp
-  ${OPENSPACE_BASE_DIR}/src/navigation/pathhelperfunctions.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator_lua.inl
   ${OPENSPACE_BASE_DIR}/src/navigation/waypoint.cpp
@@ -161,6 +160,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/coordinateconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
@@ -189,6 +189,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/universalhelpers.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
@@ -253,7 +254,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/path.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurve.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathhelperfunctions.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
@@ -344,6 +344,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/collisionhelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
@@ -382,6 +383,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h

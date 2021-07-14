@@ -22,78 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PATHCURVE___H__
-#define __OPENSPACE_CORE___PATHCURVE___H__
+#ifndef __OPENSPACE_CORE___COLLISIONHELPER___H__
+#define __OPENSPACE_CORE___COLLISIONHELPER___H__
 
 #include <ghoul/glm.h>
-#include <vector>
 
-namespace openspace::interaction {
+namespace openspace::collision {
 
-class Waypoint;
+/*
+ * Calculate the intersection of a line segment and a sphere.
+ * The line segment is defined from \p p1 to \p p2.
+ * The sphere is defined by the radius \p r and center point \p center.
+ * The resulting intersection point is stored in the \p intersectionPoint parameter.
+ *
+ * In the case of two intersection points, only care about the first one.
+ *
+ * \param p1 The start point for the line segment
+ * \param p2 The end point for the line segment
+ * \param center The center point for the sphere
+ * \param r The radius of the sphere
+ * \param intersectionPoint A variable to store the resulting intersection point in
+ * \return True if the line between \p p1 and \p p2 intersects the sphere given by
+ *         \p r and \p center, and false otherwise
+ */
+bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
+    double r, glm::dvec3& intersectionPoint);
 
-class PathCurve {
-public:
-    virtual ~PathCurve() = 0;
+/*
+ * Check if the point \p p is inside of the sphere defined by radius \p r and center
+ * point \p c
+ */
+bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 
-    const double length() const;
+} // namespace openspace::collision
 
-    /*
-     * Compute and rteturn the position along the path at the specified relative
-     * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path
-     */
-    glm::dvec3 positionAt(double relativeDistance);
-
-    /*
-     * Compute curve parameter u that matches the input arc length s
-     */
-    virtual glm::dvec3 interpolate(double u);
-
-    /*
-     * Return the positions defining the control points for the spline interpolation
-     */
-    std::vector<glm::dvec3> points();
-
-protected:
-    /*
-     * Precompute information related to the spline parameters, that are
-     * needed for arc length reparameterization. Must be called after
-     * control point creation
-     */
-    void initializeParameterData();
-
-    /*
-     * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value, in the range [0, _totalLength]. The returned curve
-     * parameter u is in range [0, 1]
-     */
-    double curveParameter(double s);
-
-    double approximatedDerivative(double u, double h = 0.0001);
-    double arcLength(double limit = 1.0);
-    double arcLength(double lowerLimit, double upperLimit);
-
-    std::vector<glm::dvec3> _points;
-    unsigned int _nSegments = 0;
-
-    std::vector<double> _curveParameterSteps; // per segment
-    std::vector<double> _lengthSums; // per segment
-    double _totalLength = 0.0;
-
-    struct ParameterPair {
-        double u; // curve parameter
-        double s; // arc length parameter
-    };
-
-    std::vector<ParameterPair> _parameterSamples;
-};
-
-class LinearCurve : public PathCurve {
-public:
-    LinearCurve(const Waypoint& start, const Waypoint& end);
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___PATHCURVE___H__
+#endif // __OPENSPACE_CORE___COLLISIONHELPER___H__

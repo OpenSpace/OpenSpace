@@ -26,7 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -48,7 +47,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     if (!start.node() || !end.node()) { // guard, but should never happen
         LERROR("Something went wrong. The start or end node does not exist");
-        return; 
+        return;
     }
 
     const double endTangentsLengthFactor = 2.0;
@@ -73,7 +72,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         // Decide the step direction for the "overview point" based on the directions
         // at the start and end of the path, to try to get a nice curve shape
         glm::dvec3 goodStepDirection;
-        if (glm::dot(n1, n2) < 0.0) { 
+        if (glm::dot(n1, n2) < 0.0) {
             // Facing in different directions => step in direction of the cross product
             goodStepDirection = glm::normalize(glm::cross(-n1, n2));
         }
@@ -83,13 +82,13 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
         // Find a direction that is orthogonal to the line between the start and end position
         const glm::dvec3 startPosToEndPos = end.position() - start.position();
-        const glm::dvec3 outwardStepVector = 
+        const glm::dvec3 outwardStepVector =
             0.5 * glm::length(startPosToEndPos) * goodStepDirection;
 
         const glm::dvec3 projectedVec = glm::proj(outwardStepVector, startPosToEndPos);
         const glm::dvec3 orthogonalComponent = outwardStepVector - projectedVec;
         const glm::dvec3 stepDirection = glm::normalize(orthogonalComponent);
-        
+
         // Step half-way along the line between the position and then orthogonally
         const glm::dvec3 extraKnot = start.position() + 0.5 * startPosToEndPos
             + 1.5 * glm::length(startPosToEndPos) * stepDirection;

@@ -27,11 +27,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/collisionhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
@@ -60,7 +60,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     const glm::dvec3 endNodeCenter = end.node()->worldPosition();
     const double startNodeRadius = start.validBoundingSphere();
     const double endNodeRadius = end.validBoundingSphere();
-    const glm::dvec3 startViewDir = helpers::viewDirection(start.rotation());
+    const glm::dvec3 startViewDir = ghoul::viewDirection(start.rotation());
 
     // Add control points for a catmull-rom spline, first and last will not be intersected
     _points.push_back(start.position());
@@ -83,7 +83,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     if (targetInOppositeDirection) {
         const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
-        const glm::dvec3 middleViewDir = helpers::viewDirection(midleRot);
+        const glm::dvec3 middleViewDir = ghoul::viewDirection(midleRot);
         const double stepOutDistance = 0.4 * glm::length(startToEnd);
 
         glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
@@ -137,14 +137,14 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             // Add a buffer to avoid passing too close to the node.
             // Dont't add it if any point is inside the buffer
             double buffer = CollisionBufferSizeRadiusMultiplier * radius;
-            bool p1IsInside = helpers::isPointInsideSphere(p1, center, radius + buffer);
-            bool p2IsInside = helpers::isPointInsideSphere(p2, center, radius + buffer);
+            bool p1IsInside = collision::isPointInsideSphere(p1, center, radius + buffer);
+            bool p2IsInside = collision::isPointInsideSphere(p2, center, radius + buffer);
             if (!p1IsInside && !p2IsInside) {
                 radius += buffer;
             }
 
             glm::dvec3 intersectionPointModelCoords;
-            bool collision = helpers::lineSphereIntersection(
+            bool collision = collision::lineSphereIntersection(
                 p1,
                 p2,
                 center,
@@ -157,8 +157,8 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                     glm::dvec4(intersectionPointModelCoords, 1.0);
 
                 // before collision response, make sure none of the points are inside the node
-                bool isStartInsideNode = helpers::isPointInsideSphere(p1, center, radius);
-                bool isEndInsideNode = helpers::isPointInsideSphere(p2, center, radius);
+                bool isStartInsideNode = collision::isPointInsideSphere(p1, center, radius);
+                bool isEndInsideNode = collision::isPointInsideSphere(p2, center, radius);
                 if (isStartInsideNode || isEndInsideNode) {
                     LWARNING(fmt::format(
                         "Something went wrong! "
@@ -177,7 +177,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
                 const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
 
-                const double avoidCollisionDistance = 
+                const double avoidCollisionDistance =
                     AvoidCollisionDistanceRadiusMultiplier * radius;
 
                 glm::dvec3 extraKnot = collisionPoint -

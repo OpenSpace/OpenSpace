@@ -22,78 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PATHCURVE___H__
-#define __OPENSPACE_CORE___PATHCURVE___H__
+#ifndef __OPENSPACE_CORE___UNIVERSALHELPERS___H__
+#define __OPENSPACE_CORE___UNIVERSALHELPERS___H__
 
-#include <ghoul/glm.h>
-#include <vector>
+/*
+ * This file is meant to contain generally useful functions that is used a bit all over
+ * the place but that do not belong in any other, more specific, file.
+ *
+ * If you implement a function that can be useful in several other situations, feel free
+ * to document it and put it this file
+ */
 
-namespace openspace::interaction {
+namespace openspace::helpers {
 
-class Waypoint;
+/*
+ * Remap a parameter t in [0,1] to a subinterval [start, end], by shifting and scaling
+ * the value to match the interval. If \p t is smaller than \p start, the return value
+ * will be 0 and if bigger than \p end it will be 1. Other values will be linearly
+ * interpolated within the range [start, end]
+ */
+double shiftAndScale(double t, double start, double end);
 
-class PathCurve {
-public:
-    virtual ~PathCurve() = 0;
+} // namespace openspace::helpers
 
-    const double length() const;
-
-    /*
-     * Compute and rteturn the position along the path at the specified relative
-     * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path
-     */
-    glm::dvec3 positionAt(double relativeDistance);
-
-    /*
-     * Compute curve parameter u that matches the input arc length s
-     */
-    virtual glm::dvec3 interpolate(double u);
-
-    /*
-     * Return the positions defining the control points for the spline interpolation
-     */
-    std::vector<glm::dvec3> points();
-
-protected:
-    /*
-     * Precompute information related to the spline parameters, that are
-     * needed for arc length reparameterization. Must be called after
-     * control point creation
-     */
-    void initializeParameterData();
-
-    /*
-     * Compute curve parameter u that matches the input arc length s.
-     * Input s is a length value, in the range [0, _totalLength]. The returned curve
-     * parameter u is in range [0, 1]
-     */
-    double curveParameter(double s);
-
-    double approximatedDerivative(double u, double h = 0.0001);
-    double arcLength(double limit = 1.0);
-    double arcLength(double lowerLimit, double upperLimit);
-
-    std::vector<glm::dvec3> _points;
-    unsigned int _nSegments = 0;
-
-    std::vector<double> _curveParameterSteps; // per segment
-    std::vector<double> _lengthSums; // per segment
-    double _totalLength = 0.0;
-
-    struct ParameterPair {
-        double u; // curve parameter
-        double s; // arc length parameter
-    };
-
-    std::vector<ParameterPair> _parameterSamples;
-};
-
-class LinearCurve : public PathCurve {
-public:
-    LinearCurve(const Waypoint& start, const Waypoint& end);
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___PATHCURVE___H__
+#endif // __OPENSPACE_CORE___UNIVERSALHELPERS___H__

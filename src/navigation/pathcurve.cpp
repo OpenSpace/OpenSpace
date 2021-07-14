@@ -24,11 +24,12 @@
 
 #include <openspace/navigation/pathcurve.h>
 
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/integration.h>
+#include <ghoul/misc/interpolator.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>
@@ -188,7 +189,7 @@ double PathCurve::arcLength(double limit) {
 }
 
 double PathCurve::arcLength(double lowerLimit, double upperLimit) {
-    return helpers::fivePointGaussianQuadrature(
+    return ghoul::integrateGaussianQuadrature<double>(
         lowerLimit,
         upperLimit,
         [this](double u) { return approximatedDerivative(u); }
@@ -196,7 +197,7 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) {
 }
 
 glm::dvec3 PathCurve::interpolate(double u) {
-    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
+    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable must be in range [0,1]");
 
     if (u < 0.0) {
         return _points[1];
@@ -208,14 +209,14 @@ glm::dvec3 PathCurve::interpolate(double u) {
     std::vector<double>::iterator segmentEndIt =
         std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
 
-    const int index = 
+    const int index =
         static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
 
     double segmentStart = _curveParameterSteps[index];
     double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     double uSegment = (u - segmentStart) / segmentDuration;
 
-    return splines::catmullRom(
+    return ghoul::interpolateCatmullRom(
         uSegment,
         _points[index],
         _points[index + 1],

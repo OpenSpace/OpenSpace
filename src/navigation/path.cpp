@@ -32,10 +32,11 @@
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/collisionhelper.h>
+#include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
@@ -198,7 +199,7 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     if (t < t1) {
         // Compute a position in front of the camera at the start orientation
         const double inFrontDistance = glm::distance(startPos, startNodePos);
-        const glm::dvec3 viewDir = helpers::viewDirection(_start.rotation());
+        const glm::dvec3 viewDir = ghoul::viewDirection(_start.rotation());
         const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
         const double tScaled = ghoul::cubicEaseInOut(t / t1);
@@ -212,7 +213,7 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     else if (t > t2) {
         // Compute a position in front of the camera at the end orientation
         const double inFrontDistance = glm::distance(endPos, endNodePos);
-        const glm::dvec3 viewDir = helpers::viewDirection(_end.rotation());
+        const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
         const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
         const double tScaled = ghoul::cubicEaseInOut((t - t2) / (1.0 - t2));
@@ -227,7 +228,7 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     tUp = ghoul::sineEaseInOut(tUp);
     glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
 
-    return helpers::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
+    return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
 
 double Path::speedAlongPath(double traveledDistance) {
@@ -303,7 +304,7 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
         const glm::dvec3 posInModelCoords =
             glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
 
-        bool isClose = helpers::isPointInsideSphere(
+        bool isClose = collision::isPointInsideSphere(
             posInModelCoords,
             glm::dvec3(0.0, 0.0, 0.0),
             proximityRadius
@@ -317,19 +318,19 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-// Compute a target position close to the specified target node, using knowledge of 
+// Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
-glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode, 
+glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                      const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
 
-    // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node, 
-    // as it might not exist. Ideally, each SGN could know about their preferred 
-    // direction to be viewed from (their "good side"), and then that could be queried 
-    // and used instead. 
+    // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
+    // as it might not exist. Ideally, each SGN could know about their preferred
+    // direction to be viewed from (their "good side"), and then that could be queried
+    // and used instead.
     if (closeNode) {
         // If the node is close to another node in the scene, set the direction in a way
         // that minimizes risk of collision
@@ -378,7 +379,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
 
     glm::dvec3 targetPos;
     if (info.position.has_value()) {
-        // The position in instruction is given in the targetNode's local coordinates. 
+        // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
         targetPos = glm::dmat3(targetNode->modelTransform()) * info.position.value();
     }
@@ -402,7 +403,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
 
     // Compute rotation so the camera is looking at the targetted node
     const glm::dvec3 lookAtPos = targetNode->worldPosition();
-    const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
+    const glm::dquat targetRot = ghoul::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint(targetPos, targetRot, info.identifier);
 }

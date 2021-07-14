@@ -24,7 +24,6 @@
 
 #include <openspace/camera/camerapose.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/navigation/pathhelperfunctions.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
@@ -854,7 +853,7 @@ OrbitalNavigator::CameraRotationDecomposition
                                                      const SceneGraphNode& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
+    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
 
     const glm::dmat4 modelTransform = reference.modelTransform();
     const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
@@ -871,7 +870,7 @@ OrbitalNavigator::CameraRotationDecomposition
     );
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
+    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         normalize(cameraViewDirection + cameraUp)
@@ -888,10 +887,10 @@ OrbitalNavigator::CameraRotationDecomposition
                                               glm::dvec3 reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    const glm::dvec3 cameraViewDirection = helpers::viewDirection(cameraPose.rotation);
+    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = helpers::lookAtQuaternion(
+    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
         glm::dvec3(0.0),
         reference - cameraPose.position,
         normalize(cameraViewDirection + cameraUp)
@@ -1068,7 +1067,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         const glm::dvec3 localUp =
             localCameraRotation * Camera::UpDirectionCameraSpace;
 
-        const glm::dquat targetRotation = helpers::lookAtQuaternion(
+        const glm::dquat targetRotation = ghoul::lookAtQuaternion(
             glm::dvec3(0.0),
             Camera::ViewDirectionCameraSpace,
             normalize(localUp)
@@ -1299,7 +1298,7 @@ glm::dquat OrbitalNavigator::rotateGlobally(const glm::dquat& globalCameraRotati
     const glm::dvec3 cameraUpWhenFacingSurface = glm::inverse(focusNodeRotationDiff) *
         globalCameraRotation * Camera::UpDirectionCameraSpace;
 
-    return helpers::lookAtQuaternion(
+    return ghoul::lookAtQuaternion(
         glm::dvec3(0.0),
         -directionFromSurfaceToCamera,
         cameraUpWhenFacingSurface
