@@ -61,6 +61,7 @@ public:
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
+    void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
 
     Camera* camera() const;

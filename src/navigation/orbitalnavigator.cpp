@@ -686,16 +686,24 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Update the camera state
     _camera->setPositionVec3(pose.position);
     _camera->setRotation(composeCameraRotation(camRot));
+}
 
+void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     if (_useAdaptiveStereoscopicDepth) {
+        const glm::dvec3 anchorPos = _anchorNode->worldPosition();
+        const glm::dvec3 cameraPos = _camera->positionVec3();
+
+        SurfacePositionHandle posHandle =
+            calculateSurfacePositionHandle(*_anchorNode, cameraPos);
+
         double targetCameraToSurfaceDistance = glm::length(
-            cameraToSurfaceVector(pose.position, anchorPos, posHandle)
+            cameraToSurfaceVector(cameraPos, anchorPos, posHandle)
         );
 
         if (_aimNode) {
             targetCameraToSurfaceDistance = std::min(
                 targetCameraToSurfaceDistance,
-                glm::distance(pose.position, _aimNode->worldPosition())
+                glm::distance(cameraPos, _aimNode->worldPosition())
             );
         }
 

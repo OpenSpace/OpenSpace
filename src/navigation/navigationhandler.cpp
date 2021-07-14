@@ -180,6 +180,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
             _orbitalNavigator.updateStatesFromInput(_inputState, deltaTime);
             _orbitalNavigator.updateCameraStateFromStates(deltaTime);
         }
+
+        _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
     }
 
     // If session recording (playback mode) was started in the midst of a camera path,
