@@ -64,10 +64,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
-        "ApplyIdleBehaviorOnFishish",
-        "Apply Idle Behavior on Fishish",
+        "ApplyIdleBehaviorOnFinish",
+        "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the paht has reached its target."
+        "triggered once the path has reached its target."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
@@ -203,12 +203,12 @@ void PathNavigator::updateCamera(double deltaTime) {
         _isPlaying = false;
 
         if (_applyIdleBehaviorOnFinish) {
-            constexpr const char* ApplyIdleBehaviorScript = 
+            constexpr const char* ApplyIdleBehaviorScript =
                 "local f = 'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior';"
                 "openspace.setPropertyValueSingle(f, true);";
 
             global::scriptEngine->queueScript(
-                ApplyIdleBehaviorScript, 
+                ApplyIdleBehaviorScript,
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
