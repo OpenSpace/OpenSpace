@@ -131,13 +131,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeInfo = {
         "FollowAnchorNodeRotationDistance",
         "Follow anchor node rotation distance",
-        "" // @TODO Missing documentation
+        "A factor used to determine the distance at which the camera starts rotating "
+        "with the anchor node. When this happends, a the object will appear fixed in "
+        "relation to the camera. The actual distance will be computed by multiplying "
+        "this factor with the approximate radius of the node."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
         "Minimum allowed distance",
-        "" // @TODO Missing documentation
+        "Limits how close the camera can get to an object. The distance is given in "
+        "meters above the surface."
     };
 
     constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
