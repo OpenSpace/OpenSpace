@@ -661,8 +661,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     );
 
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
-    // is no input from interaction. So, it assumes that all the previous effects from
-    // user input resulted in no change
+    // is no input from interaction. So, it assumes that all the other effects from
+    // user input results in no change
     applyIdleBehavior(
         deltaTime,
         pose.position,
