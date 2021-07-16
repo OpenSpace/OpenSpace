@@ -149,11 +149,17 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-    properties::FloatProperty _flightDestinationDistance;
-    properties::DoubleProperty _flightDestinationFactor;
-    properties::BoolProperty _applyLinearFlight;
 
-    properties::FloatProperty _velocitySensitivity;
+    struct LinearFlight : public properties::PropertyOwner {
+        LinearFlight();
+
+        properties::BoolProperty apply;
+        properties::FloatProperty destinationDistance;
+        properties::DoubleProperty destinationFactor;
+        properties::FloatProperty velocitySensitivity;
+    };
+    LinearFlight _linearFlight;
+
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
