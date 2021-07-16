@@ -64,6 +64,11 @@ public:
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
 
+    /*
+     * This function should be called on every camera interaction: for example when
+     * navigating using an input device, changing the focus node or starting a path or
+     * a session recording playback
+     */
     void updateOnCameraInteraction();
 
     Camera* camera() const;

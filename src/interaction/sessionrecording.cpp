@@ -463,6 +463,8 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     initializePlayback_triggerStart();
 
+    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+
     return true;
 }
 

@@ -252,8 +252,8 @@ namespace {
         "Abort on Camera Interaction",
         "If set to true, the idle behavior is aborted on camera interaction. If false, "
         "the behavior will be reapplied after the interaction. Examples of camera "
-        "interaction are: changing the anchor node, starting a camera path, or "
-        "navigating manually using an input device."
+        "interaction are: changing the anchor node, starting a camera path or session "
+        "recording playback, or navigating manually using an input device."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
