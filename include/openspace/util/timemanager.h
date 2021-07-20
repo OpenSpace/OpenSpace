@@ -121,13 +121,14 @@ public:
 
 private:
     void progressTime(double dt);
-    void applyKeyframeData(const TimeKeyframeData& keyframe);
+    void applyKeyframeData(const TimeKeyframeData& keyframe, double dt);
     TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future, double time);
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
     double currentApplicationTimeForInterpolation() const;
+    double previousApplicationTimeForInterpolation() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
@@ -140,6 +141,7 @@ private:
     bool _lastTimePaused = false;
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
+    double _previousApplicationTime = 0.0;
 
     bool _deltaTimeStepsChanged = false;
     std::vector<double> _deltaTimeSteps;

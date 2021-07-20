@@ -95,6 +95,16 @@ bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b);
 */
 bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
+/**
+* Return true if the timestamp of a is smaller than or equal to b.
+* This is used only in the mode of saving render frames during session recording
+* playback. This was necessary to correct a small timing issue caused by fixing
+* the application time according to the playback framerate. In normal operation,
+* the application time at the instant the keyframes are evaluated is always a
+* little bit newer than the first keyframe in the timeline.
+*/
+bool compareKeyframeTimeWithTime_playbackWithFrames(const KeyframeBase& a, double b);
+
 } // namespace openspace
 
 #include "timeline.inl"
