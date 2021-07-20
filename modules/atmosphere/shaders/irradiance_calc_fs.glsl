@@ -39,5 +39,5 @@ void main() {
   // Because we consider the Planet as a perfect sphere and we are considering only single
   // scattering here, the dot product dot(w,n) is equal to dot(s,n) that is equal to
   // dot(s, r/||r||) = muSun.
-  renderTableColor = vec4(transmittance(r, muSun) * max(muSun, 0.0), 0.0);     
+  renderTableColor = vec4(transmittance(transmittanceTexture, r, muSun, Rg, invRtMinusRg) * max(muSun, 0.0), 0.0);     
 }

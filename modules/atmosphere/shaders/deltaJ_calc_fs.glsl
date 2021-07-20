@@ -145,7 +145,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
       // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
-      groundTransmittance = transmittance(Rg, muGround, distanceToGround);
+      groundTransmittance = transmittance(transmittanceTexture, Rg, muGround, distanceToGround, Rg, invRtMinusRg);
     }
 
     for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
@@ -184,8 +184,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU), invSamplesNu).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU), invSamplesNu).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
@@ -196,7 +196,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
+        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU), invSamplesNu).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
@@ -213,7 +213,7 @@ void main() {
   // InScattering Radiance to be calculated at different points in the ray path
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   float mu, muSun, nu;
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu, float(SAMPLES_MU), Rg2, Rt2, float(SAMPLES_MU_S), float(SAMPLES_NU));
 
   // Calculate the the light inScattered in direction
   // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper

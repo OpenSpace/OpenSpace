@@ -49,7 +49,7 @@ float opticalDepth(float r, float mu, float H) {
 
   // Integrating using the Trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
-  float b_a = rayDistance(r, mu);
+  float b_a = rayDistance(r, mu, Rt, Rg);
   float deltaStep = b_a / float(TRANSMITTANCE_STEPS);
   // cosine law
   float y_i = exp(-(r - Rg) / H);

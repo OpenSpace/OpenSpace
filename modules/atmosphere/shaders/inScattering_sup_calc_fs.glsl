@@ -46,12 +46,12 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
   float muSun_i = (r * muSun + dist * nu) / r_i;
   // The irradiance attenuated from point r until y (y-x = dist)
-  return transmittance(r, mu, dist) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu).rgb;
+  return transmittance(transmittanceTexture, r, mu, dist, Rg, invRtMinusRg) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU), invSamplesNu).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   vec3 inScatteringRadiance = vec3(0.0);
-  float dy = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+  float dy = rayDistance(r, mu, Rt, Rg) / float(INSCATTER_INTEGRAL_SAMPLES);
   vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
   
   // In order to solve the integral from equation (11) we use the trapezoidal rule:
@@ -71,7 +71,7 @@ void main() {
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu, float(SAMPLES_MU), Rg2, Rt2, float(SAMPLES_MU_S), float(SAMPLES_NU));
   
   // Write to texture deltaSR 
   renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);
