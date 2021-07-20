@@ -97,6 +97,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
+  vec3 radianceJAcc = vec3(0.0);
   for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; theta_i++) {
     float theta = (float(theta_i) + 0.5) * stepTheta;
     float cosineTheta = cos(theta);
@@ -187,10 +188,12 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
-      return radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
+      radianceJAcc += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
         betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
     }
   }
+
+  return radianceJAcc;
 }
 
 void main() {
