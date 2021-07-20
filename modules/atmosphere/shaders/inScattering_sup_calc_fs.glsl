@@ -35,7 +35,7 @@ uniform sampler3D deltaJTexture;
 // The integrand here is the f(y) of the trapezoidal rule:
 vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
-  float r_i = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
+  float r_i = sqrt(r * r + dist * dist + 2.0 * r * dist * mu);
   // r_i can be found using the dot product:
   // vec(y_i) dot vec(dist) = cos(theta_i) * ||vec(y_i)|| * ||vec(dist)||
   // But vec(y_i) = vec(x) + vec(dist), also: vec(x) dot vec(dist) = cos(theta) = mu

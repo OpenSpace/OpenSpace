@@ -42,7 +42,7 @@ float opticalDepth(float r, float mu, float H) {
   // direction and starting and ending points.
   
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
-  float cosZenithHorizon = -sqrt(1.0 - (Rg * Rg / r2));
+  float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
   if (mu < cosZenithHorizon) {
     return 1e9;
   }

@@ -103,9 +103,6 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
 }
 
 void main() {
-  vec3 S_R; // First Order Rayleigh InScattering 
-  vec3 S_M; // First Order Mie InScattering
-
   // From the layer interpolation (see C++ code for layer to r) and the textures
   // parameters (uv), we unmapping mu, muSun and nu.
   float mu, muSun, nu;
@@ -122,6 +119,8 @@ void main() {
   // S[L0] = P_R*S_R[L0] + P_M*S_M[L0]
   // In order to save memory, we just store the red component of S_M[L0], and later we use
   // the proportionality rule to calcule the other components.
+  vec3 S_R; // First Order Rayleigh InScattering 
+  vec3 S_M; // First Order Mie InScattering
   inscatter(r, mu, muSun, nu, S_R, S_M);
   renderTarget1 = vec4(S_R, 1.0);
   renderTarget2 = vec4(S_M, 1.0);

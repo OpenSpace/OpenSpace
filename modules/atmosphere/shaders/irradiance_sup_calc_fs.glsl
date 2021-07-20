@@ -37,7 +37,7 @@ const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
 void main() {
-    // See Bruneton and Colliene to understand the mapping.
+  // See Bruneton and Colliene to understand the mapping.
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY.x) - 1.0) * 1.2;
   float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * RtMinusRg;
 

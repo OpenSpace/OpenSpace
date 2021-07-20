@@ -83,25 +83,25 @@ namespace {
     constexpr const float ATM_EPS = 2000.f;
     constexpr const float KM_TO_M = 1000.f;
 
-    void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
+    void createRenderQuad(GLuint* vao, GLuint* vbo) {
         glGenVertexArrays(1, vao);
-        glGenBuffers(1, vbo);
         glBindVertexArray(*vao);
+        glGenBuffers(1, vbo);
         glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 
         const GLfloat VertexData[] = {
-            //  x      y    z    w
-            -size, -size, 0.f, 1.f,
-             size,  size, 0.f, 1.f,
-            -size,  size, 0.f, 1.f,
-            -size, -size, 0.f, 1.f,
-             size, -size, 0.f, 1.f,
-             size,  size, 0.f, 1.f
+            //  x      y    z
+            -1.f, -1.f,
+             1.f,  1.f,
+            -1.f,  1.f,
+            -1.f, -1.f,
+             1.f, -1.f,
+             1.f,  1.f,
         };
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
         glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
         glBindVertexArray(0);
     }
 
@@ -770,8 +770,8 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     if (!_atmosphereCalculated) {
         //
         // Transmittance
-        ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
-        transmittanceTableTextureUnit.activate();
+        //ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
+        //transmittanceTableTextureUnit.activate();
         glGenTextures(1, &_transmittanceTableTexture);
         if (glbinding::Binding::ObjectLabel.isResolved()) {
             glObjectLabel(
@@ -918,7 +918,8 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         _mu_s_samples * _nu_samples,
         _mu_samples,
         _r_samples,
-        0, GL_RGB,
+        0,
+        GL_RGB,
         GL_FLOAT,
         nullptr
     );
@@ -1389,7 +1390,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     // Prepare for rendering/calculations
     GLuint quadCalcVAO;
     GLuint quadCalcVBO;
-    createRenderQuad(&quadCalcVAO, &quadCalcVBO, 1.0f);
+    createRenderQuad(&quadCalcVAO, &quadCalcVBO);
 
     // Starting Calculations...
     LDEBUG("Starting precalculations for scattering effects");

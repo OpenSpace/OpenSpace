@@ -117,7 +117,7 @@ float opticalDepth(float localH, float r, float mu, float d) {
 vec3 analyticTransmittance(float r, float mu, float d) {
   vec3 ozone = vec3(0.0);
   if (ozoneLayerEnabled) {
-    ozone = betaOzoneExtinction * (0.0000006) * opticalDepth(HO, r, mu, d);
+    ozone = betaOzoneExtinction * 0.0000006 * opticalDepth(HO, r, mu, d);
   }
   return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) - ozone -
     betaMieExtinction * opticalDepth(HM, r, mu, d));
@@ -185,7 +185,7 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out f
   // to touch the ground, we obtain mu considering the geometry of the ground
   if (fragment.y < halfSAMPLE_MU) {
     float ud = 1.0 - (fragment.y / (halfSAMPLE_MU - 1.0));
-    float d  = min(max(dhdH.z, ud * dhdH.w), dhdH.w * 0.999);
+    float d = min(max(dhdH.z, ud * dhdH.w), dhdH.w * 0.999);
     // cosine law: Rg^2 = r^2 + d^2 - 2rdcos(pi-theta) where cosine(theta) = mu
     mu = (Rg2 - r2 - d * d) / (2.0 * r * d);
     // We can't handle a ray inside the planet, i.e., when r ~ Rg, so we check against it.
@@ -204,7 +204,7 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out f
   
   float modValueMuSun = mod(fragment.x, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0);
   // The following mapping is different from the paper. See Colliene for an details.
-  muSun = tan((2.0 * modValueMuSun - 1.0 + 0.26) * 1.1f) / tan(1.26 * 1.1);
+  muSun = tan((2.0 * modValueMuSun - 1.0 + 0.26) * 1.1) / tan(1.26 * 1.1);
   nu = -1.0 + floor(fragment.x / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0) * 2.0;
 }
 
@@ -234,7 +234,7 @@ vec3 transmittance(float r, float mu, float d) {
   // T(x,d) = T(x,v)/T(d,v).
   // 
   // From cosine law: c^2 = a^2 + b^2 - 2*a*b*cos(ab)
-  float ri = sqrt(d * d  + r * r + 2.0 * r * d * mu);
+  float ri = sqrt(d * d + r * r + 2.0 * r * d * mu);
   // mu_i = (vec(d) dot vec(v)) / r_i
   //      = ((vec(x) + vec(d-x)) dot vec(v))/ r_i
   //      = (r*mu + d) / r_i
@@ -247,7 +247,7 @@ vec3 transmittance(float r, float mu, float d) {
   // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
   // Because T(a,c) and T(b,c) are already in the table T, T(a,b) = T(a,c)/T(b,c).
   if (mu > 0.0) {
-    return min(transmittance(r, mu) /  transmittance(ri, mui), 1.0);
+    return min(transmittance(r, mu) / transmittance(ri, mui), 1.0);
   }
   else {
     return min(transmittance(ri, -mui) / transmittance(r, -mu), 1.0);

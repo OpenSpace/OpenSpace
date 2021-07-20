@@ -29,9 +29,9 @@
 out vec4 renderTableColor;
 
 void main() {
-    // See Bruneton and Colliene to understand the mapping
+  // See Bruneton and Colliene to understand the mapping
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;
-  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y) ) * RtMinusRg;
+  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y)) * RtMinusRg;
 
   // We are calculating the Irradiance for L0, i.e., only the radiance coming from Sun
   // direction is accounted:
