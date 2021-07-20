@@ -28,7 +28,7 @@
 
 out vec4 renderTableColor;
 
-uniform int firstIteraction;
+uniform int firstIteration;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
@@ -66,7 +66,7 @@ void main() {
       // Mie), and in order to avoid problems with the high angle dependency in the phase
       // functions, we don't include the phase functions on those tables (that's why we
       // calculate them now)
-      if (firstIteraction == 1) {
+      if (firstIteration == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         float phaseMie = miePhaseFunction(nu, mieG);
         vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb;

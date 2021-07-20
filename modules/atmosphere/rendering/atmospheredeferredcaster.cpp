@@ -1166,10 +1166,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
         _deltaJProgramObject->activate();
         if (scatteringOrder == 2) {
-            _deltaJProgramObject->setUniform("firstIteraction", 1);
+            _deltaJProgramObject->setUniform("firstIteration", 1);
         }
         else {
-            _deltaJProgramObject->setUniform("firstIteraction", 0);
+            _deltaJProgramObject->setUniform("firstIteration", 0);
         }
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -1213,10 +1213,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
         _irradianceSupTermsProgramObject->activate();
         if (scatteringOrder == 2) {
-            _irradianceSupTermsProgramObject->setUniform("firstIteraction", 1);
+            _irradianceSupTermsProgramObject->setUniform("firstIteration", 1);
         }
         else {
-            _irradianceSupTermsProgramObject->setUniform("firstIteraction", 0);
+            _irradianceSupTermsProgramObject->setUniform("firstIteration", 0);
         }
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);

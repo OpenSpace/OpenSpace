@@ -35,7 +35,7 @@ uniform sampler2D deltaETexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
-uniform int firstIteraction;
+uniform int firstIteration;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
@@ -167,7 +167,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // light. We stored these values in the deltaS textures (Ray and Mie), and in order
       // to avoid problems with the high angle dependency in the phase functions, we don't
       // include the phase functions on those tables (that's why we calculate them now).
-      if (firstIteraction == 1) {        
+      if (firstIteration == 1) {        
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
