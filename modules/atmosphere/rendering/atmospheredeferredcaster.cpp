@@ -768,19 +768,8 @@ void AtmosphereDeferredcaster::unloadComputationPrograms() {
 
 void AtmosphereDeferredcaster::createComputationTextures() {
     if (!_atmosphereCalculated) {
-        //
         // Transmittance
-        //ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
-        //transmittanceTableTextureUnit.activate();
         glGenTextures(1, &_transmittanceTableTexture);
-        if (glbinding::Binding::ObjectLabel.isResolved()) {
-            glObjectLabel(
-                GL_TEXTURE,
-                _transmittanceTableTexture,
-                -1,
-                "Transmittance Table"
-            );
-        }
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -799,20 +788,17 @@ void AtmosphereDeferredcaster::createComputationTextures() {
             GL_FLOAT,
             nullptr
         );
-
-        //
-        // Irradiance
-        ghoul::opengl::TextureUnit irradianceTableTextureUnit;
-        irradianceTableTextureUnit.activate();
-        glGenTextures(1, &_irradianceTableTexture);
         if (glbinding::Binding::ObjectLabel.isResolved()) {
             glObjectLabel(
                 GL_TEXTURE,
-                _irradianceTableTexture,
+                _transmittanceTableTexture,
                 -1,
-                "Irradiance Table"
+                "Transmittance Table"
             );
         }
+
+        // Irradiance
+        glGenTextures(1, &_irradianceTableTexture);
         glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -830,20 +816,18 @@ void AtmosphereDeferredcaster::createComputationTextures() {
             GL_FLOAT,
             nullptr
         );
-
-        //
-        // InScattering
-        ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
-        inScatteringTableTextureUnit.activate();
-        glGenTextures(1, &_inScatteringTableTexture);
         if (glbinding::Binding::ObjectLabel.isResolved()) {
             glObjectLabel(
                 GL_TEXTURE,
-                _inScatteringTableTexture,
+                _irradianceTableTexture,
                 -1,
-                "InScattering Table"
+                "Irradiance Table"
             );
         }
+
+        //
+        // InScattering
+        glGenTextures(1, &_inScatteringTableTexture);
         glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -863,16 +847,18 @@ void AtmosphereDeferredcaster::createComputationTextures() {
             GL_FLOAT,
             nullptr
         );
+        if (glbinding::Binding::ObjectLabel.isResolved()) {
+            glObjectLabel(
+                GL_TEXTURE,
+                _inScatteringTableTexture,
+                -1,
+                "InScattering Table"
+            );
+        }
     }
 
-    //
     // Delta E
-    ghoul::opengl::TextureUnit deltaETableTextureUnit;
-    deltaETableTextureUnit.activate();
     glGenTextures(1, &_deltaETableTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _deltaETableTexture, -1, "DeltaE Table");
-    }
     glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -890,20 +876,12 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         GL_FLOAT,
         nullptr
     );
-
-    //
-    // Delta S
-    ghoul::opengl::TextureUnit deltaSRayleighTableTextureUnit;
-    deltaSRayleighTableTextureUnit.activate();
-    glGenTextures(1, &_deltaSRayleighTableTexture);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _deltaSRayleighTableTexture,
-            -1,
-            "DeltaS Rayleigh Table"
-        );
+        glObjectLabel(GL_TEXTURE, _deltaETableTexture, -1, "DeltaE Table");
     }
+
+    // Delta S
+    glGenTextures(1, &_deltaSRayleighTableTexture);
     glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -923,18 +901,16 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         GL_FLOAT,
         nullptr
     );
-
-    ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
-    deltaSMieTableTextureUnit.activate();
-    glGenTextures(1, &_deltaSMieTableTexture);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(
             GL_TEXTURE,
-            _deltaSMieTableTexture,
+            _deltaSRayleighTableTexture,
             -1,
-            "DeltaS Mie Table"
+            "DeltaS Rayleigh Table"
         );
     }
+
+    glGenTextures(1, &_deltaSMieTableTexture);
     glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -954,15 +930,17 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         GL_FLOAT,
         nullptr
     );
-
-    //
-    // Delta J (Radiance Scattered)
-    ghoul::opengl::TextureUnit deltaJTableTextureUnit;
-    deltaJTableTextureUnit.activate();
-    glGenTextures(1, &_deltaJTableTexture);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _deltaJTableTexture, -1, "DeltaJ Table");
+        glObjectLabel(
+            GL_TEXTURE,
+            _deltaSMieTableTexture,
+            -1,
+            "DeltaS Mie Table"
+        );
     }
+
+    // Delta J (Radiance Scattered)
+    glGenTextures(1, &_deltaJTableTexture);
     glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -982,6 +960,9 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         GL_FLOAT,
         nullptr
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _deltaJTableTexture, -1, "DeltaJ Table");
+    }
 }
 
 void AtmosphereDeferredcaster::deleteComputationTextures() {
