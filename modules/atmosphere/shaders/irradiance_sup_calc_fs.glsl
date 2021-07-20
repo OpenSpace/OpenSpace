@@ -84,6 +84,6 @@ void main() {
     }
   }
 
-  // Write the higher oder irradiance to texture deltaE
+  // Write the higher order irradiance to texture deltaE
   renderTableColor = vec4(irradianceE, 0.0);    
 }
