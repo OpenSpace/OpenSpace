@@ -41,6 +41,19 @@ uniform int firstIteration;
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
+// Given the irradiance texture table, the cosine of zenith sun vector and the height of
+// the observer (ray's stating point x), calculates the mapping for u_r and u_muSun and
+// returns the value in the LUT
+// lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// r     := height of starting point vect(x)
+vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
+  // See Bruneton paper and Coliene to understand the mapping
+  float u_muSun = (muSun + 0.2) / 1.2;
+  float u_r = (r - Rg) * invRtMinusRg;
+  return texture(lut, vec2(u_muSun, u_r)).rgb;
+}
+
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   // Be sure to not get a cosine or height out of bounds
   r = clamp(r, Rg, Rt);

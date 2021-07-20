@@ -142,6 +142,15 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   }
 }
 
+vec3 analyticTransmittance(float r, float mu, float d) {
+  vec3 ozone = vec3(0.0);
+  if (ozoneLayerEnabled) {
+    ozone = betaOzoneExtinction * 0.0000006 * opticalDepth(HO, r, mu, d);
+  }
+  return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) - ozone -
+    betaMieExtinction * opticalDepth(HM, r, mu, d));
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //  ALL CALCULATIONS FOR ATMOSPHERE ARE KM AND IN WORLD SPACE SYSTEM                    //
 //////////////////////////////////////////////////////////////////////////////////////////

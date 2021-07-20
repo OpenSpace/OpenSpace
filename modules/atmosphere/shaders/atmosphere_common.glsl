@@ -114,21 +114,11 @@ float opticalDepth(float localH, float r, float mu, float d) {
   return sqrt(M_2PI * H * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
-vec3 analyticTransmittance(float r, float mu, float d) {
-  vec3 ozone = vec3(0.0);
-  if (ozoneLayerEnabled) {
-    ozone = betaOzoneExtinction * 0.0000006 * opticalDepth(HO, r, mu, d);
-  }
-  return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) - ozone -
-    betaMieExtinction * opticalDepth(HM, r, mu, d));
-}
-
 vec3 irradiance(sampler2D sampler, float r, float muSun) {
   float u_r = (r - Rg) * invRtMinusRg;
   float u_muSun = (muSun + 0.2) / 1.2;
   return texture(sampler, vec2(u_muSun, u_r)).rgb;
 }
-
 
 //================================================//
 //=============== General Functions ==============//
@@ -298,17 +288,4 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu) {
   return texture(
     table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0 - lerp) +
     texture(table, vec3((u_nu + u_mu_s + 1.0) * invSamplesNu, u_mu, u_r)) * lerp;
-}
-
-// Given the irradiance texture table, the cosine of zenith sun vector and the height of
-// the observer (ray's stating point x), calculates the mapping for u_r and u_muSun and
-// returns the value in the LUT
-// lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
-// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
-// r     := height of starting point vect(x)
-vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
-  // See Bruneton paper and Coliene to understand the mapping
-  float u_muSun = (muSun + 0.2) / 1.2;
-  float u_r = (r - Rg) * invRtMinusRg;
-  return texture(lut, vec2(u_muSun, u_r)).rgb;
 }
