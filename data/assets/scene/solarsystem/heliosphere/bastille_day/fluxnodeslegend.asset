@@ -1,8 +1,8 @@
 local TexturesPath = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Streamnodes textures",
-    Identifier = "streamnodes_legend",
-    Version = 1
+  Type = "HttpSynchronization",
+  Name = "Streamnodes textures",
+  Identifier = "streamnodes_legend",
+  Version = 1
 })
 
 asset.require("spice/base")
@@ -10,10 +10,10 @@ local assetHelper = asset.require("util/asset_helper")
 --local textures = asset.require('./streamnodes_textures').TexturesPath
 
 local legend = {
-    Identifier = "Legendfluxnodes",	
-    --Type = "ScreenSpaceRenderable",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = TexturesPath .. "/CMR_transparent_vittext.png",
+  Identifier = "Legendfluxnodes",	
+  --Type = "ScreenSpaceRenderable",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = TexturesPath .. "/CMR_transparent_vittext.png",
 };
 
 openspace.addScreenSpaceRenderable(legend)
@@ -26,10 +26,10 @@ openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Enabled', false);
 assetHelper.registerSceneGraphNodesAndExport(asset, { legend })
 
 asset.meta = {
-    Name = "Predictive Science Inc. Stream nodes Bastille Days",
-    Version = "1.0",
-    Description = " Stream nodes for the bastille day CME events ",
-    Author = "Christian Adamsson, Emilie Ho",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
+  Name = "Predictive Science Inc. Stream nodes Bastille Days",
+  Version = "1.0",
+  Description = " Stream nodes for the bastille day CME events ",
+  Author = "Christian Adamsson, Emilie Ho",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = ""
 }

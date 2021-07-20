@@ -4,85 +4,85 @@ local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 --15 cmr emin01, 16 cmr emin03
 local TexturesPathEquitorial = asset.syncedResource({
 Type = "HttpSynchronization",
-    Name = "cutplanes_textures",
-    Identifier = "cutplanes_textures",
-    Version = 1
+  Name = "cutplanes_textures",
+  Identifier = "cutplanes_textures",
+  Version = 1
 })
 local TexturesPathMeridial = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "cutplane_meridial_textures",
-    Identifier = "cutplane_meridial_textures",
-    Version = 1
+  Type = "HttpSynchronization",
+  Name = "cutplane_meridial_textures",
+  Identifier = "cutplane_meridial_textures",
+  Version = 1
 })
 
 local Cutplane = {
-    Identifier = "Cutplane",
-    Parent = transforms.HNMReferenceFrame.Identifier,
-    --Parent = transforms.SunIAU.Identifier,
-    Transform = {
-    	--Rotation = {
-        --This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-        --which is what the renderables paretn transforms.HNMReferenceFrame.Identifier is
-        --refering to. At the referens time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
-        --longitude was 309.3 degrees.
-        --Difference from HEEQ => 360-309.3=50.7 
-        --(or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
-        --Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
-        -- => a1 = -129.3 and a2 = 230.7
-        --Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
+  Identifier = "Cutplane",
+  Parent = transforms.HNMReferenceFrame.Identifier,
+  --Parent = transforms.SunIAU.Identifier,
+  Transform = {
+    --Rotation = {
+    --This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
+    --which is what the renderables paretn transforms.HNMReferenceFrame.Identifier is
+    --refering to. At the referens time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
+    --longitude was 309.3 degrees.
+    --Difference from HEEQ => 360-309.3=50.7 
+    --(or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
+    --Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
+    -- => a1 = -129.3 and a2 = 230.7
+    --Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
 --[[	    Type = "FixedRotation",
-            XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
-            YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
-            ZAxis = {0.0, 0.0, 1.0}
-        }--]]
+      XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
+      YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
+      ZAxis = {0.0, 0.0, 1.0}
+    }--]]
+  },
+  Renderable = {
+    Type = "RenderablePlaneTimeVaryingImage",
+    Size = 1.57*10^11,
+    Enabled = false,
+    Texture = TexturesPathEquitorial, 
+    BlendMode = "Normal",
+    MirrorBackside = false,
+    Opacity = 0.7
     },
-    Renderable = {
-	    Type = "RenderablePlaneTimeVaryingImage",
-	    Size = 1.57*10^11,
-	    Enabled = false,
-	    Texture = TexturesPathEquitorial, 
-	    BlendMode = "Normal",
-        MirrorBackside = false,
-	    Opacity = 0.7
-	  },
-    GUI = {
-        Name = "Cutplane Equitorial",
-        Path = "/Solar System/Heliosphere"
-		},
+  GUI = {
+    Name = "Cutplane Equitorial",
+    Path = "/Solar System/Heliosphere"
+    },
 };
 
 local Cutplane2 = {
   Identifier = "Cutplane2", 
   Parent = transforms.HNMReferenceFrame.Identifier,
   Transform = {
-    Rotation = {
-		  Type = "StaticRotation",
-		  Rotation = {-1.5707965, -3.141593, 0}
-		}
+  Rotation = {
+      Type = "StaticRotation",
+      Rotation = {-1.5707965, -3.141593, 0}
+    }
   },
   Renderable = {
-    Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57*10^11,
-    Enabled = false,
-    Texture = TexturesPathMeridial,
-    BlendMode = "Normal",
-    MirrorBackside = false,
-    Opacity = 0.7
+  Type = "RenderablePlaneTimeVaryingImage",
+  Size = 1.57*10^11,
+  Enabled = false,
+  Texture = TexturesPathMeridial,
+  BlendMode = "Normal",
+  MirrorBackside = false,
+  Opacity = 0.7
   },
   GUI = {
-    Name = "Cutplane Meridial",
-    Path = "/Solar System/Heliosphere"
-	},
+  Name = "Cutplane Meridial",
+  Path = "/Solar System/Heliosphere"
+  },
 };
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2})
 --assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane})
 
 asset.meta = {
-    Name = "Predictive Science Inc. Flux nodes Bastille Days",
-    Version = "1.0",
-    Description = " Flux nodes for the bastille day CME events ",
-    Author = "Christian Adamsson, Emilie Ho",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
+  Name = "Predictive Science Inc. Flux nodes Bastille Days",
+  Version = "1.0",
+  Description = " Flux nodes for the bastille day CME events ",
+  Author = "Christian Adamsson, Emilie Ho",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = ""
 }

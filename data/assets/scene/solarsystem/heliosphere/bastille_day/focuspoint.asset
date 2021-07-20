@@ -2,23 +2,23 @@ local assetHelper = asset.require('util/asset_helper')
 openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 
 local focusPoint = {
-    Identifier = "focusPoint",
-    Parent = "SunIAU",
-    Transform = {
-        Translation = {
-            -- Type = "StaticTranslation",
-            Type = "GlobeTranslation",
-            -- Position = {4.44531843286E8, 4.89946069886E8, 2.52887479935E8}
-            Globe = "Sun",
-            Longitude = -45,
-            Latitude = 20,
-            Altitude = 102000000
-        }
-    },
-    GUI = {
-        Path = "/Solar System/Heliosphere",
-        Name = "Focus point"
+  Identifier = "focusPoint",
+  Parent = "SunIAU",
+  Transform = {
+    Translation = {
+      -- Type = "StaticTranslation",
+      Type = "GlobeTranslation",
+      -- Position = {4.44531843286E8, 4.89946069886E8, 2.52887479935E8}
+      Globe = "Sun",
+      Longitude = -45,
+      Latitude = 20,
+      Altitude = 102000000
     }
+  },
+  GUI = {
+    Path = "/Solar System/Heliosphere",
+    Name = "Focus point"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { focusPoint })
@@ -30,10 +30,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { focusPoint })
 -- Long = 47.7823       =>       18.1863 * PI/180 = 0.83395845917 rad
 
 asset.meta = {
-    Name = "Focus point",
-    Version = "1.0",
-    Description = "Speed of light from sun to earth",
-    Author = "Christian Adamsson, Emilie Ho",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
+  Name = "Focus point",
+  Version = "1.0",
+  Description = "Speed of light from sun to earth",
+  Author = "Christian Adamsson, Emilie Ho",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = ""
 }

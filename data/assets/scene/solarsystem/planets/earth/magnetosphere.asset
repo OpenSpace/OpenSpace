@@ -3,49 +3,49 @@ local transforms = asset.require('../../planets/earth/transforms_magnetosphere')
 
 --local fieldlinesDirectory = "C:/Users/elono/Documents/OpenSpace/data/earthMagnetoSphere"
 local fieldlinesDirectory = asset.syncedResource({
-    Name = "Magnetosphere 2012 event",
-    Type = "HttpSynchronization",
-    Identifier = "magnetosphere_2012_event",
-    Version = 1
+  Name = "Magnetosphere 2012 event",
+  Type = "HttpSynchronization",
+  Identifier = "magnetosphere_2012_event",
+  Version = 1
 })
 
 -- Fieldlies from binaries
 local earthMagnetosphere = {
-    Identifier = "Earths_Magnetosphere",
-    Parent = transforms.GSMReferenceFrame.Identifier,
-    --Parent = sunTransforms.SunIAU.Identifier,
-    Renderable = {
-        Type = "RenderableFieldlinesSequence",
-        SourceFolder = fieldlinesDirectory,
-        -- FlowEnabled = false,
-        LineWidth = 3.0,
-        AlphaBlendlingEnabled = false,
-        InputFileType = "osfls",    -- openspace Field lines Sequence
+  Identifier = "Earths_Magnetosphere",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  --Parent = sunTransforms.SunIAU.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    SourceFolder = fieldlinesDirectory,
+    -- FlowEnabled = false,
+    LineWidth = 3.0,
+    AlphaBlendlingEnabled = false,
+    InputFileType = "osfls",    -- openspace Field lines Sequence
 
-        --maskingEnabled = true,
-        --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
-        LoadAtRuntime = true,
-        ScaleToMeters = 1.0,
-        SecondsBefore = 24*60*60*365*100,
-        SecondsAfter = 24*60*60*365*100,
-        --SimulationModel = "mas",
-        Color = {
-            Uniform = {1.0, 0.725, 0.75, 1}
-        }
-    },
-    GUI = {
-        Path = "/Solar System/Planets/Earth",
-        Name = "Magnetosphere"
-    },
+    --maskingEnabled = true,
+    --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
+    LoadAtRuntime = true,
+    ScaleToMeters = 1.0,
+    SecondsBefore = 24*60*60*365*100,
+    SecondsAfter = 24*60*60*365*100,
+    --SimulationModel = "mas",
+    Color = {
+      Uniform = {1.0, 0.725, 0.75, 1}
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth",
+    Name = "Magnetosphere"
+  },
 } 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
 
 asset.meta = {
-    Name = "",
-    Version = "1.0",
-    Description = " Magnetic fieldlines for the bastille day CME event ",
-    Author = "CCMC",
-    URL = "",
-    License = ""
+  Name = "",
+  Version = "1.0",
+  Description = " Magnetic fieldlines for the bastille day CME event ",
+  Author = "CCMC",
+  URL = "",
+  License = ""
 }
