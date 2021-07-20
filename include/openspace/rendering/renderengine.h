@@ -194,7 +194,7 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
-    ghoul::opengl::OpenGLStateCache* _openglStateCache;
+    ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;

@@ -158,10 +158,12 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     using namespace std::chrono;
     _period = p.period * duration_cast<seconds>(hours(24)).count();
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _period.setExponent(5.f);
     addProperty(_period);
 
     _resolution = p.resolution;
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _resolution.setExponent(3.5f);
     addProperty(_resolution);
 
     // We store the vertices with (excluding the wrapping) decending temporal order
