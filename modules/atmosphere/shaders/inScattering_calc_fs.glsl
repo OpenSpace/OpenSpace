@@ -106,7 +106,7 @@ void main() {
   // From the layer interpolation (see C++ code for layer to r) and the textures
   // parameters (uv), we unmapping mu, muSun and nu.
   float mu, muSun, nu;
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu, float(SAMPLES_MU), Rg2, Rt2, float(SAMPLES_MU_S), float(SAMPLES_NU));
+  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu, float(SAMPLES_MU), Rg, Rt, float(SAMPLES_MU_S), float(SAMPLES_NU));
   
   // Here we calculate the single inScattered light. Because this is a single
   // inscattering, the light that arrives at a point y in the path from the eye to the

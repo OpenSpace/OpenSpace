@@ -150,7 +150,7 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   vec2 a01sq = a01 * a01;
   float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) * vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
-  return sqrt(M_2PI * H * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
+  return sqrt(M_2PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
 vec3 analyticTransmittance(float r, float mu, float d) {
@@ -294,7 +294,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // I.e. the next line has the scattering light for the "infinite" ray passing through
   // the atmosphere. If this ray hits something inside the atmosphere, we will subtract
   // the attenuated scattering light from that path in the current path
-  vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), SAMPLES_NU), 0.0);
+  vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), SAMPLES_NU), 0.0);
     
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
@@ -318,7 +318,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0        
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
     // the unsused contribution to the final radiance.
-    vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
     inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0);
 
     // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
@@ -333,7 +333,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // cos(PI-thetaH) = dist/r
   // cos(thetaH) = -dist/r
   // muHorizon = -sqrt(r^2-Rg^2)/r = -sqrt(1-(Rg/r)^2)
-  float muHorizon = -sqrt(1.0 - Rg2 / r2);
+  float muHorizon = -sqrt(1.0 - Rg*Rg / r2);
 
   // In order to avoid precision problems near horizon, we interpolate between two
   // points: above and below horizon
@@ -358,8 +358,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // mu0 = (r*mu + t) / r0
     mu0 = (r * mu + t) * (1.0 / r0);
     
-    vec4 inScatterAboveX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU));
-    vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterAboveX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
@@ -370,8 +370,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     
     mu0 = (r * mu + t) * (1.0 / r0);
     
-    vec4 inScatterBelowX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU));
-    vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterBelowX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterBelow = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
 
@@ -441,7 +441,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
 
   // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
   vec3 transmittanceL0 =
-    muSun < -sqrt(1.0 - (Rg2 / (r0 * r0)))  ?  vec3(0.0)  :  transmittance(transmittanceTexture, r0, muSun, Rg, Rt);
+    muSun < -sqrt(1.0 - (Rg*Rg / (r0 * r0)))  ?  vec3(0.0)  :  transmittance(transmittanceTexture, r0, muSun, Rg, Rt);
 
   // E[L*] at x0
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
