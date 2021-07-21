@@ -31,7 +31,7 @@ out vec4 renderTableColor;
 void main() {
   // See Bruneton and Colliene to understand the mapping
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;
-  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y)) * RtMinusRg;
+  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y)) * (Rt - Rg);
 
   // We are calculating the Irradiance for L0, i.e., only the radiance coming from Sun
   // direction is accounted:
@@ -39,5 +39,5 @@ void main() {
   // Because we consider the Planet as a perfect sphere and we are considering only single
   // scattering here, the dot product dot(w,n) is equal to dot(s,n) that is equal to
   // dot(s, r/||r||) = muSun.
-  renderTableColor = vec4(transmittance(transmittanceTexture, r, muSun, Rg, invRtMinusRg) * max(muSun, 0.0), 0.0);     
+  renderTableColor = vec4(transmittance(transmittanceTexture, r, muSun, Rg, Rt) * max(muSun, 0.0), 0.0);     
 }

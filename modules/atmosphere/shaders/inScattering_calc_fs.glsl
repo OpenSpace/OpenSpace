@@ -60,7 +60,7 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
   if (muSun_i >= -sqrt(1.0 - Rg * Rg / (ri * ri))) {
     // It's the transmittance from the point y (ri) to the top of atmosphere in direction
     // of the sun (muSun_i) and the transmittance from the observer at x (r) to y (ri).
-    vec3 transmittanceY = transmittance(transmittanceTexture, r, mu, y, Rg, invRtMinusRg) * transmittance(transmittanceTexture, ri, muSun_i, Rg, invRtMinusRg);
+    vec3 transmittanceY = transmittance(transmittanceTexture, r, mu, y, Rg, Rt) * transmittance(transmittanceTexture, ri, muSun_i, Rg, Rt);
     // exp(-h/H)*T(x,v)
     if (ozoneLayerEnabled) {
       S_R = (exp(-(ri - Rg) / HO) + exp(-(ri - Rg) / HR)) * transmittanceY;

@@ -46,7 +46,7 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
   float muSun_i = (r * muSun + dist * nu) / r_i;
   // The irradiance attenuated from point r until y (y-x = dist)
-  return transmittance(transmittanceTexture, r, mu, dist, Rg, invRtMinusRg) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU), invSamplesNu).rgb;
+  return transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU)).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {

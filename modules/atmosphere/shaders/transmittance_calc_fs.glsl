@@ -72,7 +72,7 @@ void main() {
   
   // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
   // So, extracting r from u_r in the above equation:
-  float r = Rg + (u_r * u_r) * RtMinusRg;
+  float r = Rg + (u_r * u_r) * (Rt - Rg);
   
   // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
   // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))

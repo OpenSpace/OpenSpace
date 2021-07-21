@@ -54,7 +54,6 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 const float ATM_EPSILON = 1.0;
 
 // Integration steps
@@ -66,9 +65,6 @@ const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 const float M_PI = 3.141592657;
 const float M_2PI = 2.0 * M_PI;
 
-//================================================//
-//=============== General Functions ==============//
-//================================================//
 // In the following shaders r (altitude) is the length of vector/position x in the
 // atmosphere (or on the top of it when considering an observer in space), where the light
 // is coming from the opposite direction of the view direction, here the vector v or
@@ -109,7 +105,10 @@ float rayDistance(float r, float mu, float Rt, float Rg) {
 // nu := cosone of the angle between vec(s) and vec(v)
 // dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value
 //         (see paper), dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper)
-void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out float nu, float SAMPLES_MU, float Rg2, float Rt2, float SAMPLES_MU_S, float SAMPLES_NU) {
+void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out float nu,
+                        float SAMPLES_MU, float Rg2, float Rt2, float SAMPLES_MU_S,
+                        float SAMPLES_NU)
+{
   // Window coordinates of pixel (uncentering also)
   vec2 fragment = gl_FragCoord.xy - vec2(0.5);
 
@@ -149,10 +148,11 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out f
 // hits the ground or the top of atmosphere.
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-vec3 transmittance(sampler2D transmittanceTexture, float r, float mu, float Rg, float invRtMinusRg) {
+vec3 transmittance(sampler2D transmittanceTexture, float r, float mu, float Rg, float Rt)
+{
   // Given the position x (here the altitude r) and the view angle v
   // (here the cosine(v)= mu), we map this
-  float u_r = sqrt((r - Rg) * invRtMinusRg);
+  float u_r = sqrt((r - Rg) / (Rt - Rg));
   // See Colliene to understand the mapping
   float u_mu = atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
   
@@ -164,7 +164,7 @@ vec3 transmittance(sampler2D transmittanceTexture, float r, float mu, float Rg, 
 // T(a,b) = TableT(a,v)/TableT(b, v)
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-vec3 transmittance(sampler2D transmittanceTexture, float r, float mu, float d, float Rg, float invRtMinusRg) {
+vec3 transmittance(sampler2D tex, float r, float mu, float d, float Rg, float Rt) {
   // Here we use the transmittance property: T(x,v) = T(x,d)*T(d,v) to, given a distance
   // d, calculates that transmittance along that distance starting in x (height r):
   // T(x,d) = T(x,v)/T(d,v).
@@ -183,10 +183,10 @@ vec3 transmittance(sampler2D transmittanceTexture, float r, float mu, float d, f
   // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
   // Because T(a,c) and T(b,c) are already in the table T, T(a,b) = T(a,c)/T(b,c).
   if (mu > 0.0) {
-    return min(transmittance(transmittanceTexture, r, mu, Rg, invRtMinusRg) / transmittance(transmittanceTexture, ri, mui, Rg, invRtMinusRg), 1.0);
+    return min(transmittance(tex, r, mu, Rg, Rt) / transmittance(tex, ri, mui, Rg, Rt), 1.0);
   }
   else {
-    return min(transmittance(transmittanceTexture, ri, -mui, Rg, invRtMinusRg) / transmittance(transmittanceTexture, r, -mu, Rg, invRtMinusRg), 1.0);
+    return min(transmittance(tex, ri, -mui, Rg, Rt) / transmittance(tex, r, -mu, Rg, Rt), 1.0);
   }
 }
 
@@ -213,7 +213,7 @@ float miePhaseFunction(float mu, float mieG) {
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // nu := cosine of the angle between vec(s) and vec(v)
-vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float Rg2, float invSamplesMu, float H2, float invSamplesR, float invSamplesMuS, float SAMPLES_NU, float invSamplesNu) {
+vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float Rg2, float invSamplesMu, float H2, float invSamplesR, float invSamplesMuS, float samplesNu) {
   float r2 = r * r;
   float rho = sqrt(r2 - Rg2);
   float rmu = r * mu;
@@ -227,13 +227,13 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
   float u_mu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - invSamplesMu);
   float u_mu_s = 0.5 * invSamplesMuS +
     (atan(max(muSun, -0.1975) * tan(1.386)) * 0.9090909090909090 + 0.74) * 0.5 * (1.0 - invSamplesMuS);
-  float lerp = (nu + 1.0) / 2.0 * (SAMPLES_NU - 1.0);
+  float lerp = (nu + 1.0) / 2.0 * (samplesNu - 1.0);
   float u_nu = floor(lerp);
   lerp = lerp - u_nu;
 
   return texture(
-    table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0 - lerp) +
-    texture(table, vec3((u_nu + u_mu_s + 1.0) * invSamplesNu, u_mu, u_r)) * lerp;
+    table, vec3((u_nu + u_mu_s) / samplesNu, u_mu, u_r)) * (1.0 - lerp) +
+    texture(table, vec3((u_nu + u_mu_s + 1.0) / samplesNu, u_mu, u_r)) * lerp;
 }
 
 // Atmosphere Rendering Parameters 
@@ -270,6 +270,3 @@ float H2 = Rt2 - Rg2;
 float invSamplesMu = 1.0 / float(SAMPLES_MU);
 float invSamplesR = 1.0 / float(SAMPLES_R);
 float invSamplesMuS = 1.0 / float(SAMPLES_MU_S);
-float invSamplesNu = 1.0 / float(SAMPLES_NU);
-float RtMinusRg = float(Rt - Rg);
-float invRtMinusRg = 1.0 / RtMinusRg;
