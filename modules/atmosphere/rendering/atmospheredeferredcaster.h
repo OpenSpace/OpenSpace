@@ -104,6 +104,23 @@ private:
     void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
         bool doCalculation);
 
+    void calculateTransmittance(GLuint quadCalcVao);
+    void calculateDeltaE(GLuint quadCalcVao);
+    void calculateDeltaS(GLuint quadCalcVao);
+    void calculateIrradiance(GLuint quadCalcVao);
+    void calculateInscattering(GLuint quadCalcVao);
+    void calculateDeltaJ(GLuint quadCalcVao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program);
+    void calculateDeltaE(GLuint quadCalcVao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program);
+    void calculateDeltaS(GLuint quadCalcVao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program);
+    void calculateIrradiance(GLuint quadCalcVao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program);
+    void calculateInscattering(GLuint quadCalcVao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program);
+
+
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
