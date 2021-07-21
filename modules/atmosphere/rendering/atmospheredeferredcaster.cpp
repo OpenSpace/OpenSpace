@@ -637,7 +637,8 @@ void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {
     _saveCalculationTextures = true;
 }
 
-void AtmosphereDeferredcaster::loadComputationPrograms() {
+void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
+    // Load Shader Programs for Calculations
     // Transmittance T
     if (!_transmittanceProgramObject) {
         _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -646,7 +647,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
         );
     }
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
 
     // Irradiance E
     if (!_irradianceProgramObject) {
@@ -730,22 +730,8 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-}
 
-void AtmosphereDeferredcaster::unloadComputationPrograms() {
-    _transmittanceProgramObject = nullptr;
-    _irradianceProgramObject = nullptr;
-    _irradianceSupTermsProgramObject = nullptr;
-    _inScatteringProgramObject = nullptr;
-    _inScatteringSupTermsProgramObject = nullptr;
-    _deltaEProgramObject = nullptr;
-    _irradianceFinalProgramObject = nullptr;
-    _deltaSProgramObject = nullptr;
-    _deltaSSupTermsProgramObject = nullptr;
-    _deltaJProgramObject = nullptr;
-}
-
-void AtmosphereDeferredcaster::createComputationTextures() {
+    // Create Textures for Calculations
     if (!_atmosphereCalculated) {
         // Transmittance
         glGenTextures(1, &_transmittanceTableTexture);
@@ -942,40 +928,32 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(GL_TEXTURE, _deltaJTableTexture, -1, "DeltaJ Table");
     }
-}
 
-void AtmosphereDeferredcaster::deleteComputationTextures() {
-    glDeleteTextures(1, &_transmittanceTableTexture);
-    _transmittanceTableTexture = 0;
-    glDeleteTextures(1, &_irradianceTableTexture);
-    _irradianceTableTexture = 0;
-    glDeleteTextures(1, &_inScatteringTableTexture);
-    _inScatteringTableTexture = 0;
-    glDeleteTextures(1, &_deltaETableTexture);
-    _deltaETableTexture = 0;
-    glDeleteTextures(1, &_deltaSRayleighTableTexture);
-    _deltaSRayleighTableTexture = 0;
-    glDeleteTextures(1, &_deltaSMieTableTexture);
-    _deltaSMieTableTexture = 0;
-    glDeleteTextures(1, &_deltaJTableTexture);
-    _deltaJTableTexture = 0;
-}
+    // Saves current FBO first
+    GLint defaultFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
-void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
-    glDeleteTextures(1, &_deltaETableTexture);
-    _deltaETableTexture = 0;
-    glDeleteTextures(1, &_deltaSRayleighTableTexture);
-    _deltaSRayleighTableTexture = 0;
-    glDeleteTextures(1, &_deltaSMieTableTexture);
-    _deltaSMieTableTexture = 0;
-    glDeleteTextures(1, &_deltaJTableTexture);
-    _deltaJTableTexture = 0;
-}
+    GLint viewport[4];
+    global::renderEngine->openglStateCache().viewport(viewport);
 
-void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
-                                                   GLenum drawBuffers[1],
-                                                   GLsizei vertexSize)
-{
+    // Creates the FBO for the calculations
+    GLuint calcFBO;
+    glGenFramebuffers(1, &calcFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
+    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+    // Prepare for rendering/calculations
+    GLuint quadCalcVAO;
+    GLuint quadCalcVBO;
+    createRenderQuad(&quadCalcVAO, &quadCalcVBO);
+
+    // Starting Calculations
+    LDEBUG("Starting precalculations for scattering effects");
+
+    // Execute Calculations
+    //executeCalculations(quadCalcVAO, drawBuffers, 6);
+
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
@@ -1008,7 +986,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
 
     static const float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
-    renderQuadForCalc(quadCalcVAO, vertexSize);
+    renderQuadForCalc(quadCalcVAO, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -1032,7 +1010,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     _irradianceProgramObject->setUniform("Rt", _atmosphereRadius);
     _irradianceProgramObject->setUniform("OTHER_TEXTURES", _deltaETableSize);
     glClear(GL_COLOR_BUFFER_BIT);
-    renderQuadForCalc(quadCalcVAO, vertexSize);
+    renderQuadForCalc(quadCalcVAO, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -1079,7 +1057,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(*_inScatteringProgramObject, layer, true);
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(quadCalcVAO, 6);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -1110,7 +1088,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
     _deltaEProgramObject->activate();
     glClear(GL_COLOR_BUFFER_BIT);
-    renderQuadForCalc(quadCalcVAO, vertexSize);
+    renderQuadForCalc(quadCalcVAO, 6);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -1142,7 +1120,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(*_deltaSProgramObject, layer, false);
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(quadCalcVAO, 6);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -1205,7 +1183,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _deltaJProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_deltaJProgramObject, layer, true);
-            renderQuadForCalc(quadCalcVAO, vertexSize);
+            renderQuadForCalc(quadCalcVAO, 6);
         }
         if (_saveCalculationTextures) {
             saveTextureFile(
@@ -1251,7 +1229,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _irradianceSupTermsProgramObject->setUniform("SAMPLES_MU", _mu_samples);
         _irradianceSupTermsProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
         _irradianceSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(quadCalcVAO, 6);
         if (_saveCalculationTextures) {
             saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
@@ -1290,7 +1268,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _inScatteringSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_inScatteringSupTermsProgramObject, layer, true);
-            renderQuadForCalc(quadCalcVAO, vertexSize);
+            renderQuadForCalc(quadCalcVAO, 6);
         }
         if (_saveCalculationTextures) {
             saveTextureFile(
@@ -1320,7 +1298,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             "deltaETexture",
             deltaETableTextureUnit
         );
-        renderQuadForCalc(quadCalcVAO, vertexSize);
+        renderQuadForCalc(quadCalcVAO, 6);
         if (_saveCalculationTextures) {
             saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
@@ -1351,7 +1329,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _deltaSSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_deltaSSupTermsProgramObject, layer, false);
-            renderQuadForCalc(quadCalcVAO, vertexSize);
+            renderQuadForCalc(quadCalcVAO, 6);
         }
         if (_saveCalculationTextures) {
             saveTextureFile(GL_COLOR_ATTACHMENT0,
@@ -1366,41 +1344,26 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
 
     // Restores OpenGL blending state
     global::renderEngine->openglStateCache().resetBlendState();
-}
 
-void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
-    // Load Shader Programs for Calculations
-    loadComputationPrograms();
 
-    // Create Textures for Calculations
-    createComputationTextures();
-
-    // Saves current FBO first
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    GLint viewport[4];
-    global::renderEngine->openglStateCache().viewport(viewport);
-
-    // Creates the FBO for the calculations
-    GLuint calcFBO;
-    glGenFramebuffers(1, &calcFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
-
-    // Prepare for rendering/calculations
-    GLuint quadCalcVAO;
-    GLuint quadCalcVBO;
-    createRenderQuad(&quadCalcVAO, &quadCalcVBO);
-
-    // Starting Calculations
-    LDEBUG("Starting precalculations for scattering effects");
-
-    // Execute Calculations
-    executeCalculations(quadCalcVAO, drawBuffers, 6);
-
-    deleteUnusedComputationTextures();
+    _transmittanceProgramObject = nullptr;
+    _irradianceProgramObject = nullptr;
+    _irradianceSupTermsProgramObject = nullptr;
+    _inScatteringProgramObject = nullptr;
+    _inScatteringSupTermsProgramObject = nullptr;
+    _deltaEProgramObject = nullptr;
+    _irradianceFinalProgramObject = nullptr;
+    _deltaSProgramObject = nullptr;
+    _deltaSSupTermsProgramObject = nullptr;
+    _deltaJProgramObject = nullptr;
+    glDeleteTextures(1, &_deltaETableTexture);
+    _deltaETableTexture = 0;
+    glDeleteTextures(1, &_deltaSRayleighTableTexture);
+    _deltaSRayleighTableTexture = 0;
+    glDeleteTextures(1, &_deltaSMieTableTexture);
+    _deltaSMieTableTexture = 0;
+    glDeleteTextures(1, &_deltaJTableTexture);
+    _deltaJTableTexture = 0;
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);

@@ -101,13 +101,6 @@ public:
     void enablePrecalculationTexturesSaving();
 
 private:
-    void loadComputationPrograms();
-    void unloadComputationPrograms();
-    void createComputationTextures();
-    void deleteComputationTextures();
-    void deleteUnusedComputationTextures();
-    void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
-        GLsizei vertexSize);
     void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
         bool doCalculation);
 
@@ -125,9 +118,9 @@ private:
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
-        modelTransformMatrix, projectionToModelTransformMatrix,
-        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows,
-        transmittanceTexture, irradianceTexture, inscatterTexture) _uniformCache;
+        modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
+        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture, 
+        inscatterTexture) _uniformCache;
 
     GLuint _transmittanceTableTexture = 0;
     GLuint _irradianceTableTexture = 0;
