@@ -642,7 +642,6 @@ void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {
 }
 
 void AtmosphereDeferredcaster::loadComputationPrograms() {
-    //
     // Transmittance T
     if (!_transmittanceProgramObject) {
         _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -652,9 +651,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
         );
     }
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _transmittanceProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // Irradiance E
     if (!_irradianceProgramObject) {
         _irradianceProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -663,7 +660,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl")
         );
     }
-    _irradianceProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     if (!_irradianceSupTermsProgramObject) {
         _irradianceSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -672,9 +668,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_fs.glsl")
         );
     }
-    _irradianceSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // InScattering S
     if (!_inScatteringProgramObject) {
         _inScatteringProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -684,7 +678,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-    _inScatteringProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     if (!_inScatteringSupTermsProgramObject) {
         _inScatteringSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -694,9 +687,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-    _inScatteringSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // Delta E
     if (!_deltaEProgramObject) {
         _deltaEProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -705,9 +696,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl")
         );
     }
-    _deltaEProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // Irradiance finel E
     if (!_irradianceFinalProgramObject) {
         _irradianceFinalProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -716,9 +705,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_final_fs.glsl")
         );
     }
-    _irradianceFinalProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // Delta S
     if (!_deltaSProgramObject) {
         _deltaSProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -728,7 +715,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-    _deltaSProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     if (!_deltaSSupTermsProgramObject) {
         _deltaSSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -738,9 +724,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-    _deltaSSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    //
     // Delta J (Radiance Scattered)
     if (!_deltaJProgramObject) {
         _deltaJProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -750,7 +734,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
-    _deltaJProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void AtmosphereDeferredcaster::unloadComputationPrograms() {
@@ -1016,7 +999,16 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     );
     glViewport(0, 0, _transmittanceTableSize.x, _transmittanceTableSize.y);
     _transmittanceProgramObject->activate();
-    loadAtmosphereDataIntoShaderProgram(*_transmittanceProgramObject);
+    _transmittanceProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+    _transmittanceProgramObject->setUniform("Rt", _atmosphereRadius);
+    _transmittanceProgramObject->setUniform("HR", _rayleighHeightScale);
+    _transmittanceProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
+    _transmittanceProgramObject->setUniform("HM", _mieHeightScale);
+    _transmittanceProgramObject->setUniform("betaMieExtinction", _mieExtinctionCoeff);
+    _transmittanceProgramObject->setUniform("TRANSMITTANCE", _transmittanceTableSize);
+    _transmittanceProgramObject->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    _transmittanceProgramObject->setUniform("HO", _ozoneHeightScale);
+    _transmittanceProgramObject->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
     static const float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
@@ -1040,7 +1032,9 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         "transmittanceTexture",
         transmittanceTableTextureUnit
     );
-    loadAtmosphereDataIntoShaderProgram(*_irradianceProgramObject);
+    _irradianceProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+    _irradianceProgramObject->setUniform("Rt", _atmosphereRadius);
+    _irradianceProgramObject->setUniform("OTHER_TEXTURES", _deltaETableSize);
     glClear(GL_COLOR_BUFFER_BIT);
     renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
@@ -1075,7 +1069,17 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         "transmittanceTexture",
         transmittanceTableTextureUnit
     );
-    loadAtmosphereDataIntoShaderProgram(*_inScatteringProgramObject);
+    _inScatteringProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+    _inScatteringProgramObject->setUniform("Rt", _atmosphereRadius);
+    _inScatteringProgramObject->setUniform("HR", _rayleighHeightScale);
+    _inScatteringProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
+    _inScatteringProgramObject->setUniform("HM", _mieHeightScale);
+    _inScatteringProgramObject->setUniform("betaMieScattering", _mieScatteringCoeff);
+    _inScatteringProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+    _inScatteringProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+    _inScatteringProgramObject->setUniform("SAMPLES_NU", _nu_samples);
+    _inScatteringProgramObject->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    _inScatteringProgramObject->setUniform("HO", _ozoneHeightScale);
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(*_inScatteringProgramObject, layer, true);
@@ -1109,10 +1113,6 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
 
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
     _deltaEProgramObject->activate();
-    deltaETableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-    _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
-    loadAtmosphereDataIntoShaderProgram(*_deltaEProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
     renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
@@ -1139,7 +1139,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
     _deltaSProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
     _deltaSProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
-    loadAtmosphereDataIntoShaderProgram(*_deltaSProgramObject);
+    _deltaSProgramObject->setUniform("SAMPLES_R", _r_samples);
+    _deltaSProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+    _deltaSProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+    _deltaSProgramObject->setUniform("SAMPLES_NU", _nu_samples);
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(*_deltaSProgramObject, layer, false);
@@ -1189,7 +1192,18 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
         _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
-        loadAtmosphereDataIntoShaderProgram(*_deltaJProgramObject);
+        _deltaJProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+        _deltaJProgramObject->setUniform("Rt", _atmosphereRadius);
+        _deltaJProgramObject->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
+        _deltaJProgramObject->setUniform("HR", _rayleighHeightScale);
+        _deltaJProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
+        _deltaJProgramObject->setUniform("HM", _mieHeightScale);
+        _deltaJProgramObject->setUniform("betaMieScattering", _mieScatteringCoeff);
+        _deltaJProgramObject->setUniform("mieG", _miePhaseConstant);
+        _deltaJProgramObject->setUniform("SAMPLES_R", _r_samples);
+        _deltaJProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+        _deltaJProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+        _deltaJProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_deltaJProgramObject, layer, true);
             renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1218,12 +1232,6 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         else {
             _irradianceSupTermsProgramObject->setUniform("firstIteration", 0);
         }
-        transmittanceTableTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-        _irradianceSupTermsProgramObject->setUniform(
-            "transmittanceTexture",
-            transmittanceTableTextureUnit
-        );
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
         _irradianceSupTermsProgramObject->setUniform(
@@ -1236,7 +1244,14 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             "deltaSMTexture",
             deltaSMieTableTextureUnit
         );
-        loadAtmosphereDataIntoShaderProgram(*_irradianceSupTermsProgramObject);
+        _irradianceSupTermsProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+        _irradianceSupTermsProgramObject->setUniform("Rt", _atmosphereRadius);
+        _irradianceSupTermsProgramObject->setUniform("mieG", _miePhaseConstant);
+        _irradianceSupTermsProgramObject->setUniform("SKY", _irradianceTableSize);
+        _irradianceSupTermsProgramObject->setUniform("SAMPLES_R", _r_samples);
+        _irradianceSupTermsProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+        _irradianceSupTermsProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+        _irradianceSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
             saveTextureFile(
@@ -1268,7 +1283,12 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             "deltaJTexture",
             deltaJTableTextureUnit
         );
-        loadAtmosphereDataIntoShaderProgram(*_inScatteringSupTermsProgramObject);
+        _inScatteringSupTermsProgramObject->setUniform("Rg", _atmospherePlanetRadius);
+        _inScatteringSupTermsProgramObject->setUniform("Rt", _atmosphereRadius);
+        _inScatteringSupTermsProgramObject->setUniform("SAMPLES_R", _r_samples);
+        _inScatteringSupTermsProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+        _inScatteringSupTermsProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+        _inScatteringSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_inScatteringSupTermsProgramObject, layer, true);
             renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1301,7 +1321,6 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             "deltaETexture",
             deltaETableTextureUnit
         );
-        loadAtmosphereDataIntoShaderProgram(*_irradianceFinalProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
             saveTextureFile(
@@ -1327,7 +1346,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             "deltaSTexture",
             deltaSRayleighTableTextureUnit
         );
-        loadAtmosphereDataIntoShaderProgram(*_deltaSSupTermsProgramObject);
+        _deltaSSupTermsProgramObject->setUniform("SAMPLES_R", _r_samples);
+        _deltaSSupTermsProgramObject->setUniform("SAMPLES_MU", _mu_samples);
+        _deltaSSupTermsProgramObject->setUniform("SAMPLES_MU_S", _mu_s_samples);
+        _deltaSSupTermsProgramObject->setUniform("SAMPLES_NU", _nu_samples);
         for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(*_deltaSSupTermsProgramObject, layer, false);
             renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1373,7 +1395,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     GLuint quadCalcVBO;
     createRenderQuad(&quadCalcVAO, &quadCalcVBO);
 
-    // Starting Calculations...
+    // Starting Calculations
     LDEBUG("Starting precalculations for scattering effects");
 
     // Execute Calculations
@@ -1389,32 +1411,6 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glDeleteFramebuffers(1, &calcFBO);
 
     LDEBUG("Ended precalculations for Atmosphere effects");
-}
-
-void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
-                                                 ghoul::opengl::ProgramObject& shaderProg)
-{
-    shaderProg.setUniform("Rg", _atmospherePlanetRadius);
-    shaderProg.setUniform("Rt", _atmosphereRadius);
-    shaderProg.setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
-    shaderProg.setUniform("groundRadianceEmission", _planetGroundRadianceEmission);
-    shaderProg.setUniform("HR", _rayleighHeightScale);
-    shaderProg.setUniform("betaRayleigh", _rayleighScatteringCoeff);
-    shaderProg.setUniform("HM", _mieHeightScale);
-    shaderProg.setUniform("betaMieScattering", _mieScatteringCoeff);
-    shaderProg.setUniform("betaMieExtinction", _mieExtinctionCoeff);
-    shaderProg.setUniform("mieG", _miePhaseConstant);
-    shaderProg.setUniform("sunRadiance", _sunRadianceIntensity);
-    shaderProg.setUniform("TRANSMITTANCE", _transmittanceTableSize);
-    shaderProg.setUniform("SKY", _irradianceTableSize);
-    shaderProg.setUniform("OTHER_TEXTURES", _deltaETableSize);
-    shaderProg.setUniform("SAMPLES_R", _r_samples);
-    shaderProg.setUniform("SAMPLES_MU", _mu_samples);
-    shaderProg.setUniform("SAMPLES_MU_S", _mu_s_samples);
-    shaderProg.setUniform("SAMPLES_NU", _nu_samples);
-    shaderProg.setUniform("ozoneLayerEnabled", _ozoneEnabled);
-    shaderProg.setUniform("HO", _ozoneHeightScale);
-    shaderProg.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 }
 
 void AtmosphereDeferredcaster::step3DTexture(ghoul::opengl::ProgramObject& shaderProg,

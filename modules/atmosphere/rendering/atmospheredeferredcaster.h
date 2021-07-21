@@ -111,7 +111,6 @@ private:
         GLsizei vertexSize);
     void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
         bool doCalculation);
-    void loadAtmosphereDataIntoShaderProgram(ghoul::opengl::ProgramObject& shaderProg);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
