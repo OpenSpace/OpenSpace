@@ -962,6 +962,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint vao, int scatteringOrd
     deltaETableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, deltaE);
     program.setUniform("deltaETexture", deltaETableTextureUnit);
+    program.setUniform("OTHER_TEXTURES", _deltaETableSize);
 
     renderQuadForCalc(vao);
     if (_saveCalculationTextures) {
