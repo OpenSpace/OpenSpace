@@ -184,8 +184,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU)).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU)).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU)).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU)).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
@@ -196,7 +196,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, invSamplesMu, H2, invSamplesR, invSamplesMuS, float(SAMPLES_NU)).rgb;
+        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg2, 1.0 / float(SAMPLES_MU), H2, 1.0 / float(SAMPLES_R), 1.0 / float(SAMPLES_MU_S), float(SAMPLES_NU)).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the

@@ -267,6 +267,3 @@ float Rg2 = Rg * Rg;
 float Rt2 = Rt * Rt;
 float H = sqrt(Rt2 - Rg2);
 float H2 = Rt2 - Rg2;
-float invSamplesMu = 1.0 / float(SAMPLES_MU);
-float invSamplesR = 1.0 / float(SAMPLES_R);
-float invSamplesMuS = 1.0 / float(SAMPLES_MU_S);
