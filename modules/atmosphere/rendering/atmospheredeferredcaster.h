@@ -104,17 +104,6 @@ private:
     void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
         bool doCalculation);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceFinalProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaEProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
-
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
@@ -135,7 +124,6 @@ private:
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
 
     // Atmosphere Data
-    bool _atmosphereCalculated = false;
     bool _ozoneEnabled = false;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
