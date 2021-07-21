@@ -244,7 +244,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         MieScatteringCoeffInfo,
         glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
     )
-    , _mieScatteringExtinctionPropCoefficient(
+    , _mieScatteringExtinctionPropCoeff(
         MieScatteringExtinctionPropCoeffInfo,
         0.9f, 0.01f, 1.f
     )
@@ -328,16 +328,15 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _miePhaseConstant.onChange(updateWithCalculation);
     addProperty(_miePhaseConstant);
 
-    _mieScatteringExtinctionPropCoefficient =
+    _mieScatteringExtinctionPropCoeff =
         _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
         _mieScatteringCoeff.value().x / _mieExtinctionCoeff.x;
 
-    _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
-    addProperty(_mieScatteringExtinctionPropCoefficient);
+    _mieScatteringExtinctionPropCoeff.onChange(updateWithCalculation);
+    addProperty(_mieScatteringExtinctionPropCoeff);
 
     if (p.debug.has_value()) {
-        _preCalculatedTexturesScale =
-            p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);
+        _textureScale = p.debug->preCalculatedTextureScale.value_or(_textureScale);
 
         _saveCalculationsToTexture =
             p.debug->saveCalculatedTextures.value_or(_saveCalculationsToTexture);
@@ -365,16 +364,12 @@ void RenderableAtmosphere::deinitializeGL() {
 
 void RenderableAtmosphere::initializeGL() {
     _deferredcaster = std::make_unique<AtmosphereDeferredcaster>(
-        _preCalculatedTexturesScale
+        _textureScale,
+        _shadowEnabled ? std::move(_shadowConfArray) : std::vector<ShadowConfiguration>(),
+        _saveCalculationsToTexture
     );
+    _shadowConfArray.clear();
     updateAtmosphereParameters();
-
-    if (_shadowEnabled) {
-        _deferredcaster->setShadowConfigArray(_shadowConfArray);
-        // We no longer need it
-        _shadowConfArray.clear();
-    }
-
     _deferredcaster->initialize();
 
     global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
@@ -384,13 +379,11 @@ bool RenderableAtmosphere::isReady() const {
     return true;
 }
 
-glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
-                                                       const TransformData& transformData)
-{
+glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData& data) {
     // scale the planet to appropriate size since the planet is a unit sphere
-    return glm::translate(glm::dmat4(1.0), transformData.translation) *
-        glm::dmat4(transformData.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
+    return glm::translate(glm::dmat4(1.0), data.translation) *
+        glm::dmat4(data.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale));
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
@@ -417,10 +410,10 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
     _mieExtinctionCoeff =
-        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoefficient.value();
+        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoeff.value();
 
     _deferredcaster->setParameters(
-        _planetRadius + _atmosphereHeight, // atmosphere radius
+        _planetRadius + _atmosphereHeight,
         _planetRadius,
         _groundAverageReflectance,
         _groundRadianceEmission,
@@ -436,16 +429,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _mieExtinctionCoeff,
         _sunFollowingCameraEnabled
     );
-    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
-    //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-
-    if (_saveCalculationsToTexture) {
-        _deferredcaster->enablePrecalculationTexturesSaving();
-    }
-
-    if (_shadowEnabled) {
-        _deferredcaster->setHardShadows(_hardShadowsEnabled);
-    }
+    _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }
 
 }  // namespace openspace

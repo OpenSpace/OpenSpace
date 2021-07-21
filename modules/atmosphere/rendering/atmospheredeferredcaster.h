@@ -57,14 +57,15 @@ struct ShadowRenderingStruct {
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
-    AtmosphereDeferredcaster(float textureScale);
+    AtmosphereDeferredcaster(float textureScale,
+        std::vector<ShadowConfiguration> shadowConfigArray, bool saveCalculatedTextures);
     virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
     void deinitialize();
-    void preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
+    void preRaycast(const RenderData& data, const DeferredcastData& deferredData,
         ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
+    void postRaycast(const RenderData& data, const DeferredcastData& deferredData,
         ghoul::opengl::ProgramObject& program) override;
 
     std::filesystem::path deferredcastPath() const override;
@@ -88,11 +89,7 @@ public:
         glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
         bool sunFollowing);
 
-    void setEllipsoidRadii(glm::dvec3 radii);
-    void setShadowConfigArray(std::vector<ShadowConfiguration> shadowConfigArray);
     void setHardShadows(bool enabled);
-
-    void enablePrecalculationTexturesSaving();
 
 private:
     void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer);
@@ -119,7 +116,7 @@ private:
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
-        modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
+        modelTransformMatrix, projectionToModelTransform, viewToWorldMatrix,
         camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture, 
         inscatterTexture) _uniformCache;
 
@@ -148,7 +145,6 @@ private:
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
-    glm::dvec3 _ellipsoidRadii = glm::dvec3(0.0);
 
     // Atmosphere Textures Dimmensions
     const glm::ivec2 _transmittanceTableSize;
@@ -166,7 +162,7 @@ private:
     bool _hardShadowsEnabled = false;
 
     // Atmosphere Debugging
-    bool _saveCalculationTextures = false;
+    const bool _saveCalculationTextures = false;
 
     std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
     // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
