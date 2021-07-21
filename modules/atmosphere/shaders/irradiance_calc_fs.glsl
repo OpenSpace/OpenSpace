@@ -28,6 +28,11 @@
 
 out vec4 renderTableColor;
 
+uniform float Rg;
+uniform float Rt;
+uniform ivec2 OTHER_TEXTURES;
+uniform sampler2D transmittanceTexture;
+
 void main() {
   // See Bruneton and Colliene to understand the mapping
   float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;

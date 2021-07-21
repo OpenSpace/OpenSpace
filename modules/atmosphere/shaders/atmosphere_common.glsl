@@ -213,7 +213,10 @@ float miePhaseFunction(float mu, float mieG) {
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // nu := cosine of the angle between vec(s) and vec(v)
-vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float Rg, float samplesMu, float Rt, float samplesR, float samplesMuS, float samplesNu) {
+vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float Rg,
+               float samplesMu, float Rt, float samplesR, float samplesMuS,
+               float samplesNu)
+{
   float r2 = r * r;
   float rho = sqrt(r2 - Rg*Rg);
   float rmu = r * mu;
@@ -235,30 +238,3 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
     table, vec3((u_nu + u_mu_s) / samplesNu, u_mu, u_r)) * (1.0 - lerp) +
     texture(table, vec3((u_nu + u_mu_s + 1.0) / samplesNu, u_mu, u_r)) * lerp;
 }
-
-// Atmosphere Rendering Parameters 
-uniform float Rg;
-uniform float Rt;
-uniform float AverageGroundReflectance;
-uniform float groundRadianceEmission;
-uniform float HR;
-uniform vec3 betaRayleigh;
-uniform float HO;
-uniform vec3 betaOzoneExtinction;
-uniform float HM;
-uniform vec3 betaMieScattering;
-uniform vec3 betaMieExtinction;
-uniform float mieG;
-uniform float sunRadiance;
-
-uniform bool ozoneLayerEnabled;
-
-uniform ivec2 TRANSMITTANCE;
-uniform ivec2 SKY;
-uniform ivec2 OTHER_TEXTURES;
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
-
-uniform sampler2D transmittanceTexture;

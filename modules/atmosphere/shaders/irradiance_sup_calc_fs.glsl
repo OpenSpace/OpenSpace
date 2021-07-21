@@ -28,6 +28,14 @@
 
 out vec4 renderTableColor;
 
+uniform float Rg;
+uniform float Rt;
+uniform float mieG;
+uniform ivec2 SKY;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
 uniform int firstIteration;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;

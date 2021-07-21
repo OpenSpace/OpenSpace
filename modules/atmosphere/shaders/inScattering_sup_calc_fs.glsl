@@ -28,6 +28,13 @@
 
 out vec4 renderTarget;
 
+uniform float Rg;
+uniform float Rt;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
 uniform sampler3D deltaJTexture;

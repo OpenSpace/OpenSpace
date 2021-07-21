@@ -28,6 +28,17 @@
 
 out vec4 renderTableColor;
 
+uniform float Rg;
+uniform float Rt;
+uniform float HR;
+uniform vec3 betaRayleigh;
+uniform float HO;
+uniform vec3 betaOzoneExtinction;
+uniform float HM;
+uniform vec3 betaMieExtinction;
+uniform bool ozoneLayerEnabled;
+uniform ivec2 TRANSMITTANCE;
+
 // Optical depth by integration, from ray starting at point vec(x), i.e, height r and
 // angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
 // r := height of starting point vect(x)

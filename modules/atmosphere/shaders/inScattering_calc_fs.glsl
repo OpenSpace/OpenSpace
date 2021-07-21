@@ -29,6 +29,18 @@
 layout(location = 0) out vec4 renderTarget1;
 layout(location = 1) out vec4 renderTarget2;
 
+uniform float Rg;
+uniform float Rt;
+uniform float HR;
+uniform vec3 betaRayleigh;
+uniform float HO;
+uniform float HM;
+uniform vec3 betaMieScattering;
+uniform bool ozoneLayerEnabled;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
 

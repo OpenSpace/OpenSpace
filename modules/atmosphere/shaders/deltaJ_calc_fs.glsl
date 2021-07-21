@@ -28,13 +28,24 @@
 
 out vec4 renderTarget;
 
+uniform float Rg;
+uniform float Rt;
+uniform float AverageGroundReflectance;
+uniform float HR;
+uniform vec3 betaRayleigh;
+uniform float HM;
+uniform vec3 betaMieScattering;
+uniform float mieG;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
-
 uniform sampler2D deltaETexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
-
 uniform int firstIteration;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]

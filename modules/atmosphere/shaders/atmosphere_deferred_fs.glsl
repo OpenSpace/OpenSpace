@@ -64,26 +64,36 @@ out vec4 renderTarget;
 
 uniform int cullAtmosphere;
 
+uniform float Rg;
+uniform float Rt;
+uniform float groundRadianceEmission;
+uniform float HR;
+uniform vec3 betaRayleigh;
+uniform float HO;
+uniform vec3 betaOzoneExtinction;
+uniform float HM;
+uniform vec3 betaMieExtinction;
+uniform float mieG;
+uniform float sunRadiance;
+uniform bool ozoneLayerEnabled;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 uniform sampler2D mainPositionTexture;
 uniform sampler2D mainNormalTexture;
 uniform sampler2D mainColorTexture;
-
 uniform dmat4 inverseModelTransformMatrix; 
 uniform dmat4 modelTransformMatrix;
 uniform dmat4 viewToWorldMatrix;
 uniform dmat4 projectionToModelTransformMatrix;
-
 uniform vec4 viewport;
 uniform vec2 resolution;
-
 uniform dvec3 camPosObj;
 uniform dvec3 sunDirectionObj;
-
-uniform dvec3 sunWorld;
-uniform dvec3 viewDirWorld;
-uniform dvec3 sunModel;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
