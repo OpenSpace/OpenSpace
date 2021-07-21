@@ -57,6 +57,7 @@ struct ShadowRenderingStruct {
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
+    AtmosphereDeferredcaster(float textureScale);
     virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
@@ -78,7 +79,6 @@ public:
     void preCalculateAtmosphereParam();
 
     void setModelTransform(glm::dmat4 transform);
-    void setTime(double time);
     void setAtmosphereRadius(float atmRadius);
     void setPlanetRadius(float planetRadius);
     void setPlanetAverageGroundReflectance(float averageGReflectance);
@@ -98,7 +98,6 @@ public:
     void setHardShadows(bool enabled);
     void enableSunFollowing(bool enable);
 
-    void setPrecalculationTextureScale(float preCalculatedTexturesScale);
     void enablePrecalculationTexturesSaving();
 
 private:
@@ -163,16 +162,15 @@ private:
     glm::dvec3 _ellipsoidRadii = glm::dvec3(0.0);
 
     // Atmosphere Textures Dimmensions
-    glm::ivec2 _transmittanceTableSize = glm::ivec2(256, 64);
-    glm::ivec2 _irradianceTableSize = glm::ivec2(64, 16);
-    glm::ivec2 _deltaETableSize = glm::ivec2(64, 16);
-    int _r_samples = 32;
-    int _mu_samples = 128;
-    int _mu_s_samples = 32;
-    int _nu_samples = 8;
+    const glm::ivec2 _transmittanceTableSize;
+    const glm::ivec2 _irradianceTableSize;
+    const glm::ivec2 _deltaETableSize;
+    const int _r_samples;
+    const int _mu_samples;
+    const int _mu_s_samples;
+    const int _nu_samples;
 
     glm::dmat4 _modelTransform;
-    double _time = 0.0;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;

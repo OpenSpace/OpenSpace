@@ -364,7 +364,9 @@ void RenderableAtmosphere::deinitializeGL() {
 }
 
 void RenderableAtmosphere::initializeGL() {
-    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
+    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>(
+        _preCalculatedTexturesScale
+    );
     updateAtmosphereParameters();
 
     if (_shadowEnabled) {
@@ -408,7 +410,6 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         _deferredCasterNeedsCalculation = false;
     }
 
-    _deferredcaster->setTime(data.time.j2000Seconds());
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
     _deferredcaster->setModelTransform(modelTransform);
     _deferredcaster->update(data);
@@ -436,7 +437,6 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
     //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 
-    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
     if (_saveCalculationsToTexture) {
         _deferredcaster->enablePrecalculationTexturesSaving();
     }

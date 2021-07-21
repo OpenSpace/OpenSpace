@@ -217,6 +217,18 @@ namespace {
 
 namespace openspace {
 
+AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale)
+    : _transmittanceTableSize(glm::ivec2(256 * textureScale, 64 * textureScale) )
+    , _irradianceTableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
+    , _deltaETableSize(glm::ivec2(64 * textureScale, 16 * textureScale))
+    , _r_samples(32 * textureScale)
+    , _mu_samples(128 * textureScale)
+    , _mu_s_samples(32 * textureScale)
+    , _nu_samples(8 * textureScale)
+{
+    std::memset(_uniformNameBuffer, '\0', 40);
+}
+
 void AtmosphereDeferredcaster::initialize() {
     ZoneScoped
 
@@ -380,7 +392,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         "SSB",
                         "GALACTIC",
                         {},
-                        _time,
+                        renderData.time.j2000Seconds(),
                         lt
                     );
                     sourcePos *= KM_TO_M; // converting to meters
@@ -389,7 +401,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         "SSB",
                         "GALACTIC",
                         {},
-                        _time,
+                        renderData.time.j2000Seconds(),
                         lt
                     );
                     casterPos *= KM_TO_M; // converting to meters
@@ -539,10 +551,6 @@ void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
     _modelTransform = std::move(transform);
 }
 
-void AtmosphereDeferredcaster::setTime(double time) {
-    _time = time;
-}
-
 void AtmosphereDeferredcaster::setAtmosphereRadius(float atmRadius) {
     _atmosphereRadius = atmRadius;
 }
@@ -623,18 +631,6 @@ void AtmosphereDeferredcaster::setShadowConfigArray(
 
 void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {
     _sunFollowingCameraEnabled = enable;
-}
-
-void AtmosphereDeferredcaster::setPrecalculationTextureScale(
-                                                         float preCalculatedTexturesScale)
-{
-    _transmittanceTableSize *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _irradianceTableSize *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _deltaETableSize *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _r_samples *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _mu_samples *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _mu_s_samples *= static_cast<unsigned int>(preCalculatedTexturesScale);
-    _nu_samples *= static_cast<unsigned int>(preCalculatedTexturesScale);
 }
 
 void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {
@@ -1194,7 +1190,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
         _deltaJProgramObject->setUniform("Rg", _atmospherePlanetRadius);
         _deltaJProgramObject->setUniform("Rt", _atmosphereRadius);
-        _deltaJProgramObject->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
+        _deltaJProgramObject->setUniform(
+            "AverageGroundReflectance",
+            _planetAverageGroundReflectance
+        );
         _deltaJProgramObject->setUniform("HR", _rayleighHeightScale);
         _deltaJProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
         _deltaJProgramObject->setUniform("HM", _mieHeightScale);
