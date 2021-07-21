@@ -105,20 +105,21 @@ private:
         bool doCalculation);
 
     void calculateTransmittance(GLuint quadCalcVao);
-    void calculateDeltaE(GLuint quadCalcVao);
-    void calculateDeltaS(GLuint quadCalcVao);
+    void calculateDeltaE(GLuint quadCalcVao, GLuint deltaE);
+    void calculateDeltaS(GLuint quadCalcVao, GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateIrradiance(GLuint quadCalcVao);
-    void calculateInscattering(GLuint quadCalcVao);
+    void calculateInscattering(GLuint quadCalcVao, GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateDeltaJ(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program);
+        ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
+        GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateDeltaE(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program);
+        ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateDeltaS(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program);
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh, GLuint deltaJ);
     void calculateIrradiance(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program);
+        ghoul::opengl::ProgramObject& program, GLuint deltaE);
     void calculateInscattering(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program);
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
@@ -131,10 +132,6 @@ private:
     GLuint _transmittanceTableTexture = 0;
     GLuint _irradianceTableTexture = 0;
     GLuint _inScatteringTableTexture = 0;
-    GLuint _deltaETableTexture = 0;
-    GLuint _deltaSRayleighTableTexture = 0;
-    GLuint _deltaSMieTableTexture = 0;
-    GLuint _deltaJTableTexture = 0;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
@@ -184,6 +181,6 @@ private:
     char _uniformNameBuffer[40];
 };
 
-} // openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHEREDEFERREDCASTER___H__
