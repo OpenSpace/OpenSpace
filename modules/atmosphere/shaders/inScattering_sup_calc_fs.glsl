@@ -53,7 +53,10 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
   float muSun_i = (r * muSun + dist * nu) / r_i;
   // The irradiance attenuated from point r until y (y-x = dist)
-  return transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU)).rgb;
+  return
+    transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
+    texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+      SAMPLES_MU_S, SAMPLES_NU).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
@@ -78,7 +81,7 @@ void main() {
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu, float(SAMPLES_MU), Rg, Rt, float(SAMPLES_MU_S), float(SAMPLES_NU));
+  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
   
   // Write to texture deltaSR 
   renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);

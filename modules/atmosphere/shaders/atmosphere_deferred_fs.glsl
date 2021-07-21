@@ -102,8 +102,10 @@ uniform dvec3 sunDirectionObj;
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
-  double xu, xp;
-  double rs, rc;
+  double xu;
+  double xp;
+  double rs;
+  double rc;
   dvec3 sourceCasterVec;
   dvec3 casterPositionVec;
   bool isShadowing;
@@ -159,7 +161,8 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   vec2 a01s = sign(a01);
   vec2 a01sq = a01 * a01;
   float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) * vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
+  vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
+    vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
   return sqrt(M_2PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
@@ -209,10 +212,11 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
   double l2 = dot(l, l);
   double r2 = atmRadius * atmRadius; // avoiding surface acne
 
+  offset = 0.0;
+  maxLength = 0.0;
+
   // Ray origin (eye position) is behind sphere
   if ((s < 0.0) && (l2 > r2)) {
-    offset = 0.0;
-    maxLength = 0.0;
     return false;
   }
 
@@ -220,12 +224,8 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
 
   // Ray misses atmosphere
   if (m2 > r2) {
-    offset = 0.0;
-    maxLength = 0.0;
     return false;
   }
-
-  // We already now the ray hits the atmosphere
 
   // If q = 0.0, there is only one intersection
   double q = sqrt(r2 - m2);
@@ -284,9 +284,9 @@ Ray calculateRayRenderableGlobe(vec2 st) {
  *                the reflectance R[L]
  */
 vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3 v, vec3 s,
-                       float r, out float mu, out vec3 attenuation, vec3 fragPosObj,
-                       out bool groundHit, double maxLength, double pixelDepth,
-                       vec3 spaceColor, float sunIntensity)
+                       float r, vec3 fragPosObj, double maxLength, double pixelDepth,
+                       vec3 spaceColor, float sunIntensity,
+                       out float mu, out vec3 attenuation, out bool groundHit)
 {
   const float INTERPOLATION_EPS = 0.004; // precision const from Brunetton
 
@@ -304,7 +304,11 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // I.e. the next line has the scattering light for the "infinite" ray passing through
   // the atmosphere. If this ray hits something inside the atmosphere, we will subtract
   // the attenuated scattering light from that path in the current path
-  vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), SAMPLES_NU), 0.0);
+  vec4 inscatterRadiance = max(
+    texture4D(inscatterTexture, r, mu, muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+      SAMPLES_MU_S, SAMPLES_NU),
+    0.0
+  );
     
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
@@ -328,7 +332,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0        
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
     // the unsused contribution to the final radiance.
-    vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
     inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0);
 
     // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
@@ -368,8 +373,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // mu0 = (r*mu + t) / r0
     mu0 = (r * mu + t) * (1.0 / r0);
     
-    vec4 inScatterAboveX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
-    vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterAboveX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
@@ -380,8 +387,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     
     mu0 = (r * mu + t) * (1.0 / r0);
     
-    vec4 inScatterBelowX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
-    vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg, float(SAMPLES_MU), Rt, float(SAMPLES_R), float(SAMPLES_MU_S), float(SAMPLES_NU));
+    vec4 inScatterBelowX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+    vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
+      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterBelow = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
 
@@ -406,13 +415,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // Finally we add the Lsun (all calculations are done with no Lsun so we can change it
   // on the fly with no precomputations)
   vec3 finalScatteringRadiance = radiance * sunIntensity;
-  
-  if (groundHit) {
-    return finalScatteringRadiance;
-  }
-  else {
-    return spaceColor + finalScatteringRadiance;
-  }    
+  return groundHit ?  finalScatteringRadiance  :  spaceColor + finalScatteringRadiance;
 }
 
 /* 
@@ -437,8 +440,6 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
                  vec3 normal, float irradianceFactor, float waterReflectance,
                  float sunIntensity)
 {
-  vec3 reflectedRadiance = vec3(0.0);
-
   // First we obtain the ray's end point on the surface
   float r0 = length(x + t * v);
 
@@ -469,16 +470,14 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
     // Fresnell Schlick's approximation
     float fresnel = 0.02 + 0.98 * pow(1.0 - dot(-v, h), 5.0);
     // Walter BRDF approximation
-    float waterBrdf = fresnel * pow(max(dot(h, normal), 0.0), 150.0);
+    float waterBrdf = max(fresnel * pow(max(dot(h, normal), 0.0), 150.0), 0.0);
     // Adding Fresnell and Water BRDFs approximation to the final surface color
     // after adding the sunRadiance and the attenuation of the Sun through atmosphere
-    groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunIntensity;
+    groundRadiance += waterReflectance * waterBrdf * transmittanceL0 * sunIntensity;
   }
 
   // Finally, we attenuate the surface Radiance from the point x0 to the camera location
-  reflectedRadiance = attenuationXtoX0 * groundRadiance;    
-    
-  // Returns reflectedRadiance = 0.0 if the ray doesn't hit the ground.
+  vec3 reflectedRadiance = attenuationXtoX0 * groundRadiance;    
   return reflectedRadiance;  
 }
 
@@ -500,7 +499,7 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
   // JCC: Change this function to a impostor texture with gaussian decay color weighted
   // by the sunRadiance, transmittance and irradianceColor (11/03/2017)
 
-  // @TODO (abock, 2021-07-01) This value is hard-coded to our sun right now
+  // @TODO (abock, 2021-07-01) This value is hard-coded to our sun+earth right now
   // Convert 0.3 degrees -> radians
   const float SunAngularSize = (0.3 * M_PI / 180.0);
   const float FuzzyFactor = 0.5; // How fuzzy should the edges be
@@ -624,24 +623,22 @@ void main() {
   bool groundHit = false;
   vec3 attenuation;     
   
-  vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v, s, r, mu,
-    attenuation, vec3(positionObjectsCoords), groundHit, maxLength, pixelDepth,
-    color, sunIntensityInscatter);
+  vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v, s, r,
+    vec3(positionObjectsCoords), maxLength, pixelDepth, color, sunIntensityInscatter, mu,
+    attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
     float eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet;
-    atmColor = groundColor(x, tF, v, s, attenuation, color, normal.xyz,
-      irradianceFactor, normal.w, sunIntensityGround);
+    atmColor = groundColor(x, tF, v, s, attenuation, color, normal.xyz, irradianceFactor,
+      normal.w, sunIntensityGround);
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel
     // when the ray doesn't intersect the ground
-    
     atmColor = sunColor(v, s, r, mu, irradianceFactor);
   } 
   
   // Final Color of ATM plus terrain:
-  vec4 finalRadiance = vec4(inscatterColor + atmColor, 1.0);
-  renderTarget = finalRadiance;
+  renderTarget = vec4(inscatterColor + atmColor, 1.0);;
 }

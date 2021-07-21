@@ -76,7 +76,7 @@ public:
 
     void update(const UpdateData&) override;
 
-    void preCalculateAtmosphereParam();
+    void calculateAtmosphereParameters();
 
     void setModelTransform(glm::dmat4 transform);
 

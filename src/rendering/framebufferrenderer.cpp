@@ -1090,13 +1090,6 @@ void FramebufferRenderer::updateDeferredcastData() {
                 dict
             );
 
-            _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
         }
         catch (ghoul::RuntimeError& e) {

@@ -242,7 +242,7 @@ namespace {
     }
 
     GLuint createTexture(const glm::ivec3& size, std::string_view name, int components) {
-        ghoul_assert(components == 3 || components == 4, "Only 3-4 components allowed");
+        ghoul_assert(components == 3 || components == 4, "Only 3-4 components supported");
 
         GLuint texture;
         glGenTextures(1, &texture);
@@ -290,7 +290,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale)
 void AtmosphereDeferredcaster::initialize() {
     ZoneScoped
 
-    preCalculateAtmosphereParam();
+        calculateAtmosphereParameters();
 
     std::memset(_uniformNameBuffer, 0, sizeof(_uniformNameBuffer));
     std::strcpy(_uniformNameBuffer, "shadowDataArray[");
@@ -1050,10 +1050,13 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint vao, int scatteringO
     program.deactivate();
 }
 
-void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
+void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
+    glDeleteTextures(1, &_transmittanceTableTexture);
     _transmittanceTableTexture = createTexture(_transmittanceTableSize, "Transmittance");
+    glDeleteTextures(1, &_irradianceTableTexture);
     _irradianceTableTexture = createTexture(_irradianceTableSize, "Irradiance");
     glm::ivec3 lSize = glm::ivec3(_mu_s_samples * _nu_samples, _mu_samples, _r_samples);
+    glDeleteTextures(1, &_inScatteringTableTexture);
     _inScatteringTableTexture = createTexture(lSize, "InScattering", 4);
 
     // Saves current FBO first

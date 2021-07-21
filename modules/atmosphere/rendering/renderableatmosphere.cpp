@@ -406,7 +406,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         _deferredCasterNeedsUpdate = false;
     }
     if (_deferredCasterNeedsCalculation) {
-        _deferredcaster->preCalculateAtmosphereParam();
+        _deferredcaster->calculateAtmosphereParameters();
         _deferredCasterNeedsCalculation = false;
     }
 
