@@ -419,21 +419,23 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _mieExtinctionCoeff =
         _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoefficient.value();
 
-    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
-    _deferredcaster->setPlanetRadius(_planetRadius);
-    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmission(_groundRadianceEmission);
-    _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-    _deferredcaster->enableOzone(_ozoneEnabled);
-    _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
-    _deferredcaster->setMieHeightScale(_mieHeightScale);
-    _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
-    _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
-    _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-    _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-    _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
+    _deferredcaster->setParameters(
+        _planetRadius + _atmosphereHeight, // atmosphere radius
+        _planetRadius,
+        _groundAverageReflectance,
+        _groundRadianceEmission,
+        _rayleighHeightScale,
+        _ozoneEnabled,
+        _ozoneHeightScale,
+        _mieHeightScale,
+        _miePhaseConstant,
+        _sunIntensity,
+        _rayleighScatteringCoeff,
+        _ozoneCoeff,
+        _mieScatteringCoeff,
+        _mieExtinctionCoeff,
+        _sunFollowingCameraEnabled
+    );
     // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
     //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 

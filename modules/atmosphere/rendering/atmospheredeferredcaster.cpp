@@ -304,6 +304,8 @@ void AtmosphereDeferredcaster::deinitialize() {
     glDeleteTextures(1, &_inScatteringTableTexture);
 }
 
+void AtmosphereDeferredcaster::update(const UpdateData&) {}
+
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                                           const DeferredcastData&,
                                           ghoul::opengl::ProgramObject& program)
@@ -587,71 +589,37 @@ void AtmosphereDeferredcaster::initializeCachedVariables(
     ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames);
 }
 
-void AtmosphereDeferredcaster::update(const UpdateData&) {}
-
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
     _modelTransform = std::move(transform);
 }
 
-void AtmosphereDeferredcaster::setAtmosphereRadius(float atmRadius) {
-    _atmosphereRadius = atmRadius;
-}
-
-void AtmosphereDeferredcaster::setPlanetRadius(float planetRadius) {
+void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float planetRadius,
+                                             float averageGroundReflectance,
+                                             float groundRadianceEmission,
+                                             float rayleighHeightScale, bool enableOzone,
+                                             float ozoneHeightScale, float mieHeightScale, 
+                                             float miePhaseConstant, float sunRadiance,
+                                             glm::vec3 rayScatteringCoefficients,
+                                             glm::vec3 ozoneExtinctionCoefficients,
+                                             glm::vec3 mieScatteringCoefficients,
+                                             glm::vec3 mieExtinctionCoefficients,
+                                             bool sunFollowing)
+{
+    _atmosphereRadius = atmosphereRadius;
     _atmospherePlanetRadius = planetRadius;
-}
-
-void AtmosphereDeferredcaster::setPlanetAverageGroundReflectance(
-                                                                float averageGReflectance)
-{
-    _planetAverageGroundReflectance = averageGReflectance;
-}
-
-void AtmosphereDeferredcaster::setPlanetGroundRadianceEmission(
-                                                             float groundRadianceEmission)
-{
+    _planetAverageGroundReflectance = averageGroundReflectance;
     _planetGroundRadianceEmission = groundRadianceEmission;
-}
-
-void AtmosphereDeferredcaster::setRayleighHeightScale(float rayleighHeightScale) {
     _rayleighHeightScale = rayleighHeightScale;
-}
-
-void AtmosphereDeferredcaster::enableOzone(bool enable) {
-    _ozoneEnabled = enable;
-}
-
-void AtmosphereDeferredcaster::setOzoneHeightScale(float ozoneHeightScale) {
+    _ozoneEnabled = enableOzone;
     _ozoneHeightScale = ozoneHeightScale;
-}
-
-void AtmosphereDeferredcaster::setMieHeightScale(float mieHeightScale) {
     _mieHeightScale = mieHeightScale;
-}
-
-void AtmosphereDeferredcaster::setMiePhaseConstant(float miePhaseConstant) {
     _miePhaseConstant = miePhaseConstant;
-}
-
-void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
-}
-
-void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff)
-{
-    _rayleighScatteringCoeff = std::move(rayScattCoeff);
-}
-
-void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(glm::vec3 ozoneExtCoeff) {
-    _ozoneExtinctionCoeff = std::move(ozoneExtCoeff);
-}
-
-void AtmosphereDeferredcaster::setMieScatteringCoefficients(glm::vec3 mieScattCoeff) {
-    _mieScatteringCoeff = std::move(mieScattCoeff);
-}
-
-void AtmosphereDeferredcaster::setMieExtinctionCoefficients(glm::vec3 mieExtCoeff) {
-    _mieExtinctionCoeff = std::move(mieExtCoeff);
+    _rayleighScatteringCoeff = std::move(rayScatteringCoefficients);
+    _ozoneExtinctionCoeff = std::move(ozoneExtinctionCoefficients);
+    _mieScatteringCoeff = std::move(mieScatteringCoefficients);
+    _mieExtinctionCoeff = std::move(mieExtinctionCoefficients);
+    _sunFollowingCameraEnabled = sunFollowing;
 }
 
 void AtmosphereDeferredcaster::setEllipsoidRadii(glm::dvec3 radii) {
@@ -671,15 +639,11 @@ void AtmosphereDeferredcaster::setShadowConfigArray(
     _shadowDataArrayCache.reserve(_shadowConfArray.size());
 }
 
-void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {
-    _sunFollowingCameraEnabled = enable;
-}
-
 void AtmosphereDeferredcaster::enablePrecalculationTexturesSaving() {
     _saveCalculationTextures = true;
 }
 
-void AtmosphereDeferredcaster::calculateTransmittance(GLuint quadCalcVao) {
+void AtmosphereDeferredcaster::calculateTransmittance(GLuint vao) {
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -689,7 +653,7 @@ void AtmosphereDeferredcaster::calculateTransmittance(GLuint quadCalcVao) {
     glViewport(0, 0, _transmittanceTableSize.x, _transmittanceTableSize.y);
     using ProgramObject = ghoul::opengl::ProgramObject;
     std::unique_ptr<ProgramObject> transmittanceProgram = ProgramObject::Build(
-        "transmittanceCalcProgram",
+        "Transmittance Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
     );
@@ -707,7 +671,7 @@ void AtmosphereDeferredcaster::calculateTransmittance(GLuint quadCalcVao) {
 
     constexpr const float Black[] = { 0.f, 0.f, 0.f, 0.f };
     glClearBufferfv(GL_COLOR, 0, Black);
-    renderQuadForCalc(quadCalcVao);
+    renderQuadForCalc(vao);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -718,12 +682,12 @@ void AtmosphereDeferredcaster::calculateTransmittance(GLuint quadCalcVao) {
     transmittanceProgram->deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, GLuint deltaE) {
+void AtmosphereDeferredcaster::calculateDeltaE(GLuint vao, GLuint deltaE) {
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaE, 0);
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
     using ProgramObject = ghoul::opengl::ProgramObject;
     std::unique_ptr<ProgramObject> irradianceProgram = ProgramObject::Build(
-        "irradianceCalcProgram",
+        "Irradiance Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl")
     );
@@ -739,7 +703,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, GLuint deltaE
     irradianceProgram->setUniform("Rt", _atmosphereRadius);
     irradianceProgram->setUniform("OTHER_TEXTURES", _deltaETableSize);
     glClear(GL_COLOR_BUFFER_BIT);
-    renderQuadForCalc(quadCalcVao);
+    renderQuadForCalc(vao);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -750,7 +714,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, GLuint deltaE
     irradianceProgram->deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, GLuint deltaSRayleigh, 
+void AtmosphereDeferredcaster::calculateDeltaS(GLuint vao, GLuint deltaSRayleigh, 
                                                GLuint deltaSMie)
 {
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaSRayleigh, 0);
@@ -760,7 +724,7 @@ void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, GLuint deltaS
     glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
     using ProgramObject = ghoul::opengl::ProgramObject;
     std::unique_ptr<ProgramObject> inScatteringProgram = ProgramObject::Build(
-        "inScatteringCalcProgram",
+        "InScattering Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
@@ -786,8 +750,9 @@ void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, GLuint deltaS
     inScatteringProgram->setUniform("HO", _ozoneHeightScale);
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
-        step3DTexture(*inScatteringProgram, layer, true);
-        renderQuadForCalc(quadCalcVao);
+        inScatteringProgram->setUniform("layer", layer);
+        step3DTexture(*inScatteringProgram, layer);
+        renderQuadForCalc(vao);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -820,7 +785,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao) {
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
     using ProgramObject = ghoul::opengl::ProgramObject;
     std::unique_ptr<ProgramObject> deltaEProgram = ProgramObject::Build(
-        "deltaECalcProgram",
+        "DeltaE Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl")
     );
@@ -837,7 +802,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao) {
     deltaEProgram->deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateDeltaJ(GLuint quadCalcVao, int scatteringOrder,
+void AtmosphereDeferredcaster::calculateDeltaJ(GLuint vao, int scatteringOrder,
                                                ghoul::opengl::ProgramObject& program,
                                                GLuint deltaJ, GLuint deltaE,
                                                GLuint deltaSRayleigh, GLuint deltaSMie)
@@ -880,8 +845,9 @@ void AtmosphereDeferredcaster::calculateDeltaJ(GLuint quadCalcVao, int scatterin
     program.setUniform("SAMPLES_MU_S", _mu_s_samples);
     program.setUniform("SAMPLES_NU", _nu_samples);
     for (int layer = 0; layer < _r_samples; ++layer) {
-        step3DTexture(program, layer, true);
-        renderQuadForCalc(quadCalcVao);
+        program.setUniform("layer", layer);
+        step3DTexture(program, layer);
+        renderQuadForCalc(vao);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -893,7 +859,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(GLuint quadCalcVao, int scatterin
     program.deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, int scatteringOrder,
+void AtmosphereDeferredcaster::calculateDeltaE(GLuint vao, int scatteringOrder,
                                                ghoul::opengl::ProgramObject& program,
                                                GLuint deltaE, GLuint deltaSRayleigh,
                                                GLuint deltaSMie)
@@ -921,7 +887,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, int scatterin
     program.setUniform("SAMPLES_MU", _mu_samples);
     program.setUniform("SAMPLES_MU_S", _mu_s_samples);
     program.setUniform("SAMPLES_NU", _nu_samples);
-    renderQuadForCalc(quadCalcVao);
+    renderQuadForCalc(vao);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -932,7 +898,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(GLuint quadCalcVao, int scatterin
     program.deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, int scatteringOrder,
+void AtmosphereDeferredcaster::calculateDeltaS(GLuint vao, int scatteringOrder,
                                                ghoul::opengl::ProgramObject& program,
                                                GLuint deltaSRayleigh, GLuint deltaJ)
 {
@@ -957,8 +923,9 @@ void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, int scatterin
     program.setUniform("SAMPLES_MU_S", _mu_s_samples);
     program.setUniform("SAMPLES_NU", _nu_samples);
     for (int layer = 0; layer < _r_samples; ++layer) {
-        step3DTexture(program, layer, true);
-        renderQuadForCalc(quadCalcVao);
+        program.setUniform("layer", layer);
+        step3DTexture(program, layer);
+        renderQuadForCalc(vao);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -970,8 +937,7 @@ void AtmosphereDeferredcaster::calculateDeltaS(GLuint quadCalcVao, int scatterin
     program.deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateInscattering(GLuint quadCalcVao,
-                                                     GLuint deltaSRayleigh,
+void AtmosphereDeferredcaster::calculateInscattering(GLuint vao, GLuint deltaSRayleigh,
                                                      GLuint deltaSMie)
 {
     glFramebufferTexture(
@@ -1006,8 +972,8 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint quadCalcVao,
     deltaSProgram->setUniform("SAMPLES_NU", _nu_samples);
     glClear(GL_COLOR_BUFFER_BIT);
     for (int layer = 0; layer < _r_samples; ++layer) {
-        step3DTexture(*deltaSProgram, layer, false);
-        renderQuadForCalc(quadCalcVao);
+        deltaSProgram->setUniform("layer", layer);
+        renderQuadForCalc(vao);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
@@ -1019,8 +985,7 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint quadCalcVao,
     deltaSProgram->deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao,
-                                                   int scatteringOrder,
+void AtmosphereDeferredcaster::calculateIrradiance(GLuint vao, int scatteringOrder,
                                                    ghoul::opengl::ProgramObject& program,
                                                    GLuint deltaE)
 {
@@ -1038,7 +1003,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao,
     glBindTexture(GL_TEXTURE_2D, deltaE);
     program.setUniform("deltaETexture", deltaETableTextureUnit);
 
-    renderQuadForCalc(quadCalcVao);
+    renderQuadForCalc(vao);
     if (_saveCalculationTextures) {
         saveTextureFile(
             GL_COLOR_ATTACHMENT0,
@@ -1049,8 +1014,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao,
     program.deactivate();
 }
 
-void AtmosphereDeferredcaster::calculateInscattering(GLuint quadCalcVao,
-                                                     int scatteringOrder,
+void AtmosphereDeferredcaster::calculateInscattering(GLuint vao, int scatteringOrder,
                                                     ghoul::opengl::ProgramObject& program,
                                                                     GLuint deltaSRayleigh)
 
@@ -1074,8 +1038,8 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint quadCalcVao,
     program.setUniform("SAMPLES_MU_S", _mu_s_samples);
     program.setUniform("SAMPLES_NU", _nu_samples);
     for (int layer = 0; layer < _r_samples; ++layer) {
-        step3DTexture(program, layer, false);
-        renderQuadForCalc(quadCalcVao);
+        program.setUniform("layer", layer);
+        renderQuadForCalc(vao);
     }
     if (_saveCalculationTextures) {
         saveTextureFile(GL_COLOR_ATTACHMENT0,
@@ -1202,10 +1166,20 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
         glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
 
         // line 10 in algorithm 4.1
-        calculateIrradiance(quadVao, scatteringOrder, *irradianceFinalProgram, deltaETableTexture);
+        calculateIrradiance(
+            quadVao,
+            scatteringOrder,
+            *irradianceFinalProgram,
+            deltaETableTexture
+        );
 
         // line 11 in algorithm 4.1
-        calculateInscattering(quadVao, scatteringOrder, *deltaSSupTermsProgram, deltaSRayleighTableTexture);
+        calculateInscattering(
+            quadVao,
+            scatteringOrder,
+            *deltaSSupTermsProgram,
+            deltaSRayleighTableTexture
+        );
 
         glDisable(GL_BLEND);
     }
@@ -1228,38 +1202,32 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     LDEBUG("Ended precalculations for Atmosphere effects");
 }
 
-void AtmosphereDeferredcaster::step3DTexture(ghoul::opengl::ProgramObject& shaderProg,
-                                             int layer, bool doCalculation)
+void AtmosphereDeferredcaster::step3DTexture(ghoul::opengl::ProgramObject& prg, int layer)
 {
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
-    if (doCalculation) {
-        const float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
-        const float diff = _atmosphereRadius * _atmosphereRadius - earth2;
-        const float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
-        const float eps = [&]() {
-            if (layer == 0) {
-                return 0.01f;
-            }
-            else {
-                if (layer == (_r_samples - 1)) {
-                    return -0.001f;
-                }
-                else {
-                    return 0.f;
-                }
-            }
-        }();
-        const float r = std::sqrt(earth2 + ri * ri * diff) + eps;
-        const float dminG = r - _atmospherePlanetRadius;
-        const float dminT = _atmosphereRadius - r;
-        const float dh = std::sqrt(r * r - earth2);
-        const float dH = dh + std::sqrt(diff);
-
-        shaderProg.setUniform("r", r);
-        shaderProg.setUniform("dhdH", dminT, dH, dminG, dh);
+    const float planet2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
+    const float diff = _atmosphereRadius * _atmosphereRadius - planet2;
+    const float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
+    float eps;
+    if (layer == 0) {
+        eps = 0.01f;
     }
+    else {
+        if (layer == (_r_samples - 1)) {
+            eps = -0.001f;
+        }
+        else {
+            eps = 0.f;
+        }
+    }
+    const float r = std::sqrt(planet2 + ri * ri * diff) + eps;
+    const float dminG = r - _atmospherePlanetRadius;
+    const float dminT = _atmosphereRadius - r;
+    const float dh = std::sqrt(r * r - planet2);
+    const float dH = dh + std::sqrt(diff);
 
-    shaderProg.setUniform("layer", layer);
+    prg.setUniform("r", r);
+    prg.setUniform("dhdH", dminT, dH, dminG, dh);
 }
 
 } // namespace openspace

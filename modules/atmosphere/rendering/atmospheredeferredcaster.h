@@ -79,46 +79,40 @@ public:
     void preCalculateAtmosphereParam();
 
     void setModelTransform(glm::dmat4 transform);
-    void setAtmosphereRadius(float atmRadius);
-    void setPlanetRadius(float planetRadius);
-    void setPlanetAverageGroundReflectance(float averageGReflectance);
-    void setPlanetGroundRadianceEmission(float groundRadianceEmission);
-    void setRayleighHeightScale(float rayleighHeightScale);
-    void enableOzone(bool enable);
-    void setOzoneHeightScale(float ozoneHeightScale);
-    void setMieHeightScale(float mieHeightScale);
-    void setMiePhaseConstant(float miePhaseConstant);
-    void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff);
-    void setOzoneExtinctionCoefficients(glm::vec3 ozoneExtCoeff);
-    void setMieScatteringCoefficients(glm::vec3 mieScattCoeff);
-    void setMieExtinctionCoefficients(glm::vec3 mieExtCoeff);
+
+    void setParameters(float atmosphereRadius, float planetRadius,
+        float averageGroundReflectance, float groundRadianceEmission,
+        float rayleighHeightScale, bool enableOzone, float ozoneHeightScale,
+        float mieHeightScale, float miePhaseConstant, float sunRadiance,
+        glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
+        glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
+        bool sunFollowing);
+
     void setEllipsoidRadii(glm::dvec3 radii);
     void setShadowConfigArray(std::vector<ShadowConfiguration> shadowConfigArray);
     void setHardShadows(bool enabled);
-    void enableSunFollowing(bool enable);
 
     void enablePrecalculationTexturesSaving();
 
 private:
-    void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
-        bool doCalculation);
+    void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer);
 
-    void calculateTransmittance(GLuint quadCalcVao);
-    void calculateDeltaE(GLuint quadCalcVao, GLuint deltaE);
-    void calculateDeltaS(GLuint quadCalcVao, GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateIrradiance(GLuint quadCalcVao);
-    void calculateInscattering(GLuint quadCalcVao, GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaJ(GLuint quadCalcVao, int scatteringOrder,
+    void calculateTransmittance(GLuint vao);
+    void calculateDeltaE(GLuint vao, GLuint deltaE);
+    void calculateDeltaS(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateIrradiance(GLuint vao);
+    void calculateInscattering(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaJ(GLuint vao, int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
         GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaE(GLuint quadCalcVao, int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaS(GLuint quadCalcVao, int scatteringOrder,
+    void calculateDeltaE(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh,
+        GLuint deltaSMie);
+    void calculateDeltaS(GLuint vao, int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh, GLuint deltaJ);
-    void calculateIrradiance(GLuint quadCalcVao, int scatteringOrder,
+    void calculateIrradiance(GLuint vao, int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaE);
-    void calculateInscattering(GLuint quadCalcVao, int scatteringOrder,
+    void calculateInscattering(GLuint vao, int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
