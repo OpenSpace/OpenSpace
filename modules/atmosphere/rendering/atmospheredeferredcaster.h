@@ -57,16 +57,17 @@ struct ShadowRenderingStruct {
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
+    AtmosphereDeferredcaster(float textureScale,
+        std::vector<ShadowConfiguration> shadowConfigArray, bool saveCalculatedTextures);
     virtual ~AtmosphereDeferredcaster() = default;
 
     void initialize();
     void deinitialize();
-    void preRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
+    void preRaycast(const RenderData& data, const DeferredcastData& deferredData,
         ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RenderData& renderData, const DeferredcastData& deferredData,
+    void postRaycast(const RenderData& data, const DeferredcastData& deferredData,
         ghoul::opengl::ProgramObject& program) override;
 
-    std::filesystem::path deferredcastPath() const override;
     std::filesystem::path deferredcastVSPath() const override;
     std::filesystem::path deferredcastFSPath() const override;
     std::filesystem::path helperPath() const override;
@@ -75,82 +76,64 @@ public:
 
     void update(const UpdateData&) override;
 
-    void preCalculateAtmosphereParam();
+    void calculateAtmosphereParameters();
 
     void setModelTransform(glm::dmat4 transform);
-    void setTime(double time);
-    void setAtmosphereRadius(float atmRadius);
-    void setPlanetRadius(float planetRadius);
-    void setPlanetAverageGroundReflectance(float averageGReflectance);
-    void setPlanetGroundRadianceEmission(float groundRadianceEmission);
-    void setRayleighHeightScale(float rayleighHeightScale);
-    void enableOzone(bool enable);
-    void setOzoneHeightScale(float ozoneHeightScale);
-    void setMieHeightScale(float mieHeightScale);
-    void setMiePhaseConstant(float miePhaseConstant);
-    void setSunRadianceIntensity(float sunRadiance);
-    void setRayleighScatteringCoefficients(glm::vec3 rayScattCoeff);
-    void setOzoneExtinctionCoefficients(glm::vec3 ozoneExtCoeff);
-    void setMieScatteringCoefficients(glm::vec3 mieScattCoeff);
-    void setMieExtinctionCoefficients(glm::vec3 mieExtCoeff);
-    void setEllipsoidRadii(glm::dvec3 radii);
-    void setShadowConfigArray(std::vector<ShadowConfiguration> shadowConfigArray);
-    void setHardShadows(bool enabled);
-    void enableSunFollowing(bool enable);
 
-    void setPrecalculationTextureScale(float preCalculatedTexturesScale);
-    void enablePrecalculationTexturesSaving();
+    void setParameters(float atmosphereRadius, float planetRadius,
+        float averageGroundReflectance, float groundRadianceEmission,
+        float rayleighHeightScale, bool enableOzone, float ozoneHeightScale,
+        float mieHeightScale, float miePhaseConstant, float sunRadiance,
+        glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
+        glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
+        bool sunFollowing);
+
+    void setHardShadows(bool enabled);
 
 private:
-    void loadComputationPrograms();
-    void unloadComputationPrograms();
-    void createComputationTextures();
-    void deleteComputationTextures();
-    void deleteUnusedComputationTextures();
-    void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
-        GLsizei vertexSize);
-    void step3DTexture(ghoul::opengl::ProgramObject& shaderProg, int layer,
-        bool doCalculation);
-    void loadAtmosphereDataIntoShaderProgram(ghoul::opengl::ProgramObject& shaderProg);
+    void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceFinalProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaEProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSSupTermsProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
+    void calculateTransmittance(GLuint vao);
+    GLuint calculateDeltaE(GLuint vao);
+    std::pair<GLuint, GLuint> calculateDeltaS(GLuint vao);
+    void calculateIrradiance(GLuint vao);
+    void calculateInscattering(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaJ(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
+        GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaE(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh,
+        GLuint deltaSMie);
+    void calculateDeltaS(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh, GLuint deltaJ);
+    void calculateIrradiance(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaE);
+    void calculateInscattering(GLuint vao, int scatteringOrder,
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
+
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
-        modelTransformMatrix, projectionToModelTransformMatrix,
-        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows,
-        transmittanceTexture, irradianceTexture, inscatterTexture) _uniformCache;
-
-    GLuint _transmittanceTableTexture = 0;
-    GLuint _irradianceTableTexture = 0;
-    GLuint _inScatteringTableTexture = 0;
-    GLuint _deltaETableTexture = 0;
-    GLuint _deltaSRayleighTableTexture = 0;
-    GLuint _deltaSMieTableTexture = 0;
-    GLuint _deltaJTableTexture = 0;
+        modelTransformMatrix, projectionToModelTransform, viewToWorldMatrix,
+        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture, 
+        inscatterTexture) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
 
+    GLuint _transmittanceTableTexture = 0;
+    GLuint _irradianceTableTexture = 0;
+    GLuint _inScatteringTableTexture = 0;
+
     // Atmosphere Data
-    bool _atmosphereCalculated = false;
     bool _ozoneEnabled = false;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;
-    float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmission = 0.f;
+    float _averageGroundReflectance = 0.f;
+    float _groundRadianceEmission = 0.f;
     float _rayleighHeightScale = 0.f;
     float _ozoneHeightScale = 0.f;
     float _mieHeightScale = 0.f;
@@ -161,34 +144,33 @@ private:
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
-    glm::dvec3 _ellipsoidRadii = glm::dvec3(0.0);
 
     // Atmosphere Textures Dimmensions
-    glm::ivec2 _transmittanceTableSize = glm::ivec2(256, 64);
-    glm::ivec2 _irradianceTableSize = glm::ivec2(64, 16);
-    glm::ivec2 _deltaETableSize = glm::ivec2(64, 16);
-    int _r_samples = 32;
-    int _mu_samples = 128;
-    int _mu_s_samples = 32;
-    int _nu_samples = 8;
+    const glm::ivec2 _transmittanceTableSize;
+    const glm::ivec2 _irradianceTableSize;
+    const glm::ivec2 _deltaETableSize;
+    const int _muSSamples;
+    const int _nuSamples;
+    const int _muSamples;
+    const int _rSamples;
+    const glm::ivec3 _textureSize;
 
     glm::dmat4 _modelTransform;
-    double _time = 0.0;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;
+    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
     bool _hardShadowsEnabled = false;
 
     // Atmosphere Debugging
-    bool _saveCalculationTextures = false;
+    const bool _saveCalculationTextures = false;
 
-    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
     // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
     // shadowDataArray[999].casterPositionVec
     // which needs to fit into the uniform buffer
     char _uniformNameBuffer[40];
 };
 
-} // openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHEREDEFERREDCASTER___H__

@@ -1067,7 +1067,6 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         std::filesystem::path vsPath = caster->deferredcastVSPath();
         std::filesystem::path fsPath = caster->deferredcastFSPath();
-        std::filesystem::path deferredShaderPath = caster->deferredcastPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
@@ -1086,15 +1085,8 @@ void FramebufferRenderer::updateDeferredcastData() {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
                 vsPath,
-                deferredShaderPath,
+                fsPath,
                 dict
-            );
-
-            _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
