@@ -40,7 +40,10 @@ namespace {
     constexpr const int8_t LabelCacheFileVersion = 10;
     constexpr const int8_t ColorCacheFileVersion = 10;
 
-    constexpr bool startsWith(std::string_view lhs, std::string_view rhs) noexcept {
+    bool startsWith(std::string lhs, std::string_view rhs) noexcept {
+        for (size_t i = 0; i < lhs.size(); i++) {
+            lhs[i] = static_cast<char>(tolower(lhs[i]));
+        }
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
