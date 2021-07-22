@@ -94,8 +94,8 @@ private:
     void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer);
 
     void calculateTransmittance(GLuint vao);
-    void calculateDeltaE(GLuint vao, GLuint deltaE);
-    void calculateDeltaS(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
+    GLuint calculateDeltaE(GLuint vao);
+    std::pair<GLuint, GLuint> calculateDeltaS(GLuint vao);
     void calculateIrradiance(GLuint vao);
     void calculateInscattering(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateDeltaJ(GLuint vao, int scatteringOrder,
@@ -119,21 +119,21 @@ private:
         camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture, 
         inscatterTexture) _uniformCache;
 
-    GLuint _transmittanceTableTexture = 0;
-    GLuint _irradianceTableTexture = 0;
-    GLuint _inScatteringTableTexture = 0;
-
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
+
+    GLuint _transmittanceTableTexture = 0;
+    GLuint _irradianceTableTexture = 0;
+    GLuint _inScatteringTableTexture = 0;
 
     // Atmosphere Data
     bool _ozoneEnabled = false;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;
-    float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmission = 0.f;
+    float _averageGroundReflectance = 0.f;
+    float _groundRadianceEmission = 0.f;
     float _rayleighHeightScale = 0.f;
     float _ozoneHeightScale = 0.f;
     float _mieHeightScale = 0.f;
@@ -149,21 +149,22 @@ private:
     const glm::ivec2 _transmittanceTableSize;
     const glm::ivec2 _irradianceTableSize;
     const glm::ivec2 _deltaETableSize;
-    const int _r_samples;
-    const int _mu_samples;
-    const int _mu_s_samples;
-    const int _nu_samples;
+    const int _muSSamples;
+    const int _nuSamples;
+    const int _muSamples;
+    const int _rSamples;
+    const glm::ivec3 _textureSize;
 
     glm::dmat4 _modelTransform;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;
+    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
     bool _hardShadowsEnabled = false;
 
     // Atmosphere Debugging
     const bool _saveCalculationTextures = false;
 
-    std::vector<ShadowRenderingStruct> _shadowDataArrayCache;
     // Assuming < 1000 shadow casters, the longest uniform name that we are getting is
     // shadowDataArray[999].casterPositionVec
     // which needs to fit into the uniform buffer
