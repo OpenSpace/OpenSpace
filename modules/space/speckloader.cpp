@@ -50,7 +50,7 @@ namespace {
         // 3. Remove all spaces from the new beginning
         // 4. Remove all spaces from the end
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
@@ -58,11 +58,11 @@ namespace {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line.back() == ' ') {
+        while (!line.empty() && (line.back() == ' ' || line.back() == '\t')) {
             line = line.substr(0, line.size() - 1);
         }
     }
