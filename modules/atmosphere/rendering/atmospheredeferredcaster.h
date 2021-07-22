@@ -68,7 +68,6 @@ public:
     void postRaycast(const RenderData& data, const DeferredcastData& deferredData,
         ghoul::opengl::ProgramObject& program) override;
 
-    std::filesystem::path deferredcastPath() const override;
     std::filesystem::path deferredcastVSPath() const override;
     std::filesystem::path deferredcastFSPath() const override;
     std::filesystem::path helperPath() const override;

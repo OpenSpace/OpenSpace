@@ -51,8 +51,6 @@ public:
         const DeferredcastData& /*deferredData*/,
         ghoul::opengl::ProgramObject& /*program*/) {};
 
-    virtual std::filesystem::path deferredcastPath() const = 0;
-
     virtual std::filesystem::path deferredcastVSPath() const = 0;
 
     virtual std::filesystem::path deferredcastFSPath() const = 0;
