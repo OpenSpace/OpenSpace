@@ -48,6 +48,8 @@ uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 uniform int firstIteration;
 
+const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
+
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
@@ -83,7 +85,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   float muSun2 = muSun * muSun;
   float sinThetaSinSigma = sqrt(1.0 - mu2) * sqrt(1.0 - muSun2);
   // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
-  // cos(ni) = nu = mu * muSun - sqrt(1.0f - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
+  // cos(ni) = nu = mu * muSun - sqrt(1.0 - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
   // Now we make sure the angle between vec(s) and vec(v) is in the right range:
   nu = clamp(nu, muSun * mu - sinThetaSinSigma, muSun * mu + sinThetaSinSigma);
 
@@ -186,7 +188,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
       // cos(angle between vec(s) and vec(w)), ||s|| = ||w|| = 1
       float nuSW = dot(s, w);
-      // The first iteraction is different from the others. In the first iteraction all
+      // The first iteration is different from the others. In the first iteration all
       // the light InScattered is coming from the initial pre-computed single InScattered
       // light. We stored these values in the deltaS textures (Ray and Mie), and in order
       // to avoid problems with the high angle dependency in the phase functions, we don't
@@ -205,7 +207,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       }
       else {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we
-        // are not in the first iteraction, we are getting the updated result of deltaSR
+        // are not in the first iteration, we are getting the updated result of deltaSR
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)

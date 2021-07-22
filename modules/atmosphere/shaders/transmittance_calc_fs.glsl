@@ -39,6 +39,8 @@ uniform vec3 betaMieExtinction;
 uniform bool ozoneLayerEnabled;
 uniform ivec2 TRANSMITTANCE;
 
+const int TRANSMITTANCE_STEPS = 500;
+
 // Optical depth by integration, from ray starting at point vec(x), i.e, height r and
 // angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
 // r := height of starting point vect(x)
@@ -87,7 +89,7 @@ void main() {
   
   // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
   // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
-  // But the below one is better. See Colliene.
+  // But the below one is better. See Collienne.
   // One must remember that mu is defined from 0 to PI/2 + epsilon
   float muSun = -0.15 + tan(1.5 * u_mu) / tan(1.5) * 1.15;
 

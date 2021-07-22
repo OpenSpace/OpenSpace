@@ -692,7 +692,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(GLuint quadCalcVao) {
 }
 
 void AtmosphereDeferredcaster::calculateInscattering(GLuint vao, GLuint deltaSRayleigh,
-    GLuint deltaSMie)
+                                                     GLuint deltaSMie)
 {
     glFramebufferTexture(
         GL_FRAMEBUFFER,

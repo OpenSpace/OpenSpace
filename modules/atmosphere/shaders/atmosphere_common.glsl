@@ -54,16 +54,10 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const float ATM_EPSILON = 1.0;
 
-// Integration steps
-const int TRANSMITTANCE_STEPS = 500;
 const int INSCATTER_INTEGRAL_SAMPLES = 50;
-const int IRRADIANCE_INTEGRAL_SAMPLES = 32;
-const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
-
 const float M_PI = 3.141592657;
-const float M_2PI = 2.0 * M_PI;
+const float ATM_EPSILON = 1.0;
 
 // In the following shaders r (altitude) is the length of vector/position x in the
 // atmosphere (or on the top of it when considering an observer in space), where the light
@@ -83,9 +77,8 @@ float rayDistance(float r, float mu, float Rt, float Rg) {
   float atmRadiusEps2 = (Rt + ATM_EPSILON) * (Rt + ATM_EPSILON);
   float mu2 = mu * mu;
   float r2 = r * r;
-  float rg2 = Rg * Rg;
   float rayDistanceAtmosphere = -r * mu + sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2); 
-  float delta = r2 * (mu2 - 1.0) + rg2;
+  float delta = r2 * (mu2 - 1.0) + Rg*Rg;
 
   // Ray may be hitting ground
   if (delta >= 0.0) {
@@ -139,7 +132,7 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
   }
   
   float modValueMuSun = mod(fragment.x, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0);
-  // The following mapping is different from the paper. See Colliene for an details.
+  // The following mapping is different from the paper. See Collienne for an details.
   muSun = tan((2.0 * modValueMuSun - 1.0 + 0.26) * 1.1) / tan(1.26 * 1.1);
   nu = -1.0 + floor(fragment.x / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0) * 2.0;
 }
@@ -195,7 +188,7 @@ vec3 transmittance(sampler2D tex, float r, float mu, float d, float Rg, float Rt
 // Calculates Rayleigh phase function given the scattering cosine angle mu
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 float rayleighPhaseFunction(float mu) {
-  // return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
+  // return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
   return 0.0596831036 * (1.0 + mu * mu);
 }
 

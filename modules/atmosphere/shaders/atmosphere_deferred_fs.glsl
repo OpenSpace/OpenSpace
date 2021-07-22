@@ -125,15 +125,15 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   }
 
   dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
-  dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
-  dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
-  dvec3 d = pc - pc_proj;
+  dvec3 scNorm = shadowInfoArray[0].sourceCasterVec;
+  dvec3 pcProj = dot(pc, scNorm) * scNorm;
+  dvec3 d = pc - pcProj;
   
   float length_d = float(length(d));
-  double length_pc_proj = length(pc_proj);
+  double lengthPcProj = length(pcProj);
   
-  float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
-  float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
+  float r_p_pi = float(shadowInfoArray[0].rc * (lengthPcProj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
+  float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu);
   
   if (length_d < r_u_pi) {
     // umbra
@@ -163,7 +163,7 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
     vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
-  return sqrt(M_2PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
+  return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
 vec3 analyticTransmittance(float r, float mu, float d) {
@@ -359,10 +359,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Above Horizon
     mu = muHorizon - INTERPOLATION_EPS;
-    // r0  = sqrt(r * r + t * t + 2.0f * r * t * mu);
+    // r0  = sqrt(r * r + t * t + 2.0 * r * t * mu);
     // From cosine law where t = distance between x and x0
     // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
-    // r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+    // r0  = sqrt(r2 + t2 + 2.0 * r * t * mu);
     float halfCosineLaw1 = r2 + (t * t);
     float halfCosineLaw2 = 2.0 * r * t;
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
@@ -382,7 +382,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Below Horizon
     mu = muHorizon + INTERPOLATION_EPS;
-    //r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+    //r0  = sqrt(r2 + t2 + 2.0 * r * t * mu);
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
     
     mu0 = (r * mu + t) * (1.0 / r0);
