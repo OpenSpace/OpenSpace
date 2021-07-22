@@ -62,15 +62,19 @@ void FieldlinesState::scalePositions(float scale) {
 }
 
 void FieldlinesState::scaleflowline(float scale) {
-    for (glm::vec3& i : _vertexPath) {
-        i *= scale;
+    for (std::vector<glm::vec3>& v : _vertexPath) {
+        for (glm::vec3& i : v) {
+            i *= scale;
+        }
     }
 }
 
 void FieldlinesState::scaleFieldlines(float scale) {
-    for (std::vector<glm::vec3>& v : _fieldLines) {
-        for (glm::vec3& i : v) {
-            i *= scale;
+    for (std::vector<std::vector<glm::vec3>>& v1 : _fieldLines) {
+        for (std::vector<glm::vec3>& v : v1) {
+            for (glm::vec3& i : v) {
+                i *= scale;
+            }
         }
     }
 }
@@ -420,6 +424,9 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     const size_t nOldPoints = _vertexPositions.size();
     _lineStart.push_back(static_cast<GLint>(nOldPoints));
     _lineCount.push_back(static_cast<GLsizei>(nNewPoints));
+    _numberOfLines++;
+    _timeSinceLastInterpolation.push_back(0.0f);
+    _vertexIndex.push_back(0);
     _vertexPositions.reserve(nOldPoints + nNewPoints);
     _vertexPositions.insert(
         _vertexPositions.end(),
@@ -427,6 +434,7 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
         std::make_move_iterator(line.end())
     );
     line.clear();
+
 }
 
 void FieldlinesState::appendToExtra(size_t idx, float val) {
@@ -451,10 +459,11 @@ void FieldlinesState::moveLine(double dt) {
     bool vertexEnd = false;
     bool vertexStart = false;
 
-    _timeSinceLastVertex += float(dt);
-    unsigned i = 0;
     //each vertex on the rendered field line
-    for (glm::vec3& vertex : _vertexPositions) {
+
+    for (int i = 0; i < _numberOfLines; i++) {
+
+        _timeSinceLastInterpolation[i] += float(dt);
 
         if (forward) {
 
@@ -462,30 +471,38 @@ void FieldlinesState::moveLine(double dt) {
             //field line positions
             if (atEnd) break;
 
-            while (_timeSinceLastVertex > _vertexTimes[_vertexIndex]) {
-                _timeSinceLastVertex -= _vertexTimes[_vertexIndex];
-                _vertexIndex++;
+            while (_timeSinceLastInterpolation[i] > _vertexTimes[i][_vertexIndex[i]]) {
+                _timeSinceLastInterpolation[i] -= _vertexTimes[i][_vertexIndex[i]];
+                _vertexIndex[i]++;
 
                 //check if at end after increasing index
-                
+
                 //size - 3 as a margin to avoid bugs
-                if (_vertexIndex == _vertexPath.size() - 3) {
-                    _timeSinceLastVertex = _vertexTimes[_vertexIndex-1];
-                    vertex = _fieldLines[_vertexIndex][i];
+                if (_vertexIndex[i] == _vertexPath[i].size() - 3) {
+                    _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i] - 1];
+                    int k = 0;
+                    for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                        _vertexPositions[j] = _fieldLines[i][_vertexIndex[i]][k];
+                        k++;
+                    }
                     vertexEnd = true;
                     break;
                 }
             }
-            
+
             if (vertexEnd) continue;
 
             //linear interpolation
             //normalize t to [0,1]
-            float t = _timeSinceLastVertex / _vertexTimes[_vertexIndex];
-            glm::vec3 a = _fieldLines[_vertexIndex][i];
-            glm::vec3 b = _fieldLines[_vertexIndex+1][i];
-            
-            vertex = lerp(a, b, t);
+            float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
+            int k = 0;
+            for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+
+                _vertexPositions[j] = lerp(a, b, t);
+                k++;
+            }
 
         }
         else {
@@ -493,16 +510,20 @@ void FieldlinesState::moveLine(double dt) {
             if (atStart) break;
 
             //the inital position, end condition
-            if (_vertexIndex == 0) continue;
+            if (_vertexIndex[i] == 0) continue;
 
-            while (_timeSinceLastVertex < FLT_EPSILON) {
-                _vertexIndex--;
-                _timeSinceLastVertex += _vertexTimes[_vertexIndex];
+            while (_timeSinceLastInterpolation[i] < FLT_EPSILON) {
+                _vertexIndex[i]--;
+                _timeSinceLastInterpolation[i] += _vertexTimes[i][_vertexIndex[i]];
 
                 //check if at end after decreasing index and updating timeSinceLastVertex
-                if (_vertexIndex == 0 && _timeSinceLastVertex < FLT_EPSILON) {
-                    vertex = _fieldLines[_vertexIndex][i];
-                    _timeSinceLastVertex = 0.0f;
+                if (_vertexIndex[i] == 0 && _timeSinceLastInterpolation[i] < FLT_EPSILON) {
+                    int k = 0;
+                    for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                        _vertexPositions[j] = _fieldLines[i][_vertexIndex[i]][k];
+                        k++;
+                    }
+                    _timeSinceLastInterpolation[i] = 0.0f;
                     vertexStart = true;
                     break;
                 }
@@ -511,44 +532,53 @@ void FieldlinesState::moveLine(double dt) {
             if (vertexStart) continue;
 
             //linear interpolation
-            float t = _timeSinceLastVertex / _vertexTimes[_vertexIndex];
-            glm::vec3 a = _fieldLines[_vertexIndex][i];
-            glm::vec3 b = _fieldLines[_vertexIndex+1][i];
+            float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
+            int k = 0;
+            for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
 
-            vertex = lerp(a, b, t);
+                _vertexPositions[j] = lerp(a, b, t);
+                k++;
+            }
         }
-        i++;
     }
+
 
     if (vertexEnd) atEnd = true;
     if (vertexStart) atStart = true;
 }
 
 void FieldlinesState::addPath(std::vector<glm::vec3> path) {
-    _vertexPath = path;
+    _vertexPath.push_back(path);
 }
 
-void FieldlinesState::addFieldLine(std::vector<glm::vec3> fieldLine) {
+void FieldlinesState::addFieldLines(std::vector<std::vector<glm::vec3>> fieldLine) {
     _fieldLines.push_back(fieldLine);
 }
 
 void FieldlinesState::addVelocities(std::vector<float> velocities) {
-    _vertexVelocities = velocities;
+    _vertexVelocities.push_back(velocities);
 }
 
 void FieldlinesState::computeTimes() {
-    std::vector<float> times;
-    for (int i = 0; i < _vertexPath.size() - 2; i++) {
 
-        //distance to next vertex point in trajectory (path)
-        float d = glm::length(_vertexPath[i + 1] - _vertexPath[i]);
+    int j = 0;
+    for (std::vector<glm::vec3>& v : _vertexPath) {
+        std::vector<float> times;
+        for (int i = 0; i < v.size() - 2; i++) {
 
-        //time to next vertex = distance / velocity
-        float time = d / _vertexVelocities[i];
+            //distance to next vertex point in trajectory (path)
+            float d = glm::length(v[i + 1] - v[i]);
 
-        times.push_back(time);
+            //time to next vertex = distance / velocity
+            float time = d / _vertexVelocities[j][i];
+
+            times.push_back(time);
+        }
+        j++;
+        _vertexTimes.push_back(times);
     }
-    _vertexTimes = times;
 }
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
@@ -587,20 +617,24 @@ double FieldlinesState::triggerTime() const {
 const std::vector<glm::vec3>& FieldlinesState::vertexPositions() const {
     return _vertexPositions;
 }
+//
+//const std::vector<size_t> FieldlinesState::vertexIndex() const {
+//    return _vertexIndex;
+//}
 
-const std::vector<glm::vec3>& FieldlinesState::vertexPath() const {
+const std::vector < std::vector<glm::vec3>>& FieldlinesState::vertexPath() const {
     return _vertexPath;
 }
 
-const std::vector<float>& FieldlinesState::vertexVelocities() const {
+const std::vector < std::vector<float>>& FieldlinesState::vertexVelocities() const {
     return _vertexVelocities;
 }
 
-const std::vector<float>& FieldlinesState::vertexTimes() const {
+const std::vector < std::vector<float>>& FieldlinesState::vertexTimes() const {
     return _vertexTimes;
 }
 
-const std::vector<std::vector<glm::vec3>>& FieldlinesState::fieldLines() const {
+const std::vector<std::vector<std::vector<glm::vec3>>>& FieldlinesState::fieldLines() const {
     return _fieldLines;
 }
 

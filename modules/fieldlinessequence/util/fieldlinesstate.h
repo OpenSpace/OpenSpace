@@ -34,6 +34,11 @@
 
 namespace openspace {
 
+struct fieldline {
+    int i;
+
+};
+
 class FieldlinesState {
 public:
     void convertLatLonToCartesian(float scale = 1.f);
@@ -62,13 +67,13 @@ public:
     double triggerTime() const;
     const std::vector<glm::vec3>& vertexPositions() const;
 
-    const std::vector<glm::vec3>& vertexPath() const;
+    const std::vector<std::vector<glm::vec3>>& vertexPath() const;
 
-    const std::vector<float>& vertexVelocities() const;
+    const std::vector < std::vector<float>>& vertexVelocities() const;
 
-    const std::vector<float>& vertexTimes() const;
+    const std::vector < std::vector<float>>& vertexTimes() const;
 
-    const std::vector<std::vector<glm::vec3>>& fieldLines() const;
+    const std::vector < std::vector<std::vector<glm::vec3>>>& fieldLines() const;
 
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
@@ -84,7 +89,7 @@ public:
 
     void addPath(std::vector<glm::vec3> path);
 
-    void addFieldLine(std::vector<glm::vec3> fieldLine);
+    void addFieldLines(std::vector<std::vector<glm::vec3>> fieldLine);
 
     void addVelocities(std::vector<float> path);
 
@@ -101,14 +106,15 @@ private:
     std::vector<std::string> _extraQuantityNames;
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
+    int _numberOfLines = 0;
     std::vector<glm::vec3> _vertexPositions;
 
-    size_t _vertexIndex = 0;
-    float _timeSinceLastVertex = 0.0f;
-    std::vector<glm::vec3> _vertexPath;
-    std::vector<std::vector<glm::vec3>> _fieldLines;
-    std::vector<float> _vertexVelocities;
-    std::vector<float> _vertexTimes;
+    std::vector<size_t> _vertexIndex;
+    std::vector<float> _timeSinceLastInterpolation;
+    std::vector<std::vector<glm::vec3>> _vertexPath;
+    std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines;
+    std::vector<std::vector<float>> _vertexVelocities;
+    std::vector<std::vector<float>> _vertexTimes;
 };
 
 } // namespace openspace

@@ -216,6 +216,7 @@ namespace openspace::fls {
             std::vector<ccmc::Point3f> positions = mappedPath.getPositions();
 
             const size_t nLinePoints = positions.size();
+            std::vector<std::vector<glm::vec3>> interpolations;
             std::vector<glm::vec3> path;
             int i = 0;
             for (const ccmc::Point3f& p : positions) {
@@ -250,21 +251,20 @@ namespace openspace::fls {
                 for (const ccmc::Point3f& p2 : positions2) {
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
                 }
-                //add all the field lines, will be used for interpolation
-                state.addFieldLine(vertices);
+                interpolations.push_back(vertices);
 
-                //addLine will render the field line, we only want to render the first one
+                //we only want to render the first field line from the seed point
                 if (i == 0) {
                     state.addLine(vertices);
                 }
                 i++;
             }
+            state.addFieldLines(interpolations);
             //the flow line from the seed point, 
             //used to compute how fast the field lines move
             state.addPath(path);
 
             success |= (nLinePoints > 0);
-
         }
 
         return success;
@@ -304,31 +304,32 @@ namespace openspace::fls {
 
         if (state.extraQuantityNames()[nXtraScalars] == "u_perp_b") {
 
-            std::vector<float> velocities;
-            for (const glm::vec3 p : state.vertexPath()) {
-                //compute u_perp_b with variables u and b
-                //normalized b vector
-                const glm::vec3 normBVec = glm::normalize(glm::vec3(
-                    interpolator->interpolate("bx", p.x, p.y, p.z),
-                    interpolator->interpolate("by", p.x, p.y, p.z),
-                    interpolator->interpolate("bz", p.x, p.y, p.z)));
+            for (const std::vector<glm::vec3> v : state.vertexPath()) {
+                std::vector<float> velocities;
+                for (const glm::vec3 p : v) {
+                    //compute u_perp_b with variables u and b
+                    //normalized b vector
+                    const glm::vec3 normBVec = glm::normalize(glm::vec3(
+                        interpolator->interpolate("bx", p.x, p.y, p.z),
+                        interpolator->interpolate("by", p.x, p.y, p.z),
+                        interpolator->interpolate("bz", p.x, p.y, p.z)));
 
-                const glm::vec3 uVec = glm::vec3(
-                    interpolator->interpolate("ux", p.x, p.y, p.z),
-                    interpolator->interpolate("uy", p.x, p.y, p.z),
-                    interpolator->interpolate("uz", p.x, p.y, p.z));
+                    const glm::vec3 uVec = glm::vec3(
+                        interpolator->interpolate("ux", p.x, p.y, p.z),
+                        interpolator->interpolate("uy", p.x, p.y, p.z),
+                        interpolator->interpolate("uz", p.x, p.y, p.z));
 
-                float u_dot_b = glm::dot(normBVec, uVec);
+                    float u_dot_b = glm::dot(normBVec, uVec);
 
-                //multiply by 1000 since the data is in km/s and openspace uses m/s
-                glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b)) * 1000.0f;
+                    //multiply by 1000 since the data is in km/s and openspace uses m/s
+                    glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b)) * 1000.0f;
 
-                float magnitude = glm::length(u_perp_b);
+                    float magnitude = glm::length(u_perp_b);
 
-                velocities.push_back(magnitude);
-            }
-            state.addVelocities(velocities);
-                
+                    velocities.push_back(magnitude);
+                }
+                state.addVelocities(velocities);
+            }      
         }
         
         // ------ Extract all the extraQuantities from kameleon and store in state! //
