@@ -93,22 +93,22 @@ public:
 private:
     void step3DTexture(ghoul::opengl::ProgramObject& prg, int layer);
 
-    void calculateTransmittance(GLuint vao);
-    GLuint calculateDeltaE(GLuint vao);
-    std::pair<GLuint, GLuint> calculateDeltaS(GLuint vao);
-    void calculateIrradiance(GLuint vao);
-    void calculateInscattering(GLuint vao, GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaJ(GLuint vao, int scatteringOrder,
+    void calculateTransmittance();
+    GLuint calculateDeltaE();
+    std::pair<GLuint, GLuint> calculateDeltaS();
+    void calculateIrradiance();
+    void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateDeltaJ(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
         GLuint deltaSRayleigh, GLuint deltaSMie);
-    void calculateDeltaE(GLuint vao, int scatteringOrder,
+    void calculateDeltaE(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaE, GLuint deltaSRayleigh,
         GLuint deltaSMie);
-    void calculateDeltaS(GLuint vao, int scatteringOrder,
+    void calculateDeltaS(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh, GLuint deltaJ);
-    void calculateIrradiance(GLuint vao, int scatteringOrder,
+    void calculateIrradiance(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaE);
-    void calculateInscattering(GLuint vao, int scatteringOrder,
+    void calculateInscattering(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
 
