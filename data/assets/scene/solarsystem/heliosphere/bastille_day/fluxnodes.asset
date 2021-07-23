@@ -18,11 +18,31 @@ local fluxnodesBinaries = asset.syncedResource({
 local Fluxnodes = {
   Identifier = "MAS_MHD_FluxNodes",
   Parent = heliosphereTransforms.HNMReferenceFrame.Identifier,
-
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1
+    },
+    Rotation = {
+      -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
+      -- which is what the renderables parent transforms.HNMReferenceFrame.Identifier is
+      -- referring to. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
+      -- longitude was 309.3 degrees.
+      -- Difference from HEEQ => 360-309.3=50.7 
+      -- (or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
+      -- Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
+      -- => a1 = -129.3 and a2 = 230.7
+      -- Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
+      Type = "FixedRotation",
+        XAxis = { -0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0 },
+        YAxis = { 0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0 },
+        ZAxis = { 0.0, 0.0, 1.0 }
+    }
+  },
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxnodesBinaries,
-    ColorTablePaths = {  
+    ColorTablePaths = {
       Standard = fluxnodeColorTable,
       CMR = fluxnodeColorTableCMR,
       Earth = fluxnodeColorTableEarth,
@@ -38,27 +58,6 @@ local Fluxnodes = {
   GUI = {
     Path = "/Solar System/Heliosphere",
     Name = "Fluxnodes"
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1
-    },
-    Rotation = {
-      --This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-      --which is what the renderables paretn transforms.HNMReferenceFrame.Identifier is
-      --refering to. At the referens time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
-      --longitude was 309.3 degrees.
-      --Difference from HEEQ => 360-309.3=50.7 
-      --(or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
-      --Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
-      -- => a1 = -129.3 and a2 = 230.7
-      --Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
-      Type = "FixedRotation",
-        XAxis = {-0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0},
-        YAxis = {0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0},
-        ZAxis = {0.0, 0.0, 1.0}
-    }
   }
 } 
 
@@ -67,7 +66,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Fluxnodes })
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
   Version = "1.0",
-  Description = " Flux nodes for the bastille day CME event ",
+  Description = "Flux nodes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = ""

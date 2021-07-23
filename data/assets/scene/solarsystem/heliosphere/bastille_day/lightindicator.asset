@@ -1,11 +1,17 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
---openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
-
 local travelSpeedIndicator = {
   Identifier = "travelSpeedIndicator",
+  --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
   Parent =  sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SUN",
+      Observer = "SSB"
+    }
+  },
   Renderable = {
     Type = "RenderableTravelSpeed",
     Target = "Earth",    --name of scene graph node. Earth by default
@@ -21,12 +27,11 @@ local travelSpeedIndicator = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { travelSpeedIndicator })
 
-
 asset.meta = {
   Name = "Lighttravel sun to earth",
   Version = "1.0",
   Description = "Speed of light from sun to earth",
-  Author = "Christian Adamsson, Emilie Ho",
+  Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
   License = ""
 }

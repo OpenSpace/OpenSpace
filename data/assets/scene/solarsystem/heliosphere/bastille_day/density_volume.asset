@@ -13,10 +13,21 @@ local sunRadius = 6.957E8
 local densityVolume = {
   Identifier = "MAS_MHD_density", 
   Parent = sunTransforms.SunIAU.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+    Rotation = {
+      Type = "FixedRotation",
+        XAxis = { -1.0, 0.0, 0.0 },
+        YAxis = { 0.0, 1.0, 0.0 },
+        ZAxis = { 0.0, 0.0, -1.0 }
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     StepSize = 0.004,
-    --Enabled = false,
     Opacity = 0.3,
     TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
     SourceDirectory = densityDirectory,
@@ -25,21 +36,8 @@ local densityVolume = {
     GridType = "Spherical",
     SecondsBefore = 24*60*60,
     SecondsAfter = 24*60*60,
-    Dimensions = {100, 100, 128},
+    Dimensions = { 100, 100, 128 },
     InvertDataAtZ = true
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = sunRadius
-    },
-    Rotation = {
-      --Type = "StaticRotation", --LuaRotation
-      Type = "FixedRotation",
-        XAxis = {-1.0, 0.0, 0.0},
-        YAxis = {0.0, 1.0, 0.0},
-        ZAxis = {0.0, 0.0, -1.0}
-    }       
   },
   GUI = {
     Name = "MAS Density",
@@ -52,7 +50,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { densityVolume })
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",
   Version = "1.0",
-  Description = " Volumetric rendering for the bastille day CME event ",
+  Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = ""

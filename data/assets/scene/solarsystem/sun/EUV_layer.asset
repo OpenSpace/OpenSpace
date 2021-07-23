@@ -1,12 +1,3 @@
-asset.meta = {
-  Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
-  Version = "1.0",
-  Description = "EUV simulation, texture sequence",
-  Author = "CCMC, OpenSpace team",
-  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = ""
-}
-
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
@@ -38,11 +29,11 @@ local EUV_Layer = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { EUV_Layer })
 
-
-
-
-
-
-
-
-
+asset.meta = {
+  Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
+  Version = "1.0",
+  Description = "EUV simulation, texture sequence",
+  Author = "CCMC, OpenSpace team",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = ""
+}
