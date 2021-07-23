@@ -42,14 +42,15 @@ Camera::Camera(const Camera& o)
 {}
 
 void Camera::setPositionVec3(glm::dvec3 pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _position = std::move(pos);
-
-    _cachedCombinedViewMatrix.isDirty = true;
+    if (!glm::any(glm::isnan(pos))) {
+        std::lock_guard _lock(_mutex);
+        _position = std::move(pos);
+        _cachedCombinedViewMatrix.isDirty = true;
+    }
 }
 
 void Camera::setRotation(glm::dquat rotation) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
     _rotation = std::move(rotation);
     _cachedViewDirection.isDirty = true;
     _cachedLookupVector.isDirty = true;
@@ -58,14 +59,14 @@ void Camera::setRotation(glm::dquat rotation) {
 }
 
 void Camera::setScaling(float scaling) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
     _scaling = scaling;
     _cachedViewScaleMatrix.isDirty = true;
     _cachedCombinedViewMatrix.isDirty = true;
 }
 
 void Camera::setMaxFov(float fov) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
     _maxFov = fov;
     _cachedSinMaxFov.isDirty = true;
 }
@@ -75,7 +76,7 @@ void Camera::setParent(SceneGraphNode* parent) {
 }
 
 void Camera::rotate(glm::dquat rotation) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
     _rotation = std::move(rotation) * static_cast<glm::dquat>(_rotation);
 
     _cachedViewDirection.isDirty = true;
@@ -224,20 +225,20 @@ Camera::SgctInternal::SgctInternal(const SgctInternal& o)
 {}
 
 void Camera::SgctInternal::setSceneMatrix(glm::mat4 sceneMatrix) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
 
     _sceneMatrix = std::move(sceneMatrix);
 }
 
 void Camera::SgctInternal::setViewMatrix(glm::mat4 viewMatrix) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
 
     _viewMatrix = std::move(viewMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
 }
 
 void Camera::SgctInternal::setProjectionMatrix(glm::mat4 projectionMatrix) {
-    std::lock_guard<std::mutex> _lock(_mutex);
+    std::lock_guard _lock(_mutex);
 
     _projectionMatrix = std::move(projectionMatrix);
     _cachedViewProjectionMatrix.isDirty = true;
