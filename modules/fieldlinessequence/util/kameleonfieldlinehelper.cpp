@@ -151,7 +151,7 @@ namespace openspace::fls {
 
         switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 1.0f;  // TODO specify in Lua?
+            innerBoundaryLimit = 0.5f;  // TODO specify in Lua?
             break;
         case fls::Model::Enlil:
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
@@ -211,6 +211,7 @@ namespace openspace::fls {
             pathline.measure();
             pathline.integrate();
 
+            //change second arg to increase/decrease amount of interpolations.
             ccmc::Fieldline mappedPath = pathline.interpolate(1, 100);
 
             std::vector<ccmc::Point3f> positions = mappedPath.getPositions();
@@ -218,10 +219,11 @@ namespace openspace::fls {
             const size_t nLinePoints = positions.size();
             std::vector<std::vector<glm::vec3>> interpolations;
             std::vector<glm::vec3> path;
-            int i = 0;
+            std::vector<int> closed;
+            std::vector<int> open;
+            int j = 0;
             for (const ccmc::Point3f& p : positions) {
                 std::vector<glm::vec3> vertices;
-                //vertices.emplace_back(p.component1, p.component2, p.component3);
 
                 //add vertices to path line
                 path.emplace_back(p.component1, p.component2, p.component3);
@@ -231,7 +233,7 @@ namespace openspace::fls {
                 ccmc::Tracer tracer2(kameleon, interpolator2.get());
                 tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-                //traces with "u" or "u_perp_b" need unidirectioalTrace, while "b" needs 
+                //traces with "u" or "u_perp_b" uses unidirectioalTrace, while "b" uses 
                 //bidirectionalTrace.
                 ccmc::Fieldline fieldline;
                 fieldline = tracer2.bidirectionalTrace(
@@ -245,20 +247,26 @@ namespace openspace::fls {
                 fieldline.getDs();
                 fieldline.measure();
                 fieldline.integrate();
-                ccmc::Fieldline mapped = fieldline.interpolate(1, 100);
+                ccmc::Fieldline mapped = fieldline.interpolate(1, 200);
 
                 const std::vector<ccmc::Point3f>& positions2 = mapped.getPositions();
                 for (const ccmc::Point3f& p2 : positions2) {
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
                 }
+                //check if field line is open or closed
+                if (glm::length(vertices.front()) < 1.5f) closed.push_back(j);
+                else if (glm::length(vertices.back()) < 1.5f) open.push_back(j);
+
                 interpolations.push_back(vertices);
 
                 //we only want to render the first field line from the seed point
-                if (i == 0) {
+                if (j == 0) {
                     state.addLine(vertices);
                 }
-                i++;
+                j++;
             }
+            state.addOpenIndices(open);
+            state.addClosedIndices(closed);
             state.addFieldLines(interpolations);
             //the flow line from the seed point, 
             //used to compute how fast the field lines move

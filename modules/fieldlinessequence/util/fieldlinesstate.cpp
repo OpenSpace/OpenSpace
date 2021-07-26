@@ -79,6 +79,14 @@ void FieldlinesState::scaleFieldlines(float scale) {
     }
 }
 
+void FieldlinesState::addOpenIndices(std::vector<int> open) {
+    _open.push_back(open);
+}
+
+void FieldlinesState::addClosedIndices(std::vector<int> close) {
+    _closed.push_back(close);
+}
+
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {
@@ -477,7 +485,7 @@ void FieldlinesState::moveLine(double dt) {
 
                 //check if at end after increasing index
 
-                //size - 3 as a margin to avoid bugs
+                //size - 3 as a margin to avoid bugs when simulation reaches end
                 if (_vertexIndex[i] == _vertexPath[i].size() - 3) {
                     _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i] - 1];
                     int k = 0;
@@ -492,18 +500,49 @@ void FieldlinesState::moveLine(double dt) {
 
             if (vertexEnd) continue;
 
-            //linear interpolation
-            //normalize t to [0,1]
-            float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
-            int k = 0;
-            for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
-                glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
-                glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+            if (std::find(_open[i].begin(), _open[i].end(), _vertexIndex[i]+1)
+                != _open[i].end() &&
+                std::find(_open[i].begin(), _open[i].end(), _vertexIndex[i])
+                == _open[i].end()) {
+                _vertexIndex[i]++;
+                _timeSinceLastInterpolation[i] = 0.0f;
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                    _vertexPositions[j] = a;
+                    k++;
+                }
 
-                _vertexPositions[j] = lerp(a, b, t);
-                k++;
+
             }
 
+            else if (std::find(_closed[i].begin(), _closed[i].end(), _vertexIndex[i]+1)
+                != _closed[i].end() &&
+                std::find(_closed[i].begin(), _closed[i].end(), _vertexIndex[i])
+                == _closed[i].end()) {
+                _vertexIndex[i]++;
+                _timeSinceLastInterpolation[i] = 0.0f;
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                    _vertexPositions[j] = a;
+                    k++;
+                }
+
+            }
+            else {
+                //linear interpolation
+                //normalize t to [0,1]
+                float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                    glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+
+                    _vertexPositions[j] = lerp(a, b, t);
+                    k++;
+                }
+            }
         }
         else {
 
@@ -531,15 +570,42 @@ void FieldlinesState::moveLine(double dt) {
 
             if (vertexStart) continue;
 
-            //linear interpolation
-            float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
-            int k = 0;
-            for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
-                glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
-                glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+            if (std::find(_open[i].begin(), _open[i].end(), _vertexIndex[i]+1)
+                != _open[i].end() &&
+                std::find(_open[i].begin(), _open[i].end(), _vertexIndex[i])
+                == _open[i].end()) {
+                _vertexIndex[i]--;
+                _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i]];
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    _vertexPositions[j] = _fieldLines[i][_vertexIndex[i]][k];;
+                    k++;
+                }
+            }
+            else if (std::find(_closed[i].begin(), _closed[i].end(), _vertexIndex[i]+1)
+                != _closed[i].end() &&
+                std::find(_closed[i].begin(), _closed[i].end(), _vertexIndex[i])
+                == _closed[i].end()) {
+                _vertexIndex[i]--;
+                _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i]];
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    _vertexPositions[j] = _fieldLines[i][_vertexIndex[i]][k];
+                    k++;
+                }
 
-                _vertexPositions[j] = lerp(a, b, t);
-                k++;
+            }
+            else {
+                //linear interpolation
+                float t = _timeSinceLastInterpolation[i] / _vertexTimes[i][_vertexIndex[i]];
+                int k = 0;
+                for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
+                    glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
+                    glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+
+                    _vertexPositions[j] = lerp(a, b, t);
+                    k++;
+                }
             }
         }
     }
@@ -568,10 +634,10 @@ void FieldlinesState::computeTimes() {
         std::vector<float> times;
         for (int i = 0; i < v.size() - 2; i++) {
 
-            //distance to next vertex point in trajectory (path)
+            //distance to next interpolation
             float d = glm::length(v[i + 1] - v[i]);
 
-            //time to next vertex = distance / velocity
+            //time to next interpolation = distance / velocity
             float time = d / _vertexVelocities[j][i];
 
             times.push_back(time);
@@ -612,6 +678,14 @@ size_t FieldlinesState::nExtraQuantities() const {
 
 double FieldlinesState::triggerTime() const {
     return _triggerTime;
+}
+
+const std::vector<std::vector<int>> FieldlinesState::closed() const {
+    return _closed;
+}
+
+const std::vector<std::vector<int>> FieldlinesState::open() const {
+    return _open;
 }
 
 const std::vector<glm::vec3>& FieldlinesState::vertexPositions() const {

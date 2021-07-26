@@ -34,10 +34,6 @@
 
 namespace openspace {
 
-struct fieldline {
-    int i;
-
-};
 
 class FieldlinesState {
 public:
@@ -47,6 +43,10 @@ public:
     void scaleflowline(float scale);
 
     void scaleFieldlines(float scale);
+
+    void addClosedIndices(std::vector<int> close);
+
+    void addOpenIndices(std::vector<int> open);
 
     void computeTimes();
 
@@ -65,6 +65,11 @@ public:
     fls::Model model() const;
     size_t nExtraQuantities() const;
     double triggerTime() const;
+
+    const std::vector< std::vector<int> > closed() const;
+
+    const std::vector< std::vector<int> > open() const;
+
     const std::vector<glm::vec3>& vertexPositions() const;
 
     const std::vector<std::vector<glm::vec3>>& vertexPath() const;
@@ -115,6 +120,8 @@ private:
     std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines;
     std::vector<std::vector<float>> _vertexVelocities;
     std::vector<std::vector<float>> _vertexTimes;
+    std::vector<std::vector<int>> _open;
+    std::vector<std::vector<int>> _closed;
 };
 
 } // namespace openspace

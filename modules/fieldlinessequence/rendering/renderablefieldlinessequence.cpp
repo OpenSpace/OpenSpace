@@ -921,9 +921,9 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 
         //LINFO(fmt::format("MaxVel: {}", maxVel));
 
-        std::vector<std::vector< std::vector<glm::vec3> >> verts = newState.fieldLines();
+        //std::vector<std::vector< std::vector<glm::vec3> >> verts = newState.fieldLines();
 
-        //std::vector<size_t>  vertexIndex = newState.vertexTimes();
+        //std::vector<std::vector<int>>  open = newState.open();
 
         if (isSuccessful) {
             addStateToSequence(newState);
