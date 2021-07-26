@@ -424,6 +424,13 @@ void ScriptEngine::addBaseLibrary() {
                 "Checks whether the provided file exists."
             },
             {
+                "readFile",
+                &luascriptfunctions::readFile,
+                {},
+                "string",
+                "Reads a file from disk and return its contents"
+            },
+            {
                 "directoryExists",
                 &luascriptfunctions::directoryExists,
                 {},

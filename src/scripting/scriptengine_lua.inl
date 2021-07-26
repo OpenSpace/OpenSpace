@@ -204,6 +204,32 @@ int fileExists(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
+ * readFile(string):
+ * Reads a file from disk and return its contents
+ */
+int readFile(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::readFile");
+
+    const std::string& file = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        return ghoul::lua::luaError(L, fmt::format("Could not open file {}", file));
+    }
+
+    std::ifstream f(p);
+    std::stringstream buffer;
+    buffer << f.rdbuf();
+
+    ghoul::lua::push(L, buffer.str());
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
  * directoryExists(string):
  * Checks whether the provided file exists
  */
