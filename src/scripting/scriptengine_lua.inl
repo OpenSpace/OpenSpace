@@ -30,37 +30,42 @@
 namespace openspace::luascriptfunctions {
 
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::printInternal");
-
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, 1);
-    switch (type) {
-        case LUA_TNONE:
-        case LUA_TLIGHTUSERDATA:
-        case LUA_TTABLE:
-        case LUA_TFUNCTION:
-        case LUA_TUSERDATA:
-        case LUA_TTHREAD:
-            log(
-                level,
-                "print",
-                fmt::format("Function parameter was of type '{}'", luaTypeToString(type))
-            );
-            break;
-        case LUA_TNIL:
-            break;
-        case LUA_TBOOLEAN:
-            log(level, "print", std::to_string(ghoul::lua::value<bool>(L, 1)));
-            break;
-        case LUA_TNUMBER:
-            log(level, "print", std::to_string(ghoul::lua::value<double>(L, 1)));
-            break;
-        case LUA_TSTRING:
-            log(level, "print", ghoul::lua::value<std::string>(L, 1));
-            break;
+    const int nArguments = lua_gettop(L);
+    for (int i = 1; i <= nArguments; i++) {
+        const int type = lua_type(L, i);
+        switch (type) {
+            case LUA_TNONE:
+            case LUA_TLIGHTUSERDATA:
+            case LUA_TTABLE:
+            case LUA_TFUNCTION:
+            case LUA_TUSERDATA:
+            case LUA_TTHREAD:
+                log(
+                    level,
+                    "print",
+                    fmt::format(
+                        "Function parameter was of type '{}'", luaTypeToString(type)
+                    )
+                );
+                break;
+            case LUA_TNIL:
+                break;
+            case LUA_TBOOLEAN:
+                log(level, "print", std::to_string(ghoul::lua::value<bool>(L, i)));
+                break;
+            case LUA_TNUMBER:
+                log(level, "print", std::to_string(ghoul::lua::value<double>(L, i)));
+                break;
+            case LUA_TSTRING:
+                log(level, "print", ghoul::lua::value<std::string>(L, i));
+                break;
+        }
     }
-    lua_pop(L, 1);
+
+
+    lua_pop(L, nArguments);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
