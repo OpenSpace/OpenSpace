@@ -39,6 +39,8 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 
+#pragma optimize ("", off)
+
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
@@ -56,6 +58,12 @@ namespace {
         "This value determines the size of the font that is used to render the date."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
+        "DisplayFormat",
+        "Display Format",
+        "Choosing the format in which the camera location is displayed"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
@@ -68,6 +76,14 @@ namespace {
 
         // [[codegen::verbatim(FontSizeInfo.description)]]
         std::optional<float> fontSize;
+
+        enum class DisplayFormat {
+            DecimalDegrees,
+            DegreeMinuteSeconds
+        };
+
+        // [[codegen::verbatim(DisplayFormatInfo.description)]]
+        std::optional<DisplayFormat> displayFormat;
 
         // [[codegen::verbatim(SignificantDigitsInfo.description)]]
         std::optional<int> significantDigits;
@@ -86,6 +102,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
+    , _displayFormat(DisplayFormatInfo)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
     , _font(global::fontManager->font(KeyFontMono, 10))
 {
@@ -104,20 +121,54 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     addProperty(_fontSize);
 
     auto updateFormatString = [this]() {
-        using namespace fmt::literals;
-
-        _formatString = fmt::format(
-            "Position: {{:03.{0}f}}{{}}, {{:03.{0}f}}{{}}  Altitude: {{:03.{0}f}} {{}}",
-            _significantDigits.value()
-        );
+        switch (_displayFormat.value()) {
+            case static_cast<int>(DisplayFormat::DecimalDegrees):
+                _formatString = fmt::format(
+                    "Position: {{:03.{0}f}}, {{:03.{0}f}}  "
+                    "Altitude: {{:03.{0}f}} {{}}",
+                    _significantDigits.value()
+                );
+                break;
+            case static_cast<int>(DisplayFormat::DegreeMinuteSeconds):
+                _formatString = fmt::format(
+                    "Position: {{}}d {{}}' {{:03.{0}f}}\" {{}}, "
+                    "{{}}d {{}}' {{:03.{0}f}}\" {{}}  "
+                    "Altitude: {{:03.{0}f}} {{}}",
+                    _significantDigits.value()
+                );
+                break;
+        }
     };
+
+    _displayFormat.addOptions({
+        { static_cast<int>(DisplayFormat::DecimalDegrees), "Decimal Degrees" },
+        { static_cast<int>(DisplayFormat::DegreeMinuteSeconds), "Degree Minute Seconds" }
+    });
+    _displayFormat.onChange(updateFormatString);
+    addProperty(_displayFormat);
+
+    if (p.displayFormat.has_value()) {
+        switch (*p.displayFormat) {
+            case Parameters::DisplayFormat::DecimalDegrees:
+                _displayFormat = static_cast<int>(DisplayFormat::DecimalDegrees);
+                break;
+            case Parameters::DisplayFormat::DegreeMinuteSeconds:
+                _displayFormat = static_cast<int>(DisplayFormat::DegreeMinuteSeconds);
+                break;
+        }
+    }
+    else {
+        _displayFormat = static_cast<int>(DisplayFormat::DecimalDegrees);
+    }
+
+
     _significantDigits = p.significantDigits.value_or(_significantDigits);
     _significantDigits.onChange(updateFormatString);
     addProperty(_significantDigits);
-    updateFormatString();
 
     _font = global::fontManager->font(_fontName, _fontSize);
     _buffer.resize(128);
+    updateFormatString();
 }
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
@@ -149,12 +200,6 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     double lat = glm::degrees(geo2.lat);
     double lon = glm::degrees(geo2.lon);
 
-    bool isNorth = lat > 0.0;
-    lat = std::abs(lat);
-
-    bool isEast = lon > 0.0;
-    lon = std::abs(lon);
-
     double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
@@ -168,13 +213,49 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
-    char* end = fmt::format_to(
-        _buffer.data(),
-        _formatString.c_str(),
-        lat, isNorth ? "N" : "S",
-        lon, isEast ? "E" : "W",
-        dist.first, dist.second
-    );
+    char* end = nullptr;
+    switch (_displayFormat.value()) {
+        case static_cast<int>(DisplayFormat::DecimalDegrees):
+        {
+            end = fmt::format_to(
+                _buffer.data(),
+                _formatString, lat, lon, dist.first, dist.second
+            );
+            break;
+        }
+        case static_cast<int>(DisplayFormat::DegreeMinuteSeconds):
+        {
+            const bool isNorth = lat > 0.0;
+            lat = std::abs(lat);
+
+            const bool isEast = lon > 0.0;
+            lon = std::abs(lon);
+
+            const float latDeg = std::trunc(lat);
+            const float latDegRemainder = lat - latDeg;
+            const float latMin = std::trunc(latDegRemainder * 60.f);
+            const float latMinRemainder = latDegRemainder * 60.f - latMin;
+            const float latSec = latMinRemainder * 60.f;
+
+            const float lonDeg = std::trunc(lon);
+            const float lonDegRemainder = lon - lonDeg;
+            const float lonMin = std::trunc(lonDegRemainder * 60.f);
+            const float lonMinRemainder = lonDegRemainder * 60.f - lonMin;
+            const float lonSec = lonMinRemainder * 60.f;
+
+
+            end = fmt::format_to(
+                _buffer.data(),
+                _formatString,
+                latDeg, latMin, latSec, isNorth ? "N" : "S",
+                lonDeg, lonMin, lonSec, isEast ? "E" : "W",
+                dist.first, dist.second
+            );
+
+            break;
+        }
+    }
+
     std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
 
     RenderFont(*_font, penPosition, text);

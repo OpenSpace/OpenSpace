@@ -32,9 +32,11 @@ namespace {
     constexpr const char* _loggerCat = "Coordinateconversion";
 
     // J2000 Galactic reference frame
-    constexpr double A0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
+    // Equatorial coordinates of the Galactic north pole
+    constexpr double A0 = glm::radians(192.8595);
     constexpr double D0 = glm::radians(27.1284);
-    constexpr double L0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
+    // Galactic longitude of the equatorial north pole
+    constexpr double L0 = glm::radians(122.9320);
 
     void parseString(const std::string& str, int& hoursOrDegrees, int& minutes,
                      double& seconds)
