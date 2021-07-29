@@ -25,6 +25,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 
@@ -703,6 +704,15 @@ int removeSceneGraphNode(lua_State* L) {
     // Remove the node and all its children
     std::function<void(SceneGraphNode*)> removeNode =
         [&removeNode](SceneGraphNode* localNode) {
+
+        if (localNode == global::navigationHandler->anchorNode()) {
+            global::navigationHandler->setFocusNode(sceneGraph()->root());
+        }
+
+        if (localNode == global::navigationHandler->orbitalNavigator().aimNode()) {
+            global::navigationHandler->orbitalNavigator().setAimNode("");
+        }
+
         std::vector<SceneGraphNode*> children = localNode->children();
 
         ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
@@ -852,6 +862,15 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     // Remove all marked nodes
     std::function<void(SceneGraphNode*)> removeNode =
         [&removeNode, &markedList](SceneGraphNode* localNode) {
+
+        if (localNode == global::navigationHandler->anchorNode()) {
+            global::navigationHandler->setFocusNode(sceneGraph()->root());
+        }
+
+        if (localNode == global::navigationHandler->orbitalNavigator().aimNode()) {
+            global::navigationHandler->orbitalNavigator().setAimNode("");
+        }
+
         std::vector<SceneGraphNode*> children = localNode->children();
 
         ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
