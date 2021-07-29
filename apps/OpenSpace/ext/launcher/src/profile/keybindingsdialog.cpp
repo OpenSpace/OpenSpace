@@ -28,7 +28,6 @@
 #include "profile/scriptlogdialog.h"
 
 #include <openspace/scene/profile.h>
-#include <openspace/util/keys.h>
 #include <qevent.h>
 #include <algorithm>
 #include <QKeyEvent>
@@ -167,6 +166,10 @@ void KeybindingsDialog::createWidgets() {
             _mapModKeyComboBoxIndexToKeyValue.push_back(modIdx++);
         }
         _keyModCombo->addItems(comboModKeysStringList);
+        connect(
+            _keyModCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &KeybindingsDialog::keyModSelected
+        );
         box->addWidget(_keyModCombo, 0, 1);
 
 
@@ -286,6 +289,7 @@ void KeybindingsDialog::createWidgets() {
 void KeybindingsDialog::listItemSelected() {
     QListWidgetItem *item = _list->currentItem();
     int index = _list->row(item);
+    _currentKeybindingSelection = index;
 
     if (_data.size() > 0) {
         Profile::Keybinding& k = _data[index];
@@ -317,21 +321,25 @@ void KeybindingsDialog::listItemSelected() {
 }
 
 void KeybindingsDialog::keySelected(int index) {
-    const QString numKeyWarning = "Warning: Using a number key may conflict with the "
-        "keybindings for simulation time increments.";
+    _errorMsg->clear();
+    int selectedKey = _mapKeyComboBoxIndexToKeyValue[index];
+    checkForNumberKeyConflict(selectedKey);
+    checkForBindingConflict(_keyModCombo->currentIndex(), selectedKey);
+}
+
+void KeybindingsDialog::keyModSelected(int index) {
+    _errorMsg->clear();
+    int selectedKey = _mapModKeyComboBoxIndexToKeyValue[index];
+    checkForBindingConflict(selectedKey,
+        _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex()));
+}
+
+void KeybindingsDialog::addStringToErrorDisplay(const QString& newString) {
     QString errorContents = _errorMsg->text();
-    bool alreadyContainsWarning = (errorContents.length() >= numKeyWarning.length() &&
-        errorContents.left(numKeyWarning.length()) == numKeyWarning);
-    if  (_mapKeyComboBoxIndexToKeyValue[index] >= static_cast<int>(Key::Num0)
-      && _mapKeyComboBoxIndexToKeyValue[index] <= static_cast<int>(Key::Num9))
-    {
-        if (!alreadyContainsWarning) {
-            errorContents = numKeyWarning + errorContents;
-            _errorMsg->setText(errorContents);
-        }
-    }
-    else if (alreadyContainsWarning) {
-        _errorMsg->setText(errorContents.mid(numKeyWarning.length()));
+    bool alreadyContainsString = (errorContents.indexOf(newString, 0) != -1);
+    if (!alreadyContainsString) {
+        errorContents = newString + errorContents;
+        _errorMsg->setText(errorContents);
     }
 }
 
@@ -371,8 +379,35 @@ void KeybindingsDialog::listItemAdded() {
     _documentationEdit->setText(QString::fromStdString(_data.back().documentation));
     _localCheck->setChecked(false);
     _scriptEdit->setText(QString::fromStdString(_data.back().script));
-
+    _currentKeybindingSelection = _data.size() - 1;
     _editModeNewItem = true;
+}
+
+void KeybindingsDialog::checkForNumberKeyConflict(int key) {
+    const QString numKeyWarning = "Warning: Using a number key may conflict with the "
+        "keybindings for simulation time increments.\n";
+    if (key >= static_cast<int>(Key::Num0) && key <= static_cast<int>(Key::Num9)) {
+        addStringToErrorDisplay(numKeyWarning);
+    }
+}
+
+void KeybindingsDialog::checkForBindingConflict(int selectedModKey, int selectedKey) {
+    const QString localWarn = "Warning: New selection conflicts with binding '";
+    if (_currentKeybindingSelection >= _data.size()) {
+        return;
+    }
+    KeyModifier newModifier = static_cast<KeyModifier>(selectedModKey);
+    Key newKey = static_cast<Key>(selectedKey);
+    for (int i = 0; i < _data.size(); ++i) {
+        if (i == _currentKeybindingSelection) {
+            continue;
+        }
+        openspace::Profile::Keybinding k = _data[i];
+        if ((k.key.key == newKey) && (k.key.modifier == newModifier)) {
+            addStringToErrorDisplay(localWarn + QString::fromStdString(k.name) + "'.\n");
+            break;
+        }
+    }
 }
 
 void KeybindingsDialog::listItemSave() {
