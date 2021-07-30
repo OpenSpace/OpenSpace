@@ -388,6 +388,7 @@ TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {
         constexpr const char Extra[] = R"(OpenGLDebugContext = { Activate = true })";
         const Configuration c = loadConfiguration("openGLDebugContext1", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == false);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous
@@ -451,6 +452,7 @@ OpenGLDebugContext = { Activate = true, Synchronous = true }
         constexpr const char Extra[] = R"(
 OpenGLDebugContext = {
     Activate = true,
+    PrintStacktrace = true,
     FilterIdentifier = {
         { Identifier = 1, Source = "API", Type = "Error" },
         { Identifier = 2, Source = "Window System", Type = "Deprecated" },
@@ -467,6 +469,7 @@ OpenGLDebugContext = {
 )";
         const Configuration c = loadConfiguration("openGLDebugContext3", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == true);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous
@@ -515,6 +518,7 @@ OpenGLDebugContext = { Activate = true, FilterSeverity = { "High", "Medium" } }
 )";
         const Configuration c = loadConfiguration("openGLDebugContext4", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == false);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous

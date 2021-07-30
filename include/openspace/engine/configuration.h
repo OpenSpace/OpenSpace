@@ -108,6 +108,7 @@ struct Configuration {
 
     struct OpenGLDebugContext {
         bool isActive = false;
+        bool printStacktrace = false;
         bool isSynchronous = true;
         struct IdentifierFilter {
             std::string type;

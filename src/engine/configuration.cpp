@@ -223,6 +223,11 @@ namespace {
             // Determines whether the OpenGL context should be a debug context
             bool activate;
 
+            // If this is set to 'true', everytime an OpenGL error is logged, the full
+            // stacktrace leading to the error is printed as well, making debugging under
+            // production situations much easier
+            std::optional<bool> printStacktrace;
+
             // Determines whether the OpenGL debug callbacks are performed synchronously.
             // If set to 'true' the callbacks are in the same thread as the context and in
             // the scope of the OpenGL function that triggered the message. The default
@@ -478,6 +483,9 @@ void parseLuaState(Configuration& configuration) {
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
         c.openGLDebugContext.isActive = l.activate;
+        c.openGLDebugContext.printStacktrace = l.printStacktrace.value_or(
+            c.openGLDebugContext.printStacktrace
+        );
         c.openGLDebugContext.isSynchronous = l.synchronous.value_or(
             c.openGLDebugContext.isSynchronous
         );
