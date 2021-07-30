@@ -98,15 +98,13 @@ struct Configuration {
     bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
-    glm::dvec3 globalRotation = glm::dvec3(0.0);
-    glm::dvec3 screenSpaceRotation = glm::dvec3(0.0);
-    glm::dvec3 masterRotation = glm::dvec3(0.0);
+    glm::vec3 globalRotation = glm::vec3(0.0);
+    glm::vec3 screenSpaceRotation = glm::vec3(0.0);
+    glm::vec3 masterRotation = glm::vec3(0.0);
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
-
-    std::string renderingMethod = "Framebuffer";
 
     struct OpenGLDebugContext {
         bool isActive = false;

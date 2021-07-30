@@ -26,30 +26,6 @@
 
 namespace openspace::luascriptfunctions {
 
-/**
-* \ingroup LuaScripts
-* setRenderer(string):
-* Set renderer
-*/
-int setRenderer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setRenderer");
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
-    }
-
-    const std::string& renderer = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    global::renderEngine->setRendererFromString(renderer);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
 int addScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
 
