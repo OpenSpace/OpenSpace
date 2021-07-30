@@ -379,7 +379,7 @@ void KeybindingsDialog::listItemAdded() {
     _documentationEdit->setText(QString::fromStdString(_data.back().documentation));
     _localCheck->setChecked(false);
     _scriptEdit->setText(QString::fromStdString(_data.back().script));
-    _currentKeybindingSelection = _data.size() - 1;
+    _currentKeybindingSelection = static_cast<int>(_data.size() - 1);
     _editModeNewItem = true;
 }
 
@@ -393,12 +393,12 @@ void KeybindingsDialog::checkForNumberKeyConflict(int key) {
 
 void KeybindingsDialog::checkForBindingConflict(int selectedModKey, int selectedKey) {
     const QString localWarn = "Warning: New selection conflicts with binding '";
-    if (_currentKeybindingSelection >= _data.size()) {
+    if (_currentKeybindingSelection >= static_cast<int>(_data.size())) {
         return;
     }
     KeyModifier newModifier = static_cast<KeyModifier>(selectedModKey);
     Key newKey = static_cast<Key>(selectedKey);
-    for (int i = 0; i < _data.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(_data.size()); ++i) {
         if (i == _currentKeybindingSelection) {
             continue;
         }
