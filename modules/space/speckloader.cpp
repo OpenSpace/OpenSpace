@@ -40,7 +40,10 @@ namespace {
     constexpr const int8_t LabelCacheFileVersion = 10;
     constexpr const int8_t ColorCacheFileVersion = 10;
 
-    constexpr bool startsWith(std::string_view lhs, std::string_view rhs) noexcept {
+    bool startsWith(std::string lhs, std::string_view rhs) noexcept {
+        for (size_t i = 0; i < lhs.size(); i++) {
+            lhs[i] = static_cast<char>(tolower(lhs[i]));
+        }
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
@@ -50,7 +53,7 @@ namespace {
         // 3. Remove all spaces from the new beginning
         // 4. Remove all spaces from the end
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
@@ -58,11 +61,11 @@ namespace {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line.back() == ' ') {
+        while (!line.empty() && (line.back() == ' ' || line.back() == '\t')) {
             line = line.substr(0, line.size() - 1);
         }
     }

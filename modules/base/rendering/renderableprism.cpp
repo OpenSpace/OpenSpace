@@ -215,7 +215,10 @@ void RenderablePrism::updateVertexData() {
     for (int i = 0; i < 2; ++i) {
         float h = i * _length; // z value, 0 to _length
 
-        for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j, k += 2) {
+        for (int j = 0, k = 0;
+             j < _nShapeSegments && k < static_cast<int>(unitVertices.size());
+             ++j, k += 2)
+        {
             float ux = unitVertices[k];
             float uy = unitVertices[k + 1];
 
@@ -239,7 +242,10 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(_length);
     }
     else {
-        for (int j = 0, k = 0; j < _nLines && k < unitVerticesLines.size(); ++j, k += 2) {
+        for (int j = 0, k = 0;
+             j < _nLines && k < static_cast<int>(unitVerticesLines.size());
+             ++j, k += 2)
+        {
             float ux = unitVerticesLines[k];
             float uy = unitVerticesLines[k + 1];
 
