@@ -39,8 +39,6 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 
-#pragma optimize ("", off)
-
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;

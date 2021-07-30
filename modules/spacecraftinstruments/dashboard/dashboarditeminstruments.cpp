@@ -105,8 +105,10 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _activeColor.setViewOption(properties::Property::ViewOptions::Color);
+    _activeColor = p.activeColor.value_or(_activeColor);
     addProperty(_activeColor);
     _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
+    _activeFlash = p.flashColor.value_or(_activeFlash);
     addProperty(_activeFlash);
 }
 

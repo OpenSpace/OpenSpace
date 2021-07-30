@@ -224,19 +224,19 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _size(SizeInfo, 8.f, 0.5f, 30.f)
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
+    , _size(SizeInfo, 8.f, 0.5f, 30.f)
     , _minMaxSize(MinMaxSizeInfo, glm::ivec2(8, 20), glm::ivec2(0), glm::ivec2(100))
-    , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _text(TextInfo, "")
-    , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
+    , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _orientationOption(
-        OrientationOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _fadeUnitOption(
         FadeUnitOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _orientationOption(
+        OrientationOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
 {

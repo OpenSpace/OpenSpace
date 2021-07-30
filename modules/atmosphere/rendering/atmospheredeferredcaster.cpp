@@ -90,7 +90,10 @@ namespace {
             return;
         }
 
-        std::vector<unsigned char> px(size.x * size.y * 3, unsigned char(255));
+        std::vector<unsigned char> px(
+            size.x * size.y * 3,
+            static_cast<unsigned char>(255)
+        );
 
         glReadBuffer(colorBufferAttachment);
         glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, px.data());
@@ -198,9 +201,9 @@ namespace {
     GLuint createTexture(const glm::ivec3& size, std::string_view name, int components) {
         ghoul_assert(components == 3 || components == 4, "Only 3-4 components supported");
 
-        GLuint texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_3D, texture);
+        GLuint t;
+        glGenTextures(1, &t);
+        glBindTexture(GL_TEXTURE_3D, t);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -221,9 +224,9 @@ namespace {
             nullptr
         );
         if (glbinding::Binding::ObjectLabel.isResolved()) {
-            glObjectLabel(GL_TEXTURE, texture, name.size(), name.data());
+            glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
         }
-        return texture;
+        return t;
     }
 } // namespace
 
@@ -239,9 +242,9 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster(float textureScale,
     , _nuSamples(static_cast<int>(8 * textureScale))
     , _muSamples(static_cast<int>(128 * textureScale))
     , _rSamples(static_cast<int>(32 * textureScale))
+    , _textureSize(_muSSamples * _nuSamples, _muSamples, _rSamples)
     , _shadowConfArray(std::move(shadowConfigArray))
     , _saveCalculationTextures(saveCalculatedTextures)
-    , _textureSize(_muSSamples * _nuSamples, _muSamples, _rSamples)
 {
     std::memset(_uniformNameBuffer, '\0', sizeof(_uniformNameBuffer));
     std::strcpy(_uniformNameBuffer, "shadowDataArray[");
