@@ -843,8 +843,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
 
-double TimeManager::currentApplicationTimeForInterpolation() const
-{
+double TimeManager::currentApplicationTimeForInterpolation() const {
     if (global::sessionRecording->isSavingFramesDuringPlayback()) {
         return global::sessionRecording->currentApplicationInterpolationTime();
     }
@@ -853,8 +852,7 @@ double TimeManager::currentApplicationTimeForInterpolation() const
     }
 }
 
-double TimeManager::previousApplicationTimeForInterpolation() const
-{
+double TimeManager::previousApplicationTimeForInterpolation() const {
     //If playing back with frames, this function needs to be called when a time rate
     // interpolation (either speed change or pause) begins and ends. If the application
     // time of the interpolation keyframe timestamp (when it was added to timeline) is

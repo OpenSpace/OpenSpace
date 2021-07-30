@@ -474,8 +474,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
-std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation()
-{
+std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
     if (global::sessionRecording->isSavingFramesDuringPlayback()) {
         return global::sessionRecording->currentPlaybackInterpolationTime();
     }

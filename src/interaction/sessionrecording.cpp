@@ -1178,13 +1178,11 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 }
 
 std::chrono::steady_clock::time_point
-SessionRecording::currentPlaybackInterpolationTime() const
-{
+SessionRecording::currentPlaybackInterpolationTime() const {
     return _saveRenderingCurrentRecordedTime_interpolation;
 }
 
-double SessionRecording::currentApplicationInterpolationTime() const
-{
+double SessionRecording::currentApplicationInterpolationTime() const {
     return _saveRenderingCurrentApplicationTime_interpolation;
 }
 
