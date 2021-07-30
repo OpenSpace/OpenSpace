@@ -901,13 +901,15 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
     if (!extractSeedPointsFromFile(seedFilePath, seedPoints)) {
         return false;
     }
+    int numberOfSeedPoints = seedPoints.size();
 
     std::vector<std::string> extraMagVars;
     extractMagnitudeVarsFromStrings(extraVars, extraMagVars);
 
     // Load states into RAM!
+    FieldlinesState newState;
+
     for (const std::string& cdfPath : _sourceFiles) {
-        FieldlinesState newState;
         bool isSuccessful = fls::convertCdfToFieldlinesState(
             newState,
             cdfPath,
@@ -917,13 +919,9 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
             extraMagVars
         );
 
-
-
         //LINFO(fmt::format("MaxVel: {}", maxVel));
 
-        //std::vector<std::vector< std::vector<glm::vec3> >> verts = newState.fieldLines();
 
-        //std::vector<std::vector<int>>  open = newState.open();
 
         if (isSuccessful) {
             addStateToSequence(newState);
@@ -932,6 +930,13 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
             }
         }
     }
+
+    std::vector<std::vector< std::vector<glm::vec3> >> fieldlines = newState.fieldLines();
+    std::vector<std::vector<float>> times = newState.vertexTimes();
+    std::vector<float>  timesince = newState.timeSinceLastInterpolation();
+    std::vector<std::vector<glm::vec3>> _vertexPath = newState.vertexPath();
+    newState.addLinesToBeRendered();
+
     return true;
 }
 

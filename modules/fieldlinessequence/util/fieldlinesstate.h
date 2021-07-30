@@ -44,9 +44,9 @@ public:
 
     void scaleFieldlines(float scale);
 
-    void addClosedIndices(std::vector<int> close);
+    void addClosedIndices(std::vector<int>& closed, int i);
 
-    void addOpenIndices(std::vector<int> open);
+    void addOpenIndices(std::vector<int>& open,int i);
 
     void computeTimes();
 
@@ -78,6 +78,8 @@ public:
 
     const std::vector < std::vector<float>>& vertexTimes() const;
 
+    const std::vector<float>& timeSinceLastInterpolation() const;
+
     const std::vector < std::vector<std::vector<glm::vec3>>>& fieldLines() const;
 
     // Special getter. Returns extraQuantities[index].
@@ -87,16 +89,17 @@ public:
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
 
+    void addLinesToBeRendered();
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
 
     void moveLine( double dt);
 
-    void addPath(std::vector<glm::vec3> path);
+    void addPath(std::vector<glm::vec3>& path, int i);
 
-    void addFieldLines(std::vector<std::vector<glm::vec3>> fieldLine);
+    void addFieldLines(std::vector<std::vector<glm::vec3>>& fieldLines, int i);
 
-    void addVelocities(std::vector<float> path);
+    void addTimes(std::vector<float> times, int i);
 
 
 private:
@@ -117,6 +120,7 @@ private:
     std::vector<size_t> _vertexIndex;
     std::vector<float> _timeSinceLastInterpolation;
     std::vector<std::vector<glm::vec3>> _vertexPath;
+
     std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines;
     std::vector<std::vector<float>> _vertexVelocities;
     std::vector<std::vector<float>> _vertexTimes;

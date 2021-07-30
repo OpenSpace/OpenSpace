@@ -55,11 +55,11 @@ void FieldlinesState::convertLatLonToCartesian(float scale) {
     }
 }
 
-void FieldlinesState::scalePositions(float scale) {
-    for (glm::vec3& p : _vertexPositions) {
-        p *= scale;
-    }
-}
+//void FieldlinesState::scalePositions(float scale) {
+//    for (glm::vec3& p : _vertexPositions) {
+//        p *= scale;
+//    }
+//}
 
 void FieldlinesState::scaleflowline(float scale) {
     for (std::vector<glm::vec3>& v : _vertexPath) {
@@ -79,12 +79,52 @@ void FieldlinesState::scaleFieldlines(float scale) {
     }
 }
 
-void FieldlinesState::addOpenIndices(std::vector<int> open) {
-    _open.push_back(open);
+void FieldlinesState::addOpenIndices(std::vector<int>& open, int i) {
+    if (_open.empty()) {
+        _open.push_back(open);
+    }
+
+    //std::vector<std::vector<int>> openVec;
+    //openVec.push_back(open);
+    //_open.insert(_open.begin() + i, openVec.begin(), openVec.end());
+
+    else {
+        for (int& index : open) {
+            index += _vertexPath[i].size();
+        }
+        if (_open[i].empty()) {
+            _open.push_back(open);
+        }
+        else {
+            for (float o : open) {
+                _open[i].push_back(o);
+            }
+        }
+    }
 }
 
-void FieldlinesState::addClosedIndices(std::vector<int> close) {
-    _closed.push_back(close);
+void FieldlinesState::addClosedIndices(std::vector<int>& closed, int i) {
+    //std::vector<std::vector<int>> closedVec;
+       //closedVec.push_back(closed);
+       //_closed.insert(_closed.begin() + i, closedVec.begin(), closedVec.end());
+    if (_closed.empty()) {
+        _closed.push_back(closed);
+    }
+    else {
+        for (int& index : closed) {
+            index += _vertexPath[i].size();
+        }
+       
+        if (_closed[i].empty()) {
+            _closed.push_back(closed);
+        }
+        else {
+            for (float c : closed) {
+                _closed[i].push_back(c);
+            }
+        }
+    }
+    
 }
 
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
@@ -486,8 +526,8 @@ void FieldlinesState::moveLine(double dt) {
                 //check if at end after increasing index
 
                 //size - 3 as a margin to avoid bugs when simulation reaches end
-                if (_vertexIndex[i] == _vertexPath[i].size() - 3) {
-                    _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i] - 1];
+                if (_vertexIndex[i] == _vertexPath[i].size() - 2) {
+                    _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i]-1];
                     int k = 0;
                     for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
                         _vertexPositions[j] = _fieldLines[i][_vertexIndex[i]][k];
@@ -601,7 +641,7 @@ void FieldlinesState::moveLine(double dt) {
                 int k = 0;
                 for (int j = _lineStart[i]; j < _lineCount[i] + _lineStart[i]; j++) {
                     glm::vec3 a = _fieldLines[i][_vertexIndex[i]][k];
-                    glm::vec3 b = _fieldLines[i][_vertexIndex[i] + 1][k];
+                    glm::vec3 b = _fieldLines[i][_vertexIndex[i]+1][k];
 
                     _vertexPositions[j] = lerp(a, b, t);
                     k++;
@@ -615,37 +655,93 @@ void FieldlinesState::moveLine(double dt) {
     if (vertexStart) atStart = true;
 }
 
-void FieldlinesState::addPath(std::vector<glm::vec3> path) {
-    _vertexPath.push_back(path);
-}
+void FieldlinesState::addPath(std::vector<glm::vec3>& path, int i) {
+    //
+    //if ( _vertexPath.empty() ) {
+    //    _vertexPath.push_back(path);
+    //}
+    //else {
+    //    std::vector<std::vector<glm::vec3>> pathVec;
+    //    pathVec.push_back(path);
 
-void FieldlinesState::addFieldLines(std::vector<std::vector<glm::vec3>> fieldLine) {
-    _fieldLines.push_back(fieldLine);
-}
-
-void FieldlinesState::addVelocities(std::vector<float> velocities) {
-    _vertexVelocities.push_back(velocities);
-}
-
-void FieldlinesState::computeTimes() {
-
-    int j = 0;
-    for (std::vector<glm::vec3>& v : _vertexPath) {
-        std::vector<float> times;
-        for (int i = 0; i < v.size() - 2; i++) {
-
-            //distance to next interpolation
-            float d = glm::length(v[i + 1] - v[i]);
-
-            //time to next interpolation = distance / velocity
-            float time = d / _vertexVelocities[j][i];
-
-            times.push_back(time);
+    //    _vertexPath.insert(_vertexPath.begin() + i, pathVec.begin(), pathVec.end());
+    //}
+    if (_vertexPath.empty()) {
+        _vertexPath.push_back(path);
+    }
+    else if (_vertexPath[i].empty()) {
+        _vertexPath.push_back(path);
+    }
+    else {
+        for (glm::vec3 p : path) {
+            _vertexPath[i].push_back(p);
         }
-        j++;
-        _vertexTimes.push_back(times);
+    }
+
+}
+
+void FieldlinesState::addFieldLines(std::vector<std::vector<glm::vec3>>& fieldLines, int i){
+    if (_fieldLines.empty()) {
+        _fieldLines.push_back(fieldLines);
+    }
+    else if (_fieldLines[i].empty()) {
+        _fieldLines.push_back(fieldLines);
+    }
+    else {
+        for (std::vector<glm::vec3> f : fieldLines) {
+            _fieldLines[i].push_back(f);
+        }
     }
 }
+
+void FieldlinesState::addTimes(std::vector<float> times, int i) {
+    if (_vertexTimes.empty()) {
+        _vertexTimes.push_back(times);
+    }
+    //else {
+    //    std::vector<std::vector<float>> timesVec;
+
+    //    _vertexTimes.insert(_vertexTimes.begin() + i, timesVec.begin(), timesVec.end());
+    //}
+
+    else if (_vertexTimes[i].empty()) {
+        _vertexTimes.push_back(times);
+    }
+    else {
+
+        for (float p : times) {
+            std::vector<float>& temp = _vertexTimes[i];
+            temp.push_back(p);
+            //_vertexTimes[i] = temp;
+        }
+    }
+}
+
+void FieldlinesState::addLinesToBeRendered() {
+    for (int i = 0; i < _fieldLines.size(); i++) {
+        addLine(_fieldLines[i][0]);
+    }
+}
+
+//void FieldlinesState::computeTimes() {
+//
+//    int j = 0;
+//    for (std::vector<glm::vec3>& v : _vertexPath) {
+//        std::vector<float> times;
+//        for (int i = 0; i < v.size() - 2; i++) {
+//
+//            //distance to next interpolation
+//            float d = glm::length(v[i + 1] - v[i]);
+//
+//            //time to next interpolation = distance / velocity
+//            float time = d / _vertexVelocities[j][i];
+//
+//            times.push_back(time);
+//        }
+//        j++;
+//        _vertexTimes.push_back(times);
+//    }
+//}
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
     _extraQuantityNames = std::move(names);
@@ -710,6 +806,10 @@ const std::vector < std::vector<float>>& FieldlinesState::vertexTimes() const {
 
 const std::vector<std::vector<std::vector<glm::vec3>>>& FieldlinesState::fieldLines() const {
     return _fieldLines;
+}
+
+const std::vector<float>& FieldlinesState::timeSinceLastInterpolation() const {
+    return _timeSinceLastInterpolation;
 }
 
 } // namespace openspace
