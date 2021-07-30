@@ -1254,7 +1254,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor, glm::ivec4(viewport[0], viewport[1], viewport[2], viewport[3]));
+        applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {

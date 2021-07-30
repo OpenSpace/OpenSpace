@@ -27,6 +27,7 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -647,6 +648,14 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _camera,
             _globalBlackOutFactor
         );
+    }
+
+    // The CEF webbrowser fix has to be called at least once per frame and we are doing
+    // that in the renderer::render method.  So if we disable the rendering, that fix is
+    // no longer called as we lose access to the Web UI.  Since we are calling the fix
+    // many times anyway, we can just add one call to it here and not lose much
+    if (global::callback::webBrowserPerformanceHotfix) {
+        (*global::callback::webBrowserPerformanceHotfix)();
     }
 
     if (_showFrameInformation) {
