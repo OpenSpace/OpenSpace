@@ -258,7 +258,7 @@ const glm::mat4& Camera::SgctInternal::projectionMatrix() const {
 
 const glm::mat4& Camera::SgctInternal::viewProjectionMatrix() const {
     //if (_cachedViewProjectionMatrix.isDirty) {
-        std::lock_guard<std::mutex> _lock(_mutex);
+        std::lock_guard _lock(_mutex);
         _cachedViewProjectionMatrix.datum = _projectionMatrix * _viewMatrix;
         _cachedViewProjectionMatrix.isDirty = false;
     //}

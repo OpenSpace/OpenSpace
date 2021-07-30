@@ -245,7 +245,7 @@ AsyncHttpDownload::AsyncHttpDownload(AsyncHttpDownload&& d)
 {}
 
 void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
-    std::lock_guard<std::mutex> guard(_stateChangeMutex);
+    std::lock_guard guard(_stateChangeMutex);
     if (hasStarted()) {
         return;
     }
@@ -286,7 +286,7 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onProgress([this](HttpRequest::Progress p) {
         // Return a non-zero value to cancel download
         // if onProgress returns false.
-        //std::lock_guard<std::mutex> guard(_mutex);
+        //std::lock_guard guard(_mutex);
         const bool shouldContinue = callOnProgress(p);
         if (!shouldContinue) {
             return 1;

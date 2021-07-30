@@ -66,7 +66,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         }
 
         node->initialize();
-        std::lock_guard<std::mutex> g(_mutex);
+        std::lock_guard g(_mutex);
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);
 
@@ -94,19 +94,19 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         );
     }
 
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     _initializingNodes.insert(node);
     _threadPool.enqueue(initFunction);
 }
 
 std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;
 }
 
 bool MultiThreadedSceneInitializer::isInitializing() const {
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     return !_initializingNodes.empty();
 }
 

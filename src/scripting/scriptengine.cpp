@@ -694,7 +694,7 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    std::lock_guard guard(_slaveScriptsMutex);
     while (!_incomingScripts.empty()) {
         QueueItem item = std::move(_incomingScripts.front());
         _incomingScripts.pop();
@@ -728,7 +728,7 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    std::lock_guard guard(_slaveScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
@@ -757,7 +757,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+        std::lock_guard guard(_slaveScriptsMutex);
         while (!_slaveScriptQueue.empty()) {
             try {
                 runScript(_slaveScriptQueue.front());
