@@ -315,19 +315,19 @@ TEST_CASE("Configuration: isRenderingOnMasterDisabled", "[configuration]") {
 TEST_CASE("Configuration: globalRotation", "[configuration]") {
     constexpr const char Extra[] = R"(GlobalRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("globalRotation", Extra);
-    CHECK(c.globalRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.globalRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: screenSpaceRotation", "[configuration]") {
     constexpr const char Extra[] = R"(ScreenSpaceRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("screenSpaceRotation", Extra);
-    CHECK(c.screenSpaceRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.screenSpaceRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: masterRotation", "[configuration]") {
     constexpr const char Extra[] = R"(MasterRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("masterRotation", Extra);
-    CHECK(c.masterRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.masterRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: isConsoleDisabled", "[configuration]") {
@@ -379,12 +379,6 @@ ModuleConfigurations = {
         REQUIRE(bar.hasValue<glm::dvec3>("Bar3"));
         CHECK(bar.value<glm::dvec3>("Bar3") == glm::dvec3(1.0, 2.0, 3.0));
     }
-}
-
-TEST_CASE("Configuration: renderingMethod", "[configuration]") {
-    constexpr const char Extra[] = R"(RenderingMethod = "ABuffer")";
-    const Configuration c = loadConfiguration("renderingMethod", Extra);
-    CHECK(c.renderingMethod == "ABuffer");
 }
 
 TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {

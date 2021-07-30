@@ -229,17 +229,17 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
             const bool isEast = lon > 0.0;
             lon = std::abs(lon);
 
-            const float latDeg = std::trunc(lat);
-            const float latDegRemainder = lat - latDeg;
-            const float latMin = std::trunc(latDegRemainder * 60.f);
-            const float latMinRemainder = latDegRemainder * 60.f - latMin;
-            const float latSec = latMinRemainder * 60.f;
+            const double latDeg = std::trunc(lat);
+            const double latDegRemainder = lat - latDeg;
+            const double latMin = std::trunc(latDegRemainder * 60.f);
+            const double latMinRemainder = latDegRemainder * 60.f - latMin;
+            const double latSec = latMinRemainder * 60.f;
 
-            const float lonDeg = std::trunc(lon);
-            const float lonDegRemainder = lon - lonDeg;
-            const float lonMin = std::trunc(lonDegRemainder * 60.f);
-            const float lonMinRemainder = lonDegRemainder * 60.f - lonMin;
-            const float lonSec = lonMinRemainder * 60.f;
+            const double lonDeg = std::trunc(lon);
+            const double lonDegRemainder = lon - lonDeg;
+            const double lonMin = std::trunc(lonDegRemainder * 60.f);
+            const double lonMinRemainder = lonDegRemainder * 60.f - lonMin;
+            const double lonSec = lonMinRemainder * 60.f;
 
 
             end = fmt::format_to(

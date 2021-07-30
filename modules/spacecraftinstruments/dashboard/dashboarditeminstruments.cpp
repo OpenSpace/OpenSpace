@@ -74,10 +74,10 @@ namespace {
 
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
         // [[codegen::verbatim(ActiveColorInfo.description)]]
-        std::optional<glm::dvec3> activeColor [[codegen::color()]];
+        std::optional<glm::vec3> activeColor [[codegen::color()]];
 
         // [[codegen::verbatim(FlashColorInfo.description)]]
-        std::optional<glm::dvec3> flashColor [[codegen::color()]];
+        std::optional<glm::vec3> flashColor [[codegen::color()]];
     };
 #include "dashboarditeminstruments_codegen.cpp"
 } // namespace
