@@ -37,7 +37,8 @@ if is_image_file(extension) then
     TexturePath = "]] .. filename .. [["
   });]]
 elseif extension == ".asset" then
-  return [[openspace.asset.add("]] .. filename .. [[")]]
+  return [[openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+    openspace.asset.add("]] .. filename .. [[");]]
 elseif extension == ".osrec" or extension == ".osrectxt" then
   return [[openspace.sessionRecording.startPlayback("]] .. basename .. [[")]]
 end

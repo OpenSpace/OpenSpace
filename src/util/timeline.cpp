@@ -38,4 +38,8 @@ bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b) {
     return a.timestamp < b;
 }
 
+bool compareKeyframeTimeWithTime_playbackWithFrames(const KeyframeBase& a, double b) {
+    return a.timestamp <= b;
+}
+
 } // namespace

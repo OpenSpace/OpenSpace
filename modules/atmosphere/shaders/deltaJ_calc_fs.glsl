@@ -28,18 +28,44 @@
 
 out vec4 renderTarget;
 
+uniform float Rg;
+uniform float Rt;
+uniform float AverageGroundReflectance;
+uniform float HR;
+uniform vec3 betaRayleigh;
+uniform float HM;
+uniform vec3 betaMieScattering;
+uniform float mieG;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
-
 uniform sampler2D deltaETexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
+uniform int firstIteration;
 
-uniform int firstIteraction;
+const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
+// Given the irradiance texture table, the cosine of zenith sun vector and the height of
+// the observer (ray's stating point x), calculates the mapping for u_r and u_muSun and
+// returns the value in the LUT
+// lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// r     := height of starting point vect(x)
+vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
+  // See Bruneton paper and Coliene to understand the mapping
+  float u_muSun = (muSun + 0.2) / 1.2;
+  float u_r = (r - Rg) / (Rt - Rg);
+  return texture(lut, vec2(u_muSun, u_r)).rgb;
+}
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   // Be sure to not get a cosine or height out of bounds
@@ -59,7 +85,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   float muSun2 = muSun * muSun;
   float sinThetaSinSigma = sqrt(1.0 - mu2) * sqrt(1.0 - muSun2);
   // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
-  // cos(ni) = nu = mu * muSun - sqrt(1.0f - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
+  // cos(ni) = nu = mu * muSun - sqrt(1.0 - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
   // Now we make sure the angle between vec(s) and vec(v) is in the right range:
   nu = clamp(nu, muSun * mu - sinThetaSinSigma, muSun * mu + sinThetaSinSigma);
 
@@ -69,7 +95,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   // -cos(theta) = sqrt(r*r-Rg*Rg)/r
   float Rg2 = Rg * Rg;
   float r2 = r * r;
-  float cosHorizon = -sqrt(r2 - Rg2)/r;
+  float cosHorizon = -sqrt(r2 - Rg2) / r;
 
   // Now we get vec(v) and vec(s) from mu, muSun and nu:
   // Assuming:
@@ -97,6 +123,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
+  vec3 radianceJAcc = vec3(0.0);
   for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; theta_i++) {
     float theta = (float(theta_i) + 0.5) * stepTheta;
     float cosineTheta = cos(theta);
@@ -131,7 +158,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
       // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
-      groundTransmittance = transmittance(Rg, muGround, distanceToGround);
+      groundTransmittance = transmittance(transmittanceTexture, Rg, muGround, distanceToGround, Rg, Rt);
     }
 
     for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
@@ -161,43 +188,48 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
       // cos(angle between vec(s) and vec(w)), ||s|| = ||w|| = 1
       float nuSW = dot(s, w);
-      // The first iteraction is different from the others. In the first iteraction all
+      // The first iteration is different from the others. In the first iteration all
       // the light InScattered is coming from the initial pre-computed single InScattered
       // light. We stored these values in the deltaS textures (Ray and Mie), and in order
       // to avoid problems with the high angle dependency in the phase functions, we don't
       // include the phase functions on those tables (that's why we calculate them now).
-      if (firstIteraction == 1) {        
+      if (firstIteration == 1) {        
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
+          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
+          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
       }
       else {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we
-        // are not in the first iteraction, we are getting the updated result of deltaSR
+        // are not in the first iteration, we are getting the updated result of deltaSR
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
+        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU, Rt,
+          SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
-      return radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
+      radianceJAcc += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
         betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
     }
   }
+
+  return radianceJAcc;
 }
 
 void main() {
   // InScattering Radiance to be calculated at different points in the ray path
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   float mu, muSun, nu;
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
 
   // Calculate the the light inScattered in direction
   // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper

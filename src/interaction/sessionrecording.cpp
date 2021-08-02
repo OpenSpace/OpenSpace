@@ -472,6 +472,8 @@ void SessionRecording::initializePlayback_time(double now) {
     _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
+    _saveRenderingCurrentApplicationTime_interpolation =
+        global::windowDelegate->applicationTime();
     _saveRenderingClockInterpolation_countsPerSec =
         system_clock::duration::period::den / system_clock::duration::period::num;
     _playbackPauseOffset = 0.0;
@@ -1176,9 +1178,12 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 }
 
 std::chrono::steady_clock::time_point
-SessionRecording::currentPlaybackInterpolationTime() const
-{
+SessionRecording::currentPlaybackInterpolationTime() const {
     return _saveRenderingCurrentRecordedTime_interpolation;
+}
+
+double SessionRecording::currentApplicationInterpolationTime() const {
+    return _saveRenderingCurrentApplicationTime_interpolation;
 }
 
 bool SessionRecording::playbackCamera() {
@@ -1771,7 +1776,8 @@ void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
     bool paused = global::timeManager->isPaused();
-    if (_state == SessionState::PlaybackPaused) {
+    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
@@ -1793,10 +1799,12 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            if (!paused) {
+            if (!playbackPaused) {
                 _saveRenderingCurrentRecordedTime_interpolation +=
                     _saveRenderingDeltaTime_interpolation_usec;
-               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentApplicationTime_interpolation +=
+                    _saveRenderingDeltaTime;
                 global::renderEngine->takeScreenshot();
             }
         }
