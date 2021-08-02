@@ -197,6 +197,7 @@ void NavigationHandler::deinitialize() {
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
+    ghoul_assert(node, "Focus node must not be nullptr");
     _orbitalNavigator.setFocusNode(node);
     _camera->setPositionVec3(anchorNode()->worldPosition());
 }

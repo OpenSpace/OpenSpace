@@ -129,10 +129,7 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& asset
 {
     setWindowTitle("Assets");
     _assetTreeModel.importModelData(assetBasePath, userAssetBasePath);
-    createWidgets();
-}
 
-void AssetsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         QLabel* heading = new QLabel("Select assets from /data/assets");
@@ -173,18 +170,19 @@ void AssetsDialog::createWidgets() {
             nRows,
             _assetTreeModel.index(-1, 0)
         );
-        layout->addWidget(_assetTree);
+        layout->addWidget(_assetTree, 4);
     }
     {
+        QWidget* box = new QWidget;
+        QBoxLayout* boxLayout = new QVBoxLayout(box);
         QLabel* summaryHeading = new QLabel("Selection summary");
         summaryHeading->setObjectName("heading");
-        layout->addWidget(summaryHeading);
-    }
-    {
+        boxLayout->addWidget(summaryHeading);
         _summary = new QTextEdit;
         _summary->setReadOnly(true);
         _summary->setText(createTextSummary());
-        layout->addWidget(_summary);
+        boxLayout->addWidget(_summary);
+        layout->addWidget(box, 1);
     }
 
     layout->addWidget(new Line);
