@@ -84,10 +84,6 @@ void FieldlinesState::addOpenIndices(std::vector<int>& open, int i) {
         _open.push_back(open);
     }
 
-    //std::vector<std::vector<int>> openVec;
-    //openVec.push_back(open);
-    //_open.insert(_open.begin() + i, openVec.begin(), openVec.end());
-
     else {
         for (int& index : open) {
             index += _vertexPath[i].size();
@@ -508,8 +504,13 @@ void FieldlinesState::moveLine(double dt) {
     bool vertexStart = false;
 
     //each vertex on the rendered field line
+    if (_timeSinceLastInterpolation.empty()) {
+        for (int i = 0; i < _numberOfLines; ++i) {
+            _timeSinceLastInterpolation.push_back(0.0);
+        }
+    }
 
-    for (int i = 0; i < _numberOfLines; i++) {
+    for (int i = 0; i < _numberOfLines; ++i) {
 
         _timeSinceLastInterpolation[i] += float(dt);
 
@@ -655,65 +656,45 @@ void FieldlinesState::moveLine(double dt) {
     if (vertexStart) atStart = true;
 }
 
-void FieldlinesState::addPath(std::vector<glm::vec3>& path, int i) {
-    //
-    //if ( _vertexPath.empty() ) {
-    //    _vertexPath.push_back(path);
-    //}
-    //else {
-    //    std::vector<std::vector<glm::vec3>> pathVec;
-    //    pathVec.push_back(path);
+void FieldlinesState::addPath(std::vector<glm::vec3> path, int i) {
 
-    //    _vertexPath.insert(_vertexPath.begin() + i, pathVec.begin(), pathVec.end());
-    //}
-    if (_vertexPath.empty()) {
+    if (_vertexPath.size() == i) {
         _vertexPath.push_back(path);
     }
-    else if (_vertexPath[i].empty()) {
-        _vertexPath.push_back(path);
+    else if (_vertexPath.size() > i){
+        _vertexPath[i].insert(_vertexPath[i].end(), path.begin(), path.end());
     }
+
     else {
-        for (glm::vec3 p : path) {
-            _vertexPath[i].push_back(p);
-        }
+        LDEBUG("invalid index to addPath");
     }
-
 }
 
-void FieldlinesState::addFieldLines(std::vector<std::vector<glm::vec3>>& fieldLines, int i){
-    if (_fieldLines.empty()) {
+void FieldlinesState::addFieldLines(std::vector<std::vector<glm::vec3>>& fieldLines,
+                                                                                   int i){
+    if (_fieldLines.size() == i) {
         _fieldLines.push_back(fieldLines);
     }
-    else if (_fieldLines[i].empty()) {
-        _fieldLines.push_back(fieldLines);
+    else if (_fieldLines[i].size() > i) {
+        _fieldLines[i].insert(_fieldLines[i].end(), fieldLines.begin(), fieldLines.end());
     }
     else {
-        for (std::vector<glm::vec3> f : fieldLines) {
-            _fieldLines[i].push_back(f);
-        }
+        LDEBUG("invalid index passed into addFieldLines()");
     }
 }
 
 void FieldlinesState::addTimes(std::vector<float> times, int i) {
-    if (_vertexTimes.empty()) {
+
+    if (_vertexTimes.size() == i) {
         _vertexTimes.push_back(times);
     }
-    //else {
-    //    std::vector<std::vector<float>> timesVec;
 
-    //    _vertexTimes.insert(_vertexTimes.begin() + i, timesVec.begin(), timesVec.end());
-    //}
-
-    else if (_vertexTimes[i].empty()) {
-        _vertexTimes.push_back(times);
+    else if (_vertexTimes.size() > i) {
+       _vertexTimes[i].insert(_vertexTimes[i].end(), times.begin(), times.end());
     }
+
     else {
-
-        for (float p : times) {
-            std::vector<float>& temp = _vertexTimes[i];
-            temp.push_back(p);
-            //_vertexTimes[i] = temp;
-        }
+        LDEBUG("Invalid index passed to addTimes");
     }
 }
 

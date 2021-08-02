@@ -95,7 +95,7 @@ public:
 
     void moveLine( double dt);
 
-    void addPath(std::vector<glm::vec3>& path, int i);
+    void addPath(std::vector<glm::vec3> path, int i);
 
     void addFieldLines(std::vector<std::vector<glm::vec3>>& fieldLines, int i);
 
@@ -118,7 +118,7 @@ private:
     std::vector<glm::vec3> _vertexPositions;
 
     std::vector<size_t> _vertexIndex;
-    std::vector<float> _timeSinceLastInterpolation;
+    std::vector<float> _timeSinceLastInterpolation = { 0.0f };
     std::vector<std::vector<glm::vec3>> _vertexPath;
 
     std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines;

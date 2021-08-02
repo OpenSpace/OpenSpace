@@ -6,10 +6,11 @@ local transferFunctions = asset.localResource("transferfunctions")
 local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 
-local fieldlinesDirectory = 'D:/OpenSpaceData/CDF'
-local seedPointFile = 'D:/OpenSpaceData/Seedpoints/lines.txt'
+-- local fieldlinesDirectory = 'D:/OpenSpaceData/CDF'
+local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
+-- local seedPointFile = 'D:/OpenSpaceData/Seedpoints/lines.txt'
+local seedPointFile = 'C:/Users/elono/Documents/OpenSpace/data/Chris/seedpoints/lines.txt'
 
---local sunRadius = 6.957E8
 local earthRadius = 6378137
 
 
