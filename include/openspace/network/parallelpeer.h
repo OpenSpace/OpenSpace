@@ -35,6 +35,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/designpattern/event.h>
 #include <atomic>
 #include <deque>
@@ -98,6 +99,8 @@ private:
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
 
+    bool independentView();
+
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
 
@@ -109,6 +112,7 @@ private:
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
+    properties::BoolProperty _independentView;
 
     double _lastTimeKeyframeTimestamp = 0.0;
     double _lastCameraKeyframeTimestamp = 0.0;

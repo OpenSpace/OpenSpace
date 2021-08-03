@@ -63,6 +63,7 @@ private:
     };
 
     bool isConnected(const Peer& peer) const;
+    bool independentViewEnabled(const Peer& peer) const;
 
     void sendMessage(Peer& peer, ParallelConnection::MessageType messageType,
         const std::vector<char>& message);

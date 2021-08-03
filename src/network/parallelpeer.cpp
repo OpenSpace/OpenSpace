@@ -95,6 +95,12 @@ namespace {
         "Camera Keyframe interval",
         "" // @TODO Missing documentation
     };
+
+    constexpr openspace::properties::Property::PropertyInfo IndependentViewInfo = {
+        "IndependentView",
+        "Independent View",
+        "blabla" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
@@ -109,6 +115,7 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _independentView(IndependentViewInfo)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
 {
@@ -122,6 +129,8 @@ ParallelPeer::ParallelPeer()
 
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
+
+    addProperty(_independentView);
 }
 
 ParallelPeer::~ParallelPeer() {
@@ -573,6 +582,10 @@ int ParallelPeer::nConnections() {
 
 bool ParallelPeer::isHost() {
     return _status == ParallelConnection::Status::Host;
+}
+
+bool ParallelPeer::independentView() {
+    return false;
 }
 
 void ParallelPeer::setHostName(const std::string& hostName) {

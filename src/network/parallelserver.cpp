@@ -423,4 +423,9 @@ size_t ParallelServer::nConnections() const {
     return _nConnections;
 }
 
+bool ParallelServer::independentViewEnabled(const Peer& peer) const {
+    // check if peer has enabled host-independent viewpoint
+    return false;
+}
+
 } // namespace openspace
