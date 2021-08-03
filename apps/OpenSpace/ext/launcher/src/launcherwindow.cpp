@@ -478,7 +478,7 @@ std::string LauncherWindow::selectedWindowConfig() const {
     int idx = _windowConfigBox->currentIndex();
     if (idx == 0) {
         return _sgctConfigName;
-    } else if (idx > _userAssetCount) {
+    } else if (idx > _userConfigCount) {
         return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
     else {
