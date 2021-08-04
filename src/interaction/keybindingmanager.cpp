@@ -72,14 +72,7 @@ void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
 {
 #ifdef WIN32
     const bool isShift = hasKeyModifier(modifier, KeyModifier::Shift);
-    const bool isKeypad = key == Key::Keypad0 || key == Key::Keypad1 ||
-        key == Key::Keypad2 || key == Key::Keypad3 || key == Key::Keypad4 ||
-        key == Key::Keypad5 || key == Key::Keypad6 || key == Key::Keypad7 ||
-        key == Key::Keypad8 || key == Key::Keypad9 || key == Key::KeypadEnter ||
-        key == Key::KeypadAdd || key == Key::KeypadSubtract ||
-        key == Key::KeypadMultiply || key == Key::KeypadDivide;
-
-    if (isShift && isKeypad) {
+    if (isShift && isKeypadKey(key)) {
         LWARNINGC(
             "bindKey",
             "Windows does not support binding keys to Shift + Keyboard as it will "
@@ -106,14 +99,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
 {
 #ifdef WIN32
     const bool isShift = hasKeyModifier(modifier, KeyModifier::Shift);
-    const bool isKeypad = key == Key::Keypad0 || key == Key::Keypad1 ||
-        key == Key::Keypad2 || key == Key::Keypad3 || key == Key::Keypad4 ||
-        key == Key::Keypad5 || key == Key::Keypad6 || key == Key::Keypad7 ||
-        key == Key::Keypad8 || key == Key::Keypad9 || key == Key::KeypadEnter ||
-        key == Key::KeypadAdd || key == Key::KeypadSubtract ||
-        key == Key::KeypadMultiply || key == Key::KeypadDivide;
-
-    if (isShift && isKeypad) {
+    if (isShift && isKeypadKey(key)) {
         LWARNINGC(
             "bindKey",
             "Windows does not support binding keys to Shift + Keypad as it will "
