@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/gui.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/scripting/scriptengine.h>
@@ -82,27 +83,25 @@ void GuiShortcutsComponent::render() {
     // Then display all the keybinds as buttons as well, for good measure
     CaptionText("Keybindings");
     using K = KeyWithModifier;
-    using V = interaction::KeybindingManager::KeyInformation;
+    using V = std::string;
     const std::multimap<K, V>& binds = global::keybindingManager->keyBindings();
 
     for (const std::pair<const K, V>& p : binds) {
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
-            global::scriptEngine->queueScript(
-                p.second.command,
-                scripting::ScriptEngine::RemoteScripting(p.second.synchronization)
-            );
+            global::actionManager->triggerAction(p.second);
         }
         ImGui::SameLine();
 
         // Poor mans table layout
         ImGui::SetCursorPosX(125.f);
 
-        ImGui::Text("%s", p.second.documentation.c_str());
-        if (!p.second.synchronization) {
+        const interaction::Action& a = global::actionManager->action(p.second);
+
+        ImGui::Text("%s", a.documentation.c_str());
+        if (!a.synchronization) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }
-
     }
 }
 

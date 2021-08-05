@@ -39,15 +39,12 @@ ActionManager::ActionManager() {
 bool ActionManager::hasAction(const std::string& identifier) const {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
-    const auto it = std::lower_bound(
-        _actions.begin(), _actions.end(),
-        identifier,
-        [](const Action& action, const std::string& identifier) {
-            return action.identifier < identifier;
+    for (const Action& action : _actions) {
+        if (action.identifier == identifier) {
+            return true;
         }
-    );
-
-    return it != _actions.end();
+    }
+    return false;
 }
 
 void ActionManager::registerAction(Action action) {
@@ -55,41 +52,31 @@ void ActionManager::registerAction(Action action) {
     ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
 
     _actions.push_back(std::move(action));
-    std::sort(
-        _actions.begin(), _actions.end(),
-        [](const Action& lhs, const Action& rhs) {
-            return lhs.identifier < rhs.identifier;
-        }
-    );
 }
 
 void ActionManager::removeAction(const std::string& identifier) {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
-    const auto it = std::lower_bound(
-        _actions.begin(), _actions.end(),
-        identifier,
-        [](const Action& action, const std::string& identifier) {
-            return action.identifier < identifier;
+    for (size_t i = 0; i < _actions.size(); ++i) {
+        if (_actions[i].identifier == identifier) {
+            _actions.erase(_actions.begin() + i);
+            return;
         }
-    );
-    _actions.erase(it);
+    }
 }
 
 const Action& ActionManager::action(const std::string& identifier) const {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
-    const auto it = std::lower_bound(
-        _actions.begin(), _actions.end(),
-        identifier,
-        [](const Action& action, const std::string& identifier) {
-            return action.identifier < identifier;
+    for (const Action& action : _actions) {
+        if (action.identifier == identifier) {
+            return action;
         }
-    );
+    }
 
-    return *it;
+    throw ghoul::RuntimeError(fmt::format("Did not find action '{}'", identifier));
 }
 
 const std::vector<Action>& ActionManager::actions() const {
@@ -110,7 +97,7 @@ void ActionManager::triggerAction(const std::string& identifier) const {
 
 scripting::LuaLibrary ActionManager::luaLibrary() {
     return {
-        "actions",
+        "action",
         {
             {
                 "hasAction",
@@ -130,14 +117,14 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
                 "registerAction",
                 &luascriptfunctions::registerAction,
                 {},
-                "string, string [, string, string, string, boolean]",
-                "Registers a new action. The first argument is the identifier which "
-                "cannot have been used to register a previous action before, the second "
-                "argument is the Lua command that is to be executed, and the optional "
-                "third argument is the name used in a user-interface to refer to this "
-                "action. The fourth is a human readable description of the command for "
-                "documentation purposes. The fifth is the GUI path and the last "
-                "parameter determines whether the action should be executed locally "
+                "table",
+                "Registers a new action. The table must at least contain the keys "
+                "'Identifier' and 'Command' represeting the unique identifier and the "
+                "Lua script that belong to this new action. Optional keys are 'Name' for "
+                "a human-readable name, 'Documentation' for a description of what the "
+                "action does, 'GuiPath' for a path used for grouping a user interface. "
+                "All of these parameters must be strings. The last parameter is "
+                "'IsLocal' and represents whether the action should be executed locally "
                 "(= false) or remotely (= true, the default)"
             },
             {

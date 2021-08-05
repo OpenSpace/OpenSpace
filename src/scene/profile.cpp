@@ -703,15 +703,25 @@ std::string Profile::convertToScene() const {
 
     output += "asset.onInitialize(function()\n";
     // Keybindings
-    for (const Keybinding& k : _keybindings) {
+    for (size_t i = 0; i < _keybindings.size(); ++i) {
+        const Keybinding& k = _keybindings[i];
         const std::string key = ghoul::to_string(k.key);
         const std::string name = k.name.empty() ? key : k.name;
+
+        std::string identifier = fmt::format("profile.keybind.{}", i);
+
+        // First create the action
         output += fmt::format(
-            k.isLocal ?
-            "openspace.bindKeyLocal(\"{}\",\"{}\", [[{}]], [[{}]], [[{}]]);\n" :
-            "openspace.bindKey(\"{}\", [[{}]], [[{}]], [[{}]], [[{}]]);\n",
-            key, k.script, k.documentation, name, k.guiPath
+            "openspace.action.registerAction({{"
+            "Identifier=[[{}]], Command=[[{}]], Name=[[{}]], Documentation=[[{}]], "
+            "GuiPath=[[{}]], IsLocal={}"
+            "}})\n",
+            identifier, k.script, name, k.documentation, k.guiPath,
+            k.isLocal ? "true" : "false"
         );
+
+        // The bind the key to the action
+        output += fmt::format("openspace.bindKey([[{}]], [[{}]])\n", key, identifier);
     }
 
     // Time

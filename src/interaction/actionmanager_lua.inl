@@ -80,9 +80,14 @@ int removeAction(lua_State* L) {
  * default).
  */
 int registerAction(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 6 }, "lua::registerAction");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerAction");
 
-    std::string identifier = ghoul::lua::value<std::string>(L, 1);
+    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L, 1);
+
+    if (!d.hasValue<std::string>("Identifier")) {
+        return ghoul::lua::luaError(L, "Identifier must to provided to register action");
+    }
+    std::string identifier = d.value<std::string>("Identifier");
     if (global::actionManager->hasAction(identifier)) {
         return ghoul::lua::luaError(
             L,
@@ -95,20 +100,30 @@ int registerAction(lua_State* L) {
             fmt::format("Identifier '{}' for action already registered", identifier)
         );
     }
+
+    if (!d.hasValue<std::string>("Command")) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format(
+                "Identifier '{}' does not provide a Lua command to execute", identifier
+            )
+        );
+    }
+
     interaction::Action action;
     action.identifier = std::move(identifier);
-    action.command = ghoul::lua::value<std::string>(L, 2);
-    if (n >= 3) {
-        action.name = ghoul::lua::value<std::string>(L, 3);
+    action.command = d.value<std::string>("Command");
+    if (d.hasValue<std::string>("Name")) {
+        action.name = d.value<std::string>("Name");
     }
-    if (n >= 4) {
-        action.documentation = ghoul::lua::value<std::string>(L, 4);
+    if (d.hasValue<std::string>("Documentation")) {
+        action.documentation = d.value<std::string>("Documentation");
     }
-    if (n >= 5) {
-        action.guiPath = ghoul::lua::value<std::string>(L, 5);
+    if (d.hasValue<std::string>("GuiPath")) {
+        action.guiPath = d.value<std::string>("GuiPath");
     }
-    if (n == 6) {
-        bool value = ghoul::lua::value<bool>(L, 6);
+    if (d.hasValue<bool>("IsLocal")) {
+        bool value = d.value<bool>("IsLocal");
         action.synchronization = interaction::Action::IsSynchronized(value);
     }
     global::actionManager->registerAction(std::move(action));
