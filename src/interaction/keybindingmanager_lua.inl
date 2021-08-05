@@ -138,7 +138,9 @@ int getKeyBindings(lua_State* L) {
     using K = KeyWithModifier;
     using V = interaction::KeybindingManager::KeyInformation;
 
-    const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(key);
+    const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
+        stringToKey(key)
+    );
 
     lua_createtable(L, static_cast<int>(info.size()), 0);
     int i = 1;
@@ -173,7 +175,7 @@ int clearKey(lua_State* L) {
     if (t == LUA_TSTRING) {
         // The user provided a single key
         const std::string& key = ghoul::lua::value<std::string>(L, 1);
-        global::keybindingManager->removeKeyBinding(key);
+        global::keybindingManager->removeKeyBinding(stringToKey(key));
     }
     else {
         // The user provided a list of keys
@@ -181,7 +183,7 @@ int clearKey(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
         for (size_t i = 1; i <= d.size(); ++i) {
             const std::string& k = d.value<std::string>(std::to_string(i));
-            global::keybindingManager->removeKeyBinding(k);
+            global::keybindingManager->removeKeyBinding(stringToKey(k));
         }
         lua_pop(L, 1);
     }

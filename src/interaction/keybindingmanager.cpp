@@ -120,11 +120,6 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
     });
 }
 
-void KeybindingManager::removeKeyBinding(const std::string& key) {
-    KeyWithModifier k = stringToKey(key);
-    removeKeyBinding(k);
-}
-
 void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
@@ -139,13 +134,6 @@ void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
             ++it;
         }
     }
-}
-
-std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
-KeybindingManager::keyBinding(const std::string& key) const
-{
-    KeyWithModifier k = stringToKey(key);
-    return keyBinding(k);
 }
 
 std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
