@@ -32,6 +32,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -90,6 +91,7 @@ namespace {
         sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
+        sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
@@ -270,6 +272,14 @@ void create() {
     currentPos += sizeof(configuration::Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
     configuration = new configuration::Configuration;
+#endif // WIN32
+
+#ifdef WIN32
+    actionManager = new (currentPos) interaction::ActionManager;
+    ghoul_assert(actionManager, "No action manager");
+    currentPos += sizeof(interaction::ActionManager);
+#else ^^^ WIN32 / !WIN32 vvv
+    actionManager = new interaction::ActionManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -480,6 +490,13 @@ void destroy() {
     interactionMonitor->~InteractionMonitor();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete interactionMonitor;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destorying 'ActionManager'");
+#ifdef WIN32
+    actionManager->~ActionManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete actionManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Configuration'");

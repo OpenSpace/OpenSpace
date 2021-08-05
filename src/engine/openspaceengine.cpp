@@ -35,6 +35,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -354,6 +355,10 @@ void OpenSpaceEngine::initialize() {
     global::scriptEngine->addLibrary(
         global::openSpaceEngine->_assetManager->luaLibrary()
     );
+    global::scriptEngine->addLibrary(
+        global::actionManager->luaLibrary()
+    );
+
 
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         global::scriptEngine->addLibrary(module->luaLibrary());

@@ -30,9 +30,8 @@ namespace openspace::luascriptfunctions {
 /**
  * \ingroup LuaScripts
  * bindKey():
- * Binds a key to Lua command to both execute locally
- * and broadcast to all clients if this node is hosting
- * a parallel connection.
+ * Binds a key to Lua command to both execute locally and broadcast to all clients if this
+ * node is hosting a parallel connection.
  */
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
