@@ -26,28 +26,26 @@
 #define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
 #include <openspace/interaction/action.h>
-#include <vector>
+#include <unordered_map>
 
 namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class ActionManager /* : public DocumentationGenerator */ {
+class ActionManager {
 public:
-    ActionManager();
-
     bool hasAction(const std::string& identifier) const;
     void registerAction(Action action);
     void removeAction(const std::string& identifier);
     const Action& action(const std::string& identifier) const;
-    const std::vector<Action>& actions() const;
+    std::vector<Action> actions() const;
 
     void triggerAction(const std::string& identifier) const;
 
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    std::vector<Action> _actions;
+    std::unordered_map<unsigned int, Action> _actions;
 };
 
 } // namespace openspace::interaction

@@ -26,61 +26,54 @@
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/crc32.h>
 #include <algorithm>
 
 #include "actionmanager_lua.inl"
 
 namespace openspace::interaction {
 
-ActionManager::ActionManager() {
-
-}
-
 bool ActionManager::hasAction(const std::string& identifier) const {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
-    for (const Action& action : _actions) {
-        if (action.identifier == identifier) {
-            return true;
-        }
-    }
-    return false;
+    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const auto it = _actions.find(hash);
+    return it != _actions.end();
 }
 
 void ActionManager::registerAction(Action action) {
     ghoul_assert(!action.identifier.empty(), "Action must have an identifier");
     ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
 
-    _actions.push_back(std::move(action));
+    const unsigned int hash = ghoul::hashCRC32(action.identifier);
+    _actions[hash] = std::move(action);
 }
 
 void ActionManager::removeAction(const std::string& identifier) {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
-    for (size_t i = 0; i < _actions.size(); ++i) {
-        if (_actions[i].identifier == identifier) {
-            _actions.erase(_actions.begin() + i);
-            return;
-        }
-    }
+    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const auto it = _actions.find(hash);
+    _actions.erase(it);
 }
 
 const Action& ActionManager::action(const std::string& identifier) const {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
-    for (const Action& action : _actions) {
-        if (action.identifier == identifier) {
-            return action;
-        }
-    }
-
-    throw ghoul::RuntimeError(fmt::format("Did not find action '{}'", identifier));
+    const unsigned int hash = ghoul::hashCRC32(identifier);
+    const auto it = _actions.find(hash);
+    return it->second;
 }
 
-const std::vector<Action>& ActionManager::actions() const {
-    return _actions;
+std::vector<Action> ActionManager::actions() const {
+    std::vector<Action> result;
+    result.reserve(_actions.size());
+    for (const std::pair<unsigned int, Action>& p : _actions) {
+        result.push_back(p.second);
+    }
+    return result;
 }
 
 void ActionManager::triggerAction(const std::string& identifier) const {
@@ -93,7 +86,6 @@ void ActionManager::triggerAction(const std::string& identifier) const {
         scripting::ScriptEngine::RemoteScripting(a.synchronization)
     );
 }
-
 
 scripting::LuaLibrary ActionManager::luaLibrary() {
     return {
