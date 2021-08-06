@@ -39,7 +39,6 @@
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/properties/propertyowner.h>
@@ -97,7 +96,6 @@ namespace {
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
-        sizeof(interaction::ShortcutManager) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
@@ -331,14 +329,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    shortcutManager = new (currentPos) interaction::ShortcutManager;
-    ghoul_assert(shortcutManager, "No shortcutManager");
-    currentPos += sizeof(interaction::ShortcutManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    shortcutManager = new interaction::ShortcutManager;
-#endif // WIN32
-
-#ifdef WIN32
     rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
@@ -441,13 +431,6 @@ void destroy() {
     rootPropertyOwner->~PropertyOwner();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete rootPropertyOwner;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'ShortcutManager'");
-#ifdef WIN32
-    shortcutManager->~ShortcutManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete shortcutManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'SessionRecording'");

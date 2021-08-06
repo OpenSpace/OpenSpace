@@ -28,7 +28,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 
@@ -48,45 +47,14 @@ void GuiShortcutsComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-
-
-    // First the actual shortcuts
-    CaptionText("Shortcuts");
-    const std::vector<interaction::ShortcutManager::ShortcutInformation>& shortcuts =
-        global::shortcutManager->shortcuts();
-
-    for (size_t i = 0; i < shortcuts.size(); ++i) {
-        const interaction::ShortcutManager::ShortcutInformation& info = shortcuts[i];
-
-        if (ImGui::Button(info.name.c_str())) {
-            global::scriptEngine->queueScript(
-                info.script,
-                scripting::ScriptEngine::RemoteScripting(info.synchronization)
-            );
-        }
-        ImGui::SameLine();
-
-        // Poor mans table layout
-        ImGui::SetCursorPosX(125.f);
-
-        ImGui::Text("%s", info.documentation.c_str());
-        if (!info.synchronization) {
-            ImGui::SameLine();
-            ImGui::Text("(%s)", "local");
-        }
-    }
-
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25.f);
-
-
-
-    // Then display all the keybinds as buttons as well, for good measure
-    CaptionText("Keybindings");
     using K = KeyWithModifier;
     using V = std::string;
     const std::multimap<K, V>& binds = global::keybindingManager->keyBindings();
 
+    std::set<std::string> boundActions;
+    CaptionText("Keybindings");
     for (const std::pair<const K, V>& p : binds) {
+        boundActions.insert(p.second);
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
             global::actionManager->triggerAction(p.second);
         }
@@ -96,9 +64,30 @@ void GuiShortcutsComponent::render() {
         ImGui::SetCursorPosX(125.f);
 
         const interaction::Action& a = global::actionManager->action(p.second);
-
         ImGui::Text("%s", a.documentation.c_str());
         if (!a.synchronization) {
+            ImGui::SameLine();
+            ImGui::Text("(%s)", "local");
+        }
+    }
+
+    CaptionText("Other Actions");
+    for (const interaction::Action& action : global::actionManager->actions()) {
+        // We only show all of the other actions that are not currently bound to keys here
+        if (boundActions.find(action.identifier) != boundActions.end()) {
+            continue;
+        }
+
+        if (ImGui::Button(action.identifier.c_str())) {
+            global::actionManager->triggerAction(action.command);
+        }
+        ImGui::SameLine();
+
+        // Poor mans table layout
+        ImGui::SetCursorPosX(350.f);
+
+        ImGui::Text("%s", action.documentation.c_str());
+        if (!action.synchronization) {
             ImGui::SameLine();
             ImGui::Text("(%s)", "local");
         }

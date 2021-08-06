@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 
 namespace {
@@ -45,19 +44,14 @@ bool ShortcutTopic::isDone() const {
 }
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
-    using ShortcutInformation = interaction::ShortcutManager::ShortcutInformation;
-
-    const std::vector<ShortcutInformation>& shortcuts =
-        global::shortcutManager->shortcuts();
-
     std::vector<nlohmann::json> json;
-    for (const ShortcutInformation& shortcut : shortcuts) {
+    for (const interaction::Action& action : global::actionManager->actions()) {
         nlohmann::json shortcutJson = {
-            { "name", shortcut.name },
-            { "script", shortcut.script },
-            { "synchronization", static_cast<bool>(shortcut.synchronization) },
-            { "documentation", shortcut.documentation },
-            { "guiPath", shortcut.guiPath },
+            { "name", action.name },
+            { "script", action.command },
+            { "synchronization", static_cast<bool>(action.synchronization) },
+            { "documentation", action.documentation },
+            { "guiPath", action.guiPath },
         };
         json.push_back(shortcutJson);
     }

@@ -22,66 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/shortcutmanager.h>
+#ifndef __OPENSPACE_CORE___ACTIONMANAGER___H__
+#define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
-#include <openspace/engine/globals.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/glm.h>
-#include <sstream>
+#include <openspace/interaction/action.h>
+#include <vector>
 
-#include "shortcutmanager_lua.inl"
+namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-void ShortcutManager::resetShortcuts() {
-    _shortcuts.clear();
-}
+class ActionManager /* : public DocumentationGenerator */ {
+public:
+    ActionManager();
 
-void ShortcutManager::addShortcut(ShortcutInformation info) {
-    _shortcuts.push_back(std::move(info));
-}
+    bool hasAction(const std::string& identifier) const;
+    void registerAction(Action action);
+    void removeAction(const std::string& identifier);
+    const Action& action(const std::string& identifier) const;
+    const std::vector<Action>& actions() const;
 
-const std::vector<ShortcutManager::ShortcutInformation>&
-ShortcutManager::shortcuts() const
-{
-    return _shortcuts;
-}
+    void triggerAction(const std::string& identifier) const;
 
-scripting::LuaLibrary ShortcutManager::luaLibrary() {
-    return {
-        "",
-        {
-            {
-                "clearShortcuts",
-                &luascriptfunctions::clearShortcuts,
-                {},
-                "",
-                "Clear all shortcuts in this scene"
-            },
-            {
-                "bindShortcut",
-                &luascriptfunctions::bindShortcut,
-                {},
-                "string, string [, string]",
-                "Binds a Lua script to a new shortcut that is executed both locally and "
-                "to be broadcast to clients if this is the host of a parallel session. "
-                "The first argument is a human-readable name for this shortcut, the "
-                "second argument is the Lua script that will be executed and the last "
-                "argument is a describtive text for the shortcut for tooltips, etc."
-            },
-            {
-                "bindShortcutLocal",
-                &luascriptfunctions::bindShortcutLocal,
-                {},
-                "string, string [, string]",
-                "Binds a Lua script to a new shortcut that is executed onlylocally. The "
-                "first argument is a human-readable name for this shortcut, the second "
-                "argument is the Lua script that will be executed and the last argument "
-                "is a describtive text for the shortcut for tooltips, etc."
-            }
-        }
-    };
-}
+    static scripting::LuaLibrary luaLibrary();
+
+private:
+    std::vector<Action> _actions;
+};
 
 } // namespace openspace::interaction
+
+#endif // __OPENSPACE_CORE___ACTIONMANAGER___H__

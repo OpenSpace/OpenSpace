@@ -22,58 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_CORE___ACTION___H__
+#define __OPENSPACE_CORE___ACTION___H__
 
-namespace {
+#include <ghoul/misc/boolean.h>
+#include <string>
 
-openspace::interaction::ShortcutManager::ShortcutInformation extractInfo(lua_State* L,
-                                                                         int nArguments,
-                                                                         bool isSync)
-{
-    openspace::interaction::ShortcutManager::ShortcutInformation i = {
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No),
-        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No),
-        openspace::interaction::ShortcutManager::IsSynchronized(isSync),
-        nArguments >= 3 ?
-            ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No) :
-            "",
-        nArguments == 4 ?
-            ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No) :
-            ""
-    };
-    lua_pop(L, nArguments);
-    return i;
-}
+namespace openspace::interaction {
 
-} // namespace
+struct Action {
+    BooleanType(IsSynchronized);
 
-namespace openspace::luascriptfunctions {
+    std::string identifier;
 
-int clearShortcuts(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearShortcuts");
-    global::shortcutManager->resetShortcuts();
-    return 0;
-}
+    std::string command;
+    std::string name;
+    std::string documentation;
+    std::string guiPath;
+    IsSynchronized synchronization = IsSynchronized::Yes;
+};
 
-int bindShortcut(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcut");
+} // namespace openspace::interaction
 
-    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, true);
-    global::shortcutManager->addShortcut(std::move(info));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int bindShortcutLocal(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcutLocal");
-
-    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, false);
-    global::shortcutManager->addShortcut(std::move(info));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions
+#endif // __OPENSPACE_CORE___ACTION___H__
