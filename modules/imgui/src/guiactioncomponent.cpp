@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guishortcutscomponent.h>
+#include <modules/imgui/include/guiactioncomponent.h>
 
 #include <modules/imgui/include/gui.h>
 #include <openspace/engine/globals.h>
@@ -35,11 +35,11 @@
 
 namespace openspace::gui {
 
-GuiShortcutsComponent::GuiShortcutsComponent()
+GuiActionComponent::GuiActionComponent()
     : GuiComponent("Shortcuts", "Shortcuts")
 {}
 
-void GuiShortcutsComponent::render() {
+void GuiActionComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
