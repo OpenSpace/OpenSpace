@@ -31,8 +31,7 @@ namespace openspace {
 
 class LabelParser : public SequenceParser {
 public:
-    LabelParser(std::string name, std::string fileName,
-        const ghoul::Dictionary& translationDictionary);
+    LabelParser(std::string fileName, const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 

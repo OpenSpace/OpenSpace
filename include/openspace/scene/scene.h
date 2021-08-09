@@ -238,7 +238,7 @@ private:
      * Update dependencies.
      */
     void updateNodeRegistry();
-
+    std::chrono::steady_clock::time_point currentTimeForInterpolation();
     void sortTopologically();
 
     std::unique_ptr<Camera> _camera;

@@ -15,17 +15,18 @@ asset.onInitialize(function ()
 
   local interpolationDuration = 0.5
 
-  function nextSlide()
-    helper.goToNextSlide(deck, interpolationDuration)
-  end
+  -- Add global functions for controlling slide deck and bind to keys
+  rawset(_G, "nextSlide", function()
+    helper.goToNextSlide(deck, interpolationDuration) 
+  end)
 
-  function previousSlide()
+  rawset(_G, "previousSlide", function()
     helper.goToPreviousSlide(deck, interpolationDuration)
-  end
+  end)
 
-  function toggleSlides()
+  rawset(_G, "toggleSlides", function()
     helper.toggleSlides(deck, interpolationDuration)
-  end
+  end)
 
   helper.setCurrentSlide(deck, 1)
   openspace.bindKey("KP_6", "nextSlide()", "Next slide", "Next slide", "/Slides")

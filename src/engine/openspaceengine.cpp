@@ -74,6 +74,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -559,6 +560,15 @@ void OpenSpaceEngine::initializeGL() {
                     break;
                 default:
                     throw ghoul::MissingCaseException();
+            }
+
+            if (global::configuration->openGLDebugContext.printStacktrace) {
+                std::string stackString = "Stacktrace\n";
+                std::vector<std::string> stack = ghoul::stackTrace();
+                for (size_t i = 0; i < stack.size(); i++) {
+                    stackString += fmt::format("{}: {}\n", i, stack[i]);
+                }
+                LDEBUGC(category, stackString);
             }
         };
         ghoul::opengl::debug::setDebugCallback(callback);

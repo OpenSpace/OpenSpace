@@ -146,6 +146,19 @@ public:
     std::chrono::steady_clock::time_point currentPlaybackInterpolationTime() const;
 
     /**
+     * Returns the simulated application time. This simulated application time is only
+     * used when playback is set to be in the mode where a screenshot is captured with
+     * every rendered frame (enableTakeScreenShotDuringPlayback() is used to enable this
+     * mode). At the start of playback, this timer is set to the value of the current
+     * applicationTime function provided by the window delegate (used during normal
+     * mode or playback). However, during playback it is incremented by the fixed
+     * framerate of the playback rather than the actual clock value.
+     *
+     * \returns application time in seconds, for use in playback-with-frames mode
+     */
+    double currentApplicationInterpolationTime() const;
+
+    /**
      * Starts a recording session, which will save data to the provided filename
      * according to the data format specified, and will continue until recording is
      * stopped using stopRecording() method.
@@ -719,6 +732,7 @@ protected:
     double _saveRenderingCurrentRecordedTime;
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
+    double _saveRenderingCurrentApplicationTime_interpolation;
     long long _saveRenderingClockInterpolation_countsPerSec;
     bool _saveRendering_isFirstFrame = true;
 

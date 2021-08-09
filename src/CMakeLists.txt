@@ -117,7 +117,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/query/query.cpp
-  ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
@@ -303,7 +302,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
@@ -317,7 +315,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/texturecomponent.h
@@ -483,10 +480,6 @@ endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
-
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
 
 # Just in case, create the bin directory
 add_custom_command(
