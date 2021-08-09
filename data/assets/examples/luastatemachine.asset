@@ -1,4 +1,4 @@
-local stateMachineHelper = asset.require('util/state_machine_helper')
+local stateMachineHelper = asset.require('util/lua_state_machine_helper')
 
 states = {
   {
@@ -25,7 +25,7 @@ states = {
 
 local stateMachine
 
-function next() 
+function next()
   stateMachine.goToNextState()
 end
 
