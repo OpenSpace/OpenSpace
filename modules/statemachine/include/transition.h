@@ -38,7 +38,7 @@ public:
     ~Transition() = default;
 
     std::string from() const;
-    std::string to() const; 
+    std::string to() const;
     void performAction() const;
 
     static documentation::Documentation Documentation();

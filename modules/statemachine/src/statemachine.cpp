@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/statemachine.h"
+#include <modules/statemachine/include/statemachine.h>
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "StateMachine";
@@ -38,6 +39,9 @@ namespace {
         // A list of transitions between the different states
         std::vector<ghoul::Dictionary> transitions
             [[codegen::reference("statemachine_transition")]];
+
+        // The initial state of the state machine. Defaults to the first in the list
+        std::optional<std::string> startState;
     };
 #include "statemachine_codegen.cpp"
 } // namespace
@@ -51,13 +55,42 @@ documentation::Documentation StateMachine::Documentation() {
 StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _states.reserve(p.states.size());
     for (const ghoul::Dictionary& s : p.states) {
         _states.push_back(State(s));
     }
 
+    _transitions.reserve(p.transitions.size());
     for (const ghoul::Dictionary& t : p.transitions) {
-        _transitions.push_back(Transition(t));
+        const Transition trans = Transition(t);
+
+        // Check so transition has valid identifiers
+        bool foundFrom = findState(trans.from()) != -1;
+        bool foundTo = findState(trans.to()) != -1;
+
+        if (foundFrom && foundTo) {
+            _transitions.push_back(trans);
+        }
+        else {
+            LERROR(fmt::format(
+                "Invalid transition from '{}' to '{}'. One or both of the states do not "
+                "exist in the state machine", trans.from(), trans.to()
+            ));
+        }
     }
+    _transitions.shrink_to_fit();
+
+    if (_transitions.empty()) {
+        LWARNING("Created state machine without transitions");
+    }
+
+    if (_states.empty()) {
+        LERROR("Created state machine with no states");
+        return;
+    }
+
+    const std::string startState = p.startState.value_or(_states.front().name());
+    setInitialState(startState);
 }
 
 void StateMachine::setInitialState(const std::string initialState) {
@@ -118,8 +151,7 @@ void StateMachine::setState(State& newState) {
 }
 
 // Search if the transition from _currentState to newState exists.
-// If yes then return the index to the transition,
-// otherwise return -1
+// If yes then return the index to the transition, otherwise return -1
 int StateMachine::findTransitionTo(const std::string state) const {
     for (unsigned int i = 0; i < _transitions.size(); ++i) {
         if (_transitions[i].from() == _currentState->name() &&
@@ -132,8 +164,7 @@ int StateMachine::findTransitionTo(const std::string state) const {
 }
 
 // Search if the state exist.
-// If yes then return the index to the state,
-// otherwise return -1
+// If yes then return the index to the state, otherwise return -1
 int StateMachine::findState(const std::string state) const {
     for (unsigned int i = 0; i < _states.size(); ++i) {
         if (_states[i].name() == state) {

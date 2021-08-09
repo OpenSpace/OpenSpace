@@ -43,8 +43,19 @@ StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
 { }
 
-void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& dictionary) {
-    _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
+void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
+                                                const ghoul::Dictionary& transitions,
+                                             const std::optional<std::string> startState)
+{
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("States", states);
+    dictionary.setValue("Transitions", transitions);
+
+    if (startState.has_value()) {
+        dictionary.setValue("StartState", *startState);
+    }
+
+    _machine = std::make_unique<StateMachine>(dictionary);
 }
 
 void StateMachineModule::setInitialState(const std::string initialState) {
@@ -91,9 +102,11 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "createStateMachine",
             &luascriptfunctions::createStateMachine,
             {},
-            "table",
-            "Creates a state machine from a table describing the states and "
-            "transitions. See StateMachine documentation for details. "
+            "table, table, [string]",
+            "Creates a state machine from a list of states and transitions. See State "
+            "and Transition documentation for details. The optional thrid argument is "
+            "the identifier of the desired initial state. If left out, the first state "
+            "in the list will be used."
         },
         {
             "goTo",
@@ -109,9 +122,9 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             &luascriptfunctions::setInitialState,
             {},
             "string",
-            "Immediately sets the current state to the state with to the given name, if"
-            "it exists. Must always be done after creating a state machine, before any "
-            "transitions can take place."
+            "Immediately sets the current state to the state with the given name, if "
+            "it exists. This is done without doing a transition and completely ignores "
+            "the previous state."
         },
         {
             "currentState",

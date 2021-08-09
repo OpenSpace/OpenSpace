@@ -27,19 +27,48 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace openspace::luascriptfunctions {
 
 int createStateMachine(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createStateMachine");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 3 },
+        "lua::createStateMachine"
+    );
 
-    ghoul::Dictionary dictionary;
-    ghoul::lua::luaDictionaryFromState(L, dictionary);
+    // If three arguments, a start state was included
+    std::optional<std::string> startState = std::nullopt;
+    if (nArguments > 2) {
+        startState = ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::Yes);
+    }
+
+    // Last dictionary is on top of the stack
+    ghoul::Dictionary transitions;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, transitions);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("createStateMachine", e.what());
+        return 0;
+    }
+
+    // Pop, so that first dictionary is on top and can be read
+    lua_pop(L, 1);
+    ghoul::Dictionary states;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, states);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("createStateMachine", e.what());
+        return 0;
+    }
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
 
-    module->initializeStateMachine(dictionary);
-    LINFOC("StateMachine", "State machine was created.");
+    module->initializeStateMachine(states, transitions, startState);
+    LINFOC("StateMachine", "State machine was created");
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

@@ -1,0 +1,29 @@
+states = {
+  {
+    Identifier = "Constellations",
+    Enter = "openspace.printInfo('Entering Constellations State')",
+    Exit = "openspace.printInfo('Exiting Constellations State')"
+  },
+  {
+    Identifier = "Earth",
+    Enter = "openspace.printInfo('Entering Earth State')",
+    Exit = "openspace.printInfo('Exiting Earth State')"
+  }
+}
+
+transitions = {
+  {
+      From = "Earth",
+      To = "Constellations",
+      Action = ""
+  },
+  {
+      From = "Constellations",
+      To = "Earth",
+      Action = ""
+  }
+}
+
+asset.onInitialize(function()
+  openspace.statemachine.createStateMachine(states, transitions, "Earth")
+end)
