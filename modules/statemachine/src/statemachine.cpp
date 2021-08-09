@@ -31,12 +31,12 @@ namespace {
     constexpr const char* _loggerCat = "StateMachine";
 
     struct [[codegen::Dictionary(StateMachine)]] Parameters {
-        // A list of states 
-        std::vector<ghoul::Dictionary> states 
+        // A list of states
+        std::vector<ghoul::Dictionary> states
             [[codegen::reference("statemachine_state")]];
 
         // A list of transitions between the different states
-        std::vector<ghoul::Dictionary> transitions 
+        std::vector<ghoul::Dictionary> transitions
             [[codegen::reference("statemachine_transition")]];
     };
 #include "statemachine_codegen.cpp"
@@ -76,17 +76,6 @@ void StateMachine::setInitialState(const std::string initialState) {
 
 State* StateMachine::currentState() const {
     return _currentState;
-}
-
-bool StateMachine::isIdle() const {
-    bool isIdle = true;
-    for (unsigned int i = 0; i < _states.size(); ++i) {
-        if (!_states[i].isIdle()) {
-            isIdle = false;
-            break;
-        }
-    }
-    return isIdle;
 }
 
 void StateMachine::transitionTo(const std::string newState) {

@@ -37,7 +37,7 @@ namespace {
         // transition
         std::string to;
 
-        // A string containing a Lua script that will be executed when the transition 
+        // A string containing a Lua script that will be executed when the transition
         // is triggered
         std::string action;
     };

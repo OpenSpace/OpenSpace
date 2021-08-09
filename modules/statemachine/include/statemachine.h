@@ -40,7 +40,6 @@ public:
 
     void setInitialState(const std::string initialState);
     State* currentState() const;
-    bool isIdle() const;
     void transitionTo(const std::string newState);
     bool canGoTo(const std::string state) const;
     void setState(State& newState);

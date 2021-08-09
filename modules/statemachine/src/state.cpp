@@ -30,15 +30,15 @@
 
 namespace {
     struct [[codegen::Dictionary(State)]] Parameters {
-        // A string that will be used to identify the state. Cannot be the same as 
+        // A string that will be used to identify the state. Cannot be the same as
         // any other state in the machine
         std::string identifier;
 
-        // A string containing a Lua script that will be executed when the state 
+        // A string containing a Lua script that will be executed when the state
         // is entered, i.e on a transition from another state
         std::string enter;
 
-        // A string containing a Lua script that will be executed when the state 
+        // A string containing a Lua script that will be executed when the state
         // is exited, i.e on a transition to another state
         std::string exit;
     };
@@ -57,38 +57,20 @@ State::State(const ghoul::Dictionary& dictionary) {
     _name = p.identifier;
     _enter = p.enter;
     _exit = p.exit;
-
-    _isIdle = true;
 }
 
 void State::enter() {
-    _isIdle = false;
     global::scriptEngine->queueScript(
         _enter,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
-    // TODO: Wait for script to finish, then perform idle behaviour
-    idle();
-}
-
-void State::idle() {
-    _isIdle = true;
 }
 
 void State::exit() {
-    _isIdle = false;
     global::scriptEngine->queueScript(
         _exit,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
-    // TODO: Wait for script to finish, then set state as idle
-    _isIdle = true;
-}
-
-bool State::isIdle() const{
-    return _isIdle;
 }
 
 std::string State::name() const{
