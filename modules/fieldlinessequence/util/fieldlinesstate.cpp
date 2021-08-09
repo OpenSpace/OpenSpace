@@ -80,47 +80,31 @@ void FieldlinesState::scaleFieldlines(float scale) {
 }
 
 void FieldlinesState::addOpenIndices(std::vector<int>& open, int i) {
-    if (_open.empty()) {
+
+    if (_open.size() == i) {
         _open.push_back(open);
     }
 
+    else if (_open.size() > i){
+        _open[i].insert(_open[i].end(), open.begin(), open.end());
+    }
+
     else {
-        for (int& index : open) {
-            index += _vertexPath[i].size();
-        }
-        if (_open[i].empty()) {
-            _open.push_back(open);
-        }
-        else {
-            for (float o : open) {
-                _open[i].push_back(o);
-            }
-        }
+        LDEBUG("Invalid index passed to addOpenInices");
     }
 }
 
 void FieldlinesState::addClosedIndices(std::vector<int>& closed, int i) {
-    //std::vector<std::vector<int>> closedVec;
-       //closedVec.push_back(closed);
-       //_closed.insert(_closed.begin() + i, closedVec.begin(), closedVec.end());
-    if (_closed.empty()) {
+
+    if (_closed.size() == i ) {
         _closed.push_back(closed);
     }
-    else {
-        for (int& index : closed) {
-            index += _vertexPath[i].size();
-        }
-       
-        if (_closed[i].empty()) {
-            _closed.push_back(closed);
-        }
-        else {
-            for (float c : closed) {
-                _closed[i].push_back(c);
-            }
-        }
+    else if (_closed.size() > i) {
+        _closed[i].insert(_closed[i].end(), closed.begin(), closed.end());
     }
-    
+    else {
+        LDEBUG("Invalid index passed to addClosedIndices");
+    }
 }
 
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
@@ -474,10 +458,10 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     _vertexPositions.reserve(nOldPoints + nNewPoints);
     _vertexPositions.insert(
         _vertexPositions.end(),
-        std::make_move_iterator(line.begin()),
+        std::make_move_iterator(line.begin()),      //TODO why does make_move_itr here?
         std::make_move_iterator(line.end())
     );
-    line.clear();
+    //line.clear();   //line is & here, clearing deletes This states first line?
 
 }
 
@@ -491,24 +475,26 @@ glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
 
 void FieldlinesState::moveLine(double dt) {
     bool forward;
-    if (dt > DBL_EPSILON) {
+    if (DBL_EPSILON < dt) {
         forward = true;
-        atStart = false;
+        _atStart = false;
     }
     else {
         forward = false;
-        atEnd = false;
+        _atEnd = false;
     }
 
     bool vertexEnd = false;
     bool vertexStart = false;
+    //ghoul_assert(_numberOfLines < _open.size(), "Will not be able to access open at i");
+    //ghoul_assert(_numberOfLines < _closed.size(), "Will not be able to access closed at i");
+    //ghoul_assert(_numberOfLines < _vertexIndex.size(), "Will not be able to access vertexIndex at i");
+    //ghoul_assert(_numberOfLines < _vertexTimes.size(), "Will not be able to access vertexTimes at i");
+    //ghoul_assert(_numberOfLines < _timeSinceLastInterpolation.size(), "Will not be able to access timeSinceLastInterpolation at i");
+    //ghoul_assert(_numberOfLines < _lineCount.size(), "Will not be able to access linecount at i");
+    //ghoul_assert(_numberOfLines < _lineStart.size(), "Will not be able to access linestart at i");
+    //ghoul_assert(_numberOfLines < _fieldLines.size(), "Will not be able to access fieldlines at i");
 
-    //each vertex on the rendered field line
-    if (_timeSinceLastInterpolation.empty()) {
-        for (int i = 0; i < _numberOfLines; ++i) {
-            _timeSinceLastInterpolation.push_back(0.0);
-        }
-    }
 
     for (int i = 0; i < _numberOfLines; ++i) {
 
@@ -518,7 +504,7 @@ void FieldlinesState::moveLine(double dt) {
 
             //if a vertex has reached its last vertex in the path line, stop updating the
             //field line positions
-            if (atEnd) break;
+            if (_atEnd) break;
 
             while (_timeSinceLastInterpolation[i] > _vertexTimes[i][_vertexIndex[i]]) {
                 _timeSinceLastInterpolation[i] -= _vertexTimes[i][_vertexIndex[i]];
@@ -526,6 +512,7 @@ void FieldlinesState::moveLine(double dt) {
 
                 //check if at end after increasing index
 
+                //TODO: fix
                 //size - 3 as a margin to avoid bugs when simulation reaches end
                 if (_vertexIndex[i] == _vertexPath[i].size() - 2) {
                     _timeSinceLastInterpolation[i] = _vertexTimes[i][_vertexIndex[i]-1];
@@ -553,7 +540,6 @@ void FieldlinesState::moveLine(double dt) {
                     _vertexPositions[j] = a;
                     k++;
                 }
-
 
             }
 
@@ -587,7 +573,7 @@ void FieldlinesState::moveLine(double dt) {
         }
         else {
 
-            if (atStart) break;
+            if (_atStart) break;
 
             //the inital position, end condition
             if (_vertexIndex[i] == 0) continue;
@@ -652,8 +638,8 @@ void FieldlinesState::moveLine(double dt) {
     }
 
 
-    if (vertexEnd) atEnd = true;
-    if (vertexStart) atStart = true;
+    if (vertexEnd) _atEnd = true;
+    if (vertexStart) _atStart = true;
 }
 
 void FieldlinesState::addPath(std::vector<glm::vec3> path, int i) {

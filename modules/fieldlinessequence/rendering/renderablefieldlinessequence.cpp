@@ -921,21 +921,19 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 
         //LINFO(fmt::format("MaxVel: {}", maxVel));
 
-
-
         if (isSuccessful) {
-            addStateToSequence(newState);
             if (!outputFolder.empty()) {
                 newState.saveStateToOsfls(outputFolder);
             }
         }
     }
-
-    std::vector<std::vector< std::vector<glm::vec3> >> fieldlines = newState.fieldLines();
-    std::vector<std::vector<float>> times = newState.vertexTimes();
-    std::vector<float>  timesince = newState.timeSinceLastInterpolation();
-    std::vector<std::vector<glm::vec3>> _vertexPath = newState.vertexPath();
     newState.addLinesToBeRendered();
+    addStateToSequence(newState);
+
+    //std::vector<std::vector< std::vector<glm::vec3> >> fieldlines = newState.fieldLines();
+    //std::vector<std::vector<float>> times = newState.vertexTimes();
+    //std::vector<float>  timesince = newState.timeSinceLastInterpolation();
+    //std::vector<std::vector<glm::vec3>> _vertexPath = newState.vertexPath();
 
     return true;
 }
@@ -1206,6 +1204,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         _needsUpdate              = false;
     }
 
+    //// TODO why is this here? 
+    ////_activeStateIndex can be -1 here (then used in updateVertexPositionBuffer()
     updateFieldlinePos(currentTime, previousTime);
     updateVertexPositionBuffer();
 
@@ -1225,7 +1225,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (_loadingStatesDynamically) {
             _states[0] = std::move(*_newState);
         }
-
+        updateFieldlinePos(currentTime, previousTime);
         updateVertexPositionBuffer();
 
         if (_states[_activeStateIndex].nExtraQuantities() > 0) {
@@ -1254,6 +1254,7 @@ void RenderableFieldlinesSequence::updateFieldlinePos(const double t1, const dou
     //do nothing if time in openspace is paused
     if (abs(dt) > DBL_EPSILON) {
         _states[_activeStateIndex].moveLine(dt);
+        //updateVertexPositionBuffer();
     }
 }
 

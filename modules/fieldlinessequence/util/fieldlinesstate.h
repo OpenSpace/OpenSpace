@@ -107,25 +107,25 @@ private:
     double _triggerTime = -1.0;
     fls::Model _model;
 
-    bool atEnd = false;
-    bool atStart = false;
+    bool _atEnd = false;
+    bool _atStart = false;
 
-    std::vector<std::vector<float>> _extraQuantities;
-    std::vector<std::string> _extraQuantityNames;
-    std::vector<GLsizei> _lineCount;
-    std::vector<GLint> _lineStart;
+    std::vector<std::vector<float>> _extraQuantities = {};
+    std::vector<std::string> _extraQuantityNames = {};
+    std::vector<GLsizei> _lineCount = {};
+    std::vector<GLint> _lineStart = {};
     int _numberOfLines = 0;
-    std::vector<glm::vec3> _vertexPositions;
+    std::vector<glm::vec3> _vertexPositions = {};
 
-    std::vector<size_t> _vertexIndex;
-    std::vector<float> _timeSinceLastInterpolation = { 0.0f };
-    std::vector<std::vector<glm::vec3>> _vertexPath;
+    std::vector<size_t> _vertexIndex = {};
+    std::vector<float> _timeSinceLastInterpolation;
+    std::vector<std::vector<glm::vec3>> _vertexPath = {};
 
-    std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines;
-    std::vector<std::vector<float>> _vertexVelocities;
-    std::vector<std::vector<float>> _vertexTimes;
-    std::vector<std::vector<int>> _open;
-    std::vector<std::vector<int>> _closed;
+    std::vector<std::vector<std::vector<glm::vec3>>> _fieldLines = {};
+    std::vector<std::vector<float>> _vertexVelocities = {};
+    std::vector<std::vector<float>> _vertexTimes = {};
+    std::vector<std::vector<int>> _open = {};
+    std::vector<std::vector<int>> _closed = {};
 };
 
 } // namespace openspace

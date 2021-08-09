@@ -294,8 +294,8 @@ namespace openspace::fls {
 
             const size_t nLinePoints = positions.size();
 
-            std::vector<glm::vec3> path;
-            std::vector<float> times;
+            std::vector<glm::vec3> path = {};
+            std::vector<float> times = {};
 
 
             for (const ccmc::Point3f& p : positions) {
@@ -308,10 +308,10 @@ namespace openspace::fls {
             state.addTimes(times, i);
             state.addPath(path, i);
 
-            std::vector<int> closed;
-            std::vector<int> open;
+            std::vector<int> closed = {};
+            std::vector<int> open = {};
             int j = 0;
-            std::vector<std::vector<glm::vec3>> interpolations;
+            std::vector<std::vector<glm::vec3>> interpolations = {};
             for (const glm::vec3& p : path) {
                 std::vector<glm::vec3> vertices;
 
