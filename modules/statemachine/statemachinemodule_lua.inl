@@ -27,6 +27,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <optional>
 
 namespace openspace::luascriptfunctions {
@@ -136,6 +137,17 @@ int currentState(lua_State* L) {
     return 1;
 }
 
+int possibleTransitions(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::possibleTransitions");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    std::vector<std::string> transitions = module->possibleTransitions();
+
+    ghoul::lua::push(L, transitions);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
 int canGoTo(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoTo");
     const bool isString = (lua_isstring(L, 1) != 0);
@@ -156,6 +168,28 @@ int canGoTo(lua_State* L) {
     ghoul::lua::push(L, module->canGoTo(state));
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int printCurrentStateInfo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::printCurrentStateInfo");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+
+    if (module->hasStateMachine()) {
+        std::string currentState = module->currentState();
+        std::vector<std::string> transitions = module->possibleTransitions();
+        LINFOC("StateMachine", fmt::format(
+            "Currently in state: '{}'. Can transition to states: [ {} ]",
+            currentState,
+            ghoul::join(transitions, ",")
+        ));
+    }
+    else {
+        LINFOC("StateMachine", "No state machine has been created");
+    }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 1;
 }
 

@@ -58,6 +58,10 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
     _machine = std::make_unique<StateMachine>(dictionary);
 }
 
+bool StateMachineModule::hasStateMachine() const {
+    return _machine != nullptr;
+}
+
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
@@ -76,6 +80,15 @@ std::string StateMachineModule::currentState() const {
     return _machine->currentState()->name();
 }
 
+std::vector<std::string> StateMachineModule::possibleTransitions() const {
+    if (!_machine) {
+        LWARNING("Attempting to use uninitialized state machine");
+        return std::vector<std::string>();
+    }
+
+    return _machine->possibleTransitions();
+}
+
 void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
@@ -91,7 +104,7 @@ bool StateMachineModule::canGoTo(const std::string state) const {
         return false;
     }
 
-    return _machine->canGoTo(state);
+    return _machine->canTransitionTo(state);
 }
 
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
@@ -134,6 +147,14 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "Returns the string name of the current state that the statemachine is in."
         },
         {
+            "possibleTransitions",
+            &luascriptfunctions::possibleTransitions,
+            {},
+            "",
+            "Returns a list with the identifiers of all the states that can be "
+            "transitioned to from the current state."
+        },
+        {
             "canGoTo",
             &luascriptfunctions::canGoTo,
             {},
@@ -141,6 +162,13 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "Returns true if there is a defined transition between the current state and "
             "the given string name of a state, otherwise false"
         },
+        {
+            "printCurrentStateInfo",
+            &luascriptfunctions::printCurrentStateInfo,
+            {},
+            "",
+            "Prints information about the current state and possible transitions to the log."
+        }
     };
     return res;
 }

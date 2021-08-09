@@ -41,7 +41,12 @@ public:
     void setInitialState(const std::string initialState);
     const State* currentState() const;
     void transitionTo(const std::string newState);
-    bool canGoTo(const std::string state) const;
+    bool canTransitionTo(const std::string state) const;
+
+    /*
+     * Return the identifiers of all possible transitions from the current state
+     */
+    std::vector<std::string> possibleTransitions() const;
 
     static documentation::Documentation Documentation();
 

@@ -147,7 +147,7 @@ void StateMachine::transitionTo(const std::string newState) {
     currentState()->enter();
 }
 
-bool StateMachine::canGoTo(const std::string state) const {
+bool StateMachine::canTransitionTo(const std::string state) const {
     int transitionIndex = findTransitionTo(state);
     return (transitionIndex != -1) ? true : false;
 }
@@ -155,6 +155,10 @@ bool StateMachine::canGoTo(const std::string state) const {
 // Search if the transition from _currentState to newState exists.
 // If yes then return the index to the transition, otherwise return -1
 int StateMachine::findTransitionTo(const std::string state) const {
+    if (!currentState()) {
+        return -1;
+    }
+
     for (unsigned int i = 0; i < _transitions.size(); ++i) {
         if (_transitions[i].from() == currentState()->name() &&
             _transitions[i].to() == state)
@@ -174,6 +178,22 @@ int StateMachine::findState(const std::string state) const {
         }
     }
     return -1;
+}
+
+std::vector<std::string> StateMachine::possibleTransitions() const {
+    std::vector<std::string> res;
+
+    if (!currentState()) {
+        return res;
+    }
+
+    res.reserve(_transitions.size());
+    for (unsigned int i = 0; i < _transitions.size(); ++i) {
+        if (_transitions[i].from() == currentState()->name()) {
+            res.push_back(_transitions[i].to());
+        }
+    }
+    return res;
 }
 
 } // namespace openspace
