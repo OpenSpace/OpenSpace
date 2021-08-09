@@ -204,13 +204,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
-        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
+        fmt::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
-            "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), std::filesystem::path(filePath).parent_path().string()
+            "File {} exists, but directory {} does not",
+            absPath(filePath), std::filesystem::path(filePath).parent_path()
         )
     );
 
@@ -234,7 +234,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     std::filesystem::path p = std::filesystem::path(path).parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
+    LINFO(fmt::format("Loading SPICE kernel {}", path));
     // Load the kernel
     furnsh_c(path.string().c_str());
 
@@ -273,7 +273,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", it->path));
             unload_c(it->path.c_str());
             _loadedKernels.erase(it);
         }
@@ -299,7 +299,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                fmt::format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("{} did not correspond to a loaded kernel", path)
             );
         }
         else {
@@ -309,7 +309,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", path));
             unload_c(path.string().c_str());
             _loadedKernels.erase(it);
         }
@@ -325,6 +325,11 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
+    if (id == 0) {
+        return true;
+    }
+
     const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
@@ -607,7 +612,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             );
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
@@ -678,7 +683,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!to.empty(), "To must not be empty");
 
     // get rotation matrix from frame A - frame B
-    glm::dmat3 transform;
+    glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
         to.c_str(),
@@ -851,7 +856,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     pxform_c(
         sourceFrame.c_str(),
         destinationFrame.c_str(),
@@ -883,7 +888,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
 
     pxfrm2_c(
         sourceFrame.c_str(),
@@ -1006,8 +1011,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1065,8 +1070,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         fmt::format("File '{}' does not exist", path)
     );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1145,7 +1150,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             throw SpiceException(fmt::format("No position for '{}' at any time", target));
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
 

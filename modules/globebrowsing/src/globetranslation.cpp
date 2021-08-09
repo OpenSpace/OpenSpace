@@ -125,6 +125,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_latitude);
 
     _altitude = p.altitude.value_or(_altitude);
+    _altitude.setExponent(8.f);
     _altitude.onChange([this]() { _positionIsDirty = true; });
     addProperty(_altitude);
 

@@ -130,6 +130,7 @@ inline std::string to_string(
         case T::OrbitY:      return "Orbit Y";
         case T::ZoomIn:      return "Zoom In";
         case T::ZoomOut:     return "Zoom Out";
+        case T::Zoom:        return "Zoom In and Out";
         case T::LocalRollX:  return "LocalRoll X";
         case T::LocalRollY:  return "LocalRoll Y";
         case T::GlobalRollX: return "GlobalRoll X";
@@ -149,9 +150,9 @@ from_string(std::string_view string)
     if (string == "None") { return T::None; }
     if (string == "Orbit X") { return T::OrbitX; }
     if (string == "Orbit Y") { return T::OrbitY; }
-    if (string == "Zoom") { return T::Zoom; }
     if (string == "Zoom In") { return T::ZoomIn; }
     if (string == "Zoom Out") { return T::ZoomOut; }
+    if (string == "Zoom") { return T::Zoom; }
     if (string == "LocalRoll X") { return T::LocalRollX; }
     if (string == "LocalRoll Y") { return T::LocalRollY; }
     if (string == "GlobalRoll X") { return T::GlobalRollX; }

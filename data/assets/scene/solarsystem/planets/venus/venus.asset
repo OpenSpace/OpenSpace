@@ -8,6 +8,11 @@ local Venus = {
   Identifier = "Venus",
   Parent = transforms.VenusBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VENUS",
+      Observer = "VENUS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_VENUS",

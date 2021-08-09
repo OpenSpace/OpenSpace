@@ -263,7 +263,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
-            bool isUserProfile = selectedIndex <= _userAssetCount;
+            bool isUserProfile = selectedIndex < _userAssetCount;
             openProfileEditor(selection, isUserProfile);
         }
     );
@@ -312,8 +312,24 @@ void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
     std::mt19937 g(rd());
     std::shuffle(files.begin(), files.end(), g);
     // We know there has to be at least one folder, so it's fine to just pick the first
-    std::string image = files.front();
-    _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+    while (!files.empty()) {
+        std::string p = files.front();
+        if (std::filesystem::path(p).extension() == ".png") {
+            // If the top path starts with the png extension, we have found our candidate
+            break;
+        }
+        else {
+            // There shouldn't be any non-png images in here, but you never know. So we 
+            // just remove non-image files here
+            files.erase(files.begin());
+        }
+    }
+
+    // There better be at least one file left, but just in in case
+    if (!files.empty()) {
+        std::string image = files.front();
+        _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+    }
 }
 
 void LauncherWindow::populateProfilesList(std::string preset) {
@@ -462,7 +478,7 @@ std::string LauncherWindow::selectedWindowConfig() const {
     int idx = _windowConfigBox->currentIndex();
     if (idx == 0) {
         return _sgctConfigName;
-    } else if (idx > _userAssetCount) {
+    } else if (idx > _userConfigCount) {
         return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
     else {

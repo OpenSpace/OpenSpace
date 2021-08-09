@@ -8,7 +8,6 @@ asset.require('spice/base')
 
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 local spheres = asset.require('examples/spheres')

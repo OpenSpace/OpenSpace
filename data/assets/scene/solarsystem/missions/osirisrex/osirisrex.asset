@@ -1,3 +1,4 @@
+asset.require('./bennu')
 asset.require('./bennu_projection')
 asset.require('./model')
 asset.require('./trail')
