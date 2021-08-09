@@ -37,8 +37,8 @@ public:
     State(const ghoul::Dictionary& dictionary);
     ~State() = default;
 
-    void enter();
-    void exit();
+    void enter() const;
+    void exit() const;
 
     std::string name() const;
 

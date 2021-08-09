@@ -59,21 +59,21 @@ State::State(const ghoul::Dictionary& dictionary) {
     _exit = p.exit;
 }
 
-void State::enter() {
+void State::enter() const {
     global::scriptEngine->queueScript(
         _enter,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
-void State::exit() {
+void State::exit() const {
     global::scriptEngine->queueScript(
         _exit,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
-std::string State::name() const{
+std::string State::name() const {
     return _name;
 }
 

@@ -103,15 +103,26 @@ void StateMachine::setInitialState(const std::string initialState) {
         return;
     }
 
-    _currentState = &_states[stateIndex];
-    _currentState->enter();
+    _currentStateIndex = stateIndex;
+    currentState()->enter();
 }
 
-State* StateMachine::currentState() const {
-    return _currentState;
+const State* StateMachine::currentState() const {
+    if (_currentStateIndex == -1) {
+        return nullptr;
+    }
+    return &_states[_currentStateIndex];
 }
 
 void StateMachine::transitionTo(const std::string newState) {
+    if (!currentState()) {
+        LERROR(
+            "Cannot perform transition as the machine is in no current state. "
+            "First set an initial state."
+        );
+        return;
+    }
+
     int stateIndex = findState(newState);
     if (stateIndex == -1) {
         LWARNING(fmt::format(
@@ -120,7 +131,20 @@ void StateMachine::transitionTo(const std::string newState) {
         return;
     }
 
-    setState(_states[stateIndex]);
+    const State& state = _states[stateIndex];
+    int transitionIndex = findTransitionTo(state.name());
+    if (transitionIndex == -1) {
+        LWARNING(fmt::format(
+            "Transition from '{}' to '{}' is undefined",
+            currentState()->name(), state.name()
+        ));
+        return;
+    }
+
+    currentState()->exit();
+    _transitions[transitionIndex].performAction();
+    _currentStateIndex = stateIndex;
+    currentState()->enter();
 }
 
 bool StateMachine::canGoTo(const std::string state) const {
@@ -128,33 +152,11 @@ bool StateMachine::canGoTo(const std::string state) const {
     return (transitionIndex != -1) ? true : false;
 }
 
-void StateMachine::setState(State& newState) {
-    if (!_currentState) {
-        setInitialState(newState.name());
-    }
-
-    // Check if the transition from _currentState to newState exists
-    int transitionIndex = findTransitionTo(newState.name());
-
-    if (transitionIndex == -1) {
-        LWARNING(fmt::format(
-            "Transition from '{}' to '{}' is undefined",
-            _currentState->name(), newState.name()
-        ));
-        return;
-    }
-
-    _currentState->exit();
-    _transitions[transitionIndex].performAction();
-    _currentState = &newState;
-    _currentState->enter();
-}
-
 // Search if the transition from _currentState to newState exists.
 // If yes then return the index to the transition, otherwise return -1
 int StateMachine::findTransitionTo(const std::string state) const {
     for (unsigned int i = 0; i < _transitions.size(); ++i) {
-        if (_transitions[i].from() == _currentState->name() &&
+        if (_transitions[i].from() == currentState()->name() &&
             _transitions[i].to() == state)
         {
             return i;

@@ -39,15 +39,14 @@ public:
     ~StateMachine() = default;
 
     void setInitialState(const std::string initialState);
-    State* currentState() const;
+    const State* currentState() const;
     void transitionTo(const std::string newState);
     bool canGoTo(const std::string state) const;
-    void setState(State& newState);
 
     static documentation::Documentation Documentation();
 
 private:
-    State* _currentState = nullptr;
+    int _currentStateIndex = -1;
     std::vector<State> _states;
     std::vector<Transition> _transitions;
 
