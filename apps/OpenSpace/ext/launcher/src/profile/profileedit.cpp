@@ -24,11 +24,11 @@
 
 #include "profile/profileedit.h"
 
+#include "profile/actiondialog.h"
 #include "profile/additionalscriptsdialog.h"
 #include "profile/assetsdialog.h"
 #include "profile/cameradialog.h"
 #include "profile/deltatimesdialog.h"
-#include "profile/keybindingsdialog.h"
 #include "profile/line.h"
 #include "profile/marknodesdialog.h"
 #include "profile/metadialog.h"
@@ -430,7 +430,7 @@ void ProfileEdit::openProperties() {
 
 void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
-    KeybindingsDialog(_profile, this).exec();
+    ActionDialog(_profile, this).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
         summarizeKeybindings(_profile.keybindings(), _profile.actions())
