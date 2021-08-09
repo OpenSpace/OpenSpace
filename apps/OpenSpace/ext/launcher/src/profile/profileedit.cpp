@@ -69,11 +69,20 @@ namespace {
         return results;
     }
 
-    std::string summarizeKeybindings(const std::vector<Profile::Keybinding>& keybindings)
+    std::string summarizeKeybindings(const std::vector<Profile::Keybinding>& keybindings,
+                                     const std::vector<Profile::Action>& actions)
     {
         std::string results;
         for (Profile::Keybinding k : keybindings) {
-            results += k.name + " (";
+            const auto it = std::find_if(
+                actions.begin(), actions.end(),
+                [id = k.action](const Profile::Action& action) {
+                    return action.identifier == id;
+                }
+            );
+
+            std::string name = it != actions.end() ? it->name : "Unknown action";
+            results += name + " (";
             int keymod = static_cast<int>(k.key.modifier);
             if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
                 results += openspace::KeyModifierNames.at(keymod) + "+";
@@ -344,9 +353,9 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     );
 
     _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(
-        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
-    );
+    _keybindingsEdit->setText(QString::fromStdString(
+        summarizeKeybindings(_profile.keybindings(), _profile.actions())
+    ));
 
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
@@ -423,9 +432,9 @@ void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
     KeybindingsDialog(_profile, this).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(
-        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
-    );
+    _keybindingsEdit->setText(QString::fromStdString(
+        summarizeKeybindings(_profile.keybindings(), _profile.actions())
+    ));
 }
 
 void ProfileEdit::openAssets() {

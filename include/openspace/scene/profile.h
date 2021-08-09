@@ -77,14 +77,19 @@ public:
         SetType setType;
         std::string name;
         std::string value;
+
     };
-    struct Keybinding {
-        KeyWithModifier key;
+    struct Action {
+        std::string identifier;
         std::string documentation;
         std::string name;
         std::string guiPath;
         bool isLocal;
         std::string script;
+    };
+    struct Keybinding {
+        KeyWithModifier key;
+        std::string action;
     };
     struct Time {
         enum class Type {
@@ -148,6 +153,7 @@ public:
     std::optional<Meta> meta() const;
     std::vector<std::string> assets() const;
     std::vector<Property> properties() const;
+    std::vector<Action> actions() const;
     std::vector<Keybinding> keybindings() const;
     std::optional<Time> time() const;
     std::vector<double> deltaTimes() const;
@@ -186,6 +192,7 @@ private:
     std::optional<Meta> _meta;
     std::vector<std::string> _assets;
     std::vector<Property> _properties;
+    std::vector<Action> _actions;
     std::vector<Keybinding> _keybindings;
     std::optional<Time> _time;
     std::vector<double> _deltaTimes;

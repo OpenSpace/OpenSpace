@@ -108,6 +108,43 @@ namespace {
     }
 } // namespace
 
+// In these namespaces we defined the structs as they used to be defined in the older
+// versions. That way, we can keep the from_json files as they were originally written too
+namespace version10 {
+    struct Keybinding {
+        KeyWithModifier key;
+        std::string documentation;
+        std::string name;
+        std::string guiPath;
+        bool isLocal;
+        std::string script;
+    };
+
+void from_json(const nlohmann::json& j, version10::Keybinding& v) {
+    checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "documentation", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "gui_path", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "is_local", &nlohmann::json::is_boolean, "keybinding", false);
+    checkValue(j, "script", &nlohmann::json::is_string, "keybinding", false);
+    checkExtraKeys(
+        j,
+        "keybinding",
+        { "key", "documentation", "name", "gui_path", "is_local", "script" }
+    );
+
+    v.key = stringToKey(j.at("key").get<std::string>());
+    j["documentation"].get_to(v.documentation);
+    j["name"].get_to(v.name);
+    j["gui_path"].get_to(v.guiPath);
+    j["is_local"].get_to(v.isLocal);
+    j["script"].get_to(v.script);
+}
+
+} // namespace version10
+
+// Current version:
+
 void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
     j["minor"] = v.minor;
@@ -248,8 +285,8 @@ void from_json(const nlohmann::json& j, Profile::Property& v) {
     j["value"].get_to(v.value);
 }
 
-void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
-    j["key"] = ghoul::to_string(v.key);
+void to_json(nlohmann::json& j, const Profile::Action& v) {
+    j["identifier"] = v.identifier;
     j["documentation"] = v.documentation;
     j["name"] = v.name;
     j["gui_path"] = v.guiPath;
@@ -257,25 +294,39 @@ void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
     j["script"] = v.script;
 }
 
-void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
-    checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
-    checkValue(j, "documentation", &nlohmann::json::is_string, "keybinding", false);
-    checkValue(j, "name", &nlohmann::json::is_string, "keybinding", false);
-    checkValue(j, "gui_path", &nlohmann::json::is_string, "keybinding", false);
-    checkValue(j, "is_local", &nlohmann::json::is_boolean, "keybinding", false);
-    checkValue(j, "script", &nlohmann::json::is_string, "keybinding", false);
+void from_json(const nlohmann::json& j, Profile::Action& v) {
+    checkValue(j, "identifier", &nlohmann::json::is_string, "action", false);
+    checkValue(j, "documentation", &nlohmann::json::is_string, "action", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "action", false);
+    checkValue(j, "gui_path", &nlohmann::json::is_string, "action", false);
+    checkValue(j, "is_local", &nlohmann::json::is_boolean, "action", false);
+    checkValue(j, "script", &nlohmann::json::is_string, "action", false);
     checkExtraKeys(
         j,
-        "keybinding",
-        { "key", "documentation", "name", "gui_path", "is_local", "script" }
+        "action",
+        { "identifier", "documentation", "name", "gui_path", "is_local", "script" }
     );
 
-    v.key = stringToKey(j.at("key").get<std::string>());
+    j["identifier"].get_to(v.identifier);
     j["documentation"].get_to(v.documentation);
     j["name"].get_to(v.name);
     j["gui_path"].get_to(v.guiPath);
     j["is_local"].get_to(v.isLocal);
     j["script"].get_to(v.script);
+}
+
+void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
+    j["key"] = ghoul::to_string(v.key);
+    j["action"] = v.action;
+}
+
+void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
+    checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "action", &nlohmann::json::is_string, "keybinding", false);
+    checkExtraKeys(j, "keybinding", { "key", "action" });
+
+    v.key = stringToKey(j.at("key").get<std::string>());
+    j["action"].get_to(v.action);
 }
 
 void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
@@ -568,6 +619,9 @@ std::string Profile::serialize() const {
     if (!_properties.empty()) {
         r["properties"] = _properties;
     }
+    if (!_actions.empty()) {
+        r["actions"] = _actions;
+    }
     if (!_keybindings.empty()) {
         r["keybindings"] = _keybindings;
     }
@@ -601,11 +655,55 @@ std::string Profile::serialize() const {
     return r.dump(2);
 }
 
+void convertVersion10to11(nlohmann::json& profile) {
+    // Version 1.1 introduced actions and remove Lua function calling from keybindings
+
+    if (profile.find("keybindings") == profile.end()) {
+        // We didn't find any keybindings, so there is nothing to do
+        return;
+    }
+
+    // This needs to be changed if there is another version for any of these types later
+    using Action = Profile::Action;
+    using Keybinding = Profile::Keybinding;
+
+    std::vector<Action> actions;
+    std::vector<Keybinding> keybindings;
+
+    std::vector<version10::Keybinding> kbs =
+        profile.at("keybindings").get<std::vector<version10::Keybinding>>();
+    for (size_t i = 0; i < kbs.size(); ++i) {
+        version10::Keybinding& kb = kbs[i];
+        std::string identifier = fmt::format("profile.keybind.{}", i);
+
+        Action action;
+        action.identifier = identifier;
+        action.documentation = std::move(kb.documentation);
+        action.name = std::move(kb.name);
+        action.guiPath = std::move(kb.guiPath);
+        action.isLocal = std::move(kb.isLocal);
+        action.script = std::move(kb.script);
+        actions.push_back(std::move(action));
+
+        Keybinding keybinding;
+        keybinding.key = kb.key;
+        keybinding.action = identifier;
+        keybindings.push_back(keybinding);
+    }
+
+    profile["actions"] = actions;
+    profile["keybindings"] = keybindings;
+}
+
 Profile::Profile(const std::string& content) {
     try {
         nlohmann::json profile = nlohmann::json::parse(content);
-
         profile.at("version").get_to(_version);
+
+        if (_version.major == 1 && _version.minor == 0) {
+            convertVersion10to11(profile);
+        }
+
         if (profile.find("modules") != profile.end()) {
             profile["modules"].get_to(_modules);
         }
@@ -617,6 +715,9 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("properties") != profile.end()) {
             profile.at("properties").get_to(_properties);
+        }
+        if (profile.find("actions") != profile.end()) {
+            profile.at("actions").get_to(_actions);
         }
         if (profile.find("keybindings") != profile.end()) {
             profile.at("keybindings").get_to(_keybindings);
@@ -664,28 +765,28 @@ std::string Profile::convertToScene() const {
     std::string output;
 
     if (_meta.has_value()) {
-        output += "asset.meta = {";
+        output += "asset.meta = {\n";
 
         if (_meta->name.has_value()) {
-            output += fmt::format("  Name = [[{}]],", *_meta->name);
+            output += fmt::format("  Name = [[{}]],\n", *_meta->name);
         }
         if (_meta->version.has_value()) {
-            output += fmt::format("  Version = [[{}]],", *_meta->version);
+            output += fmt::format("  Version = [[{}]],\n", *_meta->version);
         }
         if (_meta->description.has_value()) {
-            output += fmt::format("  Description = [[{}]],", *_meta->description);
+            output += fmt::format("  Description = [[{}]],\n", *_meta->description);
         }
         if (_meta->author.has_value()) {
-            output += fmt::format("  Author = [[{}]],", *_meta->author);
+            output += fmt::format("  Author = [[{}]],\n", *_meta->author);
         }
         if (_meta->url.has_value()) {
-            output += fmt::format("  URL = [[{}]],", *_meta->url);
+            output += fmt::format("  URL = [[{}]],\n", *_meta->url);
         }
         if (_meta->license.has_value()) {
-            output += fmt::format("  License = [[{}]],", *_meta->license);
+            output += fmt::format("  License = [[{}]]\n", *_meta->license);
         }
 
-        output += "}";
+        output += "}\n\n";
     }
 
     // Modules
@@ -701,40 +802,41 @@ std::string Profile::convertToScene() const {
         output += fmt::format("asset.require(\"{}\");\n", asset);
     }
 
-    output += "asset.onInitialize(function()\n";
-    // Keybindings
-    for (size_t i = 0; i < _keybindings.size(); ++i) {
-        const Keybinding& k = _keybindings[i];
-        const std::string key = ghoul::to_string(k.key);
-        const std::string name = k.name.empty() ? key : k.name;
-
-        std::string identifier = fmt::format("profile.keybind.{}", i);
-
-        // First create the action
+    output += "\n\nasset.onInitialize(function()\n";
+    // Actions
+    output += "  -- Actions\n";
+    for (const Action& action : _actions) {
+        const std::string name = action.name.empty() ? action.identifier : action.name;
         output += fmt::format(
-            "openspace.action.registerAction({{"
+            "  openspace.action.registerAction({{"
             "Identifier=[[{}]], Command=[[{}]], Name=[[{}]], Documentation=[[{}]], "
             "GuiPath=[[{}]], IsLocal={}"
             "}})\n",
-            identifier, k.script, name, k.documentation, k.guiPath,
-            k.isLocal ? "true" : "false"
+            action.identifier, action.script, name, action.documentation, action.guiPath,
+            action.isLocal ? "true" : "false"
         );
+    }
 
-        // The bind the key to the action
-        output += fmt::format("openspace.bindKey([[{}]], [[{}]])\n", key, identifier);
+    // Keybindings
+    output += "\n  -- Keybindings\n";
+        for (size_t i = 0; i < _keybindings.size(); ++i) {
+        const Keybinding& k = _keybindings[i];
+        const std::string key = ghoul::to_string(k.key);
+        output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
 
     // Time
+    output += "\n  -- Time\n";
     switch (_time->type) {
         case Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", _time->value);
+            output += fmt::format("  openspace.time.setTime(\"{}\")\n", _time->value);
             break;
         case Time::Type::Relative:
-            output += "local now = openspace.time.currentWallTime();\n";
+            output += "  local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n", _time->value
+                "  local prev = openspace.time.advancedTime(now, \"{}\");\n", _time->value
             );
-            output += "openspace.time.setTime(prev);\n";
+            output += "  openspace.time.setTime(prev);\n";
             break;
         default:
             throw ghoul::MissingCaseException();
@@ -742,35 +844,36 @@ std::string Profile::convertToScene() const {
 
     // Delta Times
     {
+        output += "\n  -- Delta Times\n";
         std::string times;
         for (const double d : _deltaTimes) {
-            times += fmt::format("{} ,", d);
+            times += fmt::format("{}, ", d);
         }
-        output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
+        output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
     }
 
     // Mark Nodes
     {
+        output += "\n  -- Mark Nodes\n";
         std::string nodes;
         for (const std::string& n : _markNodes) {
             nodes += fmt::format("[[{}]],", n);
         }
-        output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
+        output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     // Properties
+    output += "\n  -- Properties\n";
     for (const Property& p : _properties) {
         switch (p.setType) {
             case Property::SetType::SetPropertyValue:
                 output += fmt::format(
-                    "openspace.setPropertyValue(\"{}\", {});\n",
-                    p.name, p.value
+                    "  openspace.setPropertyValue(\"{}\", {});\n", p.name, p.value
                 );
                 break;
             case Property::SetType::SetPropertyValueSingle:
                 output += fmt::format(
-                    "openspace.setPropertyValueSingle(\"{}\", {});\n",
-                    p.name, p.value
+                    "  openspace.setPropertyValueSingle(\"{}\", {});\n", p.name, p.value
                 );
                 break;
             default:
@@ -779,12 +882,13 @@ std::string Profile::convertToScene() const {
     }
 
     // Camera
+    output += "\n  -- Camera\n";
     if (_camera.has_value()) {
         output += std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
                     std::string result;
-                    result += "openspace.navigation.setNavigationState({";
+                    result += "  openspace.navigation.setNavigationState({";
                     result += fmt::format("Anchor = [[{}]], ", camera.anchor);
                     if (camera.aim.has_value()) {
                         result += fmt::format("Aim = [[{}]], ", *camera.aim);
@@ -816,14 +920,14 @@ std::string Profile::convertToScene() const {
                 [](const CameraGoToGeo& camera) {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
+                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
                             camera.anchor,
                             camera.latitude, camera.longitude, *camera.altitude
                         );
                     }
                     else {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
+                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
                             camera.anchor, camera.latitude, camera.longitude
                         );
                     }
@@ -833,10 +937,11 @@ std::string Profile::convertToScene() const {
         );
     }
 
+    output += "\n  -- Additional Scripts begin\n";
     for (const std::string& a : _additionalScripts) {
-        output += fmt::format("{}\n", a);
+        output += fmt::format("  {}\n", a);
     }
-
+    output += "  -- Additional Scripts end\n";
     output += "end)\n";
 
     return output;
@@ -860,6 +965,10 @@ std::vector<std::string> Profile::assets() const {
 
 std::vector<Profile::Property> Profile::properties() const {
     return _properties;
+}
+
+std::vector<Profile::Action> Profile::actions() const {
+    return _actions;
 }
 
 std::vector<Profile::Keybinding> Profile::keybindings() const {

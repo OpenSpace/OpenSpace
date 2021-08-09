@@ -43,12 +43,8 @@
 using namespace openspace;
 
 namespace {
-    const Profile::Keybinding BlankKey= {
+    const Profile::Keybinding BlankKey = {
         { Key::Unknown, KeyModifier::NoModifier },
-        "",
-        "",
-        "",
-        true,
         ""
     };
 
@@ -65,7 +61,7 @@ namespace {
         src.swap(newString);
     }
 
-    std::string truncateString(std::string& s) {
+    [[ nodiscard ]] std::string truncateString(std::string s) {
         const size_t maxLength = 50;
         replaceChars(s, "\n", ";");
         if (s.length() > maxLength) {
@@ -75,7 +71,9 @@ namespace {
         return s;
     }
 
-    std::string createOneLineSummary(Profile::Keybinding k) {
+    std::string createOneLineSummary(Profile::Keybinding k,
+                                     const std::vector<Profile::Action>& actions)
+    {
         std::string summary;
 
         int keymod = static_cast<int>(k.key.modifier);
@@ -84,12 +82,22 @@ namespace {
         }
         int keyname = static_cast<int>(k.key.key);
 
+        const auto it = std::find_if(
+            actions.begin(), actions.end(),
+            [id = k.action](const Profile::Action& action) {
+                return action.identifier == id;
+            }
+        );
+        if (it == actions.end()) {
+            return fmt::format("Did not find action '{}'", k.action);
+        }
+
         summary += KeyNames.at(keyname) + "  ";
-        summary += truncateString(k.name) + " (";
-        summary += truncateString(k.documentation) + ") @ ";
-        summary += truncateString(k.guiPath) + " ";
-        summary += (k.isLocal) ? "local" : "remote";
-        summary += " `" + truncateString(k.script) + "`";
+        summary += truncateString(it->name) + " (";
+        summary += truncateString(it->documentation) + ") @ ";
+        summary += truncateString(it->guiPath) + " ";
+        summary += (it->isLocal) ? "local" : "remote";
+        summary += " `" + truncateString(it->script) + "`";
 
         return summary;
     }
@@ -124,7 +132,7 @@ void KeybindingsDialog::createWidgets() {
         _list->setResizeMode(QListView::Adjust);
 
         for (size_t i = 0; i < _data.size(); ++i) {
-            std::string summary = createOneLineSummary(_data[i]);
+            std::string summary = createOneLineSummary(_data[i], _profile.actions());
             _list->addItem(new QListWidgetItem(QString::fromStdString(summary)));
         }
 
@@ -311,11 +319,11 @@ void KeybindingsDialog::listItemSelected() {
         }
 
         // Do key here
-        _nameEdit->setText(QString::fromStdString(k.name));
-        _guiPathEdit->setText(QString::fromStdString(k.guiPath));
-        _documentationEdit->setText(QString::fromStdString(k.documentation));
-        _localCheck->setChecked(k.isLocal);
-        _scriptEdit->setText(QString::fromStdString(k.script));
+        //_nameEdit->setText(QString::fromStdString(k.name));
+        //_guiPathEdit->setText(QString::fromStdString(k.guiPath));
+        //_documentationEdit->setText(QString::fromStdString(k.documentation));
+        //_localCheck->setChecked(k.isLocal);
+        //_scriptEdit->setText(QString::fromStdString(k.script));
     }
     transitionToEditMode();
 }
@@ -353,9 +361,9 @@ bool KeybindingsDialog::isLineEmpty(int index) {
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if (!_data.empty() && !_data.at(0).name.empty()) {
-        isEmpty = false;
-    }
+    //if (!_data.empty() && !_data.at(0).name.empty()) {
+    //    isEmpty = false;
+    //}
     return isEmpty;
 }
 
@@ -373,14 +381,14 @@ void KeybindingsDialog::listItemAdded() {
     else {
         _keyCombo->setCurrentIndex(static_cast<int>(_data.back().key.key));
     }
-    _keyModCombo->setFocus(Qt::OtherFocusReason);
-    _nameEdit->setText(QString::fromStdString(_data.back().name));
-    _guiPathEdit->setText("/");
-    _documentationEdit->setText(QString::fromStdString(_data.back().documentation));
-    _localCheck->setChecked(false);
-    _scriptEdit->setText(QString::fromStdString(_data.back().script));
-    _currentKeybindingSelection = static_cast<int>(_data.size() - 1);
-    _editModeNewItem = true;
+    //_keyModCombo->setFocus(Qt::OtherFocusReason);
+    //_nameEdit->setText(QString::fromStdString(_data.back().name));
+    //_guiPathEdit->setText("/");
+    //_documentationEdit->setText(QString::fromStdString(_data.back().documentation));
+    //_localCheck->setChecked(false);
+    //_scriptEdit->setText(QString::fromStdString(_data.back().script));
+    //_currentKeybindingSelection = static_cast<int>(_data.size() - 1);
+    //_editModeNewItem = true;
 }
 
 void KeybindingsDialog::checkForNumberKeyConflict(int key) {
@@ -404,7 +412,7 @@ void KeybindingsDialog::checkForBindingConflict(int selectedModKey, int selected
         }
         openspace::Profile::Keybinding k = _data[i];
         if ((k.key.key == newKey) && (k.key.modifier == newModifier)) {
-            addStringToErrorDisplay(localWarn + QString::fromStdString(k.name) + "'.\n");
+            //addStringToErrorDisplay(localWarn + QString::fromStdString(k.name) + "'.\n");
             break;
         }
     }
@@ -419,18 +427,18 @@ void KeybindingsDialog::listItemSave() {
     int index = _list->row(item);
 
     if (!_data.empty()) {
-        int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(
-            _keyModCombo->currentIndex());
-        _data[index].key.modifier = static_cast<KeyModifier>(keyModIdx);
-        int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex());
-        _data[index].key.key = static_cast<Key>(keyIdx);
-        _data[index].name = _nameEdit->text().toStdString();
-        _data[index].guiPath = _guiPathEdit->text().toStdString();
-        _data[index].documentation = _documentationEdit->text().toStdString();
-        _data[index].script = _scriptEdit->toPlainText().toStdString();
-        _data[index].isLocal = (_localCheck->isChecked());
-        std::string summary = createOneLineSummary(_data[index]);
-        _list->item(index)->setText(QString::fromStdString(summary));
+        //int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(
+        //    _keyModCombo->currentIndex());
+        //_data[index].key.modifier = static_cast<KeyModifier>(keyModIdx);
+        //int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex());
+        //_data[index].key.key = static_cast<Key>(keyIdx);
+        //_data[index].name = _nameEdit->text().toStdString();
+        //_data[index].guiPath = _guiPathEdit->text().toStdString();
+        //_data[index].documentation = _documentationEdit->text().toStdString();
+        //_data[index].script = _scriptEdit->toPlainText().toStdString();
+        //_data[index].isLocal = (_localCheck->isChecked());
+        //std::string summary = createOneLineSummary(_data[index]);
+        //_list->item(index)->setText(QString::fromStdString(summary));
     }
     transitionFromEditMode();
 }
@@ -463,12 +471,12 @@ bool KeybindingsDialog::areRequiredFormsFilled() {
 void KeybindingsDialog::listItemCancelSave() {
     listItemSelected();
     transitionFromEditMode();
-    if (_editModeNewItem && !_data.empty() &&
-        (_data.back().name.length() == 0 || _data.back().script.length() == 0 ||
-        _data.back().key.key == Key::Unknown))
-    {
-        listItemRemove();
-    }
+    //if (_editModeNewItem && !_data.empty() &&
+    //    (_data.back().name.length() == 0 || _data.back().script.length() == 0 ||
+    //    _data.back().key.key == Key::Unknown))
+    //{
+    //    listItemRemove();
+    //}
     _editModeNewItem = false;
 }
 
@@ -548,9 +556,9 @@ void KeybindingsDialog::editBoxDisabled(bool disabled) {
 
 void KeybindingsDialog::parseSelections() {
     // Handle case with only one remaining but empty line
-    if ((_data.size() == 1) && (_data.at(0).name.empty())) {
-        _data.clear();
-    }
+    //if ((_data.size() == 1) && (_data.at(0).name.empty())) {
+    //    _data.clear();
+    //}
     _profile.setKeybindings(_data);
     accept();
 }
