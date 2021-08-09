@@ -56,6 +56,8 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
     }
 
     _machine = std::make_unique<StateMachine>(dictionary);
+
+    LINFO(fmt::format("State machine was created with start state: {}", currentState()));
 }
 
 bool StateMachineModule::hasStateMachine() const {
@@ -72,7 +74,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 }
 
 std::string StateMachineModule::currentState() const {
-    if (!_machine) {
+    if (!_machine || !_machine->currentState()) {
         LWARNING("Attempting to use uninitialized state machine");
         return "";
     }

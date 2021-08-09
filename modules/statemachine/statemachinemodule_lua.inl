@@ -69,7 +69,6 @@ int createStateMachine(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
 
     module->initializeStateMachine(states, transitions, startState);
-    LINFOC("StateMachine", "State machine was created");
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
