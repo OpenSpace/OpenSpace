@@ -55,9 +55,17 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
         dictionary.setValue("StartState", *startState);
     }
 
-    _machine = std::make_unique<StateMachine>(dictionary);
-
-    LINFO(fmt::format("State machine was created with start state: {}", currentState()));
+    try {
+        _machine = std::make_unique<StateMachine>(dictionary);
+        LINFO(fmt::format(
+            "State machine was created with start state: {}", currentState()
+        ));
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(ghoul::to_string(e.result));
+        LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        return;
+    }
 }
 
 bool StateMachineModule::hasStateMachine() const {
