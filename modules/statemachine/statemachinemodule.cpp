@@ -43,8 +43,33 @@ StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
 { }
 
-void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& dictionary) {
-    _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
+void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
+                                                const ghoul::Dictionary& transitions,
+                                             const std::optional<std::string> startState)
+{
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("States", states);
+    dictionary.setValue("Transitions", transitions);
+
+    if (startState.has_value()) {
+        dictionary.setValue("StartState", *startState);
+    }
+
+    try {
+        _machine = std::make_unique<StateMachine>(dictionary);
+        LINFO(fmt::format(
+            "State machine was created with start state: {}", currentState()
+        ));
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(ghoul::to_string(e.result));
+        LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        return;
+    }
+}
+
+bool StateMachineModule::hasStateMachine() const {
+    return _machine != nullptr;
 }
 
 void StateMachineModule::setInitialState(const std::string initialState) {
@@ -57,7 +82,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 }
 
 std::string StateMachineModule::currentState() const {
-    if (!_machine) {
+    if (!_machine || !_machine->currentState()) {
         LWARNING("Attempting to use uninitialized state machine");
         return "";
     }
@@ -65,13 +90,13 @@ std::string StateMachineModule::currentState() const {
     return _machine->currentState()->name();
 }
 
-bool StateMachineModule::isIdle() const {
+std::vector<std::string> StateMachineModule::possibleTransitions() const {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
-        return false;
+        return std::vector<std::string>();
     }
 
-    return _machine->isIdle();
+    return _machine->possibleTransitions();
 }
 
 void StateMachineModule::transitionTo(const std::string newState) {
@@ -89,7 +114,7 @@ bool StateMachineModule::canGoTo(const std::string state) const {
         return false;
     }
 
-    return _machine->canGoTo(state);
+    return _machine->canTransitionTo(state);
 }
 
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
@@ -100,9 +125,11 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "createStateMachine",
             &luascriptfunctions::createStateMachine,
             {},
-            "table",
-            "Creates a state machine from a table describing the states and "
-            "transitions. See StateMachine documentation for details. "
+            "table, table, [string]",
+            "Creates a state machine from a list of states and transitions. See State "
+            "and Transition documentation for details. The optional thrid argument is "
+            "the identifier of the desired initial state. If left out, the first state "
+            "in the list will be used."
         },
         {
             "goTo",
@@ -118,9 +145,9 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             &luascriptfunctions::setInitialState,
             {},
             "string",
-            "Immediately sets the current state to the state with to the given name, if"
-            "it exists. Must always be done after creating a state machine, before any "
-            "transitions can take place."
+            "Immediately sets the current state to the state with the given name, if "
+            "it exists. This is done without doing a transition and completely ignores "
+            "the previous state."
         },
         {
             "currentState",
@@ -130,11 +157,12 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "Returns the string name of the current state that the statemachine is in."
         },
         {
-            "isIdle",
-            &luascriptfunctions::isIdle,
+            "possibleTransitions",
+            &luascriptfunctions::possibleTransitions,
             {},
             "",
-            "Returns true if state machine is idle and false otherwise."
+            "Returns a list with the identifiers of all the states that can be "
+            "transitioned to from the current state."
         },
         {
             "canGoTo",
@@ -144,6 +172,13 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "Returns true if there is a defined transition between the current state and "
             "the given string name of a state, otherwise false"
         },
+        {
+            "printCurrentStateInfo",
+            &luascriptfunctions::printCurrentStateInfo,
+            {},
+            "",
+            "Prints information about the current state and possible transitions to the log."
+        }
     };
     return res;
 }

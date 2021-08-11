@@ -62,10 +62,10 @@ public:
     void draw(const RenderData& data);
 
 private:
-    bool loadLabelsData(const std::string& file);
-    bool readLabelsFile(const std::string& file);
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    bool loadLabelsData(const std::filesystem::path& file);
+    bool readLabelsFile(const std::filesystem::path& file);
+    bool loadCachedFile(const std::filesystem::path& file);
+    bool saveCachedFile(const std::filesystem::path& file) const;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         float distToCamera, float fadeInVariable);
     bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;

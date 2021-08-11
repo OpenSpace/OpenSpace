@@ -230,11 +230,11 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                     normal = glm::normalize(normal);
                 }
 
-                glm::vec4 tmp(x, y, z, 1);
+                glm::vec4 tmp(x, y, z, 1.f);
                 glm::mat4 rot = glm::rotate(
-                    glm::mat4(1),
+                    glm::mat4(1.f),
                     glm::half_pi<float>(),
-                    glm::vec3(1, 0, 0)
+                    glm::vec3(1.f, 0.f, 0.f)
                 );
                 tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
 

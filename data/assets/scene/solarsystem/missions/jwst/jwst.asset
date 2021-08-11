@@ -115,8 +115,7 @@ local JWSTModel = {
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
-    --TODO: Update theese when the new animation is finished
-    AnimationStartTime = "2018 10 01 15:00:00",
+    AnimationStartTime = "2018 10 01 14:05:52",
     AnimationMode = "Once",
     LightSources = {
       {
@@ -130,7 +129,7 @@ local JWSTModel = {
     DisableFaceCulling = true
   },
   GUI = {
-    Name = "James Webb Space Telescope",
+    Name = "James Webb Space Telescope Model",
     Path = "/Solar System/Missions/JWST",
   }
 }
@@ -165,7 +164,7 @@ local JWSTSunTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JWST",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
     },
     Color = { 0.0, 0.9, 0.9 },
@@ -226,7 +225,7 @@ local JWSTLaunchModel = {
   Parent = JWSTLaunchPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 13:18:00",
+    Start = "2018 OCT 01 14:05:52",
     End = "2019 OCT 01"
   },
   Transform = {
@@ -245,8 +244,7 @@ local JWSTLaunchModel = {
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
-    --TODO: Update theese when the new animation is finished
-    AnimationStartTime = "2018 10 01 15:00:00",
+    AnimationStartTime = "2018 10 01 14:05:52",
     AnimationMode = "Once",
     LightSources = {
       {

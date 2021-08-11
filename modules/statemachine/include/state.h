@@ -37,17 +37,14 @@ public:
     State(const ghoul::Dictionary& dictionary);
     ~State() = default;
 
-    // What should be done entering the state, while in the state and exiting the state
-    void enter();
-    void idle();
-    void exit();
-    bool isIdle() const;
+    void enter() const;
+    void exit() const;
+
     std::string name() const;
 
     static documentation::Documentation Documentation();
 
 private:
-    bool _isIdle;
     std::string _name;
     std::string _enter;
     std::string _exit;

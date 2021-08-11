@@ -39,16 +39,19 @@ public:
     ~StateMachine() = default;
 
     void setInitialState(const std::string initialState);
-    State* currentState() const;
-    bool isIdle() const;
+    const State* currentState() const;
     void transitionTo(const std::string newState);
-    bool canGoTo(const std::string state) const;
-    void setState(State& newState);
+    bool canTransitionTo(const std::string state) const;
+
+    /*
+     * Return the identifiers of all possible transitions from the current state
+     */
+    std::vector<std::string> possibleTransitions() const;
 
     static documentation::Documentation Documentation();
 
 private:
-    State* _currentState = nullptr;
+    int _currentStateIndex = -1;
     std::vector<State> _states;
     std::vector<Transition> _transitions;
 

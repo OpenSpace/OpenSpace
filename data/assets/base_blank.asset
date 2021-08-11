@@ -10,7 +10,6 @@ asset.require('spice/base')
 -- Load default key bindings applicable to most scenes
 asset.require('dashboard/default_dashboard')
 asset.require('util/default_keybindings')
-asset.require('util/default_joystick')
 
 -- Load web gui
 local webGui = asset.require('util/webgui')

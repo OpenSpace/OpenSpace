@@ -37,9 +37,9 @@ namespace {
         // transition
         std::string to;
 
-        // A string containing a Lua script that will be executed when the transition 
+        // A string containing a Lua script that will be executed when the transition
         // is triggered
-        std::string action;
+        std::optional<std::string> action;
     };
 #include "transition_codegen.cpp"
 } // namespace
@@ -54,7 +54,7 @@ Transition::Transition(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _from = p.from;
     _to = p.to;
-    _action = p.action;
+    _action = p.action.value_or("");
 }
 
 std::string Transition::from() const {
@@ -66,6 +66,9 @@ std::string Transition::to() const {
 }
 
 void Transition::performAction() const {
+    if (_action.empty()) {
+        return;
+    }
     global::scriptEngine->queueScript(
         _action,
         scripting::ScriptEngine::RemoteScripting::Yes

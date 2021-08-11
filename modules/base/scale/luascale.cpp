@@ -77,7 +77,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "scale");
@@ -85,7 +85,9 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
+            )
         );
         return glm::dvec3(1.0);
     }

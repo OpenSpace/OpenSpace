@@ -637,7 +637,7 @@ local Dawn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "DAWN",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = KernelFiles
     },
     Rotation = {
@@ -722,7 +722,7 @@ local DawnTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "DAWN",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 1.0, 0.8, 0.4 },
     ShowFullTrail = false,

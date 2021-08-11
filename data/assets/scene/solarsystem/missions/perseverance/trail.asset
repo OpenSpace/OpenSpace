@@ -35,7 +35,7 @@ local PerseveranceNode = {
     Translation = {
       Type = "SpiceTranslation",
       Target = perseverance_id,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = m2020_kernels
     }
   },
@@ -54,7 +54,7 @@ local PerseveranceTrailSun = {
     Translation = { 
       Type = "SpiceTranslation",
       Target = perseverance_id,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = m2020_kernels
     },
     Color = { 0.2, 0.7, 0.1 },

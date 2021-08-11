@@ -34,7 +34,7 @@ local BennuProjection = {
     Enabled = true,
     Type = "RenderableModelProjection",
     Body = BENNU_BODY,
-    GeometryFile = models .. "/BennuTextured.obj",
+    GeometryFile = models .. "/Bennu_v20_200k_an.obj",
     Projection = {
       Sequence   = { images, imagesA },
       SequenceType = "image-sequence",
@@ -88,7 +88,7 @@ local BennuTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = BENNU_BODY,
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.4, 0.0, 0.7 },
     StartTime = "2015 JAN 01 00:00:00.000",

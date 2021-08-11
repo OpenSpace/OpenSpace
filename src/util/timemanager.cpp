@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
@@ -112,7 +113,7 @@ TimeManager::TimeManager()
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
@@ -129,7 +130,7 @@ void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) 
     const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
     const TimeKeyframeData predictedTime = interpolate(
-        global::windowDelegate->applicationTime() + duration
+        currentApplicationTimeForInterpolation() + duration
     );
     const double targetTime = predictedTime.time.j2000Seconds() + delta;
     interpolateTime(targetTime, durationSeconds);
@@ -188,6 +189,7 @@ void TimeManager::preSynchronization(double dt) {
     _lastTimePaused = _timePaused;
     _deltaTimeStepsChanged = false;
     _timelineChanged = false;
+    _previousApplicationTime = currentApplicationTimeForInterpolation();
 }
 
 TimeKeyframeData TimeManager::interpolate(double applicationTime) {
@@ -262,14 +264,17 @@ void TimeManager::progressTime(double dt) {
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    const double now = currentApplicationTimeForInterpolation();
     const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
 
+    std::function<bool(const KeyframeBase&, double)> comparisonFunc =
+        (global::sessionRecording->isPlayingBack()) ?
+        &compareKeyframeTimeWithTime_playbackWithFrames : &compareKeyframeTimeWithTime;
     auto firstFutureKeyframe = std::lower_bound(
         keyframes.begin(),
         keyframes.end(),
         now,
-        &compareKeyframeTimeWithTime
+        comparisonFunc
     );
 
     const bool hasFutureKeyframes = firstFutureKeyframe != keyframes.end();
@@ -296,7 +301,7 @@ void TimeManager::progressTime(double dt) {
         _deltaTime = interpolated.delta;
     }
     else if (!hasConsumedLastPastKeyframe) {
-        applyKeyframeData(lastPastKeyframe->data);
+        applyKeyframeData(lastPastKeyframe->data, dt);
     }
     else if (!isPaused()) {
         // If there are no keyframes to consider
@@ -352,9 +357,15 @@ TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past
     return data;
 }
 
-void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
+void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData, double dt) {
     const Time& currentTime = keyframeData.time;
-    _currentTime.data().setTime(currentTime.j2000Seconds());
+    _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
+    if (global::sessionRecording->isPlayingBack()) {
+        _currentTime.data().advanceTime(dt * _deltaTime);
+    }
+    else {
+        _currentTime.data().setTime(currentTime.j2000Seconds());
+    }
     _timePaused = keyframeData.pause;
     _targetDeltaTime = keyframeData.delta;
     _deltaTime = _timePaused ? 0.0 : _targetDeltaTime;
@@ -713,7 +724,7 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    double now = currentApplicationTimeForInterpolation();
     Time newTime(
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
@@ -723,6 +734,9 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
 
     _targetDeltaTime = newDeltaTime;
 
+    if (global::sessionRecording->isPlayingBack()) {
+        now = previousApplicationTimeForInterpolation();
+    }
     addKeyframe(now, currentKeyframe);
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
@@ -809,7 +823,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         return;
     }
 
-    const double now = global::windowDelegate->applicationTime();
+    double now = currentApplicationTimeForInterpolation();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
     Time newTime(
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration
@@ -819,11 +833,35 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
     TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
     _timePaused = pause;
 
+    if (global::sessionRecording->isPlayingBack()) {
+        now = previousApplicationTimeForInterpolation();
+    }
     clearKeyframes();
     if (interpolationDuration > 0) {
         addKeyframe(now, currentKeyframe);
     }
     addKeyframe(now + interpolationDuration, futureKeyframe);
+}
+
+double TimeManager::currentApplicationTimeForInterpolation() const {
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        return global::sessionRecording->currentApplicationInterpolationTime();
+    }
+    else {
+        return global::windowDelegate->applicationTime();
+    }
+}
+
+double TimeManager::previousApplicationTimeForInterpolation() const {
+    //If playing back with frames, this function needs to be called when a time rate
+    // interpolation (either speed change or pause) begins and ends. If the application
+    // time of the interpolation keyframe timestamp (when it was added to timeline) is
+    // exactly the same as when it is evaluated, then the interpolation math fails and
+    // two identical frames are generated at the begin & end. This only happens when the
+    // application time is forced to discrete intervals for a fixed rendering framerate.
+    // Using the previous frame render time fixes this problem. This doesn't adversely
+    // affect playback without frames.
+    return _previousApplicationTime;
 }
 
 } // namespace openspace

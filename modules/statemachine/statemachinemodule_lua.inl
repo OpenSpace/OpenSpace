@@ -27,19 +27,48 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
+#include <optional>
 
 namespace openspace::luascriptfunctions {
 
 int createStateMachine(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createStateMachine");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 3 },
+        "lua::createStateMachine"
+    );
 
-    ghoul::Dictionary dictionary;
-    ghoul::lua::luaDictionaryFromState(L, dictionary);
+    // If three arguments, a start state was included
+    std::optional<std::string> startState = std::nullopt;
+    if (nArguments > 2) {
+        startState = ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::Yes);
+    }
+
+    // Last dictionary is on top of the stack
+    ghoul::Dictionary transitions;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, transitions);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("createStateMachine", e.what());
+        return 0;
+    }
+
+    // Pop, so that first dictionary is on top and can be read
+    lua_pop(L, 1);
+    ghoul::Dictionary states;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, states);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("createStateMachine", e.what());
+        return 0;
+    }
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
 
-    module->initializeStateMachine(dictionary);
-    LINFOC("StateMachine", "State machine was created.");
+    module->initializeStateMachine(states, transitions, startState);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -107,12 +136,13 @@ int currentState(lua_State* L) {
     return 1;
 }
 
-int isIdle(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isIdle");
+int possibleTransitions(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::possibleTransitions");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    ghoul::lua::push(L, module->isIdle());
+    std::vector<std::string> transitions = module->possibleTransitions();
 
+    ghoul::lua::push(L, transitions);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -137,6 +167,28 @@ int canGoTo(lua_State* L) {
     ghoul::lua::push(L, module->canGoTo(state));
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int printCurrentStateInfo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::printCurrentStateInfo");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+
+    if (module->hasStateMachine()) {
+        std::string currentState = module->currentState();
+        std::vector<std::string> transitions = module->possibleTransitions();
+        LINFOC("StateMachine", fmt::format(
+            "Currently in state: '{}'. Can transition to states: [ {} ]",
+            currentState,
+            ghoul::join(transitions, ",")
+        ));
+    }
+    else {
+        LINFOC("StateMachine", "No state machine has been created");
+    }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 1;
 }
 

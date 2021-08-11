@@ -1,0 +1,66 @@
+-- Variables to store the state of the joystick between frames
+Joystick = {}
+Joystick.State = {}
+Joystick.State.IsInRollMode = false
+Joystick.State.Axis = {}
+
+local bindLocalRoll = function(axis)
+  return [[
+    -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+    if not Joystick.State.IsInRollMode then
+      -- Save current axis state
+      Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity = openspace.navigation.joystickAxis(]] .. axis .. [[)
+    end
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "LocalRoll X", Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);
+    Joystick.State.IsInRollMode = true
+  ]]
+end
+
+local bindGlobalRoll = function(axis)
+  return [[
+    -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+    if not Joystick.State.IsInRollMode then
+      -- Save current axis state
+      Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity = openspace.navigation.joystickAxis(]] .. axis .. [[)
+    end
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "GlobalRoll X", Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);
+    Joystick.State.IsInRollMode = true
+  ]]
+end
+
+local permaBindLocalRoll = function(axis)
+  return [[
+    -- Save current axis state
+    Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity = openspace.navigation.joystickAxis(]] .. axis .. [[)
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "LocalRoll X", Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);
+  ]]
+end
+
+local permaBindGlobalRoll = function(axis)
+  return [[
+    -- Save current axis state
+    Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity = openspace.navigation.joystickAxis(]] .. axis .. [[)
+
+    -- Set new axis state
+    openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "GlobalRoll X", Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);
+  ]]
+end
+
+local unbindRoll = function(axis)
+  return [[
+    -- Reset previous state
+    openspace.navigation.bindJoystickAxis(]] .. axis .. [[, Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized, Joystick.State.Axis.Sticky, Joystick.State.Axis.Sensitivity);
+  ]]
+end
+
+asset.export("bindLocalRoll", bindLocalRoll)
+asset.export("bindGlobalRoll", bindGlobalRoll)
+asset.export("permaBindLocalRoll", permaBindLocalRoll)
+asset.export("permaBindGlobalRoll", permaBindGlobalRoll)
+asset.export("unbindRoll", unbindRoll)
