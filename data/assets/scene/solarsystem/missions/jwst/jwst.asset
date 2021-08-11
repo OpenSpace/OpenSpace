@@ -23,7 +23,7 @@ local model = asset.syncedResource({
   Name = "JWST Model",
   Type = "HttpSynchronization",
   Identifier = "jwst_model",
-  Version = 1
+  Version = 2
 })
 
 local band = asset.syncedResource({
@@ -111,7 +111,7 @@ local JWSTModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
+    GeometryFile = model .. "/JWST.osmodel",
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
@@ -240,7 +240,7 @@ local JWSTLaunchModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
+    GeometryFile = model .. "/JWST.osmodel",
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
