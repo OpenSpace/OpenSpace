@@ -25,7 +25,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 

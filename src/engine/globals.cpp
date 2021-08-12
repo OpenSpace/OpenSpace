@@ -36,10 +36,10 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>

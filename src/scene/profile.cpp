@@ -24,6 +24,7 @@
 
 #include <openspace/scene/profile.h>
 
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
@@ -445,7 +446,7 @@ Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
 
 void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
                                            std::string currentTime,
-                                 interaction::NavigationHandler::NavigationState navState)
+                                           interaction::NavigationState navState)
 {
     _version = Profile::CurrentVersion;
 

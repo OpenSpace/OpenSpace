@@ -24,8 +24,8 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 
 namespace {
     // Used in the LM algorithm

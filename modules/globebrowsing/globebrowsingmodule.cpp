@@ -37,8 +37,9 @@
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -398,6 +399,20 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "the surface of the specified globe."
         },
         {
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            "flyToGeo", 
+            &globebrowsing::luascriptfunctions::flyToGeo,
+            {},
+            "[string], number, number, number, [number]",
+            "Fly the camera to geographic coordinates of a globe, using the path "
+            "navigation system. The first (optional) argument is the identifier of a "
+            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
+            "current anchor will be used. The second and third argument is latitude "
+            "and longitude (degrees). The fourth argument is the altitude, in meters. "
+            "The last (optional) parameter is a duration for the motion"
+        },
+        {
             "getLocalPositionFromGeo",
             &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
             {},
@@ -599,7 +614,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
         Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
     );
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     state.anchor = globe.owner()->identifier();
     state.referenceFrame = globe.owner()->identifier();
     state.position = positionModelSpace;
