@@ -35,7 +35,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "StateMachine";
-}
+} // namespace
 
 namespace openspace {
 
@@ -136,7 +136,7 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             &luascriptfunctions::goToState,
             {},
             "string",
-            "Triggers a transition from the current state to th state with the given "
+            "Triggers a transition from the current state to the state with the given "
             "identifier. Requires that the specified string corresponds to an existing "
             "state, and that a transition between the two states exists."
         },

@@ -85,9 +85,9 @@ int goToState(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string newState = lua_tostring(L, 1);
@@ -110,9 +110,9 @@ int setInitialState(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string startState = lua_tostring(L, 1);
@@ -157,9 +157,9 @@ int canGoToState(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string state = lua_tostring(L, 1);

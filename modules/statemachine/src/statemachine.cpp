@@ -131,12 +131,11 @@ void StateMachine::transitionTo(const std::string newState) {
         return;
     }
 
-    const State& state = _states[stateIndex];
-    int transitionIndex = findTransitionTo(state.name());
+    int transitionIndex = findTransitionTo(newState);
     if (transitionIndex == -1) {
         LWARNING(fmt::format(
             "Transition from '{}' to '{}' is undefined",
-            currentState()->name(), state.name()
+            currentState()->name(), newState
         ));
         return;
     }
@@ -148,8 +147,8 @@ void StateMachine::transitionTo(const std::string newState) {
 }
 
 bool StateMachine::canTransitionTo(const std::string state) const {
-    int transitionIndex = findTransitionTo(state);
-    return (transitionIndex != -1) ? true : false;
+    const int transitionIndex = findTransitionTo(state);
+    return transitionIndex != -1;
 }
 
 // Search if the transition from _currentState to newState exists.
