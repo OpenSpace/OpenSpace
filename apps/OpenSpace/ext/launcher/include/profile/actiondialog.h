@@ -32,6 +32,7 @@
 class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
+class QGridLayout;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -44,7 +45,8 @@ public:
 
 private:
     void createWidgets();
-    void updateActionList();
+    void createActionWidgets(QGridLayout* layout);
+    void createKeyboardWidgets(QGridLayout* layout);
     void applyChanges();
 
     openspace::Profile::Action* selectedAction();
@@ -81,7 +83,10 @@ private:
 
     struct {
         QListWidget* list = nullptr;
-        QComboBox* modifier = nullptr;
+        //QComboBox* modifier = nullptr;
+        QCheckBox* shiftModifier = nullptr;
+        QCheckBox* ctrlModifier = nullptr;
+        QCheckBox* altModifier = nullptr;
         QComboBox* key = nullptr;
         QComboBox* action = nullptr;
         QPushButton* addButton = nullptr;

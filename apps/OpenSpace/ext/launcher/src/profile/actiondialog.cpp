@@ -39,8 +39,10 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
+using namespace openspace;
+
 namespace {
-    void updateListItem(QListWidgetItem* item, const openspace::Profile::Action& action) {
+    void updateListItem(QListWidgetItem* item, const Profile::Action& action) {
         ghoul_assert(item, "Item must exist at this point");
         item->setText(
             action.name.empty() ?
@@ -49,14 +51,14 @@ namespace {
         );
     }
 
-    void updateListItem(QListWidgetItem* item, const openspace::Profile::Keybinding& kb) {
+    void updateListItem(QListWidgetItem* item, const Profile::Keybinding& kb) {
         ghoul_assert(item, "Item must exist at this point");
         std::string name = fmt::format("{}\t{}", ghoul::to_string(kb.key), kb.action);
         item->setText(QString::fromStdString(name));
     }
 } // namespace
 
-ActionDialog::ActionDialog(openspace::Profile& profile, QWidget* parent)
+ActionDialog::ActionDialog(Profile& profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -68,189 +70,38 @@ ActionDialog::ActionDialog(openspace::Profile& profile, QWidget* parent)
 }
 
 void ActionDialog::createWidgets() {
+    //         Column 0            Column 1         Column 2
+    //  *----------------------*---------------*----------------*
+    //  |                      | Identifier    | [oooooooooooo] |    Row 0
+    //  |                      | Name          | [oooooooooooo] |    Row 1
+    //  |                      | GUI Path      | [oooooooooooo] |    Row 2
+    //  |                      | Documentation | [oooooooooooo] |    Row 3
+    //  |                      | Is Local      | []             |    Row 4
+    //  |                      | Script        | [oooooooooooo] |    Row 5
+    //  *----------------------*---------------*----------------*
+    //  | [+] [-]              |               | [Save] [Cancel]|    Row 6
+    //  *----------------------*---------------*----------------*
+    //  |=======================================================|    Row 7
+    //  *----------------------*---------------*----------------|
+    //  |                      | Modifier      | []S []C []A    |    Row 8
+    //  |                      | Key           | DDDDDDDDDDDD>  |    Row 9
+    //  |                      | Actions       | [oooooooooooo] |    Row 10
+    //  |                      | Add action    | DDDDDDDDD> [+] |    Row 11
+    //  |                      |               |                |    Row 12
+    //  *----------------------*---------------*----------------*
+    //  | [+] [-]              |               | [Save] [Cancel]|    Row 13
+    //  *----------------------*---------------*----------------*
+    //  |=======================================================|    Row 14
+    //  *----------------------*---------------*----------------*
+    //  |                                      | [Save] [Cancel]|    Row 15
+    //  *----------------------*---------------*----------------*
+
     QGridLayout* layout = new QGridLayout(this);
-    {
-        // Action part
-        _actions.list = new QListWidget;
-        connect(
-            _actions.list, &QListWidget::itemSelectionChanged,
-            this, &ActionDialog::actionSelected
-        );
-        _actions.list->setAlternatingRowColors(true);
-        _actions.list->setResizeMode(QListView::Adjust);
-
-        for (size_t i = 0; i < _actions.data.size(); ++i) {
-            const openspace::Profile::Action& action = _actions.data[i];
-            std::string name = action.name.empty() ? action.identifier : action.name;
-            _actions.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
-        }
-
-        layout->addWidget(_actions.list, 0, 0);
-
-        QWidget* controls = new QWidget;
-        QGridLayout* controlsLayout = new QGridLayout(controls);
-
-        controlsLayout->addWidget(new QLabel("Identifier"), 0, 0);
-        _actions.identifier = new QLineEdit;
-        _actions.identifier->setEnabled(false);
-        controlsLayout->addWidget(_actions.identifier, 0, 1);
-
-        controlsLayout->addWidget(new QLabel("Name"), 1, 0);
-        _actions.name = new QLineEdit;
-        _actions.name->setEnabled(false);
-        controlsLayout->addWidget(_actions.name, 1, 1);
-        
-        controlsLayout->addWidget(new QLabel("GUI Path"), 2, 0);
-        _actions.guiPath = new QLineEdit;
-        _actions.guiPath->setEnabled(false);
-        controlsLayout->addWidget(_actions.guiPath, 2, 1);
-        
-        controlsLayout->addWidget(new QLabel("Documentation"), 3, 0);
-        _actions.documentation = new QLineEdit;
-        _actions.documentation->setEnabled(false);
-        controlsLayout->addWidget(_actions.documentation, 3, 1);
-        
-        controlsLayout->addWidget(new QLabel("Is Local"), 4, 0);
-        _actions.isLocal = new QCheckBox;
-        _actions.isLocal->setEnabled(false);
-        controlsLayout->addWidget(_actions.isLocal, 4, 1);
-        
-        controlsLayout->addWidget(new QLabel("Script"), 5, 0);
-        _actions.script = new QTextEdit;
-        _actions.script->setEnabled(false);
-        controlsLayout->addWidget(_actions.script, 5, 1);
-
-        QWidget* container = new QWidget;
-        QBoxLayout* containerLayout = new QHBoxLayout(container);
-        _actions.addButton = new QPushButton("+");
-        QObject::connect(
-            _actions.addButton, &QPushButton::clicked,
-            this, &ActionDialog::actionAdd
-        );
-        containerLayout->addWidget(_actions.addButton);
-
-        _actions.removeButton = new QPushButton("-");
-        _actions.removeButton->setEnabled(false);
-        QObject::connect(
-            _actions.removeButton, &QPushButton::clicked,
-            this, &ActionDialog::actionRemove
-        );
-        containerLayout->addWidget(_actions.removeButton);
-
-        _actions.saveButtons = new QDialogButtonBox;
-        _actions.saveButtons->setEnabled(false);
-        _actions.saveButtons->setStandardButtons(
-            QDialogButtonBox::Save | QDialogButtonBox::Cancel
-        );
-        QObject::connect(
-            _actions.saveButtons, &QDialogButtonBox::accepted,
-            this, &ActionDialog::actionSaved
-        );
-        QObject::connect(
-            _actions.saveButtons, &QDialogButtonBox::rejected,
-            this, &ActionDialog::actionRejected
-        );
-
-        layout->addWidget(controls, 0, 1);
-        clearActionFields();
     
-        layout->addWidget(container, 1, 0, Qt::AlignLeft);
-        layout->addWidget(_actions.saveButtons, 1, 1, Qt::AlignRight);
-    }
-
+    createActionWidgets(layout);
     layout->addWidget(new Line, 2, 0, 1, 2);
-
-    {
-        // Keyboard binding part
-        _keybindings.list = new QListWidget;
-        connect(
-            _keybindings.list, &QListWidget::itemSelectionChanged,
-            this, &ActionDialog::keybindingSelected
-        );
-        _keybindings.list->setAlternatingRowColors(true);
-        _keybindings.list->setResizeMode(QListView::Adjust);
-
-        for (size_t i = 0; i < _keybindings.data.size(); ++i) {
-            const openspace::Profile::Keybinding& kv = _keybindings.data[i];
-            QListWidgetItem* item = new QListWidgetItem;
-            updateListItem(item, kv);
-            _keybindings.list->addItem(item);
-        }
-
-        layout->addWidget(_keybindings.list, 3, 0);
-
-        QWidget* controls = new QWidget;
-        QGridLayout* controlsLayout = new QGridLayout(controls);
-
-        controlsLayout->addWidget(new QLabel("Modifier"), 0, 0);
-        _keybindings.modifier = new QComboBox;
-        QStringList modifierList;
-        for (const std::pair<const int, std::string>& m : openspace::KeyModifierNames) {
-            modifierList += QString::fromStdString(m.second);
-        }
-        _keybindings.modifier->addItems(modifierList);
-        _keybindings.modifier->setEnabled(false);
-        controlsLayout->addWidget(_keybindings.modifier, 0, 1);
-
-        controlsLayout->addWidget(new QLabel("Key"), 1, 0);
-        _keybindings.key = new QComboBox;
-        QStringList keyList;
-        for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
-            keyList += QString::fromStdString(std::string(ki.name));
-        }
-        _keybindings.key->addItems(keyList);
-
-
-        _keybindings.key->setEnabled(false);
-        controlsLayout->addWidget(_keybindings.key, 1, 1);
-
-        controlsLayout->addWidget(new QLabel("Action"), 2, 0);
-        _keybindings.action = new QComboBox;
-        for (const openspace::Profile::Action& action : _actions.data) {
-            _keybindings.action->addItem(QString::fromStdString(action.identifier));
-        }
-        _keybindings.action->setEnabled(false);
-        controlsLayout->addWidget(_keybindings.action, 2, 1);
-
-        QWidget* container = new QWidget;
-        QBoxLayout* containerLayout = new QHBoxLayout(container);
-        _keybindings.addButton = new QPushButton("+");
-        QObject::connect(
-            _keybindings.addButton, &QPushButton::clicked,
-            this, &ActionDialog::keybindingAdd
-        );
-        containerLayout->addWidget(_keybindings.addButton);
-
-        _keybindings.removeButton = new QPushButton("-");
-        _keybindings.removeButton->setEnabled(false);
-        QObject::connect(
-            _keybindings.removeButton, &QPushButton::clicked,
-            this, &ActionDialog::keybindingRemove
-        );
-        containerLayout->addWidget(_keybindings.removeButton);
-
-        _keybindings.saveButtons = new QDialogButtonBox;
-        _keybindings.saveButtons->setEnabled(false);
-        _keybindings.saveButtons->setStandardButtons(
-            QDialogButtonBox::Save | QDialogButtonBox::Cancel
-        );
-        QObject::connect(
-            _keybindings.saveButtons, &QDialogButtonBox::accepted,
-            this, &ActionDialog::keybindingSaved
-        );
-        QObject::connect(
-            _keybindings.saveButtons, &QDialogButtonBox::rejected,
-            this, &ActionDialog::keybindingRejected
-        );
-
-        layout->addWidget(controls, 3, 1);
-        clearKeybindingFields();
-    
-        layout->addWidget(container, 4, 0, Qt::AlignLeft);
-        layout->addWidget(_keybindings.saveButtons, 4, 1, Qt::AlignRight);
-    }
-
-    layout->addWidget(new Line, 5, 0, 1, 2);
+    createKeyboardWidgets(layout);
+    layout->addWidget(new Line, 6, 0, 1, 2);
     
     QDialogButtonBox* buttonBox = new QDialogButtonBox;
     buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -262,7 +113,193 @@ void ActionDialog::createWidgets() {
         buttonBox, &QDialogButtonBox::rejected,
         this, &ActionDialog::reject
     );
-    layout->addWidget(buttonBox, 6, 1, Qt::AlignRight);
+    layout->addWidget(buttonBox, 7, 1, Qt::AlignRight);
+}
+
+void ActionDialog::createActionWidgets(QGridLayout* layout) {
+    _actions.list = new QListWidget;
+    connect(
+        _actions.list, &QListWidget::itemSelectionChanged,
+        this, &ActionDialog::actionSelected
+    );
+    _actions.list->setAlternatingRowColors(true);
+    _actions.list->setResizeMode(QListView::Adjust);
+
+    for (size_t i = 0; i < _actions.data.size(); ++i) {
+        const Profile::Action& action = _actions.data[i];
+        std::string name = action.name.empty() ? action.identifier : action.name;
+        _actions.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
+    }
+
+    layout->addWidget(_actions.list, 0, 0);
+
+    QWidget* controls = new QWidget;
+    QGridLayout* controlsLayout = new QGridLayout(controls);
+    controlsLayout->setContentsMargins(0, 0, 0, 0);
+    controlsLayout->addWidget(new QLabel("Identifier"), 0, 0);
+    _actions.identifier = new QLineEdit;
+    _actions.identifier->setEnabled(false);
+    controlsLayout->addWidget(_actions.identifier, 0, 1);
+
+    controlsLayout->addWidget(new QLabel("Name"), 1, 0);
+    _actions.name = new QLineEdit;
+    _actions.name->setEnabled(false);
+    controlsLayout->addWidget(_actions.name, 1, 1);
+
+    controlsLayout->addWidget(new QLabel("GUI Path"), 2, 0);
+    _actions.guiPath = new QLineEdit;
+    _actions.guiPath->setEnabled(false);
+    controlsLayout->addWidget(_actions.guiPath, 2, 1);
+
+    controlsLayout->addWidget(new QLabel("Documentation"), 3, 0);
+    _actions.documentation = new QLineEdit;
+    _actions.documentation->setEnabled(false);
+    controlsLayout->addWidget(_actions.documentation, 3, 1);
+
+    controlsLayout->addWidget(new QLabel("Is Local"), 4, 0);
+    _actions.isLocal = new QCheckBox;
+    _actions.isLocal->setEnabled(false);
+    controlsLayout->addWidget(_actions.isLocal, 4, 1);
+
+    controlsLayout->addWidget(new QLabel("Script"), 5, 0);
+    _actions.script = new QTextEdit;
+    _actions.script->setEnabled(false);
+    controlsLayout->addWidget(_actions.script, 5, 1);
+
+    QWidget* container = new QWidget;
+    QBoxLayout* containerLayout = new QHBoxLayout(container);
+    _actions.addButton = new QPushButton("+");
+    _actions.addButton->setObjectName("add-button");
+    QObject::connect(
+        _actions.addButton, &QPushButton::clicked,
+        this, &ActionDialog::actionAdd
+    );
+    containerLayout->addWidget(_actions.addButton);
+
+    _actions.removeButton = new QPushButton("-");
+    _actions.removeButton->setObjectName("remove-button");
+    _actions.removeButton->setEnabled(false);
+    QObject::connect(
+        _actions.removeButton, &QPushButton::clicked,
+        this, &ActionDialog::actionRemove
+    );
+    containerLayout->addWidget(_actions.removeButton);
+
+    _actions.saveButtons = new QDialogButtonBox;
+    _actions.saveButtons->setEnabled(false);
+    _actions.saveButtons->setStandardButtons(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel
+    );
+    QObject::connect(
+        _actions.saveButtons, &QDialogButtonBox::accepted,
+        this, &ActionDialog::actionSaved
+    );
+    QObject::connect(
+        _actions.saveButtons, &QDialogButtonBox::rejected,
+        this, &ActionDialog::actionRejected
+    );
+
+    layout->addWidget(controls, 0, 1);
+    clearActionFields();
+
+    layout->addWidget(container, 1, 0, Qt::AlignLeft);
+    layout->addWidget(_actions.saveButtons, 1, 1, Qt::AlignRight);
+}
+
+void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
+    _keybindings.list = new QListWidget;
+    connect(
+        _keybindings.list, &QListWidget::itemSelectionChanged,
+        this, &ActionDialog::keybindingSelected
+    );
+    _keybindings.list->setAlternatingRowColors(true);
+    _keybindings.list->setResizeMode(QListView::Adjust);
+
+    for (size_t i = 0; i < _keybindings.data.size(); ++i) {
+        const Profile::Keybinding& kv = _keybindings.data[i];
+        QListWidgetItem* item = new QListWidgetItem;
+        updateListItem(item, kv);
+        _keybindings.list->addItem(item);
+    }
+
+    layout->addWidget(_keybindings.list, 3, 0, 2, 1);
+
+    QWidget* controls = new QWidget;
+    QGridLayout* controlsLayout = new QGridLayout(controls);
+    controlsLayout->addWidget(new QLabel("Modifier"), 0, 0);
+    {
+        QWidget* container = new QWidget;
+        QBoxLayout* containerLayout = new QHBoxLayout(container);
+        _keybindings.shiftModifier = new QCheckBox("Shift");
+        _keybindings.shiftModifier->setEnabled(false);
+        containerLayout->addWidget(_keybindings.shiftModifier);
+        _keybindings.ctrlModifier = new QCheckBox("Control");
+        _keybindings.ctrlModifier->setEnabled(false);
+        containerLayout->addWidget(_keybindings.ctrlModifier);
+        _keybindings.altModifier = new QCheckBox("Alt");
+        _keybindings.altModifier->setEnabled(false);
+        containerLayout->addWidget(_keybindings.altModifier);
+        controlsLayout->addWidget(container, 0, 1);
+    }
+
+    controlsLayout->addWidget(new QLabel("Key"), 1, 0);
+    _keybindings.key = new QComboBox;
+    QStringList keyList;
+    for (const KeyInfo& ki : KeyInfos) {
+        keyList += QString::fromStdString(std::string(ki.name));
+    }
+    _keybindings.key->addItems(keyList);
+    _keybindings.key->setCurrentIndex(-1);
+    _keybindings.key->setEnabled(false);
+    controlsLayout->addWidget(_keybindings.key, 1, 1);
+
+    controlsLayout->addWidget(new QLabel("Action"), 2, 0);
+    _keybindings.action = new QComboBox;
+    for (const Profile::Action& action : _actions.data) {
+        _keybindings.action->addItem(QString::fromStdString(action.identifier));
+    }
+    _keybindings.action->setEnabled(false);
+    controlsLayout->addWidget(_keybindings.action, 2, 1);
+
+    QWidget* container = new QWidget;
+    QBoxLayout* containerLayout = new QHBoxLayout(container);
+    _keybindings.addButton = new QPushButton("+");
+    _keybindings.addButton->setObjectName("add-button");
+    QObject::connect(
+        _keybindings.addButton, &QPushButton::clicked,
+        this, &ActionDialog::keybindingAdd
+    );
+    containerLayout->addWidget(_keybindings.addButton);
+
+    _keybindings.removeButton = new QPushButton("-");
+    _keybindings.removeButton->setObjectName("remove-button");
+    _keybindings.removeButton->setEnabled(false);
+    QObject::connect(
+        _keybindings.removeButton, &QPushButton::clicked,
+        this, &ActionDialog::keybindingRemove
+    );
+    containerLayout->addWidget(_keybindings.removeButton);
+
+    _keybindings.saveButtons = new QDialogButtonBox;
+    _keybindings.saveButtons->setEnabled(false);
+    _keybindings.saveButtons->setStandardButtons(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel
+    );
+    QObject::connect(
+        _keybindings.saveButtons, &QDialogButtonBox::accepted,
+        this, &ActionDialog::keybindingSaved
+    );
+    QObject::connect(
+        _keybindings.saveButtons, &QDialogButtonBox::rejected,
+        this, &ActionDialog::keybindingRejected
+    );
+
+    layout->addWidget(controls, 3, 1);
+    layout->addWidget(new QWidget, 4, 1);
+    clearKeybindingFields();
+
+    layout->addWidget(container, 5, 0, Qt::AlignLeft);
+    layout->addWidget(_keybindings.saveButtons, 5, 1, Qt::AlignRight);
 }
 
 void ActionDialog::applyChanges() {
@@ -271,7 +308,7 @@ void ActionDialog::applyChanges() {
     accept();
 }
 
-openspace::Profile::Action* ActionDialog::selectedAction() {
+Profile::Action* ActionDialog::selectedAction() {
     QListWidgetItem* item = _actions.list->currentItem();
     const int idx = _actions.list->row(item);
     return idx != -1 ? &_actions.data[idx] : nullptr;
@@ -279,7 +316,7 @@ openspace::Profile::Action* ActionDialog::selectedAction() {
 
 void ActionDialog::actionAdd() {
     _actions.list->addItem("");
-    _actions.data.push_back(openspace::Profile::Action());
+    _actions.data.push_back(Profile::Action());
     _actions.list->setCurrentRow(_actions.list->count() - 1);
 }
 
@@ -294,7 +331,7 @@ void ActionDialog::actionRemove() {
 
     // We can't remove an action if it has a keyboard shortcut attached to it
     for (size_t i = 0; i < _keybindings.data.size(); ++i) {
-        const openspace::Profile::Keybinding& kb = _keybindings.data[i];
+        const Profile::Keybinding& kb = _keybindings.data[i];
         if (kb.action != action->identifier) {
             continue;
         }
@@ -334,7 +371,7 @@ void ActionDialog::actionRemove() {
 }
 
 void ActionDialog::actionSelected() {
-    const openspace::Profile::Action* action = selectedAction();
+    const Profile::Action* action = selectedAction();
     if (action) {
         // Action selected
         _actions.identifier->setText(QString::fromStdString(action->identifier));
@@ -368,7 +405,7 @@ void ActionDialog::actionSaved() {
         return;
     }
 
-    openspace::Profile::Action* action = selectedAction();
+    Profile::Action* action = selectedAction();
     std::string oldIdentifier = action->identifier;
     if (oldIdentifier != newIdentifier) {
         // The identifier is a bit special as we need to make sure that we didn't
@@ -378,7 +415,7 @@ void ActionDialog::actionSaved() {
 
         const auto it = std::find_if(
             _actions.data.begin(), _actions.data.end(),
-            [id = newIdentifier](const openspace::Profile::Action& action) {
+            [id = newIdentifier](const Profile::Action& action) {
                 return action.identifier == id;
             }
         );
@@ -454,7 +491,7 @@ void ActionDialog::actionRejected() {
     clearActionFields();
 }
 
-openspace::Profile::Keybinding* ActionDialog::selectedKeybinding() {
+Profile::Keybinding* ActionDialog::selectedKeybinding() {
     QListWidgetItem* item = _keybindings.list->currentItem();
     const int idx = _keybindings.list->row(item);
     return idx != -1 ? &_keybindings.data[idx] : nullptr;
@@ -462,12 +499,12 @@ openspace::Profile::Keybinding* ActionDialog::selectedKeybinding() {
 
 void ActionDialog::keybindingAdd() {
     _keybindings.list->addItem("");
-    _keybindings.data.push_back(openspace::Profile::Keybinding());
+    _keybindings.data.push_back(Profile::Keybinding());
     _keybindings.list->setCurrentRow(_keybindings.list->count() - 1);
 }
 
 void ActionDialog::keybindingRemove() {
-    const openspace::Profile::Keybinding* keybinding = selectedKeybinding();
+    const Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "A keybinding must be selected at this point");
     
     for (size_t i = 0; i < _keybindings.data.size(); ++i) {
@@ -483,17 +520,25 @@ void ActionDialog::keybindingRemove() {
 }
 
 void ActionDialog::keybindingSelected() {
-    const openspace::Profile::Keybinding* keybinding = selectedKeybinding();
+    const Profile::Keybinding* keybinding = selectedKeybinding();
     if (keybinding) {
-        std::string modifier = ghoul::to_string(keybinding->key.modifier);
-        std::string key = ghoul::to_string(keybinding->key.key);
-        std::string action = keybinding->action;
+        _keybindings.shiftModifier->setEnabled(true);
+        _keybindings.shiftModifier->setChecked(
+            hasKeyModifier(keybinding->key.modifier, KeyModifier::Shift)
+        );
+        _keybindings.ctrlModifier->setEnabled(true);
+        _keybindings.ctrlModifier->setChecked(
+            hasKeyModifier(keybinding->key.modifier, KeyModifier::Control)
+        );
+        _keybindings.altModifier->setEnabled(true);
+        _keybindings.altModifier->setChecked(
+            hasKeyModifier(keybinding->key.modifier, KeyModifier::Alt)
+        );
 
-        _keybindings.modifier->setCurrentText(QString::fromStdString(modifier));
-        _keybindings.modifier->setEnabled(true);
+        std::string key = ghoul::to_string(keybinding->key.key);
         _keybindings.key->setCurrentText(QString::fromStdString(key));
         _keybindings.key->setEnabled(true);
-        _keybindings.action->setCurrentText(QString::fromStdString(action));
+        _keybindings.action->setCurrentText(QString::fromStdString(keybinding->action));
         _keybindings.action->setEnabled(true);
         _keybindings.addButton->setEnabled(false);
         _keybindings.removeButton->setEnabled(true);
@@ -508,14 +553,22 @@ void ActionDialog::keybindingSelected() {
 }
 
 void ActionDialog::keybindingSaved() {
-    openspace::Profile::Keybinding* keybinding = selectedKeybinding();
+    Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "There must be a selected action at this point");
 
-    keybinding->key = openspace::stringToKey(fmt::format(
-        "{}+{}",
-        _keybindings.modifier->currentText().toStdString(),
-        _keybindings.key->currentText().toStdString()
-    ));
+    KeyModifier km = KeyModifier::None;
+    if (_keybindings.shiftModifier->isChecked()) {
+        km |= KeyModifier::Shift;
+    }
+    if (_keybindings.altModifier->isChecked()) {
+        km |= KeyModifier::Alt;
+    }
+    if (_keybindings.ctrlModifier->isChecked()) {
+        km |= KeyModifier::Control;
+    }
+
+    keybinding->key = stringToKey(_keybindings.key->currentText().toStdString());
+    keybinding->key.modifier = km;
     keybinding->action = _keybindings.action->currentText().toStdString();
 
     updateListItem(_keybindings.list->currentItem(), *keybinding);
@@ -524,8 +577,12 @@ void ActionDialog::keybindingSaved() {
 
 void ActionDialog::clearKeybindingFields() {
     _keybindings.list->setCurrentRow(-1);
-    _keybindings.modifier->setCurrentIndex(-1);
-    _keybindings.modifier->setEnabled(false);
+    _keybindings.shiftModifier->setChecked(false);
+    _keybindings.shiftModifier->setEnabled(false);
+    _keybindings.ctrlModifier->setChecked(false);
+    _keybindings.ctrlModifier->setEnabled(false);
+    _keybindings.altModifier->setChecked(false);
+    _keybindings.altModifier->setEnabled(false);
     _keybindings.key->setCurrentIndex(-1);
     _keybindings.key->setEnabled(false);
     _keybindings.action->setCurrentIndex(-1);

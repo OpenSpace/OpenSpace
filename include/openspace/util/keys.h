@@ -64,51 +64,74 @@
 
 namespace openspace {
 
-enum class KeyAction : int {
+//////////////////////////////////////////////////////////////////////////////////////////
+
+enum class KeyAction : uint8_t {
     Release = 0,
     Press = 1,
     Repeat = 2
 };
 
-bool hasKeyAction(KeyAction lhs, KeyAction rhs);
+constexpr bool hasKeyAction(KeyAction lhs, KeyAction rhs) {
+    return static_cast<std::underlying_type_t<KeyAction>>(lhs) &
+        static_cast<std::underlying_type_t<KeyAction>>(rhs);
+}
 
-KeyAction operator|(KeyAction lhs, KeyAction rhs);
-KeyAction operator|=(KeyAction& lhs, KeyAction rhs);
+constexpr KeyAction operator|(KeyAction lhs, KeyAction rhs) {
+    return static_cast<KeyAction>(
+        static_cast<std::underlying_type_t<KeyAction>>(lhs) |
+        static_cast<std::underlying_type_t<KeyAction>>(rhs)
+    );
+}
 
-enum class KeyModifier : int {
-    NoModifier = 0,
+constexpr KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
+    return (lhs | rhs);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+enum class KeyModifier : uint8_t {
+    None = 0,
     Shift      = 0x01,
     Control    = 0x02,
     Alt        = 0x04,
     Super      = 0x08
 };
 
-static const std::map<int, std::string> KeyModifierNames = {
-    { 0, "" },
-    { 0x0001, "Shift" },
-    { 0x0002, "Control" },
-    { 0x0004, "Alt" },
-    { 0x0008, "Super" },
-    { 0x0003, "Shift+Control" },
-    { 0x0005, "Shift+Alt" },
-    { 0x0009, "Shift+Super" },
-    { 0x0006, "Control+Alt" },
-    { 0x000A, "Control+Super" },
-    { 0x000C, "Alt+Super" },
-    { 0x0007, "Shift+Control+Alt" },
-    { 0x000B, "Shift+Control+Super" },
-    { 0x000D, "Shift+Alt+Super" },
-    { 0x000E, "Control+Alt+Super" },
-    { 0x000F, "Shift+Control+Alt+Super" }
+constexpr KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
+    return static_cast<KeyModifier>(
+        static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
+        static_cast<std::underlying_type_t<KeyModifier>>(rhs)
+        );
+}
+
+constexpr KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
+    return lhs = (lhs | rhs);
+}
+
+struct KeyModifierInfo {
+    KeyModifier modifier;
+    std::string_view name;
+    std::string_view identifier;
 };
 
-bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs);
+constexpr std::array<KeyModifierInfo, 5> KeyModifierInfos = {
+    KeyModifierInfo{ KeyModifier::None,       "",        ""      },
+    KeyModifierInfo{ KeyModifier::Shift,      "Shift",   "SHIFT" },
+    KeyModifierInfo{ KeyModifier::Control,    "Control", "CTRL"  },
+    KeyModifierInfo{ KeyModifier::Alt,        "Alt",     "ALT"   },
+    KeyModifierInfo{ KeyModifier::Super,      "Super",   "SUPER" },
+};
 
-KeyModifier operator|(KeyModifier lhs, KeyModifier rhs);
-KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs);
+constexpr bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
+    return static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
+        static_cast<std::underlying_type_t<KeyModifier>>(rhs);
+}
 
-enum class Key {
-    Unknown        =  -1,
+//////////////////////////////////////////////////////////////////////////////////////////
+
+enum class Key : uint16_t {
+    Unknown        =  uint16_t(-1),
     Space          =  32,
     Apostrophe     =  39,
     Comma          =  44,
@@ -231,22 +254,14 @@ enum class Key {
     Last           = Menu
 };
 
-constexpr inline bool isKeypadKey(Key key) noexcept {
-    return key == Key::Keypad0 || key == Key::Keypad1 || key == Key::Keypad2 ||
-        key == Key::Keypad3 || key == Key::Keypad4 || key == Key::Keypad5 ||
-        key == Key::Keypad6 || key == Key::Keypad7 || key == Key::Keypad8 ||
-        key == Key::Keypad9 || key == Key::KeypadEnter || key == Key::KeypadAdd ||
-        key == Key::KeypadSubtract || key == Key::KeypadMultiply ||
-        key == Key::KeypadDivide;
-}
-
 struct KeyInfo {
     Key key;
     std::string_view name;
     std::string_view identifier;
 };
 
-constexpr const std::array<KeyInfo, 119> KeyInfos = {
+constexpr const std::array<KeyInfo, 120> KeyInfos = {
+    KeyInfo { Key::Unknown,        "",              ""              },
     KeyInfo { Key::Space,          "Space",         "SPACE"         },
     KeyInfo { Key::Apostrophe,     "'",             "APOSTROPHE"    },
     KeyInfo { Key::Comma,          ",",             "COMMA"         },
@@ -368,22 +383,39 @@ constexpr const std::array<KeyInfo, 119> KeyInfos = {
     KeyInfo { Key::Menu,           "Menu",          "MENU"          }
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 struct KeyWithModifier {
-    Key key;
-    KeyModifier modifier;
+    Key key = Key::Unknown;
+    KeyModifier modifier = KeyModifier::None;
 };
+
+constexpr inline bool isKeypadKey(Key key) noexcept {
+    return key == Key::Keypad0 || key == Key::Keypad1 || key == Key::Keypad2 ||
+        key == Key::Keypad3 || key == Key::Keypad4 || key == Key::Keypad5 ||
+        key == Key::Keypad6 || key == Key::Keypad7 || key == Key::Keypad8 ||
+        key == Key::Keypad9 || key == Key::KeypadEnter || key == Key::KeypadAdd ||
+        key == Key::KeypadSubtract || key == Key::KeypadMultiply ||
+        key == Key::KeypadDivide;
+}
 
 KeyWithModifier stringToKey(std::string str);
-bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
-bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs);
 
-static const std::map<std::string, KeyModifier> KeyModifierMapping = {
-    { ""     , KeyModifier::NoModifier },
-    { "SHIFT", KeyModifier::Shift },
-    { "ALT"  , KeyModifier::Alt },
-    { "CTRL" , KeyModifier::Control },
-    { "SUPER", KeyModifier::Super }
-};
+// @TODO (abock, 2021-08-12) This function should die
+constexpr bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) noexcept
+{
+    if (lhs.modifier == rhs.modifier) {
+        return lhs.key < rhs.key;
+    }
+    else {
+        return lhs.modifier < rhs.modifier;
+    }
+}
+
+constexpr bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) noexcept
+{
+    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
+}
 
 } // namespace openspace
 

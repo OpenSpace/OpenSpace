@@ -6,7 +6,7 @@
 }
 
 QLabel#heading {
-    font-size: 12pt;
+  font-size: 12pt;
 }
 
 QLabel#error-message {
@@ -18,12 +18,12 @@ QLabel#error-message {
  */
 LauncherWindow  QLabel {
   font-family: Segoe UI;
-  font-weight:600;
+  font-weight: 600;
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
   color: #ddd;
-  font-size:10pt;
+  font-size: 10pt;
 }
 
 LauncherWindow  QLabel#clear {
@@ -119,10 +119,20 @@ AssetsDialog  QTreeView {
 }
 
 /*
- * Keybindings
+ * ActionDialog
  */
-KeybindingsDialog  QListWidget {
+ActionDialog  QListWidget {
   min-width: 40em;
+}
+
+ActionDialog  QPushButton#add-button, QPushButton#remove-button {
+  font-weight: bold;
+
+  padding: 0px 0px 0px 0px;
+  min-width: 1.5em;
+  max-width: 1.5em;
+  min-height: 1.5em;
+  max-height: 1.5em;
 }
 
 /*

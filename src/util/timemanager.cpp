@@ -490,7 +490,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         const Key key = Keys[i % nKeys];
         const double deltaTimeStep = steps[i];
 
-        KeyModifier modifier = KeyModifier::NoModifier;
+        KeyModifier modifier = KeyModifier::None;
         if (i > nKeys - 1) {
             modifier = KeyModifier::Shift;
         }

@@ -82,17 +82,7 @@ namespace {
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += name + " (";
-            int keymod = static_cast<int>(k.key.modifier);
-            if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-                results += openspace::KeyModifierNames.at(keymod) + "+";
-            }
-            for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
-                if (ki.key == k.key.key) {
-                    results += ki.name;
-                }
-            }
-            results += ")\n";
+            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
         }
         return results;
     }
