@@ -62,8 +62,8 @@ ActionDialog::ActionDialog(Profile& profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
-    _actions.data = _profile.actions();
-    _keybindings.data = _profile.keybindings();
+    _actions.data = _profile.actions;
+    _keybindings.data = _profile.keybindings;
 
     setWindowTitle("Actions and Keybindings");
     createWidgets();
@@ -304,8 +304,8 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
 }
 
 void ActionDialog::applyChanges() {
-    _profile.setActions(_actions.data);
-    _profile.setKeybindings(_keybindings.data);
+    _profile.actions = std::move(_actions.data);
+    _profile.keybindings = std::move(_keybindings.data);
     accept();
 }
 

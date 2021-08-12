@@ -151,7 +151,8 @@ std::string to_string(const openspace::KeyModifier& mod) {
     }
     // The last addition has added an additional '+' that we
     // should remove
-    return result.substr(0, result.size() - 1);
+    result.pop_back();
+    return result;
 }
 
 template <>
@@ -160,7 +161,7 @@ std::string to_string(const openspace::KeyWithModifier& key) {
         return to_string(key.key);
     }
     else {
-        return to_string(key.modifier) + "+" + to_string(key.key);
+        return fmt::format("{}+{}", to_string(key.modifier), to_string(key.key));
     }
 }
 

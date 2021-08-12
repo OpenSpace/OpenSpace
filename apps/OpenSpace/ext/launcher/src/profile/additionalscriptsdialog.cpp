@@ -42,7 +42,7 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
     setWindowTitle("Additional Scripts");
     createWidgets();
 
-    std::vector<std::string> scripts = _profile.additionalScripts();
+    const std::vector<std::string>& scripts = _profile.additionalScripts;
     std::string scriptText = std::accumulate(
         scripts.begin(), scripts.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
@@ -95,7 +95,7 @@ void AdditionalScriptsDialog::parseScript() {
         std::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
-    _profile.setAdditionalScripts(additionalScripts);
+    _profile.additionalScripts = std::move(additionalScripts);
     accept();
 }
 

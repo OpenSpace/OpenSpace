@@ -336,26 +336,26 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
-    _modulesLabel->setText(labelText(_profile.modules().size(), "Modules"));
+    _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 
-    _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
+    _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 
-    _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
+    _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
-        QString::fromStdString(summarizeProperties(_profile.properties()))
+        QString::fromStdString(summarizeProperties(_profile.properties))
     );
 
-    _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
+    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
-        summarizeKeybindings(_profile.keybindings(), _profile.actions())
+        summarizeKeybindings(_profile.keybindings, _profile.actions)
     ));
 
     _deltaTimesLabel->setText(
-        labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
+        labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
     );
     _interestingNodesLabel->setText(
-        labelText(_profile.markNodes().size(), "Mark Interesting Nodes")
+        labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
     );
 }
 
@@ -410,32 +410,32 @@ void ProfileEdit::openMeta() {
 void ProfileEdit::openModules() {
     _errorMsg->clear();
     ModulesDialog(_profile, this).exec();
-    _modulesLabel->setText(labelText(_profile.modules().size(), "Modules"));
+    _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
 void ProfileEdit::openProperties() {
     _errorMsg->clear();
     PropertiesDialog(_profile, this).exec();
-    _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
+    _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
-        QString::fromStdString(summarizeProperties(_profile.properties()))
+        QString::fromStdString(summarizeProperties(_profile.properties))
     );
 }
 
 void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
     ActionDialog(_profile, this).exec();
-    _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
+    _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
-        summarizeKeybindings(_profile.keybindings(), _profile.actions())
+        summarizeKeybindings(_profile.keybindings, _profile.actions)
     ));
 }
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
     AssetsDialog(_profile, _assetBasePath, _userAssetBasePath, this).exec();
-    _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
+    _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
@@ -447,7 +447,7 @@ void ProfileEdit::openDeltaTimes() {
     _errorMsg->clear();
     DeltaTimesDialog(_profile, this).exec();
     _deltaTimesLabel->setText(
-        labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
+        labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
     );
 }
 
@@ -465,7 +465,7 @@ void ProfileEdit::openMarkNodes() {
     _errorMsg->clear();
     MarkNodesDialog(_profile, this).exec();
     _interestingNodesLabel->setText(
-        labelText(_profile.markNodes().size(), "Mark Interesting Nodes")
+        labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
     );
 }
 

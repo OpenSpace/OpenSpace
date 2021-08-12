@@ -38,7 +38,7 @@
 MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
-    , _data(_profile.markNodes())
+    , _data(_profile.markNodes)
 {
     setWindowTitle("Mark Interesting Nodes");
     createWidgets();
@@ -141,7 +141,7 @@ void MarkNodesDialog::listItemRemove() {
 }
 
 void MarkNodesDialog::parseSelections() {
-    _profile.setMarkNodes(_data);
+    _profile.markNodes = std::move(_data);
     accept();
 }
 

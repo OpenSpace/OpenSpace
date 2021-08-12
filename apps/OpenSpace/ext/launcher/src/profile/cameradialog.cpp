@@ -63,8 +63,8 @@ CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
     setWindowTitle("Set Camera Position");
     createWidgets();
 
-    if (_profile.camera().has_value()) {
-        openspace::Profile::CameraType type = *_profile.camera();
+    if (_profile.camera.has_value()) {
+        const openspace::Profile::CameraType& type = *_profile.camera;
         std::visit(overloaded {
             [this](const openspace::Profile::CameraNavState& nav) {
                 _tabWidget->setCurrentIndex(CameraTypeNav);
@@ -406,7 +406,7 @@ void CameraDialog::approved() {
         else {
             nav.pitch = std::nullopt;
         }
-        _profile.setCamera(nav);
+        _profile.camera = std::move(nav);
     }
     else if (_tabWidget->currentIndex() == CameraTypeGeo) {
         openspace::Profile::CameraGoToGeo geo;
@@ -416,7 +416,7 @@ void CameraDialog::approved() {
         if (!_geoState.altitude->text().isEmpty()) {
             geo.altitude = _geoState.altitude->text().toDouble();
         }
-        _profile.setCamera(geo);
+        _profile.camera = std::move(geo);
     }
 
     accept();

@@ -43,7 +43,7 @@ namespace {
 ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
-    , _data(_profile.modules())
+    , _data(_profile.modules)
 {
     setWindowTitle("Modules");
     createWidgets();
@@ -339,7 +339,7 @@ void ModulesDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
     }
-    _profile.setModules(_data);
+    _profile.modules = std::move(_data);
     accept();
 }
 

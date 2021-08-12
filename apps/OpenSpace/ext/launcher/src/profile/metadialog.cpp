@@ -41,8 +41,8 @@ MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
     setWindowTitle("Meta");
     createWidgets();
 
-    if (_profile.meta().has_value()) {
-        openspace::Profile::Meta meta = *_profile.meta();
+    if (_profile.meta.has_value()) {
+        const openspace::Profile::Meta& meta = *_profile.meta;
         if (meta.name.has_value()) {
             _nameEdit->setText(QString::fromStdString(*meta.name));
         }
@@ -127,10 +127,10 @@ void MetaDialog::save() {
         if (!_licenseEdit->text().isEmpty()) {
             m.license = _licenseEdit->text().toStdString();
         }
-        _profile.setMeta(m);
+        _profile.meta = std::move(m);
     }
     else {
-        _profile.clearMeta();
+        _profile.meta = std::nullopt;
     }
     accept();
 }

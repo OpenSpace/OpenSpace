@@ -86,7 +86,7 @@ DeltaTimesDialog::DeltaTimesDialog(openspace::Profile& profile, QWidget *parent)
     setWindowTitle("Simulation Time Increments");
     createWidgets();
 
-    _data = _profile.deltaTimes();
+    _data = _profile.deltaTimes;
 
     for (size_t d = 0; d < _data.size(); ++d) {
         std::string summary = createSummaryForDeltaTime(d, true);
@@ -368,7 +368,7 @@ void DeltaTimesDialog::parseSelections() {
     for (int i = 0; i < (finalNonzeroIndex + 1); ++i) {
         tempDt.push_back(_data[i]);
     }
-    _profile.setDeltaTimes(tempDt);
+    _profile.deltaTimes = std::move(tempDt);
     accept();
 }
 
