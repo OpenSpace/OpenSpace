@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2020                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2021                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/statemachine/statemachinemodule.h>
 #include <openspace/engine/globals.h>
@@ -75,8 +75,8 @@ int createStateMachine(lua_State* L) {
     return 0;
 }
 
-int goTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goTo");
+int goToState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goToState");
     const bool isString = (lua_isstring(L, 1) != 0);
 
     if (!isString) {
@@ -85,9 +85,9 @@ int goTo(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string newState = lua_tostring(L, 1);
@@ -110,9 +110,9 @@ int setInitialState(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string startState = lua_tostring(L, 1);
@@ -147,8 +147,8 @@ int possibleTransitions(lua_State* L) {
     return 1;
 }
 
-int canGoTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoTo");
+int canGoToState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoToState");
     const bool isString = (lua_isstring(L, 1) != 0);
 
     if (!isString) {
@@ -157,14 +157,14 @@ int canGoTo(lua_State* L) {
             L,
             "%s expected, got %s",
             lua_typename(L, LUA_TSTRING),
-            luaL_typename(L, -1)
+            luaL_typename(L, 0)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
     const std::string state = lua_tostring(L, 1);
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    ghoul::lua::push(L, module->canGoTo(state));
+    ghoul::lua::push(L, module->canGoToState(state));
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

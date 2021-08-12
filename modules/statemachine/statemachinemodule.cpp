@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "StateMachine";
-}
+} // namespace
 
 namespace openspace {
 
@@ -108,7 +108,7 @@ void StateMachineModule::transitionTo(const std::string newState) {
     _machine->transitionTo(newState);
 }
 
-bool StateMachineModule::canGoTo(const std::string state) const {
+bool StateMachineModule::canGoToState(const std::string state) const {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
         return false;
@@ -132,11 +132,11 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "in the list will be used."
         },
         {
-            "goTo",
-            &luascriptfunctions::goTo,
+            "goToState",
+            &luascriptfunctions::goToState,
             {},
             "string",
-            "Triggers a transition from the current state to th state with the given "
+            "Triggers a transition from the current state to the state with the given "
             "identifier. Requires that the specified string corresponds to an existing "
             "state, and that a transition between the two states exists."
         },
@@ -165,8 +165,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "transitioned to from the current state."
         },
         {
-            "canGoTo",
-            &luascriptfunctions::canGoTo,
+            "canGoToState",
+            &luascriptfunctions::canGoToState,
             {},
             "string",
             "Returns true if there is a defined transition between the current state and "
