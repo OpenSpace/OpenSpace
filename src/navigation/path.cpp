@@ -377,11 +377,11 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         return Waypoint();
     }
 
-    glm::dvec3 targetPos;
+    glm::dvec3 targetPos = glm::dvec3(0.0);
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
-        targetPos = glm::dmat3(targetNode->modelTransform()) * info.position.value();
+        targetPos = glm::dvec3(targetNode->modelTransform() * glm::dvec4(*info.position, 1.0));
     }
     else {
         const double radius = Waypoint::findValidBoundingSphere(targetNode);
