@@ -85,8 +85,8 @@ void ActionDialog::createWidgets() {
     //  *----------------------*---------------*----------------|
     //  |                      | Modifier      | []S []C []A    |    Row 8
     //  |                      | Key           | DDDDDDDDDDDD>  |    Row 9
-    //  |                      | Actions       | [oooooooooooo] |    Row 10
-    //  |                      | Add action    | DDDDDDDDD> [+] |    Row 11
+    //  |                      | Actions       | DDDDDDDDDDDD>  |    Row 10
+    //  |                      | Add action    | [oooooooooooo] |    Row 11
     //  |                      |               |                |    Row 12
     //  *----------------------*---------------*----------------*
     //  | [+] [-]              |               | [Save] [Cancel]|    Row 13
@@ -255,13 +255,23 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     _keybindings.key->setEnabled(false);
     layout->addWidget(_keybindings.key, 9, 2);
 
-    layout->addWidget(new QLabel("Action"), 10, 1);
+    layout->addWidget(new QLabel("Action chooser"), 10, 1);
     _keybindings.action = new QComboBox;
     for (const Profile::Action& action : _actions.data) {
         _keybindings.action->addItem(QString::fromStdString(action.identifier));
     }
+    connect(
+        _keybindings.action, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this, &ActionDialog::keybindingActionSelected
+    );
+
     _keybindings.action->setEnabled(false);
     layout->addWidget(_keybindings.action, 10, 2);
+
+    layout->addWidget(new QLabel("Action"), 11, 1);
+    _keybindings.actionText = new QLineEdit;
+    _keybindings.actionText->setEnabled(false);
+    layout->addWidget(_keybindings.actionText, 11, 2);
 
 
     // +/- buttons
@@ -540,6 +550,8 @@ void ActionDialog::keybindingSelected() {
         _keybindings.key->setEnabled(true);
         _keybindings.action->setCurrentText(QString::fromStdString(keybinding->action));
         _keybindings.action->setEnabled(true);
+        _keybindings.actionText->setText(QString::fromStdString(keybinding->action));
+        _keybindings.actionText->setEnabled(true);
         _keybindings.addButton->setEnabled(false);
         _keybindings.removeButton->setEnabled(true);
         _keybindings.saveButtons->setEnabled(true);
@@ -550,6 +562,10 @@ void ActionDialog::keybindingSelected() {
         _keybindings.removeButton->setEnabled(false);
         _keybindings.saveButtons->setEnabled(false);
     }
+}
+
+void ActionDialog::keybindingActionSelected(int) {
+    _keybindings.actionText->setText(_keybindings.action->currentText());
 }
 
 void ActionDialog::keybindingSaved() {
@@ -569,7 +585,7 @@ void ActionDialog::keybindingSaved() {
 
     keybinding->key = stringToKey(_keybindings.key->currentText().toStdString());
     keybinding->key.modifier = km;
-    keybinding->action = _keybindings.action->currentText().toStdString();
+    keybinding->action = _keybindings.actionText->text().toStdString();
 
     updateListItem(_keybindings.list->currentItem(), *keybinding);
     clearKeybindingFields();
@@ -587,6 +603,8 @@ void ActionDialog::clearKeybindingFields() {
     _keybindings.key->setEnabled(false);
     _keybindings.action->setCurrentIndex(-1);
     _keybindings.action->setEnabled(false);
+    _keybindings.actionText->clear();
+    _keybindings.actionText->setEnabled(false);
 }
 
 void ActionDialog::keybindingRejected() {

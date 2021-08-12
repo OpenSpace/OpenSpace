@@ -75,10 +75,8 @@ namespace {
         std::string results;
         for (Profile::Keybinding k : keybindings) {
             const auto it = std::find_if(
-                actions.begin(), actions.end(),
-                [id = k.action](const Profile::Action& action) {
-                    return action.identifier == id;
-                }
+                actions.cbegin(), actions.cend(),
+                [id = k.action](const Profile::Action& a) { return a.identifier == id; }
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
@@ -90,7 +88,7 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += p.name + " = " + p.value + '\n';
+            results += fmt::format("{} = {}\n", p.name, p.value);
         }
         return results;
     }

@@ -61,6 +61,7 @@ private:
     void keybindingAdd();
     void keybindingRemove();
     void keybindingSelected();
+    void keybindingActionSelected(int);
     void keybindingSaved();
     void clearKeybindingFields();
     void keybindingRejected();
@@ -89,6 +90,7 @@ private:
         QCheckBox* altModifier = nullptr;
         QComboBox* key = nullptr;
         QComboBox* action = nullptr;
+        QLineEdit* actionText = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;

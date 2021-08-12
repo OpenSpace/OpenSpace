@@ -15,7 +15,7 @@ local webGui = asset.require('util/webgui')
 
 local toggle_trails = {
   Identifier = "os_default.toggle_trails",
-  Name="Toggle Trails",
+  Name = "Toggle Trails",
   Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
     "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
   Documentation = "Toggles the visibility of planet and moon trails",
