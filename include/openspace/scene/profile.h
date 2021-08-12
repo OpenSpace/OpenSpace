@@ -125,8 +125,6 @@ public:
     explicit Profile(const std::string& content);
     std::string serialize() const;
 
-    std::string convertToScene() const;
-
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
@@ -135,14 +133,11 @@ public:
         std::string currentTime,
         interaction::NavigationHandler::NavigationState navState);
 
-    /// If the value passed to this function is 'true', the addAsset and removeAsset
-    /// functions will be no-ops instead
-    void setIgnoreUpdates(bool ignoreUpdates);
-
-    /// Adds a new asset and checks for duplicates
+    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+    /// set to `true`
     void addAsset(const std::string& path);
 
-    /// Removes an asset
+    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
     static constexpr const Version CurrentVersion = Version{ 1, 1 };
@@ -160,16 +155,18 @@ public:
     std::vector<std::string> markNodes;
     std::vector<std::string> additionalScripts;
 
+    bool ignoreUpdates = false;
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
-
-private:
-    bool _ignoreUpdates = false;
 };
+
+std::string convertToScene(const Profile& profile);
+
 
 } // namespace openspace
 

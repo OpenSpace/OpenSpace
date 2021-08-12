@@ -334,7 +334,7 @@ void OpenSpaceEngine::initialize() {
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
             std::ofstream scene(outputAsset);
-            std::string sceneContent = global::profile->convertToScene();
+            std::string sceneContent = convertToScene(*global::profile);
             scene << sceneContent;
 
             // Set asset name to that of the profile because a new scene file will be
@@ -1103,9 +1103,9 @@ void OpenSpaceEngine::preSynchronization() {
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
-        global::profile->setIgnoreUpdates(true);
+        global::profile->ignoreUpdates = true;
         loadSingleAsset(_scheduledAssetPathToLoad);
-        global::profile->setIgnoreUpdates(false);
+        global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();

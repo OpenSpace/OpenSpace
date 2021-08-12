@@ -61,8 +61,8 @@ namespace {
     }
 
     void checkValue(const nlohmann::json& j, const std::string& key,
-        bool (nlohmann::json::*checkFunc)() const, std::string_view keyPrefix,
-        bool isOptional)
+                    bool (nlohmann::json::*checkFunc)() const,
+                    std::string_view keyPrefix, bool isOptional)
     {
         if (j.find(key) == j.end()) {
             if (!isOptional) {
@@ -579,14 +579,10 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     camera = std::move(c);
 }
 
-void Profile::setIgnoreUpdates(bool ignoreUpdates) {
-    _ignoreUpdates = ignoreUpdates;
-}
-
 void Profile::addAsset(const std::string& path) {
     ZoneScoped
 
-    if (_ignoreUpdates) {
+    if (ignoreUpdates) {
         return;
     }
 
@@ -599,7 +595,7 @@ void Profile::addAsset(const std::string& path) {
 void Profile::removeAsset(const std::string& path) {
     ZoneScoped
 
-    if (_ignoreUpdates) {
+    if (ignoreUpdates) {
         return;
     }
 
@@ -721,38 +717,61 @@ Profile::Profile(const std::string& content) {
     }
 }
 
-std::string Profile::convertToScene() const {
+scripting::LuaLibrary Profile::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "saveSettingsToProfile",
+                &luascriptfunctions::saveSettingsToProfile,
+                {},
+                "[string, bool]",
+                "Collects all changes that have been made since startup, including all "
+                "property changes and assets required, requested, or removed. All "
+                "changes will be added to the profile that OpenSpace was started with, "
+                "and the new saved file will contain all of this information. If the "
+                "arugment is provided, the settings will be saved into new profile with "
+                "that name. If the argument is blank, the current profile will be saved "
+                "to a backup file and the original profile will be overwritten. The "
+                "second argument determines if a file that already exists should be "
+                "overwritten, which is 'false' by default"
+            }
+        }
+    };
+}
+
+std::string convertToScene(const Profile& p) {
     ZoneScoped
 
     std::string output;
 
-    if (meta.has_value()) {
+    if (p.meta.has_value()) {
         output += "asset.meta = {\n";
 
-        if (meta->name.has_value()) {
-            output += fmt::format("  Name = [[{}]],\n", *meta->name);
+        if (p.meta->name.has_value()) {
+            output += fmt::format("  Name = [[{}]],\n", *p.meta->name);
         }
-        if (meta->version.has_value()) {
-            output += fmt::format("  Version = [[{}]],\n", *meta->version);
+        if (p.meta->version.has_value()) {
+            output += fmt::format("  Version = [[{}]],\n", *p.meta->version);
         }
-        if (meta->description.has_value()) {
-            output += fmt::format("  Description = [[{}]],\n", *meta->description);
+        if (p.meta->description.has_value()) {
+            output += fmt::format("  Description = [[{}]],\n", *p.meta->description);
         }
-        if (meta->author.has_value()) {
-            output += fmt::format("  Author = [[{}]],\n", *meta->author);
+        if (p.meta->author.has_value()) {
+            output += fmt::format("  Author = [[{}]],\n", *p.meta->author);
         }
-        if (meta->url.has_value()) {
-            output += fmt::format("  URL = [[{}]],\n", *meta->url);
+        if (p.meta->url.has_value()) {
+            output += fmt::format("  URL = [[{}]],\n", *p.meta->url);
         }
-        if (meta->license.has_value()) {
-            output += fmt::format("  License = [[{}]]\n", *meta->license);
+        if (p.meta->license.has_value()) {
+            output += fmt::format("  License = [[{}]]\n", *p.meta->license);
         }
 
         output += "}\n\n";
     }
 
     // Modules
-    for (const Module& m : modules) {
+    for (const Profile::Module& m : p.modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
             m.name, *m.loadedInstruction, *m.notLoadedInstruction
@@ -760,14 +779,14 @@ std::string Profile::convertToScene() const {
     }
 
     // Assets
-    for (const std::string& asset : assets) {
+    for (const std::string& asset : p.assets) {
         output += fmt::format("asset.require(\"{}\");\n", asset);
     }
 
     output += "\n\nasset.onInitialize(function()\n";
     // Actions
     output += "  -- Actions\n";
-    for (const Action& action : actions) {
+    for (const Profile::Action& action : p.actions) {
         const std::string name = action.name.empty() ? action.identifier : action.name;
         output += fmt::format(
             "  openspace.action.registerAction({{"
@@ -781,22 +800,22 @@ std::string Profile::convertToScene() const {
 
     // Keybindings
     output += "\n  -- Keybindings\n";
-        for (size_t i = 0; i < keybindings.size(); ++i) {
-        const Keybinding& k = keybindings[i];
+        for (size_t i = 0; i < p.keybindings.size(); ++i) {
+        const Profile::Keybinding& k = p.keybindings[i];
         const std::string key = ghoul::to_string(k.key);
         output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
 
     // Time
     output += "\n  -- Time\n";
-    switch (time->type) {
-        case Time::Type::Absolute:
-            output += fmt::format("  openspace.time.setTime(\"{}\")\n", time->value);
+    switch (p.time->type) {
+        case Profile::Time::Type::Absolute:
+            output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
             break;
-        case Time::Type::Relative:
+        case Profile::Time::Type::Relative:
             output += "  local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "  local prev = openspace.time.advancedTime(now, \"{}\");\n", time->value
+                "  local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
             );
             output += "  openspace.time.setTime(prev);\n";
             break;
@@ -808,7 +827,7 @@ std::string Profile::convertToScene() const {
     {
         output += "\n  -- Delta Times\n";
         std::string times;
-        for (double d : deltaTimes) {
+        for (double d : p.deltaTimes) {
             times += fmt::format("{}, ", d);
         }
         output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
@@ -818,7 +837,7 @@ std::string Profile::convertToScene() const {
     {
         output += "\n  -- Mark Nodes\n";
         std::string nodes;
-        for (const std::string& n : markNodes) {
+        for (const std::string& n : p.markNodes) {
             nodes += fmt::format("[[{}]],", n);
         }
         output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
@@ -826,16 +845,17 @@ std::string Profile::convertToScene() const {
 
     // Properties
     output += "\n  -- Properties\n";
-    for (const Property& p : properties) {
-        switch (p.setType) {
-            case Property::SetType::SetPropertyValue:
+    for (const Profile::Property& prop : p.properties) {
+        switch (prop.setType) {
+            case Profile::Property::SetType::SetPropertyValue:
                 output += fmt::format(
-                    "  openspace.setPropertyValue(\"{}\", {});\n", p.name, p.value
+                    "  openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
                 );
                 break;
-            case Property::SetType::SetPropertyValueSingle:
+            case Profile::Property::SetType::SetPropertyValueSingle:
                 output += fmt::format(
-                    "  openspace.setPropertyValueSingle(\"{}\", {});\n", p.name, p.value
+                    "  openspace.setPropertyValueSingle(\"{}\", {});\n",
+                    prop.name, prop.value
                 );
                 break;
             default:
@@ -845,10 +865,10 @@ std::string Profile::convertToScene() const {
 
     // Camera
     output += "\n  -- Camera\n";
-    if (camera.has_value()) {
+    if (p.camera.has_value()) {
         output += std::visit(
             overloaded {
-                [](const CameraNavState& c) {
+                [](const Profile::CameraNavState& c) {
                     std::string result;
                     result += "  openspace.navigation.setNavigationState({";
                     result += fmt::format("Anchor = [[{}]], ", c.anchor);
@@ -878,7 +898,7 @@ std::string Profile::convertToScene() const {
                     result += "})\n";
                     return result;
                 },
-                [](const CameraGoToGeo& c) {
+                [](const Profile::CameraGoToGeo& c) {
                     if (c.altitude.has_value()) {
                         return fmt::format(
                             "  openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
@@ -893,41 +913,18 @@ std::string Profile::convertToScene() const {
                     }
                 }
             },
-            *camera
+            *p.camera
         );
     }
 
     output += "\n  -- Additional Scripts begin\n";
-    for (const std::string& a : additionalScripts) {
+    for (const std::string& a : p.additionalScripts) {
         output += fmt::format("  {}\n", a);
     }
     output += "  -- Additional Scripts end\n";
     output += "end)\n";
 
     return output;
-}
-
-scripting::LuaLibrary Profile::luaLibrary() {
-    return {
-        "",
-        {
-            {
-                "saveSettingsToProfile",
-                &luascriptfunctions::saveSettingsToProfile,
-                {},
-                "[string, bool]",
-                "Collects all changes that have been made since startup, including all "
-                "property changes and assets required, requested, or removed. All "
-                "changes will be added to the profile that OpenSpace was started with, "
-                "and the new saved file will contain all of this information. If the "
-                "arugment is provided, the settings will be saved into new profile with "
-                "that name. If the argument is blank, the current profile will be saved "
-                "to a backup file and the original profile will be overwritten. The "
-                "second argument determines if a file that already exists should be "
-                "overwritten, which is 'false' by default"
-            }
-        }
-    };
 }
 
 }  // namespace openspace
