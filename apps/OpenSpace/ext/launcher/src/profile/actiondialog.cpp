@@ -440,7 +440,6 @@ void ActionDialog::actionSaved() {
             if (_keybindings.data[i].action == oldIdentifier) {
                 _keybindings.data[i].action = newIdentifier;
                 updateListItem(_keybindings.list->item(i), _keybindings.data[i]);
-                break;
             }
         }
         for (int i = 0; i < _keybindings.action->count(); ++i) {

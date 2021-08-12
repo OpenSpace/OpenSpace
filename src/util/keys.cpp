@@ -35,21 +35,25 @@
 namespace openspace {
 
 KeyWithModifier stringToKey(std::string str) {
-    // key only uppercase
-    std::transform(
-        str.begin(),
-        str.end(),
-        str.begin(),
-        [](char v) { return static_cast<char>(toupper(v)); }
-    );
-
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
+    std::vector<std::string> originalTokens = tokens;
+    for (std::string& t : tokens) {
+        std::transform(
+            t.begin(), t.end(),
+            t.begin(),
+            [](char v) { return static_cast<char>(toupper(v)); }
+        );
+
+    }
 
     // default is unknown
     Key key = Key::Unknown;
     std::string keyName = tokens.back();
+    std::string keyNameOriginal = originalTokens.back();
     for (const KeyInfo& ki : KeyInfos) {
-        if (ki.identifier == keyName || ki.name == keyName) {
+        if (ki.identifier == keyName || ki.name == keyName ||
+            ki.identifier == keyNameOriginal || ki.name == keyNameOriginal)
+        {
             key = ki.key;
             break;
         }

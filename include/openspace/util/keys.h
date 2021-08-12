@@ -58,6 +58,7 @@
 // definitions GLFW v3.1
 
 #include <ghoul/misc/stringconversion.h>
+#include <array>
 #include <map>
 #include <string>
 #include <unordered_map>
