@@ -87,7 +87,11 @@ namespace {
             if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
                 results += openspace::KeyModifierNames.at(keymod) + "+";
             }
-            results += openspace::KeyNames.at(static_cast<int>(k.key.key));
+            for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+                if (ki.key == k.key.key) {
+                    results += ki.name;
+                }
+            }
             results += ")\n";
         }
         return results;

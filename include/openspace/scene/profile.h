@@ -166,15 +166,16 @@ public:
     void clearCamera();
 
     void setVersion(Version v);
-    void setModules(std::vector<Module>& m);
+    void setModules(std::vector<Module> m);
     void setMeta(Meta m);
-    void setProperties(std::vector<Property>& p);
-    void setKeybindings(std::vector<Keybinding>& k);
+    void setProperties(std::vector<Property> p);
+    void setActions(std::vector<Action> a);
+    void setKeybindings(std::vector<Keybinding> k);
     void setTime(Time t);
     void setDeltaTimes(std::vector<double> dt);
     void setCamera(CameraType c);
-    void setMarkNodes(std::vector<std::string>& n);
-    void setAdditionalScripts(std::vector<std::string>& s);
+    void setMarkNodes(std::vector<std::string> n);
+    void setAdditionalScripts(std::vector<std::string> s);
 
 
     /**
@@ -185,7 +186,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    static constexpr const Version CurrentVersion = Version { 1, 0 };
+    static constexpr const Version CurrentVersion = Version{ 1, 1 };
 
     Version _version = CurrentVersion;
     std::vector<Module> _modules;

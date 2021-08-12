@@ -78,13 +78,17 @@ KeyWithModifier stringToKey(std::string str) {
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
 
     // default is unknown
-    const auto itKey = KeyMapping.find(tokens.back());
-    if (itKey == KeyMapping.cend()) {
-        throw ghoul::RuntimeError(
-            fmt::format("Could not find key for '{}'", tokens.back())
-        );
+    Key key = Key::Unknown;
+    std::string keyName = tokens.back();
+    for (const KeyInfo& ki : KeyInfos) {
+        if (ki.identifier == keyName || ki.name == keyName) {
+            key = ki.key;
+            break;
+        }
     }
-    Key k = itKey->second;
+    if (key == Key::Unknown) {
+        throw ghoul::RuntimeError(fmt::format("Could not find key for '{}'", keyName));
+    }
 
     KeyModifier m = KeyModifier::NoModifier;
     std::for_each(
@@ -104,7 +108,7 @@ KeyWithModifier stringToKey(std::string str) {
         }
     );
 
-    return { k, m };
+    return { key, m };
 }
 
 bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
@@ -126,11 +130,12 @@ namespace ghoul {
 
 template <>
 std::string to_string(const openspace::Key& key) {
-    for (const std::pair<const std::string, openspace::Key>& p : openspace::KeyMapping) {
-        if (p.second == key) {
-            return p.first;
+    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+        if (ki.key == key) {
+            return std::string(ki.name);
         }
     }
+    
     throw ghoul::MissingCaseException();
 }
 

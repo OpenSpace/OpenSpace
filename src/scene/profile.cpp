@@ -693,6 +693,8 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     profile["actions"] = actions;
     profile["keybindings"] = keybindings;
+
+    profile["version"] = Profile::Version{ 1, 1 };
 }
 
 Profile::Profile(const std::string& content) {
@@ -702,6 +704,7 @@ Profile::Profile(const std::string& content) {
 
         if (_version.major == 1 && _version.minor == 0) {
             convertVersion10to11(profile);
+            profile.at("version").get_to(_version);
         }
 
         if (profile.find("modules") != profile.end()) {
@@ -999,23 +1002,24 @@ void Profile::setVersion(Version v) {
     _version = v;
 }
 
-void Profile::setModules(std::vector<Module>& m) {
-    _modules.clear();
-    copy(m.begin(), m.end(), back_inserter(_modules));
+void Profile::setModules(std::vector<Module> m) {
+    _modules = std::move(m);
 }
 
 void Profile::setMeta(Meta m) {
     _meta = m;
 }
 
-void Profile::setProperties(std::vector<Property>& p) {
-    _properties.clear();
-    copy(p.begin(), p.end(), back_inserter(_properties));
+void Profile::setProperties(std::vector<Property> p) {
+    _properties = std::move(p);
 }
 
-void Profile::setKeybindings(std::vector<Keybinding>& k) {
-    _keybindings.clear();
-    copy(k.begin(), k.end(), back_inserter(_keybindings));
+void Profile::setActions(std::vector<Action> a) {
+    _actions = std::move(a);
+}
+
+void Profile::setKeybindings(std::vector<Keybinding> k) {
+    _keybindings = std::move(k);
 }
 
 void Profile::setTime(Time t) {
@@ -1030,14 +1034,12 @@ void Profile::setCamera(CameraType c) {
     _camera = c;
 }
 
-void Profile::setMarkNodes(std::vector<std::string>& n) {
-    _markNodes.clear();
-    copy(n.begin(), n.end(), back_inserter(_markNodes));
+void Profile::setMarkNodes(std::vector<std::string> n) {
+    _markNodes = std::move(n);
 }
 
-void Profile::setAdditionalScripts(std::vector<std::string>& s) {
-    _additionalScripts.clear();
-    copy(s.begin(), s.end(), back_inserter(_additionalScripts));
+void Profile::setAdditionalScripts(std::vector<std::string> s) {
+    _additionalScripts = std::move(s);
 }
 
 void Profile::clearMeta() {

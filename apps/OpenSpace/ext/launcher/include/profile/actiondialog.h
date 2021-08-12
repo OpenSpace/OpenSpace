@@ -34,6 +34,7 @@ class QComboBox;
 class QDialogButtonBox;
 class QLineEdit;
 class QListWidget;
+class QPushButton;
 class QTextEdit;
 
 class ActionDialog : public QDialog {
@@ -41,19 +42,22 @@ Q_OBJECT
 public:
     ActionDialog(openspace::Profile& profile, QWidget* parent);
 
-    virtual void keyPressEvent(QKeyEvent* evt) override;
-
 private:
     void createWidgets();
     void updateActionList();
+    void applyChanges();
 
     openspace::Profile::Action* selectedAction();
+    void actionAdd();
+    void actionRemove();
     void actionSelected();
     void actionSaved();
     void clearActionFields();
     void actionRejected();
 
     openspace::Profile::Keybinding* selectedKeybinding();
+    void keybindingAdd();
+    void keybindingRemove();
     void keybindingSelected();
     void keybindingSaved();
     void clearKeybindingFields();
@@ -68,7 +72,9 @@ private:
         QLineEdit* documentation = nullptr;
         QCheckBox* isLocal = nullptr;
         QTextEdit* script = nullptr;
-        QDialogButtonBox* buttons = nullptr;
+        QPushButton* addButton = nullptr;
+        QPushButton* removeButton = nullptr;
+        QDialogButtonBox* saveButtons = nullptr;
 
         std::vector<openspace::Profile::Action> data;
     } _actions;
@@ -78,13 +84,12 @@ private:
         QComboBox* modifier = nullptr;
         QComboBox* key = nullptr;
         QComboBox* action = nullptr;
-        QDialogButtonBox* buttons = nullptr;
+        QPushButton* addButton = nullptr;
+        QPushButton* removeButton = nullptr;
+        QDialogButtonBox* saveButtons = nullptr;
 
         std::vector<openspace::Profile::Keybinding> data;
     } _keybindings;
-    //std::vector<int> _modifierKeyComboBoxIndexToKeyValue;
-    //std::vector<int> _keyComboBoxIndexToKeyValue;
 };
-
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
