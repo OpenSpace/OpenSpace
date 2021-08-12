@@ -1,4 +1,62 @@
 {
+  "actions": [
+    {
+      "documentation": "Sets the focus of the camera on 'OsirisRex'",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.0",
+      "is_local": false,
+      "name": "Focus on OsirisRex",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Sets the focus of the camera on 'Bennu'",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.1",
+      "is_local": false,
+      "name": "Focus on Bennu",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Sets the time to the approach at Bennu",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.2",
+      "is_local": false,
+      "name": "Set Bennu approach time",
+      "script": "openspace.printInfo('Set time: Approach');openspace.time.setTime('2018-SEP-11 21:31:01.183');"
+    },
+    {
+      "documentation": "Sets the time to the preliminary survey of Bennu",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.3",
+      "is_local": false,
+      "name": "Set Bennu survey time",
+      "script": "openspace.printInfo('Set time: Preliminary Survey'); openspace.time.setTime('2018-NOV-20 01:13:12.183');"
+    },
+    {
+      "documentation": "Sets the time to the orbital B event",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.4",
+      "is_local": false,
+      "name": "Set orbital B event time",
+      "script": "openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186');"
+    },
+    {
+      "documentation": "Sets the time to the recon event",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.5",
+      "is_local": false,
+      "name": "Set recon event time",
+      "script": "openspace.printInfo('Set time: Recon'); openspace.time.setTime('2019-MAY-25 03:50:31.195');"
+    },
+    {
+      "documentation": "Toggles the visibility of the text marking the location of the Sun",
+      "gui_path": "/Missions/Osiris Rex",
+      "identifier": "profile.keybind.6",
+      "is_local": false,
+      "name": "Toggle Sun marker",
+      "script": "openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'));"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/missions/osirisrex/dashboard",
@@ -41,60 +99,32 @@
   ],
   "keybindings": [
     {
-      "documentation": "Sets the focus of the camera on 'OsirisRex'",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "A",
-      "name": "Focus on OsirisRex",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.0",
+      "key": "A"
     },
     {
-      "documentation": "Sets the focus of the camera on 'Bennu'",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Bennu",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.1",
+      "key": "S"
     },
     {
-      "documentation": "Sets the time to the approach at Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F8",
-      "name": "Set Bennu approach time",
-      "script": "openspace.printInfo('Set time: Approach');openspace.time.setTime('2018-SEP-11 21:31:01.183');"
+      "action": "profile.keybind.2",
+      "key": "F8"
     },
     {
-      "documentation": "Sets the time to the preliminary survey of Bennu",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F9",
-      "name": "Set Bennu survey time",
-      "script": "openspace.printInfo('Set time: Preliminary Survey'); openspace.time.setTime('2018-NOV-20 01:13:12.183');"
+      "action": "profile.keybind.3",
+      "key": "F9"
     },
     {
-      "documentation": "Sets the time to the orbital B event",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F10",
-      "name": "Set orbital B event time",
-      "script": "openspace.printInfo('Set time: Orbital B'); openspace.time.setTime('2019-APR-08 10:35:27.186');"
+      "action": "profile.keybind.4",
+      "key": "F10"
     },
     {
-      "documentation": "Sets the time to the recon event",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "F11",
-      "name": "Set recon event time",
-      "script": "openspace.printInfo('Set time: Recon'); openspace.time.setTime('2019-MAY-25 03:50:31.195');"
+      "action": "profile.keybind.5",
+      "key": "F11"
     },
     {
-      "documentation": "Toggles the visibility of the text marking the location of the Sun",
-      "gui_path": "/Missions/Osiris Rex",
-      "is_local": false,
-      "key": "Q",
-      "name": "Toggle Sun marker",
-      "script": "openspace.setPropertyValueSingle('Scene.SunMarker.Renderable.Enabled', not openspace.getPropertyValue('Scene.SunMarker.Renderable.Enabled'));"
+      "action": "profile.keybind.6",
+      "key": "Q"
     }
   ],
   "mark_nodes": [
@@ -123,6 +153,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

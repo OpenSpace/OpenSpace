@@ -81,6 +81,36 @@ KeyWithModifier stringToKey(std::string str) {
     return { key, m };
 }
 
+// Returns the 'identifier' of the key (compared to the ghoul::to_string which returns the
+// 'name' of the key
+std::string keyToString(KeyWithModifier keyWithModifier) {
+    using namespace openspace;
+
+    std::string modifier;
+    if (keyWithModifier.modifier != KeyModifier::None) {
+        for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
+            // No need for an extra check for the empty modifier since that is mapped to 0,
+            // meaning that the `hasKeyModifier` will always fail for it since it checks
+            // internally against != 0
+
+            if (hasKeyModifier(keyWithModifier.modifier, kmi.modifier)) {
+                modifier += fmt::format("{}+", kmi.identifier);
+            }
+        }
+    }
+
+    std::string key;
+    for (const openspace::KeyInfo& ki : openspace::KeyInfos) {
+        if (ki.key == keyWithModifier.key) {
+            key = std::string(ki.identifier);
+            break;
+        }
+    }
+
+    // The modifier has a residual + at the end that we use here
+    return modifier + key;
+}
+
 } // namespace openspace
 
 namespace ghoul {

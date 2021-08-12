@@ -1,4 +1,70 @@
 {
+  "actions": [
+    {
+      "documentation": "Sets the focus of the camera on 67P",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.0",
+      "is_local": false,
+      "name": "Focus on 67P",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Sets the focus of the camera on Rosetta",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.1",
+      "is_local": false,
+      "name": "Focus on Rosetta",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Jumps to the time when the Philae lander is released.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.2",
+      "is_local": false,
+      "name": "Set lander release time",
+      "script": "openspace.time.setTime('2014-11-12T08:20:00.00');"
+    },
+    {
+      "documentation": "Removes all image projections from 67P.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.3",
+      "is_local": false,
+      "name": "Clear 67P projections",
+      "script": "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);"
+    },
+    {
+      "documentation": "Toggles the visibility of all trails further from the Sun than 67P.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.4",
+      "is_local": false,
+      "name": "Toggle outer planetary trails",
+      "script": "local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggles the visibility of the free floating image plane.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.5",
+      "is_local": false,
+      "name": "Toggle image plane",
+      "script": "openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));"
+    },
+    {
+      "documentation": "Toggles the visibility of Philae's trail.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.6",
+      "is_local": false,
+      "name": "Toggle Philae trail",
+      "script": "openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));"
+    },
+    {
+      "documentation": "Enables or disables the image projection on 67P.",
+      "gui_path": "/Missions/Rosetta",
+      "identifier": "profile.keybind.7",
+      "is_local": false,
+      "name": "Toggle 67P projection",
+      "script": "openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/missions/rosetta/67p",
@@ -45,68 +111,36 @@
   ],
   "keybindings": [
     {
-      "documentation": "Sets the focus of the camera on 67P",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "A",
-      "name": "Focus on 67P",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.0",
+      "key": "A"
     },
     {
-      "documentation": "Sets the focus of the camera on Rosetta",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Rosetta",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta'); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.1",
+      "key": "S"
     },
     {
-      "documentation": "Jumps to the time when the Philae lander is released.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "F6",
-      "name": "Set lander release time",
-      "script": "openspace.time.setTime('2014-11-12T08:20:00.00');"
+      "action": "profile.keybind.2",
+      "key": "F6"
     },
     {
-      "documentation": "Removes all image projections from 67P.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "F8",
-      "name": "Clear 67P projections",
-      "script": "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true);"
+      "action": "profile.keybind.3",
+      "key": "F8"
     },
     {
-      "documentation": "Toggles the visibility of all trails further from the Sun than 67P.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "E",
-      "name": "Toggle outer planetary trails",
-      "script": "local list = openspace.getProperty('{planetTrail_giants}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.keybind.4",
+      "key": "E"
     },
     {
-      "documentation": "Toggles the visibility of the free floating image plane.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "I",
-      "name": "Toggle image plane",
-      "script": "openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));"
+      "action": "profile.keybind.5",
+      "key": "I"
     },
     {
-      "documentation": "Toggles the visibility of Philae's trail.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "O",
-      "name": "Toggle Philae trail",
-      "script": "openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));"
+      "action": "profile.keybind.6",
+      "key": "O"
     },
     {
-      "documentation": "Enables or disables the image projection on 67P.",
-      "gui_path": "/Missions/Rosetta",
-      "is_local": false,
-      "key": "P",
-      "name": "Toggle 67P projection",
-      "script": "openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));"
+      "action": "profile.keybind.7",
+      "key": "P"
     }
   ],
   "mark_nodes": [
@@ -140,6 +174,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

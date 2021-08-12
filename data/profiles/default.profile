@@ -1,4 +1,30 @@
 {
+  "actions": [
+    {
+      "documentation": "Toggle trails on or off for satellites around Earth",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.0",
+      "is_local": false,
+      "name": "Toggle satellite trails",
+      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Refocuses the camera on the ISS",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.1",
+      "is_local": false,
+      "name": "Focus ISS",
+      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Retargets the camera on Earth",
+      "gui_path": "/Earth",
+      "identifier": "profile.keybind.2",
+      "is_local": false,
+      "name": "Focus on Earth",
+      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",
@@ -35,28 +61,16 @@
   ],
   "keybindings": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.keybind.0",
+      "key": "S"
     },
     {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "I",
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.1",
+      "key": "I"
     },
     {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "HOME",
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.keybind.2",
+      "key": "Home"
     }
   ],
   "mark_nodes": [
@@ -88,6 +102,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

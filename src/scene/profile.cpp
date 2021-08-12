@@ -316,7 +316,7 @@ void from_json(const nlohmann::json& j, Profile::Action& v) {
 }
 
 void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
-    j["key"] = ghoul::to_string(v.key);
+    j["key"] = keyToString(v.key);
     j["action"] = v.action;
 }
 

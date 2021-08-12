@@ -400,6 +400,7 @@ constexpr inline bool isKeypadKey(Key key) noexcept {
 }
 
 KeyWithModifier stringToKey(std::string str);
+std::string keyToString(KeyWithModifier keyWithModifier);
 
 // @TODO (abock, 2021-08-12) This function should die
 constexpr bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) noexcept
