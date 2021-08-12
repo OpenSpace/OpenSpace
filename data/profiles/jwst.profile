@@ -3,7 +3,7 @@
     {
       "documentation": "Toggle trails on or off for satellites around Earth",
       "gui_path": "/Earth",
-      "identifier": "profile.keybind.0",
+      "identifier": "profile.toggle.satellitetrails",
       "is_local": false,
       "name": "Toggle satellite trails",
       "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -11,7 +11,7 @@
     {
       "documentation": "Toggle points and labels for the Lagrangian points for Earth Sun system",
       "gui_path": "/JWST",
-      "identifier": "profile.keybind.1",
+      "identifier": "profile.toggle.lagrangianpoints",
       "is_local": false,
       "name": "Toggle Lagrangian points",
       "script": "local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -19,7 +19,7 @@
     {
       "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
       "gui_path": "/JWST",
-      "identifier": "profile.keybind.2",
+      "identifier": "profile.toggle.hudf",
       "is_local": false,
       "name": "Toggle Hubble Ultra Deep Field",
       "script": "local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -27,7 +27,7 @@
     {
       "documentation": "Toggle L2 label, point and line",
       "gui_path": "/JWST",
-      "identifier": "profile.keybind.3",
+      "identifier": "profile.toggle.l2",
       "is_local": false,
       "name": "Toggle L2",
       "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -35,7 +35,7 @@
     {
       "documentation": "Toggle James Webb Space Telecope field of view and view band",
       "gui_path": "/JWST",
-      "identifier": "profile.keybind.4",
+      "identifier": "profile.toggle.jwst_fov",
       "is_local": false,
       "name": "Toggle JWST field of view and view band",
       "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -80,23 +80,23 @@
   ],
   "keybindings": [
     {
-      "action": "profile.keybind.0",
+      "action": "profile.toggle.satellitetrails",
       "key": "S"
     },
     {
-      "action": "profile.keybind.1",
+      "action": "profile.toggle.lagrangianpoints",
       "key": "P"
     },
     {
-      "action": "profile.keybind.2",
+      "action": "profile.toggle.hudf",
       "key": "U"
     },
     {
-      "action": "profile.keybind.3",
+      "action": "profile.toggle.l2",
       "key": "O"
     },
     {
-      "action": "profile.keybind.4",
+      "action": "profile.toggle.jwst_fov",
       "key": "V"
     }
   ],

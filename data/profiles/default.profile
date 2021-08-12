@@ -3,7 +3,7 @@
     {
       "documentation": "Toggle trails on or off for satellites around Earth",
       "gui_path": "/Earth",
-      "identifier": "profile.keybind.0",
+      "identifier": "profile.toggle.satellite",
       "is_local": false,
       "name": "Toggle satellite trails",
       "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -11,7 +11,7 @@
     {
       "documentation": "Refocuses the camera on the ISS",
       "gui_path": "/Earth",
-      "identifier": "profile.keybind.1",
+      "identifier": "profile.focus.iss",
       "is_local": false,
       "name": "Focus ISS",
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
@@ -19,7 +19,7 @@
     {
       "documentation": "Retargets the camera on Earth",
       "gui_path": "/Earth",
-      "identifier": "profile.keybind.2",
+      "identifier": "profile.focus.earth",
       "is_local": false,
       "name": "Focus on Earth",
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
@@ -61,16 +61,16 @@
   ],
   "keybindings": [
     {
-      "action": "profile.keybind.0",
+      "action": "profile.toggle.satellite",
       "key": "S"
     },
     {
-      "action": "profile.keybind.1",
+      "action": "profile.focus.iss",
       "key": "I"
     },
     {
-      "action": "profile.keybind.2",
-      "key": "Home"
+      "action": "profile.focus.earth",
+      "key": "HOME"
     }
   ],
   "mark_nodes": [

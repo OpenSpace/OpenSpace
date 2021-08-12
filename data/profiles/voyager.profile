@@ -3,15 +3,15 @@
     {
       "documentation": "Set camera focus to Voyager 1",
       "gui_path": "/Missions/Voyager",
-      "identifier": "profile.keybind.0",
+      "identifier": "profile.focus.voyager1",
       "is_local": false,
-      "name": "Focvus on Voyager",
+      "name": "Focus on Voyager",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
     },
     {
       "documentation": "Sets the camera focus on Voyager 2",
       "gui_path": "/Missions/Voyager",
-      "identifier": "profile.keybind.1",
+      "identifier": "profile.focus.voyager2",
       "is_local": false,
       "name": "Focus on Voyager2",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
@@ -19,7 +19,7 @@
     {
       "documentation": "Sets the time for Voyager's approach to Jupiter",
       "gui_path": "/",
-      "identifier": "profile.keybind.2",
+      "identifier": "profile.setup.jupiter_approach",
       "is_local": false,
       "name": "Set Jupiter Approach",
       "script": "openspace.time.setTime(\"1979-01-20T01:32:07.914\")"
@@ -27,7 +27,7 @@
     {
       "documentation": "Sets the time for Voyager's approach to Saturn",
       "gui_path": "/Missions/Voyager",
-      "identifier": "profile.keybind.3",
+      "identifier": "profile.setup.saturn_approach",
       "is_local": false,
       "name": "Set Saturn Approach",
       "script": "openspace.time.setTime(\"1980-10-20T07:43:42.645\");"
@@ -35,7 +35,7 @@
     {
       "documentation": "Set the camera focus to Jupiter",
       "gui_path": "/Missions/Voyager",
-      "identifier": "profile.keybind.4",
+      "identifier": "profile.focus.jupiter",
       "is_local": false,
       "name": "Focus on Jupiter",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Jupiter');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
@@ -43,7 +43,7 @@
     {
       "documentation": "Sets the camera focus on Saturn",
       "gui_path": "/Missions/Voyager",
-      "identifier": "profile.keybind.5",
+      "identifier": "profile.focus.saturn",
       "is_local": false,
       "name": "Focus on Saturn",
       "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Saturn');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
@@ -51,7 +51,7 @@
     {
       "documentation": "Toggles the trails of the minor moons",
       "gui_path": "/Solar System",
-      "identifier": "profile.keybind.6",
+      "identifier": "profile.toggle.minor_trails",
       "is_local": false,
       "name": "Toggle minor trails",
       "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
@@ -95,31 +95,31 @@
   ],
   "keybindings": [
     {
-      "action": "profile.keybind.0",
+      "action": "profile.focus.voyager1",
       "key": "V"
     },
     {
-      "action": "profile.keybind.1",
+      "action": "profile.focus.voyager2",
       "key": "SHIFT+V"
     },
     {
-      "action": "profile.keybind.2",
+      "action": "profile.setup.jupiter_approach",
       "key": "SHIFT+J"
     },
     {
-      "action": "profile.keybind.3",
+      "action": "profile.setup.saturn_approach",
       "key": "SHIFT+S"
     },
     {
-      "action": "profile.keybind.4",
+      "action": "profile.focus.jupiter",
       "key": "J"
     },
     {
-      "action": "profile.keybind.5",
+      "action": "profile.focus.saturn",
       "key": "S"
     },
     {
-      "action": "profile.keybind.6",
+      "action": "profile.toggle.minor_trails",
       "key": "SHIFT+H"
     }
   ],
