@@ -259,7 +259,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Earth', true)
+            openspace.pathnavigation.goTo('Earth', true)
         ]]
     },
     -- Mars - Earth
@@ -270,7 +270,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Mars')
+            openspace.pathnavigation.goTo('Mars')
         ]]
     },
     {
@@ -280,7 +280,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Earth', true)
+            openspace.pathnavigation.goTo('Earth', true)
         ]]
     },
     -- 2. Galaxies
@@ -378,7 +378,7 @@ transitions = {
             ]] .. util.changeAnchor('Sun', 1) .. [[
             openspace.time.setPause(true)
             local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
-            openspace.autonavigation.goToHeight('Sun', targetDistance, true, 10)
+            openspace.pathnavigation.goToHeight('Sun', targetDistance, true, 10)
         ]]
     },
     -- 4. Mars
@@ -394,7 +394,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Mars', true)
+            openspace.pathnavigation.goTo('Mars', true)
         ]]
     },
     -- 5. Constellations
@@ -418,7 +418,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goToHeight(
+            openspace.pathnavigation.goToHeight(
                 'Earth',
                 ]] .. tostring(constellationsTargetDistance) .. [[,
                 true
@@ -446,7 +446,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goToHeight(
+            openspace.pathnavigation.goToHeight(
                 'Saturn',
                 ]] .. tostring(saturnTargetDistance) .. [[,
                 true
@@ -461,7 +461,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goToHeight(
+            openspace.pathnavigation.goToHeight(
                 'Saturn',
                 ]] .. tostring(saturnTargetDistance) .. [[,
                 true
@@ -475,7 +475,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Earth', true)
+            openspace.pathnavigation.goTo('Earth', true)
         ]]
     },
     -- Saturn - Mars
@@ -486,7 +486,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goToHeight(
+            openspace.pathnavigation.goToHeight(
                 'Saturn',
                 ]] .. tostring(saturnTargetDistance) .. [[,
                 true
@@ -500,7 +500,7 @@ transitions = {
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
-            openspace.autonavigation.goTo('Mars', true)
+            openspace.pathnavigation.goTo('Mars', true)
         ]]
     }
 }

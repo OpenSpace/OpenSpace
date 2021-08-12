@@ -4,11 +4,11 @@
 local orbitOnArrival = function()
     return [[
         openspace.setPropertyValueSingle(
-            "Modules.AutoNavigation.AutoNavigationHandler.DefaultStopBehavior", 
-            1 -- Orbit
+            "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+            0 -- Orbit
         )
         openspace.setPropertyValueSingle(
-            "Modules.AutoNavigation.AutoNavigationHandler.ApplyStopBehaviorWhenIdle", 
+            "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
             true
         )
     ]]
@@ -17,7 +17,7 @@ end
 local stopOrbiting = function()
     return [[
         openspace.setPropertyValueSingle(
-            "Modules.AutoNavigation.AutoNavigationHandler.ApplyStopBehaviorWhenIdle", 
+            "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
             false
         )
     ]]
@@ -26,7 +26,7 @@ end
 local setOrbitSpeedFactor = function(value)
     return [[
         openspace.setPropertyValueSingle(
-            "Modules.AutoNavigation.AutoNavigationHandler.AtNodeNavigator.OrbitSpeedFactor",
+            "NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor",
             ]] .. tostring(value) .. [[
         )    
     ]]
@@ -35,7 +35,7 @@ end
 local changeAnchor = function(name, interpolationTime) 
     return [[
         openspace.setPropertyValueSingle(
-            "NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime", 
+            "NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime",
             ]] .. tostring(interpolationTime) .. [[
         ) 
         openspace.setPropertyValueSingle(
@@ -53,15 +53,15 @@ end
 local applyLinearFlight = function(height, zoomSpeedFactor) 
     return [[
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.FlightDestinationDistance', 
+            'NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance',
             ]] .. tostring(height) .. [[
         )
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.VelocityZoomControl', 
+            'NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl',
             ]] .. tostring(zoomSpeedFactor) .. [[
         )
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.ApplyLinearFlight', 
+            'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight',
             true
         )
     ]]
@@ -70,20 +70,20 @@ end
 local disableLinearFlight = function() 
     return [[
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.ApplyLinearFlight', 
+            'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight,
             false
         )
     ]]
 end
 
 -- Sets the camera path curve type to the one that has a look at rotation 
--- and zooming out motion to show both targets, if close enough.
+-- and zooming out motion to show both targets, if close enough
 local setCurveTypeToZoomOverview = function ()
     -- CurveOption 2 = ZoomOutOverview
     return [[
         openspace.setPropertyValueSingle(
-            "Modules.AutoNavigation.AutoNavigationHandler.DefaultCurveOption", 
-            2 
+            "NavigationHandler.PathNavigator.DefaultCurveOption",
+            2
         )
     ]]
 end 
