@@ -21,7 +21,7 @@ local earthTargetDistance = 1.5E7
 local noWeatherLayer = "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery"
 
 earthState = {
-    Identifier = "Earth", 
+    Identifier = "Earth",
     Enter = [[
         openspace.printInfo('Entering Earth State')
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
@@ -506,12 +506,9 @@ transitions = {
 }
 
 asset.onInitialize(function()
-    openspace.statemachine.createStateMachine({
-        States = states,
-        Transitions = transitions
-    })
+    openspace.statemachine.createStateMachine(states, transitions)
 
-    -- OBS: the following lines should be set in the profile
+    -- OBS: the following line should be set in the profile
     openspace.statemachine.setInitialState("Earth")
-    openspace.time.setPause(true) -- However, this does no work
+    openspace.time.setPause(true) -- However, this does not work
 end)
