@@ -75,8 +75,8 @@ int createStateMachine(lua_State* L) {
     return 0;
 }
 
-int goTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goTo");
+int goToState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goToState");
     const bool isString = (lua_isstring(L, 1) != 0);
 
     if (!isString) {
@@ -147,8 +147,8 @@ int possibleTransitions(lua_State* L) {
     return 1;
 }
 
-int canGoTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoTo");
+int canGoToState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoToState");
     const bool isString = (lua_isstring(L, 1) != 0);
 
     if (!isString) {
@@ -164,7 +164,7 @@ int canGoTo(lua_State* L) {
 
     const std::string state = lua_tostring(L, 1);
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    ghoul::lua::push(L, module->canGoTo(state));
+    ghoul::lua::push(L, module->canGoToState(state));
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

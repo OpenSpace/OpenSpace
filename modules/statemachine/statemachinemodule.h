@@ -50,7 +50,7 @@ public:
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;
     void transitionTo(const std::string newState);
-    bool canGoTo(const std::string state) const;
+    bool canGoToState(const std::string state) const;
 
     scripting::LuaLibrary luaLibrary() const override;
 

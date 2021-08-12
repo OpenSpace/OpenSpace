@@ -108,7 +108,7 @@ void StateMachineModule::transitionTo(const std::string newState) {
     _machine->transitionTo(newState);
 }
 
-bool StateMachineModule::canGoTo(const std::string state) const {
+bool StateMachineModule::canGoToState(const std::string state) const {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
         return false;
@@ -132,8 +132,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "in the list will be used."
         },
         {
-            "goTo",
-            &luascriptfunctions::goTo,
+            "goToState",
+            &luascriptfunctions::goToState,
             {},
             "string",
             "Triggers a transition from the current state to th state with the given "
@@ -165,8 +165,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "transitioned to from the current state."
         },
         {
-            "canGoTo",
-            &luascriptfunctions::canGoTo,
+            "canGoToState",
+            &luascriptfunctions::canGoToState,
             {},
             "string",
             "Returns true if there is a defined transition between the current state and "
