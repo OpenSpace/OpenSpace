@@ -99,9 +99,14 @@ void ActionDialog::createWidgets() {
     QGridLayout* layout = new QGridLayout(this);
     
     createActionWidgets(layout);
-    layout->addWidget(new Line, 2, 0, 1, 2);
+    clearActionFields();
+
+    layout->addWidget(new Line, 7, 0, 1, 3);
+
     createKeyboardWidgets(layout);
-    layout->addWidget(new Line, 6, 0, 1, 2);
+    clearKeybindingFields();
+
+    layout->addWidget(new Line, 14, 0, 1, 3);
     
     QDialogButtonBox* buttonBox = new QDialogButtonBox;
     buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -113,7 +118,7 @@ void ActionDialog::createWidgets() {
         buttonBox, &QDialogButtonBox::rejected,
         this, &ActionDialog::reject
     );
-    layout->addWidget(buttonBox, 7, 1, Qt::AlignRight);
+    layout->addWidget(buttonBox, 15, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createActionWidgets(QGridLayout* layout) {
@@ -131,41 +136,40 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actions.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
     }
 
-    layout->addWidget(_actions.list, 0, 0);
+    layout->addWidget(_actions.list, 0, 0, 6, 1);
 
-    QWidget* controls = new QWidget;
-    QGridLayout* controlsLayout = new QGridLayout(controls);
-    controlsLayout->setContentsMargins(0, 0, 0, 0);
-    controlsLayout->addWidget(new QLabel("Identifier"), 0, 0);
+    layout->addWidget(new QLabel("Identifier"), 0, 1);
     _actions.identifier = new QLineEdit;
     _actions.identifier->setEnabled(false);
-    controlsLayout->addWidget(_actions.identifier, 0, 1);
+    layout->addWidget(_actions.identifier, 0, 2);
 
-    controlsLayout->addWidget(new QLabel("Name"), 1, 0);
+    layout->addWidget(new QLabel("Name"), 1, 1);
     _actions.name = new QLineEdit;
     _actions.name->setEnabled(false);
-    controlsLayout->addWidget(_actions.name, 1, 1);
+    layout->addWidget(_actions.name, 1, 2);
 
-    controlsLayout->addWidget(new QLabel("GUI Path"), 2, 0);
+    layout->addWidget(new QLabel("GUI Path"), 2, 1);
     _actions.guiPath = new QLineEdit;
     _actions.guiPath->setEnabled(false);
-    controlsLayout->addWidget(_actions.guiPath, 2, 1);
+    layout->addWidget(_actions.guiPath, 2, 2);
 
-    controlsLayout->addWidget(new QLabel("Documentation"), 3, 0);
+    layout->addWidget(new QLabel("Documentation"), 3, 1);
     _actions.documentation = new QLineEdit;
     _actions.documentation->setEnabled(false);
-    controlsLayout->addWidget(_actions.documentation, 3, 1);
+    layout->addWidget(_actions.documentation, 3, 2);
 
-    controlsLayout->addWidget(new QLabel("Is Local"), 4, 0);
+    layout->addWidget(new QLabel("Is Local"), 4, 1);
     _actions.isLocal = new QCheckBox;
     _actions.isLocal->setEnabled(false);
-    controlsLayout->addWidget(_actions.isLocal, 4, 1);
+    layout->addWidget(_actions.isLocal, 4, 2);
 
-    controlsLayout->addWidget(new QLabel("Script"), 5, 0);
+    layout->addWidget(new QLabel("Script"), 5, 1);
     _actions.script = new QTextEdit;
     _actions.script->setEnabled(false);
-    controlsLayout->addWidget(_actions.script, 5, 1);
+    layout->addWidget(_actions.script, 5, 2);
 
+
+    // + / - buttons
     QWidget* container = new QWidget;
     QBoxLayout* containerLayout = new QHBoxLayout(container);
     _actions.addButton = new QPushButton("+");
@@ -184,7 +188,10 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         this, &ActionDialog::actionRemove
     );
     containerLayout->addWidget(_actions.removeButton);
+    layout->addWidget(container, 6, 0, Qt::AlignLeft);
 
+
+    // Save / Cancel buttons
     _actions.saveButtons = new QDialogButtonBox;
     _actions.saveButtons->setEnabled(false);
     _actions.saveButtons->setStandardButtons(
@@ -198,12 +205,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actions.saveButtons, &QDialogButtonBox::rejected,
         this, &ActionDialog::actionRejected
     );
-
-    layout->addWidget(controls, 0, 1);
-    clearActionFields();
-
-    layout->addWidget(container, 1, 0, Qt::AlignLeft);
-    layout->addWidget(_actions.saveButtons, 1, 1, Qt::AlignRight);
+    layout->addWidget(_actions.saveButtons, 6, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
@@ -222,11 +224,11 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindings.list->addItem(item);
     }
 
-    layout->addWidget(_keybindings.list, 3, 0, 2, 1);
+    layout->addWidget(_keybindings.list, 8, 0, 5, 1);
 
-    QWidget* controls = new QWidget;
-    QGridLayout* controlsLayout = new QGridLayout(controls);
-    controlsLayout->addWidget(new QLabel("Modifier"), 0, 0);
+    //QWidget* controls = new QWidget;
+    //QGridLayout* controlsLayout = new QGridLayout(controls);
+    layout->addWidget(new QLabel("Modifier"), 8, 1);
     {
         QWidget* container = new QWidget;
         QBoxLayout* containerLayout = new QHBoxLayout(container);
@@ -239,10 +241,10 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindings.altModifier = new QCheckBox("Alt");
         _keybindings.altModifier->setEnabled(false);
         containerLayout->addWidget(_keybindings.altModifier);
-        controlsLayout->addWidget(container, 0, 1);
+        layout->addWidget(container, 8, 2);
     }
 
-    controlsLayout->addWidget(new QLabel("Key"), 1, 0);
+    layout->addWidget(new QLabel("Key"), 9, 1);
     _keybindings.key = new QComboBox;
     QStringList keyList;
     for (const KeyInfo& ki : KeyInfos) {
@@ -251,16 +253,18 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     _keybindings.key->addItems(keyList);
     _keybindings.key->setCurrentIndex(-1);
     _keybindings.key->setEnabled(false);
-    controlsLayout->addWidget(_keybindings.key, 1, 1);
+    layout->addWidget(_keybindings.key, 9, 2);
 
-    controlsLayout->addWidget(new QLabel("Action"), 2, 0);
+    layout->addWidget(new QLabel("Action"), 10, 1);
     _keybindings.action = new QComboBox;
     for (const Profile::Action& action : _actions.data) {
         _keybindings.action->addItem(QString::fromStdString(action.identifier));
     }
     _keybindings.action->setEnabled(false);
-    controlsLayout->addWidget(_keybindings.action, 2, 1);
+    layout->addWidget(_keybindings.action, 10, 2);
 
+
+    // +/- buttons
     QWidget* container = new QWidget;
     QBoxLayout* containerLayout = new QHBoxLayout(container);
     _keybindings.addButton = new QPushButton("+");
@@ -279,7 +283,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingRemove
     );
     containerLayout->addWidget(_keybindings.removeButton);
+    layout->addWidget(container, 13, 0, Qt::AlignLeft);
 
+    // Save/Cancel
     _keybindings.saveButtons = new QDialogButtonBox;
     _keybindings.saveButtons->setEnabled(false);
     _keybindings.saveButtons->setStandardButtons(
@@ -294,12 +300,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingRejected
     );
 
-    layout->addWidget(controls, 3, 1);
-    layout->addWidget(new QWidget, 4, 1);
-    clearKeybindingFields();
-
-    layout->addWidget(container, 5, 0, Qt::AlignLeft);
-    layout->addWidget(_keybindings.saveButtons, 5, 1, Qt::AlignRight);
+    layout->addWidget(_keybindings.saveButtons, 13, 2, Qt::AlignRight);
 }
 
 void ActionDialog::applyChanges() {
