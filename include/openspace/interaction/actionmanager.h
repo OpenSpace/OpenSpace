@@ -28,6 +28,7 @@
 #include <openspace/interaction/action.h>
 #include <unordered_map>
 
+namespace ghoul { class Dictionary; }
 namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
@@ -40,7 +41,8 @@ public:
     const Action& action(const std::string& identifier) const;
     std::vector<Action> actions() const;
 
-    void triggerAction(const std::string& identifier) const;
+    void triggerAction(const std::string& identifier,
+        const ghoul::Dictionary& arguments) const;
 
     static scripting::LuaLibrary luaLibrary();
 

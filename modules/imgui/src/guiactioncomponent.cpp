@@ -56,7 +56,7 @@ void GuiActionComponent::render() {
     for (const std::pair<const K, V>& p : binds) {
         boundActions.insert(p.second);
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
-            global::actionManager->triggerAction(p.second);
+            global::actionManager->triggerAction(p.second, ghoul::Dictionary());
         }
         ImGui::SameLine();
 
@@ -79,7 +79,7 @@ void GuiActionComponent::render() {
         }
 
         if (ImGui::Button(action.identifier.c_str())) {
-            global::actionManager->triggerAction(action.command);
+            global::actionManager->triggerAction(action.command, ghoul::Dictionary());
         }
         ImGui::SameLine();
 

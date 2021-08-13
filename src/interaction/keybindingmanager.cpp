@@ -58,7 +58,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
                 global::actionManager->hasAction(it->second),
                 "Action must be registered"
             );
-            global::actionManager->triggerAction(it->second);
+            global::actionManager->triggerAction(it->second, ghoul::Dictionary());
         }
     }
 }

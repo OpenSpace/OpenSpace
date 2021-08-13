@@ -27,6 +27,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/crc32.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 
 #include "actionmanager_lua.inl"
@@ -76,13 +77,15 @@ std::vector<Action> ActionManager::actions() const {
     return result;
 }
 
-void ActionManager::triggerAction(const std::string& identifier) const {
+void ActionManager::triggerAction(const std::string& identifier,
+                                  const ghoul::Dictionary& arguments) const
+{
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
     const Action& a = action(identifier);
     global::scriptEngine->queueScript(
-        a.command,
+        fmt::format("local args = {}\n{}", ghoul::formatLua(arguments), a.command),
         scripting::ScriptEngine::RemoteScripting(a.synchronization)
     );
 }

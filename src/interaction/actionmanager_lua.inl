@@ -216,7 +216,7 @@ int actions(lua_State* L) {
  * Triggers the action given by the specified identifier.
  */
 int triggerAction(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::triggerAction");
+    int n = ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::triggerAction");
 
     const std::string& identifier = ghoul::lua::value<std::string>(L, 1);
     if (identifier.empty()) {
@@ -229,7 +229,12 @@ int triggerAction(lua_State* L) {
         );
     }
 
-    global::actionManager->triggerAction(identifier);
+    ghoul::Dictionary arguments;
+    if (n == 2) {
+        ghoul::lua::luaDictionaryFromState(L, arguments, 2);
+    }
+
+    global::actionManager->triggerAction(identifier, arguments);
     return 0;
 }
 
