@@ -6,8 +6,8 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.unbindKey("v")
-  openspace.unbindKey("Shift+v")
+  openspace.clearKey("v")
+  openspace.clearKey("Shift+v")
 end)
 
 asset.meta = {

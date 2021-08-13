@@ -18,5 +18,5 @@ end)
 
 asset.onDeinitialize(function ()
   openspace.action.removeAction(take_screenshot.Identifier)
-  openspace.unbindKey("F7")
+  openspace.clearKey("F7")
 end)

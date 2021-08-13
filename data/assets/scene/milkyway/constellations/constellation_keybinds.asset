@@ -7,9 +7,9 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.unbindKey("c")
-  openspace.unbindKey("SHIFT+c")
-  openspace.unbindKey("CTRL+c")
+  openspace.clearKey("c")
+  openspace.clearKey("SHIFT+c")
+  openspace.clearKey("CTRL+c")
 end)
 
 

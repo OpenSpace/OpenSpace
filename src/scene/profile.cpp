@@ -802,7 +802,7 @@ std::string convertToScene(const Profile& p) {
     output += "\n  -- Keybindings\n";
         for (size_t i = 0; i < p.keybindings.size(); ++i) {
         const Profile::Keybinding& k = p.keybindings[i];
-        const std::string key = ghoul::to_string(k.key);
+        const std::string key = keyToString(k.key);
         output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
 
