@@ -39,6 +39,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/crc32.h>
+
 #include <filesystem>
 #include <optional>
 
