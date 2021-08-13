@@ -93,6 +93,7 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
 {
     switch (_curveType) {
         case CurveType::AvoidCollision:
+        case CurveType::AvoidCollisionWithLookAt:
             _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
             break;
         case CurveType::Linear:
@@ -174,6 +175,7 @@ glm::dquat Path::interpolateRotation(double t) const {
         case CurveType::Linear:
             return easedSlerpRotation(t);
         case CurveType::ZoomOutOverview:
+        case CurveType::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
         default:
             throw ghoul::MissingCaseException();

@@ -42,7 +42,13 @@ public:
     enum CurveType {
         AvoidCollision,
         Linear,
-        ZoomOutOverview
+        ZoomOutOverview,
+        AvoidCollisionWithLookAt // @TODO (2021-08-13, emmbr) This type right now leads
+                                 // to rapid rotations, but is useful in specific 
+                                 // scenarios, e.g. close to surfaces. Later we want to 
+                                 // remove it, and create a curve type that looks nicely
+                                 // at the targets when moving, avoids collisions and 
+                                 // doesn't introduce sudden large changes in rotation
     };
 
     Path(Waypoint start, Waypoint end, CurveType type,

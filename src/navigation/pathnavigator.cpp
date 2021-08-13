@@ -105,7 +105,8 @@ PathNavigator::PathNavigator()
     _defaultCurveOption.addOptions({
         { Path::CurveType::AvoidCollision, "AvoidCollision" },
         { Path::CurveType::Linear, "Linear" },
-        { Path::CurveType::ZoomOutOverview, "ZoomOutOverview"}
+        { Path::CurveType::ZoomOutOverview, "ZoomOutOverview"},
+        { Path::CurveType::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
     });
     addProperty(_defaultCurveOption);
 
