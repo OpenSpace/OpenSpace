@@ -70,7 +70,7 @@ end
 local disableLinearFlight = function() 
     return [[
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight,
+            'NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight',
             false
         )
     ]]
