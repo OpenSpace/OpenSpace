@@ -43,6 +43,7 @@ namespace openspace {
 class Sphere;
 struct RenderData;
 struct UpdateData;
+
 struct FileData {
     std::string path;
     double time;
@@ -75,8 +76,6 @@ private:
     // Estimated end of sequence.
     double _sequenceEndTime;
     bool _needsUpdate = false;
-    //std::vector<std::string> _sourceFiles;
-    //std::vector<double> _startTimes;
     std::vector<FileData> _files;
     int _activeTriggerTimeIndex = 0;
     // Number of states in the sequence
@@ -97,10 +96,8 @@ private:
     properties::FloatProperty _fadeOutThreshold;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    //std::unique_ptr<ghoul::opengl::Texture> _texture;
     ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    //std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,

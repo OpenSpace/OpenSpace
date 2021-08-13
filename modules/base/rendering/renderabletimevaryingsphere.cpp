@@ -50,7 +50,7 @@ namespace {
         "mirrorTexture"
     };
 
-    enum class Orientation : int {
+    enum class Orientation {
         Outside = 0,
         Inside,
         Both
@@ -58,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "TextureSource",
+        "Texture Source",
         "This value specifies a directory of images that are loaded from disk and is used"
         "as a texture that is applied to this sphere. The images are expected to be an"
         "equirectangular projection."
@@ -117,7 +117,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "Background",
-        "Sets the current sphere rendering as a background rendering type",
+        "Render as Background",
         "Enables/Disables background rendering."
     };
 
@@ -162,12 +162,13 @@ namespace {
 } // namespace
 
 namespace openspace {
+
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
 }
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _textureSourcePath(TextureSourceInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -230,27 +231,19 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 
     addProperty(_mirrorTexture);
     addProperty(_useAdditiveBlending);
+    addProperty(_fadeOutThreshold);
+    addProperty(_fadeInThreshold);
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
+    _fadeOutThreshold = p.fadeOutThreshold.value_or(_fadeOutThreshold);
+    _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
 
     if (_useAdditiveBlending) {
         setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     }
 
-    bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
-    if (hasGivenFadeOut) {
-        _fadeOutThreshold = *p.fadeOutThreshold;
-        addProperty(_fadeOutThreshold);
-    }
-
-    bool hasGivenFadeIn = p.fadeInThreshold.has_value();
-    if (hasGivenFadeIn) {
-        _fadeInThreshold = *p.fadeInThreshold;
-        addProperty(_fadeInThreshold);
-    }
-
-    if (hasGivenFadeIn || hasGivenFadeOut) {
+    if (_fadeOutThreshold || _fadeInThreshold) {
         _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
@@ -314,8 +307,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat3 modelRotation =
-        glm::dmat3(data.modelTransform.rotation);
+    glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -337,7 +329,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         if (_fadeInThreshold > -1.0) {
             const float logDistCamera = glm::log(static_cast<float>(
                 glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-                ));
+            ));
             const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
@@ -345,7 +337,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
                 logDistCamera < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
-                    (stopLogFadeDistance - startLogFadeDistance),
+                        (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
                     1.f
                 );
@@ -359,7 +351,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         if (_fadeOutThreshold > -1.0) {
             const float logDistCamera = glm::log(static_cast<float>(
                 glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-                ));
+            ));
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
@@ -367,7 +359,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
                 logDistCamera < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
-                    (stopLogFadeDistance - startLogFadeDistance),
+                        (stopLogFadeDistance - startLogFadeDistance),
                     0.f,
                     1.f
                 );
@@ -456,18 +448,21 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
                 std::unique_ptr<ghoul::opengl::Texture> t =
                     ghoul::io::TextureReader::ref().loadTexture(filePath);
 
-                t.get()->setInternalFormat(GL_COMPRESSED_RGBA);
-                t.get()->uploadTexture();
-                t.get()->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                t.get()->purgeFromRAM();
+                t->setInternalFormat(GL_COMPRESSED_RGBA);
+                t->uploadTexture();
+                t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                t->purgeFromRAM();
 
                 _files.push_back({ filePath, time, std::move(t) });
             }
         }
 
-        std::sort(_files.begin(), _files.end(), [](const FileData& a, const FileData& b) {
-            return a.time < b.time;
-        });
+        std::sort(
+            _files.begin(), _files.end(), 
+            [](const FileData& a, const FileData& b) {
+                return a.time < b.time;
+            }
+        );
         // Ensure that there are available and valid source files left
         if (_files.empty()) {
             LERROR(fmt::format(
@@ -480,8 +475,7 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
     else {
         LERROR(fmt::format(
             "{}: FieldlinesSequence {} is not a valid directory",
-            _identifier,
-            _textureSourcePath
+            _identifier, _textureSourcePath
         ));
         return false;
     }
@@ -489,8 +483,9 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
     LDEBUG("returning true in extractMandatoryInfoFromDictionary");
     return true;
 }
+
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
-    if (!this->_enabled) {
+    if (!_enabled) {
         return;
     }
     if (_shader->isDirty()) {
@@ -500,12 +495,9 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
-    //const bool isInInterval = true;
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
-            // true => Previous frame was not within the sequence interval
-            //_activeTriggerTimeIndex < 0 ||
             // true => We stepped back to a time represented by another state
             currentTime < _files[_activeTriggerTimeIndex].time ||
             // true => We stepped forward to a time represented by another state
@@ -519,7 +511,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
-        //not in interval => set everything to false
+        // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
         _needsUpdate = false;
     }
@@ -534,20 +526,11 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
 double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(
-    const std::string& filePath) {
-
-    // number of  characters in filename (excluding '.png')
-    constexpr const int FilenameSize = 23;
-    // size(".png")
-    constexpr const int ExtSize = 4;
-
+                                                            const std::string& filePath) {
     LDEBUG("filepath " + filePath);
-    const size_t strLength = filePath.size();
     // Extract the filename from the path (without extension)
-    std::string timeString = filePath.substr(
-        strLength - FilenameSize - ExtSize,
-        FilenameSize - 1
-    );
+    std::string timeString = std::filesystem::path(filePath).stem().string();
+
     // Ensure the separators are correct
     timeString.replace(4, 1, "-");
     timeString.replace(7, 1, "-");
@@ -555,22 +538,21 @@ double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(
     timeString.replace(16, 1, ":");
     timeString.replace(19, 1, ".");
 
-    LDEBUG("timestring " + timeString);
     return Time::convertTime(timeString);
-    
 }
 
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
-
-    auto iter = std::upper_bound(_files.begin(), _files.end(), currentTime,
+    auto iter = std::upper_bound(
+        _files.begin(), _files.end(), currentTime,
         [](double value, const FileData& f) {
             return value < f.time;
-        });
+        }
+    );
     if (iter != _files.end()) {
         if (iter != _files.begin()) {
             _activeTriggerTimeIndex = static_cast<int>(
                 std::distance(_files.begin(), iter)
-                ) - 1;
+            ) - 1;
         }
         else {
             _activeTriggerTimeIndex = 0;
@@ -591,7 +573,7 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
     }
     else {
         // If there's just one state it should never disappear!
-        _sequenceEndTime = DBL_MAX;
+        _sequenceEndTime = std::numeric_limits<double>::max();
     }
 }
 

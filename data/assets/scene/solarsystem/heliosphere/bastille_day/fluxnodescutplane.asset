@@ -58,7 +58,7 @@ local Cutplane2 = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -1.5707965, -3.141593, 0.0 }
+      Rotation = { -math.pi/2, -math.pi, 0.0 }
     }
   },
   Renderable = {

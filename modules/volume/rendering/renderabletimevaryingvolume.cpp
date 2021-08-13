@@ -54,74 +54,74 @@ namespace {
     constexpr const float VolumeMaxOpacity = 500;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
-        "stepSize",
+        "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
-        "gridType",
+        "GridType",
         "Grid Type",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
-        "secondsBefore",
+        "SecondsBefore",
         "Seconds before",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
-        "secondsAfter",
+        "SecondsAfter",
         "Seconds after",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
-        "sourceDirectory",
+        "SourceDirectory",
         "Source Directory",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
-        "transferFunctionPath",
+        "TransferFunctionPath",
         "Transfer Function Path",
         ""
     };
 
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
-        "triggerTimeJump",
+        "TriggerTimeJump",
         "Jump",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
-        "jumpToTimestep",
+        "JumpToTimestep",
         "Jump to timestep",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
-        "currentTimestep",
+        "CurrentTimestep",
         "Current timestep",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "opacity",
+        "Opacity",
         "Opacity",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
-        "rNormalization",
+        "RNormalization",
         "Radius normalization",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
-        "rUpperBound",
+        "RUpperBound",
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
@@ -213,7 +213,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         VolumeGridType gridType = volume::parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
-    
+
     addProperty(_opacity);
 }
 
@@ -263,7 +263,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             GL_FLOAT,
             ghoul::opengl::Texture::FilterMode::Linear,
             ghoul::opengl::Texture::WrappingMode::Clamp
-            );
+        );
 
         t.texture->setPixelData(
             reinterpret_cast<void*>(data),
@@ -278,7 +278,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         nullptr,
         _transferFunction,
         _clipPlanes
-        );
+    );
 
     _raycaster->initialize();
     global::raycasterManager->attachRaycaster(*_raycaster.get());
@@ -316,7 +316,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
         _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-        });
+    });
 
     _transferFunctionPath.onChange([this] {
         _transferFunction = std::make_shared<openspace::TransferFunction>(

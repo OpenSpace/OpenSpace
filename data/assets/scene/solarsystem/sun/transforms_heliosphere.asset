@@ -27,7 +27,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { HNMReferenceFrame })
 asset.meta = {
   Name = "Sun Transform, HNM",
   Version = "1.0",
-  Description = [[ Sun transform: HNM]],
+  Description = "Sun transform: HNM",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license",

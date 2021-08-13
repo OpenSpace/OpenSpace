@@ -27,7 +27,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { GSMReferenceFrame })
 asset.meta = {
   Name = "Earth magnetosphere transforms",
   Version = "1.0",
-  Description = [[ Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric]],
+  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license",

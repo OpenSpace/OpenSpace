@@ -18,7 +18,6 @@ local sunRadius = 6.957E8
 local fieldlines = {
   Identifier = "MAS_MHD_Fieldlines",
   Parent = heliosphereTransforms.HNMReferenceFrame.Identifier,
-  --wrong Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",

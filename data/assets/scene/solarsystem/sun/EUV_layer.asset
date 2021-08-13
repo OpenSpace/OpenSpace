@@ -24,7 +24,7 @@ local EUV_Layer = {
   GUI = {
     Name = "EUV_Layer",
     Path = "/Solar System/Sun"
-    },
+  },
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { EUV_Layer })
