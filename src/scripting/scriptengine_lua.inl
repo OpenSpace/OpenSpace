@@ -115,15 +115,8 @@ int printFatal(lua_State* L) {
 int absolutePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
 
-    const std::string& path = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
+    const std::string& path = ghoul::lua::value<std::string>(L);
     ghoul::lua::push(L, absPath(path).string());
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -135,18 +128,13 @@ int absolutePath(lua_State* L) {
  */
 int setPathToken(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setPathToken");
-
-    std::string pathToken = ghoul::lua::value<std::string>(L, 1);
-    std::string path = ghoul::lua::value<std::string>(L, 2);
+    auto [pathToken, path] = ghoul::lua::values<std::string, std::string>(L);
 
     FileSys.registerPathToken(
         std::move(pathToken),
         std::move(path),
         ghoul::filesystem::FileSystem::Override::Yes
     );
-
-    lua_pop(L, 2);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -158,16 +146,9 @@ int setPathToken(lua_State* L) {
 int fileExists(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
 
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string& file = ghoul::lua::value<std::string>(L);
     const bool e = std::filesystem::is_regular_file(absPath(file));
-
     ghoul::lua::push(L, e);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -178,15 +159,11 @@ int fileExists(lua_State* L) {
  */
 int readFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::readFile");
+    const std::string& file = ghoul::lua::value<std::string>(L);
 
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        return ghoul::lua::luaError(L, fmt::format("Could not open file {}", file));
+        return ghoul::lua::luaError(L, fmt::format("Could not open file '{}'", file));
     }
 
     std::ifstream f(p);
@@ -204,26 +181,19 @@ int readFile(lua_State* L) {
  */
 int directoryExists(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
+    const std::string& file = ghoul::lua::value<std::string>(L);
 
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     const bool e = std::filesystem::is_directory(absPath(file));
-
     ghoul::lua::push(L, e);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
 int walkCommon(lua_State* L, std::function<bool(const std::filesystem::path&)> filter) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
-
-    const std::string path = ghoul::lua::value<std::string>(L, 1);
-    const bool recursive = nArguments >= 2 ? ghoul::lua::value<bool>(L, 2) : false;
-    const bool sorted = nArguments == 3 ? ghoul::lua::value<bool>(L, 3) : false;
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
+    auto [path, recursive, sorted] =
+        ghoul::lua::values<std::string, std::optional<bool>, std::optional<bool>>(L);
+    recursive = recursive.value_or(false);
+    sorted = sorted.value_or(false);
 
     namespace fs = std::filesystem;
     std::vector<fs::directory_entry> result;
@@ -249,7 +219,6 @@ int walkCommon(lua_State* L, std::function<bool(const std::filesystem::path&)> f
     }
 
     lua_newtable(L);
-
     for (int i = 0; i < static_cast<int>(result.size()); ++i) {
         lua_pushstring(L, result[i].path().string().c_str());
         lua_rawseti(L, -2, i + 1);
@@ -311,13 +280,10 @@ int walkDirectoryFolder(lua_State* L) {
  */
 int directoryForPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
+    std::string file = ghoul::lua::value<std::string>(L);
 
-    std::string file = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
     std::string path = std::filesystem::path(std::move(file)).parent_path().string();
-
     ghoul::lua::push(L, path);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

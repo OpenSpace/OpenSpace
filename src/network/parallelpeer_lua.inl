@@ -30,8 +30,6 @@ int connect(lua_State* L) {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -41,8 +39,6 @@ int disconnect(lua_State* L) {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -52,8 +48,6 @@ int requestHostship(lua_State* L) {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->requestHostship();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -63,8 +57,6 @@ int resignHostship(lua_State* L) {
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->resignHostship();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

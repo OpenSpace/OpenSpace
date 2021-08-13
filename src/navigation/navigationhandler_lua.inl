@@ -30,40 +30,29 @@ namespace openspace::luascriptfunctions {
 
 int loadNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadNavigationState");
-
-    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(L);
 
     if (cameraStateFilePath.empty()) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
     global::navigationHandler->loadNavigationState(cameraStateFilePath);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int getNavigationState(lua_State* L) {
-    const int n = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 0, 1 },
-        "lua::getNavigationState"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::getNavigationState");
+    std::optional<std::string> referenceFrameIdentifier =
+        ghoul::lua::value<std::optional<std::string>>(L);
 
     interaction::NavigationState state;
-    if (n == 1) {
-        const std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
-        const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+    if (referenceFrameIdentifier.has_value()) {
+        const SceneGraphNode* referenceFrame = sceneGraphNode(*referenceFrameIdentifier);
         if (!referenceFrame) {
             LERROR(fmt::format(
                 "Could not find node '{}' to use as reference frame",
-                referenceFrameIdentifier
+                *referenceFrameIdentifier
             ));
-            lua_settop(L, 0);
             return 0;
         }
         state = global::navigationHandler->navigationState(*referenceFrame);
@@ -72,7 +61,6 @@ int getNavigationState(lua_State* L) {
         state = global::navigationHandler->navigationState();
     }
 
-    lua_settop(L, 0);
 
     const auto pushVector = [](lua_State* s, const glm::dvec3& v) {
         lua_newtable(s);
@@ -114,7 +102,6 @@ int getNavigationState(lua_State* L) {
         lua_rawset(L, -3);
     }
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

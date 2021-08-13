@@ -28,12 +28,8 @@ namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
+    const std::string& fileName = ghoul::lua::value<std::string>(L);
 
-    const std::string& fileName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     if (fileName.empty()) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
@@ -56,42 +52,24 @@ int loadFile(lua_State* L) {
     }
 
     global::scriptScheduler->loadScripts(scripts);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int loadScheduledScript(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 2, 4 },
-        "lua::loadScheduledScript"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::loadScheduledScript");
+    auto [time, forwardScript, backwardScript, universalScript] = ghoul::lua::values<
+        std::string, std::string, std::optional<std::string>, std::optional<std::string>
+    >(L);
 
     scripting::ScriptScheduler::ScheduledScript script;
-
-    std::string time = ghoul::lua::value<std::string>(L, 1);
     script.time = Time::convertTime(time);
-    std::string forwardScript = ghoul::lua::value<std::string>(L, 2);
     script.forwardScript = std::move(forwardScript);
+    script.backwardScript = backwardScript.value_or(script.backwardScript);
+    script.universalScript = universalScript.value_or(script.universalScript);
 
-    if (nArguments == 3) {
-        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        script.backwardScript = std::move(backwardScript);
-    }
-    else if (nArguments == 4) {
-        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        script.backwardScript = std::move(backwardScript);
-        std::string universalScript = ghoul::lua::value<std::string>(L, 4);
-        script.universalScript = std::move(universalScript);
-    }
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
     global::scriptScheduler->loadScripts(scripts);
-
-    lua_settop(L, 0);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -99,8 +77,6 @@ int setModeApplicationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
 
     global::scriptScheduler->setModeApplicationTime();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -108,8 +84,6 @@ int setModeRecordedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
 
     global::scriptScheduler->setModeRecordedTime();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -117,8 +91,6 @@ int setModeSimulationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
 
     global::scriptScheduler->setModeSimulationTime();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -126,8 +98,6 @@ int clear(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
 
     global::scriptScheduler->clearSchedule();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

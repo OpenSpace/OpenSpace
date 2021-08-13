@@ -34,35 +34,24 @@ namespace openspace::luascriptfunctions {
  * node is hosting a parallel connection.
  */
 int bindKey(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::bindKey");
-
-    std::string key = ghoul::lua::value<std::string>(L, 1);
-    std::string action = ghoul::lua::value<std::string>(L, 2);
+    auto [key, action] = ghoul::lua::values<std::string, std::string>(L);
 
     if (action.empty()) {
-        lua_settop(L, 0);
         return ghoul::lua::luaError(L, "Action must not be empty");
     }
     if (!global::actionManager->hasAction(action)) {
-        lua_settop(L, 0);
         return ghoul::lua::luaError(L, fmt::format("Action '{}' does not exist", action));
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-
     if (iKey.key == openspace::Key::Unknown) {
         std::string error = fmt::format("Could not find key '{}'", key);
         LERRORC("lua.bindKey", error);
-        lua_settop(L, 0);
         return ghoul::lua::luaError(L, error);
     }
 
     global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -74,16 +63,10 @@ int bindKey(lua_State* L) {
 */
 int getKeyBindings(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getKeyBindings");
-
-    const std::string& key = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string& key = ghoul::lua::value<std::string>(L);
 
     using K = KeyWithModifier;
     using V = std::string;
-
     const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
         stringToKey(key)
     );
@@ -97,7 +80,6 @@ int getKeyBindings(lua_State* L) {
         ++i;
     }
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -117,17 +99,12 @@ int clearKey(lua_State* L) {
     }
     else {
         // The user provided a list of keys
-        ghoul::Dictionary d;
-        ghoul::lua::luaDictionaryFromState(L, d);
+        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
         for (size_t i = 1; i <= d.size(); ++i) {
             const std::string& k = d.value<std::string>(std::to_string(i));
             global::keybindingManager->removeKeyBinding(stringToKey(k));
         }
-        lua_pop(L, 1);
     }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -138,10 +115,7 @@ int clearKey(lua_State* L) {
 */
 int clearKeys(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearKeys");
-
     global::keybindingManager->resetKeyBindings();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -44,14 +44,12 @@ int saveSettingsToProfile(lua_State* L) {
         );
     }
 
-    const int n = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 0, 2 },
-        "lua::saveSettingsToProfile"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 2 }, "lua::saveSettingsToProfile");
+    auto [saveFilePath, overwrite] =
+        ghoul::lua::values<std::optional<std::string>, std::optional<bool>>(L);
+    overwrite = overwrite.value_or(true);
 
-    std::string saveFilePath;
-    if (n == 0) {
+    if (!saveFilePath.has_value()) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
@@ -81,9 +79,8 @@ int saveSettingsToProfile(lua_State* L) {
         saveFilePath = global::configuration->profile;
     }
     else {
-        saveFilePath = ghoul::lua::value<std::string>(L, 1);
-        if (saveFilePath.empty()) {
-            return luaL_error(L, "save filepath string is empty");
+        if (saveFilePath->empty()) {
+            return luaL_error(L, "Save filepath string is empty");
         }
     }
 
@@ -91,24 +88,24 @@ int saveSettingsToProfile(lua_State* L) {
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
     interaction::NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration->profile = saveFilePath;
+    global::configuration->profile = *saveFilePath;
 
-    if (saveFilePath.find('/') != std::string::npos) {
+    if (saveFilePath->find('/') != std::string::npos) {
         return luaL_error(L, "Profile filename must not contain path (/) elements");
     }
-    else if (saveFilePath.find(':') != std::string::npos) {
+    else if (saveFilePath->find(':') != std::string::npos) {
         return luaL_error(L, "Profile filename must not contain path (:) elements");
     }
-    else if (saveFilePath.find('.') != std::string::npos) {
+    else if (saveFilePath->find('.') != std::string::npos) {
         return luaL_error(L, "Only provide the filename to save without file extension");
     }
 
-    std::string absFilename = fmt::format("{}/{}.profile",
-        absPath("${PROFILES}").string(), saveFilePath);
+    std::string absFilename = fmt::format(
+        "{}/{}.profile", absPath("${PROFILES}").string(), *saveFilePath
+    );
     if (!std::filesystem::is_regular_file(absFilename)) {
-        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile").string();
+        absFilename = absPath("${USER_PROFILES}/" + *saveFilePath + ".profile").string();
     }
-    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
     if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
         return luaL_error(
@@ -147,8 +144,6 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     outFile.close();
-
-    lua_settop(L, 0);
     return 0;
 }
 

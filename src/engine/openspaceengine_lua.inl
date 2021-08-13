@@ -45,8 +45,6 @@ int toggleShutdown(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
 
     global::openSpaceEngine->toggleShutdownMode();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -60,8 +58,6 @@ int writeDocumentation(lua_State* L) {
 
     global::openSpaceEngine->writeStaticDocumentation();
     global::openSpaceEngine->writeSceneDocumentation();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -72,15 +68,12 @@ int writeDocumentation(lua_State* L) {
  */
 int addVirtualProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 5, 7 }, "lua::addVirtualProperty");
-
-    const std::string& type = ghoul::lua::value<std::string>(L, 1);
-    const std::string& name = ghoul::lua::value<std::string>(L, 2);
-    const std::string& identifier = ghoul::lua::value<std::string>(L, 3);
-    const std::string& description = ghoul::lua::value<std::string>(L, 4);
+    auto [type, name, identifier, description] =
+        ghoul::lua::values<std::string, std::string, std::string, std::string>(L);
 
     std::unique_ptr<properties::Property> prop;
     if (type == "BoolProperty") {
-        const bool v = ghoul::lua::value<bool>(L, 5);
+        const bool v = ghoul::lua::value<bool>(L);
         prop = std::make_unique<properties::BoolProperty>(
             properties::Property::PropertyInfo {
                 identifier.c_str(),
@@ -91,10 +84,7 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else if (type == "IntProperty") {
-        const int v = ghoul::lua::value<int>(L, 5);
-        const int min = ghoul::lua::value<int>(L, 6);
-        const int max = ghoul::lua::value<int>(L, 7);
-
+        auto [v, min, max] = ghoul::lua::values<int, int, int>(L);
         prop = std::make_unique<properties::IntProperty>(
             properties::Property::PropertyInfo {
                 identifier.c_str(),
@@ -107,10 +97,7 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else if (type == "FloatProperty") {
-        const float v = ghoul::lua::value<float>(L, 5);
-        const float min = ghoul::lua::value<float>(L, 6);
-        const float max = ghoul::lua::value<float>(L, 7);
-
+        auto [v, min, max] = ghoul::lua::values<float, float, float>(L);
         prop = std::make_unique<properties::FloatProperty>(
             properties::Property::PropertyInfo {
                 identifier.c_str(),
@@ -132,14 +119,10 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else {
-        lua_settop(L, 0);
         return ghoul::lua::luaError(L, fmt::format("Unknown property type '{}'", type));
     }
 
-    lua_settop(L, 0);
     global::virtualPropertyManager->addProperty(std::move(prop));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -150,8 +133,8 @@ int addVirtualProperty(lua_State* L) {
 */
 int removeVirtualProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
-
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
+
     properties::Property* p = global::virtualPropertyManager->property(name);
     if (p) {
         global::virtualPropertyManager->removeProperty(p);
@@ -159,12 +142,9 @@ int removeVirtualProperty(lua_State* L) {
     else {
         LWARNINGC(
             "removeVirtualProperty",
-            fmt::format("Virtual Property with name '{}'' did not exist", name)
+            fmt::format("Virtual Property with name '{}' did not exist", name)
         );
     }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -182,16 +162,12 @@ int removeAllVirtualProperties(lua_State* L) {
         global::virtualPropertyManager->removeProperty(p);
         delete p;
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int setScreenshotFolder(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setScreenshotFolder");
-
     std::string arg = ghoul::lua::value<std::string>(L);
-    lua_pop(L, 0);
 
     std::filesystem::path folder = absPath(arg);
     if (!std::filesystem::exists(folder)) {
@@ -215,22 +191,14 @@ int setScreenshotFolder(lua_State* L) {
  */
 int addTag(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
-
-    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
-    std::string tag = ghoul::lua::value<std::string>(L, 2);
-    lua_settop(L, 0);
+    auto [uri, tag] = ghoul::lua::values<std::string, std::string>(L);
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Unknown scene graph node type '{}'", uri)
-        );
+        return ghoul::lua::luaError(L, fmt::format("Unknown scene graph node '{}'", uri));
     }
 
     node->addTag(std::move(tag));
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -240,23 +208,15 @@ int addTag(lua_State* L) {
  * Removes a tag from a SceneGraphNode
  */
 int removeTag(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
-
-    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
-    const std::string& tag = ghoul::lua::value<std::string>(L, 2);
-    lua_settop(L, 0);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::removeTag");
+    auto [uri, tag] = ghoul::lua::values<std::string, std::string>(L);
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Unknown scene graph node type '{}'", uri)
-        );
+        return ghoul::lua::luaError(L, fmt::format("Unknown scene graph node '{}'", uri));
     }
 
     node->removeTag(tag);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -266,15 +226,10 @@ int removeTag(lua_State* L) {
 * Downloads a file from Lua interpreter
 */
 int downloadFile(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, {2, 3}, "lua::addTag");
-
-    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
-    const std::string& savePath = ghoul::lua::value<std::string>(L, 2);
-    bool waitForComplete = false;
-    if (n == 3) {
-        waitForComplete = ghoul::lua::value<bool>(L, 3);
-    }
-    lua_settop(L, 0);
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::addTag");
+    auto [uri, savePath, waitForComplete] =
+        ghoul::lua::values<std::string, std::string, std::optional<bool>>(L);
+    waitForComplete = waitForComplete.value_or(false);
 
     LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
     std::shared_ptr<DownloadManager::FileFuture> future =
@@ -300,7 +255,6 @@ int downloadFile(lua_State* L) {
         );
     }
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -311,10 +265,7 @@ int downloadFile(lua_State* L) {
 */
 int createSingleColorImage(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingleColorImage");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
-    lua_settop(L, 0);
+    auto [name, d] = ghoul::lua::values<std::string, ghoul::Dictionary>(L);
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
