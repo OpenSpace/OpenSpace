@@ -1362,14 +1362,14 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
                 "getSpkCoverage",
                 &luascriptfunctions::spkCoverage,
                 {},
-                "{string [, printValues]}",
+                "string",
                 "Returns a list of SPK coverage intervals for the target."
             },
             {
                 "getCkCoverage",
                 &luascriptfunctions::ckCoverage,
                 {},
-                "{string [, printValues]}",
+                "string",
                 "Returns a list of CK coverage intervals for the target."
             },
             {

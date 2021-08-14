@@ -116,7 +116,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     bool foundMatching = false;
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
-        const std::string& id = prop->fullyQualifiedIdentifier();
+        const std::string id = prop->fullyQualifiedIdentifier();
 
         if (isLiteral && id != propertyName) {
             continue;
@@ -216,7 +216,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
 // Checks to see if URI contains a group tag (with { } around the first term). If so,
 // returns true and sets groupName with the tag
 bool doesUriContainGroupTag(const std::string& command, std::string& groupName) {
-    std::string name = command.substr(0, command.find_first_of("."));
+    const std::string name = command.substr(0, command.find_first_of("."));
     if (name.front() == '{' && name.back() == '}') {
         groupName = name.substr(1, name.length() - 2);
         return true;
@@ -287,9 +287,6 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
  */
 
 int property_setValue(lua_State* L) {
-    using ghoul::lua::errorLocation;
-    using ghoul::lua::luaTypeToString;
-
     ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::property_setValue");
     defer { lua_settop(L, 0); };
 
@@ -301,7 +298,7 @@ int property_setValue(lua_State* L) {
     ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
 
     if (lua_gettop(L) >= 3) {
-        if (lua_type(L, 3) == LUA_TNUMBER) {
+        if (ghoul::lua::hasValue<double>(L, 3)) {
             interpolationDuration =
                 ghoul::lua::value<double>(L, 3, ghoul::lua::PopValue::No);
         }
@@ -311,7 +308,7 @@ int property_setValue(lua_State* L) {
         }
 
         if (lua_gettop(L) >= 4) {
-            if (lua_type(L, 4) == LUA_TNUMBER) {
+            if (ghoul::lua::hasValue<double>(L, 4)) {
                 interpolationDuration =
                     ghoul::lua::value<double>(L, 4, ghoul::lua::PopValue::No);
             }
@@ -337,7 +334,7 @@ int property_setValue(lua_State* L) {
     }
 
     if (!easingMethodName.empty()) {
-        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName.c_str());
+        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName);
         if (!correctName) {
             LWARNINGC(
                 "property_setValue",
@@ -345,7 +342,7 @@ int property_setValue(lua_State* L) {
             );
         }
         else {
-            easingMethod = ghoul::easingFunctionFromName(easingMethodName.c_str());
+            easingMethod = ghoul::easingFunctionFromName(easingMethodName);
         }
     }
 
@@ -383,7 +380,7 @@ int property_setValue(lua_State* L) {
                 "property_setValue",
                 fmt::format(
                     "{}: Property with URI '{}' was not found",
-                    errorLocation(L), uriOrRegex
+                    ghoul::lua::errorLocation(L), uriOrRegex
                 )
             );
             return 0;
@@ -400,7 +397,8 @@ int property_setValue(lua_State* L) {
         LERRORC(
             "lua::property_setGroup",
             fmt::format(
-                "{}: Unexpected optimization '{}'", errorLocation(L), optimization
+                "{}: Unexpected optimization '{}'",
+                ghoul::lua::errorLocation(L), optimization
             )
         );
     }
@@ -427,9 +425,9 @@ int property_setValueSingle(lua_State* L) {
  */
 int property_hasProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_hasProperty");
-    std::string uri = ghoul::lua::value<std::string>(L);
+    const std::string uri = ghoul::lua::value<std::string>(L);
 
-    openspace::properties::Property* prop = property(uri);
+    properties::Property* prop = property(uri);
     ghoul::lua::push(L, prop != nullptr);
     return 1;
 }
@@ -442,9 +440,9 @@ int property_hasProperty(lua_State* L) {
  */
 int property_getValue(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
-    std::string uri = ghoul::lua::value<std::string>(L);
+    const std::string uri = ghoul::lua::value<std::string>(L);
 
-    openspace::properties::Property* prop = property(uri);
+    properties::Property* prop = property(uri);
     if (!prop) {
         LERRORC(
             "property_getValue",
@@ -468,8 +466,7 @@ int property_getValue(lua_State* L) {
  */
 int property_getProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
-
-    std::string regex = ghoul::lua::value<std::string>(L, 1);
+    std::string regex = ghoul::lua::value<std::string>(L);
 
     std::string groupName;
     if (doesUriContainGroupTag(regex, groupName)) {
@@ -582,7 +579,7 @@ int property_getProperty(lua_State* L) {
     lua_newtable(L);
     int number = 1;
     for (const std::string& s : res) {
-        lua_pushstring(L, s.c_str());
+        ghoul::lua::push(L, s);
         lua_rawseti(L, -2, number);
         ++number;
     }
@@ -591,15 +588,15 @@ int property_getProperty(lua_State* L) {
 
 int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
-    const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
+    std::string sceneFile = ghoul::lua::value<std::string>(L);
 
-    global::openSpaceEngine->scheduleLoadSingleAsset(sceneFile);
+    global::openSpaceEngine->scheduleLoadSingleAsset(std::move(sceneFile));
     return 0;
 }
 
 int addSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addSceneGraphNode");
-    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+    const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
     try {
         SceneGraphNode* node = global::renderEngine->scene()->loadNode(d);
@@ -611,7 +608,7 @@ int addSceneGraphNode(lua_State* L) {
         global::renderEngine->scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
-        std::string cat = 
+        std::string cat =
             d.hasValue<std::string>("Identifier") ?
             d.value<std::string>("Identifier") :
             "Scene";
@@ -633,7 +630,7 @@ int addSceneGraphNode(lua_State* L) {
 
 int removeSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
-    std::string name = ghoul::lua::value<std::string>(L);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     SceneGraphNode* foundNode = sceneGraphNode(name);
     if (!foundNode) {
@@ -687,7 +684,7 @@ int removeSceneGraphNode(lua_State* L) {
 
 int removeSceneGraphNodesFromRegex(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNodesFromRegex");
-    std::string name = ghoul::lua::value<std::string>(L);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
@@ -793,8 +790,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode =
         [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& marked)
     {
-        std::vector<SceneGraphNode*> children = node->children();
-        for (SceneGraphNode* child : children) {
+        for (SceneGraphNode* child : node->children()) {
             markNode(child, marked);
         }
 
@@ -849,7 +845,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
 
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
-    std::string nodeName = ghoul::lua::value<std::string>(L);
+    const std::string nodeName = ghoul::lua::value<std::string>(L);
 
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
     ghoul::lua::push(L, node != nullptr);
@@ -868,7 +864,7 @@ int addInterestingTime(lua_State* L) {
 
 int worldPosition(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::worldPosition");
-    std::string identifier = ghoul::lua::value<std::string>(L);
+    const std::string identifier = ghoul::lua::value<std::string>(L);
 
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
@@ -879,7 +875,7 @@ int worldPosition(lua_State* L) {
     }
 
     glm::dvec3 pos = node->worldPosition();
-    ghoul::lua::push(L, pos);
+    ghoul::lua::push(L, std::move(pos));
     return 1;
 }
 
@@ -896,7 +892,7 @@ int worldRotation(lua_State* L) {
     }
 
     glm::dmat3 rot = node->worldRotationMatrix();
-    ghoul::lua::push(L, rot);
+    ghoul::lua::push(L, std::move(rot));
     return 1;
 }
 

@@ -33,7 +33,7 @@ namespace openspace::luascriptfunctions {
  */
 int hasAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasAction");
-    const std::string& identifier = ghoul::lua::value<std::string>(L, 1);
+    const std::string identifier = ghoul::lua::value<std::string>(L);
 
     if (identifier.empty()) {
         return ghoul::lua::luaError(L, "Identifier must not be empty");
@@ -51,7 +51,7 @@ int hasAction(lua_State* L) {
 */
 int removeAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeAction");
-    const std::string& identifier = ghoul::lua::value<std::string>(L, 1);
+    const std::string identifier = ghoul::lua::value<std::string>(L);
 
     if (identifier.empty()) {
         return ghoul::lua::luaError(L, "Identifier must not be empty");
@@ -80,7 +80,7 @@ int removeAction(lua_State* L) {
  */
 int registerAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerAction");
-    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L, 1);
+    const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
     if (!d.hasValue<std::string>("Identifier")) {
         return ghoul::lua::luaError(L, "Identifier must to provided to register action");
@@ -136,7 +136,7 @@ int registerAction(lua_State* L) {
  */
 int action(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::action");
-    const std::string& identifier = ghoul::lua::value<std::string>(L, 1);
+    const std::string identifier = ghoul::lua::value<std::string>(L);
 
     if (identifier.empty()) {
         return ghoul::lua::luaError(L, "Identifier must not be empty");
@@ -214,21 +214,17 @@ int actions(lua_State* L) {
  */
 int triggerAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::triggerAction");
-    auto [identifier, arguments] =
-        ghoul::lua::values<std::string, std::optional<ghoul::Dictionary>>(L);
-    arguments = arguments.value_or(ghoul::Dictionary());
+    auto [id, arg] = ghoul::lua::values<std::string, std::optional<ghoul::Dictionary>>(L);
+    arg = arg.value_or(ghoul::Dictionary());
 
-    if (identifier.empty()) {
+    if (id.empty()) {
         return ghoul::lua::luaError(L, "Identifier must not be empty");
     }
-    if (!global::actionManager->hasAction(identifier)) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Identifier '{}' for action not found", identifier)
-        );
+    if (!global::actionManager->hasAction(id)) {
+        return ghoul::lua::luaError(L, fmt::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(identifier, *arguments);
+    global::actionManager->triggerAction(id, *arg);
     return 0;
 }
 

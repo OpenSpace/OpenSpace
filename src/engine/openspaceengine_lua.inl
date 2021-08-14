@@ -43,19 +43,17 @@ namespace openspace::luascriptfunctions {
  */
 int toggleShutdown(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
-
     global::openSpaceEngine->toggleShutdownMode();
     return 0;
 }
 
 /**
-* \ingroup LuaScripts
-* writeDocumentation():
-* Writes out documentation files
-*/
+ * \ingroup LuaScripts
+ * writeDocumentation():
+ * Writes out documentation files
+ */
 int writeDocumentation(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
-
     global::openSpaceEngine->writeStaticDocumentation();
     global::openSpaceEngine->writeSceneDocumentation();
     return 0;
@@ -127,13 +125,13 @@ int addVirtualProperty(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* removeVirtualProperty():
-* Removes a previously added virtual property
-*/
+ * \ingroup LuaScripts
+ * removeVirtualProperty():
+ * Removes a previously added virtual property
+ */
 int removeVirtualProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     properties::Property* p = global::virtualPropertyManager->property(name);
     if (p) {
@@ -149,16 +147,14 @@ int removeVirtualProperty(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* removeAllVirtualProperties():
-* Remove all registered virtual properties
-*/
+ * \ingroup LuaScripts
+ * removeAllVirtualProperties():
+ * Remove all registered virtual properties
+ */
 int removeAllVirtualProperties(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
 
-    const std::vector<properties::Property*>& ps =
-        global::virtualPropertyManager->properties();
-    for (properties::Property* p : ps) {
+    for (properties::Property* p : global::virtualPropertyManager->properties()) {
         global::virtualPropertyManager->removeProperty(p);
         delete p;
     }
@@ -167,7 +163,7 @@ int removeAllVirtualProperties(lua_State* L) {
 
 int setScreenshotFolder(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setScreenshotFolder");
-    std::string arg = ghoul::lua::value<std::string>(L);
+    const std::string arg = ghoul::lua::value<std::string>(L);
 
     std::filesystem::path folder = absPath(arg);
     if (!std::filesystem::exists(folder)) {
@@ -221,10 +217,10 @@ int removeTag(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* downloadFile():
-* Downloads a file from Lua interpreter
-*/
+ * \ingroup LuaScripts
+ * downloadFile():
+ * Downloads a file from Lua interpreter
+ */
 int downloadFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::downloadFile");
     auto [uri, savePath, waitForComplete] =
@@ -259,10 +255,10 @@ int downloadFile(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* createSingleColorImage():
-* Creates a one pixel image with a given color and returns the path to the cached file
-*/
+ * \ingroup LuaScripts
+ * createSingleColorImage():
+ * Creates a one pixel image with a given color and returns the path to the cached file
+ */
 int createSingleColorImage(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingleColorImage");
     auto [name, d] = ghoul::lua::values<std::string, ghoul::Dictionary>(L);

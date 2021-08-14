@@ -24,7 +24,6 @@
 
 namespace openspace::luascriptfunctions {
 
-
 int startRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startRecording");
     const std::string recordFilePath = ghoul::lua::value<std::string>(L);
@@ -55,7 +54,6 @@ int startRecordingAscii(lua_State* L) {
 
 int stopRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopRecording");
-
     global::sessionRecording->stopRecording();
     return 0;
 }
@@ -64,20 +62,13 @@ int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
                   bool forceSimTimeAtStart)
 {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::startPlayback");
-    auto [playbackFile, loop] = ghoul::lua::values<std::string, std::optional<bool>>(L);
+    auto [file, loop] = ghoul::lua::values<std::string, std::optional<bool>>(L);
     loop = loop.value_or(false);
 
-    if (playbackFile.empty()) {
-        return luaL_error(L, "filepath string is empty");
+    if (file.empty()) {
+        return ghoul::lua::luaError(L, "Filepath string is empty");
     }
-
-    global::sessionRecording->startPlayback(
-        playbackFile,
-        timeMode,
-        forceSimTimeAtStart,
-        *loop
-    );
-
+    global::sessionRecording->startPlayback(file, timeMode, forceSimTimeAtStart, *loop);
     return 0;
 }
 
@@ -109,7 +100,6 @@ int startPlaybackSimulationTime(lua_State* L) {
 
 int stopPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPlayback");
-
     global::sessionRecording->stopPlayback();
     return 0;
 }
@@ -129,14 +119,13 @@ int enableTakeScreenShotDuringPlayback(lua_State* L) {
 
 int disableTakeScreenShotDuringPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableTakeScreenShotDuringPlayback");
-
     global::sessionRecording->disableTakeScreenShotDuringPlayback();
     return 0;
 }
 
 int fileFormatConversion(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileFormatConversion");
-    std::string convertFilePath = ghoul::lua::value<std::string>(L);
+    const std::string convertFilePath = ghoul::lua::value<std::string>(L);
 
     if (convertFilePath.empty()) {
         return luaL_error(L, "Filepath string must not be empty");
@@ -147,7 +136,8 @@ int fileFormatConversion(lua_State* L) {
 
 int setPlaybackPause(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setPlaybackPause");
-    bool pause = ghoul::lua::value<bool>(L);
+    const bool pause = ghoul::lua::value<bool>(L);
+
     global::sessionRecording->setPlaybackPause(pause);
     return 0;
 }

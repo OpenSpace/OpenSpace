@@ -557,37 +557,36 @@ void createExoplanetSystem(const std::string& starName) {
 
 int addExoplanetSystem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addExoplanetSystem");
+    std::variant<std::string, ghoul::Dictionary> v = 
+        ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
 
-    const int t = lua_type(L, 1);
-    if (t == LUA_TSTRING) {
+    if (std::holds_alternative<std::string>(v)) {
         // The user provided a single name
-        const std::string& starName = ghoul::lua::value<std::string>(L, 1);
+        std::string starName = std::get<std::string>(v);
         createExoplanetSystem(starName);
     }
-    else if (t == LUA_TTABLE) {
+    else {
         // A list of names was provided
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-        for (size_t i = 1; i <= d.size(); ++i) {
-            if (!d.hasValue<std::string>(std::to_string(i))) {
+        ghoul::Dictionary starNames = ghoul::lua::value<ghoul::Dictionary>(L);
+        for (size_t i = 1; i <= starNames.size(); ++i) {
+            if (!starNames.hasValue<std::string>(std::to_string(i))) {
                 return ghoul::lua::luaError(
-                    L, fmt::format("List item {} is of invalid type", i)
+                    L,
+                    fmt::format("List item {} is of invalid type", i)
                 );
             }
-            const std::string& starName = d.value<std::string>(std::to_string(i));
+            const std::string& starName = starNames.value<std::string>(std::to_string(i));
             createExoplanetSystem(starName);
         }
-    }
-    else {
-        return ghoul::lua::luaError(L, "Invalid input");
     }
     return 0;
 }
 
 int removeExoplanetSystem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeExoplanetSystem");
-    const std::string starName = ghoul::lua::value<std::string>(L);
+    std::string starName = ghoul::lua::value<std::string>(L);
 
-    const std::string starIdentifier = createIdentifier(starName);
+    const std::string starIdentifier = createIdentifier(std::move(starName));
     openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
@@ -659,7 +658,7 @@ int getListOfExoplanets(lua_State* L) {
     lua_newtable(L);
     int number = 1;
     for (const std::string& s : names) {
-        lua_pushstring(L, s.c_str());
+        ghoul::lua::push(L, s);
         lua_rawseti(L, -2, number);
         ++number;
     }
@@ -673,10 +672,10 @@ int listAvailableExoplanetSystems(lua_State* L) {
 
     std::string output;
     for (auto it = names.begin(); it != names.end(); ++it) {
-        if (it != names.end()) {
-            output += *it + ", ";
-        }
+        output += *it + ", ";
     }
+    output.pop_back();
+    output.pop_back();
 
     LINFO(fmt::format(
         "There is data available for the following {} exoplanet systems: {}",

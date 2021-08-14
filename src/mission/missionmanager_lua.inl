@@ -28,21 +28,21 @@ namespace openspace::luascriptfunctions {
 
 int loadMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadMission");
-
     const std::string& missionFileName = ghoul::lua::value<std::string>(L);
+
     if (missionFileName.empty()) {
         return ghoul::lua::luaError(L, "Filepath is empty");
     }
 
-    std::string name = global::missionManager->loadMission(missionFileName);
+    const std::string name = global::missionManager->loadMission(missionFileName);
     ghoul::lua::push(L, name);
     return 1;
 }
 
 int unloadMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadMission");
+    const std::string missionName = ghoul::lua::value<std::string>(L);
 
-    const std::string& missionName = ghoul::lua::value<std::string>(L);
     if (missionName.empty()) {
         return ghoul::lua::luaError(L, "Mission name is empty");
     }
@@ -57,8 +57,8 @@ int unloadMission(lua_State* L) {
 
 int hasMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasMission");
+    const std::string missionName = ghoul::lua::value<std::string>(L);
 
-    const std::string& missionName = ghoul::lua::value<std::string>(L);
     if (missionName.empty()) {
         return ghoul::lua::luaError(L, "Missing name is empty");
     }
@@ -70,12 +70,11 @@ int hasMission(lua_State* L) {
 
 int setCurrentMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setCurrentMission");
+    const std::string missionName = ghoul::lua::value<std::string>(L);
 
-    const std::string& missionName = ghoul::lua::value<std::string>(L);
     if (missionName.empty()) {
         return ghoul::lua::luaError(L, "Mission name is empty");
     }
-
     global::missionManager->setCurrentMission(missionName);
     return 0;
 }

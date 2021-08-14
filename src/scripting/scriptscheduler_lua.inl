@@ -75,28 +75,24 @@ int loadScheduledScript(lua_State* L) {
 
 int setModeApplicationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
-
     global::scriptScheduler->setModeApplicationTime();
     return 0;
 }
 
 int setModeRecordedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
-
     global::scriptScheduler->setModeRecordedTime();
     return 0;
 }
 
 int setModeSimulationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
-
     global::scriptScheduler->setModeSimulationTime();
     return 0;
 }
 
 int clear(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
-
     global::scriptScheduler->clearSchedule();
     return 0;
 }

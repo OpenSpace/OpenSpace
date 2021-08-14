@@ -26,7 +26,6 @@ namespace openspace::luascriptfunctions {
 
 int connect(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
-
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
@@ -35,7 +34,6 @@ int connect(lua_State* L) {
 
 int disconnect(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
-
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->connect();
     }
@@ -44,7 +42,6 @@ int disconnect(lua_State* L) {
 
 int requestHostship(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
-
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->requestHostship();
     }
@@ -53,7 +50,6 @@ int requestHostship(lua_State* L) {
 
 int resignHostship(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
-
     if (global::windowDelegate->isMaster()) {
         global::parallelPeer->resignHostship();
     }

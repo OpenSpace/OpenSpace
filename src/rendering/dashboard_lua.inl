@@ -28,15 +28,17 @@
 namespace openspace::luascriptfunctions {
 
 /**
-* \ingroup LuaScripts
-* addDashboardItem(table):
-*/
+ * \ingroup LuaScripts
+ * addDashboardItem(table):
+ */
 int addDashboardItem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
     ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
     try {
-        global::dashboard->addDashboardItem(DashboardItem::createFromDictionary(d));
+        global::dashboard->addDashboardItem(
+            DashboardItem::createFromDictionary(std::move(d))
+        );
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC("addDashboardItem", e.what());
@@ -47,24 +49,23 @@ int addDashboardItem(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* removeDashboardItem(string):
-*/
+ * \ingroup LuaScripts
+ * removeDashboardItem(string):
+ */
 int removeDashboardItem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
-    std::string identifier = ghoul::lua::value<std::string>(L);
+    const std::string identifier = ghoul::lua::value<std::string>(L);
 
     global::dashboard->removeDashboardItem(identifier);
     return 0;
 }
 
 /**
-* \ingroup LuaScripts
-* removeDashboardItems():
-*/
+ * \ingroup LuaScripts
+ * removeDashboardItems():
+ */
 int clearDashboardItems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
-
     global::dashboard->clearDashboardItems();
     return 0;
 }

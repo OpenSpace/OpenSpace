@@ -37,7 +37,7 @@ namespace openspace::luascriptfunctions {
 
 int saveSettingsToProfile(lua_State* L) {
     if (!global::configuration->usingProfile) {
-        return luaL_error(
+        return ghoul::lua::luaError(
             L,
             "Program was not started with a profile, so cannot use this "
             "save-current-settings feature"
@@ -66,13 +66,19 @@ int saveSettingsToProfile(lua_State* L) {
         std::filesystem::path path = global::configuration->profile;
         path.replace_extension();
         std::string newFile = fmt::format("{}_{}", path.string(), time);
-        std::string sourcePath = fmt::format("{}/{}.profile",
-            absPath("${USER_PROFILES}").string(), global::configuration->profile);
-        std::string destPath = fmt::format("{}/{}.profile",
-            absPath("${PROFILES}").string(), global::configuration->profile);
+        std::string sourcePath = fmt::format(
+            "{}/{}.profile",
+            absPath("${USER_PROFILES}").string(), global::configuration->profile
+        );
+        std::string destPath = fmt::format(
+            "{}/{}.profile",
+            absPath("${PROFILES}").string(), global::configuration->profile
+        );
         if (!std::filesystem::is_regular_file(sourcePath)) {
-            sourcePath = absPath("${USER_PROFILES}").string()
-                + '/' + global::configuration->profile + ".profile";
+            sourcePath = fmt::format(
+                "{}/{}.profile",
+                absPath("${USER_PROFILES}").string(), global::configuration->profile
+            );
         }
         LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
         std::filesystem::copy(sourcePath, destPath);
@@ -80,7 +86,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
     else {
         if (saveFilePath->empty()) {
-            return luaL_error(L, "Save filepath string is empty");
+            return ghoul::lua::luaError(L, "Save filepath string is empty");
         }
     }
 
@@ -91,13 +97,16 @@ int saveSettingsToProfile(lua_State* L) {
     global::configuration->profile = *saveFilePath;
 
     if (saveFilePath->find('/') != std::string::npos) {
-        return luaL_error(L, "Profile filename must not contain path (/) elements");
+        return ghoul::lua::luaError(L, "Profile filename must not contain (/) elements");
     }
     else if (saveFilePath->find(':') != std::string::npos) {
-        return luaL_error(L, "Profile filename must not contain path (:) elements");
+        return ghoul::lua::luaError(L, "Profile filename must not contain (:) elements");
     }
     else if (saveFilePath->find('.') != std::string::npos) {
-        return luaL_error(L, "Only provide the filename to save without file extension");
+        return ghoul::lua::luaError(
+            L,
+            "Only provide the filename to save without file extension"
+        );
     }
 
     std::string absFilename = fmt::format(
@@ -108,12 +117,12 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
-        return luaL_error(
+        return ghoul::lua::luaError(
             L,
             fmt::format(
                 "Unable to save profile '{}'. File of same name already exists",
                 absFilename
-            ).c_str()
+            )
         );
     }
 
@@ -123,11 +132,11 @@ int saveSettingsToProfile(lua_State* L) {
         outFile.open(absFilename, std::ofstream::out);
     }
     catch (const std::ofstream::failure& e) {
-        return luaL_error(
+        return ghoul::lua::luaError(
             L,
             fmt::format(
                 "Exception opening profile file for write: {} ({})", absFilename, e.what()
-            ).c_str()
+            )
         );
     }
 
@@ -135,15 +144,11 @@ int saveSettingsToProfile(lua_State* L) {
         outFile << global::profile->serialize();
     }
     catch (const std::ofstream::failure& e) {
-        return luaL_error(
+        return ghoul::lua::luaError(
             L,
-            fmt::format(
-                "Data write error to file: {} ({})", absFilename, e.what()
-            ).c_str()
+            fmt::format("Data write error to file: {} ({})", absFilename, e.what())
         );
     }
-
-    outFile.close();
     return 0;
 }
 

@@ -175,12 +175,11 @@ int moveLayer(lua_State* L) {
 
 int goToChunk(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::goToChunk");
-    auto [globeIdentifier, x, y, level] =
-        ghoul::lua::values<std::string, int, int, int>(L);
+    auto [identifier, x, y, level] = ghoul::lua::values<std::string, int, int, int>(L);
 
-    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    SceneGraphNode* n = sceneGraphNode(identifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+        return ghoul::lua::luaError(L, "Unknown globe name: " + identifier);
     }
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
@@ -240,7 +239,9 @@ int goToGeo(lua_State* L) {
     }
     else {
         global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
-            *globe, latitude, longitude
+            *globe,
+            latitude,
+            longitude
         );
     }
     return 0;
@@ -415,7 +416,7 @@ int loadWMSCapabilities(lua_State* L) {
 
 int removeWMSServer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
-    const std::string& name = ghoul::lua::value<std::string>(L);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     global::moduleEngine->module<GlobeBrowsingModule>()->removeWMSServer(name);
     return 0;
@@ -423,23 +424,20 @@ int removeWMSServer(lua_State* L) {
 
 int capabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
-    const std::string& name = ghoul::lua::value<std::string>(L);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     GlobeBrowsingModule::Capabilities cap =
         global::moduleEngine->module<GlobeBrowsingModule>()->capabilities(name);
 
     lua_newtable(L);
-    for (unsigned long i = 0; i < cap.size(); ++i) {
+    for (size_t i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
 
         lua_newtable(L);
-
         ghoul::lua::push(L, "Name", l.name);
         lua_settable(L, -3);
-
         ghoul::lua::push(L, "URL", l.url);
         lua_settable(L, -3);
-
         lua_rawseti(L, -2, i + 1);
     }
     return 1;

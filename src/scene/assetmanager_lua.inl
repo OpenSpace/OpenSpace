@@ -31,10 +31,10 @@ namespace openspace::luascriptfunctions::asset {
 int add(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(L, lua_upvalueindex(1)));
-
-    const std::string& assetName = ghoul::lua::value<std::string>(L);
+    AssetManager* assetManager = reinterpret_cast<AssetManager*>(
+        lua_touserdata(L, lua_upvalueindex(1))
+    );
+    const std::string assetName = ghoul::lua::value<std::string>(L);
 
     if (global::renderEngine->scene()) {
         assetManager->add(assetName);
@@ -53,8 +53,8 @@ int remove(lua_State* L) {
 
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(L, lua_upvalueindex(1)));
+    const std::string assetName = ghoul::lua::value<std::string>(L);
 
-    const std::string& assetName = ghoul::lua::value<std::string>(L);
     assetManager->remove(assetName);
     return 0;
 }

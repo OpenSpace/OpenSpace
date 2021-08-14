@@ -34,7 +34,7 @@ namespace openspace::luascriptfunctions {
  */
 int isLoaded(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
-    const std::string& name = ghoul::lua::value<std::string>(L);
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
     const auto it = std::find_if(

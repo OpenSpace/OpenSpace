@@ -28,7 +28,7 @@ namespace openspace::luascriptfunctions {
 
 int addScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
-    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+    const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
     std::unique_ptr<ScreenSpaceRenderable> s =
        ScreenSpaceRenderable::createFromDictionary(d);
@@ -39,18 +39,17 @@ int addScreenSpaceRenderable(lua_State* L) {
 
 int removeScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
+    const std::string name = ghoul::lua::value<std::string>(L);
 
-    const std::string& name = ghoul::lua::value<std::string>(L);
     global::renderEngine->removeScreenSpaceRenderable(name);
     return 0;
 }
 
 int takeScreenshot(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
-
     global::renderEngine->takeScreenshot();
     const unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
-    lua_pushinteger(L, screenshotNumber);
+    ghoul::lua::push(L, screenshotNumber);
     return 1;
 }
 

@@ -91,15 +91,13 @@ int getKeyBindings(lua_State* L) {
 int clearKey(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::clearKey");
 
-    const int t = lua_type(L, 1);
-    if (t == LUA_TSTRING) {
-        // The user provided a single key
-        const std::string& key = ghoul::lua::value<std::string>(L, 1);
-        global::keybindingManager->removeKeyBinding(stringToKey(key));
+    std::variant key = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
+    if (std::holds_alternative<std::string>(key)) {
+        KeyWithModifier k = stringToKey(std::get<std::string>(key));
+        global::keybindingManager->removeKeyBinding(k);
     }
     else {
-        // The user provided a list of keys
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(key);
         for (size_t i = 1; i <= d.size(); ++i) {
             const std::string& k = d.value<std::string>(std::to_string(i));
             global::keybindingManager->removeKeyBinding(stringToKey(k));

@@ -30,11 +30,13 @@ int convertFromRaDec(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
     glm::dvec2 degrees = glm::dvec2(0.0);
-    if (lua_type(L, 1) == LUA_TSTRING && lua_type(L, 2) == LUA_TSTRING) {
+    if (ghoul::lua::hasValue<std::string>(L, 1) &&
+        ghoul::lua::hasValue<std::string>(L, 2))
+    {
         auto [ra, dec] = ghoul::lua::values<std::string, std::string>(L);
         degrees = icrsToDecimalDegrees(ra, dec);
     }
-    else if (lua_type(L, 1) == LUA_TNUMBER && lua_type(L, 2) == LUA_TNUMBER) {
+    else if (ghoul::lua::hasValue<double>(L, 1) && ghoul::lua::hasValue<double>(L, 2)) {
         auto [x, y] = ghoul::lua::values<double, double>(L);
         degrees.x = x;
         degrees.y = y;
