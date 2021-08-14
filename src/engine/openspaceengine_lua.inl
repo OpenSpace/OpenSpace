@@ -226,7 +226,7 @@ int removeTag(lua_State* L) {
 * Downloads a file from Lua interpreter
 */
 int downloadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::addTag");
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::downloadFile");
     auto [uri, savePath, waitForComplete] =
         ghoul::lua::values<std::string, std::string, std::optional<bool>>(L);
     waitForComplete = waitForComplete.value_or(false);
