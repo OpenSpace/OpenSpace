@@ -43,8 +43,8 @@ namespace openspace::luascriptfunctions {
  */
 int time_setDeltaTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setDeltaTime");
-
     double newDeltaTime = ghoul::lua::value<double>(L);
+
     global::timeManager->setDeltaTime(newDeltaTime);
     return 0;
 }
@@ -56,10 +56,9 @@ int time_setDeltaTime(lua_State* L) {
  */
 int time_setDeltaTimeSteps(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setDeltaTimeSteps");
-
     ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(L);
-    const size_t nItems = dict.size();
 
+    const size_t nItems = dict.size();
     std::vector<double> inputDeltaTimes;
     inputDeltaTimes.reserve(nItems);
 
@@ -89,7 +88,6 @@ int time_setDeltaTimeSteps(lua_State* L) {
  */
 int time_setNextDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setNextDeltaTimeStep");
-
     global::timeManager->setNextDeltaTimeStep();
     return 0;
 }
@@ -102,7 +100,6 @@ int time_setNextDeltaTimeStep(lua_State* L) {
  */
 int time_setPreviousDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setPreviousDeltaTimeStep");
-
     global::timeManager->setPreviousDeltaTimeStep();
     return 0;
 }
@@ -253,6 +250,7 @@ int time_pauseToggleViaKeyboard(lua_State* L) {
 int time_setPause(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setPause");
     bool pause = ghoul::lua::value<bool>(L);
+
     global::timeManager->setPause(pause);
     return 0;
 }
@@ -289,20 +287,18 @@ int time_interpolatePause(lua_State* L) {
  */
 int time_setTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setTime");
+    std::variant<std::string, double> time =
+        ghoul::lua::value<std::variant<std::string, double>>(L);
 
-    double time;
-    int type = lua_type(L, 1);
-    if (type == LUA_TSTRING) {
-        std::string value = ghoul::lua::value<std::string>(L);
-        time = Time::convertTime(value);
-    }
-    else if (type == LUA_TNUMBER) {
-        time = ghoul::lua::value<double>(L);
+    double t;
+    if (std::holds_alternative<std::string>(time)) {
+        t = Time::convertTime(std::get<std::string>(time));
     }
     else {
-        return ghoul::lua::luaError(L, "Expected string or number as parameter");
+        t = std::get<double>(time);
     }
-    global::timeManager->setTimeNextFrame(Time(time));
+
+    global::timeManager->setTimeNextFrame(Time(t));
     return 0;
 }
 
@@ -316,24 +312,19 @@ int time_setTime(lua_State* L) {
  */
 int time_interpolateTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::time_interpolateTime");
-
-    double targetTime;
-    int type = lua_type(L, 1);
-    if (type == LUA_TSTRING) {
-        std::string value = ghoul::lua::value<std::string>(L);
-        targetTime = Time::convertTime(value);
-    }
-    else if (type == LUA_TNUMBER) {
-        targetTime = ghoul::lua::value<double>(L);
-    }
-    else {
-        return ghoul::lua::luaError(L, "Expected string or number as parameter");
-    }
-
-    std::optional<double> interpDuration = ghoul::lua::value<std::optional<double>>(L);
+    auto [time, interpDuration] =
+        ghoul::lua::values<std::variant<std::string, double>, std::optional<double>>(L);
     interpDuration = interpDuration.value_or(
         global::timeManager->defaultTimeInterpolationDuration()
     );
+
+    double targetTime;
+    if (std::holds_alternative<std::string>(time)) {
+        targetTime = Time::convertTime(std::get<std::string>(time));
+    }
+    else {
+        targetTime = std::get<double>(time);
+    }
 
     if (*interpDuration > 0) {
         global::timeManager->interpolateTime(targetTime, *interpDuration);
@@ -415,28 +406,28 @@ int time_currentWallTime(lua_State* L) {
 
 int time_advancedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::time_advanceTime");
+    auto [base, change] =
+        ghoul::lua::values<
+            std::variant<std::string, double>, std::variant<std::string, double>
+        >(L);
 
     double j2000Seconds = -1.0;
-    Time t;
     bool usesISO = false;
-    if (lua_type(L, 1) == LUA_TSTRING) {
-        j2000Seconds = Time::convertTime(ghoul::lua::value<std::string>(L));
+    if (std::holds_alternative<std::string>(base)) {
+        j2000Seconds = Time::convertTime(std::get<std::string>(base));
         usesISO = true;
     }
-    else if (lua_type(L, 1) == LUA_TNUMBER) {
-        j2000Seconds = ghoul::lua::value<double>(L);
-        usesISO = false;
-    }
     else {
-        return ghoul::lua::luaError(L, "Needs string or number as the first argument");
+        j2000Seconds = std::get<double>(base);
+        usesISO = false;
     }
 
     double dt = 0.0;
-    if (lua_type(L, 1) == LUA_TNUMBER) {
-        dt = ghoul::lua::value<double>(L, 1);
+    if (std::holds_alternative<double>(change)) {
+        dt = std::get<double>(change);
     }
-    else if (lua_type(L, 1) == LUA_TSTRING) {
-        std::string modifier = ghoul::lua::value<std::string>(L, 1);
+    else {
+        std::string modifier = std::get<std::string>(change);
         if (modifier.empty()) {
             return ghoul::lua::luaError(L, "Modifier string must not be empty");
         }
@@ -475,9 +466,6 @@ int time_advancedTime(lua_State* L) {
         if (isNegative) {
             dt *= -1.0;
         }
-    }
-    else {
-        return ghoul::lua::luaError(L, "Needs string or number as the second argument");
     }
 
     if (usesISO) {
