@@ -36,7 +36,7 @@ namespace openspace::interaction {
 
 struct NavigationState {
     NavigationState() = default;
-    NavigationState(const ghoul::Dictionary& dictionary);
+    explicit NavigationState(const ghoul::Dictionary& dictionary);
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
         double yaw = 0.0, double pitch = 0.0);

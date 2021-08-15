@@ -36,43 +36,45 @@ class PathCurve {
 public:
     virtual ~PathCurve() = 0;
 
-    const double length() const;
+    double length() const;
 
-    /*
-     * Compute and rteturn the position along the path at the specified relative
+    /**
+     * Compute and return the position along the path at the specified relative
      * distance. The input parameter should be in range [0, 1], where 1 correspond to
      * the full length of the path
      */
-    glm::dvec3 positionAt(double relativeDistance);
+    glm::dvec3 positionAt(double relativeDistance) const;
 
-    /*
-     * Compute curve parameter u that matches the input arc length s
+    /**
+     * Get the intorlatied position along the spline, based on the given curve parameter 
+     * u in range [0, 1]. A curve parameter of 0 returns the start position and 1 the end 
+     * position. Note that u does not correspond to the relatively traveled distance. 
      */
-    virtual glm::dvec3 interpolate(double u);
+    virtual glm::dvec3 interpolate(double u) const;
 
-    /*
+    /**
      * Return the positions defining the control points for the spline interpolation
      */
-    std::vector<glm::dvec3> points();
+    std::vector<glm::dvec3> points() const;
 
 protected:
-    /*
+    /**
      * Precompute information related to the spline parameters, that are
      * needed for arc length reparameterization. Must be called after
      * control point creation
      */
     void initializeParameterData();
 
-    /*
+    /**
      * Compute curve parameter u that matches the input arc length s.
      * Input s is a length value, in the range [0, _totalLength]. The returned curve
      * parameter u is in range [0, 1]
      */
-    double curveParameter(double s);
+    double curveParameter(double s) const;
 
-    double approximatedDerivative(double u, double h = 0.0001);
-    double arcLength(double limit = 1.0);
-    double arcLength(double lowerLimit, double upperLimit);
+    double approximatedDerivative(double u, double h = 0.0001) const;
+    double arcLength(double limit = 1.0) const;
+    double arcLength(double lowerLimit, double upperLimit) const;
 
     std::vector<glm::dvec3> _points;
     unsigned int _nSegments = 0;

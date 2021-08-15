@@ -57,49 +57,49 @@ public:
     Waypoint startPoint() const;
     Waypoint endPoint() const;
 
-    /*
+    /**
      * Return the specified duration for the path, in seconds. Note that the time it
      * takes to actually traverse the path will not exactly match the provided duration 
      */
     double duration() const;
 
-    /*
+    /**
      * Return the total length of the the curve for the path, in meters
      */
     double pathLength() const;
 
-    /*
+    /**
      * Return a vector of positions corresponding to the control points of the path's 
      * spline curve
      */
     std::vector<glm::dvec3> controlPoints() const;
 
-    /*
+    /**
      * Take a step along the current path, corresponding to the delta time step \p dt, and
      * return the resulting camera pose. The \p speedScale is a factor that will be 
      * multiplied with the traversal speed
      */
     CameraPose traversePath(double dt, float speedScale = 1.f);
 
-    /*
+    /**
      * Return the identifer of the node that is the current appropriate anchor node, of 
      * the start and end waypoint's reference node. Dtermined based on how far along the 
      * path we have traveled
      */
     std::string currentAnchor() const;
 
-    /*
+    /**
      * Return wether the path has reached its end point or not
      */
     bool hasReachedEnd() const;
 
-    /*
+    /**
      * Compute the interpolated camera pose at a certain distance along the path
      */
     CameraPose interpolatedPose(double distance) const;
 
 private:
-    /*
+    /**
      * Interpolate between the paths start and end rotation using the approach that 
      * corresponds to the path's curve type. The interpolation parameter \p t is the
      * same as for the position interpolation, i.e. the relative traveled in distance
@@ -107,24 +107,24 @@ private:
      */
     glm::dquat interpolateRotation(double t) const;
 
-    /*
+    /**
      * Compute the interpolated rotation quaternion using an eased SLERP approach
      */
     glm::dquat easedSlerpRotation(double t) const;
 
-    /*
+    /**
      * Compute the interpolated rotation quaternion using an approach that first 
      * interpolates to look at the start node, and then the end node, before 
      * interpolating to the end rotation
      */
     glm::dquat lookAtTargetsRotation(double t) const;
 
-    /*
+    /**
      * Evaluate the current traversal speed along the path, based on the currently 
      * traveled distance. The final speed will be scaled to match the desired duration
      * for the path (which might have been specified by the user)
      */
-    double speedAlongPath(double traveledDistance);
+    double speedAlongPath(double traveledDistance) const;
 
     Waypoint _start;
     Waypoint _end;

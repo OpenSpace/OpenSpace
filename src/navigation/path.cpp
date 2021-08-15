@@ -107,11 +107,7 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
             throw ghoul::MissingCaseException();
     }
 
-    const auto defaultDuration = [](double pathlength) {
-        return std::log(pathlength);
-    };
-
-    _duration = duration.value_or(defaultDuration(pathLength()));
+    _duration = duration.value_or(std::log(pathLength()));
 
     // Compute speed factor to match the generated path length and duration, by
     // traversing the path and computing how much faster/slower it should be
@@ -233,7 +229,7 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
 
-double Path::speedAlongPath(double traveledDistance) {
+double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
 
@@ -323,7 +319,7 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
-                                     const Waypoint& startPoint)
+                                    const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
@@ -363,7 +359,7 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
 
         return glm::normalize(offsetRotation * targetToSun);
     }
-};
+}
 
 struct NodeInfo {
     std::string identifier;
@@ -415,10 +411,12 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::optional<float> duration = p.duration;
+    const std::optional<float> duration = p.duration;
 
     bool hasStart = p.startState.has_value();
-    Waypoint startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
+    const Waypoint startPoint = hasStart ? 
+        Waypoint(NavigationState(p.startState.value())) : 
+        waypointFromCamera();
 
     // TODO: also handle curve type here
 
@@ -466,7 +464,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
-    Waypoint waypointToAdd = waypoints[0];
+    const Waypoint waypointToAdd = waypoints[0];
 
     return Path(startPoint, waypointToAdd, curveType, duration);
 }

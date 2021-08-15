@@ -46,7 +46,8 @@ namespace {
         "DefaultCurveOption",
         "Default Curve Option",
         "The defualt curve type chosen when generating a path, if none is specified"
-        // TODO: right now there is no way to specify a type for a single path
+        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a 
+        // single path instance, only for any created paths
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -118,7 +119,7 @@ PathNavigator::PathNavigator()
     _relevantNodeTags = std::vector<std::string>{
         "planet_solarSystem",
         "moon_solarSystem"
-    };;
+    };
     _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
     addProperty(_relevantNodeTags);
 }
@@ -159,11 +160,7 @@ bool PathNavigator::isPlayingPath() const {
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
-    if (!hasCurrentPath()) {
-        return;
-    }
-
-    if (!_isPlaying) {
+    if (!hasCurrentPath() || !_isPlaying) {
         return;
     }
 
@@ -242,7 +239,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
 }
 
 void PathNavigator::clearPath() {
-    LINFO("Clearing path...");
+    LINFO("Clearing path");
     _currentPath = nullptr;
 }
 
@@ -258,7 +255,7 @@ void PathNavigator::startPath() {
         return;
     }
 
-    LINFO("Starting path...");
+    LINFO("Starting path");
     _isPlaying = true;
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
@@ -277,7 +274,7 @@ void PathNavigator::abortPath() {
 
 void PathNavigator::pausePath() {
     if (hasFinished()) {
-        LERROR("No path to pause (path is empty or has finished).");
+        LERROR("No path to pause (path is empty or has finished)");
         return;
     }
 
@@ -292,7 +289,7 @@ void PathNavigator::pausePath() {
 
 void PathNavigator::continuePath() {
     if (hasFinished()) {
-        LERROR("No path to resume (path is empty or has finished).");
+        LERROR("No path to resume (path is empty or has finished)");
         return;
     }
 
@@ -301,7 +298,7 @@ void PathNavigator::continuePath() {
         return;
     }
 
-    LINFO("Continuing path...");
+    LINFO("Continuing path");
     _isPlaying = true;
 }
 
