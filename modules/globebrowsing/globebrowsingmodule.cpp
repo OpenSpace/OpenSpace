@@ -404,13 +404,15 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "flyToGeo", 
             &globebrowsing::luascriptfunctions::flyToGeo,
             {},
-            "[string], number, number, number, [number]",
+            "[string], number, number, number [, bool, number]",
             "Fly the camera to geographic coordinates of a globe, using the path "
             "navigation system. The first (optional) argument is the identifier of a "
             "scene graph node with a RenderableGlobe. If no globe is passed in, the "
-            "current anchor will be used. The second and third argument is latitude "
-            "and longitude (degrees). The fourth argument is the altitude, in meters. "
-            "The last (optional) parameter is a duration for the motion"
+            "current anchor will be used. The second and third argument is latitude and "
+            "longitude (degrees). The fourth argument is the altitude, in meters. The "
+            "last two optional arguments are: a bool specifying whether the up vector "
+            "at the target position should be set to the globe's North vector, and a "
+            "duration for the motion, in seconds. Either of the two can be left out."
         },
         {
             "getLocalPositionFromGeo",
