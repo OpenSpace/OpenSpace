@@ -12,7 +12,7 @@ local targetNode = function(nodeIdentifier)
   ]]
 end
 
-states = {
+local states = {
   {
     Identifier = "Constellations",
     Enter = [[
@@ -34,7 +34,7 @@ states = {
   }
 }
 
-transitions = {
+local transitions = {
   {
     From = "Earth",
     To = "Moon",

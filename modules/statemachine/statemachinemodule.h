@@ -49,8 +49,8 @@ public:
     void setInitialState(const std::string initialState);
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;
-    void transitionTo(const std::string newState);
-    bool canGoToState(const std::string state) const;
+    void transitionTo(const std::string& newState);
+    bool canGoToState(const std::string& state) const;
 
     scripting::LuaLibrary luaLibrary() const override;
 

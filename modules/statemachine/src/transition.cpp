@@ -57,11 +57,11 @@ Transition::Transition(const ghoul::Dictionary& dictionary) {
     _action = p.action.value_or("");
 }
 
-std::string Transition::from() const {
+const std::string& Transition::from() const {
     return _from;
 }
 
-std::string Transition::to() const {
+const std::string& Transition::to() const {
     return _to;
 }
 

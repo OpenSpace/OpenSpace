@@ -1,6 +1,6 @@
 local stateMachineHelper = asset.require('util/lua_state_machine_helper')
 
-states = {
+local states = {
   {
     Title = "Highlight EarthTrail",
     Play = function ()
