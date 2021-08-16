@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/space/rendering/renderablefluxnodes.h>
 
 #include <openspace/engine/globals.h>
@@ -31,25 +32,24 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 // Test debugging tools more then logmanager
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/filesystem/cachemanager.h>
-
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <functional> 
 #include <fstream>
-#include <thread>
-#include <openspace/query/query.h>
-#include <sys/stat.h>
+#include <functional> 
 #include <optional>
+#include <sys/stat.h>
+#include <thread>
 
 namespace {
     // log category
-    constexpr const char* _loggerCat = "renderableFluxNodes";
+    constexpr const char* _loggerCat = "RenderableFluxNodes";
 
     // GL variables for shaders, probably needed some of them atleast
     constexpr const GLuint VaPosition   = 0;    // MUST CORRESPOND TO THE SHADER PROGRAM
@@ -83,241 +83,241 @@ namespace {
         "Default is Emin03 where values > 100 Mev."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
-        "colorMode",
+        "ColorMode",
         "Color Mode",
         "Color lines uniformly or using color tables based on specific values on nodes,"
         "for examples flux values."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
-        "colorTablePath",
+        "ColorTablePath",
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring."
     };
     constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
-        "color",
+        "Color",
         "Color",
         "Color of particles."
     };
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
-       "nodeSize",
+       "NodeSize",
        "Size of nodes",
        "Change the size of the nodes"
     };
     constexpr openspace::properties::Property::PropertyInfo NodeSizeLargerFluxInfo = {
-       "nodeSizeLargerFlux",
+       "NodeSizeLargerFlux",
        "Size of nodes for larger flux",
        "Change the size of the nodes when flux is larger than flux threshold value"
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-       "lineWidth",
+       "LineWidth",
        "Line Width",
        "This value specifies the line width of the field lines if the "
        "selected render method includes lines."
     };
     constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
-       "thresholdFlux",
+       "ThresholdFlux",
        "Threshold flux value",
        "This value specifies the threshold that will be changed with the flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
-        "filterLower",
+        "FilterLower",
         "Filtering Lower Value in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
-        "filterUpper",
+        "FilterUpper",
         "Filtering Upper Value in AU",
         "Use filtering to show nodes within a given range."
     };
     constexpr openspace::properties::Property::PropertyInfo AmountofNodesInfo = {
-        "amountOfNodes",
+        "AmountOfNodes",
         "Every nth node to render in",
         "Show only every nth node"
     };
     constexpr openspace::properties::Property::PropertyInfo DefaultNodeSkipInfo = {
-        "nodeSkip",
+        "NodeSkip",
         "Every nth node to render default",
         "Show only every nth node outside of skippingmethod"
     };
     constexpr openspace::properties::Property::PropertyInfo EarthNodeSkipInfo = {
-       "nodeSkipEarth",
+       "NodeSkipEarth",
        "Every nth node to render close to Earth",
        "Show only every nth node outside of skippingmethod"
     };
     constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
-        "scalingFlux",
+        "ScalingFlux",
         "Scale the flux value with color table",
         "Use scaling to color nodes with a given method."
     };
     constexpr openspace::properties::Property::PropertyInfo NodeskipMethodInfo = {
-        "skippingNodes",
+        "SkippingNodes",
         "How to select nodes to skip",
         "Methods to select nodes to skip."
     };
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
-        "colorTableRange",
+        "ColorTableRange",
         "Color Table Range",
         "Valid range for the color table. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
-        "zLimit",
+        "ZLimit",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
-        "fluxColorAlpha",
+        "FluxColorAlpha",
         "Flux Color Alpha",
         "The value of alpha for the flux color mode."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                        FluxColorAlphaIlluminanceInfo = {
-        "fluxColorAlphaIlluminance",
+                                                         FluxColorAlphaIlluminanceInfo = {
+        "FluxColorAlphaIlluminance",
         "Flux Color Alpha for illuminance",
         "The value of alpha for the flux color mode."
     };
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
-        "skippingNodesByFlux",
+        "SkippingNodesByFlux",
         "Skipping Nodes By Flux",
         "Select nodes to skip depending on flux value."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                          RadiusNodeSkipThresholdInfo = {
-        "skippingNodesByRadius",
+                                                           RadiusNodeSkipThresholdInfo = {
+        "SkippingNodesByRadius",
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
     constexpr openspace::properties::Property::PropertyInfo EnhanceMethodInfo = {
-        "enhanceMethod",
+        "EnhanceMethod",
         "Enhance Method",
         "Deciding what method to use for nodes close to earth"
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
-        "distanceplanet",
+        "Distanceplanet",
         "Distance Planet",
         "Deciding what planet to check distance to."
     };
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
-        "distancePlanetThreshold",
+        "DistancePlanetThreshold",
         "Threshold for distance between planet",
         "Enhance the size of nodes dependent on distance to planet."
     };
     constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
-        "misalignedIndex",
+        "MisalignedIndex",
         "Index to shift sequence number",
         "The misalignement number for sequence for fluxnodes vs Fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "flowcolor",
+        "Flowcolor",
         "Color of Flow",
         "Color of Flow."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
-        "flowEnabled",
+        "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow."
     };
     constexpr openspace::properties::Property::PropertyInfo InterestingStreamsInfo = {
-        "interestingStreamsEnabled",
+        "InterestingStreamsEnabled",
         "Interesting Streams Enabled",
         "Toggles the rendering of selected streams."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
-        "particleSize",
+        "ParticleSize",
         "Particle Size",
         "Size of the particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
-        "particleSpacing",
+        "ParticleSpacing",
         "Particle Spacing",
         "Spacing inbetween particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
-        "speed",
+        "Speed",
         "Speed",
         "Speed of the flow."
     };
     constexpr openspace::properties::Property::PropertyInfo UseFlowColorInfo = {
-        "coloring",
+        "Coloring",
         "Color either by Flowcolor or Flow colortable",
         "If set to true the flow will be colored by Flowcolor."
     };
     constexpr openspace::properties::Property::PropertyInfo TempInfo1 = {
-        "temp1",
+        "Temp1",
         "temp",
         "Temp"
     };
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
-        "maxNodeDistanceSize",
+        "MaxNodeDistanceSize",
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance."
     };
     constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
-        "nodeDistanceThreshold",
+        "NodeDistanceThreshold",
         "Node Distance Threshold",
         "Threshold for where to interpolate between the max and min node distance."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                        CameraPerspectiveEnabledInfo = {
-        "cameraPerspectiveEnabled",
+                                                          CameraPerspectiveEnabledInfo = {
+        "CameraPerspectiveEnabled",
         "Use Camera perspective",
         "Camera perspective changes the size of the nodes dependent on "
         "distance from camera."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
-        "renderingcircles",
+        "Renderingcircles",
         "Render as circles",
         "Using fragment shader to draw nodes as circles instead of squares."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingHollowInfo = {
-        "renderingHollowCircles",
+        "RenderingHollowCircles",
         "Render as hollow circles",
         "Using fragment shader to draw nodes as hollow circles."
     };
     constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
-        "renderingGaussianAlphaFilter",
+        "RenderingGaussianAlphaFilter",
         "Alpha by Gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value."
 
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                        RadiusPerspectiveEnabledInfo = {
-        "radiusPerspectiveEnabled",
+                                                          RadiusPerspectiveEnabledInfo = {
+        "RadiusPerspectiveEnabled",
         "Include radius with cameraperspective",
         "If false, then nodes closer to the sun will not be larger "
         "regardless of distance to camera."
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                        PerspectiveDistanceFactorInfo = {
-        "perspectiveDistanceFactor",
+                                                         PerspectiveDistanceFactorInfo = {
+        "PerspectiveDistanceFactor",
         "Perspective Distance factor",
         "This value decides how far away the camera must be to start "
         "impacting the node size."
     };
     constexpr openspace::properties::Property::PropertyInfo MinNodeSizeInfo = {
-        "minNodeSize",
+        "MinNodeSize",
         "Minimum node size",
         "The minimum node size."
     };
     constexpr openspace::properties::Property::PropertyInfo MaxNodeSizeInfo = {
-        "maxNodeSize",
+        "MaxNodeSize",
         "Maximum node size",
         "The minimum node size."
     };
     constexpr openspace::properties::Property::PropertyInfo AlwaysPulseInfo = {
-        "alwaysPulsate",
+        "AlwaysPulsate",
         "Pulsate regardless of camera position",
         "Always have nodes close to earth pulsate regardless of position."
     };
     constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
-       "pulseEnabled",
-       "Nodes close to Earth pulsate",
-       "Toggles the pulse for nodes close to Earth."
+        "PulseEnabled",
+        "Nodes close to Earth pulsate",
+        "Toggles the pulse for nodes close to Earth."
     };
     constexpr openspace::properties::Property::PropertyInfo gaussianPulseEnabledInfo = {
-       "gaussianPulseEnabled",
-       "Nodes close to Earth pulsate with alpha by gaussian",
-       "Toggles the pulse with alpha by gaussian for nodes close to Earth."
+        "GaussianPulseEnabled",
+        "Nodes close to Earth pulsate with alpha by gaussian",
+        "Toggles the pulse with alpha by gaussian for nodes close to Earth."
     };
 
     float stringToFloat(const std::string input, const float backupValue = 0.f) {
@@ -328,7 +328,7 @@ namespace {
         catch (const std::invalid_argument& ia) {
             LWARNING(fmt::format(
                 "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
-                ));
+            ));
             return backupValue;
         }
         return tmp;
@@ -354,8 +354,8 @@ namespace {
 #include "renderablefluxnodes_codegen.cpp"
 
     // Changed everything from dvec3 to vec3
-    glm::vec3 sphericalToCartesianCoord(glm::vec3 position) {
-        glm::vec3 cartesianPosition = glm::vec3();
+    glm::vec3 sphericalToCartesianCoord(const glm::vec3& position) {
+        glm::vec3 cartesianPosition;
 
         // ρsinφcosθ 
         cartesianPosition.x = position.x * sin(position.z) * cos(position.y);
@@ -366,7 +366,7 @@ namespace {
 
         return cartesianPosition;
     }
-} //namespace
+} // namespace
 
 namespace openspace {
 
@@ -437,7 +437,6 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _pPulseEnabled(pulseEnabledInfo, false)
     , _pGaussianPulseEnabled(gaussianPulseEnabledInfo, false)
     , _pPulseAlways(AlwaysPulseInfo, false)
-
 {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -528,7 +527,6 @@ void RenderableFluxNodes::initialize() {
 }
     
 void RenderableFluxNodes::initializeGL() {
-
     // Setup shader program
     _shaderProgram = global::renderEngine->buildRenderProgram(
         "Fluxnodes",
@@ -572,7 +570,7 @@ void RenderableFluxNodes::setModelDependentConstants() {
     float limit = 8.f;
     _pColorTableRange.setMinValue(glm::vec2(-limit));
     _pColorTableRange.setMaxValue(glm::vec2(limit));
-    _pColorTableRange = glm::vec2(-2, 4);
+    _pColorTableRange = glm::vec2(-2.f, 4.f);
 
     float limitZMin = -2.5f;
     float limitZMax = 2.5f;
@@ -582,31 +580,29 @@ void RenderableFluxNodes::setModelDependentConstants() {
     _pDomainZ = glm::vec2(limitZMin, limitZMax);
 }
 
-void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
-    constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
-
+void RenderableFluxNodes::loadNodeData(int energybinOption) {
     LDEBUG("Loading in binary files directly from sync folder");
 
     std::string energybin;
     switch (energybinOption) {
-    case 0:
-        energybin = "_emin01";
-    break;
-    case 1:
-        energybin = "_emin03";
-    break;
+        case 0:
+            energybin = "_emin01";
+        break;
+        case 1:
+            energybin = "_emin03";
+        break;
     }
 
-    std::string _file = _binarySourceFolderPath + "\\positions" + energybin;
-    std::string _file2 = _binarySourceFolderPath + "\\fluxes" + energybin;
-    std::string _file3 = _binarySourceFolderPath + "\\radiuses" + energybin;
+    std::string file = _binarySourceFolderPath + "\\positions" + energybin;
+    std::string file2 = _binarySourceFolderPath + "\\fluxes" + energybin;
+    std::string file3 = _binarySourceFolderPath + "\\radiuses" + energybin;
 
-    std::ifstream fileStream(_file, std::ifstream::binary);
-    std::ifstream fileStream2(_file2, std::ifstream::binary);
-    std::ifstream fileStream3(_file3, std::ifstream::binary);
+    std::ifstream fileStream(file, std::ifstream::binary);
+    std::ifstream fileStream2(file2, std::ifstream::binary);
+    std::ifstream fileStream3(file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Could not read file '{}'", _file));
+        LERROR(fmt::format("Could not read file '{}'", file));
         return;
     }
 
@@ -618,8 +614,8 @@ void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
     _nStates = nTimeSteps;
 
     if (_nStates != _startTimes.size()) {
-        LERROR("number of states, _nStates, and number of start times, _startTimes, "
-            "dont match");
+        LERROR("Number of states, _nStates, and number of start times, _startTimes, "
+            "do not match");
         return;
     }
 
@@ -630,8 +626,8 @@ void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
     for (unsigned int i = 0; i < _nStates; ++i) {
         _vertexPositions.resize(nNodesPerTimestep);
         fileStream.read(reinterpret_cast<char*>(
-            _vertexPositions.data()),
-            nNodesPerTimestep * sizeof(glm::vec3));
+            _vertexPositions.data()), nNodesPerTimestep * sizeof(glm::vec3)
+        );
 
         _statesPos.push_back(_vertexPositions);
         _vertexPositions.clear();
@@ -639,8 +635,8 @@ void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
     for (unsigned int i = 0; i < _nStates; ++i) {
         _vertexColor.resize(nNodesPerTimestep);
         fileStream2.read(reinterpret_cast<char*>(
-            _vertexColor.data()),
-            nNodesPerTimestep * sizeof(float));
+            _vertexColor.data()), nNodesPerTimestep * sizeof(float)
+        );
 
         _statesColor.push_back(_vertexColor);
         _vertexColor.clear();
@@ -648,8 +644,8 @@ void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
     for (unsigned int i = 0; i < _nStates; ++i) {
         _vertexRadius.resize(nNodesPerTimestep);
         fileStream3.read(reinterpret_cast<char*>(
-            _vertexRadius.data()),
-            nNodesPerTimestep * sizeof(float));
+            _vertexRadius.data()), nNodesPerTimestep * sizeof(float)
+        );
 
         _statesRadius.push_back(_vertexRadius);
         _vertexRadius.clear();
@@ -657,7 +653,6 @@ void RenderableFluxNodes::loadNodeData(const int& energybinOption) {
 }
 
 void RenderableFluxNodes::setupProperties() {
-
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
     addProperty(_pGoesEnergyBins);
     addProperty(_pLineWidth);
@@ -747,13 +742,12 @@ bool RenderableFluxNodes::isReady() const {
 }
 
 void RenderableFluxNodes::populateStartTimes() {
-
     // number of  characters in UTC ISO8601 format (without additional Z)
     // 'YYYY-MM-DDTHH-MM-SS-XXX'
     constexpr const int timeFormatSize = 23;
 
-    std::string timeFile = "";
-    std::string fileType = "";
+    std::string timeFile;
+    std::string fileType;
     for (const std::string& filePath : _binarySourceFiles) {
         timeFile = filePath;
 
@@ -761,12 +755,10 @@ void RenderableFluxNodes::populateStartTimes() {
             fileType = "csv";
             break;
         }
-
         else if (filePath.substr(filePath.find_last_of(".") + 1) == "dat") {
             fileType = "dat";
             break;
         }
-
         else if (filePath.substr(filePath.find_last_of(".") + 1) == "txt") {
             fileType = "txt";
             break;
@@ -777,11 +769,11 @@ void RenderableFluxNodes::populateStartTimes() {
             break;
         }
         else {
-            LERROR(fmt::format("Error in file type or nameing of file '{}'.",
-                " Time meta file supports csv, dat, txt or without file extention",
-                " (but then have to include 'time' in filename)", filePath
+            LERROR(fmt::format("Error in file type or nameing of file '{}'. ",
+                "Time meta file supports csv, dat, txt or without file extention ",
+                "(but then have to include 'time' in filename)", filePath
             ));
-            timeFile = "";
+            timeFile.clear();
         }
     }
 
@@ -789,9 +781,12 @@ void RenderableFluxNodes::populateStartTimes() {
         LERROR("Could not find a metadata file with time steps," 
             " such as a csv, dat, txt or no file extention with 'time' in filename");
     }
+
     // time filestream
     std::ifstream tfs(timeFile);
-    if (!tfs.is_open()) throw std::runtime_error("Could not open file");
+    if (!tfs.is_open()) {
+        throw std::runtime_error("Could not open file");
+    }
 
     std::string line;
     std::getline(tfs, line);    //gets only first line
@@ -801,31 +796,34 @@ void RenderableFluxNodes::populateStartTimes() {
     int nColumns = 0;
     std::string columnName;
     //loops through the names/columns in first line/header
-    while (s >> columnName) ++nColumns; 
-
+    while (s >> columnName) {
+        ++nColumns;
+    }
     while (std::getline(tfs, line)) {   //for each line of data
         std::istringstream iss(line);
         for (int i = 0; i < nColumns; ++i) {    //for each column in line
             std::string columnValue;
             iss >> columnValue;
-            if (i == nColumns - 1) {    // last column
-                if (columnValue.length() == 23) {
-                    // Ensure the separators are correct
-                    columnValue.replace(4, 1, "-");
-                    columnValue.replace(7, 1, "-");
-                    columnValue.replace(13, 1, ":");
-                    columnValue.replace(16, 1, ":");
-                    columnValue.replace(19, 1, ".");
-                    const double triggerTime = Time::convertTime(columnValue);
-                    LDEBUG("timestring " + columnValue);
-                    _startTimes.push_back(triggerTime);
-                }
-                else {
-                    LERROR(fmt::format("Error in file formating. Last column in ",
-                        "file '{}' is not on UTC ISO8601 format", timeFile
-                    ));
-                }
+            if (i != nColumns - 1) {    // last column
+                continue;
             }
+            if (columnValue.length() == 23) {
+                // Ensure the separators are correct
+                columnValue.replace(4, 1, "-");
+                columnValue.replace(7, 1, "-");
+                columnValue.replace(13, 1, ":");
+                columnValue.replace(16, 1, ":");
+                columnValue.replace(19, 1, ".");
+                const double triggerTime = Time::convertTime(columnValue);
+                LDEBUG("timestring " + columnValue);
+                _startTimes.push_back(triggerTime);
+            }
+            else {
+                LERROR(fmt::format("Error in file formating. Last column in ",
+                    "file '{}' is not on UTC ISO8601 format", timeFile
+                ));
+            }
+            
         }
     }
 }
@@ -836,7 +834,7 @@ void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
         if (iter != _startTimes.begin()) {
             _activeTriggerTimeIndex = static_cast<int>(
                 std::distance(_startTimes.begin(), iter)
-                ) - 1;
+            ) - 1;
         }
         else {
             _activeTriggerTimeIndex = 0;
@@ -855,39 +853,55 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         const glm::dmat4 modelMat =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             rotMat *
-            glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+            glm::dmat4(glm::scale(
+                glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)
+            ));
         const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
         //not in use atm.
         _shaderProgram->setUniform("modelViewProjection",
-            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
+            data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat)
+        );
 
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
+        if (!earthNode) {
+            LWARNING("Could not find scene graph node 'Earth'.");
+        }
         glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
     
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
-        _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, 
-            _pNodeSizeLargerFlux);
+        _shaderProgram->setUniform(
+            _uniformCache.nodeSizeLargerFlux, 
+            _pNodeSizeLargerFlux
+        );
         _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
         _shaderProgram->setUniform(_uniformCache.colorMode, _pColorMode);
         _shaderProgram->setUniform(_uniformCache.filterLower, _pFilteringLower);
         _shaderProgram->setUniform(_uniformCache.filterUpper, _pFilteringUpper);
         _shaderProgram->setUniform(_uniformCache.scalingMode, _pScalingmethod);
-        _shaderProgram->setUniform(_uniformCache.colorTableRange, 
-            _pColorTableRange.value());
+        _shaderProgram->setUniform(
+            _uniformCache.colorTableRange, 
+            _pColorTableRange.value()
+        );
         _shaderProgram->setUniform(_uniformCache.domainLimZ, _pDomainZ.value());
         _shaderProgram->setUniform(_uniformCache.nodeSkip, _pAmountofNodes);
         _shaderProgram->setUniform(_uniformCache.nodeSkipDefault, _pDefaultNodeSkip);
         _shaderProgram->setUniform(_uniformCache.nodeSkipEarth, _pEarthNodeSkip);
         _shaderProgram->setUniform(_uniformCache.nodeSkipMethod, _pNodeskipMethod);
-        _shaderProgram->setUniform(_uniformCache.nodeSkipFluxThreshold, 
-            _pFluxNodeskipThreshold);
-        _shaderProgram->setUniform(_uniformCache.nodeSkipRadiusThreshold, 
-            _pRadiusNodeSkipThreshold);
+        _shaderProgram->setUniform(
+            _uniformCache.nodeSkipFluxThreshold, 
+            _pFluxNodeskipThreshold
+        );
+        _shaderProgram->setUniform(
+            _uniformCache.nodeSkipRadiusThreshold, 
+            _pRadiusNodeSkipThreshold
+        );
         _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _pFluxColorAlpha);
-        _shaderProgram->setUniform(_uniformCache.fluxColorAlphaIlluminance, 
-            _pFluxColorAlphaIlluminance);
+        _shaderProgram->setUniform(
+            _uniformCache.fluxColorAlphaIlluminance, 
+            _pFluxColorAlphaIlluminance
+        );
         _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
         _shaderProgram->setUniform(_uniformCache.distanceThreshold, _pDistanceThreshold);
         _shaderProgram->setUniform(_uniformCache.enhanceMethod, _pEnhancemethod);
@@ -896,52 +910,63 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform(_uniformCache.particleSize, _pFlowParticleSize);
         _shaderProgram->setUniform(_uniformCache.particleSpacing, _pFlowParticleSpacing);
         _shaderProgram->setUniform(_uniformCache.particleSpeed, _pFlowSpeed);
-        _shaderProgram->setUniform(_uniformCache2.time,
-            global::windowDelegate->applicationTime() * -1);
+        _shaderProgram->setUniform(
+            _uniformCache2.time,
+            global::windowDelegate->applicationTime() * -1
+        );
         _shaderProgram->setUniform(_uniformCache2.flowColoring, _pUseFlowColor);
-        _shaderProgram->setUniform(_uniformCache2.maxNodeDistanceSize, 
-            _pMaxNodeDistanceSize);
-        _shaderProgram->setUniform(_uniformCache2.usingCameraPerspective, 
-            _pCameraPerspectiveEnabled);
+        _shaderProgram->setUniform(
+            _uniformCache2.maxNodeDistanceSize, 
+            _pMaxNodeDistanceSize
+        );
+        _shaderProgram->setUniform(
+            _uniformCache2.usingCameraPerspective, 
+            _pCameraPerspectiveEnabled
+        );
         _shaderProgram->setUniform(_uniformCache2.drawCircles, _pDrawingCircles);
         _shaderProgram->setUniform(_uniformCache2.drawHollow, _pDrawingHollow);
         _shaderProgram->setUniform(_uniformCache2.useGaussian, _pGaussianAlphaFilter);
-        _shaderProgram->setUniform(_uniformCache2.usingRadiusPerspective, 
-            _pRadiusPerspectiveEnabled);
-        _shaderProgram->setUniform(_uniformCache2.perspectiveDistanceFactor, 
-            _pPerspectiveDistanceFactor);
+        _shaderProgram->setUniform(
+            _uniformCache2.usingRadiusPerspective, 
+            _pRadiusPerspectiveEnabled
+        );
+        _shaderProgram->setUniform(
+            _uniformCache2.perspectiveDistanceFactor, 
+            _pPerspectiveDistanceFactor
+        );
         _shaderProgram->setUniform(_uniformCache2.maxNodeSize, _pMaxNodeSize);
         _shaderProgram->setUniform(_uniformCache2.minNodeSize, _pMinNodeSize);
         _shaderProgram->setUniform(_uniformCache2.usingPulse, _pPulseEnabled);
-        _shaderProgram->setUniform(_uniformCache2.usingGaussianPulse, 
-            _pGaussianPulseEnabled);
+        _shaderProgram->setUniform(
+            _uniformCache2.usingGaussianPulse, 
+            _pGaussianPulseEnabled
+        );
         _shaderProgram->setUniform(_uniformCache2.pulsatingAlways, _pPulseAlways);
         
         glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
     
         _shaderProgram->setUniform("cameraPos", cameraPos);
     
+        ghoul::opengl::TextureUnit textureUnit;
+        ghoul::opengl::TextureUnit textureUnitCMR;
+        ghoul::opengl::TextureUnit textureUnitEarth;
+        ghoul::opengl::TextureUnit textureUnitFlow;
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
-            ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
             _transferFunction->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTable", textureUnit);
 
-            ghoul::opengl::TextureUnit textureUnitCMR;
             textureUnitCMR.activate();
             _transferFunctionCMR->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTableCMR", textureUnitCMR);
 
-            ghoul::opengl::TextureUnit textureUnitEarth;
             textureUnitEarth.activate();
             _transferFunctionEarth->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTableEarth", textureUnitEarth);
 
-            ghoul::opengl::TextureUnit textureUnitFlow;
             textureUnitFlow.activate();
             _transferFunctionFlow->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
-
         }
 
         glBindVertexArray(_vertexArrayObject);
@@ -956,10 +981,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->deactivate();
     }
 }
-inline void unbindGL() {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
 
 void RenderableFluxNodes::computeSequenceEndTime() {
     if (_nStates > 1) {
@@ -971,15 +992,17 @@ void RenderableFluxNodes::computeSequenceEndTime() {
     }
     else if (_nStates == 1) {
         // If there's just one state it should never disappear!
-        _sequenceEndTime = DBL_MAX;
+        _sequenceEndTime = std::numeric_limits<double>::max();
     }
     else {
-        LWARNING("Start up or error?");
+        LERROR("No states were found. The position file include this data");
     }
 }
 
 void RenderableFluxNodes::update(const UpdateData& data) {
-    if (!this->_enabled) return;
+    if (!_enabled) {
+        return;
+    }
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }
@@ -992,17 +1015,13 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
-            // true => Previous frame was not within the sequence interval
-            //_activeTriggerTimeIndex < 0 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
             updateActiveTriggerTimeIndex(currentTime);
-
             needsUpdate = true;
-
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
@@ -1011,8 +1030,7 @@ void RenderableFluxNodes::update(const UpdateData& data) {
     }
 
     if (needsUpdate) {
-
-        if(!_statesPos[_activeTriggerTimeIndex].empty()) {
+        if (!_statesPos[_activeTriggerTimeIndex].empty()) {
             //if (_activeTriggerTimeIndex > _pMisalignedIndex) {
             //    _activeTriggerTimeIndex += -_pMisalignedIndex;
             //}
@@ -1028,10 +1046,16 @@ void RenderableFluxNodes::update(const UpdateData& data) {
 
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, 
-            UniformNames);
-        ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, 
-            UniformNames2);
+        ghoul::opengl::updateUniformLocations(
+            *_shaderProgram, 
+            _uniformCache, 
+            UniformNames
+        );
+        ghoul::opengl::updateUniformLocations(
+            *_shaderProgram,
+            _uniformCache2,
+            UniformNames2
+        );
     }
 }
 
@@ -1052,7 +1076,8 @@ void RenderableFluxNodes::updatePositionBuffer() {
     glEnable(GL_PROGRAM_POINT_SIZE);
     glVertexAttribPointer(VaPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 void RenderableFluxNodes::updateVertexColorBuffer() {
     glBindVertexArray(_vertexArrayObject);
@@ -1060,34 +1085,36 @@ void RenderableFluxNodes::updateVertexColorBuffer() {
 
     const std::vector<float>& vertColor = _vertexColor;
 
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertColor.size() * sizeof(float),
-            vertColor.data(),
-            GL_STATIC_DRAW
-        );
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        vertColor.size() * sizeof(float),
+        vertColor.data(),
+        GL_STATIC_DRAW
+    );
 
-        glEnableVertexAttribArray(VaColor);
-        glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(VaColor);
+    glVertexAttribPointer(VaColor, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
-        unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 void RenderableFluxNodes::updateVertexFilteringBuffer() {
-        glBindVertexArray(_vertexArrayObject);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
+    glBindVertexArray(_vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
 
-        const std::vector<float>& vertexRadius = _vertexRadius;
+    const std::vector<float>& vertexRadius = _vertexRadius;
 
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vertexRadius.size() * sizeof(float),
-            vertexRadius.data(),
-            GL_STATIC_DRAW
-        );
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        vertexRadius.size() * sizeof(float),
+        vertexRadius.data(),
+        GL_STATIC_DRAW
+    );
 
-        glEnableVertexAttribArray(VaFiltering);
-        glVertexAttribPointer(VaFiltering, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(VaFiltering);
+    glVertexAttribPointer(VaFiltering, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
-        unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 } // namespace openspace

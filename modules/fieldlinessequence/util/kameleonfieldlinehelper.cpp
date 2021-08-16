@@ -89,14 +89,13 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                        const std::unordered_map<std::string, 
-                                                 std::vector<glm::vec3>>& seedMap,
-                        double manualTimeOffset,
-                        const std::string& tracingVar,
-                        std::vector<std::string>& extraVars,
-                        std::vector<std::string>& extraMagVars)
+                                                const std::unordered_map<std::string, 
+                                                std::vector<glm::vec3>>& seedMap,
+                                                double manualTimeOffset,
+                                                const std::string& tracingVar,
+                                                std::vector<std::string>& extraVars,
+                                                std::vector<std::string>& extraMagVars)
 {
-
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
     LERROR("CDF inputs provided but Kameleon module is deactivated");
     return false;
@@ -111,13 +110,14 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     state.setTriggerTime(cdfDoubleTime);
 
     //get time as string.
-    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime,
-        "YYYYMMDDHRMNSC::RND"); //YYYY MM DD HOUR MIN SEC   ROUNDED
+    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
+        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
+    ); //YYYY MM DD HOUR MIN SEC   ROUNDED
 
     // use time as string for picking seedpoints from seedm
     std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
-
-    if (addLinesToState(kameleon.get(), seedPoints, tracingVar, state)) {
+    bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
+    if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical)
         // Before we scale to meters (and maybe cartesian) we must extract
         // the extraQuantites, as the iterpolator needs the unaltered positions

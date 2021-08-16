@@ -221,7 +221,7 @@ private:
     void definePropertyCallbackFunctions();
     //bool extractCdfInfoFromDictionary();
     fls::Model extractJsonInfoFromDictionary();
-    void extractMagnitudeVarsFromStrings(std::vector<std::string>& extraMagVars);
+    std::vector<std::string> extractMagnitudeVarsFromStrings();
     //bool extractMandatoryInfoFromDictionary(std::string sourceFolderPath);
     std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles();
     void extractTriggerTimesFromFileNames();

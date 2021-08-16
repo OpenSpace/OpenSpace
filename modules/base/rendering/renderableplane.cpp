@@ -118,7 +118,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
-    , _mirrorBackside(MirrorBacksideInfo, true)
+    , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {

@@ -21,14 +21,10 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#include <modules/base/rendering/renderableplanetimevaryingimage.h>
-#include <modules/base/basemodule.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 
-// Test debugging tools more then logmanager
-#include <ghoul/logging/logmanager.h>
-//#include <ghoul/logging/consolelog.h>
+#include <modules/base/rendering/renderableplanetimevaryingimage.h>
+
+#include <modules/base/basemodule.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -37,6 +33,12 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+// Test debugging tools more then logmanager
+#include <ghoul/logging/logmanager.h>
+//#include <ghoul/logging/consolelog.h>
 #include <optional>
 
 namespace {
@@ -58,7 +60,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
-
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
@@ -71,16 +72,7 @@ namespace {
         };
 
         // [[codegen::verbatim(RenderTypeInfo.description)]]
-        std::optional<RenderType> renderType [[codegen::key("RenderType")]];
-
-        //KeyLazyLoading,   // TODO, might be useful for potential realtime streaming
-        //    new BoolVerifier,
-        //    Optional::Yes,
-        //    "If this value is set to 'true', the image for this plane will not"
-        //    "be loaded at startup but rather when image is shown for the first "
-        //    "time. Additionally, if the plane is hidden, the image will "
-        //    "automatically be unloaded"
-
+        std::optional<RenderType> renderType;
     };
 #include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
@@ -92,9 +84,8 @@ documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
-
     , _texturePath(TextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -112,21 +103,21 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
     if (p.renderType.has_value()) {
         switch (*p.renderType) {
-        case Parameters::RenderType::Background:
-            setRenderBin(Renderable::RenderBin::Background);
-            break;
-        case Parameters::RenderType::Opaque:
-            setRenderBin(Renderable::RenderBin::Opaque);
-            break;
-        case Parameters::RenderType::PreDeferredTransparency:
-            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-            break;
-        case Parameters::RenderType::PostDeferredTransparency:
-            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-            break;
-        case Parameters::RenderType::Overlay:
-            setRenderBin(Renderable::RenderBin::Overlay);
-            break;
+            case Parameters::RenderType::Background:
+                setRenderBin(Renderable::RenderBin::Background);
+                break;
+            case Parameters::RenderType::Opaque:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case Parameters::RenderType::PreDeferredTransparency:
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+                break;
+            case Parameters::RenderType::PostDeferredTransparency:
+                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+                break;
+            case Parameters::RenderType::Overlay:
+                setRenderBin(Renderable::RenderBin::Overlay);
+                break;
         }
     }
     else {
@@ -154,11 +145,9 @@ bool RenderablePlaneTimeVaryingImage::isReady() const {
     return RenderablePlane::isReady();
 }
 
-void RenderablePlaneTimeVaryingImage::initialize() {
-
-    LDEBUG("sourcefiles size:" + std::to_string(_sourceFiles.size()));
-       
-    if (!extractMandatoryInfoFromDictionary()) {
+void RenderablePlaneTimeVaryingImage::initialize() {       
+    bool success = extractMandatoryInfoFromDictionary();
+    if (!success) {
         return;
     }
     extractTriggerTimesFromFileNames();
@@ -174,20 +163,18 @@ void RenderablePlaneTimeVaryingImage::initialize() {
 void RenderablePlaneTimeVaryingImage::initializeGL() {
     RenderablePlane::initializeGL();
 
-    for (int i = 0; i < _sourceFiles.size(); ++i) {
-
+    for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-                                                       absPath(_sourceFiles[i]).string());
+            absPath(_sourceFiles[i]).string()
+        );
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
         _textureFiles[i]->uploadTexture();
         _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         _textureFiles[i]->purgeFromRAM();
     }
-
 }
 
-bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
-{
+bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
@@ -205,8 +192,8 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
-                "{}: {} contains no {} files",
-                _identifier, _texturePath, "extension"
+                "{}: Plane sequence filepath {} was empty",
+                _identifier, _texturePath
             ));
             return false;
         }
@@ -214,13 +201,11 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
     else {
         LERROR(fmt::format(
             "{}: Plane sequence filepath {} is not a valid directory",
-            _identifier,
-            _texturePath
+            _identifier, _texturePath
         ));
         return false;
     }
     _nStates = _sourceFiles.size();
-    LDEBUG("returning true");
     return true;
 }
 void RenderablePlaneTimeVaryingImage::deinitializeGL() {
@@ -240,19 +225,16 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     ZoneScoped
     RenderablePlane::update(data);
         
-    if (!this->_enabled) {
+    if (!_enabled) {
         return;
     }
 
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
         (currentTime < _sequenceEndTime);
-    //const bool isInInterval = true;
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
-            // true => Previous frame was not within the sequence interval
-            //_activeTriggerTimeIndex < 0 ||
             // true => We stepped back to a time represented by another state
             currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state
@@ -264,7 +246,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         } // else we're still in same state as previous frame (no changes needed)
     }
     else {
-        //not in interval => set everything to false
+        // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
         _needsUpdate = false;
     }
@@ -274,23 +256,15 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         loadTexture();
         _textureIsDirty = false;
     }
-
 }
 
 // Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
-    constexpr const int FilenameSize = 23;
-    // size(.png or .jpg)
-    constexpr const int ExtSize = 4;
-
     for (const std::string& filePath : _sourceFiles) {
         LDEBUG("filepath " + filePath);
-        const size_t strLength = filePath.size();
         // Extract the filename from the path (without extension)
-        std::string timeString = filePath.substr(
-            strLength - FilenameSize - ExtSize,
-            FilenameSize - 1
-        );
+        std::string timeString = std::filesystem::path(filePath).stem().string();
+
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
         timeString.replace(7, 1, "-");
@@ -298,19 +272,17 @@ void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
         timeString.replace(16, 1, ":");
         timeString.replace(19, 1, ".");
         const double triggerTime = Time::convertTime(timeString);
-        LDEBUG("timestring " + timeString);
         _startTimes.push_back(triggerTime);
     }
 }
 
-void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex
-(double currentTime) {
+void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
             _activeTriggerTimeIndex = static_cast<int>(
                 std::distance(_startTimes.begin(), iter)
-                ) - 1;
+            ) - 1;
         }
         else {
             _activeTriggerTimeIndex = 0;
@@ -330,7 +302,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     }
     else {
         // If there's just one state it should never disappear!
-        _sequenceEndTime = DBL_MAX;
+        _sequenceEndTime = std::numeric_limits<double>::max();
     }
 }
 void RenderablePlaneTimeVaryingImage::loadTexture() {

@@ -24,13 +24,6 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
-#include <filesystem>
-#include <fstream>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <map>
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
@@ -41,6 +34,13 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
+#include <filesystem>
+#include <fstream>
+#include <map>
 #include <optional>
 #include <thread>
 
@@ -53,99 +53,99 @@ namespace {
 
     // --------------------------------- Property Info -------------------------------- //
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
-        "colorMethod",
+        "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
-        "colorQuantity",
+        "ColorQuantity",
         "Quantity to Color By",
         "Quantity used to color lines if the 'By Quantity' color method is selected."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
-        "colorQuantityMin",
+        "ColorQuantityMin",
         "ColorTable Min Value",
         "Value to map to the lowest end of the color table."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityMaxInfo = {
-        "colorQuantityMax",
+        "ColorQuantityMax",
         "ColorTable Max Value",
         "Value to map to the highest end of the color table."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
-        "colorTablePath",
+        "ColorTablePath",
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
-        "uniform",
+        "Uniform",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
-        "aBlendingEnabled",
+        "ABlendingEnabled",
         "Additive Blending",
         "Activate/deactivate additive blending."
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
-        "domainEnabled",
+        "DomainEnabled",
         "Domain Limits",
         "Enable/Disable domain limits"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
-        "limitsX",
+        "LimitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
-        "limitsY",
+        "LimitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
-        "limitsZ",
+        "LimitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
-        "limitsR",
+        "LimitsR",
         "Radial limits",
         "Valid radial range. [Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "color",
+        "Color",
         "Color",
         "Color of particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
-        "flowEnabled",
+        "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
-        "reversed",
+        "Reversed",
         "Reversed Flow",
         "Toggle to make the flow move in the opposite direction."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
-        "particleSize",
+        "ParticleSize",
         "Particle Size",
         "Size of the particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
-        "particleSpacing",
+        "ParticleSpacing",
         "Particle Spacing",
         "Spacing inbetween particles."
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
-        "speed",
+        "Speed",
         "Speed",
         "Speed of the flow."
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
-        "maskingEnabled",
+        "MaskingEnabled",
         "Masking",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
@@ -153,32 +153,32 @@ namespace {
         "topologies like solar wind & closed lines."
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinInfo = {
-        "maskingMinLimit",
+        "MaskingMinLimit",
         "Lower Limit",
         "Lower limit of the valid masking range"
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMaxInfo = {
-        "maskingMaxLimit",
+        "MaskingMaxLimit",
         "Upper Limit",
         "Upper limit of the valid masking range"
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
-        "maskingQuantity",
+        "MaskingQuantity",
         "Quantity used for Masking",
         "Quantity used for masking."
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "lineWidth",
+        "LineWidth",
         "Line Width",
         "This value specifies the line width of the field lines if the " 
         "selected rendering method includes lines."
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
-        "timeJumpToStart",
+        "TimeJumpToStart",
         "Jump to Start Of Sequence",
         "Performs a time jump to the start of the sequence."
     };
-    enum class SourceFileType : int {
+    enum class SourceFileType {
         Cdf = 0,
         Json,
         Osfls,
@@ -186,54 +186,54 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
-        // [STRING] osfls, cdf or json  
+        // osfls, cdf or json  
         std::string inputFileType;
 
-        // [STRING] should be path to folder containing the input files
+        // Should be path to folder containing the input files
         std::string sourceFolder;
 
-        // [STRING] Path to a .txt file containing seed points. Mandatory if CDF as input.
+        // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
         std::optional<std::string> seedPointDirectory;
 
-        // [STRING] Currently supports: batsrus, enlil & pfss
+        // Currently supports: batsrus, enlil & pfss
         std::optional<std::string> simluationModel;
         
-        // [VECTOR of STRING] Extra variables such as rho, p or t
+        // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         
-        // [STRING] Which variable in CDF file to trace. b is default for fieldline
+        // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
 
-        // [FLOAT] 1.f is default, assuming meters as input.
+        // 1.f is default, assuming meters as input.
         // In setup it is used to scale JSON coordinates. 
         // During runtime it is used to scale domain limits.
         std::optional<float> scaleToMeters;
         
-        // [BOOLEAN] If False (default) => Load in initializing step and store in RAM
+        // If False (default) => Load in initializing step and store in RAM
         std::optional<bool> loadAtRuntime;
 
-        // [VECTOR of STRING] Values should be paths to .txt files
+        // Values should be paths to .txt files
         std::optional<std::vector<std::string>> colorTablePaths;
 
-        // [VECTOR of VEC2] Values should be entered as {X, Y}, where X & Y are numbers
+        // Values should be entered as {X, Y}, where X & Y are numbers
         std::optional<std::vector<glm::vec2>> colorTableRanges;
         
-        // [BOOL] Enables Flow
+        // Enables Flow
         std::optional<bool> flowEnabled;
 
-        // [VECTOR of VEC2] Values should be entered as {X, Y}, where X & Y are numbers
+        // Values should be entered as {X, Y}, where X & Y are numbers
         std::optional<std::vector<glm::vec2>> maskingRanges;
         
-        // [STRING] Value should be path to folder where states are saved. Specifying this
+        // Value should be path to folder where states are saved. Specifying this
         // makes it use file type converter 
         // (JSON/CDF input => osfls output & oslfs input => JSON output)
         std::optional<std::string> outputFolder;
         
-        // [FLOAT] Line width of line
+        // Line width of line
         std::optional<float> lineWidth;
         
-        // [DOUBLE] If data sets parameter start_time differ from start of run, 
+        // If data sets parameter start_time differ from start of run, 
         // elapsed_time_in_seconds might be in relation to start of run. 
         // ManuelTimeOffset will be added to trigger time.
         std::optional<double> manualTimeOffset;
@@ -252,7 +252,7 @@ namespace {
             return backupValue;
         }
         return tmp;
-    }   
+    }
 } // namespace
 
 namespace openspace {
@@ -379,10 +379,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
-            "{} contains no {} files",
-            sourcePath, _inputFileTypeString
-        ));
+        LERROR(fmt::format("{} contains no {} files", sourcePath, _inputFileTypeString));
     }
 
     _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
@@ -415,21 +412,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
-        _outputFolderPath = ""; 
+        _outputFolderPath.clear();
         LERROR(fmt::format(
             "The specified output path: '{}', does not exist", 
-            _outputFolderPath)
-        );
+            _outputFolderPath
+        ));
     }    
     
-    if (p.scaleToMeters.has_value()) {
-        _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
-    }
-    else {
-        LWARNING("Does not provide scalingFactor. Assumes coordinates are in meters");        
-    }
-
-} // constructor
+    _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
+}
 
 void RenderableFieldlinesSequence::initialize() {
     // Set a default color table, just in case the (optional) user defined paths are
@@ -807,13 +798,12 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
 
 bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
 
-    std::vector<std::string> extraMagVars;
-    extractMagnitudeVarsFromStrings(extraMagVars);
+    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings();
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles = 
-                                                             extractSeedPointsFromFiles();
+        extractSeedPointsFromFiles();
     if (seedsPerFiles.empty()) {
-        LERROR("no seed files");
+        LERROR("No seed files found");
         return false;
     }
 
@@ -841,7 +831,8 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
 }
 
 std::unordered_map<std::string, std::vector<glm::vec3>>
-                              RenderableFieldlinesSequence::extractSeedPointsFromFiles() {
+RenderableFieldlinesSequence::extractSeedPointsFromFiles() 
+{
     std::vector<std::string> files;
     std::filesystem::path seedPointDir;
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
@@ -870,7 +861,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         if (!seedFile.good()) {
             LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
-            return outMap;
+            return {};
         }
 
         LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
@@ -888,13 +879,13 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         if (outVec.size() == 0) {
             LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
             outMap.clear();
-            return outMap;
+            return {};
         }
 
         size_t lastIndex = seedFilePath.find_last_of('.');
         std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
         size_t dateAndTimeSeperator = name.find_last_of('_');
-        std::string time = name.substr(dateAndTimeSeperator+1, name.length());
+        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
         std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
         std::string dateAndTime = date + time;
             
@@ -904,9 +895,8 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     return outMap;
 }
 
-void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
-                                                 std::vector<std::string>& extraMagVars) {
-
+std::vector<std::string> RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings() {
+    std::vector<std::string> extraMagVars;
     for (int i = 0; i < static_cast<int>(_extraVars.size()); i++) {
         const std::string& str = _extraVars[i];
         // Check if string is in the format specified for magnitude variables
@@ -936,6 +926,7 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
             i--;
         }
     }
+    return extraMagVars;
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
@@ -1041,9 +1032,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         }
 
         glBindVertexArray(_vertexArrayObject);
+#ifndef __APPLE__
         glLineWidth(_pLineWidth);
-#ifdef __APPLE__
-        glLineWidth(1);
+#else      
+        glLineWidth(1.f);
 #endif
 
         glMultiDrawArrays(

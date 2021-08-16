@@ -1,40 +1,40 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2021                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2021                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/base/rendering/renderabletrail.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <atomic>
 
-#include <modules/base/rendering/renderabletrail.h>
 
 
 namespace openspace {
@@ -59,28 +59,28 @@ private:
     std::vector<GLint> _lineStart;
     // ------------------------------------- ENUMS -------------------------------------//
     // Used to determine if lines should be colored UNIFORMLY or by Flux Value
-    enum class ColorMethod : int {
+    enum class ColorMethod {
         ByFluxValue = 0,
         Uniform = 1
     };
-    enum class GoesEnergyBins : int {
+    enum class GoesEnergyBins {
         Emin01 = 0,
         Emin03 = 1
     };
-    enum class ScalingMethod : int {
+    enum class ScalingMethod {
         Flux = 0,
         RFlux = 1,
         R2Flux = 2,
         log10RFlux = 3,
         lnRFlux = 4
     };
-    enum class NodeSkipMethod : int {
+    enum class NodeSkipMethod {
         Uniform = 0,
         Flux = 1,
         Radius = 2,
         Streamnumber = 3
     };
-    enum class EnhanceMethod : int {
+    enum class EnhanceMethod {
         Sizescaling = 0,
         Colortables = 1,
         Sizeandcolor = 2,
@@ -269,17 +269,10 @@ private:
     void setupProperties();
     void updateActiveTriggerTimeIndex(double currentTime);
 
-    void loadNodeData(const int& energybinOption);
+    void loadNodeData(int energybinOption);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexFilteringBuffer();
-
-    // ----------------------TEMPORARY VARIABLES ------------------
-    //properties::StringProperty _spriteTexturePath;
-
-    //std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    //std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-
 };
-}
+} // namespace openspace

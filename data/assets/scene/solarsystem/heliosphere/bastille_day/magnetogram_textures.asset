@@ -11,24 +11,24 @@ local textures = openspace.walkDirectoryFiles(textureDirectory);
 
 -- put elements from textures into magnetograms
 for _, v in ipairs(textures) do
-    table.insert(magnetograms, v)
+  table.insert(magnetograms, v)
 end
 
 asset.onInitialize(function ()
-    -- add all all elements in magnetograms as layers
-    for i, imagename in ipairs(magnetograms) do
+  -- add all all elements in magnetograms as layers
+  for i, imagename in ipairs(magnetograms) do
    
-        openspace.globebrowsing.addLayer(
-            'Sun',
-            'ColorLayers',
-            {
-                Identifier = "magnetogram-" .. i,
-                Name = imagename,   --"Magnetogram-" .. i,
-                Description = "",
-                FilePath = imagename,
-                Enabled = false
-            }
-        )
-    end
+    openspace.globebrowsing.addLayer(
+      'Sun',
+      'ColorLayers',
+      {
+        Identifier = "magnetogram-" .. i,
+        Name = imagename,   --"Magnetogram-" .. i,
+        Description = "",
+        FilePath = imagename,
+        Enabled = false
+      }
+    )
+  end
 
 end)

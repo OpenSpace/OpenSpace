@@ -4,21 +4,21 @@ asset.require("spice/base")
 local HNMKernel = asset.localResource("./kernels/HNM.tf")
 
 local HNMReferenceFrame = {
-    Identifier = "HNMReferenceFrame",
-    Parent = sunTransforms.SunIAU.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "HEEQ180",
-            DestinationFrame = "GALACTIC",
-            Kernels = HNMKernel
-        }
-    },
-    GUI = {
-        Name = "HNM Reference Frame",
-        Path = "/Solar System/Sun",
-        Hidden = true
+  Identifier = "HNMReferenceFrame",
+  Parent = sunTransforms.SunIAU.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "HEEQ180",
+      DestinationFrame = "GALACTIC",
+      Kernels = HNMKernel
     }
+  },
+  GUI = {
+    Name = "HNM Reference Frame",
+    Path = "/Solar System/Sun",
+    Hidden = true
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { HNMReferenceFrame })
@@ -27,7 +27,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { HNMReferenceFrame })
 asset.meta = {
   Name = "Sun Transform, HNM",
   Version = "1.0",
-  Description = [[ Sun transform: HNM]],
+  Description = "Sun transform: HNM",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license",

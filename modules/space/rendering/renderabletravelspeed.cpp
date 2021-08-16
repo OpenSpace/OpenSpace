@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/space/rendering/renderabletravelspeed.h>
 
 #include <modules/base/basemodule.h>
@@ -40,50 +41,50 @@ namespace {
     constexpr const char* _loggerCat = "renderableTravelSpeed";
 
     constexpr const std::array<const char*, 2> UniformNames = {
-    "lineColor", "opacity"
+        "lineColor", "opacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
-    "travelSpeed",
-    "Speed of travel",
-    "The speed of light is the default value."
+        "TravelSpeed",
+        "Speed of travel",
+        "The speed of light is the default value."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
-    "targetNode",
-    "Target object",
-    "This value sets which scene graph node to target with the light speed indicator"
+        "TargetNode",
+        "Target object",
+        "This value sets which scene graph node to target with the light speed indicator"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-    "Color",
-    "Color",
-    "This value determines the RGB color for the line."
+        "Color",
+        "Color",
+        "This value determines the RGB color for the line."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineOpacityInfo = {
-    "Opacity",
-    "Opacity",
-    "This value determines the opacity for the line."
+        "Opacity",
+        "Opacity",
+        "This value determines the opacity for the line."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-    "LineWidth",
-    "Line Width",
-    "This value specifies the line width."
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
-    "IndicatorLength",
-    "Indicator Length",
-    "This value specifies the length of the light indicator set in light seconds."
+        "IndicatorLength",
+        "Indicator Length",
+        "This value specifies the length of the light indicator set in light seconds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
-    "FadeLength",
-    "Fade Length",
-    "This value specifies the length of the faded tail of the light indicator "
-    "set in light seconds."
+        "FadeLength",
+        "Fade Length",
+        "This value specifies the length of the faded tail of the light indicator "
+        "set in light seconds."
     };
 
     struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {
@@ -107,8 +108,6 @@ namespace {
         
         // [[codegen::verbatim(FadeLengthInfo.description)]]
         std::optional<int> fadeLength;
-
-        
     };
 #include "renderabletravelspeed_codegen.cpp"
 } // namespace
@@ -123,14 +122,17 @@ documentation::Documentation RenderableTravelSpeed::Documentation() {
 RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _targetName(TargetInfo)
-    , _travelSpeed(SpeedInfo, distanceconstants::LightSecond, 1.0, 
-        distanceconstants::LightSecond)
+    , _travelSpeed(
+        SpeedInfo,
+        distanceconstants::LightSecond,
+        1.0, 
+        distanceconstants::LightSecond
+      )
     , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(LineOpacityInfo, 1.0, 0.0, 1.0)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
-
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     setRenderBin(RenderBin::Overlay);
@@ -153,11 +155,12 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     _targetName = p.target;
     addProperty(_targetName);
     _targetName.onChange([this]() {
-        if (SceneGraphNode* n = sceneGraphNode(_targetName); n) {
+        if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
             _lightTravelTime = calculateLightTravelTime(
-                _sourcePosition, _targetPosition
+                _sourcePosition, 
+                _targetPosition
             );
             calculateDirectionVector();
             reinitiateTravel();
@@ -169,18 +172,14 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     _travelSpeed.onChange([this]() {
         reinitiateTravel();
     });
-
-} // constructor
+}
 
 void RenderableTravelSpeed::initialize() {
-
     _initiationTime = -1;
     _targetNode = sceneGraphNode(_targetName);
-
-} // initialize
+}
 
 void RenderableTravelSpeed::initializeGL() {
-
     _shaderProgram = BaseModule::ProgramObjectManager.request(
         "Travelspeed",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -196,8 +195,7 @@ void RenderableTravelSpeed::initializeGL() {
     glGenBuffers(1, &_vBufferId);
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
-
-} // initializeGL
+}
 
 void RenderableTravelSpeed::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
@@ -208,7 +206,7 @@ void RenderableTravelSpeed::deinitializeGL() {
     );
     glDeleteVertexArrays(1, &_vaoId);
     glDeleteBuffers(1, &_vBufferId);
-} // deinitializeGL
+}
 
 double RenderableTravelSpeed::calculateLightTravelTime(glm::dvec3 startPosition,
     glm::dvec3 targetPosition) {
@@ -221,24 +219,16 @@ void RenderableTravelSpeed::calculateDirectionVector() {
 }
 
 void RenderableTravelSpeed::calculateVerticesPositions() {
-
     // 3: start of light, 2: start of fade, 1: end of fade
-    _verticesPositions[2].x = _travelSpeed * _timeSinceStart * _directionVector.x;
-    _verticesPositions[2].y = _travelSpeed * _timeSinceStart * _directionVector.y;
-    _verticesPositions[2].z = _travelSpeed * _timeSinceStart * _directionVector.z;
+    _verticesPositions[2] = _travelSpeed * _timeSinceStart * _directionVector;
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
         _verticesPositions[1] = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _verticesPositions[1].x =
-            _travelSpeed * _directionVector.x * (_timeSinceStart - _indicatorLength);        
-        _verticesPositions[1].y =
-            _travelSpeed * _directionVector.y * (_timeSinceStart - _indicatorLength);
-        _verticesPositions[1].z =
-            _travelSpeed * _directionVector.z * (_timeSinceStart - _indicatorLength);
-
+        _verticesPositions[1] =
+            _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
     // This if statment is there to not start the line from behind the source node
@@ -246,20 +236,14 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
         _verticesPositions[0] = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _verticesPositions[0].x =
-            _travelSpeed * _directionVector.x * 
-            (_timeSinceStart - _indicatorLength - _fadeLength);
-        _verticesPositions[0].y =
-            _travelSpeed * _directionVector.y * 
-            (_timeSinceStart - _indicatorLength - _fadeLength);
-        _verticesPositions[0].z =
-            _travelSpeed * _directionVector.z * 
-            (_timeSinceStart - _indicatorLength - _fadeLength);
+        _verticesPositions[0] =
+            _travelSpeed * 
+            (_timeSinceStart - _indicatorLength - _fadeLength) *
+            _directionVector;
     }
 }
 
 void RenderableTravelSpeed::updateVertexData() {
-
     calculateVerticesPositions();
 
     glBindVertexArray(_vaoId);
@@ -285,7 +269,6 @@ bool RenderableTravelSpeed::isReady() const{
 }
 
 void RenderableTravelSpeed::update(const UpdateData& data) {
-    
     if (_initiationTime == -1) {
         _initiationTime = data.time.j2000Seconds();
         std::string_view temp = data.time.ISO8601();
@@ -298,17 +281,16 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     _sourcePosition = mySGNPointer->worldPosition();
 
     _lightTravelTime = calculateLightTravelTime(
-        _sourcePosition, _targetPosition
+        _sourcePosition, 
+        _targetPosition
     );
 
     const double currentTime = data.time.j2000Seconds();
     // Unless we've reached the target
     if (_initiationTime < currentTime && _arrivalTime > currentTime) {
-
         _timeSinceStart = currentTime - _initiationTime;
         calculateDirectionVector();
         updateVertexData();
-
     }
     else { // in case we've reached the target
         reinitiateTravel();
@@ -316,12 +298,12 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
 
     _shaderProgram->setUniform("lineColor", _lineColor);
     _shaderProgram->setUniform("opacity", _opacity);
-
-} // update
+}
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
-    if (!this->_enabled) return;
-
+    if (!_enabled) {
+        return;
+    }
     _shaderProgram->activate();
 
     const glm::dmat4 modelTransform =
@@ -335,9 +317,10 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
 
+#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#ifdef __APPLE__
-    glLineWidth(1);
+#else
+    glLineWidth(1.f);
 #endif
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
@@ -349,6 +332,5 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
     glBindVertexArray(0);
 
     _shaderProgram->deactivate();
-
-} // render
-} // namespace
+}
+} // namespace openspace

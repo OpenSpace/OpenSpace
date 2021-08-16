@@ -1,8 +1,8 @@
 local TexturesPath = asset.syncedResource({
-    Name = "Bastille Day Magnetogram",
-    Type = "HttpSynchronization",
-    Identifier = "bastille_day_magnetogram",
-    Version = 3
+  Name = "Bastille Day Magnetogram",
+  Type = "HttpSynchronization",
+  Identifier = "bastille_day_magnetogram",
+  Version = 2
 })
 
 asset.export("TexturesPath", TexturesPath)
@@ -12,10 +12,10 @@ asset.export("TexturesPath", TexturesPath)
 -- ApJ, 
 -- 856:75.
 asset.meta = {
-    Name = "Predictive Science Inc. MAS Bastille Day Textures",
-    Version = "1.0",
-    Description = " Magnetograms of the sun ",
-    Author = "Jonathan Grangien, Matthias Berg",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
+  Name = "Predictive Science Inc. MAS Bastille Day Textures",
+  Version = "1.0",
+  Description = "Magnetograms of the sun",
+  Author = "Jonathan Grangien, Matthias Berg",
+  URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+  License = ""
 }
