@@ -216,8 +216,9 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // TODO: Improve how curve types are handled
-    const int curveType = _defaultPathType;
+    // @TODO (2021-08.16, emmbr): Improve how curve types are handled. 
+    // We want the user to be able to choose easily
+    const int pathType = _defaultPathType;
 
     // Ignore paths that are created during session recording, as the camera
     // position should have been recorded
@@ -228,7 +229,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
     try {
         _currentPath = std::make_unique<Path>(
-            createPathFromDictionary(dictionary, Path::Type(curveType))
+            createPathFromDictionary(dictionary, Path::Type(pathType))
         );
     }
     catch (const ghoul::RuntimeError& e) {

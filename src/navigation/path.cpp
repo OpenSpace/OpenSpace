@@ -50,11 +50,11 @@ namespace {
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
-        enum class Type {
+        enum class TargetType {
             Node,
             NavigationState
         };
-        Type type;
+        TargetType targetType;
 
         // The desired duration traversing the specified path segment should take
         std::optional<float> duration;
@@ -419,8 +419,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
     // TODO: also handle curve type here
 
     std::vector<Waypoint> waypoints;
-    switch (p.type) {
-        case Parameters::Type::NavigationState: {
+    switch (p.targetType) {
+        case Parameters::TargetType::NavigationState: {
             if (!p.navigationState.has_value()) {
                 throw ghoul::RuntimeError("A navigation state is required");
             }
@@ -431,7 +431,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
             waypoints = { Waypoint(navigationState) };
             break;
         }
-        case Parameters::Type::Node: {
+        case Parameters::TargetType::Node: {
             if (!p.target.has_value()) {
                 throw ghoul::RuntimeError("A target node is required");
             }
@@ -456,7 +456,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
             break;
         }
         default: {
-            LERROR(fmt::format("Uknown instruciton type: {}", p.type));
+            LERROR(fmt::format("Uknown camera path target type: {}", p.targetType));
             throw ghoul::MissingCaseException();
         }
     }

@@ -137,7 +137,7 @@ int goTo(lua_State* L) {
 
     using namespace std::string_literals;
     ghoul::Dictionary insDict;
-    insDict.setValue("Type", "Node"s);
+    insDict.setValue("TargetType", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
 
     if (nArguments > 1) {
@@ -172,7 +172,7 @@ int goToHeight(lua_State* L) {
 
     using namespace std::string_literals;
     ghoul::Dictionary insDict;
-    insDict.setValue("Type", "Node"s);
+    insDict.setValue("TargetType", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
 
