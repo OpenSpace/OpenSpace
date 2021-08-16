@@ -27,7 +27,8 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
+#include <openspace/scene/profile.h>
+#include <optional>
 
 class QLabel;
 class QLineEdit;
@@ -43,7 +44,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    CameraDialog(openspace::Profile& profile, QWidget* parent);
+    CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
 private slots:
     void approved();
@@ -57,7 +58,7 @@ private:
     void addErrorMsg(QString errorDescription);
     bool areRequiredFormsFilledAndValid();
 
-    openspace::Profile& _profile;
+    std::optional<openspace::Profile::CameraType>* _camera = nullptr;
     QTabWidget* _tabWidget = nullptr;
     struct {
         QLineEdit* anchor = nullptr;

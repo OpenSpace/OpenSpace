@@ -402,18 +402,18 @@ void ProfileEdit::duplicateProfile() {
 
 void ProfileEdit::openMeta() {
     _errorMsg->clear();
-    MetaDialog(_profile, this).exec();
+    MetaDialog(this, &_profile.meta).exec();
 }
 
 void ProfileEdit::openModules() {
     _errorMsg->clear();
-    ModulesDialog(_profile, this).exec();
+    ModulesDialog(this, &_profile.modules).exec();
     _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
 void ProfileEdit::openProperties() {
     _errorMsg->clear();
-    PropertiesDialog(_profile, this).exec();
+    PropertiesDialog(this, &_profile.properties).exec();
     _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
         QString::fromStdString(summarizeProperties(_profile.properties))
@@ -422,7 +422,7 @@ void ProfileEdit::openProperties() {
 
 void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
-    ActionDialog(_profile, this).exec();
+    ActionDialog(this, &_profile.actions, &_profile.keybindings).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
         summarizeKeybindings(_profile.keybindings, _profile.actions)
@@ -431,19 +431,19 @@ void ProfileEdit::openKeybindings() {
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog(_profile, _assetBasePath, _userAssetBasePath, this).exec();
+    AssetsDialog(this, &_profile, _assetBasePath, _userAssetBasePath).exec();
     _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
     _errorMsg->clear();
-    TimeDialog(_profile, this).exec();
+    TimeDialog(this, &_profile.time).exec();
 }
 
 void ProfileEdit::openDeltaTimes() {
     _errorMsg->clear();
-    DeltaTimesDialog(_profile, this).exec();
+    DeltaTimesDialog(this, &_profile.deltaTimes).exec();
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
     );
@@ -451,17 +451,17 @@ void ProfileEdit::openDeltaTimes() {
 
 void ProfileEdit::openAddedScripts() {
     _errorMsg->clear();
-    AdditionalScriptsDialog(_profile, this).exec();
+    AdditionalScriptsDialog(this, &_profile.additionalScripts).exec();
 }
 
 void ProfileEdit::openCamera() {
     _errorMsg->clear();
-    CameraDialog(_profile, this).exec();
+    CameraDialog(this, &_profile.camera).exec();
 }
 
 void ProfileEdit::openMarkNodes() {
     _errorMsg->clear();
-    MarkNodesDialog(_profile, this).exec();
+    MarkNodesDialog(this, &_profile.markNodes).exec();
     _interestingNodesLabel->setText(
         labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
     );

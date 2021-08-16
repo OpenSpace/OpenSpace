@@ -41,7 +41,9 @@ class QTextEdit;
 class ActionDialog : public QDialog {
 Q_OBJECT
 public:
-    ActionDialog(openspace::Profile& profile, QWidget* parent);
+    ActionDialog(QWidget* parent,
+        std::vector<openspace::Profile::Action>* actions,
+        std::vector<openspace::Profile::Keybinding>* keybindings);
 
 private:
     void createWidgets();
@@ -66,7 +68,11 @@ private:
     void clearKeybindingFields();
     void keybindingRejected();
 
-    openspace::Profile& _profile;
+    std::vector<openspace::Profile::Action>* _actions = nullptr;
+    std::vector<openspace::Profile::Action> _actionData;
+    std::vector<openspace::Profile::Keybinding>* _keybindings = nullptr;
+    std::vector<openspace::Profile::Keybinding> _keybindingsData;
+
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
@@ -78,13 +84,10 @@ private:
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
-
-        std::vector<openspace::Profile::Action> data;
-    } _actions;
+    } _actionWidgets;
 
     struct {
         QListWidget* list = nullptr;
-        //QComboBox* modifier = nullptr;
         QCheckBox* shiftModifier = nullptr;
         QCheckBox* ctrlModifier = nullptr;
         QCheckBox* altModifier = nullptr;
@@ -94,9 +97,7 @@ private:
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
-
-        std::vector<openspace::Profile::Keybinding> data;
-    } _keybindings;
+    } _keybindingWidgets;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
