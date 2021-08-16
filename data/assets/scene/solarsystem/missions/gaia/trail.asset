@@ -11,7 +11,7 @@ local trail = asset.syncedResource({
 
 local GaiaTrail = {
   Identifier = "GaiaTrail",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthTransforms.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -36,7 +36,7 @@ local GaiaTrail = {
 
 local GaiaTrailEclip = {
   Identifier = "GaiaTrail_Eclip",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = sunTransforms.SunCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Enabled = false,

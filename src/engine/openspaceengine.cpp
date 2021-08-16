@@ -74,6 +74,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -154,7 +155,7 @@ void OpenSpaceEngine::registerPathTokens() {
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
         std::string fullKey = "${" + path.first + "}";
-        LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
+        LDEBUG(fmt::format("Registering path '{}': '{}'", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
         if (overrideBase) {
@@ -559,6 +560,15 @@ void OpenSpaceEngine::initializeGL() {
                     break;
                 default:
                     throw ghoul::MissingCaseException();
+            }
+
+            if (global::configuration->openGLDebugContext.printStacktrace) {
+                std::string stackString = "Stacktrace\n";
+                std::vector<std::string> stack = ghoul::stackTrace();
+                for (size_t i = 0; i < stack.size(); i++) {
+                    stackString += fmt::format("{}: {}\n", i, stack[i]);
+                }
+                LDEBUGC(category, stackString);
             }
         };
         ghoul::opengl::debug::setDebugCallback(callback);
@@ -1092,7 +1102,7 @@ void OpenSpaceEngine::preSynchronization() {
     global::memoryManager->TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
-        LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
+        LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
         global::profile->setIgnoreUpdates(true);
         loadSingleAsset(_scheduledAssetPathToLoad);
         global::profile->setIgnoreUpdates(false);
@@ -1270,7 +1280,6 @@ void OpenSpaceEngine::drawOverlays() {
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D")
-
         func();
     }
 

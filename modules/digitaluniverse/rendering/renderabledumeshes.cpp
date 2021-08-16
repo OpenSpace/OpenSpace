@@ -484,7 +484,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -502,7 +502,9 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+        LERROR(fmt::format(
+            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
+        ));
         return false;
     }
 
@@ -513,7 +515,6 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (file.eof()) {
@@ -532,16 +533,9 @@ bool RenderableDUMeshes::readSpeckFile() {
 
         std::size_t found = line.find("mesh");
         if (found == std::string::npos) {
-        //if (line.substr(0, 4) != "mesh") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            //file.seekg(position);
-            //break;
             continue;
         }
         else {
-
-        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;

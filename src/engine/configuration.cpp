@@ -69,6 +69,22 @@ namespace {
         // font
         std::optional<std::map<std::string, std::string>> fonts;
 
+        struct FontSizes {
+            // The font size (in pt) used for printing optional information about the
+            // currently rendered frame
+            float frameInfo;
+            // The font size (in pt) used for rendering the shutdown text
+            float shutdown;
+            // The font size (in pt) used for rendering the screen log
+            float log;
+            // The font size (in pt) used for printing the camera friction state
+            float cameraInfo;
+            // The font size (in pt) used for printing the version information
+            float versionInfo;
+        };
+        // Information about the hardcoded fontsizes used by the rendering engine itself
+        FontSizes fontSize;
+
         struct Logging {
             // List from logmanager.cpp::levelFromString
             enum class Level {
@@ -145,15 +161,6 @@ namespace {
         // resolution ('framebuffer'). This value defaults to 'window'
         std::optional<Scaling> onScreenTextScaling;
 
-        // List from RenderEngine::setRendererFromString
-        enum class RenderingMethod {
-            Framebuffer,
-            ABuffer
-        };
-        // The renderer that is use after startup. The renderer 'ABuffer' requires support
-        // for at least OpenGL 4.3
-        std::optional<RenderingMethod> renderingMethod;
-
         // Toggles whether the master in a multi-application setup should be rendering or
         // just managing the state of the network. This is desired in cases where the
         // master computer does not have the resources to render a scene
@@ -162,16 +169,16 @@ namespace {
         // Applies a global view rotation. Use this to rotate the position of the focus
         // node away from the default location on the screen. This setting persists even
         // when a new focus node is selected. Defined using roll, pitch, yaw in radians
-        std::optional<glm::dvec3> globalRotation;
+        std::optional<glm::vec3> globalRotation;
 
         // Applies a view rotation for only the master node, defined using roll, pitch yaw
         // in radians. This can be used to compensate the master view direction for tilted
         // display systems in clustered immersive environments
-        std::optional<glm::dvec3> masterRotation;
+        std::optional<glm::vec3> masterRotation;
 
         // Applies a global rotation for all screenspace renderables. Defined using roll,
         // pitch, yaw in radians
-        std::optional<glm::dvec3> screenSpaceRotation;
+        std::optional<glm::vec3> screenSpaceRotation;
 
         // If this value is set to 'true' the ingame console is disabled, locking the
         // system down against random access
@@ -215,6 +222,11 @@ namespace {
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context
             bool activate;
+
+            // If this is set to 'true', everytime an OpenGL error is logged, the full
+            // stacktrace leading to the error is printed as well, making debugging under
+            // production situations much easier
+            std::optional<bool> printStacktrace;
 
             // Determines whether the OpenGL debug callbacks are performed synchronously.
             // If set to 'true' the callbacks are in the same thread as the context and in
@@ -368,6 +380,11 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
+    c.fontSize.frameInfo = p.fontSize.frameInfo;
+    c.fontSize.shutdown = p.fontSize.shutdown;
+    c.fontSize.log = p.fontSize.log;
+    c.fontSize.cameraInfo = p.fontSize.cameraInfo;
+    c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
@@ -394,18 +411,6 @@ void parseLuaState(Configuration& configuration) {
     c.globalRotation = p.globalRotation.value_or(c.globalRotation);
     c.masterRotation = p.masterRotation.value_or(c.masterRotation);
     c.screenSpaceRotation = p.screenSpaceRotation.value_or(c.screenSpaceRotation);
-    if (p.renderingMethod.has_value()) {
-        switch (*p.renderingMethod) {
-            case Parameters::RenderingMethod::Framebuffer:
-                c.renderingMethod = "Framebuffer";
-                break;
-            case Parameters::RenderingMethod::ABuffer:
-                c.renderingMethod = "ABuffer";
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
     c.isConsoleDisabled = p.disableInGameConsole.value_or(c.isConsoleDisabled);
     if (p.logging.has_value()) {
         if (p.logging->logLevel.has_value()) {
@@ -478,6 +483,9 @@ void parseLuaState(Configuration& configuration) {
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
         c.openGLDebugContext.isActive = l.activate;
+        c.openGLDebugContext.printStacktrace = l.printStacktrace.value_or(
+            c.openGLDebugContext.printStacktrace
+        );
         c.openGLDebugContext.isSynchronous = l.synchronous.value_or(
             c.openGLDebugContext.isSynchronous
         );

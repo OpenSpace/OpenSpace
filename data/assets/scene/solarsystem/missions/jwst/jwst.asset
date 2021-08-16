@@ -23,7 +23,7 @@ local model = asset.syncedResource({
   Name = "JWST Model",
   Type = "HttpSynchronization",
   Identifier = "jwst_model",
-  Version = 1
+  Version = 2
 })
 
 local band = asset.syncedResource({
@@ -111,12 +111,11 @@ local JWSTModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
+    GeometryFile = model .. "/JWST.osmodel",
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
-    --TODO: Update theese when the new animation is finished
-    AnimationStartTime = "2018 10 01 15:00:00",
+    AnimationStartTime = "2018 10 01 14:05:52",
     AnimationMode = "Once",
     LightSources = {
       {
@@ -130,7 +129,7 @@ local JWSTModel = {
     DisableFaceCulling = true
   },
   GUI = {
-    Name = "James Webb Space Telescope",
+    Name = "James Webb Space Telescope Model",
     Path = "/Solar System/Missions/JWST",
   }
 }
@@ -226,7 +225,7 @@ local JWSTLaunchModel = {
   Parent = JWSTLaunchPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 13:18:00",
+    Start = "2018 OCT 01 14:05:52",
     End = "2019 OCT 01"
   },
   Transform = {
@@ -241,12 +240,11 @@ local JWSTLaunchModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWSTFBX.osmodel",
+    GeometryFile = model .. "/JWST.osmodel",
     ModelScale = "Foot",
     InvertModelScale = true,
     EnableAnimation = true,
-    --TODO: Update theese when the new animation is finished
-    AnimationStartTime = "2018 10 01 15:00:00",
+    AnimationStartTime = "2018 10 01 14:05:52",
     AnimationMode = "Once",
     LightSources = {
       {

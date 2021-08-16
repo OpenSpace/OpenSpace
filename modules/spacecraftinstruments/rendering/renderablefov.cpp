@@ -66,6 +66,13 @@ namespace {
         "making it more visible."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
+        "AlwaysDrawFov",
+        "Always Draw FOV",
+        "If this value is enabled, the field of view will always be drawn, regardless of "
+        "whether image information has been loaded or not"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
         "Colors.DefaultStart",
         "Start of default color",
@@ -160,6 +167,10 @@ namespace {
         // A table describing the instrument whose field of view should be rendered
         Instrument instrument;
 
+        // If this value is set to 'true', the field of view specified here will always be
+        // rendered, regardless of whether image information is currently available or not
+        std::optional<bool> alwaysDrawFov;
+
         // A list of potential targets (specified as SPICE names) that the field of view
         // should be tested against
         std::vector<std::string> potentialTargets;
@@ -192,6 +203,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
+    , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
         { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
         { DefaultEndColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
@@ -239,6 +251,9 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     _standOffDistance = p.standOffDistance.value_or(_standOffDistance);
     addProperty(_standOffDistance);
+
+    _alwaysDrawFov = p.alwaysDrawFov.value_or(_alwaysDrawFov);
+    addProperty(_alwaysDrawFov);
     
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
 
@@ -769,7 +784,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableFov::update(const UpdateData& data) {
-    _drawFOV = false;
+    _drawFOV = _alwaysDrawFov;
     if (ImageSequencer::ref().isReady()) {
         _drawFOV = ImageSequencer::ref().isInstrumentActive(
             data.time.j2000Seconds(),

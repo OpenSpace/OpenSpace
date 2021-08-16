@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <string>
 
 namespace openspace::volume {
@@ -37,11 +38,11 @@ class RawVolumeReader {
 public:
     using VoxelType = Type;
 
-    RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
+    RawVolumeReader(const std::filesystem::path& path, const glm::uvec3& dimensions);
 
     glm::uvec3 dimensions() const;
-    std::string path() const;
-    void setPath(const std::string& path);
+    std::filesystem::path path() const;
+    void setPath(std::filesystem::path path);
     void setDimensions(const glm::uvec3& dimensions);
     //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
     //VoxelType get(const size_t index) const; // TODO: Implement this
@@ -51,7 +52,7 @@ private:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;
     glm::uvec3 indexToCoords(size_t linear) const;
     glm::uvec3 _dimensions;
-    std::string _path;
+    std::filesystem::path _path;
 };
 
 } // namespace openspace::volume

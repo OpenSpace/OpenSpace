@@ -219,6 +219,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
 
+        ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),

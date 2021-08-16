@@ -22,62 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RENDERER___H__
-#define __OPENSPACE_CORE___RENDERER___H__
+#ifndef __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
+#define __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 
-#include <ghoul/glm.h>
+#include <modules/statemachine/include/state.h>
+#include <modules/statemachine/include/transition.h>
 #include <vector>
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
-class RenderableVolume;
-class Camera;
-class Scene;
+namespace documentation { struct Documentation; }
 
-class Renderer {
+class StateMachine {
 public:
-    virtual ~Renderer() = default;
+    explicit StateMachine(const ghoul::Dictionary& dictionary);
+    ~StateMachine() = default;
 
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
+    void setInitialState(const std::string initialState);
+    const State* currentState() const;
+    void transitionTo(const std::string& newState);
+    bool canTransitionTo(const std::string& state) const;
 
-    virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setGamma(float gamma) = 0;
-    virtual void setHue(float hue) = 0;
-    virtual void setValue(float value) = 0;
-    virtual void setSaturation(float sat) = 0;
-    virtual void enableFXAA(bool enable) = 0;
-    virtual void setDisableHDR(bool disable) = 0;
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-
-    virtual void update() = 0;
-
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
-    /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
+    /*
+     * Return the identifiers of all possible transitions from the current state
      */
-    virtual void updateRendererData() = 0;
+    std::vector<std::string> possibleTransitions() const;
+
+    static documentation::Documentation Documentation();
+
+private:
+    int findTransitionTo(const std::string& state) const;
+    int findState(const std::string& state) const;
+
+    int _currentStateIndex = -1;
+    std::vector<State> _states;
+    std::vector<Transition> _transitions;
 };
 
-} // openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___RENDERER___H__
+#endif __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__

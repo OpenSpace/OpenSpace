@@ -256,7 +256,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
-        200000,
+        21500,
         0.25,
         500000
     )
@@ -391,7 +391,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
-    _stereoscopicDepthOfFocusSurface.setExponent(10.f);
+    _stereoscopicDepthOfFocusSurface.setExponent(3.f);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
     addProperty(_retargetInterpolationTime);
@@ -1423,7 +1423,7 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
 {
     const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1));
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
     const SurfacePositionHandle posHandle =
         node.calculateSurfacePositionHandle(cameraPositionModelSpace);
 

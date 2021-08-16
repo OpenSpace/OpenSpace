@@ -27,103 +27,100 @@
 
 namespace openspace::volume {
 
-    template <typename VoxelType>
-    RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
-        const glm::uvec3& dimensions)
-        : _dimensions(dimensions)
-        , _path(path)
-    {}
+template <typename VoxelType>
+RawVolumeReader<VoxelType>::RawVolumeReader(const std::filesystem::path& path,
+                                            const glm::uvec3& dimensions)
+    : _dimensions(dimensions)
+    , _path(std::move(path))
+{}
 
-    template <typename VoxelType>
-    glm::uvec3 RawVolumeReader<VoxelType>::dimensions() const {
-        return _dimensions;
+template <typename VoxelType>
+glm::uvec3 RawVolumeReader<VoxelType>::dimensions() const {
+    return _dimensions;
+}
+
+template <typename VoxelType>
+void RawVolumeReader<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
+    _dimensions = dimensions;
+}
+
+template <typename VoxelType>
+std::filesystem::path RawVolumeReader<VoxelType>::path() const {
+    return _path;
+}
+
+template <typename VoxelType>
+void RawVolumeReader<VoxelType>::setPath(std::filesystem::path path) {
+    _path = std::move(path);
+}
+
+/*
+TODO: Implement these methods for random access in raw volume file
+template <typename VoxelType>
+VoxelType RawVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
+    return get(coordsToIndex(coordinates, dimensions()));
+}
+
+template <typename VoxelType>
+VoxelType RawVolumeReader<VoxelType>::get(size_t index) const {
+    // TODO: read from specific position.
+    return VoxelType();
+}*/
+
+template <typename VoxelType>
+size_t RawVolumeReader<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
+    return coordsToIndex(cartesian, dimensions());
+}
+
+template <typename VoxelType>
+glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
+    return indexToCoords(linear, dimensions());
+}
+
+template <typename VoxelType>
+std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
+    glm::uvec3 dims = dimensions();
+    std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
+        dims
+    );
+    std::unique_ptr<RawVolume<VoxelType>> newVolume = std::make_unique<RawVolume<VoxelType>>(
+        dims
+    );
+
+    std::ifstream file(_path, std::ios::binary);
+    char* buffer = reinterpret_cast<char*>(volume->data());
+
+    if (file.fail()) {
+        throw ghoul::FileNotFoundError("Volume file not found");
     }
 
-    template <typename VoxelType>
-    void RawVolumeReader<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
-        _dimensions = dimensions;
+    size_t length = static_cast<size_t>(dims.x) *
+                    static_cast<size_t>(dims.y) *
+                    static_cast<size_t>(dims.z) *
+                    sizeof(VoxelType);
+
+    file.read(buffer, length);
+
+    if (file.fail()) {
+        throw ghoul::RuntimeError("Error reading volume file");
     }
 
-    template <typename VoxelType>
-    std::string RawVolumeReader<VoxelType>::path() const {
-        return _path;
-    }
+    if (invertZ) {
+        for (int i = 0; i < volume->nCells(); ++i) {
+            const glm::uvec3& coords = volume->indexToCoords(i);
+            glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 
-    template <typename VoxelType>
-    void RawVolumeReader<VoxelType>::setPath(const std::string& path) {
-        _path = path;
-    }
+            size_t newIndex = volume->coordsToIndex(newcoords);
+            size_t oldIndex = volume->coordsToIndex(coords);
 
-
-    /*
-    TODO: Implement these methods for random access in raw volume file
-    template <typename VoxelType>
-    VoxelType RawVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
-        return get(coordsToIndex(coordinates, dimensions()));
-    }
-    template <typename VoxelType>
-    VoxelType RawVolumeReader<VoxelType>::get(size_t index) const {
-        // TODO: read from specific position.
-        return VoxelType();
-    }*/
-
-    template <typename VoxelType>
-    size_t RawVolumeReader<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-        return coordsToIndex(cartesian, dimensions());
-    }
-
-    template <typename VoxelType>
-    glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
-        return indexToCoords(linear, dimensions());
-    }
-
-
-    template <typename VoxelType>
-    std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
-        glm::uvec3 dims = dimensions();
-        std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
-            dims
-            );
-        std::unique_ptr<RawVolume<VoxelType>> newVolume = std::make_unique<RawVolume<VoxelType>>(
-            dims
-            );
-
-        std::ifstream file(_path, std::ios::binary);
-        char* buffer = reinterpret_cast<char*>(volume->data());
-
-        if (file.fail()) {
-            throw ghoul::FileNotFoundError("Volume file not found");
+            newVolume->set(newcoords, volume->get(coords));
         }
-
-        size_t length = static_cast<size_t>(dims.x) *
-            static_cast<size_t>(dims.y) *
-            static_cast<size_t>(dims.z) *
-            sizeof(VoxelType);
-
-        file.read(buffer, length);
-
-        if (file.fail()) {
-            throw ghoul::RuntimeError("Error reading volume file");
-        }
-
-        if (invertZ) {
-            for (int i = 0; i < volume->nCells(); ++i) {
-                const glm::uvec3& coords = volume->indexToCoords(i);
-                glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
-
-                size_t newIndex = volume->coordsToIndex(newcoords);
-                size_t oldIndex = volume->coordsToIndex(coords);
-
-                newVolume->set(newcoords, volume->get(coords));
-            }
-        }
-        else {
-            return volume;
-        }
-
-
-
-        return newVolume;
     }
+    else {
+        return volume;
+    }
+
+    return newVolume;
+}
 
 } // namespace openspace::volume

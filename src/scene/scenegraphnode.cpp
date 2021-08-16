@@ -229,7 +229,7 @@ namespace {
             // A user-facing description about this scene graph node
             std::optional<std::string> description;
 
-            // If this value is specified, GUI applications are incouraged to ignore this 
+            // If this value is specified, GUI applications are incouraged to ignore this
             // scenegraph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
@@ -447,7 +447,9 @@ SceneGraphNode::SceneGraphNode()
             _overrideBoundingSphere = std::nullopt;
         }
     });
-    _boundingSphere.setExponent(10.f);
+    // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
+    // negative values
+    //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
@@ -456,8 +458,10 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideInteractionSphere = std::nullopt;
         }
-        });
-    _interactionSphere.setExponent(10.f);
+    });
+    // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
+    // negative values
+    //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
     addProperty(_showDebugSphere);
 }

@@ -46,6 +46,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  spacemodule_lua.inl
   speckloader.cpp
   rendering/planetgeometry.cpp
   rendering/renderableconstellationbounds.cpp

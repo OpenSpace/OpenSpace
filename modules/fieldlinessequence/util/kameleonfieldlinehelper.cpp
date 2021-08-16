@@ -316,8 +316,10 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 (str == TAsPOverRho || str == "T" || str == "t"))
             )
         {
-            LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
-                   "calculate it using the ideal gas law: T = pressure/density");
+            LDEBUG(
+                "BATSRUS doesn't contain variable T for temperature. Trying to calculate "
+                "it using the ideal gas law: T = pressure/density"
+            );
             constexpr const char* p = "p";
             constexpr const char* r = "rho";
             success = kameleon->doesVariableExist(p) && kameleon->loadVariable(p) &&
@@ -325,9 +327,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format(
-                "Failed to load extra variable: '{}'. Ignoring", str
-            ));
+            LWARNING(fmt::format("Failed to load extra variable: '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }
