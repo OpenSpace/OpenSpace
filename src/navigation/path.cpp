@@ -87,19 +87,19 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, CurveType type,
+Path::Path(Waypoint start, Waypoint end, Type type,
            std::optional<double> duration)
-    : _start(start), _end(end), _curveType(type)
+    : _start(start), _end(end), _type(type)
 {
-    switch (_curveType) {
-        case CurveType::AvoidCollision:
-        case CurveType::AvoidCollisionWithLookAt:
+    switch (_type) {
+        case Type::AvoidCollision:
+        case Type::AvoidCollisionWithLookAt:
             _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
             break;
-        case CurveType::Linear:
+        case Type::Linear:
             _curve = std::make_unique<LinearCurve>(_start, _end);
             break;
-        case CurveType::ZoomOutOverview:
+        case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
         default:
@@ -166,12 +166,12 @@ CameraPose Path::interpolatedPose(double distance) const {
 }
 
 glm::dquat Path::interpolateRotation(double t) const {
-    switch (_curveType) {
-        case CurveType::AvoidCollision:
-        case CurveType::Linear:
+    switch (_type) {
+        case Type::AvoidCollision:
+        case Type::Linear:
             return easedSlerpRotation(t);
-        case CurveType::ZoomOutOverview:
-        case CurveType::AvoidCollisionWithLookAt:
+        case Type::ZoomOutOverview:
+        case Type::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
         default:
             throw ghoul::MissingCaseException();
@@ -406,9 +406,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
-                              Path::CurveType curveType)
-{
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     const std::optional<float> duration = p.duration;
@@ -466,7 +464,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
     const Waypoint waypointToAdd = waypoints[0];
 
-    return Path(startPoint, waypointToAdd, curveType, duration);
+    return Path(startPoint, waypointToAdd, type, duration);
 }
 
 } // namespace openspace::interaction

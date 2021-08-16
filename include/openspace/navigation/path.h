@@ -39,7 +39,7 @@ namespace openspace::interaction {
 
 class Path {
 public:
-    enum CurveType {
+    enum Type {
         AvoidCollision,
         Linear,
         ZoomOutOverview,
@@ -51,7 +51,7 @@ public:
                                  // doesn't introduce sudden large changes in rotation
     };
 
-    Path(Waypoint start, Waypoint end, CurveType type,
+    Path(Waypoint start, Waypoint end, Type type,
         std::optional<double> duration = std::nullopt);
 
     Waypoint startPoint() const;
@@ -129,7 +129,7 @@ private:
     Waypoint _start;
     Waypoint _end;
     double _duration; // seconds
-    CurveType _curveType;
+    Type _type;
 
     std::unique_ptr<PathCurve> _curve;
 
@@ -140,8 +140,11 @@ private:
     double _progressedTime = 0.0; // Time since playback started
 };
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary, 
-    Path::CurveType curveType);
+
+// Create a path of the given type based on an instruction given as a dictionary. 
+// See top of cpp file for documentation on keys and values for the dictionary. 
+// Returns the created path. 
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type);
 
 } // namespace openspace::interaction
 

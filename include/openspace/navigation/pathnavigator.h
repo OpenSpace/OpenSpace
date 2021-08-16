@@ -91,7 +91,7 @@ private:
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
 
-    properties::OptionProperty _defaultCurveOption;
+    properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
     properties::BoolProperty _applyIdleBehaviorOnFinish;
