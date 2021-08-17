@@ -22,12 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 
 #include <sstream>
 
 namespace openspace {
 
+// (2021-07-16, emmbr) Note that this hard coded vector for the view direction is also
+// used in a qauternion -> view direction helper function in ghoul/glm.h
 const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0.0, 0.0, -1.0);
 const glm::dvec3 Camera::UpDirectionCameraSpace = glm::dvec3(0.0, 1.0, 0.0);
 

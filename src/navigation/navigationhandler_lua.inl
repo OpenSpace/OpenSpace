@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <numeric>
 #include <openspace/interaction/scriptcamerastates.h>
+#include <openspace/navigation/navigationstate.h>
+#include <numeric>
 
 namespace openspace::luascriptfunctions {
 
@@ -53,7 +54,7 @@ int getNavigationState(lua_State* L) {
         "lua::getNavigationState"
     );
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     if (n == 1) {
         const std::string referenceFrameIdentifier = ghoul::lua::value<std::string>(L, 1);
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
@@ -124,7 +125,7 @@ int setNavigationState(lua_State* L) {
     ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
 
     openspace::documentation::TestResult r = openspace::documentation::testSpecification(
-        interaction::NavigationHandler::NavigationState::Documentation(),
+        interaction::NavigationState::Documentation(),
         navigationStateDictionary
     );
 
@@ -135,7 +136,9 @@ int setNavigationState(lua_State* L) {
         );
     }
 
-    global::navigationHandler->setNavigationStateNextFrame(navigationStateDictionary);
+    global::navigationHandler->setNavigationStateNextFrame(
+        interaction::NavigationState(navigationStateDictionary)
+    );
 
     // @CLEANUP:  When luaDictionaryFromState doesn't leak space anymore, remove the next
     //            line ---abock(2018-02-15)

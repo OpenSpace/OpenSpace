@@ -28,16 +28,18 @@
 
 #include <openspace/engine/configuration.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <QComboBox>
 #include <QFile>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardItemModel>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random>
-#include <QStandardItemModel>
 
 using namespace openspace;
 

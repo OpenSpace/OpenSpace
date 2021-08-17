@@ -24,7 +24,8 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -88,8 +89,7 @@ int saveSettingsToProfile(lua_State* L) {
 
     const properties::PropertyOwner& root = *global::rootPropertyOwner;
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
-    interaction::NavigationHandler::NavigationState navState =
-        global::navigationHandler->navigationState();
+    interaction::NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
     global::configuration->profile = saveFilePath;
 

@@ -27,15 +27,15 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
@@ -280,6 +280,111 @@ int goToGeo(lua_State* L) {
             altitude
         );
     }
+
+    lua_settop(L, 0);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int flyToGeo(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 3, 6 }, "lua::flyToGeo");
+
+    // Check if the user provided a Scene graph node identifier as the first argument.
+    // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber
+    const bool providedGlobeIdentifier = !lua_isnumber(L, 1);
+    const int parameterOffset = providedGlobeIdentifier ? 1 : 0;
+
+    const SceneGraphNode* n;
+    if (providedGlobeIdentifier) {
+        const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+        n = sceneGraphNode(globeIdentifier);
+        if (!n) {
+            return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+        }
+    }
+    else {
+        n = global::navigationHandler->orbitalNavigator().anchorNode();
+        if (!n) {
+            return ghoul::lua::luaError(L, "No anchor node is set.");
+        }
+    }
+
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        if (providedGlobeIdentifier) {
+            return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+        }
+        else {
+            return ghoul::lua::luaError(L,
+                "Current anchor node is not a RenderableGlobe. "
+                "Either change the anchor to a globe, or specify a globe identifier "
+                "as the first argument"
+            );
+        }
+    }
+
+    const double latitude = ghoul::lua::value<double>(L, parameterOffset + 1);
+    const double longitude = ghoul::lua::value<double>(L, parameterOffset + 2);
+    const double altitude = ghoul::lua::value<double>(L, parameterOffset + 3);
+
+    // Compute the relative position based on the input values
+    auto module = global::moduleEngine->module<GlobeBrowsingModule>();
+    const glm::dvec3 positionModelCoords = module->cartesianCoordinatesFromGeo(
+        *globe,
+        latitude,
+        longitude,
+        altitude
+    );
+
+    using namespace std::string_literals;
+    ghoul::Dictionary instruction;
+    instruction.setValue("Type", "Node"s);
+    instruction.setValue("Target", n->identifier());
+    instruction.setValue("Position", positionModelCoords);
+
+    // Handle the two optional arguments: duration and use target's up direction argument
+    // The user can either provide both, or one of them
+    if (nArguments >= parameterOffset + 4) {
+        const int firstLocation = parameterOffset + 4;
+        const bool firstIsNumber = (lua_isnumber(L, firstLocation) != 0);
+        const bool firstIsBool = (lua_isboolean(L, firstLocation) != 0);
+
+        if (!(firstIsNumber || firstIsBool)) {
+            const char* msg = lua_pushfstring(
+                L,
+                "%s or %s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                lua_typename(L, LUA_TBOOLEAN),
+                luaL_typename(L, -1)
+            );
+            return ghoul::lua::luaError(
+                L, fmt::format("bad argument #{} ({})", firstLocation, msg)
+            );
+        }
+
+        int location = firstLocation;
+        if (firstIsBool) {
+            const bool useUpFromTarget = (lua_toboolean(L, location) == 1);
+            instruction.setValue("UseTargetUpDirection", useUpFromTarget);
+
+            if (nArguments > location) {
+                location++;
+            }
+        }
+
+        if (firstIsNumber || nArguments > firstLocation) {
+            double duration = ghoul::lua::value<double>(L, location);
+            constexpr const double Epsilon = 1e-5;
+            if (duration <= Epsilon) {
+                return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            }
+            instruction.setValue("Duration", duration);
+        }
+    }
+
+    global::navigationHandler->pathNavigator().createPath(instruction);
+    global::navigationHandler->pathNavigator().startPath();
 
     lua_settop(L, 0);
 
