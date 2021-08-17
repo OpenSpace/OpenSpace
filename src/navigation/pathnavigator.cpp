@@ -47,7 +47,7 @@ namespace {
         "Default Path Type",
         "The defualt path type chosen when generating a path. See wiki for alternatives."
         " The shape of the generated path will be different depending on the path type."
-        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a 
+        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a
         // single path instance, only for any created paths
     };
 
@@ -216,7 +216,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // @TODO (2021-08.16, emmbr): Improve how curve types are handled. 
+    // @TODO (2021-08.16, emmbr): Improve how curve types are handled.
     // We want the user to be able to choose easily
     const int pathType = _defaultPathType;
 
@@ -231,6 +231,15 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         _currentPath = std::make_unique<Path>(
             createPathFromDictionary(dictionary, Path::Type(pathType))
         );
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR("Could not create camera path");
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, ghoul::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        }
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Could not create path. Reason: ", e.message));
