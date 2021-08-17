@@ -412,8 +412,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
     const std::optional<float> duration = p.duration;
 
     bool hasStart = p.startState.has_value();
-    const Waypoint startPoint = hasStart ? 
-        Waypoint(NavigationState(p.startState.value())) : 
+    const Waypoint startPoint = hasStart ?
+        Waypoint(NavigationState(p.startState.value())) :
         waypointFromCamera();
 
     // TODO: also handle curve type here
