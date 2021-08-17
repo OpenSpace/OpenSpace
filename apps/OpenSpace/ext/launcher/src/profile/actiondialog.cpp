@@ -85,8 +85,8 @@ void ActionDialog::createWidgets() {
     //  | [+] [-]              |               | [Save] [Cancel]|    Row 7
     //  *----------------------*---------------*----------------*
     //  |=======================================================|    Row 8
-    //  *----------------------*---------------*----------------|
     //  | Keybindings                                           |    Row 9
+    //  *----------------------*---------------*----------------|
     //  |                      | Modifier      | []S []C []A    |    Row 10
     //  |                      | Key           | DDDDDDDDDDDD>  |    Row 11
     //  |                      | Add actions   | DDDDDDDDDDDD>  |    Row 12
@@ -130,12 +130,16 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     layout->addWidget(title, 0, 0, 1, 3);
 
     _actionWidgets.list = new QListWidget;
+    _actionWidgets.list->setToolTip(
+        "The list of all actions currently defined in the profile. Select one to edit it "
+        "or use the + button below to create a new action"
+    );
+    _actionWidgets.list->setAlternatingRowColors(true);
+    _actionWidgets.list->setResizeMode(QListView::Adjust);
     connect(
         _actionWidgets.list, &QListWidget::itemSelectionChanged,
         this, &ActionDialog::actionSelected
     );
-    _actionWidgets.list->setAlternatingRowColors(true);
-    _actionWidgets.list->setResizeMode(QListView::Adjust);
 
     for (size_t i = 0; i < _actionData.size(); ++i) {
         const Profile::Action& action = _actionData[i];
@@ -147,31 +151,66 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
 
     layout->addWidget(new QLabel("Identifier"), 1, 1);
     _actionWidgets.identifier = new QLineEdit;
+    _actionWidgets.identifier->setToolTip(
+        "The unique identifier for this action. The identifier name cannot be reused "
+        "between different actions and will lead to a failure to load the profile if it "
+        "happens. There are no restrictions on the name of the identifier, but a dot "
+        "separated hierarchical structure is suggested to prevent name clashes"
+    );
     _actionWidgets.identifier->setEnabled(false);
     layout->addWidget(_actionWidgets.identifier, 1, 2);
 
     layout->addWidget(new QLabel("Name"), 2, 1);
     _actionWidgets.name = new QLineEdit;
+    _actionWidgets.name->setToolTip(
+        "The user-facing name of this action. As it is displayed in user interfaces, the "
+        "name should be as concise and informative as possible"
+    );
     _actionWidgets.name->setEnabled(false);
     layout->addWidget(_actionWidgets.name, 2, 2);
 
     layout->addWidget(new QLabel("GUI Path"), 3, 1);
     _actionWidgets.guiPath = new QLineEdit;
+    _actionWidgets.guiPath->setToolTip(
+        "The path under which this action will be shown in user interfaces. The path "
+        "must use the '/' character as separators between folders and start with a '/' "
+        "character that denotes the root folder"
+    );
     _actionWidgets.guiPath->setEnabled(false);
     layout->addWidget(_actionWidgets.guiPath, 3, 2);
 
     layout->addWidget(new QLabel("Documentation"), 4, 1);
     _actionWidgets.documentation = new QLineEdit;
+    _actionWidgets.documentation->setToolTip(
+        "A longer user-facing documentation that describes the action in more detail. "
+        "The user can request the documentation on demand, so it might be longer and "
+        "more descriptive than the name itself and might also explain some optional "
+        "parameters that that action can consume"
+    );
     _actionWidgets.documentation->setEnabled(false);
     layout->addWidget(_actionWidgets.documentation, 4, 2);
 
     layout->addWidget(new QLabel("Is Local"), 5, 1);
     _actionWidgets.isLocal = new QCheckBox;
+    _actionWidgets.isLocal->setToolTip(
+        "If this value is checked, the action will only ever affect the OpenSpace "
+        "instance that is executing it. If running a 'regular' OpenSpace instance, this "
+        "setting will not make any difference, but it is necessary in a clustered "
+        "environment or when using a parallel connection, in which case it determines "
+        "whether a command should be executed only locally or send to all remote "
+        "instances as well"
+    );
     _actionWidgets.isLocal->setEnabled(false);
     layout->addWidget(_actionWidgets.isLocal, 5, 2);
 
     layout->addWidget(new QLabel("Script"), 6, 1);
     _actionWidgets.script = new QTextEdit;
+    _actionWidgets.script->setToolTip(
+        "This is the Lua script that gets executed when this action is triggered. "
+        "Actions can make use of optional arguments which are already defined as the "
+        "`args` variable when this script executes. If no arguments are passed, this "
+        "variable just contains the empty table"
+    );
     _actionWidgets.script->setEnabled(false);
     layout->addWidget(_actionWidgets.script, 6, 2);
 
@@ -181,6 +220,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     QBoxLayout* containerLayout = new QHBoxLayout(container);
     _actionWidgets.addButton = new QPushButton("+");
     _actionWidgets.addButton->setObjectName("add-button");
+    _actionWidgets.addButton->setToolTip("Adds a new action to the list of all actions");
     QObject::connect(
         _actionWidgets.addButton, &QPushButton::clicked,
         this, &ActionDialog::actionAdd
@@ -189,6 +229,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
 
     _actionWidgets.removeButton = new QPushButton("-");
     _actionWidgets.removeButton->setObjectName("remove-button");
+    _actionWidgets.removeButton->setToolTip("Removes the currently selected action");
     _actionWidgets.removeButton->setEnabled(false);
     QObject::connect(
         _actionWidgets.removeButton, &QPushButton::clicked,
@@ -200,6 +241,9 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
 
     // Save / Cancel buttons
     _actionWidgets.saveButtons = new QDialogButtonBox;
+    _actionWidgets.saveButtons->setToolTip(
+        "Saves or discards all changes to the currently selected action"
+    );
     _actionWidgets.saveButtons->setEnabled(false);
     _actionWidgets.saveButtons->setStandardButtons(
         QDialogButtonBox::Save | QDialogButtonBox::Cancel
@@ -221,12 +265,15 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     layout->addWidget(title);
 
     _keybindingWidgets.list = new QListWidget;
+    _keybindingWidgets.list->setToolTip(
+        "The list of all keybindings currently assigned in this profile"
+    );
+    _keybindingWidgets.list->setAlternatingRowColors(true);
+    _keybindingWidgets.list->setResizeMode(QListView::Adjust);
     connect(
         _keybindingWidgets.list, &QListWidget::itemSelectionChanged,
         this, &ActionDialog::keybindingSelected
     );
-    _keybindingWidgets.list->setAlternatingRowColors(true);
-    _keybindingWidgets.list->setResizeMode(QListView::Adjust);
 
     for (size_t i = 0; i < _keybindingsData.size(); ++i) {
         const Profile::Keybinding& kv = _keybindingsData[i];
@@ -235,7 +282,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindingWidgets.list->addItem(item);
     }
 
-    layout->addWidget(_keybindingWidgets.list, 10, 0, 5, 1);
+    layout->addWidget(_keybindingWidgets.list, 10, 0, 4, 1);
 
     layout->addWidget(new QLabel("Modifier"), 10, 1);
     {
@@ -266,6 +313,12 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
 
     layout->addWidget(new QLabel("Action chooser"), 12, 1);
     _keybindingWidgets.action = new QComboBox;
+    _keybindingWidgets.action->setToolTip(
+        "You can select any of the actions defined above here to be associated with the "
+        "selected keybind. Selecting an action from this dropdown menu will "
+        "automatically enter it into the text field below and overwrite any value that "
+        "already is entered in there"
+    );
     for (const Profile::Action& action : _actionData) {
         _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
     }
@@ -279,6 +332,16 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
 
     layout->addWidget(new QLabel("Action"), 13, 1);
     _keybindingWidgets.actionText = new QLineEdit;
+    _keybindingWidgets.actionText->setToolTip(
+        "This is the action that will be triggered when the keybind is pressed. In the "
+        "majority of cases, you do not need to enter something here manually, but "
+        "instead select the action from the dropdown list above. However, if you know "
+        "that an action with a specific identifier will exist at runtime, for example if "
+        "it is defined in an asset included in this profile, you can enter the "
+        "identifier of that action manually here to associate a key with it. If the "
+        "identifer does not exist, an error will be logged when trying to bind the key "
+        "at startup."
+    );
     _keybindingWidgets.actionText->setEnabled(false);
     layout->addWidget(_keybindingWidgets.actionText, 13, 2);
 
@@ -288,6 +351,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     QBoxLayout* containerLayout = new QHBoxLayout(container);
     _keybindingWidgets.addButton = new QPushButton("+");
     _keybindingWidgets.addButton->setObjectName("add-button");
+    _keybindingWidgets.addButton->setToolTip(
+        "Adds a new keybinding to the list of all keybindings"
+    );
     QObject::connect(
         _keybindingWidgets.addButton, &QPushButton::clicked,
         this, &ActionDialog::keybindingAdd
@@ -296,6 +362,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
 
     _keybindingWidgets.removeButton = new QPushButton("-");
     _keybindingWidgets.removeButton->setObjectName("remove-button");
+    _keybindingWidgets.removeButton->setToolTip(
+        "Removes the currently selected keybinding"
+    );
     _keybindingWidgets.removeButton->setEnabled(false);
     QObject::connect(
         _keybindingWidgets.removeButton, &QPushButton::clicked,
@@ -306,6 +375,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
 
     // Save/Cancel
     _keybindingWidgets.saveButtons = new QDialogButtonBox;
+    _keybindingWidgets.saveButtons->setToolTip(
+        "Saves or discards all changes to the currently selected keybinding"
+    );
     _keybindingWidgets.saveButtons->setEnabled(false);
     _keybindingWidgets.saveButtons->setStandardButtons(
         QDialogButtonBox::Save | QDialogButtonBox::Cancel
