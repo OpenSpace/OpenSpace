@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/statemachine/include/statemachine.h>
+#include <memory>
 #include <optional>
 
 namespace openspace {
