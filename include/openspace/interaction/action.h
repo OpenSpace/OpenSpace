@@ -33,12 +33,35 @@ namespace openspace::interaction {
 struct Action {
     BooleanType(IsSynchronized);
 
+    /// Unique identifier that identifies this action. There is no special naming scheme
+    /// that we enforce, we are trying to stick to the same . separated structure that
+    /// hopefully provides some protection against accidentally reusing identifiers
     std::string identifier;
 
+    /// The Lua script that gets executed whenever this action is triggered. Optional
+    /// parameters can be passed to actions which are accessible through an `args`
+    /// variable that contains all of the arguments passed into the action. This means
+    /// that the provided script must not use this variable name itself or the script will
+    /// not successfully execute
     std::string command;
+
+    /// The human-readable name of this action. This name must not be unique, but it is
+    /// recommended that the combination of GuiPath + name should be unique to prevent
+    /// user confusion
     std::string name;
+
+    /// A user-facing description of what the action does when it gets triggered. If the
+    /// action uses optional arguments, they should be described in here, too
     std::string documentation;
+
+    /// This variable defines a subdivision of where this action is placed in a user
+    /// interface. The individual path components are separated by '/' with a leading '/'
+    /// for the root path
     std::string guiPath;
+
+    /// If this value is set to `Yes`, the execution of this action is synchronized to
+    /// other OpenSpace instances, for example other nodes in a cluster environment, or
+    /// to other OpenSpace instances using a parallel connection
     IsSynchronized synchronization = IsSynchronized::Yes;
 };
 

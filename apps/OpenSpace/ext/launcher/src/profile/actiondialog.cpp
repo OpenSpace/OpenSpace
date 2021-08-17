@@ -74,24 +74,25 @@ ActionDialog::ActionDialog(QWidget* parent,
 void ActionDialog::createWidgets() {
     //         Column 0            Column 1         Column 2
     //  *----------------------*---------------*----------------*
-    //  |                      | Identifier    | [oooooooooooo] |    Row 0
-    //  |                      | Name          | [oooooooooooo] |    Row 1
-    //  |                      | GUI Path      | [oooooooooooo] |    Row 2
-    //  |                      | Documentation | [oooooooooooo] |    Row 3
-    //  |                      | Is Local      | []             |    Row 4
-    //  |                      | Script        | [oooooooooooo] |    Row 5
+    //  | Actions                                               |    Row 0
+    //  |                      | Identifier    | [oooooooooooo] |    Row 1
+    //  |                      | Name          | [oooooooooooo] |    Row 2
+    //  |                      | GUI Path      | [oooooooooooo] |    Row 3
+    //  |                      | Documentation | [oooooooooooo] |    Row 4
+    //  |                      | Is Local      | []             |    Row 5
+    //  |                      | Script        | [oooooooooooo] |    Row 6
     //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | [Save] [Cancel]|    Row 6
+    //  | [+] [-]              |               | [Save] [Cancel]|    Row 7
     //  *----------------------*---------------*----------------*
-    //  |=======================================================|    Row 7
+    //  |=======================================================|    Row 8
     //  *----------------------*---------------*----------------|
-    //  |                      | Modifier      | []S []C []A    |    Row 8
-    //  |                      | Key           | DDDDDDDDDDDD>  |    Row 9
-    //  |                      | Add actions   | DDDDDDDDDDDD>  |    Row 10
-    //  |                      | Action        | [oooooooooooo] |    Row 11
-    //  |                      |               |                |    Row 12
+    //  | Keybindings                                           |    Row 9
+    //  |                      | Modifier      | []S []C []A    |    Row 10
+    //  |                      | Key           | DDDDDDDDDDDD>  |    Row 11
+    //  |                      | Add actions   | DDDDDDDDDDDD>  |    Row 12
+    //  |                      | Action        | [oooooooooooo] |    Row 13
     //  *----------------------*---------------*----------------*
-    //  | [+] [-]              |               | [Save] [Cancel]|    Row 13
+    //  | [+] [-]              |               | [Save] [Cancel]|    Row 14
     //  *----------------------*---------------*----------------*
     //  |=======================================================|    Row 14
     //  *----------------------*---------------*----------------*
@@ -103,12 +104,12 @@ void ActionDialog::createWidgets() {
     createActionWidgets(layout);
     clearActionFields();
 
-    layout->addWidget(new Line, 7, 0, 1, 3);
+    layout->addWidget(new Line, 8, 0, 1, 3);
 
     createKeyboardWidgets(layout);
     clearKeybindingFields();
 
-    layout->addWidget(new Line, 14, 0, 1, 3);
+    layout->addWidget(new Line, 16, 0, 1, 3);
     
     QDialogButtonBox* buttonBox = new QDialogButtonBox;
     buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -120,10 +121,14 @@ void ActionDialog::createWidgets() {
         buttonBox, &QDialogButtonBox::rejected,
         this, &ActionDialog::reject
     );
-    layout->addWidget(buttonBox, 15, 2, Qt::AlignRight);
+    layout->addWidget(buttonBox, 17, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createActionWidgets(QGridLayout* layout) {
+    QLabel* title = new QLabel("Actions");
+    title->setObjectName("heading");
+    layout->addWidget(title, 0, 0, 1, 3);
+
     _actionWidgets.list = new QListWidget;
     connect(
         _actionWidgets.list, &QListWidget::itemSelectionChanged,
@@ -138,37 +143,37 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actionWidgets.list->addItem(new QListWidgetItem(QString::fromStdString(name)));
     }
 
-    layout->addWidget(_actionWidgets.list, 0, 0, 6, 1);
+    layout->addWidget(_actionWidgets.list, 1, 0, 6, 1);
 
-    layout->addWidget(new QLabel("Identifier"), 0, 1);
+    layout->addWidget(new QLabel("Identifier"), 1, 1);
     _actionWidgets.identifier = new QLineEdit;
     _actionWidgets.identifier->setEnabled(false);
-    layout->addWidget(_actionWidgets.identifier, 0, 2);
+    layout->addWidget(_actionWidgets.identifier, 1, 2);
 
-    layout->addWidget(new QLabel("Name"), 1, 1);
+    layout->addWidget(new QLabel("Name"), 2, 1);
     _actionWidgets.name = new QLineEdit;
     _actionWidgets.name->setEnabled(false);
-    layout->addWidget(_actionWidgets.name, 1, 2);
+    layout->addWidget(_actionWidgets.name, 2, 2);
 
-    layout->addWidget(new QLabel("GUI Path"), 2, 1);
+    layout->addWidget(new QLabel("GUI Path"), 3, 1);
     _actionWidgets.guiPath = new QLineEdit;
     _actionWidgets.guiPath->setEnabled(false);
-    layout->addWidget(_actionWidgets.guiPath, 2, 2);
+    layout->addWidget(_actionWidgets.guiPath, 3, 2);
 
-    layout->addWidget(new QLabel("Documentation"), 3, 1);
+    layout->addWidget(new QLabel("Documentation"), 4, 1);
     _actionWidgets.documentation = new QLineEdit;
     _actionWidgets.documentation->setEnabled(false);
-    layout->addWidget(_actionWidgets.documentation, 3, 2);
+    layout->addWidget(_actionWidgets.documentation, 4, 2);
 
-    layout->addWidget(new QLabel("Is Local"), 4, 1);
+    layout->addWidget(new QLabel("Is Local"), 5, 1);
     _actionWidgets.isLocal = new QCheckBox;
     _actionWidgets.isLocal->setEnabled(false);
-    layout->addWidget(_actionWidgets.isLocal, 4, 2);
+    layout->addWidget(_actionWidgets.isLocal, 5, 2);
 
-    layout->addWidget(new QLabel("Script"), 5, 1);
+    layout->addWidget(new QLabel("Script"), 6, 1);
     _actionWidgets.script = new QTextEdit;
     _actionWidgets.script->setEnabled(false);
-    layout->addWidget(_actionWidgets.script, 5, 2);
+    layout->addWidget(_actionWidgets.script, 6, 2);
 
 
     // + / - buttons
@@ -190,7 +195,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         this, &ActionDialog::actionRemove
     );
     containerLayout->addWidget(_actionWidgets.removeButton);
-    layout->addWidget(container, 6, 0, Qt::AlignLeft);
+    layout->addWidget(container, 7, 0, Qt::AlignLeft);
 
 
     // Save / Cancel buttons
@@ -207,10 +212,14 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         _actionWidgets.saveButtons, &QDialogButtonBox::rejected,
         this, &ActionDialog::actionRejected
     );
-    layout->addWidget(_actionWidgets.saveButtons, 6, 2, Qt::AlignRight);
+    layout->addWidget(_actionWidgets.saveButtons, 7, 2, Qt::AlignRight);
 }
 
 void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
+    QLabel* title = new QLabel("Keybindings");
+    title->setObjectName("heading");
+    layout->addWidget(title);
+
     _keybindingWidgets.list = new QListWidget;
     connect(
         _keybindingWidgets.list, &QListWidget::itemSelectionChanged,
@@ -226,9 +235,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindingWidgets.list->addItem(item);
     }
 
-    layout->addWidget(_keybindingWidgets.list, 8, 0, 5, 1);
+    layout->addWidget(_keybindingWidgets.list, 10, 0, 5, 1);
 
-    layout->addWidget(new QLabel("Modifier"), 8, 1);
+    layout->addWidget(new QLabel("Modifier"), 10, 1);
     {
         QWidget* container = new QWidget;
         QBoxLayout* containerLayout = new QHBoxLayout(container);
@@ -241,10 +250,10 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         _keybindingWidgets.altModifier = new QCheckBox("Alt");
         _keybindingWidgets.altModifier->setEnabled(false);
         containerLayout->addWidget(_keybindingWidgets.altModifier);
-        layout->addWidget(container, 8, 2);
+        layout->addWidget(container, 10, 2);
     }
 
-    layout->addWidget(new QLabel("Key"), 9, 1);
+    layout->addWidget(new QLabel("Key"), 11, 1);
     _keybindingWidgets.key = new QComboBox;
     QStringList keyList;
     for (const KeyInfo& ki : KeyInfos) {
@@ -253,9 +262,9 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     _keybindingWidgets.key->addItems(keyList);
     _keybindingWidgets.key->setCurrentIndex(-1);
     _keybindingWidgets.key->setEnabled(false);
-    layout->addWidget(_keybindingWidgets.key, 9, 2);
+    layout->addWidget(_keybindingWidgets.key, 11, 2);
 
-    layout->addWidget(new QLabel("Action chooser"), 10, 1);
+    layout->addWidget(new QLabel("Action chooser"), 12, 1);
     _keybindingWidgets.action = new QComboBox;
     for (const Profile::Action& action : _actionData) {
         _keybindingWidgets.action->addItem(QString::fromStdString(action.identifier));
@@ -266,12 +275,12 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     );
 
     _keybindingWidgets.action->setEnabled(false);
-    layout->addWidget(_keybindingWidgets.action, 10, 2);
+    layout->addWidget(_keybindingWidgets.action, 12, 2);
 
-    layout->addWidget(new QLabel("Action"), 11, 1);
+    layout->addWidget(new QLabel("Action"), 13, 1);
     _keybindingWidgets.actionText = new QLineEdit;
     _keybindingWidgets.actionText->setEnabled(false);
-    layout->addWidget(_keybindingWidgets.actionText, 11, 2);
+    layout->addWidget(_keybindingWidgets.actionText, 13, 2);
 
 
     // +/- buttons
@@ -293,7 +302,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingRemove
     );
     containerLayout->addWidget(_keybindingWidgets.removeButton);
-    layout->addWidget(container, 13, 0, Qt::AlignLeft);
+    layout->addWidget(container, 14, 0, Qt::AlignLeft);
 
     // Save/Cancel
     _keybindingWidgets.saveButtons = new QDialogButtonBox;
@@ -310,7 +319,7 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
         this, &ActionDialog::keybindingRejected
     );
 
-    layout->addWidget(_keybindingWidgets.saveButtons, 13, 2, Qt::AlignRight);
+    layout->addWidget(_keybindingWidgets.saveButtons, 14, 2, Qt::AlignRight);
 }
 
 void ActionDialog::applyChanges() {
@@ -422,9 +431,10 @@ void ActionDialog::actionSaved() {
     std::string oldIdentifier = action->identifier;
     if (oldIdentifier != newIdentifier) {
         // The identifier is a bit special as we need to make sure that we didn't
-        // accidentally create a duplicate.  Also if we did create a duplicate we need to
-        // make sure that we update all keybinds that referenced the old value are updated
-        // to the new one
+        // accidentally create a duplicate while renaming the currently selected action.
+        // Also if we didn't create a duplicate, meaning that we renamed an action to a
+        // new valid identifier, we need to make sure that we update all keybinds that
+        // referenced the old value are updated to use the new name instead
 
         const auto it = std::find_if(
             _actionData.begin(), _actionData.end(),

@@ -22,7 +22,7 @@ LauncherWindow  QLabel {
 }
 
 LauncherWindow  QLabel#label_choose, QLabel#label_options {
-  color: #ddd;
+  color: #dddddd;
   font-size: 10pt;
 }
 

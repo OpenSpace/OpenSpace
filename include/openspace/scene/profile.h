@@ -165,8 +165,18 @@ public:
     static scripting::LuaLibrary luaLibrary();
 };
 
+/**
+ * This function takes a profile and returns its asset-ifyied version as a string. This
+ * is the format that is saved as a scene file that, in turn, is provided to OpenSpace as
+ * the root asset to load. This function is a key step to be able to load a Profile in
+ * OpenSpace (at the moment).
+ * 
+ * \param profile The profile that should be converted to the asset-file format
+ * 
+ * \return The string representation of the provided profile, ready to be loaded as an
+ *         asset
+ */
 std::string convertToScene(const Profile& profile);
-
 
 } // namespace openspace
 
