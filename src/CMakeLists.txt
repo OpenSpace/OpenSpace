@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/openspace.cpp
+  ${OPENSPACE_BASE_DIR}/src/camera/camera.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
@@ -51,11 +52,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
@@ -67,6 +64,18 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/avoidcollisioncurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/zoomoutoverviewcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/keyframenavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/waypoint.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
@@ -150,7 +159,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/coordinateconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
@@ -179,6 +188,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/universalhelpers.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
@@ -194,6 +204,8 @@ if (APPLE)
 endif ()
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camerapose.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -223,10 +235,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
@@ -237,6 +246,16 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/avoidcollisioncurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/zoomoutoverviewcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/keyframenavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationhandler.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/orbitalnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/path.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
@@ -323,7 +342,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/collisionhelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
@@ -362,6 +381,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h

@@ -26,9 +26,9 @@
 #define __OPENSPACE_CORE___PROFILE___H__
 
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
@@ -36,6 +36,8 @@
 #include <vector>
 
 namespace openspace {
+
+namespace interaction { struct NavigationState; }
 
 namespace scripting { struct LuaLibrary; }
 
@@ -130,8 +132,7 @@ public:
      * and all of the property & asset changes that were made since startup.
      */
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime,
-        interaction::NavigationHandler::NavigationState navState);
+        std::string currentTime, interaction::NavigationState navState);
 
     /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
     /// set to `true`

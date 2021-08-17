@@ -153,7 +153,6 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
     else {
         _localRotationState.velocity.decelerate(deltaTime);
     }
-
 }
 
 void WebsocketCameraStates::setAxisMapping(int axis, AxisType mapping,

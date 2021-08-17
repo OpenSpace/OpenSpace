@@ -26,6 +26,7 @@
 
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>

@@ -22,70 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
-#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#ifndef __OPENSPACE_CORE___NAVIGATIONSTATE___H__
+#define __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 
-#include <openspace/util/timeline.h>
-#include <openspace/network/messagestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <glm/gtx/quaternion.hpp>
+#include <openspace/documentation/documentation.h>
+#include <optional>
 
 namespace openspace {
-    class Camera;
-    class TimeManager;
+    struct CameraPose;
 } // namespace openspace
 
 namespace openspace::interaction {
 
-enum class KeyframeTimeRef {
-    Relative_applicationStart,
-    Relative_recordedStart,
-    Absolute_simTimeJ2000
-};
+struct NavigationState {
+    NavigationState() = default;
+    explicit NavigationState(const ghoul::Dictionary& dictionary);
+    NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
+        glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
+        double yaw = 0.0, double pitch = 0.0);
 
-class KeyframeNavigator {
-public:
-    BooleanType(Inclusive);
+    CameraPose cameraPose() const;
+    ghoul::Dictionary dictionary() const;
+    static documentation::Documentation Documentation();
 
-    struct CameraPose {
-        glm::dvec3 position = glm::dvec3(0.0);
-        glm::quat rotation = glm::quat(0.f, 0.f, 0.f, 0.f);
-        std::string focusNode;
-        float scale = 1.f;
-        bool followFocusNodeRotation = false;
-
-        CameraPose() = default;
-        CameraPose(datamessagestructures::CameraKeyframe&& kf);
-    };
-
-    /**
-    * Update camera position using the next camera pose keyframe from the timeline.
-    * Returns true if camera was set to a pose from the next keyframe.
-    * Returns false if no keyframes are available after the current time.
-    * \param camera A reference to the camera object to have its pose updated.
-    * \param ignoreFutureKeyframes true if only past keyframes are to be used.
-    * \returns true only if a new future keyframe is available to set camera pose.
-    */
-    bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
-    static bool updateCamera(Camera* camera, const CameraPose prevPose,
-        const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
-
-    Timeline<CameraPose>& timeline();
-    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
-    double currentTime() const;
-    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
-
-private:
-    Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
-    double _referenceTimestamp = 0.0;
+    std::string anchor;
+    std::string aim;
+    std::string referenceFrame;
+    glm::dvec3 position = glm::dvec3(0.0);
+    std::optional<glm::dvec3> up;
+    double yaw = 0.0;
+    double pitch = 0.0;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#endif // __OPENSPACE_CORE___NAVIGATIONSTATE___H__

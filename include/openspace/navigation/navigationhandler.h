@@ -28,10 +28,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/pathnavigator.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/mouse.h>
@@ -48,31 +50,14 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct NavigationState;
 struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
+class PathNavigator;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
-    struct NavigationState {
-        NavigationState() = default;
-        NavigationState(const ghoul::Dictionary& dictionary);
-        NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
-            glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
-            double yaw = 0.0, double pitch = 0.0);
-
-        ghoul::Dictionary dictionary() const;
-        static documentation::Documentation Documentation();
-
-        std::string anchor;
-        std::string aim;
-        std::string referenceFrame;
-        glm::dvec3 position = glm::dvec3(0.0);
-        std::optional<glm::dvec3> up;
-        double yaw = 0.0;
-        double pitch = 0.0;
-    };
-
     NavigationHandler();
     ~NavigationHandler();
 
@@ -80,11 +65,9 @@ public:
     void deinitialize();
 
     // Mutators
-
     void setFocusNode(SceneGraphNode* node);
     void resetCameraDirection();
 
-    void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
@@ -101,6 +84,7 @@ public:
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
+    PathNavigator& pathNavigator();
     bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
 
@@ -154,7 +138,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void applyNavigationState(const NavigationHandler::NavigationState& ns);
+    void applyNavigationState(const NavigationState& ns);
 
     bool _playbackModeEnabled = false;
 
@@ -164,6 +148,7 @@ private:
 
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;
+    PathNavigator _pathNavigator;
 
     std::optional<NavigationState> _pendingNavigationState;
 
