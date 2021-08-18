@@ -22,36 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 
-#include <openspace/util/openspacemodule.h>
+namespace openspace::luascriptfunctions {
 
-namespace openspace {
+int syncResource(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::syncResource");
+    auto [identifier, version] = ghoul::lua::values<std::string, double>(L);
 
-class SyncModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Sync";
+    ghoul::Dictionary dict;
+    dict.setValue("Identifier", identifier);
+    dict.setValue("Version", version);
 
-    SyncModule();
+    const SyncModule* module = global::moduleEngine->module<SyncModule>();
+    HttpSynchronization sync(
+        dict,
+        module->synchronizationRoot(),
+        module->httpSynchronizationRepositories()
+    );
 
-    std::string synchronizationRoot() const;
+    sync.start();
 
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
+    while (sync.isSyncing()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
 
-    std::vector<documentation::Documentation> documentations() const override;
+    ghoul::lua::push(L, sync.isResolved());
+    return 1;
+}
 
-    scripting::LuaLibrary luaLibrary() const override;
+int unsyncResource(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::unsyncResource");
+    auto [identifier, version] = ghoul::lua::values<std::string, std::optional<int>>(L);
+    //version = version.value_or(-1);
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    const SyncModule* module = global::moduleEngine->module<SyncModule>();
+    std::filesystem::path sync = absPath(module->synchronizationRoot());
+    std::filesystem::path base = sync / "http" / identifier;
 
-private:
-    std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
-};
+    if (!version.has_value()) {
+        // If no version was provided, we remove all of the files
+        std::filesystem::remove_all(base);
+    }
+    else {
+        const int v = *version;
 
-} // namespace openspace
+        std::filesystem::path folder = base / std::to_string(v);
+        std::string syncFile = std::to_string(v) + ".ossync";
 
-#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+        std::filesystem::remove_all(folder);
+        std::filesystem::remove(base / syncFile);
+    }
+
+    return 0;
+}
+
+} // namespace openspace::luascriptfunctions
