@@ -79,10 +79,10 @@ end
 -- Sets the camera path curve type to the one that has a look at rotation 
 -- and zooming out motion to show both targets, if close enough
 local setCurveTypeToZoomOverview = function ()
-    -- CurveOption 2 = ZoomOutOverview
+    -- PathType 2 = ZoomOutOverview
     return [[
         openspace.setPropertyValueSingle(
-            "NavigationHandler.PathNavigator.DefaultCurveOption",
+            "NavigationHandler.PathNavigator.DefaultPathType",
             2
         )
     ]]
