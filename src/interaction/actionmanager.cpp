@@ -84,10 +84,18 @@ void ActionManager::triggerAction(const std::string& identifier,
     ghoul_assert(hasAction(identifier), "Action was not found in the list");
 
     const Action& a = action(identifier);
-    global::scriptEngine->queueScript(
-        fmt::format("local args = {}\n{}", ghoul::formatLua(arguments), a.command),
-        scripting::ScriptEngine::RemoteScripting(a.synchronization)
-    );
+    if (arguments.isEmpty()) {
+        global::scriptEngine->queueScript(
+            a.command,
+            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+        );
+    }
+    else {
+        global::scriptEngine->queueScript(
+            fmt::format("local args = {}\n{}", ghoul::formatLua(arguments), a.command),
+            scripting::ScriptEngine::RemoteScripting(a.synchronization)
+        );
+    }
 }
 
 scripting::LuaLibrary ActionManager::luaLibrary() {

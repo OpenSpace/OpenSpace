@@ -102,7 +102,7 @@
       "identifier": "profile.toggle.pluto_labels",
       "is_local": false,
       "name": "Toggle Pluto Labels",
-      "script": "local list = {\"Scene.PlutoText.Enabled\", \"Scene.CharonText.Enabled\", \"Scene.HydraText.Enabled\", \"Scene.NixText.Enabled\", \"Scene.KerberosText.Enabled\", \"Scene.StyxText.Enabled\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "script": "local list = {\"Scene.PlutoText.Renderable.Enabled\", \"Scene.CharonText.Renderable.Enabled\", \"Scene.HydraText.Renderable.Enabled\", \"Scene.NixText.Renderable.Enabled\", \"Scene.KerberosText.Renderable.Enabled\", \"Scene.StyxText.Renderable.Enabled\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
       "documentation": "Toggles the visibility of the labels for the New Horizons instruments.",
@@ -111,14 +111,6 @@
       "is_local": false,
       "name": "Toggle New Horizons Labels",
       "script": "local v = openspace.getPropertyValue(\"Scene.Labels.Renderable.Opacity\"); if v <= 0.5 then openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",1.0,2.0) else openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",0.0,2.0) end"
-    },
-    {
-      "documentation": "Draws the instrument field of views in a solid color or as lines.",
-      "gui_path": "/Missions/New Horizons",
-      "identifier": "profile.toggle.instrument_fov",
-      "is_local": false,
-      "name": "Toggle instrument FOVs",
-      "script": "local list = {\"Scene.PlutoText.Enabled\", \"Scene.NH_LORRI.Renderable.SolidDraw\", \"Scene.NH_RALPH_LEISA.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_PAN1.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_PAN2.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_RED.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_BLUE.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_FT.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_METHANE.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_NIR.Renderable.SolidDraw\", \"Scene.NH_ALICE_AIRGLOW.Renderable.SolidDraw\", \"Scene.NH_ALICE_SOC.Renderable.SolidDraw\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
       "documentation": "Toggles the visibility of the shadow visualization of Pluto and Charon.",
@@ -245,10 +237,6 @@
     {
       "action": "profile.toggle_nh_labels",
       "key": "I"
-    },
-    {
-      "action": "profile.toggle.instrument_fov",
-      "key": "M"
     },
     {
       "action": "profile.toggle_shadows",

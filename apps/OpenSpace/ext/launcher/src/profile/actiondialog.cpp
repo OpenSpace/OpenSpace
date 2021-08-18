@@ -26,6 +26,8 @@
 
 #include "profile/line.h"
 #include <openspace/util/keys.h>
+#include <ghoul/fmt.h>
+#include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -209,7 +211,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "This is the Lua script that gets executed when this action is triggered. "
         "Actions can make use of optional arguments which are already defined as the "
         "`args` variable when this script executes. If no arguments are passed, this "
-        "variable just contains the empty table"
+        "variable does not exist"
     );
     _actionWidgets.script->setEnabled(false);
     layout->addWidget(_actionWidgets.script, 6, 2);
