@@ -29,7 +29,9 @@
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <string>
 
 #include "statemachinemodule_lua.inl"
 
@@ -116,6 +118,23 @@ bool StateMachineModule::canGoToState(const std::string& state) const {
     return _machine->canTransitionTo(state);
 }
 
+void StateMachineModule::saveToFile(const std::string& filename,
+                                    std::optional<std::string> directory) const
+{
+    if (!_machine) {
+        LWARNING("Attempting to use uninitialized state machine");
+        return;
+    }
+
+    directory = directory.value_or("${TEMPORARY}/");
+    if ((*directory).back() != '/') {
+        *directory += "/";
+    }
+
+    const std::string outputFile = absPath(*directory + filename).string();
+    _machine->saveToDotFile(outputFile);
+}
+
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "statemachine";
@@ -177,6 +196,16 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             {},
             "",
             "Prints information about the current state and possible transitions to the log."
+        },
+        {
+            "saveToDotFile",
+            &luascriptfunctions::saveToDotFile,
+            {},
+            "string, [string]",
+            "Saves the current state machine to a .dot file as a directed graph. The "
+            "resulting graph can be rendered using external tools such as Graphviz. "
+            "The first parameter is the name of the file, and the second is an optional "
+            "directory. If no directory is given, the file is saved to the temp folder."
         }
     };
     return res;

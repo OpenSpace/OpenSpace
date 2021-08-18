@@ -114,4 +114,15 @@ int printCurrentStateInfo(lua_State* L) {
     return 1;
 }
 
+int saveToDotFile(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::saveToDotFile");
+
+    auto [filename, dir] =
+        ghoul::lua::values<std::string, std::optional<std::string>>(L);
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    module->saveToFile(filename, dir);
+    return 0;
+}
+
 } //namespace openspace::luascriptfunctions

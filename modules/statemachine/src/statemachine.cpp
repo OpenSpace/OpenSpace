@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
+#include <fstream>
 #include <optional>
 
 namespace {
@@ -193,6 +194,29 @@ std::vector<std::string> StateMachine::possibleTransitions() const {
         }
     }
     return res;
+}
+
+void StateMachine::saveToDotFile(const std::string& filename) const {
+    const std::string outputFile = filename + ".dot";
+
+    std::ofstream file(outputFile);
+    if (!file.good()) {
+        LERROR(fmt::format(
+            "Error opening file {} for saving state machine dot file", outputFile
+        ));
+        return;
+    }
+
+    file << "digraph statemachine {" << std::endl;
+    for (const State& s : _states) {
+        file << "\t" << s.name() << ";" << std::endl;
+    }
+    for (const Transition& t : _transitions) {
+        file << "\t" << t.from() << " -> " << t.to() << ";" << std::endl;
+    }
+    file << "}" << std::endl;
+
+    LINFO(fmt::format("Saved state machine to file: {}", outputFile));
 }
 
 } // namespace openspace
