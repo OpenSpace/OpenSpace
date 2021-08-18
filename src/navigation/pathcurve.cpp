@@ -43,16 +43,16 @@ namespace openspace::interaction {
 
 PathCurve::~PathCurve() {}
 
-const double PathCurve::length() const {
+double PathCurve::length() const {
     return _totalLength;
 }
 
-glm::dvec3 PathCurve::positionAt(double relativeDistance) {
+glm::dvec3 PathCurve::positionAt(double relativeDistance) const {
     const double u = curveParameter(relativeDistance * _totalLength);
     return interpolate(u);
 }
 
-std::vector<glm::dvec3> PathCurve::points() {
+std::vector<glm::dvec3> PathCurve::points() const {
     return _points;
 }
 
@@ -105,7 +105,7 @@ void PathCurve::initializeParameterData() {
 // https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf
 // Input s is a length value, in the range [0, _totalLength]
 // Returns curve parameter in range [0, 1]
-double PathCurve::curveParameter(double s) {
+double PathCurve::curveParameter(double s) const {
     if (s <= 0.0) return 0.0;
     if (s >= _totalLength) return 1.0;
 
@@ -127,7 +127,7 @@ double PathCurve::curveParameter(double s) {
         _parameterSamples.begin() + startIndex,
         _parameterSamples.begin() + endIndex,
         ParameterPair{ 0.0 , s }, // 0.0 is a dummy value for u
-        [](ParameterPair lhs, ParameterPair rhs) {
+        [](const ParameterPair& lhs,const ParameterPair& rhs) {
             return lhs.s < rhs.s;
         }
     );
@@ -174,7 +174,7 @@ double PathCurve::curveParameter(double s) {
     return u;
 }
 
-double PathCurve::approximatedDerivative(double u, double h) {
+double PathCurve::approximatedDerivative(double u, double h) const {
     if (u <= h) {
         return (1.0 / h) * glm::length(interpolate(0.0 + h) - interpolate(0.0));
     }
@@ -184,11 +184,11 @@ double PathCurve::approximatedDerivative(double u, double h) {
     return (0.5 / h) * glm::length(interpolate(u + h) - interpolate(u - h));
 }
 
-double PathCurve::arcLength(double limit) {
+double PathCurve::arcLength(double limit) const {
     return arcLength(0.0, limit);
 }
 
-double PathCurve::arcLength(double lowerLimit, double upperLimit) {
+double PathCurve::arcLength(double lowerLimit, double upperLimit) const {
     return ghoul::integrateGaussianQuadrature<double>(
         lowerLimit,
         upperLimit,
@@ -196,7 +196,7 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) {
     );
 }
 
-glm::dvec3 PathCurve::interpolate(double u) {
+glm::dvec3 PathCurve::interpolate(double u) const {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable must be in range [0,1]");
 
     if (u < 0.0) {
@@ -206,7 +206,7 @@ glm::dvec3 PathCurve::interpolate(double u) {
         return *(_points.end() - 2);
     }
 
-    std::vector<double>::iterator segmentEndIt =
+    std::vector<double>::const_iterator segmentEndIt =
         std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
 
     const int index =

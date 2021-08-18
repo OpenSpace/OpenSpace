@@ -43,10 +43,12 @@ namespace {
     constexpr const char* _loggerCat = "PathNavigator";
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
-        "DefaultCurveOption",
-        "Default Curve Option",
-        "The defualt curve type chosen when generating a path, if none is specified"
-        // TODO: right now there is no way to specify a type for a single path
+        "DefaultPathType",
+        "Default Path Type",
+        "The defualt path type chosen when generating a path. See wiki for alternatives."
+        " The shape of the generated path will be different depending on the path type."
+        // TODO (2021-08-15, emmbr) right now there is no way to specify a type for a
+        // single path instance, only for any created paths
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -92,7 +94,7 @@ namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator" })
-    , _defaultCurveOption(
+    , _defaultPathType(
         DefaultCurveOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
@@ -102,12 +104,13 @@ PathNavigator::PathNavigator()
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
 {
-    _defaultCurveOption.addOptions({
-        { Path::CurveType::AvoidCollision, "AvoidCollision" },
-        { Path::CurveType::Linear, "Linear" },
-        { Path::CurveType::ZoomOutOverview, "ZoomOutOverview"}
+    _defaultPathType.addOptions({
+        { Path::Type::AvoidCollision, "AvoidCollision" },
+        { Path::Type::Linear, "Linear" },
+        { Path::Type::ZoomOutOverview, "ZoomOutOverview"},
+        { Path::Type::AvoidCollisionWithLookAt, "AvoidCollisionWithLookAt"}
     });
-    addProperty(_defaultCurveOption);
+    addProperty(_defaultPathType);
 
     addProperty(_includeRoll);
     addProperty(_speedScale);
@@ -117,7 +120,7 @@ PathNavigator::PathNavigator()
     _relevantNodeTags = std::vector<std::string>{
         "planet_solarSystem",
         "moon_solarSystem"
-    };;
+    };
     _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
     addProperty(_relevantNodeTags);
 }
@@ -158,11 +161,7 @@ bool PathNavigator::isPlayingPath() const {
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
-    if (!hasCurrentPath()) {
-        return;
-    }
-
-    if (!_isPlaying) {
+    if (!hasCurrentPath() || !_isPlaying) {
         return;
     }
 
@@ -217,8 +216,9 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // TODO: Improve how curve types are handled
-    const int curveType = _defaultCurveOption;
+    // @TODO (2021-08.16, emmbr): Improve how curve types are handled.
+    // We want the user to be able to choose easily
+    const int pathType = _defaultPathType;
 
     // Ignore paths that are created during session recording, as the camera
     // position should have been recorded
@@ -229,8 +229,17 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
     try {
         _currentPath = std::make_unique<Path>(
-            createPathFromDictionary(dictionary, Path::CurveType(curveType))
+            createPathFromDictionary(dictionary, Path::Type(pathType))
         );
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR("Could not create camera path");
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, ghoul::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        }
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Could not create path. Reason: ", e.message));
@@ -241,7 +250,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
 }
 
 void PathNavigator::clearPath() {
-    LINFO("Clearing path...");
+    LINFO("Clearing path");
     _currentPath = nullptr;
 }
 
@@ -257,7 +266,7 @@ void PathNavigator::startPath() {
         return;
     }
 
-    LINFO("Starting path...");
+    LINFO("Starting path");
     _isPlaying = true;
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
@@ -276,7 +285,7 @@ void PathNavigator::abortPath() {
 
 void PathNavigator::pausePath() {
     if (hasFinished()) {
-        LERROR("No path to pause (path is empty or has finished).");
+        LERROR("No path to pause (path is empty or has finished)");
         return;
     }
 
@@ -291,7 +300,7 @@ void PathNavigator::pausePath() {
 
 void PathNavigator::continuePath() {
     if (hasFinished()) {
-        LERROR("No path to resume (path is empty or has finished).");
+        LERROR("No path to resume (path is empty or has finished)");
         return;
     }
 
@@ -300,7 +309,7 @@ void PathNavigator::continuePath() {
         return;
     }
 
-    LINFO("Continuing path...");
+    LINFO("Continuing path");
     _isPlaying = true;
 }
 
@@ -409,21 +418,22 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 &luascriptfunctions::goTo,
                 {},
                 "string [, bool, double]",
-                "Move the camera to the node with the specified name. The optional double "
-                "specifies the duration of the motion. If the optional bool is set to true "
-                "the target up vector for camera is set based on the target node. Either of "
-                "the optional parameters can be left out."
+                "Move the camera to the node with the specified identifier. The optional "
+                "double specifies the duration of the motion. If the optional bool is "
+                "set to true the target up vector for camera is set based on the target "
+                "node. Either of the optional parameters can be left out."
             },
             {
                 "goToHeight",
                 &luascriptfunctions::goToHeight,
                 {},
                 "string, double [, bool, double]",
-                "Move the camera to the node with the specified name. The second input "
-                "parameter is the desired target height. The optional double "
-                "specifies the duration of the motion. If the optional bool is set to true "
-                "the target up vector for camera is set based on the target node. Either of "
-                "the optional parameters can be left out."
+                "Move the camera to the node with the specified identifier. The second "
+                "argument is the desired target height above the target node's bounding "
+                "sphere, in meters. The optional double specifies the duration of the "
+                "motion. If the optional bool is set to true, the target up vector for "
+                "camera is set based on the target node. Either of the optional "
+                "parameters can be left out."
             },
             {
                 "generatePath",

@@ -245,7 +245,7 @@ int renderPathControlPoints(lua_State* L) {
         "openspace.createSingleColorImage('point_color', { 0.0, 1.0, 0.0 })"
     ")";
 
-    for (int i = 0; i < points.size(); i++) {
+    for (size_t i = 0; i < points.size(); i++) {
         const std::string& node = "{"
             "Identifier = 'ControlPoint_" + std::to_string(i) + "',"
             "Parent = '" + RenderedPointsIdentifier + "',"

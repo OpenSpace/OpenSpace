@@ -34,7 +34,7 @@ namespace documentation { struct Documentation; }
 
 class State {
 public:
-    State(const ghoul::Dictionary& dictionary);
+    explicit State(const ghoul::Dictionary& dictionary);
     ~State() = default;
 
     void enter() const;

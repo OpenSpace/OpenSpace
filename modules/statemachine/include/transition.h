@@ -34,11 +34,11 @@ namespace documentation { struct Documentation; }
 
 class Transition {
 public:
-    Transition(const ghoul::Dictionary& dictionary);
+    explicit Transition(const ghoul::Dictionary& dictionary);
     ~Transition() = default;
 
-    std::string from() const;
-    std::string to() const;
+    const std::string& from() const;
+    const std::string& to() const;
     void performAction() const;
 
     static documentation::Documentation Documentation();

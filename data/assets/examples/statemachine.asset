@@ -12,7 +12,7 @@ local targetNode = function(nodeIdentifier)
   ]]
 end
 
-states = {
+local states = {
   {
     Identifier = "Constellations",
     Enter = [[
@@ -28,13 +28,11 @@ states = {
     Exit = "openspace.setPropertyValueSingle('Scene.EarthLabel.Renderable.Enabled', false)"
   },
   {
-    Identifier = "Moon",
-    Enter = "",
-    Exit = ""
+    Identifier = "Moon"
   }
 }
 
-transitions = {
+local transitions = {
   {
     From = "Earth",
     To = "Moon",
@@ -48,7 +46,6 @@ transitions = {
   {
     From = "Earth",
     To = "Constellations",
-    -- action is optional
   },
   {
     From = "Constellations",
@@ -67,7 +64,7 @@ transitions = {
 }
 
 asset.onInitialize(function()
-  -- Setup
+  -- Setup (could be done in the profile)
   openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Enabled', true)
   openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Opacity', 0.0)
 

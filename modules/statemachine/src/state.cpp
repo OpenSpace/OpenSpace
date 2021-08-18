@@ -36,11 +36,11 @@ namespace {
 
         // A string containing a Lua script that will be executed when the state
         // is entered, i.e on a transition from another state
-        std::string enter;
+        std::optional<std::string> enter;
 
         // A string containing a Lua script that will be executed when the state
         // is exited, i.e on a transition to another state
-        std::string exit;
+        std::optional<std::string> exit;
     };
 #include "state_codegen.cpp"
 } // namespace
@@ -55,8 +55,8 @@ State::State(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.identifier;
-    _enter = p.enter;
-    _exit = p.exit;
+    _enter = p.enter.value_or("");
+    _exit = p.exit.value_or("");
 }
 
 void State::enter() const {

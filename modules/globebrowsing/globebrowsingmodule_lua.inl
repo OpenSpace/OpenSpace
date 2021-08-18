@@ -288,7 +288,7 @@ int goToGeo(lua_State* L) {
 }
 
 int flyToGeo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 3, 5 }, "lua::flyToGeo");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 3, 6 }, "lua::flyToGeo");
 
     // Check if the user provided a Scene graph node identifier as the first argument.
     // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber
@@ -339,23 +339,52 @@ int flyToGeo(lua_State* L) {
 
     using namespace std::string_literals;
     ghoul::Dictionary instruction;
-    instruction.setValue("Type", "Node"s);
+    instruction.setValue("TargetType", "Node"s);
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
 
-    if (nArguments == parameterOffset + 4) {
-        const double duration = ghoul::lua::value<double>(L, parameterOffset + 4);
-        if (duration <= 0.0) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+    // Handle the two optional arguments: duration and use target's up direction argument
+    // The user can either provide both, or one of them
+    if (nArguments >= parameterOffset + 4) {
+        const int firstLocation = parameterOffset + 4;
+        const bool firstIsNumber = (lua_isnumber(L, firstLocation) != 0);
+        const bool firstIsBool = (lua_isboolean(L, firstLocation) != 0);
+
+        if (!(firstIsNumber || firstIsBool)) {
+            const char* msg = lua_pushfstring(
+                L,
+                "%s or %s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                lua_typename(L, LUA_TBOOLEAN),
+                luaL_typename(L, -1)
+            );
+            return ghoul::lua::luaError(
+                L, fmt::format("bad argument #{} ({})", firstLocation, msg)
+            );
         }
-        instruction.setValue("Duration", duration);
+
+        int location = firstLocation;
+        if (firstIsBool) {
+            const bool useUpFromTarget = (lua_toboolean(L, location) == 1);
+            instruction.setValue("UseTargetUpDirection", useUpFromTarget);
+
+            if (nArguments > location) {
+                location++;
+            }
+        }
+
+        if (firstIsNumber || nArguments > firstLocation) {
+            double duration = ghoul::lua::value<double>(L, location);
+            constexpr const double Epsilon = 1e-5;
+            if (duration <= Epsilon) {
+                return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            }
+            instruction.setValue("Duration", duration);
+        }
     }
 
     global::navigationHandler->pathNavigator().createPath(instruction);
     global::navigationHandler->pathNavigator().startPath();
-
-    // @TODO (2021-06-26, emmbr) add possibility to specify that north should be "up"?
 
     lua_settop(L, 0);
 

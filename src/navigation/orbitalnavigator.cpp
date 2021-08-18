@@ -771,7 +771,7 @@ void OrbitalNavigator::updateOnCameraInteraction() {
 }
 
 glm::dquat OrbitalNavigator::composeCameraRotation(
-    const CameraRotationDecomposition& decomposition)
+                                        const CameraRotationDecomposition& decomposition)
 {
     return decomposition.globalRotation * decomposition.localRotation;
 }

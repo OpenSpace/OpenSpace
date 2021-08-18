@@ -30,7 +30,7 @@ namespace openspace::collision {
 bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
                             double r, glm::dvec3& intersectionPoint)
 {
-    long double a, b, c;
+    double a, b, c;
     const glm::dvec3 diffp = p2 - p1;
 
     a = diffp.x * diffp.x + diffp.y * diffp.y + diffp.z * diffp.z;
@@ -41,7 +41,7 @@ bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
     c -= 2.0 * (center.x * p1.x + center.y * p1.y + center.z * p1.z);
     c -= r * r;
 
-    long double intersectionTest = b * b - 4.0 * a * c;
+    double intersectionTest = b * b - 4.0 * a * c;
 
     // No intersection
     if (std::abs(a) < 0 || intersectionTest < 0.0) {
@@ -66,8 +66,8 @@ bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
 
 bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
     const glm::dvec3 v = c - p;
-    const long double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
-    const long double squaredRadius = r * r;
+    const double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+    const double squaredRadius = r * r;
 
     return (squaredDistance <= squaredRadius);
 }

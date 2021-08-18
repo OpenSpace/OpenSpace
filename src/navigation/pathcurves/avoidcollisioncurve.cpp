@@ -152,43 +152,45 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                 intersectionPointModelCoords
             );
 
-            if (collision) {
-                glm::dvec3 collisionPoint = modelTransform *
-                    glm::dvec4(intersectionPointModelCoords, 1.0);
+            if (!collision) {
+                continue;
+            }
 
-                // before collision response, make sure none of the points are inside the node
-                bool isStartInsideNode = collision::isPointInsideSphere(p1, center, radius);
-                bool isEndInsideNode = collision::isPointInsideSphere(p2, center, radius);
-                if (isStartInsideNode || isEndInsideNode) {
-                    LWARNING(fmt::format(
-                        "Something went wrong! "
-                        "At least one point in the path is inside node: {}",
-                        node->identifier()
-                    ));
-                    break;
-                }
+            glm::dvec3 collisionPoint = modelTransform *
+                glm::dvec4(intersectionPointModelCoords, 1.0);
 
-                // To avoid collision, take a step in an orhtogonal direction of the
-                // collision point and add a new point
-                const glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
-                const glm::dvec3 nodeCenter = node->worldPosition();
-                const glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
-
-                const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
-                const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
-
-                const double avoidCollisionDistance =
-                    AvoidCollisionDistanceRadiusMultiplier * radius;
-
-                glm::dvec3 extraKnot = collisionPoint -
-                    avoidCollisionDistance * glm::normalize(orthogonal);
-
-                _points.insert(_points.begin() + i + 2, extraKnot);
-
-                step++;
-                removeCollisions(step);
+            // before collision response, make sure none of the points are inside the node
+            bool isStartInsideNode = collision::isPointInsideSphere(p1, center, radius);
+            bool isEndInsideNode = collision::isPointInsideSphere(p2, center, radius);
+            if (isStartInsideNode || isEndInsideNode) {
+                LWARNING(fmt::format(
+                    "Something went wrong! "
+                    "At least one point in the path is inside node: {}",
+                    node->identifier()
+                ));
                 break;
             }
+
+            // To avoid collision, take a step in an orhtogonal direction of the
+            // collision point and add a new point
+            const glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
+            const glm::dvec3 nodeCenter = node->worldPosition();
+            const glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
+
+            const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
+            const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
+
+            const double avoidCollisionDistance =
+                AvoidCollisionDistanceRadiusMultiplier * radius;
+
+            glm::dvec3 extraKnot = collisionPoint -
+                avoidCollisionDistance * glm::normalize(orthogonal);
+
+            _points.insert(_points.begin() + i + 2, extraKnot);
+
+            step++;
+            removeCollisions(step);
+            break;
         }
     }
 }

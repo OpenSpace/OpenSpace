@@ -35,13 +35,13 @@ namespace documentation { struct Documentation; }
 
 class StateMachine {
 public:
-    StateMachine(const ghoul::Dictionary& dictionary);
+    explicit StateMachine(const ghoul::Dictionary& dictionary);
     ~StateMachine() = default;
 
     void setInitialState(const std::string initialState);
     const State* currentState() const;
-    void transitionTo(const std::string newState);
-    bool canTransitionTo(const std::string state) const;
+    void transitionTo(const std::string& newState);
+    bool canTransitionTo(const std::string& state) const;
 
     /*
      * Return the identifiers of all possible transitions from the current state
@@ -51,12 +51,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    int findTransitionTo(const std::string& state) const;
+    int findState(const std::string& state) const;
+
     int _currentStateIndex = -1;
     std::vector<State> _states;
     std::vector<Transition> _transitions;
-
-    int findTransitionTo(const std::string state) const;
-    int findState(const std::string state) const;
 };
 
 } // namespace openspace

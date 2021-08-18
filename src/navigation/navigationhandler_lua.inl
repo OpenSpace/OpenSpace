@@ -136,7 +136,9 @@ int setNavigationState(lua_State* L) {
         );
     }
 
-    global::navigationHandler->setNavigationStateNextFrame(navigationStateDictionary);
+    global::navigationHandler->setNavigationStateNextFrame(
+        interaction::NavigationState(navigationStateDictionary)
+    );
 
     // @CLEANUP:  When luaDictionaryFromState doesn't leak space anymore, remove the next
     //            line ---abock(2018-02-15)

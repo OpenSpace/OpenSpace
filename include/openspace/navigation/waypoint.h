@@ -39,7 +39,7 @@ class Waypoint {
 public:
     Waypoint() = default;
     Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
-    Waypoint(const NavigationState& ns);
+    explicit Waypoint(const NavigationState& ns);
 
     static double findValidBoundingSphere(const SceneGraphNode* node);
 

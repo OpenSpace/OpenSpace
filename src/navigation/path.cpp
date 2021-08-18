@@ -50,11 +50,11 @@ namespace {
     // It's nice to have these to interpret the dictionary when creating the path, but
     // maybe it's not really necessary
     struct [[codegen::Dictionary(PathInstruction)]] Parameters {
-        enum class Type {
+        enum class TargetType {
             Node,
             NavigationState
         };
-        Type type;
+        TargetType targetType;
 
         // The desired duration traversing the specified path segment should take
         std::optional<float> duration;
@@ -87,18 +87,19 @@ namespace {
 
 namespace openspace::interaction {
 
-Path::Path(Waypoint start, Waypoint end, CurveType type,
+Path::Path(Waypoint start, Waypoint end, Type type,
            std::optional<double> duration)
-    : _start(start), _end(end), _curveType(type)
+    : _start(start), _end(end), _type(type)
 {
-    switch (_curveType) {
-        case CurveType::AvoidCollision:
+    switch (_type) {
+        case Type::AvoidCollision:
+        case Type::AvoidCollisionWithLookAt:
             _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
             break;
-        case CurveType::Linear:
+        case Type::Linear:
             _curve = std::make_unique<LinearCurve>(_start, _end);
             break;
-        case CurveType::ZoomOutOverview:
+        case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
         default:
@@ -106,11 +107,7 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
             throw ghoul::MissingCaseException();
     }
 
-    const auto defaultDuration = [](double pathlength) {
-        return std::log(pathlength);
-    };
-
-    _duration = duration.value_or(defaultDuration(pathLength()));
+    _duration = duration.value_or(std::log(pathLength()));
 
     // Compute speed factor to match the generated path length and duration, by
     // traversing the path and computing how much faster/slower it should be
@@ -169,11 +166,12 @@ CameraPose Path::interpolatedPose(double distance) const {
 }
 
 glm::dquat Path::interpolateRotation(double t) const {
-    switch (_curveType) {
-        case CurveType::AvoidCollision:
-        case CurveType::Linear:
+    switch (_type) {
+        case Type::AvoidCollision:
+        case Type::Linear:
             return easedSlerpRotation(t);
-        case CurveType::ZoomOutOverview:
+        case Type::ZoomOutOverview:
+        case Type::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
         default:
             throw ghoul::MissingCaseException();
@@ -231,7 +229,7 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
 }
 
-double Path::speedAlongPath(double traveledDistance) {
+double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
 
@@ -321,7 +319,7 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
 // Compute a target position close to the specified target node, using knowledge of
 // the start point and a desired distance from the node's center
 glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
-                                     const Waypoint& startPoint)
+                                    const Waypoint& startPoint)
 {
     const glm::dvec3 nodePos = targetNode->worldPosition();
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
@@ -361,7 +359,7 @@ glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
 
         return glm::normalize(offsetRotation * targetToSun);
     }
-};
+}
 
 struct NodeInfo {
     std::string identifier;
@@ -408,21 +406,21 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
-                              Path::CurveType curveType)
-{
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::optional<float> duration = p.duration;
+    const std::optional<float> duration = p.duration;
 
     bool hasStart = p.startState.has_value();
-    Waypoint startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
+    const Waypoint startPoint = hasStart ?
+        Waypoint(NavigationState(p.startState.value())) :
+        waypointFromCamera();
 
     // TODO: also handle curve type here
 
     std::vector<Waypoint> waypoints;
-    switch (p.type) {
-        case Parameters::Type::NavigationState: {
+    switch (p.targetType) {
+        case Parameters::TargetType::NavigationState: {
             if (!p.navigationState.has_value()) {
                 throw ghoul::RuntimeError("A navigation state is required");
             }
@@ -433,7 +431,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             waypoints = { Waypoint(navigationState) };
             break;
         }
-        case Parameters::Type::Node: {
+        case Parameters::TargetType::Node: {
             if (!p.target.has_value()) {
                 throw ghoul::RuntimeError("A target node is required");
             }
@@ -458,15 +456,15 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
             break;
         }
         default: {
-            LERROR(fmt::format("Uknown instruciton type: {}", p.type));
+            LERROR(fmt::format("Uknown camera path target type: {}", p.targetType));
             throw ghoul::MissingCaseException();
         }
     }
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
-    Waypoint waypointToAdd = waypoints[0];
+    const Waypoint waypointToAdd = waypoints[0];
 
-    return Path(startPoint, waypointToAdd, curveType, duration);
+    return Path(startPoint, waypointToAdd, type, duration);
 }
 
 } // namespace openspace::interaction

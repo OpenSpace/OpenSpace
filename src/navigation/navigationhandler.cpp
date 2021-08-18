@@ -325,10 +325,10 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
             ));
             return;
         }
-        state = navigationState(*referenceFrame).dictionary();
+        state = navigationState(*referenceFrame);
     }
     else {
-        state = navigationState().dictionary();
+        state = navigationState();
     }
 
     if (!filepath.empty()) {

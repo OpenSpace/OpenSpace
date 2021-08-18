@@ -64,7 +64,6 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
     catch (const documentation::SpecificationError& e) {
         LERROR(ghoul::to_string(e.result));
         LERROR(fmt::format("Error loading state machine: {}", e.what()));
-        return;
     }
 }
 
@@ -99,7 +98,7 @@ std::vector<std::string> StateMachineModule::possibleTransitions() const {
     return _machine->possibleTransitions();
 }
 
-void StateMachineModule::transitionTo(const std::string newState) {
+void StateMachineModule::transitionTo(const std::string& newState) {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
         return;
@@ -108,7 +107,7 @@ void StateMachineModule::transitionTo(const std::string newState) {
     _machine->transitionTo(newState);
 }
 
-bool StateMachineModule::canGoToState(const std::string state) const {
+bool StateMachineModule::canGoToState(const std::string& state) const {
     if (!_machine) {
         LWARNING("Attempting to use uninitialized state machine");
         return false;
