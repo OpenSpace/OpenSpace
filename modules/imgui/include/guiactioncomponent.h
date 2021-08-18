@@ -22,39 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SHORTCUTMANAGER___H__
-#define __OPENSPACE_CORE___SHORTCUTMANAGER___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
 
-#include <ghoul/misc/boolean.h>
-#include <string>
-#include <vector>
+#include <modules/imgui/include/guicomponent.h>
 
-namespace openspace::scripting { struct LuaLibrary; }
+namespace openspace::gui {
 
-namespace openspace::interaction {
-
-class ShortcutManager {
+class GuiActionComponent : public GuiComponent {
 public:
-    BooleanType(IsSynchronized);
+    GuiActionComponent();
 
-    struct ShortcutInformation {
-        std::string name;
-        std::string script;
-        IsSynchronized synchronization;
-        std::string documentation;
-        std::string guiPath;
-    };
-
-    void resetShortcuts();
-    void addShortcut(ShortcutInformation info);
-    const std::vector<ShortcutInformation>& shortcuts() const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-private:
-    std::vector<ShortcutInformation> _shortcuts;
+    void render() override;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace::gui
 
-#endif // __OPENSPACE_CORE___SHORTCUTMANAGER___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__

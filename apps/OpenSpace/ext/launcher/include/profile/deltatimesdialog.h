@@ -27,8 +27,6 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
-
 class QDialogButtonBox;
 class QLabel;
 class QListWidget;
@@ -45,7 +43,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    DeltaTimesDialog(openspace::Profile& profile, QWidget* parent);
+    DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTimes);
 
     /**
      * Returns a text summary of the delta time list for display purposes
@@ -87,8 +85,8 @@ private:
     void setLabelForKey(int index, bool editMode, std::string color);
     bool isLineEmpty(int index);
 
-    openspace::Profile& _profile;
-    std::vector<double> _data;
+    std::vector<double>* _deltaTimes = nullptr;
+    std::vector<double> _deltaTimesData;
     bool _editModeNewItem = false;
 
     QListWidget* _listWidget = nullptr;

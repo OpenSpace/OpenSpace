@@ -27,7 +27,8 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
+#include <openspace/scene/profile.h>
+#include <optional>
 
 class QLineEdit;
 class QTextEdit;
@@ -42,7 +43,7 @@ public:
     *                new or imported profile.
     * \param parent Pointer to parent Qt widget
     */
-    MetaDialog(openspace::Profile& profile, QWidget* parent);
+    MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta);
 
 private slots:
     void save();
@@ -50,7 +51,7 @@ private slots:
 private:
     void createWidgets();
 
-    openspace::Profile& _profile;
+    std::optional<openspace::Profile::Meta>* _meta = nullptr;
 
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _versionEdit = nullptr;

@@ -27,13 +27,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 set(HEADER_FILES
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
   include/profile/assettreeitem.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
-  include/profile/keybindingsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
@@ -47,13 +47,13 @@ set(HEADER_FILES
 set(SOURCE_FILES
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
   src/profile/assettreeitem.cpp
   src/profile/assettreemodel.cpp
   src/profile/cameradialog.cpp
   src/profile/deltatimesdialog.cpp
-  src/profile/keybindingsdialog.cpp
   src/profile/scriptlogdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
@@ -70,12 +70,12 @@ set(MOC_FILES "")
 qt5_wrap_cpp(
   MOC_FILES
   include/launcherwindow.h
+  include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
-  include/profile/keybindingsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h

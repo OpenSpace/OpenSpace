@@ -45,7 +45,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    ModulesDialog(openspace::Profile& profile, QWidget* parent);
+    ModulesDialog(QWidget* parent, std::vector<openspace::Profile::Module>* modules);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -71,8 +71,8 @@ private:
     void editBoxDisabled(bool disabled);
     bool isLineEmpty(int index) const;
 
-    openspace::Profile& _profile;
-    std::vector<openspace::Profile::Module> _data;
+    std::vector<openspace::Profile::Module>* _modules = nullptr;
+    std::vector<openspace::Profile::Module> _moduleData;
     bool _editModeNewItem = false;
 
     QListWidget* _list = nullptr;

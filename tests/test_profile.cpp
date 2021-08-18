@@ -366,7 +366,7 @@ TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
     source["version"]["minor"] = 11;
 
     Profile p(source.dump());
-    p.setIgnoreUpdates(true);
+    p.ignoreUpdates = true;
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
@@ -403,7 +403,7 @@ TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
     source["assets"].push_back("old-asset");
 
     Profile p(source.dump());
-    p.setIgnoreUpdates(true);
+    p.ignoreUpdates = true;
     p.addAsset("new-asset");
     std::string originalSerialized = p.serialize();
 
@@ -468,7 +468,7 @@ TEST_CASE("Remove asset (ignored)", "[profile]") {
 
 
     Profile p(source.dump());
-    p.setIgnoreUpdates(true);
+    p.ignoreUpdates = true;
     p.removeAsset("asset2");
     std::string originalSerialized = p.serialize();
 
@@ -503,7 +503,7 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
     source["assets"].push_back("asset3");
 
     Profile p(source.dump());
-    p.setIgnoreUpdates(true);
+    p.ignoreUpdates = true;
     REQUIRE_NOTHROW(p.removeAsset("unknown-asset"));
 }
 

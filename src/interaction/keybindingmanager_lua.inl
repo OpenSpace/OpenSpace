@@ -30,21 +30,24 @@ namespace openspace::luascriptfunctions {
 /**
  * \ingroup LuaScripts
  * bindKey():
- * Binds a key to Lua command to both execute locally
- * and broadcast to all clients if this node is hosting
- * a parallel connection.
+ * Binds a key to Lua command to both execute locally and broadcast to all clients if this
+ * node is hosting a parallel connection.
  */
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKey");
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::bindKey");
 
-    const std::string& key = ghoul::lua::value<std::string>(L, 1);
-    std::string command = ghoul::lua::value<std::string>(L, 2);
+    std::string key = ghoul::lua::value<std::string>(L, 1);
+    std::string action = ghoul::lua::value<std::string>(L, 2);
 
-    if (command.empty()) {
+    if (action.empty()) {
         lua_settop(L, 0);
-        return ghoul::lua::luaError(L, "Command string is empty");
+        return ghoul::lua::luaError(L, "Action must not be empty");
+    }
+    if (!global::actionManager->hasAction(action)) {
+        lua_settop(L, 0);
+        return ghoul::lua::luaError(L, fmt::format("Action '{}' does not exist", action));
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
@@ -56,65 +59,7 @@ int bindKey(lua_State* L) {
         return ghoul::lua::luaError(L, error);
     }
 
-    std::string doc = (nArguments >= 3) ? ghoul::lua::value<std::string>(L, 3) : "";
-    std::string name = (nArguments >= 4) ? ghoul::lua::value<std::string>(L, 4) : "";
-    std::string guiPath = (nArguments == 5) ? ghoul::lua::value<std::string>(L, 5) : "";
-
-    global::keybindingManager->bindKey(
-        iKey.key,
-        iKey.modifier,
-        std::move(command),
-        std::move(doc),
-        std::move(name),
-        std::move(guiPath)
-    );
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* bindKey():
-* Binds a key to Lua command to execute only locally
-*/
-int bindKeyLocal(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKeyLocal");
-
-    const std::string& key = ghoul::lua::value<std::string>(L, 1);
-    std::string command = ghoul::lua::value<std::string>(L, 2);
-
-    if (command.empty()) {
-        return ghoul::lua::luaError(L, "Command string is empty");
-    }
-
-    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-
-    if (iKey.key == openspace::Key::Unknown) {
-        std::string error = fmt::format("Could not find key '{}'", key);
-        LERRORC("lua.bindKey", error);
-        return ghoul::lua::luaError(L, error);
-    }
-
-    std::string doc = nArguments >= 3 ? ghoul::lua::value<std::string>(L, 3) : "";
-    std::string name = (nArguments >= 4) ?
-        ghoul::lua::value<std::string>(L, 4) :
-        "";
-    std::string guiPath = (nArguments == 5) ?
-        ghoul::lua::value<std::string>(L, 5) :
-        "";
-
-    global::keybindingManager->bindKeyLocal(
-        iKey.key,
-        iKey.modifier,
-        std::move(command),
-        std::move(doc),
-        std::move(name),
-        std::move(guiPath)
-    );
+    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -137,23 +82,17 @@ int getKeyBindings(lua_State* L) {
     );
 
     using K = KeyWithModifier;
-    using V = interaction::KeybindingManager::KeyInformation;
+    using V = std::string;
 
-    const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(key);
+    const std::vector<std::pair<K, V>>& info = global::keybindingManager->keyBinding(
+        stringToKey(key)
+    );
 
     lua_createtable(L, static_cast<int>(info.size()), 0);
     int i = 1;
     for (const std::pair<K, V>& it : info) {
         lua_pushnumber(L, i);
-
-        lua_createtable(L, 2, 0);
-        ghoul::lua::push(L, "Command");
-        ghoul::lua::push(L, it.second.command);
-        lua_settable(L, -3);
-        ghoul::lua::push(L, "Remote");
-        ghoul::lua::push(L, static_cast<bool>(it.second.synchronization));
-        lua_settable(L, -3);
-
+        ghoul::lua::push(L, it.second);
         lua_settable(L, -3);
         ++i;
     }
@@ -174,7 +113,7 @@ int clearKey(lua_State* L) {
     if (t == LUA_TSTRING) {
         // The user provided a single key
         const std::string& key = ghoul::lua::value<std::string>(L, 1);
-        global::keybindingManager->removeKeyBinding(key);
+        global::keybindingManager->removeKeyBinding(stringToKey(key));
     }
     else {
         // The user provided a list of keys
@@ -182,7 +121,7 @@ int clearKey(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
         for (size_t i = 1; i <= d.size(); ++i) {
             const std::string& k = d.value<std::string>(std::to_string(i));
-            global::keybindingManager->removeKeyBinding(k);
+            global::keybindingManager->removeKeyBinding(stringToKey(k));
         }
         lua_pop(L, 1);
     }

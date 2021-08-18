@@ -22,20 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___ACTIONMANAGER___H__
+#define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
-#include <modules/imgui/include/guicomponent.h>
+#include <openspace/interaction/action.h>
+#include <unordered_map>
 
-namespace openspace::gui {
+namespace ghoul { class Dictionary; }
+namespace openspace::scripting { struct LuaLibrary; }
 
-class GuiShortcutsComponent : public GuiComponent {
+namespace openspace::interaction {
+
+class ActionManager {
 public:
-    GuiShortcutsComponent();
+    bool hasAction(const std::string& identifier) const;
+    void registerAction(Action action);
+    void removeAction(const std::string& identifier);
+    const Action& action(const std::string& identifier) const;
+    std::vector<Action> actions() const;
 
-    void render() override;
+    void triggerAction(const std::string& identifier,
+        const ghoul::Dictionary& arguments) const;
+
+    static scripting::LuaLibrary luaLibrary();
+
+private:
+    std::unordered_map<unsigned int, Action> _actions;
 };
 
-} // namespace openspace::gui
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#endif // __OPENSPACE_CORE___ACTIONMANAGER___H__

@@ -79,14 +79,19 @@ public:
         SetType setType;
         std::string name;
         std::string value;
+
     };
-    struct Keybinding {
-        KeyWithModifier key;
+    struct Action {
+        std::string identifier;
         std::string documentation;
         std::string name;
         std::string guiPath;
         bool isLocal;
         std::string script;
+    };
+    struct Keybinding {
+        KeyWithModifier key;
+        std::string action;
     };
     struct Time {
         enum class Type {
@@ -122,8 +127,6 @@ public:
     explicit Profile(const std::string& content);
     std::string serialize() const;
 
-    std::string convertToScene() const;
-
     /**
      * Saves all current settings, starting from the profile that was loaded at startup,
      * and all of the property & asset changes that were made since startup.
@@ -131,46 +134,29 @@ public:
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
         std::string currentTime, interaction::NavigationState navState);
 
-    /// If the value passed to this function is 'true', the addAsset and removeAsset
-    /// functions will be no-ops instead
-    void setIgnoreUpdates(bool ignoreUpdates);
-
-    /// Adds a new asset and checks for duplicates
+    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+    /// set to `true`
     void addAsset(const std::string& path);
 
-    /// Removes an asset
+    /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    /// Removes all assets
-    void clearAssets();
+    static constexpr const Version CurrentVersion = Version{ 1, 1 };
 
-    Version version() const;
-    std::vector<Module> modules() const;
-    std::optional<Meta> meta() const;
-    std::vector<std::string> assets() const;
-    std::vector<Property> properties() const;
-    std::vector<Keybinding> keybindings() const;
-    std::optional<Time> time() const;
-    std::vector<double> deltaTimes() const;
-    std::optional<CameraType> camera() const;
-    std::vector<std::string> markNodes() const;
-    std::vector<std::string> additionalScripts() const;
+    Version version = CurrentVersion;
+    std::vector<Module> modules;
+    std::optional<Meta> meta;
+    std::vector<std::string> assets;
+    std::vector<Property> properties;
+    std::vector<Action> actions;
+    std::vector<Keybinding> keybindings;
+    std::optional<Time> time;
+    std::vector<double> deltaTimes;
+    std::optional<CameraType> camera;
+    std::vector<std::string> markNodes;
+    std::vector<std::string> additionalScripts;
 
-    void clearMeta();
-    void clearTime();
-    void clearCamera();
-
-    void setVersion(Version v);
-    void setModules(std::vector<Module>& m);
-    void setMeta(Meta m);
-    void setProperties(std::vector<Property>& p);
-    void setKeybindings(std::vector<Keybinding>& k);
-    void setTime(Time t);
-    void setDeltaTimes(std::vector<double> dt);
-    void setCamera(CameraType c);
-    void setMarkNodes(std::vector<std::string>& n);
-    void setAdditionalScripts(std::vector<std::string>& s);
-
+    bool ignoreUpdates = false;
 
     /**
      * Returns the Lua library that contains all Lua functions available to provide
@@ -178,24 +164,20 @@ public:
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
-
-private:
-    static constexpr const Version CurrentVersion = Version { 1, 0 };
-
-    Version _version = CurrentVersion;
-    std::vector<Module> _modules;
-    std::optional<Meta> _meta;
-    std::vector<std::string> _assets;
-    std::vector<Property> _properties;
-    std::vector<Keybinding> _keybindings;
-    std::optional<Time> _time;
-    std::vector<double> _deltaTimes;
-    std::optional<CameraType> _camera;
-    std::vector<std::string> _markNodes;
-    std::vector<std::string> _additionalScripts;
-
-    bool _ignoreUpdates = false;
 };
+
+/**
+ * This function takes a profile and returns its asset-ifyied version as a string. This
+ * is the format that is saved as a scene file that, in turn, is provided to OpenSpace as
+ * the root asset to load. This function is a key step to be able to load a Profile in
+ * OpenSpace (at the moment).
+ * 
+ * \param profile The profile that should be converted to the asset-file format
+ * 
+ * \return The string representation of the provided profile, ready to be loaded as an
+ *         asset
+ */
+std::string convertToScene(const Profile& profile);
 
 } // namespace openspace
 

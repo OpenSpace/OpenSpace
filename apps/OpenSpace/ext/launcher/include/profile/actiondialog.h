@@ -22,76 +22,82 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
-#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
 
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
 
+class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
-class QLabel;
+class QGridLayout;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
+class QTextEdit;
 
-class PropertiesDialog : public QDialog {
+class ActionDialog : public QDialog {
 Q_OBJECT
 public:
-    /**
-     * Constructor for properties class
-     *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param parent Pointer to parent Qt widget
-     */
-    PropertiesDialog(QWidget* parent,
-        std::vector<openspace::Profile::Property>* properties);
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    virtual void keyPressEvent(QKeyEvent* evt) override;
-
-private slots:
-    void listItemSelected();
-    void listItemAdded();
-    void listItemRemove();
-    void listItemSave();
-    void listItemCancelSave();
-    void transitionToEditMode();
-    void parseSelections();
+    ActionDialog(QWidget* parent,
+        std::vector<openspace::Profile::Action>* actions,
+        std::vector<openspace::Profile::Keybinding>* keybindings);
 
 private:
     void createWidgets();
+    void createActionWidgets(QGridLayout* layout);
+    void createKeyboardWidgets(QGridLayout* layout);
+    void applyChanges();
 
-    QString createOneLineSummary(openspace::Profile::Property p);
-    void transitionFromEditMode();
-    void editBoxDisabled(bool disabled);
-    bool areRequiredFormsFilled();
-    bool isLineEmpty(int index);
+    openspace::Profile::Action* selectedAction();
+    void actionAdd();
+    void actionRemove();
+    void actionSelected();
+    void actionSaved();
+    void clearActionFields();
+    void actionRejected();
 
-    std::vector<openspace::Profile::Property>* _properties = nullptr;
-    std::vector<openspace::Profile::Property> _propertyData;
-    bool _editModeNewItem = false;
+    openspace::Profile::Keybinding* selectedKeybinding();
+    void keybindingAdd();
+    void keybindingRemove();
+    void keybindingSelected();
+    void keybindingActionSelected(int);
+    void keybindingSaved();
+    void clearKeybindingFields();
+    void keybindingRejected();
 
-    QListWidget* _list = nullptr;
-    QPushButton* _addButton = nullptr;
-    QPushButton* _removeButton = nullptr;
-    QLabel* _commandLabel = nullptr;
-    QComboBox* _commandCombo = nullptr;
-    QLabel* _propertyLabel = nullptr;
-    QLineEdit* _propertyEdit = nullptr;
-    QLabel* _valueLabel = nullptr;
-    QLineEdit* _valueEdit = nullptr;
-    QPushButton* _saveButton = nullptr;
-    QPushButton* _cancelButton = nullptr;
-    QDialogButtonBox* _buttonBox = nullptr;
+    std::vector<openspace::Profile::Action>* _actions = nullptr;
+    std::vector<openspace::Profile::Action> _actionData;
+    std::vector<openspace::Profile::Keybinding>* _keybindings = nullptr;
+    std::vector<openspace::Profile::Keybinding> _keybindingsData;
 
-    QLabel* _errorMsg = nullptr;
+    struct {
+        QListWidget* list = nullptr;
+        QLineEdit* identifier = nullptr;
+        QLineEdit* name = nullptr;
+        QLineEdit* guiPath = nullptr;
+        QLineEdit* documentation = nullptr;
+        QCheckBox* isLocal = nullptr;
+        QTextEdit* script = nullptr;
+        QPushButton* addButton = nullptr;
+        QPushButton* removeButton = nullptr;
+        QDialogButtonBox* saveButtons = nullptr;
+    } _actionWidgets;
+
+    struct {
+        QListWidget* list = nullptr;
+        QCheckBox* shiftModifier = nullptr;
+        QCheckBox* ctrlModifier = nullptr;
+        QCheckBox* altModifier = nullptr;
+        QComboBox* key = nullptr;
+        QComboBox* action = nullptr;
+        QLineEdit* actionText = nullptr;
+        QPushButton* addButton = nullptr;
+        QPushButton* removeButton = nullptr;
+        QDialogButtonBox* saveButtons = nullptr;
+    } _keybindingWidgets;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__
