@@ -257,7 +257,8 @@ int flyToGeo(lua_State* L) {
 
     const SceneGraphNode* n;
     if (providedGlobeIdentifier) {
-        const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+        const std::string& globeIdentifier =
+            ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
         n = sceneGraphNode(globeIdentifier);
         if (!n) {
             return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
@@ -284,9 +285,12 @@ int flyToGeo(lua_State* L) {
         }
     }
 
-    const double latitude = ghoul::lua::value<double>(L, parameterOffset + 1);
-    const double longitude = ghoul::lua::value<double>(L, parameterOffset + 2);
-    const double altitude = ghoul::lua::value<double>(L, parameterOffset + 3);
+    const double latitude =
+        ghoul::lua::value<double>(L, parameterOffset + 1, ghoul::lua::PopValue::No);
+    const double longitude =
+        ghoul::lua::value<double>(L, parameterOffset + 2, ghoul::lua::PopValue::No);
+    const double altitude =
+        ghoul::lua::value<double>(L, parameterOffset + 3, ghoul::lua::PopValue::No);
 
     // Compute the relative position based on the input values
     auto module = global::moduleEngine->module<GlobeBrowsingModule>();
@@ -334,7 +338,8 @@ int flyToGeo(lua_State* L) {
         }
 
         if (firstIsNumber || nArguments > firstLocation) {
-            double duration = ghoul::lua::value<double>(L, location);
+            double duration =
+                ghoul::lua::value<double>(L, location, ghoul::lua::PopValue::No);
             constexpr const double Epsilon = 1e-5;
             if (duration <= Epsilon) {
                 return ghoul::lua::luaError(L, "Duration must be larger than zero");
