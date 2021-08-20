@@ -594,8 +594,13 @@ void RenderableModel::initializeGL() {
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
                 _fragmentShaderPath;
 
-            return global::renderEngine->buildRenderProgram(program, vs, fs);
+            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
         }
+    );
+    // We don't really know what kind of shader the user provides us with, so we can't
+    // make the assumption that we are going to use all uniforms
+    _program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
