@@ -300,6 +300,8 @@ void OpenSpaceEngine::initialize() {
             + ".profile";
         std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
             global::configuration->profile + ".profile";
+        std::string outputProfilePrefix = outputScenePath + "/"
+            + global::configuration->profile;
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
 

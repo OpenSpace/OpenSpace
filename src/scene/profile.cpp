@@ -741,7 +741,60 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-std::string convertToScene(const Profile& p) {
+void convertProfileToSeparatedAssets(const std::string profilePrefix, const Profile& p) {
+    {
+        std::ofstream converted(fmt::format("{}_meta{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_meta(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_includedAssets{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_includedAssets(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_modules{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_modules(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_actionsKeybinds{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_actionsKeybinds(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_time{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_time(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_deltaTimes{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_deltaTimes(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_markNodes{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_markNodes(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_properties{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_properties(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_camera{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_camera(p);
+    }
+    {
+        std::ofstream converted(fmt::format("{}_additionalScripts{}", profilePrefix,
+            p.assetFileExtension));
+        converted << convertToAsset_additionalScripts(p);
+    }
+}
+
+std::string convertToAsset_meta(const Profile& p) {
     ZoneScoped
 
     std::string output;
@@ -771,7 +824,27 @@ std::string convertToScene(const Profile& p) {
         output += "}\n\n";
     }
 
-    // Modules
+    return output;
+}
+
+std::string convertToAsset_includedAssets(const Profile& p) {
+    ZoneScoped
+
+    std::string output;
+
+    // Assets
+    for (const std::string& asset : p.assets) {
+        output += fmt::format("asset.require(\"{}\");\n", asset);
+    }
+
+    return output;
+}
+
+std::string convertToAsset_modules(const Profile& p) {
+    ZoneScoped
+
+    std::string output;
+
     for (const Profile::Module& m : p.modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
@@ -779,12 +852,13 @@ std::string convertToScene(const Profile& p) {
         );
     }
 
-    // Assets
-    for (const std::string& asset : p.assets) {
-        output += fmt::format("asset.require(\"{}\");\n", asset);
-    }
+    return output;
+}
 
-    output += "\n\nasset.onInitialize(function()\n";
+std::string convertToAsset_actionsKeybinds(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     // Actions
     output += "  -- Actions\n";
     for (const Profile::Action& action : p.actions) {
@@ -801,30 +875,44 @@ std::string convertToScene(const Profile& p) {
 
     // Keybindings
     output += "\n  -- Keybindings\n";
-        for (size_t i = 0; i < p.keybindings.size(); ++i) {
+    for (size_t i = 0; i < p.keybindings.size(); ++i) {
         const Profile::Keybinding& k = p.keybindings[i];
         const std::string key = keyToString(k.key);
         output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
+    output += "end)\n";
 
-    // Time
+    return output;
+}
+
+std::string convertToAsset_time(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     output += "\n  -- Time\n";
     switch (p.time->type) {
-        case Profile::Time::Type::Absolute:
-            output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
-            break;
-        case Profile::Time::Type::Relative:
-            output += "  local now = openspace.time.currentWallTime();\n";
-            output += fmt::format(
-                "  local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
-            );
-            output += "  openspace.time.setTime(prev);\n";
-            break;
-        default:
-            throw ghoul::MissingCaseException();
+    case Profile::Time::Type::Absolute:
+        output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
+        break;
+    case Profile::Time::Type::Relative:
+        output += "  local now = openspace.time.currentWallTime();\n";
+        output += fmt::format(
+            "  local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
+        );
+        output += "  openspace.time.setTime(prev);\n";
+        break;
+    default:
+        throw ghoul::MissingCaseException();
     }
+    output += "end)\n";
 
-    // Delta Times
+    return output;
+}
+
+std::string convertToAsset_deltaTimes(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     {
         output += "\n  -- Delta Times\n";
         std::string times;
@@ -833,8 +921,15 @@ std::string convertToScene(const Profile& p) {
         }
         output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
     }
+    output += "end)\n";
 
-    // Mark Nodes
+    return output;
+}
+
+std::string convertToAsset_markNodes(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     {
         output += "\n  -- Mark Nodes\n";
         std::string nodes;
@@ -843,32 +938,48 @@ std::string convertToScene(const Profile& p) {
         }
         output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
+    output += "end)\n";
 
-    // Properties
+    return output;
+}
+
+std::string convertToAsset_properties(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     output += "\n  -- Properties\n";
     for (const Profile::Property& prop : p.properties) {
         switch (prop.setType) {
-            case Profile::Property::SetType::SetPropertyValue:
-                output += fmt::format(
-                    "  openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
-                );
-                break;
-            case Profile::Property::SetType::SetPropertyValueSingle:
-                output += fmt::format(
-                    "  openspace.setPropertyValueSingle(\"{}\", {});\n",
-                    prop.name, prop.value
-                );
-                break;
-            default:
-                throw ghoul::MissingCaseException();
+        case Profile::Property::SetType::SetPropertyValue:
+            output += fmt::format(
+                "  openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
+            );
+            break;
+        case Profile::Property::SetType::SetPropertyValueSingle:
+            output += fmt::format(
+                "  openspace.setPropertyValueSingle(\"{}\", {});\n",
+                prop.name, prop.value
+            );
+            break;
+        default:
+            throw ghoul::MissingCaseException();
         }
     }
+    output += "end)\n";
+
+    return output;
+}
+
+std::string convertToAsset_camera(const Profile& p) {
+    ZoneScoped
+
+    std::string output;
 
     // Camera
     output += "\n  -- Camera\n";
     if (p.camera.has_value()) {
         output += std::visit(
-            overloaded {
+            overloaded{
                 [](const Profile::CameraNavState& c) {
                     std::string result;
                     result += "  openspace.navigation.setNavigationState({";
@@ -915,14 +1026,22 @@ std::string convertToScene(const Profile& p) {
                 }
             },
             *p.camera
-        );
+                    );
     }
+    output += "end)\n";
 
-    output += "\n  -- Additional Scripts begin\n";
+    return output;
+}
+
+std::string convertToAsset_additionalScripts(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
+
+    output += "\n  -- Additional Scripts\n";
     for (const std::string& a : p.additionalScripts) {
         output += fmt::format("  {}\n", a);
     }
-    output += "  -- Additional Scripts end\n";
     output += "end)\n";
 
     return output;

@@ -164,20 +164,120 @@ public:
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
+
+    const std::string file_subName_assets = "";
+    const std::string assetFileExtension = ".asset";
 };
 
 /**
- * This function takes a profile and returns its asset-ifyied version as a string. This
- * is the format that is saved as a scene file that, in turn, is provided to OpenSpace as
- * the root asset to load. This function is a key step to be able to load a Profile in
- * OpenSpace (at the moment).
- * 
- * \param profile The profile that should be converted to the asset-file format
- * 
- * \return The string representation of the provided profile, ready to be loaded as an
- *         asset
+ * convertToAsset_* functions extract a section (* as section name) and returns its
+ * asset-ified version as a string. This allows the profile section to be processed
+ * by the asset loader. Having individual sections allows for controlling the order of
+ * processing/loading the profile. It also makes it possible for changing the way
+ * sections are processed.
  */
-std::string convertToScene(const Profile& profile);
+/**
+ * Function to process the meta information included in the profile
+ * 
+ * \param profile The profile that should be processed
+ * 
+ * \return The string representation of the provided profile's meta section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_meta(const Profile& p);
+
+/**
+ * Function to process the assets that are included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's asset section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_includedAssets(const Profile& p);
+
+/**
+ * Function to process the modules that may be included in the profile, and the commands
+ * to execute if they are/aren't loaded
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's modules section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_modules(const Profile& p);
+
+/**
+ * Function to process the actions and keybindings that are included in the profile.
+ * The actions and keybindings are separate but closely-related sections of a profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's actions and keybindings
+ *         sections, ready to be loaded as an asset
+ */
+std::string convertToAsset_actionsKeybinds(const Profile& p);
+
+/**
+ * Function to process the time setting that is included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's time section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_time(const Profile& p);
+
+/**
+ * Function to process the delta time settings that are included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's delta times section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_deltaTimes(const Profile& p);
+
+/**
+ * Function to process the mark-interesting-nodes that are included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's mark-interesting-nodes
+ *         section, ready to be loaded as an asset
+ */
+std::string convertToAsset_markNodes(const Profile& p);
+
+/**
+ * Function to process the properties that are included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's properties section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_properties(const Profile& p);
+
+/**
+ * Function to process the initial camera orientation that is included in the profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's camera section, ready
+ *         to be loaded as an asset
+ */
+std::string convertToAsset_camera(const Profile& p);
+
+/**
+ * Function to process the additional scripts command section that is included in the
+ * profile
+ *
+ * \param profile The profile that should be processed
+ *
+ * \return The string representation of the provided profile's additional scripts
+ *         section, ready to be loaded as an asset
+ */
+std::string convertToAsset_additionalScripts(const Profile& p);
 
 } // namespace openspace
 
