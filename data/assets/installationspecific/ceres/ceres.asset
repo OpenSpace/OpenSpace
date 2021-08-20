@@ -1,0 +1,79 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('scene/solarsystem/missions/dawn/dawn_kernels.asset').Kernels
+
+-- local textures = asset.syncedResource({
+--   Name = "Ceres Textures",
+--   Type = "UrlSynchronization",
+--   Url = "", -- TODO
+-- })
+
+local Ceres = {
+  Identifier = "Ceres_Stort",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_CERES",
+      DestinationFrame = "GALACTIC",
+      Kernels = {
+        kernels .. "/dawn_ceres_v01.tpc",
+        kernels .. "/sb_ceres_140724.bsp",
+        kernels .. "/sb_ceres_110211.bsp"
+      }
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CERES",
+      Observer = "SSB",
+      Kernels = {
+        kernels .. "/dawn_ceres_v01.tpc",
+        kernels .. "/sb_ceres_140724.bsp",
+        kernels .. "/sb_ceres_110211.bsp"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6.390E5, 6.390E5, 6.390E5 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Ceres"
+  }
+}
+
+
+local CeresTrail = {
+  Identifier = "CeresTrail_Stort",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CERES",
+      Observer = "SSB"
+    },
+    Color = { 0.7, 0.8, 0.7 },
+    StartTime = "2010 JAN 01 00:00:00.000",
+    EndTime = "2100 JAN 01 00:00:00.000",
+    Period = 1325.0,
+    Resolution = 3600 * 24
+  },
+  GUI = {
+    Name = "Ceres Trail",
+    Path = "/Solar System/Dwarf Planets/Ceres"
+  }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Ceres, CeresTrail })
+
+asset.onInitialize(function ()
+--   openspace.globebrowsing.addBlendingLayersFromDirectory(textures, Ceres.Identifier)
+  openspace.globebrowsing.addBlendingLayersFromDirectory(
+      "D:/dev/GitHub-Pages/weirdrubberduck.github.io/ceres_textures", 
+      Ceres.Identifier
+  )
+end)
