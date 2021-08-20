@@ -36,7 +36,7 @@ class QLabel;
 class QLineEdit;
 class QTextEdit;
 
-class ProfileEdit : public QDialog {
+class ProfileEdit final : public QDialog {
 Q_OBJECT
 public:
     /**

@@ -172,7 +172,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-length-array"
     "-Wno-missing-braces"
-    "-Wno-unknown-attributes"
+    "-Wno-ignored-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
@@ -202,6 +202,7 @@ function (set_openspace_compile_settings target)
     "-Wint-in-bool-context"
     "-Wno-deprecated-copy"
     "-Wno-float-equal"
+    "-Wno-suggest-attribute=const"
     "-Wno-write-strings"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"
