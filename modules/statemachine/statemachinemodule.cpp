@@ -75,7 +75,7 @@ bool StateMachineModule::hasStateMachine() const {
 
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -84,7 +84,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine || !_machine->currentState()) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return "";
     }
 
@@ -93,7 +93,7 @@ std::string StateMachineModule::currentState() const {
 
 std::vector<std::string> StateMachineModule::possibleTransitions() const {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return std::vector<std::string>();
     }
 
@@ -102,7 +102,7 @@ std::vector<std::string> StateMachineModule::possibleTransitions() const {
 
 void StateMachineModule::transitionTo(const std::string& newState) {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -111,7 +111,7 @@ void StateMachineModule::transitionTo(const std::string& newState) {
 
 bool StateMachineModule::canGoToState(const std::string& state) const {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return false;
     }
 
@@ -119,19 +119,18 @@ bool StateMachineModule::canGoToState(const std::string& state) const {
 }
 
 void StateMachineModule::saveToFile(const std::string& filename,
-                                    std::optional<std::string> directory) const
+                                    std::string directory) const
 {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return;
     }
 
-    directory = directory.value_or("${TEMPORARY}/");
-    if ((*directory).back() != '/') {
-        *directory += "/";
+    if (directory.back() != '/') {
+        directory += '/';
     }
 
-    const std::string outputFile = absPath(*directory + filename).string();
+    const std::string outputFile = absPath(directory + filename).string();
     _machine->saveToDotFile(outputFile);
 }
 

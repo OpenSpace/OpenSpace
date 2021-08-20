@@ -58,7 +58,7 @@ public:
      * If no directory is given, the TEMP folder is used
      */
     void saveToFile(const std::string& fileName,
-        std::optional<std::string> directory = std::nullopt) const;
+        std::string directory = "${TEMPORARY}/") const;
 
     scripting::LuaLibrary luaLibrary() const override;
 

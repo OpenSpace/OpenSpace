@@ -116,12 +116,17 @@ int printCurrentStateInfo(lua_State* L) {
 
 int saveToDotFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::saveToDotFile");
-
-    auto [filename, dir] =
+    auto [filename, directory] =
         ghoul::lua::values<std::string, std::optional<std::string>>(L);
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    module->saveToFile(filename, dir);
+
+    if (directory.has_value()) {
+        module->saveToFile(filename, *directory);
+    }
+    else {
+        module->saveToFile(filename);
+    }
     return 0;
 }
 
