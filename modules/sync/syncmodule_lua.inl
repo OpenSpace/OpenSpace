@@ -55,7 +55,6 @@ int syncResource(lua_State* L) {
 int unsyncResource(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::unsyncResource");
     auto [identifier, version] = ghoul::lua::values<std::string, std::optional<int>>(L);
-    //version = version.value_or(-1);
 
     const SyncModule* module = global::moduleEngine->module<SyncModule>();
     std::filesystem::path sync = absPath(module->synchronizationRoot());
