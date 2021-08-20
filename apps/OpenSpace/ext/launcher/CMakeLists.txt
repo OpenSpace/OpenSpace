@@ -64,11 +64,7 @@ set(SOURCE_FILES
   src/profile/propertiesdialog.cpp
 )
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
-set(MOC_FILES "")
-qt5_wrap_cpp(
-  MOC_FILES
+set(HEADER_SOURCE
   include/launcherwindow.h
   include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
@@ -85,13 +81,33 @@ qt5_wrap_cpp(
   include/profile/propertiesdialog.h
 )
 
+find_package(Qt5 COMPONENTS Widgets)
+set(MOC_FILES "")
 set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
+set(LIBRARIES "")
+
+if (${Qt5_found})
+  qt5_wrap_cpp(
+    MOC_FILES
+    ${HEADER_SOURCE}
+  )
+  qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
+  set(LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets)
+else ()
+  find_package(Qt6 COMPONENTS Widgets REQUIRED)
+
+  qt6_wrap_cpp(
+    MOC_FILES
+    ${HEADER_SOURCE}
+  )
+  qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
+  set(LIBRARIES Qt6::Core Qt6::Gui Qt6::Widgets)
+endif()
 
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
 target_include_directories(openspace-ui-launcher PUBLIC include)
-target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets openspace-core)
+target_link_libraries(openspace-ui-launcher PUBLIC ${LIBRARIES} openspace-core)
 
 if (MSVC)
 set(MSVC_WARNINGS
