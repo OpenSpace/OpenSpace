@@ -186,7 +186,6 @@ function (set_openspace_compile_settings target)
     "-Wpedantic"
     "-Wunused-parameter"
     "-Wuninitialized"
-    "-Wsuggest-attribute=const"
     "-Wsuggest-final-types"
     "-Wsuggest-final-methods"
     "-Wsuggest-override"
