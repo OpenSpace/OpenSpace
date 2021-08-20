@@ -335,7 +335,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     distanceUnit = DistanceUnit::Kilometer;
                     break;
 
-                // Weired units
+                // Weird units
                 case Parameters::ScaleUnit::Thou:
                     distanceUnit = DistanceUnit::Thou;
                     break;
