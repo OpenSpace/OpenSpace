@@ -29,7 +29,9 @@
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <string>
 
 #include "statemachinemodule_lua.inl"
 
@@ -73,7 +75,7 @@ bool StateMachineModule::hasStateMachine() const {
 
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -82,7 +84,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine || !_machine->currentState()) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return "";
     }
 
@@ -91,7 +93,7 @@ std::string StateMachineModule::currentState() const {
 
 std::vector<std::string> StateMachineModule::possibleTransitions() const {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return std::vector<std::string>();
     }
 
@@ -100,7 +102,7 @@ std::vector<std::string> StateMachineModule::possibleTransitions() const {
 
 void StateMachineModule::transitionTo(const std::string& newState) {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -109,11 +111,27 @@ void StateMachineModule::transitionTo(const std::string& newState) {
 
 bool StateMachineModule::canGoToState(const std::string& state) const {
     if (!_machine) {
-        LWARNING("Attempting to use uninitialized state machine");
+        LERROR("Attempting to use uninitialized state machine");
         return false;
     }
 
     return _machine->canTransitionTo(state);
+}
+
+void StateMachineModule::saveToFile(const std::string& filename,
+                                    std::string directory) const
+{
+    if (!_machine) {
+        LERROR("Attempting to use uninitialized state machine");
+        return;
+    }
+
+    if (directory.back() != '/') {
+        directory += '/';
+    }
+
+    const std::string outputFile = absPath(directory + filename).string();
+    _machine->saveToDotFile(outputFile);
 }
 
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
@@ -177,6 +195,16 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             {},
             "",
             "Prints information about the current state and possible transitions to the log."
+        },
+        {
+            "saveToDotFile",
+            &luascriptfunctions::saveToDotFile,
+            {},
+            "string, [string]",
+            "Saves the current state machine to a .dot file as a directed graph. The "
+            "resulting graph can be rendered using external tools such as Graphviz. "
+            "The first parameter is the name of the file, and the second is an optional "
+            "directory. If no directory is given, the file is saved to the temp folder."
         }
     };
     return res;
