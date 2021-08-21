@@ -33,7 +33,7 @@
 class QLineEdit;
 class QTextEdit;
 
-class MetaDialog : public QDialog {
+class MetaDialog final : public QDialog {
 Q_OBJECT
 public:
    /**

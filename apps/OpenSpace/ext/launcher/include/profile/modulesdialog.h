@@ -35,7 +35,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 
-class ModulesDialog : public QDialog {
+class ModulesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

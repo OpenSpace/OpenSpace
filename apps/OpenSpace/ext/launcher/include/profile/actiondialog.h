@@ -38,7 +38,7 @@ class QListWidget;
 class QPushButton;
 class QTextEdit;
 
-class ActionDialog : public QDialog {
+class ActionDialog final : public QDialog {
 Q_OBJECT
 public:
     ActionDialog(QWidget* parent,

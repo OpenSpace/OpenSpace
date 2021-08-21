@@ -50,9 +50,7 @@ bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
     // Intersection
     else {
         // Only care about the first intersection point if we have two
-        const double t = static_cast<double>(
-            (-b - std::sqrt(intersectionTest)) / (2.0 * a)
-        );
+        const double t = (-b - std::sqrt(intersectionTest)) / (2.0 * a);
 
         // Check if utside of line segment between p1 and p2
         if (t <= 0 || t >= 1.0) {

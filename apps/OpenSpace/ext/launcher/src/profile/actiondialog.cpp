@@ -65,8 +65,8 @@ ActionDialog::ActionDialog(QWidget* parent,
                            std::vector<openspace::Profile::Keybinding>* keybindings)
     : QDialog(parent)
     , _actions(actions)
-    , _keybindings(keybindings)
     , _actionData(*_actions)
+    , _keybindings(keybindings)
     , _keybindingsData(*_keybindings)
 {
     setWindowTitle("Actions and Keybindings");
@@ -512,9 +512,7 @@ void ActionDialog::actionSaved() {
 
         const auto it = std::find_if(
             _actionData.begin(), _actionData.end(),
-            [id = newIdentifier](const Profile::Action& action) {
-                return action.identifier == id;
-            }
+            [id = newIdentifier](const Profile::Action& a) { return a.identifier == id; }
         );
         if (it != _actionData.end()) {
             QMessageBox::critical(

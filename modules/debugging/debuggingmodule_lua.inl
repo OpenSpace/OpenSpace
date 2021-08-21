@@ -170,7 +170,7 @@ int renderCameraPath(lua_State* L) {
         addDirectionLine(pointIdentifier(0), poses.front());
     }
 
-    for (int i = 1; i < poses.size(); i++) {
+    for (int i = 1; i < static_cast<int>(poses.size()); i++) {
         addPoint(pointIdentifier(i), poses[i].position);
         addLineBetweenPoints(pointIdentifier(i), pointIdentifier(i - 1), PathColor, 4.f);
 

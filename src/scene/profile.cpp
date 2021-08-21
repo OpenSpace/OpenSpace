@@ -498,12 +498,8 @@ void convertVersion10to11(nlohmann::json& profile) {
         return;
     }
 
-    // This needs to be changed if there is another version for any of these types later
-    using Action = Profile::Action;
-    using Keybinding = Profile::Keybinding;
-
-    std::vector<Action> actions;
-    std::vector<Keybinding> keybindings;
+    std::vector<Profile::Action> actions;
+    std::vector<Profile::Keybinding> keybindings;
 
     std::vector<version10::Keybinding> kbs =
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
@@ -511,7 +507,7 @@ void convertVersion10to11(nlohmann::json& profile) {
         version10::Keybinding& kb = kbs[i];
         std::string identifier = fmt::format("profile.keybind.{}", i);
 
-        Action action;
+        Profile::Action action;
         action.identifier = identifier;
         action.documentation = std::move(kb.documentation);
         action.name = std::move(kb.name);
@@ -520,7 +516,7 @@ void convertVersion10to11(nlohmann::json& profile) {
         action.script = std::move(kb.script);
         actions.push_back(std::move(action));
 
-        Keybinding keybinding;
+        Profile::Keybinding keybinding;
         keybinding.key = kb.key;
         keybinding.action = identifier;
         keybindings.push_back(keybinding);

@@ -121,8 +121,7 @@ CameraPose NavigationState::cameraPose() const {
     const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
     const glm::dmat3 referenceFrameTransform = referenceFrameNode->worldRotationMatrix();
 
-    resultingPose.position = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(position, 1.0));
+    resultingPose.position = anchorWorldPosition + referenceFrameTransform * position;
 
     glm::dvec3 upVector = up.has_value() ?
         glm::normalize(referenceFrameTransform * up.value()) :

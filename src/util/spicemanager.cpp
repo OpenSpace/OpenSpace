@@ -231,7 +231,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // kernels
     std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    std::filesystem::path p = std::filesystem::path(path).parent_path();
+    std::filesystem::path p = path.parent_path();
     std::filesystem::current_path(p);
 
     LINFO(fmt::format("Loading SPICE kernel {}", path));
@@ -245,7 +245,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         throwSpiceError("Kernel loading");
     }
 
-    std::filesystem::path fileExtension = std::filesystem::path(path).extension();
+    std::filesystem::path fileExtension = path.extension();
     if (fileExtension == ".bc" || fileExtension == ".BC") {
         findCkCoverage(path.string()); // binary ck kernel
     }

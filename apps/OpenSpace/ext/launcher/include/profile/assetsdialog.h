@@ -32,7 +32,7 @@
 class QTextEdit;
 class QTreeView;
 
-class AssetsDialog : public QDialog {
+class AssetsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

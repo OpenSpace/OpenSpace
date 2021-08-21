@@ -406,21 +406,19 @@ bool HttpFileDownload::initDownload() {
             char buffer[255];
             LERROR(fmt::format(
                 "Cannot open file '{}': {}",
-                std::string(_destination),
+                _destination,
                 std::string(strerror_r(errno, buffer, sizeof(buffer)))
             ));
             return false;
 #else
             LERROR(fmt::format(
-                "Cannot open file '{}': {}",
-                std::string(_destination),
-                std::string(strerror(errno))
+                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
             ));
             return false;
 #endif
         }
 
-        LERROR(fmt::format("Cannot open file {}", std::string(_destination)));
+        LERROR(fmt::format("Cannot open file {}", _destination));
         return false;
 #endif
     }

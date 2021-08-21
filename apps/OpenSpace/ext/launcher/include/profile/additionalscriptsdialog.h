@@ -29,7 +29,7 @@
 
 class QTextEdit;
 
-class AdditionalScriptsDialog : public QDialog {
+class AdditionalScriptsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
