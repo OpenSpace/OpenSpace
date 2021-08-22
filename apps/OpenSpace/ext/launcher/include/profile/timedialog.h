@@ -34,7 +34,7 @@ class QDateTimeEdit;
 class QLabel;
 class QLineEdit;
 
-class TimeDialog : public QDialog {
+class TimeDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

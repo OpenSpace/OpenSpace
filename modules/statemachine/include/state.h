@@ -52,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+#endif // __OPENSPACE_MODULE_STATEMACHINE___STATE___H__

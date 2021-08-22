@@ -34,7 +34,7 @@ class QLabel;
 class QLineEdit;
 class QTabWidget;
 
-class CameraDialog : public QDialog {
+class CameraDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

@@ -94,9 +94,9 @@ public:
     virtual void updateRendererData();
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster,
-        RaycasterListener::IsAttached attached);
+        RaycasterListener::IsAttached attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
-        DeferredcasterListener::IsAttached isAttached);
+        DeferredcasterListener::IsAttached isAttached) override;
 
 private:
     using RaycasterProgObjMap = std::map<

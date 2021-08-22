@@ -276,7 +276,7 @@ void create() {
     actionManager = new (currentPos) interaction::ActionManager;
     ghoul_assert(actionManager, "No action manager");
     currentPos += sizeof(interaction::ActionManager);
-#else ^^^ WIN32 / !WIN32 vvv
+#else // ^^^ WIN32 / !WIN32 vvv
     actionManager = new interaction::ActionManager;
 #endif // WIN32
 

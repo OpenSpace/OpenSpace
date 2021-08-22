@@ -87,7 +87,7 @@ public:
      *
      * \param value The value that is used to set this Property
      */
-    virtual void set(std::any value) override;
+    virtual void set(std::any value) final;
 
     /**
      * Returns the <code>std::type_info</code> describing the template parameter
