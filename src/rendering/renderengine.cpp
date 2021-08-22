@@ -252,6 +252,18 @@ namespace {
         "Enable FXAA",
         "Enable FXAA"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
+        "EnabledFontColor",
+        "Enabled Font Color",
+        "The font color used for enabled options."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
+        "DisabledFontColor",
+        "Disabled Font Color",
+        "The font color used for disabled options."
+    };
 } // namespace
 
 namespace openspace {
@@ -295,6 +307,8 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _enabledFontColor(EnabledFontColorInfo, glm::vec4(0.2f, 0.75f, 0.2f, 1.f))
+    , _disabledFontColor(DisabledFontColorInfo, glm::vec4(0.55f, 0.2f, 0.2f, 1.f))
 {
     addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
@@ -380,6 +394,12 @@ RenderEngine::RenderEngine()
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
+
+    _enabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    addProperty(_enabledFontColor);
+    
+    _disabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    addProperty(_disabledFontColor);
 }
 
 RenderEngine::~RenderEngine() {} // NOLINT
@@ -1148,8 +1168,8 @@ void RenderEngine::renderCameraInformation() {
         return;
     }
 
-    const glm::vec4 EnabledColor  = glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
-    const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
+    const glm::vec4 EnabledColor  = _enabledFontColor.value(); //glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
+    const glm::vec4 DisabledColor = _disabledFontColor.value(); //glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
     const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
 
