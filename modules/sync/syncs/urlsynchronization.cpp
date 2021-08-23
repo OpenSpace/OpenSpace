@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 #include <memory>
@@ -77,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation UrlSynchronization::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "sync_synchronization_url";
-    return doc;
+    return codegen::doc<Parameters>("sync_synchronization_url");
 }
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
@@ -171,8 +170,9 @@ void UrlSynchronization::start() {
                 );
                 _filename = lastPartOfUrl;
             }
-            std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator + _filename + TempSuffix;
+            std::string fileDestination = fmt::format(
+                "{}/{}{}", directory(), _filename, TempSuffix
+            );
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
@@ -192,7 +192,7 @@ void UrlSynchronization::start() {
                 &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
             {
                 if (p.totalBytesKnown) {
-                    std::lock_guard<std::mutex> guard(fileSizeMutex);
+                    std::lock_guard guard(fileSizeMutex);
                     fileSizes[url] = p.totalBytes;
 
                     if (!_nTotalBytesKnown && startedAllDownloads &&
@@ -233,7 +233,9 @@ void UrlSynchronization::start() {
                     tempName.size() - strlen(TempSuffix)
                 );
 
-                FileSys.deleteFile(originalName);
+                if (std::filesystem::is_regular_file(originalName)) {
+                    std::filesystem::remove(originalName);
+                }
                 int success = rename(tempName.c_str(), originalName.c_str());
                 if (success != 0) {
                     LERRORC(
@@ -288,7 +290,7 @@ bool UrlSynchronization::nTotalBytesIsKnown() {
 void UrlSynchronization::createSyncFile() {
     std::string dir = directory();
     std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(dir);
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();
@@ -296,18 +298,12 @@ void UrlSynchronization::createSyncFile() {
 
 bool UrlSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 std::string UrlSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot + ghoul::filesystem::FileSystem::PathSeparator +
-        "url" + ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier + ghoul::filesystem::FileSystem::PathSeparator +
-        "files"
-    );
-
-    return absPath(d);
+    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
+    return absPath(d).string();
 }
 
 } // namespace openspace

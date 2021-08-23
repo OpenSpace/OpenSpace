@@ -28,8 +28,8 @@
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -294,7 +295,9 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -417,13 +420,16 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    if (std::filesystem::is_directory(sourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolderPath)) {
+            if (e.is_regular_file()) {
+                _sourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         // Remove all files that don't have <inputFileTypeString> as extension
         _sourceFiles.erase(
@@ -471,9 +477,8 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
-        ghoul::filesystem::Directory outputFolder(outputFolderPath);
-        if (FileSys.directoryExists(outputFolder)) {
-            outputFolderPath = absPath(outputFolderPath);
+        if (std::filesystem::is_directory(outputFolderPath)) {
+            outputFolderPath = absPath(outputFolderPath).string();
         }
         else {
             LERROR(fmt::format(
@@ -605,8 +610,9 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
-                ghoul::filesystem::File tmpFile(filePath);
-                newState.saveStateToJson(outputFolder + tmpFile.baseName());
+                newState.saveStateToJson(
+                    outputFolder + std::filesystem::path(filePath).stem().string()
+                );
             }
         }
         else {
@@ -916,9 +922,8 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
 {
     if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
         seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
-        ghoul::filesystem::File seedPointFile(seedFilePath);
-        if (FileSys.fileExists(seedPointFile)) {
-            seedFilePath = absPath(seedFilePath);
+        if (std::filesystem::is_regular_file(seedFilePath)) {
+            seedFilePath = absPath(seedFilePath).string();
         }
         else {
             LERROR(fmt::format(
@@ -962,7 +967,7 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
                                                            std::vector<glm::vec3>& outVec)
 {
 
-    std::ifstream seedFile(FileSys.relativePath(path));
+    std::ifstream seedFile(path);
     if (!seedFile.good()) {
         LERROR(fmt::format("Could not open seed points file '{}'", path));
         return false;
@@ -1107,22 +1112,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto renderer = global::renderEngine->rendererImplementation();
-            const bool usingFBufferRenderer = renderer ==
-                                        RenderEngine::RendererImplementation::Framebuffer;
-
-            const bool usingABufferRenderer = renderer ==
-                                        RenderEngine::RendererImplementation::ABuffer;
-
-            if (usingABufferRenderer) {
-                _shaderProgram->setUniform("usingAdditiveBlending", _pColorABlendEnabled);
-            }
-
-            additiveBlending = usingFBufferRenderer;
-            if (additiveBlending) {
-                glDepthMask(false);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            }
+            additiveBlending = true;
+            glDepthMask(false);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         }
 
         glBindVertexArray(_vertexArrayObject);

@@ -27,6 +27,7 @@
 
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -51,6 +52,15 @@ struct Configuration {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
     };
     std::map<std::string, std::string> fonts;
+
+    struct FontSizes {
+        float frameInfo;
+        float shutdown;
+        float log;
+        float cameraInfo;
+        float versionInfo;
+    };
+    FontSizes fontSize;
 
     struct Logging {
         std::string level = "Info";
@@ -85,21 +95,20 @@ struct Configuration {
     bool shouldUseScreenshotDate = false;
 
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache = false;
+    bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
-    glm::dvec3 globalRotation = glm::dvec3(0.0);
-    glm::dvec3 screenSpaceRotation = glm::dvec3(0.0);
-    glm::dvec3 masterRotation = glm::dvec3(0.0);
+    glm::vec3 globalRotation = glm::vec3(0.0);
+    glm::vec3 screenSpaceRotation = glm::vec3(0.0);
+    glm::vec3 masterRotation = glm::vec3(0.0);
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
-    std::string renderingMethod = "Framebuffer";
-
     struct OpenGLDebugContext {
         bool isActive = false;
+        bool printStacktrace = false;
         bool isSynchronous = true;
         struct IdentifierFilter {
             std::string type;
@@ -129,9 +138,9 @@ struct Configuration {
     ghoul::lua::LuaState state;
 };
 
-std::string findConfiguration(const std::string& filename = "openspace.cfg");
+std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
     const std::string& overrideScript);
 
 } // namespace openspace::configuration

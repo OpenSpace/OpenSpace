@@ -1,7 +1,7 @@
 local TexturesPath = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Titan textures",
-    Identifier = "titan_textures",
-    Version = 1
+  Type = "HttpSynchronization",
+  Name = "Titan textures",
+  Identifier = "titan_textures",
+  Version = 2
 })
 asset.export("TexturesPath", TexturesPath)

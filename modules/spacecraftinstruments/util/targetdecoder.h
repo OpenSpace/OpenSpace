@@ -37,7 +37,6 @@ public:
     virtual const std::vector<std::string>& translations() const override;
 
 private:
-    std::string _type;
     std::vector<std::string> _names;
 };
 

@@ -28,7 +28,6 @@
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -199,15 +198,15 @@ ExoplanetsModule::ExoplanetsModule()
 
 std::string ExoplanetsModule::exoplanetsDataPath() const {
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, ExoplanetsDataFileName)
-    );
-};
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
+    ).string();
+}
 
 std::string ExoplanetsModule::lookUpTablePath() const {
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
-    );
-};
+    ).string();
+}
 
 std::string ExoplanetsModule::bvColormapPath() const {
     return _bvColorMapPath;

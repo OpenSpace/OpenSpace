@@ -37,7 +37,6 @@ namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
-    constexpr const char* StrictLuaScript = "${BASE}/scripts/strict.lua";
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
@@ -69,6 +68,22 @@ namespace {
         // key-value pair contained in the table will become the name and the file for a
         // font
         std::optional<std::map<std::string, std::string>> fonts;
+
+        struct FontSizes {
+            // The font size (in pt) used for printing optional information about the
+            // currently rendered frame
+            float frameInfo;
+            // The font size (in pt) used for rendering the shutdown text
+            float shutdown;
+            // The font size (in pt) used for rendering the screen log
+            float log;
+            // The font size (in pt) used for printing the camera friction state
+            float cameraInfo;
+            // The font size (in pt) used for printing the version information
+            float versionInfo;
+        };
+        // Information about the hardcoded fontsizes used by the rendering engine itself
+        FontSizes fontSize;
 
         struct Logging {
             // List from logmanager.cpp::levelFromString
@@ -130,11 +145,11 @@ namespace {
         // shutting down. If ESC is pressed again in this time, the shutdown is aborted
         std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
-        // If this is set to 'true', the name of the scene will be appended to the cache
+        // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
-        // the same instance of OpenSpace is run with multiple scenes, but the caches
+        // the same instance of OpenSpace is run with multiple profiles, but the caches
         // should be retained. This value defaults to 'false'
-        std::optional<bool> perSceneCache;
+        std::optional<bool> perProfileCache;
 
         enum class Scaling {
             Window [[codegen::key("window")]],
@@ -146,15 +161,6 @@ namespace {
         // resolution ('framebuffer'). This value defaults to 'window'
         std::optional<Scaling> onScreenTextScaling;
 
-        // List from RenderEngine::setRendererFromString
-        enum class RenderingMethod {
-            Framebuffer,
-            ABuffer
-        };
-        // The renderer that is use after startup. The renderer 'ABuffer' requires support
-        // for at least OpenGL 4.3
-        std::optional<RenderingMethod> renderingMethod;
-
         // Toggles whether the master in a multi-application setup should be rendering or
         // just managing the state of the network. This is desired in cases where the
         // master computer does not have the resources to render a scene
@@ -163,16 +169,16 @@ namespace {
         // Applies a global view rotation. Use this to rotate the position of the focus
         // node away from the default location on the screen. This setting persists even
         // when a new focus node is selected. Defined using roll, pitch, yaw in radians
-        std::optional<glm::dvec3> globalRotation;
+        std::optional<glm::vec3> globalRotation;
 
         // Applies a view rotation for only the master node, defined using roll, pitch yaw
         // in radians. This can be used to compensate the master view direction for tilted
         // display systems in clustered immersive environments
-        std::optional<glm::dvec3> masterRotation;
+        std::optional<glm::vec3> masterRotation;
 
         // Applies a global rotation for all screenspace renderables. Defined using roll,
         // pitch, yaw in radians
-        std::optional<glm::dvec3> screenSpaceRotation;
+        std::optional<glm::vec3> screenSpaceRotation;
 
         // If this value is set to 'true' the ingame console is disabled, locking the
         // system down against random access
@@ -216,6 +222,11 @@ namespace {
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context
             bool activate;
+
+            // If this is set to 'true', everytime an OpenGL error is logged, the full
+            // stacktrace leading to the error is printed as well, making debugging under
+            // production situations much easier
+            std::optional<bool> printStacktrace;
 
             // Determines whether the OpenGL debug callbacks are performed synchronously.
             // If set to 'true' the callbacks are in the same thread as the context and in
@@ -349,7 +360,7 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    documentation::Documentation doc = codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -369,6 +380,11 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
     c.pathTokens = p.paths;
     c.fonts = p.fonts.value_or(c.fonts);
+    c.fontSize.frameInfo = p.fontSize.frameInfo;
+    c.fontSize.shutdown = p.fontSize.shutdown;
+    c.fontSize.log = p.fontSize.log;
+    c.fontSize.cameraInfo = p.fontSize.cameraInfo;
+    c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
@@ -389,24 +405,12 @@ void parseLuaState(Configuration& configuration) {
                 throw ghoul::MissingCaseException();
         }
     }
-    c.usePerSceneCache = p.perSceneCache.value_or(c.usePerSceneCache);
+    c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
         p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
     c.globalRotation = p.globalRotation.value_or(c.globalRotation);
     c.masterRotation = p.masterRotation.value_or(c.masterRotation);
     c.screenSpaceRotation = p.screenSpaceRotation.value_or(c.screenSpaceRotation);
-    if (p.renderingMethod.has_value()) {
-        switch (*p.renderingMethod) {
-            case Parameters::RenderingMethod::Framebuffer:
-                c.renderingMethod = "Framebuffer";
-                break;
-            case Parameters::RenderingMethod::ABuffer:
-                c.renderingMethod = "ABuffer";
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
     c.isConsoleDisabled = p.disableInGameConsole.value_or(c.isConsoleDisabled);
     if (p.logging.has_value()) {
         if (p.logging->logLevel.has_value()) {
@@ -479,6 +483,9 @@ void parseLuaState(Configuration& configuration) {
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
         c.openGLDebugContext.isActive = l.activate;
+        c.openGLDebugContext.printStacktrace = l.printStacktrace.value_or(
+            c.openGLDebugContext.printStacktrace
+        );
         c.openGLDebugContext.isSynchronous = l.synchronous.value_or(
             c.openGLDebugContext.isSynchronous
         );
@@ -604,33 +611,26 @@ void parseLuaState(Configuration& configuration) {
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 
-documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
+documentation::Documentation Configuration::Documentation =
+    codegen::doc<Parameters>("core_configuration");
 
-std::string findConfiguration(const std::string& filename) {
-    using ghoul::filesystem::Directory;
-
-    Directory directory = FileSys.absolutePath("${BIN}");
+std::filesystem::path findConfiguration(const std::string& filename) {
+    std::filesystem::path directory = absPath("${BIN}");
 
     while (true) {
-        std::string fullPath = FileSys.pathByAppendingComponent(
-            directory,
-            filename
-        );
-
-        if (FileSys.fileExists(fullPath)) {
+        std::filesystem::path p = directory / filename;
+        if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
             // We have found the configuration file and can bail out
-            return fullPath;
+            return p;
         }
 
         // Otherwise, we traverse the directory tree up
-        Directory nextDirectory = directory.parentDirectory(
-            ghoul::filesystem::Directory::AbsolutePath::Yes
-        );
+        std::filesystem::path nextDirectory = directory.parent_path();
 
-        if (directory.path() == nextDirectory.path()) {
+        if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                "Could not find configuration file '" + filename + "'",
+                fmt::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -638,24 +638,20 @@ std::string findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const std::string& overrideScript)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(FileSys.fileExists(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
 
     // If there is an initial config helper file, load it into the state
-    if (FileSys.fileExists(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
-    }
-    if (FileSys.fileExists(absPath(StrictLuaScript))) {
-        ghoul::lua::runScriptFile(result.state, absPath(StrictLuaScript));
+    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename);
+    ghoul::lua::runScriptFile(result.state, filename.string());
 
     if (!overrideScript.empty()) {
         LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");

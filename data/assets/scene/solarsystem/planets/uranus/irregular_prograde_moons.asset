@@ -10,44 +10,44 @@ local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_prograde" }
 local trailColor = { 0.60, 0.65, 0.84 }
 local trailTags = { 
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_uranus",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_uranus",
+  "moonTrail_minor"
 }
 
 local irregularMoons = {
-    {
-        Identifier = "Margaret",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "MARGARET",
-        Radii = { 20000, 20000, 20000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Irregular Prograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 1694.8,
-        Kernels = kernel
-    }
+  {
+    Identifier = "Margaret",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "MARGARET",
+    Radii = { 20000, 20000, 20000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Irregular Prograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1694.8,
+    Kernels = kernel
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(irregularMoons)
+  asset,
+  proceduralGlobes.createGlobes(irregularMoons)
 )
 
 
 asset.meta = {
-    Name = "Uranus Irregular Prograde Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Uranus' irregular prograde
-        moon: Margaret. A blank globe and SPICE trail are generated for the moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Uranus Irregular Prograde Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Uranus' irregular prograde
+    moon: Margaret. A blank globe and SPICE trail are generated for the moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

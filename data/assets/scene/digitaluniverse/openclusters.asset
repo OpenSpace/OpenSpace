@@ -3,65 +3,64 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Open Clusters Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_openclusters_textures",
-    Version = 1
+  Name = "Open Clusters Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_openclusters_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "Open Clusters Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_openclusters_speck",
-    Version = 2
+  Name = "Open Clusters Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_openclusters_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "OpenStarClusters",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 0.1, 0.8, 0.4 },
-        Opacity = 0.5,
-        File = speck .. "/oc.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 12,
-        TextColor = { 0.05, 0.4, 0.2 },
-        LabelFile = speck .. "/oc.label",
-        ScaleFactor = 405.75,
-        TextSize = 15.5,
-        TextMinSize = 4.5,
-        TextMaxSize = 30.0,
-        Unit = "pc",
-        BillboardMaxSize = 604,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Open Star Clusters",
-        Path = "/Milky Way",
-        Description = [[Census: 2,040 clusters. DU Version 5.7. <br> OB associations are
-            young groups of stars that were formed within a giant molecular cloud, but
-            have dispersed after the original gas and dust from the cloud was blown away
-            by the star's radiation pressure. Although an association's stars are no
-            longer gravitationally bound to one another, they share a common motion in
-            space because they were formed from the same cloud. This allows astronomers to
-            easily determine OB association membership stars. These objects are color
-            coded by their spiral arm membership. Blue associations trace the Sagittarius
-            Arm. Purple associations are in the local Orion Spur. Orange associations are
-            in the Perseus Arm (Description from URL) <br><br> Data Reference: Optically
-            visible open clusters and Candidates (Dias+ 2002-2015)]],
-    }
+  Identifier = "OpenStarClusters",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 0.1, 0.8, 0.4 },
+    Opacity = 0.5,
+    File = speck .. "/oc.speck",
+    Unit = "pc",
+    Texture = textures .. "/point4.png",
+    PolygonSides = 12,
+    TextColor = { 0.05, 0.4, 0.2 },
+    LabelFile = speck .. "/oc.label",
+    ScaleFactor = 405.75,
+    TextSize = 15.5,
+    TextMinMaxSize = { 4, 30 },
+    BillboardMinMaxSize = { 0.0, 604.0 },
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Open Star Clusters",
+    Path = "/Milky Way",
+    Description = [[Census: 2,040 clusters. DU Version 5.7. <br> OB associations are
+      young groups of stars that were formed within a giant molecular cloud, but
+      have dispersed after the original gas and dust from the cloud was blown away
+      by the star's radiation pressure. Although an association's stars are no
+      longer gravitationally bound to one another, they share a common motion in
+      space because they were formed from the same cloud. This allows astronomers to
+      easily determine OB association membership stars. These objects are color
+      coded by their spiral arm membership. Blue associations trace the Sagittarius
+      Arm. Purple associations are in the local Orion Spur. Orange associations are
+      in the Perseus Arm (Description from URL) <br><br> Data Reference: Optically
+      visible open clusters and Candidates (Dias+ 2002-2015)]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Open Star Clusters",
-    Version = "2.0",
-    Description = [[Digital Universe asset for Open Star Clusters]],
-    Author = "Brian Abbott (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"OpenStarClusters"}
+  Name = "Open Star Clusters",
+  Version = "2.0",
+  Description = [[Digital Universe asset for Open Star Clusters]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"OpenStarClusters"}
 }

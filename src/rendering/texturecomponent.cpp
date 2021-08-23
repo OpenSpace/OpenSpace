@@ -77,23 +77,21 @@ void TextureComponent::uploadToGpu() {
     }
 }
 
-void TextureComponent::loadFromFile(const std::string& path) {
+void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     if (!path.empty()) {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(path)
+            absPath(path.string()).string()
         );
 
         if (texture) {
-            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(path)));
+            LDEBUG(fmt::format("Loaded texture from {}", absPath(path.string())));
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(path);
             if (_shouldWatchFile) {
-                _textureFile->setCallback(
-                    [&](const ghoul::filesystem::File&) { _fileIsDirty = true; }
-                );
+                _textureFile->setCallback([this]() { _fileIsDirty = true; });
             }
 
             _fileIsDirty = false;

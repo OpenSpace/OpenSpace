@@ -5,61 +5,56 @@ asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Titan = {
-    Identifier = "Titan",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "TITAN",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_TITAN",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Titan",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TITAN",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 2576000,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/titan.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 10.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            LabelsFadeOutEnabled = true,
-            FadeInStartingDistance = 7500000.0,
-            FadeOutStartingDistance = 6000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Name = "Titan",
-        Path = "/Solar System/Planets/Saturn/Moons",
-        Description = [[Largest moon of Saturn.]]
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TITAN",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 2576000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/titan.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.6,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      FadeDistances = { 5000000.0, 7500000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Titan",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[Largest moon of Saturn.]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
 
 
 asset.meta = {
-    Name = "Titan",
-    Version = "1.0",
-    Description = [[ Titan globe with labels.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Titan"}
+  Name = "Titan",
+  Version = "1.0",
+  Description = [[ Titan globe with labels.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Titan"}
 }

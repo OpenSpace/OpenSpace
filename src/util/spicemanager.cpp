@@ -32,6 +32,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -202,18 +203,18 @@ void throwSpiceError(const std::string& errorMessage) {
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
-        FileSys.fileExists(filePath),
-        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
+        std::filesystem::is_regular_file(filePath),
+        fmt::format("File '{}' ({}) does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
-        FileSys.directoryExists(ghoul::filesystem::File(filePath).directoryName()),
+        std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
-            "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), ghoul::filesystem::File(filePath).directoryName()
+            "File {} exists, but directory {} does not",
+            absPath(filePath), std::filesystem::path(filePath).parent_path()
         )
     );
 
-    std::string path = absPath(std::move(filePath));
+    std::filesystem::path path = absPath(std::move(filePath));
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
@@ -228,39 +229,33 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // We need to set the current directory as meta-kernels are usually defined relative
     // to the directory they reside in. The directory change is not necessary for regular
     // kernels
-    ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
-    using RawPath = ghoul::filesystem::File::RawPath;
-    std::string fileDirectory = ghoul::filesystem::File(
-        path,
-        RawPath::Yes
-    ).directoryName();
-    FileSys.setCurrentDirectory(fileDirectory);
+    std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
+    std::filesystem::path p = path.parent_path();
+    std::filesystem::current_path(p);
+
+    LINFO(fmt::format("Loading SPICE kernel {}", path));
     // Load the kernel
-    furnsh_c(path.c_str());
+    furnsh_c(path.string().c_str());
 
     // Reset the current directory to the previous one
-    FileSys.setCurrentDirectory(currentDirectory);
+    std::filesystem::current_path(currentDirectory);
 
     if (failed_c()) {
         throwSpiceError("Kernel loading");
     }
 
-    std::string fileExtension = ghoul::filesystem::File(
-        path,
-        RawPath::Yes
-    ).fileExtension();
-    if (fileExtension == "bc" || fileExtension == "BC") {
-        findCkCoverage(path); // binary ck kernel
+    std::filesystem::path fileExtension = path.extension();
+    if (fileExtension == ".bc" || fileExtension == ".BC") {
+        findCkCoverage(path.string()); // binary ck kernel
     }
-    else if (fileExtension == "bsp" || fileExtension == "BSP") {
-        findSpkCoverage(path); // binary spk kernel
+    else if (fileExtension == ".bsp" || fileExtension == ".BSP") {
+        findSpkCoverage(path.string()); // binary spk kernel
     }
 
     KernelHandle kernelId = ++_lastAssignedKernel;
     ghoul_assert(kernelId != 0, fmt::format("Kernel Handle wrapped around to 0"));
-    _loadedKernels.push_back({std::move(path), kernelId, 1});
+    _loadedKernels.push_back({ path.string(), kernelId, 1 });
     return kernelId;
 }
 
@@ -278,7 +273,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(fmt::format("Unloading SPICE kernel {}", it->path));
             unload_c(it->path.c_str());
             _loadedKernels.erase(it);
         }
@@ -293,7 +288,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
 void SpiceManager::unloadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
 
-    std::string path = absPath(std::move(filePath));
+    std::filesystem::path path = absPath(std::move(filePath));
 
     const auto it = std::find_if(
         _loadedKernels.begin(),
@@ -304,7 +299,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                fmt::format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("{} did not correspond to a loaded kernel", path)
             );
         }
         else {
@@ -314,8 +309,8 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
-            unload_c(path.c_str());
+            LINFO(fmt::format("Unloading SPICE kernel {}", path));
+            unload_c(path.string().c_str());
             _loadedKernels.erase(it);
         }
         else {
@@ -330,6 +325,11 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
+    // SOLAR SYSTEM BARYCENTER special case, implicitly included by Spice
+    if (id == 0) {
+        return true;
+    }
+
     const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
         const std::vector<std::pair<double, double>>& intervalVector = it->second;
@@ -612,7 +612,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             );
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
@@ -683,7 +683,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!to.empty(), "To must not be empty");
 
     // get rotation matrix from frame A - frame B
-    glm::dmat3 transform;
+    glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
         to.c_str(),
@@ -856,7 +856,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     pxform_c(
         sourceFrame.c_str(),
         destinationFrame.c_str(),
@@ -888,7 +888,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
 
     pxfrm2_c(
         sourceFrame.c_str(),
@@ -1006,10 +1006,13 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
 
 void SpiceManager::findCkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
+    ghoul_assert(
+        std::filesystem::is_regular_file(path),
+        fmt::format("File '{}' does not exist", path)
+    );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1062,10 +1065,13 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
 void SpiceManager::findSpkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
+    ghoul_assert(
+        std::filesystem::is_regular_file(path),
+        fmt::format("File '{}' does not exist", path)
+    );
 
-    constexpr unsigned int MaxObj = 256;
-    constexpr unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 1024;
+    constexpr unsigned int WinSiz = 16384;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -1144,7 +1150,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             throw SpiceException(fmt::format("No position for '{}' at any time", target));
         }
         else {
-            return glm::dvec3();
+            return glm::dvec3(0.0);
         }
     }
 
@@ -1356,15 +1362,35 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
                 "getSpkCoverage",
                 &luascriptfunctions::spkCoverage,
                 {},
-                "{string [, printValues]}",
+                "string",
                 "Returns a list of SPK coverage intervals for the target."
             },
             {
                 "getCkCoverage",
-                & luascriptfunctions::ckCoverage,
+                &luascriptfunctions::ckCoverage,
                 {},
-                "{string [, printValues]}",
+                "string",
                 "Returns a list of CK coverage intervals for the target."
+            },
+            {
+                "rotationMatrix",
+                &luascriptfunctions::rotationMatrix,
+                {},
+                "{string, string, string}",
+                "Returns the rotationMatrix for a given body in a frame of reference at a specific"
+                "time. The first agument is the target body, the second is the frame of reference,"
+                " the third is the time. Example: openspace.spice.rotationMatrix('"
+                "INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')."
+            },
+            {
+                "position",
+                &luascriptfunctions::position,
+                {},
+                "{string, string, string, string}",
+                "Returns the position for a target by an observer in a frame of reference at a specific"
+                "time. The first agument is the target body, the second is the observer body, the third"
+                "is the frame of reference, and the fourth is the time. Example: openspace.spice."
+                "position('INSIGHT','MARS','GALACTIC', '2018 NOV 26 19:45:34')."
             },
             {
                 "getSpiceBodies",

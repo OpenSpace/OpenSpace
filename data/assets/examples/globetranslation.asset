@@ -2,73 +2,58 @@ local assetHelper = asset.require('util/asset_helper')
 local earth = asset.require('scene/solarsystem/planets/earth/earth')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-local textures = asset.syncedResource({
-    Name = "New Horizons Textures",
-    Type = "HttpSynchronization",
-    Identifier = "newhorizons_textures",
-    Version = 3
-})
-
 local models = asset.syncedResource({
-    Name = "New Horizons Model",
-    Type = "HttpSynchronization",
-    Identifier = "newhorizons_model",
-    Version = 1
+  Name = "New Horizons Model",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_model",
+  Version = 2
 })
 
 local Example_Fixed_Height = {
-    Identifier = "Example_Fixed_Height",
-    Parent = earth.Earth.Identifier,
-    Transform = {
-        Translation = {
-            Type = "GlobeTranslation",
-            Globe = earth.Earth.Identifier,
-            Longitude = 0.0,
-            Latitude = 0.0,
-            FixedAltitude = 10000000.0
-        }
-    },
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "NEW HORIZONS",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
-            ColorTexture = textures .. "/NHTexture.jpg"
-        }}
-    },
-    GUI = {
-        Path = "/Example"
+  Identifier = "Example_Fixed_Height",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.006,
+      Latitude = 40.7128,
+      Altitude = 100000.0
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "NEW HORIZONS",
+    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+  },
+  GUI = {
+    Path = "/Example"
+  }
 }
 
 local Example_Adaptive_Height = {
-    Identifier = "Example_Adaptive_Height",
-    Parent = earth.Earth.Identifier,
-    Transform = {
-        Translation = {
-            Type = "GlobeTranslation",
-            Globe = earth.Earth.Identifier,
-            Longitude = -74.006,
-            Latitude = 40.7128
-        }
-    },
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "NEW HORIZONS",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
-            ColorTexture = textures .. "/NHTexture.jpg"
-        }}
-    },
-    GUI = {
-        Path = "/Example"
+  Identifier = "Example_Adaptive_Height",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.006,
+      Latitude = 40.7128,
+      UseHeightmap = true
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "NEW HORIZONS",
+    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+  },
+  GUI = {
+    Path = "/Example"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Example_Fixed_Height,
-    Example_Adaptive_Height
+  Example_Fixed_Height,
+  Example_Adaptive_Height
 })

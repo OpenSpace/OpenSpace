@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 
@@ -58,9 +59,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation HttpSynchronization::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "http_synchronization";
-    return doc;
+    return codegen::doc<Parameters>("http_synchronization");
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
@@ -85,17 +84,10 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::string HttpSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        "http" +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        std::to_string(_version)
+    std::string d = fmt::format(
+        "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
-
-    return FileSys.absPath(d);
+    return absPath(d).string();
 }
 
 void HttpSynchronization::start() {
@@ -157,7 +149,7 @@ void HttpSynchronization::createSyncFile() {
     const std::string& directoryName = directory();
     const std::string& filepath = directoryName + ".ossync";
 
-    FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(directoryName);
 
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
@@ -166,7 +158,7 @@ void HttpSynchronization::createSyncFile() {
 
 bool HttpSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
@@ -209,9 +201,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         size_t lastSlash = line.find_last_of('/');
         std::string filename = line.substr(lastSlash + 1);
 
-        std::string fileDestination = directory() +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            filename + TempSuffix;
+        std::string fileDestination = fmt::format(
+            "{}/{}{}", directory(), filename, TempSuffix
+        );
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));
@@ -236,7 +228,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 return !_shouldCancel;
             }
 
-            std::lock_guard<std::mutex> guard(sizeDataMutex);
+            std::lock_guard guard(sizeDataMutex);
 
             sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
 
@@ -278,7 +270,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 tempName.size() - strlen(TempSuffix)
             );
 
-            FileSys.deleteFile(originalName);
+            if (std::filesystem::is_regular_file(originalName)) {
+                std::filesystem::remove(originalName);
+            }
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
                 LERROR(fmt::format(

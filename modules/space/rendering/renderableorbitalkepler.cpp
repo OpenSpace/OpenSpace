@@ -262,9 +262,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableOrbitalKepler::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderableorbitalkepler";
-    return doc;
+    return codegen::doc<Parameters>("space_renderableorbitalkepler");
 }
 
 double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const {
@@ -476,6 +474,14 @@ void RenderableOrbitalKepler::initializeGL() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
+
+    double maxSemiMajorAxis = 0.0;
+    for (const KeplerParameters& kp : _data) {
+        if (kp.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = kp.semiMajorAxis;
+        }
+    }
+    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {

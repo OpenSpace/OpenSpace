@@ -13,148 +13,148 @@ local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner" }
 local trailColor = { 0.2, 0.5, 0.75 }
 local trailTags = { 
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_neptune",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_neptune",
+  "moonTrail_minor"
 }
 
 local innerMoons = {
-    {
-        Identifier = "Naiad",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "NAIAD",
-        Radii = { 96000, 60000, 52000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.294,
-        Kernels = kernel088
+  {
+    Identifier = "Naiad",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Thalassa",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "THALASSA",
-        Radii = { 108000, 100000, 52000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.311,
-        Kernels = kernel088
+    Spice = "NAIAD",
+    Radii = { 96000, 60000, 52000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
     },
-    {
-        Identifier = "Despina",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "DESPINA",
-        Radii = { 180000, 148000, 128000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.335,
-        Kernels = kernel088
+    TrailColor = trailColor,
+    OrbitPeriod = 0.294,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "Thalassa",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Galatea",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "GALATEA",
-        Radii = { 204000, 184000, 144000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.429,
-        Kernels = kernel088
+    Spice = "THALASSA",
+    Radii = { 108000, 100000, 52000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
     },
-    {
-        Identifier = "Larissa",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "LARISSA",
-        Radii = { 216000, 204000, 168000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.555,
-        Kernels = kernel088
+    TrailColor = trailColor,
+    OrbitPeriod = 0.311,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "Despina",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "S2004N1",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "814",
-        Radii = { 16000, 16000, 16000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2004 N 1",
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 0.936,
-        Kernels = kernel088
+    Spice = "DESPINA",
+    Radii = { 180000, 148000, 128000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
     },
-    {
-        Identifier = "Proteus",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PROTEUS",
-        Radii = { 436000, 416000, 402000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 1.122,
-        Kernels = kernel081
-    }
+    TrailColor = trailColor,
+    OrbitPeriod = 0.335,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "Galatea",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "GALATEA",
+    Radii = { 204000, 184000, 144000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.429,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "Larissa",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "LARISSA",
+    Radii = { 216000, 204000, 168000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.555,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "S2004N1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "814",
+    Radii = { 16000, 16000, 16000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2004 N 1",
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 0.936,
+    Kernels = kernel088
+  },
+  {
+    Identifier = "Proteus",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PROTEUS",
+    Radii = { 436000, 416000, 402000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 1.122,
+    Kernels = kernel081
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(innerMoons)
+  asset,
+  proceduralGlobes.createGlobes(innerMoons)
 )
 
 
 asset.meta = {
-    Name = "Neptune Inner Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Neptune' inner prograde moons:
-        Naiad, Thalassa, Despina, Galatea, Larissa, S2004N1, and Proteus. Blank globes and
-        SPICE trails are generated for each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Neptune Inner Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Neptune' inner prograde moons:
+    Naiad, Thalassa, Despina, Galatea, Larissa, S2004N1, and Proteus. Blank globes and
+    SPICE trails are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

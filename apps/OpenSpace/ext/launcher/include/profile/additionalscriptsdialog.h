@@ -27,11 +27,9 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
-
 class QTextEdit;
 
-class AdditionalScriptsDialog : public QDialog {
+class AdditionalScriptsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -41,16 +39,26 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    AdditionalScriptsDialog(openspace::Profile& profile, QWidget* parent);
+    AdditionalScriptsDialog(QWidget* parent, std::vector<std::string>* scripts);
 
 private slots:
     void parseScript();
+    void chooseScripts();
+
+    /**
+     * Adds scripts to the _scriptEdit from outside dialogs
+     *
+     * \param scripts #std::string scripts to be appended
+     */
+    void appendScriptsToTextfield(std::string scripts);
 
 private:
     void createWidgets();
 
-    openspace::Profile& _profile;
+    std::vector<std::string>* _scripts = nullptr;
+    std::vector<std::string> _scriptsData;
     QTextEdit* _textScripts = nullptr;
+    QPushButton* _chooseScriptsButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__

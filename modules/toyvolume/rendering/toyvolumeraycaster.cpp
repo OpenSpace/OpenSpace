@@ -126,15 +126,15 @@ bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& local
 }
 
 std::string ToyVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath);
+    return absPath(GlslBoundsVsPath).string();
 }
 
 std::string ToyVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath);
+    return absPath(GlslBoundsFsPath).string();
 }
 
 std::string ToyVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath);
+    return absPath(GlslRaycastPath).string();
 }
 
 std::string ToyVolumeRaycaster::helperPath() const {

@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
-#include <openspace/rendering/renderer.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
@@ -56,14 +54,14 @@ struct RaycasterTask;
 class Scene;
 struct UpdateStructures;
 
-class FramebufferRenderer : public Renderer, public RaycasterListener,
+class FramebufferRenderer : public RaycasterListener,
                             public DeferredcasterListener
 {
 public:
     virtual ~FramebufferRenderer() = default;
 
-    void initialize() override;
-    void deinitialize() override;
+    void initialize();
+    void deinitialize();
 
     void updateResolution();
     void updateRaycastData();
@@ -72,26 +70,28 @@ public:
     void updateFXAA();
     void updateDownscaledVolume();
 
-    void setResolution(glm::ivec2 res) override;
-    void setHDRExposure(float hdrExposure) override;
-    void setGamma(float gamma) override;
-    void setHue(float hue) override;
-    void setValue(float value) override;
-    void setSaturation(float sat) override;
+    void setResolution(glm::ivec2 res);
+    void setHDRExposure(float hdrExposure);
+    void setGamma(float gamma);
+    void setHue(float hue);
+    void setValue(float value);
+    void setSaturation(float sat);
 
-    void enableFXAA(bool enable) override;
-    void setDisableHDR(bool disable) override;
+    void enableFXAA(bool enable);
+    void setDisableHDR(bool disable);
 
-    void update() override;
-    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
-    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
-    void render(Scene* scene, Camera* camera, float blackoutFactor) override;
+    void update();
+    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+        const glm::ivec4& viewport);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
+        const glm::ivec4& viewport);
+    void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
-    virtual void updateRendererData() override;
+    virtual void updateRendererData();
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster,
         RaycasterListener::IsAttached attached) override;
@@ -109,11 +109,11 @@ private:
     >;
 
     void resolveMSAA(float blackoutFactor);
-    void applyTMO(float blackoutFactor);
-    void applyFXAA();
+    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures();
     void updateExitVolumeTextures();
-    void writeDownscaledVolume();
+    void writeDownscaledVolume(const glm::ivec4& viewport);
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -129,10 +129,11 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-                 Hue, Saturation, Value) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize) _fxaaUniformCache;
-    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth)
-        _writeDownscaledVolumeUniformCache;
+        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, Viewport,
+        Resolution) _fxaaUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
+        resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;

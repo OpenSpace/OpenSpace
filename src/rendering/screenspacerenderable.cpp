@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -32,7 +33,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
@@ -43,7 +43,7 @@
 
 namespace {
     constexpr const std::array<const char*, 4> UniformNames = {
-        "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+        "color", "opacity", "mvpMatrix", "tex"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -100,6 +100,12 @@ namespace {
         "An euler rotation (x, y, z) to apply to the plane."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the plane's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
@@ -245,6 +251,9 @@ namespace {
         // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
         std::optional<bool> usePerspectiveProjection;
 
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+
         // [codegen::verbatim(OpacityInfo.description)]]
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
@@ -259,9 +268,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceRenderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_screenspacerenderable";
-    return doc;
+    return codegen::doc<Parameters>("core_screenspacerenderable");
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
@@ -324,6 +331,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
@@ -355,8 +363,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
 
     addProperty(_scale);
+    addProperty(_multiplyColor);
     addProperty(_opacity);
     addProperty(_localRotation);
+
+
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _enabled = p.enabled.value_or(_enabled);
     _useRadiusAzimuthElevation =
@@ -554,12 +567,11 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->activate();
 
-    _shader->setUniform(_uniformCache.alpha, _opacity);
-    _shader->setUniform(_uniformCache.modelTransform, modelTransform);
-
+    _shader->setUniform(_uniformCache.color, _multiplyColor);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(
-        _uniformCache.viewProj,
-        global::renderEngine->scene()->camera()->viewProjectionMatrix()
+        _uniformCache.mvp,
+        global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
     );
 
     ghoul::opengl::TextureUnit unit;
@@ -576,8 +588,6 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {
-}
-
+void ScreenSpaceRenderable::unbindTexture() {}
 
 } // namespace openspace

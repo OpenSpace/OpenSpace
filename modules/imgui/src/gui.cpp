@@ -38,7 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "GUI";
@@ -53,7 +53,7 @@ namespace {
     constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
-        if (!FileSys.fileExists(absPath(texturePath))) {
+        if (!std::filesystem::is_regular_file(absPath(texturePath))) {
             LWARNING(fmt::format("Could not find image '{}'", texturePath));
             return;
         }
@@ -204,18 +204,17 @@ void GUI::deinitialize() {
 }
 
 void GUI::initializeGL() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));
 
-    iniFileBuffer = new char[cachedFile.size() + 1];
+    iniFileBuffer = new char[cachedFile.string().size() + 1];
 
 #ifdef WIN32
-    strcpy_s(iniFileBuffer, cachedFile.size() + 1, cachedFile.c_str());
+    strcpy_s(iniFileBuffer, cachedFile.string().size() + 1, cachedFile.string().c_str());
 #else
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
@@ -248,9 +247,9 @@ void GUI::initializeGL() {
         io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
         io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
-        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).c_str(), FontSize);
+        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
         captionFont = io.Fonts->AddFontFromFileTTF(
-            absPath(GuiFont).c_str(),
+            absPath(GuiFont).string().c_str(),
             FontSize * 1.5f
         );
 

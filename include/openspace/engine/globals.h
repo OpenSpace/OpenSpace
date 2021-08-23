@@ -55,6 +55,7 @@ namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
+    class ActionManager;
     class InteractionMonitor;
     class KeybindingManager;
     class NavigationHandler;
@@ -90,6 +91,7 @@ inline VersionChecker* versionChecker;
 inline VirtualPropertyManager* virtualPropertyManager;
 inline WindowDelegate* windowDelegate;
 inline configuration::Configuration* configuration;
+inline interaction::ActionManager* actionManager;
 inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;

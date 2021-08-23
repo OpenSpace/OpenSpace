@@ -46,10 +46,11 @@ namespace {
     };
 } // namespace
 
-PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
+PropertiesDialog::PropertiesDialog(QWidget* parent,
+                                   std::vector<openspace::Profile::Property>* properties)
     : QDialog(parent)
-    , _profile(profile)
-    , _data(_profile.properties())
+    , _properties(properties)
+    , _propertyData(*_properties)
 {
     setWindowTitle("Set Property Values");
     createWidgets();
@@ -65,8 +66,8 @@ void PropertiesDialog::createWidgets() {
             _list, &QListWidget::itemSelectionChanged,
             this, &PropertiesDialog::listItemSelected
         );
-        for (size_t i = 0; i < _data.size(); ++i) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
+        for (size_t i = 0; i < _propertyData.size(); ++i) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(_propertyData[i])));
         }
         layout->addWidget(_list);
     }
@@ -172,8 +173,8 @@ void PropertiesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (_data.size() > 0) {
-        Profile::Property& p = _data[index];
+    if (_propertyData.size() > 0) {
+        Profile::Property& p = _propertyData[index];
         if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
             _commandCombo->setCurrentIndex(0);
         }
@@ -191,7 +192,7 @@ bool PropertiesDialog::isLineEmpty(int index) {
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if (!_data.empty() && !_data.at(0).name.empty()) {
+    if (!_propertyData.empty() && !_propertyData.at(0).name.empty()) {
         isEmpty = false;
     }
     return isEmpty;
@@ -204,13 +205,13 @@ void PropertiesDialog::listItemAdded() {
          // Special case where list is "empty" but really has one line that is blank.
          // This is done because QListWidget does not seem to like having its sole
          // remaining item being removed.
-         _data.at(0) = Blank;
+         _propertyData.at(0) = Blank;
          _list->item(0)->setText("  (Enter details below & click 'Save')");
          _list->setCurrentRow(0);
          transitionToEditMode();
      }
      else {
-         _data.push_back(Blank);
+         _propertyData.push_back(Blank);
          _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
          //Scroll down to that blank line highlighted
          _list->setCurrentRow(_list->count() - 1);
@@ -218,8 +219,8 @@ void PropertiesDialog::listItemAdded() {
 
     // Blank-out the 2 text fields, set combo box to index 0
     _commandCombo->setCurrentIndex(0);
-    _propertyEdit->setText(QString::fromStdString(_data.back().name));
-    _valueEdit->setText(QString::fromStdString(_data.back().value));
+    _propertyEdit->setText(QString::fromStdString(_propertyData.back().name));
+    _valueEdit->setText(QString::fromStdString(_propertyData.back().value));
     _commandCombo->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }
@@ -232,16 +233,17 @@ void PropertiesDialog::listItemSave() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if ( _data.size() > 0) {
+    if (_propertyData.size() > 0) {
         if (_commandCombo->currentIndex() == 0) {
-            _data[index].setType = Profile::Property::SetType::SetPropertyValueSingle;
+            _propertyData[index].setType =
+                Profile::Property::SetType::SetPropertyValueSingle;
         }
         else {
-            _data[index].setType = Profile::Property::SetType::SetPropertyValue;
+            _propertyData[index].setType = Profile::Property::SetType::SetPropertyValue;
         }
-        _data[index].name = _propertyEdit->text().toStdString();
-        _data[index].value = _valueEdit->text().toStdString();
-        _list->item(index)->setText(createOneLineSummary(_data[index]));
+        _propertyData[index].name = _propertyEdit->text().toStdString();
+        _propertyData[index].value = _valueEdit->text().toStdString();
+        _list->item(index)->setText(createOneLineSummary(_propertyData[index]));
     }
     transitionFromEditMode();
     _editModeNewItem = false;
@@ -269,8 +271,10 @@ void PropertiesDialog::listItemCancelSave() {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
-        if (_data.size() > 0) {
-            if (_data.back().name.length() == 0 || _data.back().value.length() == 0) {
+        if (_propertyData.size() > 0) {
+            if (_propertyData.back().name.length() == 0 ||
+                _propertyData.back().value.length() == 0)
+            {
                 listItemRemove();
             }
         }
@@ -284,15 +288,15 @@ void PropertiesDialog::listItemRemove() {
             if (_list->count() == 1) {
                 //Special case where last remaining item is being removed (QListWidget
                 // doesn't like the final item being removed so instead clear it)
-                _data.at(0) = Blank;
+                _propertyData.at(0) = Blank;
                 _list->item(0)->setText("");
             }
             else {
                 int index = _list->currentRow();
                 if (index >= 0 && index < _list->count()) {
                     delete _list->takeItem(index);
-                    if (_data.size() > 0) {
-                        _data.erase(_data.begin() + index);
+                    if (_propertyData.size() > 0) {
+                        _propertyData.erase(_propertyData.begin() + index);
                     }
                 }
             }
@@ -302,9 +306,6 @@ void PropertiesDialog::listItemRemove() {
 }
 
 void PropertiesDialog::transitionToEditMode() {
-    _list->setDisabled(true);
-    _addButton->setDisabled(true);
-    _removeButton->setDisabled(true);
     _saveButton->setDisabled(true);
     _cancelButton->setDisabled(true);
     _buttonBox->setDisabled(true);
@@ -344,10 +345,10 @@ void PropertiesDialog::editBoxDisabled(bool disabled) {
 
 void PropertiesDialog::parseSelections() {
     // Handle case with only one remaining but empty line
-    if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
-        _data.clear();
+    if ((_propertyData.size() == 1) && (_propertyData.at(0).name.compare("") == 0)) {
+        _propertyData.clear();
     }
-    _profile.setProperties(_data);
+    *_properties = std::move(_propertyData);
     accept();
 }
 

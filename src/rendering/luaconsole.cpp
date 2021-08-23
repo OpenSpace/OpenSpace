@@ -38,6 +38,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -169,13 +170,11 @@ LuaConsole::~LuaConsole() {} // NOLINT
 void LuaConsole::initialize() {
     ZoneScoped
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(
+    const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
-
-    if (FileSys.fileExists(filename)) {
+    if (std::filesystem::is_regular_file(filename)) {
         std::ifstream file(filename, std::ios::binary | std::ios::in);
 
         if (file.good()) {
@@ -234,10 +233,9 @@ void LuaConsole::initialize() {
 void LuaConsole::deinitialize() {
     ZoneScoped
 
-    const std::string filename = FileSys.cacheManager()->cachedFilename(
+    const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     // We want to limit the command history to a realistic value, so that it doesn't

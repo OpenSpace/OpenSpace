@@ -27,6 +27,7 @@
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
@@ -47,7 +48,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <filesystem>
 #include <fstream>
+#include <optional>
 
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
@@ -55,12 +58,12 @@ namespace {
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition",
+        "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
 
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
-        "modelMatrix", "cameraViewProjectionMatrix",
+        "modelMatrix", "viewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };
 
@@ -91,12 +94,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission Multiplier",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
-        "Translation",
-        "Translation",
         "" // @TODO Missing documentation
     };
 
@@ -134,14 +131,66 @@ namespace {
         "This value set the number of integration steps during the raycasting procedure."
     };
 
-    void saveCachedFile(const std::string& file, const std::vector<glm::vec3>& positions,
+    struct [[codegen::Dictionary(RenderableGalaxy)]] Parameters {
+        // [[codegen::verbatim(VolumeRenderingEnabledInfo.description)]]
+        std::optional<bool> volumeRenderingEnabled;
+
+        // [[codegen::verbatim(StarRenderingEnabledInfo.description)]]
+        std::optional<bool> starRenderingEnabled;
+
+        // [[codegen::verbatim(StepSizeInfo.description)]]
+        std::optional<float> stepSizeInfo;
+
+        // [[codegen::verbatim(AbsorptionMultiplyInfo.description)]]
+        std::optional<float> absorptionMultiply;
+
+        // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
+        std::optional<float> emissionMultiply;
+
+        enum class StarRenderingMethod {
+            Points,
+            Billboards
+        };
+        // [[codegen::verbatim(StarRenderingMethodInfo.description)]]
+        std::optional<StarRenderingMethod> starRenderingMethod;
+
+        // [[codegen::verbatim(RotationInfo.description)]]
+        std::optional<glm::vec3> rotation;
+
+        struct Volume {
+            std::filesystem::path filename;
+            glm::ivec3 dimensions;
+            glm::vec3 size;
+
+            // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
+            std::optional<float> steps;
+
+            // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
+            std::optional<float> downscale;
+        };
+        Volume volume;
+
+        struct Points {
+            std::filesystem::path filename;
+            std::filesystem::path texture;
+
+            // [[codegen::verbatim(EnabledPointsRatioInfo.description)]]
+            std::optional<float> enabledPointsRatio;
+        };
+        Points points;
+    };
+#include "renderablegalaxy_codegen.cpp"
+
+
+    void saveCachedFile(const std::filesystem::path& file,
+                        const std::vector<glm::vec3>& positions,
                         const std::vector<glm::vec3>& colors, int64_t nPoints,
                         float pointsRatio)
     {
         std::ofstream fileStream(file, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+            LERROR(fmt::format("Error opening file {} for save cache file", file));
             return;
         }
 
@@ -165,6 +214,12 @@ namespace {
         );
     }
 
+    float safeLength(const glm::vec3& vector) {
+        const float maxComponent = std::max(
+            std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
+        );
+        return glm::length(vector / maxComponent) * maxComponent;
+    }
 } // namespace
 
 namespace openspace {
@@ -173,7 +228,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
-    , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
     , _starRenderingMethod(
@@ -181,7 +236,6 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(
         RotationInfo,
         glm::vec3(0.f),
@@ -191,138 +245,44 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
     , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
-    if (dictionary.hasKey("VolumeRenderingEnabled")) {
-        _volumeRenderingEnabled = dictionary.value<bool>("VolumeRenderingEnabled");
-    }
-    if (dictionary.hasKey("StarRenderingEnabled")) {
-        _starRenderingEnabled = dictionary.value<bool>("StarRenderingEnabled");
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey("StarRenderingMethod")) {
-        _starRenderingMethod = dictionary.value<int>("StarRenderingMethod");
-    }
-
-    if (dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
-        _volumeRenderingEnabled = dictionary.value<bool>(
-            VolumeRenderingEnabledInfo.identifier
-        );
-    }
-
-    if (dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier)) {
-        _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
-    }
-
-    if (dictionary.hasValue<double>(StepSizeInfo.identifier)) {
-        _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
-    }
-
-    if (dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier)) {
-        _absorptionMultiply = static_cast<float>(
-            dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasValue<double>(EmissionMultiplyInfo.identifier)) {
-        _emissionMultiply = static_cast<float>(
-            dictionary.value<double>(EmissionMultiplyInfo.identifier)
-        );
-    }
+    _volumeRenderingEnabled = p.volumeRenderingEnabled.value_or(_volumeRenderingEnabled);
+    _starRenderingEnabled = p.starRenderingEnabled.value_or(_starRenderingEnabled);
+    _volumeRenderingEnabled = p.volumeRenderingEnabled.value_or(_volumeRenderingEnabled);
+    _stepSize = p.stepSizeInfo.value_or(_stepSize);
+    _absorptionMultiply = p.absorptionMultiply.value_or(_absorptionMultiply);
+    _emissionMultiply = p.emissionMultiply.value_or(_emissionMultiply);
 
     _starRenderingMethod.addOptions({
         { 0, "Points" },
         { 1, "Billboards" }
     });
-    if (dictionary.hasKey(StarRenderingMethodInfo.identifier)) {
-        const std::string starRenderingMethod = dictionary.value<std::string>(
-            StarRenderingMethodInfo.identifier
-        );
-        if (starRenderingMethod == "Points") {
-            _starRenderingMethod = 0;
+    if (p.starRenderingMethod.has_value()) {
+        switch (*p.starRenderingMethod) {
+            case Parameters::StarRenderingMethod::Points:
+                _starRenderingMethod = 0;
+                break;
+            case Parameters::StarRenderingMethod::Billboards:
+                _starRenderingMethod = 1;
+                break;
         }
-        else if (starRenderingMethod == "Billboards") {
-            _starRenderingMethod = 1;
-        }
     }
 
-    if (dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier)) {
-        _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
-    }
+    _rotation = p.rotation.value_or(_rotation);
 
-    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
-        _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
-    }
+    _volumeFilename = p.volume.filename.string();
+    _volumeDimensions = p.volume.dimensions;
+    _volumeSize = p.volume.size;
+    _numberOfRayCastingSteps = p.volume.steps.value_or(_numberOfRayCastingSteps);
+    _downScaleVolumeRendering = p.volume.downscale.value_or(_downScaleVolumeRendering);
 
-    if (!dictionary.hasValue<ghoul::Dictionary>("Volume")) {
-        LERROR("No volume dictionary specified.");
-    }
-
-    ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
-
-    if (volumeDictionary.hasValue<std::string>("Filename")) {
-        _volumeFilename = absPath(volumeDictionary.value<std::string>("Filename"));
-    }
-    else {
-        LERROR("No volume filename specified");
-    }
-
-    if (volumeDictionary.hasValue<glm::dvec3>("Dimensions")) {
-        _volumeDimensions = volumeDictionary.value<glm::dvec3>("Dimensions");
-    }
-    else {
-        LERROR("No volume dimensions specifieds");
-    }
-
-    if (volumeDictionary.hasValue<glm::dvec3>("Size")) {
-        _volumeSize = volumeDictionary.value<glm::dvec3>("Size");
-    }
-    else {
-        LERROR("No volume dimensions specified.");
-    }
-
-    if (volumeDictionary.hasKey(NumberOfRayCastingStepsInfo.identifier)) {
-        _numberOfRayCastingSteps = static_cast<float>(
-            volumeDictionary.value<double>(NumberOfRayCastingStepsInfo.identifier)
-        );
-    }
-    else {
-        LINFO("Number of raycasting steps not specified. Using default value.");
-    }
-
-    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
-    if (volumeDictionary.hasKey(DownscaleVolumeRenderingInfo.identifier)) {
-        _downScaleVolumeRendering = static_cast<float>(
-            volumeDictionary.value<double>(DownscaleVolumeRenderingInfo.identifier)
-        );
-    }
-
-    if (!dictionary.hasValue<ghoul::Dictionary>("Points")) {
-        LERROR("No points dictionary specified.");
-    }
-
-    ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
-    if (pointsDictionary.hasValue<std::string>("Filename")) {
-        _pointsFilename = absPath(pointsDictionary.value<std::string>("Filename"));
-    }
-    else {
-        LERROR("No points filename specified.");
-    }
-
-    if (pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier)) {
-        _enabledPointsRatio = static_cast<float>(
-            pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
-        );
-    }
-
-    if (pointsDictionary.hasValue<std::string>("Texture")) {
-        _pointSpreadFunctionTexturePath =
-            absPath(pointsDictionary.value<std::string>("Texture"));
-        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-            _pointSpreadFunctionTexturePath
-        );
-    }
-    else {
-        LERROR("No points filename specified.");
-    }
+    _pointsFilename = p.points.filename.string();
+    _enabledPointsRatio = p.points.enabledPointsRatio.value_or(_enabledPointsRatio);
+    _pointSpreadFunctionTexturePath = p.points.texture.string();
+    _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+        _pointSpreadFunctionTexturePath
+    );
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
@@ -342,8 +302,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     addProperty(_emissionMultiply);
     addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
-    addProperty(_translation);
     addProperty(_rotation);
+    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
     addProperty(_numberOfRayCastingSteps);
 }
@@ -352,8 +312,8 @@ void RenderableGalaxy::initialize() {
     ZoneScoped
 
     // Aspect is currently hardcoded to cubic voxels.
-    _aspect = static_cast<glm::vec3>(_volumeDimensions);
-    _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
+    glm::vec3 d = _volumeDimensions;
+    _aspect = d / glm::compMax(d);
 
     // The volume
     volume::RawVolumeReader<glm::tvec4<GLubyte>> reader(
@@ -362,14 +322,13 @@ void RenderableGalaxy::initialize() {
     );
     _volume = reader.read();
 
-    std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-        _pointsFilename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
+    std::filesystem::path cachedPointsFile = FileSys.cacheManager()->cachedFilename(
+        _pointsFilename
     );
-    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
-            cachedPointsFile, _pointsFilename
+        LINFO(fmt::format("Cached file {} used for galaxy point file {}",
+            cachedPointsFile, std::filesystem::path(_pointsFilename)
         ));
 
         Result res = loadCachedFile(cachedPointsFile);
@@ -379,7 +338,7 @@ void RenderableGalaxy::initialize() {
         }
         else {
             FileSys.cacheManager()->removeCacheFile(_pointsFilename);
-            Result resPoint = loadPointFile(_pointsFilename);
+            Result resPoint = loadPointFile();
             _pointPositionsCache = std::move(resPoint.positions);
             _pointColorsCache = std::move(resPoint.color);
             saveCachedFile(
@@ -392,7 +351,7 @@ void RenderableGalaxy::initialize() {
         }
     }
     else {
-        Result res = loadPointFile(_pointsFilename);
+        Result res = loadPointFile();
         ghoul_assert(res.success, "Point file loading failed");
         _pointPositionsCache = std::move(res.positions);
         _pointColorsCache = std::move(res.color);
@@ -455,13 +414,12 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath)
+            absPath(_pointSpreadFunctionTexturePath).string()
         );
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from '{}'",
-                absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -485,41 +443,32 @@ void RenderableGalaxy::initializeGL() {
         UniformNamesBillboards
     );
 
-    _pointsProgram->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
-    );
-
-    GLint positionAttrib = _pointsProgram->attributeLocation("in_position");
-    GLint colorAttrib = _pointsProgram->attributeLocation("in_color");
-
     glGenVertexArrays(1, &_pointsVao);
     glGenBuffers(1, &_positionVbo);
     glGenBuffers(1, &_colorVbo);
 
     glBindVertexArray(_pointsVao);
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glBufferData(GL_ARRAY_BUFFER,
+    glBufferData(
+        GL_ARRAY_BUFFER,
         _pointPositionsCache.size() * sizeof(glm::vec3),
         _pointPositionsCache.data(),
         GL_STATIC_DRAW
     );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     _pointPositionsCache.clear();
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glBufferData(GL_ARRAY_BUFFER,
+    glBufferData(
+        GL_ARRAY_BUFFER,
         _pointColorsCache.size() * sizeof(glm::vec3),
         _pointColorsCache.data(),
         GL_STATIC_DRAW
     );
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     _pointColorsCache.clear();
-
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -544,7 +493,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
     if (!_raycaster) {
         return;
     }
-    //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
     const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
     glm::mat4 transform = glm::rotate(
         glm::mat4(1.f),
@@ -556,14 +504,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
 
     glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
     _pointTransform = transform;
-    //_pointTransform = glm::scale(transform, _pointScaling);
-
-    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.f);
-
-    // Todo: handle floating point overflow, to actually support translation.
-
-    volumeTransform[3] += translation;
-    _pointTransform[3] += translation;
 
     _raycaster->setDownscaleRender(_downScaleVolumeRendering);
     _raycaster->setMaxSteps(static_cast<int>(_numberOfRayCastingSteps));
@@ -584,7 +524,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         const float length = safeLength(position);
         const glm::vec3 galaxySize = _volumeSize;
 
-        const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+        const float maxDim = glm::compMax(galaxySize);
 
         const float lowerRampStart = maxDim * 0.01f;
         const float lowerRampEnd = maxDim * 0.1f;
@@ -605,7 +545,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
         else if (length < upperRampEnd) {
             opacityCoefficient = 1.f - (length - upperRampStart) /
-                                 (upperRampEnd - upperRampStart); //fade out
+                                 (upperRampEnd - upperRampStart); // fade out
         }
         else {
             opacityCoefficient = 0;
@@ -622,22 +562,23 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    // Render the stars
-    if (_starRenderingEnabled && _opacityCoefficient > 0.f) {
-        if (_starRenderingMethod == 1) {
+    if (!(_starRenderingEnabled && _opacityCoefficient > 0.f)) {
+        return;
+    }
+
+    if (_starRenderingMethod == 1) {
+        if (_billboardsProgram) {
             renderBillboards(data);
         }
-        else {
+    }
+    else {
+        if (_pointsProgram) {
             renderPoints(data);
         }
     }
 }
 
 void RenderableGalaxy::renderPoints(const RenderData& data) {
-    if (!_pointsProgram) {
-        return;
-    }
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -680,7 +621,6 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
     glBindVertexArray(_pointsVao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
-
     glBindVertexArray(0);
 
     _pointsProgram->deactivate();
@@ -691,10 +631,6 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {
-    if (!_billboardsProgram) {
-        return;
-    }
-
     // Change OpenGL Blending and Depth states
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
@@ -742,7 +678,6 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
     glBindVertexArray(_pointsVao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_nPoints * _enabledPointsRatio));
-
     glBindVertexArray(0);
 
     _billboardsProgram->deactivate();
@@ -752,14 +687,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     global::renderEngine->openglStateCache().resetDepthState();
 }
 
-float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
-    const float maxComponent = std::max(
-        std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
-    );
-    return glm::length(vector / maxComponent) * maxComponent;
-}
-
-RenderableGalaxy::Result RenderableGalaxy::loadPointFile(const std::string&) {
+RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
     std::vector<glm::vec3> pointPositions;
     std::vector<glm::vec3> pointColors;
     int64_t nPoints;
@@ -779,11 +707,11 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile(const std::string&) {
     _nPoints = static_cast<size_t>(nPoints);
 
     // Read points
-    float x, y, z, r, g, b, a;
     for (size_t i = 0;
         i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1;
         ++i)
     {
+        float x, y, z, r, g, b, a;
         std::getline(pointFile, line);
         std::istringstream issp(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
@@ -803,17 +731,19 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile(const std::string&) {
     return res;
 }
 
-RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(const std::string& file) {
+RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
+                                                        const std::filesystem::path& file)
+{
     std::ifstream fileStream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(fmt::format("Error opening file {} for loading cache file", file));
         return { false, {}, {} };
     }
 
     int8_t cacheVersion;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
-        LINFO(fmt::format("Removing cache file '{}' as the version changed"));
+        LINFO(fmt::format("Removing cache file {} as the version changed", file));
         return { false, {}, {} };
     }
 
@@ -838,10 +768,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(const std::string& fil
     fileStream.read(reinterpret_cast<char*>(&nColors), sizeof(uint64_t));
     std::vector<glm::vec3> colors;
     colors.resize(nColors);
-    fileStream.read(
-        reinterpret_cast<char*>(colors.data()),
-        nColors * sizeof(glm::vec3)
-    );
+    fileStream.read(reinterpret_cast<char*>(colors.data()), nColors * sizeof(glm::vec3));
 
     Result result;
     result.success = true;

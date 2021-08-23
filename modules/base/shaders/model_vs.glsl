@@ -40,9 +40,11 @@ out mat3 TBN;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform mat4 normalTransform;
+uniform mat4 meshTransform;
+uniform mat4 meshNormalTransform;
 
 void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
+    vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
     vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
     vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
@@ -50,11 +52,11 @@ void main() {
     vs_st = in_st;
     vs_screenSpaceDepth = positionScreenSpace.w;
     
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
+    vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
 	// TBN matrix for normal mapping
-	vec3 T = normalize(vec3(modelViewTransform * vec4(in_tangent, 0.0)));
-	vec3 N = normalize(vec3(modelViewTransform * vec4(in_normal, 0.0)));
+	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
+	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
 	// Re-orthogonalize T with respect to N
 	T = normalize(T - dot(T, N) * N);

@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/openspace.cpp
+  ${OPENSPACE_BASE_DIR}/src/camera/camera.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
@@ -44,6 +45,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
@@ -51,17 +54,11 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecfileversiontask.cpp
@@ -69,6 +66,18 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/avoidcollisioncurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/zoomoutoverviewcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/keyframenavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/waypoint.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
@@ -78,45 +87,25 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/doublelistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/boolproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/charproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/doubleproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/floatproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/intproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longdoubleproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longlongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/longproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/shortproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/signedcharproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/ucharproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/uintproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulonglongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ushortproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/wcharproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec4property.cpp
@@ -130,7 +119,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/query/query.cpp
-  ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
@@ -173,11 +161,12 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/coordinateconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/json_helper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
   ${OPENSPACE_BASE_DIR}/src/util/planegeometry.cpp
@@ -201,6 +190,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/universalhelpers.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
@@ -216,6 +206,8 @@ if (APPLE)
 endif ()
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camerapose.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -235,6 +227,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/action.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/actionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
@@ -245,75 +239,61 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/avoidcollisioncurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/zoomoutoverviewcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/keyframenavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationhandler.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/orbitalnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/path.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/doublelistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/boolproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/charproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/floatproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/intproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longdoubleproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longlongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/shortproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/signedcharproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ucharproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/uintproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulonglongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ushortproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/wcharproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec4property.h
@@ -327,7 +307,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
@@ -341,7 +320,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/texturecomponent.h
@@ -368,7 +346,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/collisionhelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
@@ -380,6 +358,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/json_helper.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/json_helper.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
@@ -405,6 +385,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
@@ -504,10 +485,6 @@ endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
-
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
 
 # Just in case, create the bin directory
 add_custom_command(

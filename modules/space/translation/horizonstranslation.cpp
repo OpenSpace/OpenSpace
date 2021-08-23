@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -57,9 +58,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation HorizonsTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_horizons";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_horizons");
 }
 
 HorizonsTranslation::HorizonsTranslation()
@@ -69,8 +68,10 @@ HorizonsTranslation::HorizonsTranslation()
 
     _horizonsTextFile.onChange([&](){
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_horizonsTextFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(
+            _horizonsTextFile.value()
+        );
+        _fileHandle->setCallback([this]() {
              requireUpdate();
              notifyObservers();
          });
@@ -82,7 +83,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
     : HorizonsTranslation()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _horizonsTextFile = absPath(p.horizonsTextFile);
+    _horizonsTextFile = absPath(p.horizonsTextFile).string();
 }
 
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
@@ -112,21 +113,15 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 }
 
 void HorizonsTranslation::loadData() {
-    std::string file = _horizonsTextFile;
-    if (!FileSys.fileExists(absPath(file))) {
+    std::filesystem::path file = absPath(_horizonsTextFile.value());
+    if (!std::filesystem::is_regular_file(file)) {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Horizon file '{}'", cachedFile, file
-        ));
+        LINFO(fmt::format("Cached file {} used for Horizon file {}", cachedFile, file));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -139,9 +134,9 @@ void HorizonsTranslation::loadData() {
         }
     }
     else {
-        LINFO(fmt::format("Cache for Horizon file '{}' not found", file));
+        LINFO(fmt::format("Cache for Horizon file {} not found", file));
     }
-    LINFO(fmt::format("Loading Horizon file '{}'", file));
+    LINFO(fmt::format("Loading Horizon file {}", file));
 
     readHorizonsTextFile();
 
@@ -150,12 +145,11 @@ void HorizonsTranslation::loadData() {
 }
 
 void HorizonsTranslation::readHorizonsTextFile() {
-    std::ifstream fileStream(_horizonsTextFile);
+    std::filesystem::path f = absPath(_horizonsTextFile);
+    std::ifstream fileStream(f);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _horizonsTextFile
-        ));
+        LERROR(fmt::format("Failed to open Horizons text file {}", f));
         return;
     }
 
@@ -174,9 +168,9 @@ void HorizonsTranslation::readHorizonsTextFile() {
         std::stringstream str(line);
         std::string date;
         std::string time;
-        float range = 0;
-        float gLon = 0;
-        float gLat = 0;
+        double range = 0;
+        double gLon = 0;
+        double gLat = 0;
 
         // File is structured by:
         // YYYY-MM-DD
@@ -205,11 +199,11 @@ void HorizonsTranslation::readHorizonsTextFile() {
     fileStream.close();
 }
 
-bool HorizonsTranslation::loadCachedFile(const std::string& file) {
+bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(fmt::format("Error opening file {} for loading cache file", file));
         return false;
     }
 
@@ -244,10 +238,10 @@ bool HorizonsTranslation::loadCachedFile(const std::string& file) {
     return fileStream.good();
 }
 
-void HorizonsTranslation::saveCachedFile(const std::string& file) const {
+void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        LERROR(fmt::format("Error opening file {} for save cache file", file));
         return;
     }
 

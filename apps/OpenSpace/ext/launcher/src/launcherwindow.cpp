@@ -28,16 +28,18 @@
 
 #include <openspace/engine/configuration.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <QComboBox>
 #include <QFile>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardItemModel>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random>
-#include <QStandardItemModel>
 
 using namespace openspace;
 
@@ -141,13 +143,16 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
-    , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) + '/')
-    , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")) + '/')
-    , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
-    , _userConfigPath(absPath(globalConfig.pathTokens.at("USER_CONFIG")) + '/')
-    , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
-    , _userProfilePath(absPath(globalConfig.pathTokens.at("USER_PROFILES")) + '/')
+    , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")).string() + '/')
+    , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")).string() + '/')
+    , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string() + '/')
+    , _userConfigPath(absPath(globalConfig.pathTokens.at("USER_CONFIG")).string() + '/')
+    , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")).string() + '/')
+    , _userProfilePath(
+        absPath(globalConfig.pathTokens.at("USER_PROFILES")).string() + '/'
+    )
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
+    , _sgctConfigName(sgctConfigName)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -175,14 +180,16 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
-    populateWindowConfigsList(sgctConfigName);
+    populateWindowConfigsList(_sgctConfigName);
     _windowConfigBox->setEnabled(sgctConfigEnabled);
 
 
-    std::string p = absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images");
+    std::filesystem::path p = absPath(
+        globalConfig.pathTokens.at("SYNC") + "/http/launcher_images"
+    );
     if (std::filesystem::exists(p)) {
         try {
-            setBackgroundImage(p);
+            setBackgroundImage(p.string());
         }
         catch (const std::exception& e) {
             std::cerr << "Error occurrred while reading background images: " << e.what();
@@ -258,7 +265,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
-            bool isUserProfile = selectedIndex <= _userAssetCount;
+            bool isUserProfile = selectedIndex < _userAssetCount;
             openProfileEditor(selection, isUserProfile);
         }
     );
@@ -307,8 +314,24 @@ void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
     std::mt19937 g(rd());
     std::shuffle(files.begin(), files.end(), g);
     // We know there has to be at least one folder, so it's fine to just pick the first
-    std::string image = files.front();
-    _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+    while (!files.empty()) {
+        std::string p = files.front();
+        if (std::filesystem::path(p).extension() == ".png") {
+            // If the top path starts with the png extension, we have found our candidate
+            break;
+        }
+        else {
+            // There shouldn't be any non-png images in here, but you never know. So we 
+            // just remove non-image files here
+            files.erase(files.begin());
+        }
+    }
+
+    // There better be at least one file left, but just in in case
+    if (!files.empty()) {
+        std::string image = files.front();
+        _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+    }
 }
 
 void LauncherWindow::populateProfilesList(std::string preset) {
@@ -454,7 +477,10 @@ std::string LauncherWindow::selectedProfile() const {
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    if (_windowConfigBox->currentIndex() > _userAssetCount) {
+    int idx = _windowConfigBox->currentIndex();
+    if (idx == 0) {
+        return _sgctConfigName;
+    } else if (idx > _userConfigCount) {
         return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
     }
     else {

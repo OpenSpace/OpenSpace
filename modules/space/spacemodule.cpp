@@ -39,10 +39,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
+#include "spacemodule_lua.inl"
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SpiceExceptionInfo = {
@@ -131,6 +134,33 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         planetgeometry::PlanetGeometry::Documentation(),
         planetgeometry::SimpleSphereGeometry::Documentation()
     };
+}
+
+scripting::LuaLibrary SpaceModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "space";
+    res.functions = {
+        {
+            "convertFromRaDec",
+            &space::luascriptfunctions::convertFromRaDec,
+            {},
+            "string/double, string/double, double",
+            "Returns the cartesian world position of a ra dec coordinate with distance. "
+            "If the coordinate is given as strings the format should be ra 'XhYmZs' and "
+            "dec 'XdYmZs'. If the coordinate is given as numbers the values should be "
+            "in degrees."
+        },
+        {
+            "convertToRaDec",
+            &space::luascriptfunctions::convertToRaDec,
+            {},
+            "double, double, double",
+            "Returns the formatted ra, dec strings and distance for a given cartesian "
+            "world coordinate."
+        }
+    };
+
+    return res;
 }
 
 } // namespace openspace

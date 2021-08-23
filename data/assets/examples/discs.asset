@@ -1,46 +1,46 @@
 local assetHelper = asset.require('util/asset_helper')
 
 -- @TODO (emmbr 2020-02-03) Potential threading issue later on? This will run on the main thread
-local cyanTexture = openspace.createSingeColorImage("example_disc_color1", {0.0, 1.0, 1.0})
-local purpleTexture = openspace.createSingeColorImage("example_disc_color2", {0.5, 0.0, 0.5})
+local cyanTexture = openspace.createSingleColorImage("example_disc_color1", {0.0, 1.0, 1.0})
+local purpleTexture = openspace.createSingleColorImage("example_disc_color2", {0.5, 0.0, 0.5})
 
 local BasicDisc = {
-    Identifier = "BasicDisc",
-    Renderable = {
-        Type = "RenderableDisc",
-        Texture = cyanTexture,
-        Size = 1e10,
-        Width = 0.5
-    },
-    GUI = {
-        Name = "Basic Disc",
-        Path = "/Examples/Discs"
-    }
+  Identifier = "BasicDisc",
+  Renderable = {
+    Type = "RenderableDisc",
+    Texture = cyanTexture,
+    Size = 1e10,
+    Width = 0.5
+  },
+  GUI = {
+    Name = "Basic Disc",
+    Path = "/Examples/Discs"
+  }
 }
 
 -- Elliptic discs can be created using a non-uniform scaling
 -- For a full disc, use a width of 1.0
 local FullEllipticDisc = {
-    Identifier = "FullEllipticDisc",
-    Transform = {
-        Scale = {
-            Type = "NonUniformStaticScale",
-            Scale = {2.0, 1.0, 1.0}
-        }
-    },
-    Renderable = {
-        Type = "RenderableDisc",
-        Texture = purpleTexture,
-        Size = 2e10,
-        Width = 1.0
-    },
-    GUI = {
-        Name = "Full Elliptic Disc",
-        Path = "/Examples/Discs"
+  Identifier = "FullEllipticDisc",
+  Transform = {
+    Scale = {
+      Type = "NonUniformStaticScale",
+      Scale = {2.0, 1.0, 1.0}
     }
+  },
+  Renderable = {
+    Type = "RenderableDisc",
+    Texture = purpleTexture,
+    Size = 2e10,
+    Width = 1.0
+  },
+  GUI = {
+    Name = "Full Elliptic Disc",
+    Path = "/Examples/Discs"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    BasicDisc,
-    FullEllipticDisc
+  BasicDisc,
+  FullEllipticDisc
 })

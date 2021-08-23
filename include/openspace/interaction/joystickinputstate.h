@@ -28,6 +28,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -70,6 +71,11 @@ struct JoystickInputState {
     /// The values for each axis. Each value is in the range [-1, 1]. Only the first
     /// \c nAxes values are defined values, the rest are undefined
     std::array<float, MaxAxes> axes;
+
+    /// The axis values can either go back to 0 when the joystick is released or it can
+    /// stay at the value it was before the joystick was released.
+    /// The latter is called a sticky axis, when the values don't go back to 0.
+    bool isSticky = false;
 
     /// The number of buttons that this joystick possesses
     int nButtons = 0;
@@ -121,18 +127,18 @@ inline std::string to_string(const openspace::interaction::JoystickAction& value
         case openspace::interaction::JoystickAction::Press:   return "Press";
         case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
         case openspace::interaction::JoystickAction::Release: return "Release";
-       default:                                              throw MissingCaseException();
+        default:                                             throw MissingCaseException();
     }
 }
 
 template <>
 constexpr openspace::interaction::JoystickAction from_string(std::string_view string) {
-    if (string == "Idle") { return openspace::interaction::JoystickAction::Idle; }
-    if (string == "Press") { return openspace::interaction::JoystickAction::Press; }
-    if (string == "Repeat") { return openspace::interaction::JoystickAction::Repeat; }
+    if (string == "Idle")    { return openspace::interaction::JoystickAction::Idle; }
+    if (string == "Press")   { return openspace::interaction::JoystickAction::Press; }
+    if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
     if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
 
-    throw RuntimeError("Unknown action '" + std::string(string) + "'");
+    throw RuntimeError(fmt::format("Unknown action '{}'", string));
 }
 
 } // namespace ghoul

@@ -51,6 +51,7 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
+#include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -131,6 +132,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderablePrism>("RenderablePrism");
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
@@ -211,6 +213,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
 
+        ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),

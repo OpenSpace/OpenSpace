@@ -58,11 +58,6 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
-        "BoundingSphere",
-        "Bounding Sphere",
-        "The size of the bounding sphere radius."
-    };
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -76,9 +71,6 @@ namespace {
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
         std::optional<std::string> type;
-
-        // [[codegen::verbatim(BoundingSphereInfo.description)]]
-        std::optional<float> boundingSphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -86,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Renderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "renderable";
-    return doc;
+    return codegen::doc<Parameters>("renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
@@ -102,9 +92,6 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-    // Now we no longer need the type variable
-    dictionary.removeValue(KeyType);
-
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
@@ -120,7 +107,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
@@ -154,9 +140,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
-
-    _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
-    addProperty(_boundingSphere);
 }
 
 void Renderable::initialize() {}
@@ -179,12 +162,20 @@ double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
+void Renderable::setInteractionSphere(double interactionSphere) {
+    _interactionSphere = interactionSphere;
+}
+
+double Renderable::interactionSphere() const {
+    return _interactionSphere;
+}
+
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * boundingSphere(),
+        directionFromCenterToTarget * _parent->interactionSphere(),
         directionFromCenterToTarget,
         0.0
     };

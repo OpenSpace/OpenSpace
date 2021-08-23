@@ -7,58 +7,52 @@ local labelsPath = asset.require('./../pluto_globelabels').LabelsPath
 
 
 local Charon = {
-    Identifier = "Charon",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "CHARON",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_CHARON",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Charon",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CHARON",
+      Observer = "PLUTO BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 6.035E5, 6.035E5, 6.035E5 },
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/charon.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 40.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            LabelsFadeOutEnabled = true,
-            FadeInStartingDistance = 2000000.0,
-            FadeOutStartingDistance = 800000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 250000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GUI = {
-        Path = "/Solar System/Dwarf Planets/Pluto"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_CHARON",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 6.035E5, 6.035E5, 6.035E5 },
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enabled = false,
+      FileName = labelsPath .. "/charon.labels",
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 9.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
+      Distances = { 800000.0, 2000000.0 },
+      DistanceEPS = 250000.0,
+      Color = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })
 
 
 asset.meta = {
-    Name = "Charon",
-    Version = "1.0",
-    Description = [[ Charon globe with labels.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Charon",
+  Version = "1.0",
+  Description = [[ Charon globe with labels.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

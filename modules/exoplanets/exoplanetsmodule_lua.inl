@@ -88,43 +88,45 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
         std::string name;
         std::getline(ss, name, ',');
 
-        if (name.substr(0, name.length() - 2) == starName) {
-            std::string location_s;
-            std::getline(ss, location_s);
-            long location = std::stol(location_s.c_str());
+        if (name.substr(0, name.length() - 2) != starName) {
+            continue;
+        }
 
-            data.seekg(location);
-            data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
+        std::string location_s;
+        std::getline(ss, location_s);
+        long location = std::stol(location_s.c_str());
 
-            sanitizeNameString(name);
+        data.seekg(location);
+        data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
 
-            if (!hasSufficientData(p)) {
-                LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
-                continue;
-            }
+        sanitizeNameString(name);
 
-            system.planetNames.push_back(name);
-            system.planetsData.push_back(p);
+        if (!hasSufficientData(p)) {
+            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
+            continue;
+        }
 
-            // Star data - Should not vary between planets, but one data entry might
-            // lack data for the host star while another does not. So for every planet,
-            // update star data if needed
-            const glm::vec3 pos{ p.positionX, p.positionY, p.positionZ };
-            if (system.starData.position != pos && isValidPosition(pos)) {
-                system.starData.position = pos;
-            }
-            if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
-                system.starData.radius = p.rStar;
-            }
-            if (system.starData.bv != p.bmv && !std::isnan(p.bmv)) {
-                system.starData.bv = p.bmv;
-            }
-            if (system.starData.teff != p.teff && !std::isnan(p.teff)) {
-                system.starData.teff = p.teff;
-            }
-            if (system.starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
-                system.starData.luminosity = p.luminosity;
-            }
+        system.planetNames.push_back(name);
+        system.planetsData.push_back(p);
+
+        // Star data - Should not vary between planets, but one data entry might lack data
+        // for the host star while another does not. So for every planet, update star data
+        // if needed
+        const glm::vec3 pos = glm::vec3(p.positionX, p.positionY, p.positionZ);
+        if (system.starData.position != pos && isValidPosition(pos)) {
+            system.starData.position = pos;
+        }
+        if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
+            system.starData.radius = p.rStar;
+        }
+        if (system.starData.bv != p.bmv && !std::isnan(p.bmv)) {
+            system.starData.bv = p.bmv;
+        }
+        if (system.starData.teff != p.teff && !std::isnan(p.teff)) {
+            system.starData.teff = p.teff;
+        }
+        if (system.starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
+            system.starData.luminosity = p.luminosity;
         }
     }
 
@@ -158,8 +160,8 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}'. "
-            "Could not determine star position", starName
+            "Insufficient data available for exoplanet system: '{}'. Could not determine "
+            "star position", starName
         ));
         return;
     }
@@ -429,7 +431,7 @@ void createExoplanetSystem(const std::string& starName) {
         "Renderable = {"
             "Type = 'RenderableRadialGrid',"
             "Enabled = " + isCircleEnabledString + ","
-            "OuterRadius = " + std::to_string(AU) + ","
+            "Radii = { 0.0, 1.0 },"
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
         "},"
@@ -437,6 +439,10 @@ void createExoplanetSystem(const std::string& starName) {
             "Rotation = {"
                 "Type = 'StaticRotation',"
                 "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "},"
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(AU) + ""
             "}"
         "},"
         "GUI = {"
@@ -512,7 +518,7 @@ void createExoplanetSystem(const std::string& starName) {
             // the luminosity of a star is proportional to: (radius^2)*(temperature^4)
             // Maybe a better option would be to compute the size based on the aboslute
             // magnitude or star luminosity, but for now this looks good enough.
-            float size = 59.f * radiusInMeter;
+            double size = 59.0 * radiusInMeter;
             if (hasTeff) {
                 constexpr const float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
@@ -551,50 +557,40 @@ void createExoplanetSystem(const std::string& starName) {
 
 int addExoplanetSystem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addExoplanetSystem");
+    std::variant<std::string, ghoul::Dictionary> v = 
+        ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
 
-    const int t = lua_type(L, 1);
-    if (t == LUA_TSTRING) {
+    if (std::holds_alternative<std::string>(v)) {
         // The user provided a single name
-        const std::string& starName = ghoul::lua::value<std::string>(L, 1);
+        std::string starName = std::get<std::string>(v);
         createExoplanetSystem(starName);
     }
-    else if (t == LUA_TTABLE) {
+    else {
         // A list of names was provided
-        ghoul::Dictionary d;
-        ghoul::lua::luaDictionaryFromState(L, d);
-
-        for (size_t i = 1; i <= d.size(); ++i) {
-            if (!d.hasValue<std::string>(std::to_string(i))) {
+        ghoul::Dictionary starNames = ghoul::lua::value<ghoul::Dictionary>(L);
+        for (size_t i = 1; i <= starNames.size(); ++i) {
+            if (!starNames.hasValue<std::string>(std::to_string(i))) {
                 return ghoul::lua::luaError(
-                    L, fmt::format("List item {} is of invalid type", i)
+                    L,
+                    fmt::format("List item {} is of invalid type", i)
                 );
             }
-            const std::string& starName = d.value<std::string>(std::to_string(i));
+            const std::string& starName = starNames.value<std::string>(std::to_string(i));
             createExoplanetSystem(starName);
         }
-        lua_pop(L, 1);
     }
-    else {
-        return ghoul::lua::luaError(L, "Invalid input");
-    }
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeExoplanetSystem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeExoplanetSystem");
+    std::string starName = ghoul::lua::value<std::string>(L);
 
-    const int StringLocation = -1;
-    const std::string starName = luaL_checkstring(L, StringLocation);
-    const std::string starIdentifier = createIdentifier(starName);
-
+    const std::string starIdentifier = createIdentifier(std::move(starName));
     openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
     return 0;
 }
 
@@ -652,7 +648,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
     // For easier read, sort by names and remove duplicates
     std::sort(names.begin(), names.end());
     names.erase(std::unique(names.begin(), names.end()), names.end());
-
     return names;
 }
 
@@ -660,15 +655,13 @@ int getListOfExoplanets(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
 
     std::vector<std::string> names = hostStarsWithSufficientData();
-
     lua_newtable(L);
     int number = 1;
     for (const std::string& s : names) {
-        lua_pushstring(L, s.c_str());
+        ghoul::lua::push(L, s);
         lua_rawseti(L, -2, number);
         ++number;
     }
-
     return 1;
 }
 
@@ -679,16 +672,15 @@ int listAvailableExoplanetSystems(lua_State* L) {
 
     std::string output;
     for (auto it = names.begin(); it != names.end(); ++it) {
-        if (it != names.end()) {
-            output += *it + ", ";
-        }
+        output += *it + ", ";
     }
+    output.pop_back();
+    output.pop_back();
 
     LINFO(fmt::format(
         "There is data available for the following {} exoplanet systems: {}",
         names.size(), output
     ));
-
     return 0;
 }
 

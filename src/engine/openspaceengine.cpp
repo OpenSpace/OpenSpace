@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <openspace/openspace.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
@@ -40,8 +41,8 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -63,7 +64,6 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
@@ -77,6 +77,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
@@ -98,8 +99,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-    constexpr const int CacheVersion = 1;
-
 } // namespace
 
 namespace openspace {
@@ -158,10 +157,8 @@ void OpenSpaceEngine::registerPathTokens() {
     // overwrite the default path of the cfg directory
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
-            path.first +
-            ghoul::filesystem::FileSystem::TokenClosingBraces;
-        LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
+        std::string fullKey = "${" + path.first + "}";
+        LDEBUG(fmt::format("Registering path '{}': '{}'", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
         if (overrideBase) {
@@ -192,10 +189,15 @@ void OpenSpaceEngine::initialize() {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
     }
 
-    std::string cacheFolder = absPath("${CACHE}");
-    if (global::configuration->usePerSceneCache) {
-        std::string scene = global::configuration->asset;
-        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+    std::string cacheFolder = absPath("${CACHE}").string();
+    if (global::configuration->usePerProfileCache) {
+        std::string profile = global::configuration->profile;
+        if (profile.empty()) {
+            throw ghoul::RuntimeError(
+                "Unexpected error: Configuration file profile was empty"
+            );
+        }
+        cacheFolder = cacheFolder + "-" + profile;
 
         LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(fmt::format("New cache: {}", cacheFolder));
@@ -208,14 +210,13 @@ void OpenSpaceEngine::initialize() {
 
     // Create directories that doesn't exist
     for (const std::string& token : FileSys.tokens()) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        if (!std::filesystem::is_directory(token)) {
+            std::filesystem::create_directories(absPath(token));
         }
     }
 
     try {
-        FileSys.createCacheManager(cacheFolder, CacheVersion);
+        FileSys.createCacheManager(cacheFolder);
     }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Could not create Cache Manager");
@@ -296,20 +297,20 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration->profile.empty()) {
-        std::string inputProfilePath = absPath("${PROFILES}");
-        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfilePath = absPath("${PROFILES}").string();
+        std::string outputScenePath = absPath("${TEMPORARY}").string();
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
-        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+        std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
             global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
 
-        if (FileSys.fileExists(inputUserProfile)) {
+        if (std::filesystem::is_regular_file(inputUserProfile)) {
             inputProfile = inputUserProfile;
         }
 
-        if (!FileSys.fileExists(inputProfile)) {
+        if (!std::filesystem::is_regular_file(inputProfile)) {
             LERROR(fmt::format(
                 "Could not load profile '{}': File does not exist", inputProfile)
             );
@@ -336,7 +337,7 @@ void OpenSpaceEngine::initialize() {
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
             std::ofstream scene(outputAsset);
-            std::string sceneContent = global::profile->convertToScene();
+            std::string sceneContent = convertToScene(*global::profile);
             scene << sceneContent;
 
             // Set asset name to that of the profile because a new scene file will be
@@ -350,7 +351,7 @@ void OpenSpaceEngine::initialize() {
     // Set up asset loader
     global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        FileSys.absPath("${ASSETS}")
+        absPath("${ASSETS}").string()
     );
 
     global::scriptEngine->addLibrary(
@@ -392,7 +393,8 @@ void OpenSpaceEngine::initialize() {
 }
 
 std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
-    std::string path = absPath(openspaceRelativePath);
+    // @TODO (abock, 2021-05-16) This whole function can die, I think
+    std::string path = absPath(openspaceRelativePath).string();
     // Needs to handle either windows (which seems to require double back-slashes)
     // or unix path slashes.
     const std::string search = "\\";
@@ -419,8 +421,6 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    rendering::helper::initialize();
-
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
@@ -430,7 +430,6 @@ void OpenSpaceEngine::initializeGL() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
 
-    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -469,6 +468,8 @@ void OpenSpaceEngine::initializeGL() {
             }
         }
     }
+
+    rendering::helper::initialize();
 
     loadFonts();
 
@@ -562,6 +563,15 @@ void OpenSpaceEngine::initializeGL() {
                     break;
                 default:
                     throw ghoul::MissingCaseException();
+            }
+
+            if (global::configuration->openGLDebugContext.printStacktrace) {
+                std::string stackString = "Stacktrace\n";
+                std::vector<std::string> stack = ghoul::stackTrace();
+                for (size_t i = 0; i < stack.size(); i++) {
+                    stackString += fmt::format("{}: {}\n", i, stack[i]);
+                }
+                LDEBUGC(category, stackString);
             }
         };
         ghoul::opengl::debug::setDebugCallback(callback);
@@ -958,19 +968,16 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 }
 
 void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
-    LTRACE(absPath("${USER}"));
+    LTRACE(absPath("${USER}").string());
 
     if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
-        FileSys.createDirectory(absPath("${USER_ASSETS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_ASSETS}"));
     }
     if (!std::filesystem::exists(absPath("${USER_PROFILES}"))) {
-        FileSys.createDirectory(absPath("${USER_PROFILES}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_PROFILES}"));
     }
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
-        FileSys.createDirectory(absPath("${USER_CONFIG}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
 }
 
@@ -982,12 +989,13 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     global::scriptEngine->initializeLuaState(state);
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
-        std::string s = absPath(script);
-        if (FileSys.fileExists(s)) {
+        std::filesystem::path s = absPath(script);
+        if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(fmt::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s);
-            } catch (const ghoul::RuntimeError& e) {
+                ghoul::lua::runScriptFile(state, s.string());
+            }
+            catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -1003,19 +1011,19 @@ void OpenSpaceEngine::loadFonts() {
     using T = std::string;
     for (const std::pair<const T, T>& font : global::configuration->fonts) {
         std::string key = font.first;
-        std::string fontName = absPath(font.second);
+        std::filesystem::path fontName = absPath(font.second);
 
-        if (!FileSys.fileExists(fontName)) {
-            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
+        if (!std::filesystem::is_regular_file(fontName)) {
+            LERROR(fmt::format("Could not find font {} for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(fmt::format("Registering font {} with key '{}'", fontName, key));
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
-                "Error registering font '{}' with key '{}'", fontName, key
+                "Error registering font {} with key '{}'", fontName, key
             ));
         }
     }
@@ -1047,7 +1055,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 
 
-        path = absPath(path) + "/";
+        path = absPath(path).string() + '/';
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager->jsonName() + "\",";
         _documentationJson += "\"data\":";
@@ -1097,10 +1105,10 @@ void OpenSpaceEngine::preSynchronization() {
     global::memoryManager->TemporaryMemory.reset();
 
     if (_hasScheduledAssetLoading) {
-        LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
-        global::profile->setIgnoreUpdates(true);
+        LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
+        global::profile->ignoreUpdates = true;
         loadSingleAsset(_scheduledAssetPathToLoad);
-        global::profile->setIgnoreUpdates(false);
+        global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
@@ -1282,7 +1290,6 @@ void OpenSpaceEngine::drawOverlays() {
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D")
-
         func();
     }
 
@@ -1482,8 +1489,8 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
     std::filesystem::path f(file);
 
     ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
-    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    int status = luaL_loadfile(s, absolutePath.c_str());
+    std::filesystem::path absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
+    int status = luaL_loadfile(s, absolutePath.string().c_str());
     if (status != LUA_OK) {
         std::string error = lua_tostring(s, -1);
         LERROR(error);

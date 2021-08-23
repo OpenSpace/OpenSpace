@@ -1,7 +1,7 @@
 local LabelsPath = asset.syncedResource({
-    Name = "Dione Labels",
-    Type = "HttpSynchronization",
-    Identifier = "saturn_labels",
-    Version = 1
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
 })
 asset.export("LabelsPath", LabelsPath)

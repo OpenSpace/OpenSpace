@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -70,12 +71,24 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum class AnimationMode {
+        Once = 0,
+        LoopFromStart,
+        LoopInfinitely,
+        BounceFromStart,
+        BounceInfinitely
+    };
+
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    double _modelScale = 1.0;
+    bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
+    std::string _animationStart;
+    AnimationMode _animationMode = AnimationMode::Once;
+    properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
-
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
 

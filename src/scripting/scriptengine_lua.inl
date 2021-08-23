@@ -22,103 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
+#include <filesystem>
 
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 
 namespace openspace::luascriptfunctions {
 
-namespace {
-
-// Defining a common walk function that works off a pointer-to-member function
-template <typename Func>
-int walkCommon(lua_State* L, Func func) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
-
-    std::string path = ghoul::lua::value<std::string>(L, 1);
-
-    std::vector<std::string> result;
-    if (nArguments == 1) {
-        // Only the path was passed
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 2) {
-        // The path and the recursive value were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 3) {
-        // All three arguments were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        const bool sorted = ghoul::lua::value<bool>(L, 3);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort(sorted)
-        );
-    }
-
-    lua_settop(L, 0);
-
-    // Copy values into the lua_State
-    lua_newtable(L);
-
-    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
-        lua_pushstring(L, result[i].c_str());
-        lua_rawseti(L, -2, i + 1);
-    }
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-} // namespace
-
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::printInternal");
-
-    using ghoul::lua::luaTypeToString;
-
-    const int type = lua_type(L, 1);
-    switch (type) {
-        case LUA_TNONE:
-        case LUA_TLIGHTUSERDATA:
-        case LUA_TTABLE:
-        case LUA_TFUNCTION:
-        case LUA_TUSERDATA:
-        case LUA_TTHREAD:
-            log(
-                level,
-                "print",
-                fmt::format("Function parameter was of type '{}'", luaTypeToString(type))
-            );
-            break;
-        case LUA_TNIL:
-            break;
-        case LUA_TBOOLEAN:
-            log(level, "print", std::to_string(ghoul::lua::value<bool>(L, 1)));
-            break;
-        case LUA_TNUMBER:
-            log(level, "print", std::to_string(ghoul::lua::value<double>(L, 1)));
-            break;
-        case LUA_TSTRING:
-            log(level, "print", ghoul::lua::value<std::string>(L, 1));
-            break;
+    const int nArguments = lua_gettop(L);
+    for (int i = 1; i <= nArguments; i++) {
+        log(level, "print", ghoul::lua::luaValueToString(L, i));
     }
-    lua_pop(L, 1);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    lua_pop(L, nArguments);
     return 0;
 }
 
@@ -196,16 +112,9 @@ int printFatal(lua_State* L) {
  */
 int absolutePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
+    const std::string path = ghoul::lua::value<std::string>(L);
 
-    const std::string& path = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-
-    ghoul::lua::push(L, absPath(path));
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    ghoul::lua::push(L, absPath(path).string());
     return 1;
 }
 
@@ -217,18 +126,13 @@ int absolutePath(lua_State* L) {
  */
 int setPathToken(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setPathToken");
-
-    std::string pathToken = ghoul::lua::value<std::string>(L, 1);
-    std::string path = ghoul::lua::value<std::string>(L, 2);
+    auto [pathToken, path] = ghoul::lua::values<std::string, std::string>(L);
 
     FileSys.registerPathToken(
         std::move(pathToken),
         std::move(path),
         ghoul::filesystem::FileSystem::Override::Yes
     );
-
-    lua_pop(L, 2);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -239,17 +143,32 @@ int setPathToken(lua_State* L) {
  */
 int fileExists(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
+    std::string file = ghoul::lua::value<std::string>(L);
 
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    const bool e = FileSys.fileExists(absPath(file));
-
+    const bool e = std::filesystem::is_regular_file(absPath(std::move(file)));
     ghoul::lua::push(L, e);
+    return 1;
+}
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+/**
+ * \ingroup LuaScripts
+ * readFile(string):
+ * Reads a file from disk and return its contents
+ */
+int readFile(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::readFile");
+    const std::string file = ghoul::lua::value<std::string>(L);
+
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        return ghoul::lua::luaError(L, fmt::format("Could not open file '{}'", file));
+    }
+
+    std::ifstream f(p);
+    std::stringstream buffer;
+    buffer << f.rdbuf();
+
+    ghoul::lua::push(L, buffer.str());
     return 1;
 }
 
@@ -260,17 +179,47 @@ int fileExists(lua_State* L) {
  */
 int directoryExists(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
+    std::string file = ghoul::lua::value<std::string>(L);
 
-    const std::string& file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    const bool e = FileSys.directoryExists(absPath(file));
-
+    const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     ghoul::lua::push(L, e);
+    return 1;
+}
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+int walkCommon(lua_State* L, std::function<bool(const std::filesystem::path&)> filter) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
+    auto [path, recursive, sorted] =
+        ghoul::lua::values<std::string, std::optional<bool>, std::optional<bool>>(L);
+    recursive = recursive.value_or(false);
+    sorted = sorted.value_or(false);
+
+    namespace fs = std::filesystem;
+    std::vector<fs::directory_entry> result;
+    if (fs::is_directory(path)) {
+        if (recursive) {
+            for (fs::directory_entry e : fs::recursive_directory_iterator(path)) {
+                if (filter(e)) {
+                    result.push_back(e);
+                }
+            }
+        }
+        else {
+            for (fs::directory_entry e : fs::directory_iterator(path)) {
+                if (filter(e)) {
+                    result.push_back(e);
+                }
+            }
+        }
+    }
+    if (sorted) {
+        std::sort(result.begin(), result.end());
+    }
+
+    lua_newtable(L);
+    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
+        ghoul::lua::push(L, result[i].path().string());
+        lua_rawseti(L, -2, i + 1);
+    }
     return 1;
 }
 
@@ -284,7 +233,11 @@ int directoryExists(lua_State* L) {
  * table that is returned is sorted. The default value for this parameter is "false".
  */
 int walkDirectory(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::read);
+    namespace fs = std::filesystem;
+    return walkCommon(
+        L,
+        [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
+    );
 }
 
 /**
@@ -297,23 +250,23 @@ int walkDirectory(lua_State* L) {
  * table that is returned is sorted. The default value for this parameter is "false".
  */
 int walkDirectoryFiles(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::readFiles);
-
+    namespace fs = std::filesystem;
+    return walkCommon(L, [](const fs::path& p) { return fs::is_regular_file(p); });
 }
 
 /**
-* \ingroup LuaScripts
-* walkDirectory(string, bool, bool):
-* Walks a directory and returns the subfolders of the directory as absolute paths. The
-* first argument is the path of the directory that should be walked, the second argument
-* determines if the walk is recursive and will continue in contained directories. The
-* default value for this parameter is "false". The third argument determines whether the
-* table that is returned is sorted. The default value for this parameter is "false".
-*/
+ * \ingroup LuaScripts
+ * walkDirectory(string, bool, bool):
+ * Walks a directory and returns the subfolders of the directory as absolute paths. The
+ * first argument is the path of the directory that should be walked, the second argument
+ * determines if the walk is recursive and will continue in contained directories. The
+ * default value for this parameter is "false". The third argument determines whether the
+ * table that is returned is sorted. The default value for this parameter is "false".
+ */
 int walkDirectoryFolder(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::readDirectories);
+    namespace fs = std::filesystem;
+    return walkCommon(L, [](const fs::path& p) { return fs::is_directory(p); });
 }
-
 
 /**
  * \ingroup LuaScripts
@@ -324,17 +277,10 @@ int walkDirectoryFolder(lua_State* L) {
  */
 int directoryForPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
+    std::string file = ghoul::lua::value<std::string>(L);
 
-    std::string file = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    std::string path = ghoul::filesystem::File(std::move(file)).directoryName();
-
-    ghoul::lua::push(L, path);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    std::string path = std::filesystem::path(std::move(file)).parent_path().string();
+    ghoul::lua::push(L, std::move(path));
     return 1;
 }
 
@@ -347,33 +293,19 @@ int directoryForPath(lua_State* L) {
  * is finished.
  */
 int unzipFile(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 2, 3 },
-        "lua::unzipFile"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::unzipFile");
+    auto [source, dest, deleteSource] =
+        ghoul::lua::values<std::string, std::string, std::optional<bool>>(L);
+    source = absPath(source).string();
+    dest = absPath(dest).string();
+    deleteSource = deleteSource.value_or(false);
 
-    std::string source = absPath(
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)
-    );
-    std::string dest = absPath(
-        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No)
-    );
-
-    bool deleteSource = false;
-    if (nArguments == 3) {
-        deleteSource = ghoul::lua::value<bool>(L, 3, ghoul::lua::PopValue::No);
-    }
-
-    auto onExtractEntry = [](const char*, void*) { return 0; };
     int arg = 2;
-    zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
+    zip_extract(source.c_str(), dest.c_str(), [](const char*, void*) { return 0; }, &arg);
 
-    if (deleteSource) {
-        FileSys.deleteFile(source);
+    if (deleteSource && std::filesystem::is_regular_file(source)) {
+        std::filesystem::remove(source);
     }
-
-    lua_settop(L, 0);
     return 0;
 }
 
@@ -384,14 +316,14 @@ int unzipFile(lua_State* L) {
  */
 int saveLastChangeToProfile(lua_State* L) {
     std::string asset = global::configuration->asset;
-    std::string logFilePath = absPath(global::configuration->scriptLog);
+    std::filesystem::path logFilePath = absPath(global::configuration->scriptLog);
     std::ifstream logfile(logFilePath);
     std::string actualLastLine;
     std::string lastLine;
     std::string line;
-    //add check for log file
+    // add check for log file
     if (!logfile.good()) {
-        ghoul::lua::push(L, fmt::format("Could not open scriptlog '{}'", logFilePath));
+        ghoul::lua::push(L, fmt::format("Could not open scriptlog {}", logFilePath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
     while (std::getline (logfile,line)) {
@@ -406,21 +338,22 @@ int saveLastChangeToProfile(lua_State* L) {
     }
 
     std::string dataString = "${ASSETS}/";
-    std::string assetPath = absPath(fmt::format("{}{}.scene", dataString, asset));
-    std::string tempAssetPath = absPath(fmt::format("{}{}.scene.tmp", dataString, asset));
+    std::filesystem::path assetPath = absPath(fmt::format(
+        "{}{}.scene", dataString, asset
+    ));
+    std::filesystem::path tempAssetPath = absPath(fmt::format(
+        "{}{}.scene.tmp", dataString, asset
+    ));
     std::string strReplace = "--customizationsend";
     std::string strNew = fmt::format("{}\n{}",actualLastLine, strReplace);
     std::ifstream filein(assetPath);
     std::ofstream fileout(tempAssetPath);
     if (!filein) {
-        ghoul::lua::push(L, fmt::format("Could not open profile '{}'", assetPath));
+        ghoul::lua::push(L, fmt::format("Could not open profile {}", assetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
     if (!fileout) {
-        ghoul::lua::push(
-            L,
-            fmt::format("Could not open tmp profile '{}'", tempAssetPath)
-        );
+        ghoul::lua::push(L, fmt::format("Could not open tmp profile {}", tempAssetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
 
@@ -436,16 +369,21 @@ int saveLastChangeToProfile(lua_State* L) {
     filein.close();
     fileout.close();
     if (found) {
-        FileSys.deleteFile(assetPath);
-        int success = rename(tempAssetPath.c_str(), assetPath.c_str());
+        if (std::filesystem::is_regular_file(assetPath)) {
+            std::filesystem::remove(assetPath);
+        }
+        int success = rename(tempAssetPath.string().c_str(), assetPath.string().c_str());
         if (success != 0) {
-            std::string error = fmt::format("Error renaming file {} to {}",
-            tempAssetPath, assetPath);
+            std::string error = fmt::format(
+                "Error renaming file {} to {}", tempAssetPath, assetPath
+            );
             ghoul::lua::push(L, error);
             printInternal(ghoul::logging::LogLevel::Error, L);
             return -1;
         }
-        FileSys.deleteFile(tempAssetPath);
+        if (std::filesystem::is_regular_file(tempAssetPath)) {
+            std::filesystem::remove(tempAssetPath);
+        }
         return 0;
     }
     else {

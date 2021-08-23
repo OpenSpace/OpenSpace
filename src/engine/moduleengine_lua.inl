@@ -34,30 +34,15 @@ namespace openspace::luascriptfunctions {
  */
 int isLoaded(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
-
-    const int type = lua_type(L, 1);
-    if (type != LUA_TSTRING) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
-    }
-    const std::string& moduleName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
-
-    auto it = std::find_if(
-        modules.begin(),
-        modules.end(),
-        [moduleName](OpenSpaceModule* module) {
-            return module->identifier() == moduleName;
-        }
+    const auto it = std::find_if(
+        modules.cbegin(), modules.cend(),
+        [name](OpenSpaceModule* module) { return module->identifier() == name; }
     );
 
-    ghoul::lua::push(L, it != modules.end());
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    ghoul::lua::push(L, it != modules.cend());
     return 1;
 }
 

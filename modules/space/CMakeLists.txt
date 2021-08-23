@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+  speckloader.h
   rendering/planetgeometry.h
   rendering/renderableconstellationbounds.h
   rendering/renderablehabitablezone.h
@@ -43,6 +44,8 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  spacemodule_lua.inl
+  speckloader.cpp
   rendering/planetgeometry.cpp
   rendering/renderableconstellationbounds.cpp
   rendering/renderablehabitablezone.cpp

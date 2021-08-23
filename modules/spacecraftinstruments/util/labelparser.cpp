@@ -26,26 +26,24 @@
 
 #include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "LabelParser";
-    constexpr const char* keySpecs   = "Read";
+    constexpr const char* keySpecs = "Read";
     constexpr const char* keyConvert = "Convert";
 } // namespace
 
 namespace openspace {
 
-LabelParser::LabelParser(std::string name, std::string fileName,
-                         const ghoul::Dictionary& dictionary)
-    : _name(std::move(name))
-    , _fileName(std::move(fileName))
+LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictionary)
+    : _fileName(std::move(fileName))
 {
     // get the different instrument types
     // for each decoder (assuming might have more if hong makes changes)
@@ -121,7 +119,6 @@ std::string LabelParser::decode(const std::string& line) {
         if (value != std::string::npos) {
             std::string toTranslate = line.substr(value);
             return _fileTranslation[toTranslate]->translations()[0];
-
         }
     }
     return "";
@@ -140,45 +137,43 @@ std::string LabelParser::encode(const std::string& line) const {
 }
 
 bool LabelParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::filesystem::path sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
         return false;
     }
 
-    std::string previousTarget;
     std::string lblName;
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (!e.is_regular_file()) {
+            continue;
+        }
 
+        std::string path = e.path().string();
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
         size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
         }
 
-        ghoul::filesystem::File currentFile(path);
-        const std::string& extension = currentFile.fileExtension();
-
-        if (extension != "lbl" && extension != "LBL") {
+        std::filesystem::path extension = std::filesystem::path(path).extension();
+        if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
 
-        std::ifstream file(currentFile.path());
+        std::ifstream file(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", currentFile.path()));
+            LERROR(fmt::format(
+                "Failed to open label file {}", std::filesystem::path(path)
+            ));
             return false;
         }
 
         int count = 0;
 
         // open up label files
-        //TimeRange instrumentRange;
-
         double startTime = 0.0;
         double stopTime = 0.0;
         std::string line;
@@ -191,14 +186,14 @@ bool LabelParser::create() {
 
             std::string read = line.substr(0, line.find_first_of('='));
 
-            _detectorType = "CAMERA"; //default value
+            _detectorType = "CAMERA"; // default value
 
             constexpr const char* ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
                 "contain the identity tranformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";
 
-            /* Add more  */
+            // Add more
             if (read == "TARGET_NAME") {
                 _target = decode(line);
                 if (_target.empty()) {
@@ -235,7 +230,7 @@ bool LabelParser::create() {
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
 
-                getline(file, line);
+                std::getline(file, line);
                 line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -256,7 +251,7 @@ bool LabelParser::create() {
                 }
                 else{
                     LERROR(fmt::format(
-                        "Label file {} deviates from generic standard", currentFile.path()
+                        "Label file {} deviates from generic standard", path
                     ));
                     LINFO(
                         "Please make sure input data adheres to format from \
@@ -274,7 +269,7 @@ bool LabelParser::create() {
                 std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
                     std::string imagePath = p + ext;
-                    if (FileSys.fileExists(imagePath)) {
+                    if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 
@@ -317,20 +312,23 @@ bool LabelParser::create() {
         }
     );
 
+    std::string previousTarget;
     for (const Image& image : tmp) {
-        if (previousTarget != image.target) {
-            previousTarget = image.target;
-            _targetTimes.emplace_back(image.timeRange.start , image.target);
-            std::sort(
-                _targetTimes.begin(),
-                _targetTimes.end(),
-                [](const std::pair<double, std::string> &a,
-                   const std::pair<double, std::string> &b) -> bool
-                {
-                    return a.first < b.first;
-                }
-            );
+        if (previousTarget == image.target) {
+            continue;
         }
+
+        previousTarget = image.target;
+        _targetTimes.emplace_back(image.timeRange.start , image.target);
+        std::sort(
+            _targetTimes.begin(),
+            _targetTimes.end(),
+            [](const std::pair<double, std::string>& a,
+               const std::pair<double, std::string>& b) -> bool
+            {
+                return a.first < b.first;
+            }
+        );
     }
 
     for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {

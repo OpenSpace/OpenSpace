@@ -42,9 +42,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimelineRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_keyframe";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_keyframe");
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {

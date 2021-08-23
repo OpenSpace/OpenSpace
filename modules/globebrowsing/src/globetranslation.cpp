@@ -98,9 +98,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_translation_globetranslation";
-    return doc;
+    return codegen::doc<Parameters>("space_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
@@ -127,6 +125,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_latitude);
 
     _altitude = p.altitude.value_or(_altitude);
+    _altitude.setExponent(8.f);
     _altitude.onChange([this]() { _positionIsDirty = true; });
     addProperty(_altitude);
 

@@ -54,83 +54,12 @@ namespace {
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
 
+#include "screenspacedashboard_lua.inl"
+
 namespace openspace {
 
-namespace luascriptfunctions {
-
-/**
-* \ingroup LuaScripts
-* addDashboardItemToScreenSpace(string, table):
-*/
-int addDashboardItemToScreenSpace(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    const int type = lua_type(L, 2);
-    if (type != LUA_TTABLE) {
-        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
-    }
-
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addDashboardItem", e.what());
-        return 0;
-    }
-
-    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
-
-    if (!ssr) {
-        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
-    }
-
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
-    if (!dash) {
-        return ghoul::lua::luaError(
-            L,
-            "Provided name is a ScreenSpace item but not a dashboard"
-        );
-    }
-
-    dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-
-    lua_settop(L, 0);
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
-* removeDashboardItemsFromScreenSpace(string):
-*/
-int removeDashboardItemsFromScreenSpace(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
-
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
-
-    if (!ssr) {
-        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
-    }
-
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
-    if (!dash) {
-        return ghoul::lua::luaError(
-            L,
-            "Provided name is a ScreenSpace item but not a dashboard"
-        );
-    }
-
-    dash->dashboard().clearDashboardItems();
-    return 0;
-}
-} // namespace luascriptfunctions
-
 documentation::Documentation ScreenSpaceDashboard::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_dashboard";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)

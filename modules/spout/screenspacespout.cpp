@@ -29,10 +29,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyName = "Name";
-
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
         "Spout Sender Name",
@@ -54,30 +53,18 @@ namespace {
         "If this property is trigged, the 'SpoutSelection' options will be refreshed."
     };
 
+    struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
+        // [[codegen::verbatim(NameInfo.description)]]
+        std::optional<std::string> spoutName;
+    };
+#include "screenspacespout_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceSpout::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Spout",
-        "spout_screenspace_spout",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceSpout"
-            },
-            {
-                NameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                NameInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 
 ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
@@ -87,11 +74,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     , _updateSelection(UpdateInfo)
     , _receiver(GetSpout())
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceSpout"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
@@ -103,10 +86,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(std::move(identifier));
 
-    if (dictionary.hasKey(NameInfo.identifier)) {
-        _spoutName = dictionary.value<std::string>(NameInfo.identifier);
-    }
-
+    _spoutName = p.spoutName.value_or(_spoutName);
     _spoutName.onChange([this]() {
         _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;

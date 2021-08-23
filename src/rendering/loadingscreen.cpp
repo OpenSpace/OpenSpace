@@ -140,7 +140,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${DATA}/openspace-logo.png")
+            absPath("${DATA}/openspace-logo.png").string()
         );
         _logoTexture->uploadTexture();
     }
@@ -283,7 +283,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard<std::mutex> guard(_messageMutex);
+        std::lock_guard guard(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -298,7 +298,7 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        std::lock_guard<std::mutex> guard(_itemsMutex);
+        std::lock_guard guard(_itemsMutex);
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
@@ -485,7 +485,7 @@ void LoadingScreen::render() {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard<std::mutex> guard(_messageMutex);
+    std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -535,7 +535,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard<std::mutex> guard(_itemsMutex);
+    std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),

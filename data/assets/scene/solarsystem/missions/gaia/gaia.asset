@@ -3,53 +3,53 @@ local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local model = asset.syncedResource({
-    Name = "Gaia Model",
-    Type = "HttpSynchronization",
-    Identifier = "gaia_model",
-    Version = 2
+  Name = "Gaia Model",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_model",
+  Version = 2
 })
 
 
 local Gaia = {
-    Identifier = "Gaia",
-    Parent = transforms.GaiaPosition.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "FixedRotation",
-            Attached = "Gaia",
-            XAxis = { 1.0, 0.0, 0.0 },
-            XAxisOrthogonal = true,
-            YAxis = "Sun",
-            YAxisInverted = true
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 10.0
-        }
+  Identifier = "Gaia",
+  Parent = transforms.GaiaPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Gaia",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInvert = true
     },
-    -- X Orthogonal 
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "GAIA",
-        GeometryFile = model .. "/gaia.obj",
-        LightSources = {
-            {
-                Type = "SceneGraphLightSource",
-                Identifier = "Sun",
-                Node = sunTransforms.SolarSystemBarycenter.Identifier,
-                Intensity = 0.3
-            },
-            {
-                Identifier = "Camera",
-                Type = "CameraLightSource",
-                Intensity = 0.4
-            }
-        }
-    },
-    GUI = {
-        Name = "Gaia",
-        Path = "/Solar System/Missions/Gaia"
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10.0
     }
+  },
+  -- X Orthogonal 
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "GAIA",
+    GeometryFile = model .. "/gaia.obj",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 0.3
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
+    }
+  },
+  GUI = {
+    Name = "Gaia",
+    Path = "/Solar System/Missions/Gaia"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Gaia })

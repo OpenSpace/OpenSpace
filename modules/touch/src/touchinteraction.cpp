@@ -31,16 +31,16 @@
 
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/touch/include/directinputsolver.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -507,15 +507,15 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
         size_t id = inputHolder.fingerId();
 
         for (SceneGraphNode* node : selectableNodes) {
-            double boundingSphereSquared = static_cast<double>(node->boundingSphere()) *
-                                           static_cast<double>(node->boundingSphere());
+            double interactionSphereSquared =
+                node->interactionSphere() * node->interactionSphere();
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double intersectionDist = 0.0;
             const bool intersected = glm::intersectRaySphere(
                 camPos,
                 raytrace,
                 node->worldPosition(),
-                boundingSphereSquared,
+                interactionSphereSquared,
                 intersectionDist
             );
             if (intersected) {
@@ -921,7 +921,7 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
         global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
     );
 
-    dist -= anchor->boundingSphere();
+    dist -= anchor->interactionSphere();
 
     double newVelocity = dist * _tapZoomFactor;
     newVelocity *= std::max(_touchScreenSize.value() * 0.1, 1.0);
@@ -962,9 +962,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
         dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
         dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
-        const double boundingSphere = anchor->boundingSphere();
-        const double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
-        _currentRadius = boundingSphere /
+        const double interactionSphere = anchor->interactionSphere();
+        const double distance = std::max(length(centerToCamera) - interactionSphere, 0.0);
+        _currentRadius = interactionSphere /
             std::max(distance * _projectionScaleFactor, 1.0);
 
         {
@@ -1010,7 +1010,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             // This is a rough estimate of the node surface
             // If nobody has set another zoom in limit, use this as default zoom in bounds
-            double zoomInBounds = boundingSphere * _zoomBoundarySphereMultiplier;
+            double zoomInBounds = interactionSphere * _zoomBoundarySphereMultiplier;
             bool isZoomInLimitSet = (_zoomInLimit.value() >= 0.0);
 
             if (isZoomInLimitSet && _zoomInLimit.value() < zoomInBounds) {
@@ -1049,7 +1049,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
             double zoomVelocity = _vel.zoom;
             if (!directTouch) {
                 const double distanceFromSurface =
-                    length(currentPosDistance) - anchor->boundingSphere();
+                    length(currentPosDistance) - anchor->interactionSphere();
                 if (distanceFromSurface > 0.1) {
                     const double ratioOfDistanceToNodeVsSurf =
                         length(currentPosDistance) / distanceFromSurface;
@@ -1202,7 +1202,7 @@ void TouchInteraction::resetToDefault() {
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
-    _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
+    _friction.set(glm::vec4(0.025f, 0.025f, 0.02f, 0.02f));
 }
 
 void TouchInteraction::tap() {

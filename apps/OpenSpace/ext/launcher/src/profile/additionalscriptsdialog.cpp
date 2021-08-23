@@ -25,24 +25,27 @@
 #include "profile/additionalscriptsdialog.h"
 
 #include "profile/line.h"
+#include "profile/scriptlogdialog.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <sstream>
 
-AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
-                                                 QWidget* parent)
+AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
+                                                 std::vector<std::string>* scripts)
     : QDialog(parent)
-    , _profile(profile)
+    , _scripts(scripts)
+    , _scriptsData(*_scripts)
 {
     setWindowTitle("Additional Scripts");
     createWidgets();
 
-    std::vector<std::string> scripts = _profile.additionalScripts();
     std::string scriptText = std::accumulate(
-        scripts.begin(), scripts.end(),
+        _scriptsData.begin(), _scriptsData.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
     );
     _textScripts->setText(QString::fromStdString(std::move(scriptText)));
@@ -60,6 +63,13 @@ void AdditionalScriptsDialog::createWidgets() {
     _textScripts = new QTextEdit;
     _textScripts->setAcceptRichText(false);
     layout->addWidget(_textScripts, 1);
+
+    _chooseScriptsButton = new QPushButton("Choose Scripts");
+    connect(
+        _chooseScriptsButton, &QPushButton::clicked,
+        this, &AdditionalScriptsDialog::chooseScripts
+    );
+    layout->addWidget(_chooseScriptsButton);
 
     layout->addWidget(new Line);
 
@@ -86,6 +96,16 @@ void AdditionalScriptsDialog::parseScript() {
         std::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
-    _profile.setAdditionalScripts(additionalScripts);
+    *_scripts = std::move(additionalScripts);
     accept();
+}
+
+void AdditionalScriptsDialog::chooseScripts() {
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &AdditionalScriptsDialog::appendScriptsToTextfield);
+    d.exec();
+}
+
+void AdditionalScriptsDialog::appendScriptsToTextfield(std::string scripts) {
+    _textScripts->append(QString::fromStdString(std::move(scripts)));
 }

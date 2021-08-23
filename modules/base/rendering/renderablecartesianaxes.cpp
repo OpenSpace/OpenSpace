@@ -75,9 +75,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableCartesianAxes::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_cartesianaxes";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
 
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
@@ -120,14 +118,7 @@ void RenderableCartesianAxes::initializeGL() {
     );
 
     glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
-    glGenBuffers(1, &_iBufferId);
-
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
 
     std::vector<Vertex> vertices({
         Vertex{0.f, 0.f, 0.f},
@@ -142,7 +133,7 @@ void RenderableCartesianAxes::initializeGL() {
         0, 3
     };
 
-    glBindVertexArray(_vaoId);
+    glGenBuffers(1, &_vBufferId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -151,8 +142,10 @@ void RenderableCartesianAxes::initializeGL() {
         GL_STATIC_DRAW
     );
 
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
+    glGenBuffers(1, &_iBufferId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
@@ -160,6 +153,7 @@ void RenderableCartesianAxes::initializeGL() {
         indices.data(),
         GL_STATIC_DRAW
     );
+    glBindVertexArray(0);
 }
 
 void RenderableCartesianAxes::deinitializeGL() {
@@ -203,9 +197,9 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
+    glLineWidth(3.0);
 
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
     glDrawElements(GL_LINES, NVertexIndices, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 

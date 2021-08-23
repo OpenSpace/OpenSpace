@@ -2,14 +2,14 @@ local texturesPath = asset.require("./../../mercury_textures").TexturesPath
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
 local layer = {
-    Name = "Aluminium Abundance",
-    Identifier = "alsimap_02122015",
-    FilePath = texturesPath .. "/alsimap_02122015.png",
-    BlendMode = "Multiply",
+  Name = "Aluminium Abundance",
+  Identifier = "alsimap_02122015",
+  FilePath = texturesPath .. "/alsimap_02122015.png",
+  BlendMode = "Multiply",
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
