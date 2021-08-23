@@ -1168,8 +1168,8 @@ void RenderEngine::renderCameraInformation() {
         return;
     }
 
-    const glm::vec4 EnabledColor  = _enabledFontColor.value(); //glm::vec4(0.2f, 0.75f, 0.2f, 1.f);
-    const glm::vec4 DisabledColor = _disabledFontColor.value(); //glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
+    const glm::vec4 EnabledColor  = _enabledFontColor.value();
+    const glm::vec4 DisabledColor = _disabledFontColor.value();
 
     const glm::vec2 rotationBox = _fontCameraInfo->boundingBox("Rotation");
 
