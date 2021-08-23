@@ -302,8 +302,6 @@ void OpenSpaceEngine::initialize() {
             global::configuration->profile + ".profile";
         std::string outputProfilePrefix = outputScenePath + "/"
             + global::configuration->profile;
-        std::string outputAsset = outputScenePath + "/" + global::configuration->profile
-            + ".asset";
 
         if (std::filesystem::is_regular_file(inputUserProfile)) {
             inputProfile = inputUserProfile;
@@ -335,14 +333,9 @@ void OpenSpaceEngine::initialize() {
 
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
-            std::ofstream scene(outputAsset);
-            std::string sceneContent = convertToScene(*global::profile);
-            scene << sceneContent;
+            convertToSeparatedAssets(outputProfilePrefix, *global::profile);
 
-            // Set asset name to that of the profile because a new scene file will be
-            // created with that name, and also because the profile name will override
-            // an asset name if both are provided.
-            global::configuration->asset = outputAsset;
+            global::configuration->profileOutPrefixName = outputProfilePrefix;
             global::configuration->usingProfile = true;
         }
     }
@@ -386,7 +379,6 @@ void OpenSpaceEngine::initialize() {
     }
 
     global::openSpaceEngine->_assetManager->initialize();
-    scheduleLoadSingleAsset(global::configuration->asset);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
 }
@@ -1112,6 +1104,19 @@ void OpenSpaceEngine::preSynchronization() {
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
     }
+    else if (!_hasInitializedProfile) {
+        loadInitAssetSection("_meta");
+        loadInitAssetSection("_addedAssets");
+        loadInitAssetSection("_modules");
+        loadInitAssetSection("_actions");
+        loadInitAssetSection("_keybinds");
+        loadInitAssetSection("_time");
+        loadInitAssetSection("_deltaTimes");
+        loadInitAssetSection("_markNodes");
+        loadInitAssetSection("_properties");
+        loadInitAssetSection("_camera");
+        _hasInitializedProfile = true;
+    }
 
     if (_isFirstRenderingFirstFrame) {
         global::windowDelegate->setSynchronization(false);
@@ -1140,7 +1145,9 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
-        global::renderEngine->updateScene();
+        if (!_hasInitializedProfile) {
+            loadInitAssetSection("_addedScripts");
+        }
 
         if (_scene) {
             Camera* camera = _scene->camera();
@@ -1159,7 +1166,25 @@ void OpenSpaceEngine::preSynchronization() {
 
         func();
     }
+
+    if (!_hasInitializedProfile) {
+        _hasInitializedProfile = true;
+    }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
+}
+
+void OpenSpaceEngine::loadInitAssetSection(const std::string profileSectionName) {
+    std::string assetFilename = fmt::format(
+        "{}_{}{}",
+        global::configuration->profileOutPrefixName,
+        profileSectionName,
+        global::profile->assetFileExtension
+    );
+    LINFO(fmt::format("Loading profile subsection {}", profileSectionName));
+    global::profile->ignoreUpdates = true;
+    loadSingleAsset(assetFilename);
+    global::profile->ignoreUpdates = false;
+    resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {

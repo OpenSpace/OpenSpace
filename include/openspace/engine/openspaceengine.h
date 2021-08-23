@@ -115,6 +115,7 @@ private:
     void configureLogging();
     std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
+    void loadInitAssetSection(const std::string profileSectionName);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -124,6 +125,7 @@ private:
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
+    bool _hasInitializedProfile = false;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
 

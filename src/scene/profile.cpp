@@ -465,7 +465,7 @@ struct Keybinding {
     std::string documentation;
     std::string name;
     std::string guiPath;
-    bool isLocal;
+    bool isLocal = true;
     std::string script;
 };
 
@@ -741,57 +741,27 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-void convertProfileToSeparatedAssets(const std::string profilePrefix, const Profile& p) {
-    {
-        std::ofstream converted(fmt::format("{}_meta{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_meta(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_includedAssets{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_includedAssets(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_modules{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_modules(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_actionsKeybinds{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_actionsKeybinds(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_time{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_time(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_deltaTimes{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_deltaTimes(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_markNodes{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_markNodes(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_properties{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_properties(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_camera{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_camera(p);
-    }
-    {
-        std::ofstream converted(fmt::format("{}_additionalScripts{}", profilePrefix,
-            p.assetFileExtension));
-        converted << convertToAsset_additionalScripts(p);
-    }
+void convertToSeparatedAssets(const std::string filePre, const Profile& p) {
+    convertSectionToAssetFile(filePre, p, "_meta", convertToAsset_meta);
+    convertSectionToAssetFile(filePre, p, "_addedAssets", convertToAsset_addedAssets);
+    convertSectionToAssetFile(filePre, p, "_modules", convertToAsset_modules);
+    convertSectionToAssetFile(filePre, p, "_actions", convertToAsset_actions);
+    convertSectionToAssetFile(filePre, p, "_keybinds", convertToAsset_keybinds);
+    convertSectionToAssetFile(filePre, p, "_time", convertToAsset_time);
+    convertSectionToAssetFile(filePre, p, "_deltaTimes", convertToAsset_deltaTimes);
+    convertSectionToAssetFile(filePre, p, "_markNodes", convertToAsset_markNodes);
+    convertSectionToAssetFile(filePre, p, "_properties", convertToAsset_properties);
+    convertSectionToAssetFile(filePre, p, "_camera", convertToAsset_camera);
+    convertSectionToAssetFile(filePre, p, "_addedScripts", convertToAsset_addedScripts);
+}
+
+void convertSectionToAssetFile(const std::string profilePrefix, const Profile& p,
+                               const std::string profileSectionName,
+                               std::function<std::string(const Profile&)> func)
+{
+    std::ofstream converted(fmt::format("{}_{}{}", profilePrefix,
+        profileSectionName, p.assetFileExtension));
+    converted << func(p);
 }
 
 std::string convertToAsset_meta(const Profile& p) {
@@ -827,7 +797,7 @@ std::string convertToAsset_meta(const Profile& p) {
     return output;
 }
 
-std::string convertToAsset_includedAssets(const Profile& p) {
+std::string convertToAsset_addedAssets(const Profile& p) {
     ZoneScoped
 
     std::string output;
@@ -844,7 +814,6 @@ std::string convertToAsset_modules(const Profile& p) {
     ZoneScoped
 
     std::string output;
-
     for (const Profile::Module& m : p.modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
@@ -855,12 +824,10 @@ std::string convertToAsset_modules(const Profile& p) {
     return output;
 }
 
-std::string convertToAsset_actionsKeybinds(const Profile& p) {
+std::string convertToAsset_actions(const Profile& p) {
     ZoneScoped
 
     std::string output = "asset.onInitialize(function()\n";
-    // Actions
-    output += "  -- Actions\n";
     for (const Profile::Action& action : p.actions) {
         const std::string name = action.name.empty() ? action.identifier : action.name;
         output += fmt::format(
@@ -872,9 +839,15 @@ std::string convertToAsset_actionsKeybinds(const Profile& p) {
             action.isLocal ? "true" : "false"
         );
     }
+    output += "end)\n";
 
-    // Keybindings
-    output += "\n  -- Keybindings\n";
+    return output;
+}
+
+std::string convertToAsset_keybinds(const Profile& p) {
+    ZoneScoped
+
+    std::string output = "asset.onInitialize(function()\n";
     for (size_t i = 0; i < p.keybindings.size(); ++i) {
         const Profile::Keybinding& k = p.keybindings[i];
         const std::string key = keyToString(k.key);
@@ -889,7 +862,6 @@ std::string convertToAsset_time(const Profile& p) {
     ZoneScoped
 
     std::string output = "asset.onInitialize(function()\n";
-    output += "\n  -- Time\n";
     switch (p.time->type) {
     case Profile::Time::Type::Absolute:
         output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
@@ -914,7 +886,6 @@ std::string convertToAsset_deltaTimes(const Profile& p) {
 
     std::string output = "asset.onInitialize(function()\n";
     {
-        output += "\n  -- Delta Times\n";
         std::string times;
         for (double d : p.deltaTimes) {
             times += fmt::format("{}, ", d);
@@ -931,7 +902,6 @@ std::string convertToAsset_markNodes(const Profile& p) {
 
     std::string output = "asset.onInitialize(function()\n";
     {
-        output += "\n  -- Mark Nodes\n";
         std::string nodes;
         for (const std::string& n : p.markNodes) {
             nodes += fmt::format("[[{}]],", n);
@@ -947,7 +917,6 @@ std::string convertToAsset_properties(const Profile& p) {
     ZoneScoped
 
     std::string output = "asset.onInitialize(function()\n";
-    output += "\n  -- Properties\n";
     for (const Profile::Property& prop : p.properties) {
         switch (prop.setType) {
         case Profile::Property::SetType::SetPropertyValue:
@@ -973,13 +942,10 @@ std::string convertToAsset_properties(const Profile& p) {
 std::string convertToAsset_camera(const Profile& p) {
     ZoneScoped
 
-    std::string output;
-
-    // Camera
-    output += "\n  -- Camera\n";
+    std::string output = "asset.onInitialize(function()\n";
     if (p.camera.has_value()) {
         output += std::visit(
-            overloaded{
+            overloaded {
                 [](const Profile::CameraNavState& c) {
                     std::string result;
                     result += "  openspace.navigation.setNavigationState({";
@@ -1033,12 +999,10 @@ std::string convertToAsset_camera(const Profile& p) {
     return output;
 }
 
-std::string convertToAsset_additionalScripts(const Profile& p) {
+std::string convertToAsset_addedScripts(const Profile& p) {
     ZoneScoped
 
     std::string output = "asset.onInitialize(function()\n";
-
-    output += "\n  -- Additional Scripts\n";
     for (const std::string& a : p.additionalScripts) {
         output += fmt::format("  {}\n", a);
     }
