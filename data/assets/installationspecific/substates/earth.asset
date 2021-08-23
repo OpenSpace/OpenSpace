@@ -1,0 +1,92 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local earthTargetDistance = 1.5E7
+
+local earthState = {
+  Identifier = "Earth",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local moonTargetDistance = 1.5E7
+
+local moonState = {
+  Identifier = "Moon",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local apolloTargetDistance = 1.5E7
+
+local apolloState = {
+  Identifier = "Apollo",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { earthState, moonState, apolloState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  {
+    From = "Earth",
+    To = "Moon",
+    Action =  [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Moon', true)
+      ]] .. util.changeAnchor('Moon', 1) .. [[
+    ]]
+  },
+  {
+    From = "Moon",
+    To = "Earth",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Earth', true)
+      ]] .. util.changeAnchor('Earth', 1) .. [[
+    ]]
+  },
+  {
+    From = "Earth",
+    To = "Apollo",
+    Action =  [[]]
+  },
+  {
+    From = "Apollo",
+    To = "Earth",
+    Action =  [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Earth', true)
+      ]] .. util.changeAnchor('Earth', 1) .. [[
+    ]]
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

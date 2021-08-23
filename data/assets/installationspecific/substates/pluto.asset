@@ -1,0 +1,27 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local plutoTargetDistance = 2E9
+
+local plutoState = {
+  Identifier = "Pluto",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { plutoState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = { }
+
+asset.export("states", states)
+asset.export("transitions", transitions)

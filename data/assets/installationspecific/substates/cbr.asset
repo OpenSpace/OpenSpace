@@ -1,0 +1,28 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local cbrTargetDistance = 36E7
+
+local cbrState = {
+    Identifier = "CBR",
+    Enter = [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+        ]] .. util.orbitOnArrival() .. [[
+    ]],
+    Exit = [[
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
+
+local states = { cbrState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {}
+
+asset.export("states", states)
+asset.export("transitions", transitions)
+asset.export("cbrTargetDistance", cbrTargetDistance)

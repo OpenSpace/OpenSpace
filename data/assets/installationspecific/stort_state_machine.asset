@@ -8,741 +8,227 @@ local defaultTime = 654728475 -- 2020 Sep 9, 9:00
 local solarTargetDistance = 3E11
 
 local solarSystemState = {
-    Identifier = "SolarSystem", 
-    Enter = [[]],
-    Exit = [[]]
+  Identifier = "SolarSystem", 
+  Enter = [[]],
+  Exit = [[]]
 }
 
 ---------------------------------------------------------------- 
 -- 1. EARTH STATE
 ----------------------------------------------------------------
-local earthTargetDistance = 1.5E7
-
-local earthState = {
-    Identifier = "Earth",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local moonTargetDistance = 1.5E7
-
-local moonState = {
-    Identifier = "Moon",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local apolloTargetDistance = 1.5E7
-
-local apolloState = {
-    Identifier = "Apollo",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateEarth = asset.require('./substates/earth')
 
 ---------------------------------------------------------------- 
 -- 2. MARS STATE
 ----------------------------------------------------------------
-local marsTargetDistance = 7E6
-
-local marsState = {
-    Identifier = "Mars",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local vallesMarinerisTargetDistance = 7E6
-
-local vallesMarinerisState = {
-    Identifier = "VallesMarineris",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local olympusMonsTargetDistance = 7E6
-
-local olympusMonsState = {
-    Identifier = "OlympusMons",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local curiosityTargetDistance = 7E6
-
-local curiosityState = {
-    Identifier = "Curiosity",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateMars = asset.require('./substates/mars')
 
 ---------------------------------------------------------------- 
 -- 3. CERES STATE
 ----------------------------------------------------------------
-local ceresTargetDistance =  2.2E25;
-
-local ceresState = {
-    Identifier = "Ceres", 
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local ahunaMonsTargetDistance =  2.2E25;
-
-local ahunaMonsState = {
-    Identifier = "AhunaMons", 
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateCeres = asset.require('./substates/ceres')
 
 ---------------------------------------------------------------- 
 -- 4. JUPITER STATE
 ----------------------------------------------------------------
-local jupiterTargetDistance = 1e12
-
-local jupiterState = {
-    Identifier = "Jupiter",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local europaTargetDistance = 1e12
-
-local europaState = {
-    Identifier = "Europa",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local ioTargetDistance = 1e12
-
-local ioState = {
-    Identifier = "Io",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateJupiter = asset.require('./substates/jupiter')
 
 ----------------------------------------------------------------
 -- 5. SATURN STATE
 ----------------------------------------------------------------
-local saturnTargetDistance = 36E7
-
-local saturnState = {
-    Identifier = "Saturn",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local ringsTargetDistance = 36E7
-
-local ringsState = {
-    Identifier = "SaturnRings",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local titanTargetDistance = 36E7
-
-local titanState = {
-    Identifier = "Titan",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-
-local cassiniTargetDistance = 36E7
-
-local cassiniState = {
-    Identifier = "Cassini",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local huygensTargetDistance = 36E7
-
-local huygensState = {
-    Identifier = "Huygens",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateSaturn = asset.require('./substates/saturn')
 
 ---------------------------------------------------------------- 
 -- 6. PLUTO STATE
 ----------------------------------------------------------------
-local plutoTargetDistance = 2E9
-
-local plutoState = {
-    Identifier = "Pluto",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substatePluto = asset.require('./substates/pluto')
 
 ----------------------------------------------------------------
 -- 7. VOYAGER AND PIONEER STATE
 ----------------------------------------------------------------
-local voyagerPioneerTargetDistance = 36E7
-
-local voyagerPioneerState = {
-    Identifier = "VoyagerPioneer",
-    Enter = [[
-    ]],
-    Exit = [[
-    ]]
-}
-
-local VoyagerTargetDistance = 2E9
-
-local voyagerState = {
-    Identifier = "Voyager",
-    Enter = [[
-    ]],
-    Exit = [[
-    ]]
-}
-
-local pioneerTargetDistance = 2E9
-
-local pioneerState = {
-    Identifier = "Pioneer",
-    Enter = [[
-    ]],
-    Exit = [[
-    ]]
-}
+local substateVoyagerPioneer = asset.require('./substates/voyagerpioneer.asset')
 
 ----------------------------------------------------------------
 -- 8. COSMIC BACKGROUND RADIATION STATE
 ----------------------------------------------------------------
-local cbrTargetDistance = 36E7
-
-local cbrState = {
-    Identifier = "CBR",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
-    ]],
-    Exit = [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
+local substateCBR = asset.require('./substates/cbr.asset')
 
 ---------------------------------------------------------------- 
 -- COMBINE STATES AND TRANSITIONS
 ----------------------------------------------------------------
-local states = { 
-    solarSystemState,
-    earthState,
-    moonState,
-    apolloState,
-    marsState,
-    vallesMarinerisState,
-    olympusMonsState,
-    curiosityState,
-    ceresState,
-    ahunaMonsState,
-    jupiterState,
-    europaState,
-    ioState,
-    saturnState,
-    ringsState,
-    titanState,
-    cassiniState,
-    huygensState,
-    plutoState,
-    voyagerPioneerState,
-    voyagerState,
-    pioneerState,
-    cbrState
+local states = {
+  solarSystemState
 }
 
+util.appendTable(states, substateEarth.states)
+util.appendTable(states, substateMars.states)
+util.appendTable(states, substateCeres.states)
+util.appendTable(states, substateJupiter.states)
+util.appendTable(states, substateSaturn.states)
+util.appendTable(states, substatePluto.states)
+util.appendTable(states, substateVoyagerPioneer.states)
+util.appendTable(states, substateCBR.states)
+
 local transitions = {
-    -- 1. Earth
-    {
-        From = "Earth",
-        To = "SolarSystem",
-        Action =  [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Earth",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Earth', true)
-            ]] .. util.changeAnchor('Earth', 1) .. [[
-        ]]
-    },
-    {
-        From = "Earth",
-        To = "Moon",
-        Action =  [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Moon', true)
-            ]] .. util.changeAnchor('Moon', 1) .. [[
-        ]]
-    },
-    {
-        From = "Moon",
-        To = "Earth",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Earth', true)
-            ]] .. util.changeAnchor('Earth', 1) .. [[
-        ]]
-    },
-    {
-        From = "Earth",
-        To = "Apollo",
-        Action =  [[
-        ]]
-    },
-    {
-        From = "Apollo",
-        To = "Earth",
-        Action =  [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Earth', true)
-            ]] .. util.changeAnchor('Earth', 1) .. [[
-        ]]
-    },
-    -- 2. Mars
-    {
-        From = "Mars",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Mars",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Mars', true)
-            ]] .. util.changeAnchor('Mars', 1) .. [[
-        ]]
-    },
-    {
-        From = "Mars",
-        To = "VallesMarineris",
-        Action = [[
-        ]]
-    },
-    {
-        From = "VallesMarineris",
-        To = "Mars",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Mars', true)
-            ]] .. util.changeAnchor('Mars', 1) .. [[
-        ]]
-    },
-    {
-        From = "Mars",
-        To = "OlympusMons",
-        Action = [[
-        ]]
-    },
-    {
-        From = "OlympusMons",
-        To = "Mars",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Mars', true)
-            ]] .. util.changeAnchor('Mars', 1) .. [[
-        ]]
-    },
-    {
-        From = "Mars",
-        To = "Curiosity",
-        Action = [[
-        ]]
-    },
-    {
-        From = "Curiosity",
-        To = "Mars",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Mars', true)
-            ]] .. util.changeAnchor('Mars', 1) .. [[
-        ]]
-    },
-    -- 3. Ceres
-    {
-        From = "Ceres",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Ceres",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Ceres', true)
-            ]] .. util.changeAnchor('Ceres', 1) .. [[
-        ]]
-    },
-    {
-        From = "Ceres",
-        To = "AhunaMons",
-        Action = [[
-        ]]
-    },
-    {
-        From = "AhunaMons",
-        To = "Ceres",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Ceres', true)
-            ]] .. util.changeAnchor('Ceres', 1) .. [[
-        ]]
-    },
-    -- 4. Jupiter
-    {
-        From = "Jupiter",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Jupiter",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Jupiter', true)
-            ]] .. util.changeAnchor('Jupiter', 1) .. [[
-        ]]
-    },
-    {
-        From = "Jupiter",
-        To = "Europa",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Europa', true)
-            ]] .. util.changeAnchor('Europa', 1) .. [[
-        ]]
-    },
-    {
-        From = "Europa",
-        To = "Jupiter",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Jupiter', true)
-            ]] .. util.changeAnchor('Jupiter', 1) .. [[
-        ]]
-    },
-    {
-        From = "Jupiter",
-        To = "Io",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Io', true)
-            ]] .. util.changeAnchor('Io', 1) .. [[
-        ]]
-    },
-    {
-        From = "Io",
-        To = "Jupiter",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Jupiter', true)
-            ]] .. util.changeAnchor('Jupiter', 1) .. [[
-        ]]
-    },
-    -- 5. Saturn
-    {
-        From = "Saturn",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Saturn",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Saturn', true)
-            ]] .. util.changeAnchor('Saturn', 1) .. [[
-        ]]
-    },
-    {
-        From = "Saturn",
-        To = "SaturnRings",
-        Action = [[
-        ]]
-    },
-    {
-        From = "SaturnRings",
-        To = "Saturn",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Saturn', true)
-            ]] .. util.changeAnchor('Saturn', 1) .. [[
-        ]]
-    },
-    {
-        From = "Saturn",
-        To = "Titan",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Titan', true)
-            ]] .. util.changeAnchor('Titan', 1) .. [[
-        ]]
-    },
-    {
-        From = "Titan",
-        To = "Saturn",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Saturn', true)
-            ]] .. util.changeAnchor('Saturn', 1) .. [[
-        ]]
-    },
-    {
-        From = "Saturn",
-        To = "Cassini",
-        Action = [[
-        ]]
-    },
-    {
-        From = "Cassini",
-        To = "Saturn",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Saturn', true)
-            ]] .. util.changeAnchor('Saturn', 1) .. [[
-        ]]
-    },
-    {
-        From = "Saturn",
-        To = "Huygens",
-        Action = [[
-        ]]
-    },
-    {
-        From = "Huygens",
-        To = "Saturn",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Saturn', true)
-            ]] .. util.changeAnchor('Saturn', 1) .. [[
-        ]]
-    },
-    -- 6. Pluto
-    {
-        From = "Pluto",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "Pluto",
-        Action = [[
-            ]] .. util.disableLinearFlight() .. [[
-            ]] .. util.setCurveTypeToZoomOverview() .. [[
-            openspace.time.setPause(true)
-            openspace.pathnavigation.goTo('Pluto', true)
-            ]] .. util.changeAnchor('Pluto', 1) .. [[
-        ]]
-    },
-    -- 7. Voyager and Pioneer
-    {
-        From = "VoyagerPioneer",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "VoyagerPioneer",
-        Action = [[
-        ]]
-    },
-    {
-        From = "VoyagerPioneer",
-        To = "Voyager",
-        Action = [[
-        ]]
-    },
-    {
-        From = "Voyager",
-        To = "VoyagerPioneer",
-        Action = [[
-        ]]
-    },
-    {
-        From = "VoyagerPioneer",
-        To = "Pioneer",
-        Action = [[
-        ]]
-    },
-    {
-        From = "Pioneer",
-        To = "VoyagerPioneer",
-        Action = [[
-        ]]
-    },
-    -- 8. Cosmic Background Radiation
-    {
-        From = "CBR",
-        To = "SolarSystem",
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-        ]]
-    },
-    {
-        From = "SolarSystem",
-        To = "CBR",
-        Action = util.applyLinearFlight(cbrTargetDistance, 1.5)
-    }
+  -- 1. Earth - SolarSystem
+  {
+    From = "Earth",
+    To = "SolarSystem",
+    Action =  [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Earth",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Earth', true)
+      ]] .. util.changeAnchor('Earth', 1) .. [[
+    ]]
+  },
+  -- 2. Mars - SolarSystem
+  {
+    From = "Mars",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Mars",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Mars', true)
+      ]] .. util.changeAnchor('Mars', 1) .. [[
+    ]]
+  },
+  -- 3. Ceres - SolarSystem
+  {
+    From = "Ceres",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Ceres",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Ceres', true)
+      ]] .. util.changeAnchor('Ceres', 1) .. [[
+    ]]
+  },
+  -- 4. Jupiter - SolarSystem
+  {
+    From = "Jupiter",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Jupiter",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Jupiter', true)
+      ]] .. util.changeAnchor('Jupiter', 1) .. [[
+    ]]
+  },
+  -- 5. Saturn - SolarSystem
+  {
+    From = "Saturn",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Saturn",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Saturn', true)
+      ]] .. util.changeAnchor('Saturn', 1) .. [[
+    ]]
+  },
+  -- 6. Pluto - SolarSystem
+  {
+    From = "Pluto",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "Pluto",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Pluto', true)
+      ]] .. util.changeAnchor('Pluto', 1) .. [[
+    ]]
+  },
+  -- 7. Voyager and Pioneer - SolarSystem
+  {
+    From = "VoyagerPioneer",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "VoyagerPioneer",
+    Action = [[]]
+  },
+  -- 8. Cosmic Background Radiation - SolarSystem
+  {
+    From = "CBR",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.changeAnchor('Sun', 1) .. [[
+      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
+    ]]
+  },
+  {
+    From = "SolarSystem",
+    To = "CBR",
+    Action = util.applyLinearFlight(substateCBR.cbrTargetDistance, 1.5)
+  }
 }
+
+-- Add transitions within each substate
+util.appendTable(transitions, substateEarth.transitions)
+util.appendTable(transitions, substateMars.transitions)
+util.appendTable(transitions, substateCeres.transitions)
+util.appendTable(transitions, substateJupiter.transitions)
+util.appendTable(transitions, substateSaturn.transitions)
+util.appendTable(transitions, substatePluto.transitions)
+util.appendTable(transitions, substateVoyagerPioneer.transitions)
+util.appendTable(transitions, substateCBR.transitions)
 
 asset.onInitialize(function()
     openspace.statemachine.createStateMachine(states, transitions, "SolarSystem")

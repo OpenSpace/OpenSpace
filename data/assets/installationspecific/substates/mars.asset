@@ -1,0 +1,118 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local marsTargetDistance = 7E6
+
+local marsState = {
+  Identifier = "Mars",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local vallesMarinerisTargetDistance = 7E6
+
+local vallesMarinerisState = {
+  Identifier = "VallesMarineris",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local olympusMonsTargetDistance = 7E6
+
+local olympusMonsState = {
+  Identifier = "OlympusMons",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local curiosityTargetDistance = 7E6
+
+local curiosityState = {
+  Identifier = "Curiosity",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { marsState, vallesMarinerisState, olympusMonsState, curiosityState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  {
+    From = "Mars",
+    To = "VallesMarineris",
+    Action = [[
+    ]]
+  },
+  {
+    From = "VallesMarineris",
+    To = "Mars",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Mars', true)
+      ]] .. util.changeAnchor('Mars', 1) .. [[
+    ]]
+  },
+  {
+    From = "Mars",
+    To = "OlympusMons",
+    Action = [[
+    ]]
+  },
+  {
+    From = "OlympusMons",
+    To = "Mars",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Mars', true)
+      ]] .. util.changeAnchor('Mars', 1) .. [[
+    ]]
+  },
+  {
+    From = "Mars",
+    To = "Curiosity",
+    Action = [[
+    ]]
+  },
+  {
+    From = "Curiosity",
+    To = "Mars",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Mars', true)
+      ]] .. util.changeAnchor('Mars', 1) .. [[
+    ]]
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

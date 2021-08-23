@@ -1,0 +1,98 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local jupiterTargetDistance = 1e12
+
+local jupiterState = {
+  Identifier = "Jupiter",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local europaTargetDistance = 1e12
+
+local europaState = {
+  Identifier = "Europa",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local ioTargetDistance = 1e12
+
+local ioState = {
+  Identifier = "Io",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { jupiterState, europaState, ioState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  {
+    From = "Jupiter",
+    To = "Europa",
+    Action = [[
+        ]] .. util.disableLinearFlight() .. [[
+        ]] .. util.setCurveTypeToZoomOverview() .. [[
+        openspace.time.setPause(true)
+        openspace.pathnavigation.goTo('Europa', true)
+        ]] .. util.changeAnchor('Europa', 1) .. [[
+    ]]
+  },
+  {
+    From = "Europa",
+    To = "Jupiter",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Jupiter', true)
+      ]] .. util.changeAnchor('Jupiter', 1) .. [[
+    ]]
+  },
+  {
+    From = "Jupiter",
+    To = "Io",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Io', true)
+      ]] .. util.changeAnchor('Io', 1) .. [[
+    ]]
+  },
+  {
+    From = "Io",
+    To = "Jupiter",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Jupiter', true)
+      ]] .. util.changeAnchor('Jupiter', 1) .. [[
+    ]]
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

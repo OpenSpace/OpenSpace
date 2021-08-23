@@ -1,0 +1,59 @@
+local util = asset.require('./../utility_functions')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local voyagerPioneerTargetDistance = 36E7
+
+local voyagerPioneerState = {
+  Identifier = "VoyagerPioneer",
+  Enter = [[]],
+  Exit = [[]]
+}
+
+local VoyagerTargetDistance = 2E9
+
+local voyagerState = {
+  Identifier = "Voyager",
+  Enter = [[]],
+  Exit = [[]]
+}
+
+local pioneerTargetDistance = 2E9
+
+local pioneerState = {
+  Identifier = "Pioneer",
+  Enter = [[]],
+  Exit = [[]]
+}
+
+local states = { voyagerPioneerState, voyagerState, pioneerState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  {
+    From = "VoyagerPioneer",
+    To = "Voyager",
+    Action = [[]]
+  },
+  {
+    From = "Voyager",
+    To = "VoyagerPioneer",
+    Action = [[]]
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "Pioneer",
+    Action = [[]]
+  },
+  {
+    From = "Pioneer",
+    To = "VoyagerPioneer",
+    Action = [[]]
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)
