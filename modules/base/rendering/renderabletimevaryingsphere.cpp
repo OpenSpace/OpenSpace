@@ -279,7 +279,8 @@ void RenderableTimeVaryingSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-    if (!extractMandatoryInfoFromDictionary()) {
+    bool success = extractMandatoryInfoFromDictionary();
+    if (!success) {
         return;
     }
     computeSequenceEndTime();
@@ -396,24 +397,14 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
-                                    RenderEngine::RendererImplementation::Framebuffer;
-
-    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
-                                RenderEngine::RendererImplementation::ABuffer;
-
-    if (usingABufferRenderer && _useAdditiveBlending) {
-        _shader->setUniform("additiveBlending", true);
-    }
-
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -528,7 +519,6 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
 double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(
                                                             const std::string& filePath) {
-    LDEBUG("filepath " + filePath);
     // Extract the filename from the path (without extension)
     std::string timeString = std::filesystem::path(filePath).stem().string();
 

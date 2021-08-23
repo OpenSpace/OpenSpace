@@ -113,7 +113,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-    using namespace properties;
 
 documentation::Documentation RenderableTravelSpeed::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderabletravelspeed");
@@ -276,7 +275,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     }
 
     _targetPosition = _targetNode->worldPosition();
-    SceneGraphNode* mySGNPointer = dynamic_cast<SceneGraphNode*>(owner());
+    SceneGraphNode* mySGNPointer = _parent;
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 

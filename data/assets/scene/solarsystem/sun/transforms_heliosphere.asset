@@ -1,35 +1,39 @@
 local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
-local HNMKernel = asset.localResource("./kernels/HNM.tf")
+local HEEQ180Kernel = asset.localResource("./kernels/HEEQ180.tf")
 
-local HNMReferenceFrame = {
-  Identifier = "HNMReferenceFrame",
-  Parent = sunTransforms.SunIAU.Identifier,
+local HEEQ180ReferenceFrame = {
+  Identifier = "HEEQ180ReferenceFrame",
+  -- The heeq180 reference frame should have Sun_IAU as parent
+  -- instead of Solar center, however the Sun_IAU adds
+  -- an unwanter rotation which is difficult to cancel out
+  -- since it is using SpiceRotation. Sun center
+  -- is used instead.
+  Parent = sunTransforms.SunCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "HEEQ180",
       DestinationFrame = "GALACTIC",
-      Kernels = HNMKernel
-    }
+      Kernels = HEEQ180Kernel
+    },
   },
   GUI = {
-    Name = "HNM Reference Frame",
+    Name = "HEEQ180 Reference Frame",
     Path = "/Solar System/Sun",
     Hidden = true
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HNMReferenceFrame })
-
+assetHelper.registerSceneGraphNodesAndExport(asset, { HEEQ180ReferenceFrame })
 
 asset.meta = {
-  Name = "Sun Transform, HNM",
+  Name = "Sun Transform, HEEQ180",
   Version = "1.0",
-  Description = "Sun transform: HNM",
+  Description = "Sun transform: HEEQ180",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"HNMReferenceFrame"}
+  Identifiers = {"HEEQ180ReferenceFrame"}
 }

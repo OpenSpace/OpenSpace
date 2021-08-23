@@ -1,6 +1,5 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
---local textures = asset.require('./streamnodes_textures').TexturesPath
 
 local TexturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -10,14 +9,14 @@ local TexturesPath = asset.syncedResource({
 })
 
 local legend = {
-  Identifier = "Legendfluxnodes",	
+  Identifier = "Legendfluxnodes",
   Type = "ScreenSpaceImageLocal",
   TexturePath = TexturesPath .. "/CMR_transparent_vittext.png",
 }
 
 openspace.addScreenSpaceRenderable(legend)
+-- These numbers are there to put the legend on the side of the screen.
 openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.CartesianPosition', {0.677970, 0.0,-1.049180});
--- openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.CartesianPosition', {0.915250,-0.033900,-1.508200});
 openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Rotation', {0.000000,0.000000,0.56652});
 openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Scale', 0.15);
 openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Enabled', false);

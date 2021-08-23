@@ -24,8 +24,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -33,9 +31,8 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <atomic>
-
-
 
 namespace openspace {
 
@@ -101,7 +98,7 @@ private:
         _uniformCache2;
 
     // ------------------------------------ STRINGS ------------------------------------//
-    std::string _binarySourceFolderPath;
+    std::filesystem::path _binarySourceFolderPath;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
 
@@ -155,107 +152,104 @@ private:
 
     // ---------------------------------- Properties ---------------------------------- //   
     // Group to hold properties regarding distance to earth
-    properties::PropertyOwner _pEarthdistGroup;
+    properties::PropertyOwner _earthdistGroup;
 
     //Property to show different energybins
-    properties::OptionProperty _pGoesEnergyBins;
+    properties::OptionProperty _goesEnergyBins;
     // Group to hold the color properties
-    properties::PropertyOwner _pColorGroup;
+    properties::PropertyOwner _colorGroup;
     // Uniform/transfer function
-    properties::OptionProperty _pColorMode;
+    properties::OptionProperty _colorMode;
     // Uniform stream Color
-    properties::Vec4Property _pStreamColor;
+    properties::Vec4Property _streamColor;
     // Choose different distant to earth enhanchement method. 
-    properties::OptionProperty _pEnhancemethod;
+    properties::OptionProperty _enhancemethod;
     // Color table/transfer function for "By Flux value" coloring
-    properties::StringProperty _pColorTablePath;
+    properties::StringProperty _colorTablePath;
     // Valid range for the color table
-    properties::Vec2Property _pColorTableRange;
+    properties::Vec2Property _colorTableRange;
     // The value of alpha for the flux color mode
-    properties::FloatProperty _pFluxColorAlpha;
+    properties::FloatProperty _fluxColorAlpha;
     // The value of alpha for the flux illuminance color mode
-    properties::FloatProperty _pFluxColorAlphaIlluminance;
+    properties::FloatProperty _fluxColorAlphaIlluminance;
     // Group to hold the particle properties
-    properties::PropertyOwner _pStreamGroup;
+    properties::PropertyOwner _streamGroup;
     // Scaling options
-    properties::OptionProperty _pScalingmethod;
+    properties::OptionProperty _scalingmethod;
     // Group for how many nodes to render dependent on radius and flux
-    properties::PropertyOwner _pNodesamountGroup;
+    properties::PropertyOwner _nodesamountGroup;
     // Size of simulated node particles
-    properties::FloatProperty _pNodeSize;
+    properties::FloatProperty _nodeSize;
     // Size of nodes for larger flux
-    properties::FloatProperty _pNodeSizeLargerFlux;
+    properties::FloatProperty _nodeSizeLargerFlux;
     // Threshold from earth to decide the distance for which the nodeSize gets larger
-    properties::FloatProperty _pDistanceThreshold;
+    properties::FloatProperty _distanceThreshold;
     // Minimum size of nodes at a certin distance
     //properties::FloatProperty _pMinNodeDistanceSize;
     // Maximum size of nodes at a certin distance
-    properties::FloatProperty _pMaxNodeDistanceSize;
+    properties::FloatProperty _maxNodeDistanceSize;
     // Threshold for where to interpolate between the max and min node distance
-    properties::FloatProperty _pNodeDistanceThreshold;
+    properties::FloatProperty _nodeDistanceThreshold;
     // Toggle selected streams [ON/OFF]
-    properties::BoolProperty _pInterestingStreamsEnabled;
+    properties::BoolProperty _interestingStreamsEnabled;
 
-    properties::FloatProperty _pMaxNodeSize;
-    properties::FloatProperty _pMinNodeSize;
+    properties::FloatProperty _maxNodeSize;
+    properties::FloatProperty _minNodeSize;
     /// Line width for the line rendering part
-    properties::FloatProperty _pLineWidth;
+    properties::FloatProperty _lineWidth;
     // Valid range along the Z-axis
-    properties::Vec2Property _pDomainZ;
+    properties::Vec2Property _domainZ;
     // Threshold flux value
-    properties::FloatProperty _pThresholdFlux;
+    properties::FloatProperty _thresholdFlux;
     // Filtering nodes within a range
-    properties::FloatProperty _pFilteringLower;
+    properties::FloatProperty _filteringLower;
     // Filtering nodes with a upper range
-    properties::FloatProperty _pFilteringUpper;
+    properties::FloatProperty _filteringUpper;
     // Amount of nodes to show
-    properties::IntProperty _pAmountofNodes;
+    properties::IntProperty _amountofNodes;
     // Nodeskipping options
-    properties::OptionProperty _pNodeskipMethod;
+    properties::OptionProperty _nodeskipMethod;
     // amount of nodes to show outside of filterrange
-    properties::IntProperty _pDefaultNodeSkip;
+    properties::IntProperty _defaultNodeSkip;
     // The Flux threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _pFluxNodeskipThreshold;
+    properties::FloatProperty _fluxNodeskipThreshold;
     //The nodeskip for values within the range of the radius threshold to Earth
-    properties::IntProperty _pEarthNodeSkip;
+    properties::IntProperty _earthNodeSkip;
     // The Radius threshold to decide the line between 
     //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _pRadiusNodeSkipThreshold;
-    //The active stream that we want to look at
-    //properties::IntProperty _pActiveStreamNumber;
-
+    properties::FloatProperty _radiusNodeSkipThreshold;
     //Misaligned index for fieldlines vs Fluxnodes
-    properties::IntProperty _pMisalignedIndex;
+    properties::IntProperty _misalignedIndex;
 
     // Flow Properties
     // Simulated particles' color
-    properties::Vec4Property _pFlowColor;
+    properties::Vec4Property _flowColor;
     // Toggle flow [ON/OFF]
-    properties::BoolProperty _pFlowEnabled;
+    properties::BoolProperty _flowEnabled;
     // Group to hold the flow/particle properties
-    properties::PropertyOwner _pFlowGroup;
+    properties::PropertyOwner _flowGroup;
     // Size of simulated flow particles
-    properties::IntProperty _pFlowParticleSize;
+    properties::IntProperty _flowParticleSize;
     // Size of simulated flow particles
-    properties::IntProperty _pFlowParticleSpacing;
+    properties::IntProperty _flowParticleSpacing;
     // Toggle flow direction [FORWARDS/BACKWARDS]
     //properties::BoolProperty _pFlowReversed;
     // Speed of simulated flow
-    properties::IntProperty _pFlowSpeed;
+    properties::IntProperty _flowSpeed;
     //Either use flowcolortable or FlowColor.
-    properties::BoolProperty _pUseFlowColor;
+    properties::BoolProperty _useFlowColor;
 
-    properties::PropertyOwner _pCameraPerspectiveGroup;
-    properties::BoolProperty _pCameraPerspectiveEnabled;
-    properties::BoolProperty _pDrawingCircles;
-    properties::BoolProperty _pDrawingHollow;
-    properties::BoolProperty _pGaussianAlphaFilter;
-    properties::BoolProperty _pRadiusPerspectiveEnabled;
-    properties::FloatProperty _pPerspectiveDistanceFactor;
-    properties::BoolProperty _pPulseEnabled;
-    properties::BoolProperty _pGaussianPulseEnabled;
-    properties::BoolProperty _pPulseAlways;
+    properties::PropertyOwner _cameraPerspectiveGroup;
+    properties::BoolProperty _cameraPerspectiveEnabled;
+    properties::BoolProperty _drawingCircles;
+    properties::BoolProperty _drawingHollow;
+    properties::BoolProperty _gaussianAlphaFilter;
+    properties::BoolProperty _radiusPerspectiveEnabled;
+    properties::FloatProperty _perspectiveDistanceFactor;
+    properties::BoolProperty _pulseEnabled;
+    properties::BoolProperty _gaussianPulseEnabled;
+    properties::BoolProperty _pulseAlways;
     properties::FloatProperty _scaleFactor;
 
     // initialization

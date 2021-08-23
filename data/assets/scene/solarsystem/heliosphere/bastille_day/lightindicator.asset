@@ -17,7 +17,7 @@ local travelSpeedIndicator = {
     Target = "Earth",    --name of scene graph node. Earth by default
     LineWidth = 4,
     IndicatorLength = 10,
-    FadeLength = 10        
+    FadeLength = 10
   },
    GUI = {
     Path = "/Solar System/Heliosphere",

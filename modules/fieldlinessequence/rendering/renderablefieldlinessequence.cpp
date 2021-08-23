@@ -178,23 +178,22 @@ namespace {
         "Jump to Start Of Sequence",
         "Performs a time jump to the start of the sequence."
     };
-    enum class SourceFileType {
-        Cdf = 0,
-        Json,
-        Osfls,
-        Invalid
-    };
 
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         // osfls, cdf or json  
-        std::string inputFileType;
-
+        enum class SourceFileType {
+            cdf,
+            json,
+            osfls
+        };
+        SourceFileType inputFileType;
+        
         // Should be path to folder containing the input files
-        std::string sourceFolder;
+        std::filesystem::path sourceFolder [[codegen::directory()]];
 
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
         // Files need time stamp in file name like so: yyyymmdd_hhmmss.txt
-        std::optional<std::string> seedPointDirectory;
+        std::optional<std::filesystem::path> seedPointDirectory [[codegen::directory()]];
 
         // Currently supports: batsrus, enlil & pfss
         std::optional<std::string> simluationModel;
@@ -265,83 +264,82 @@ documentation::Documentation RenderableFieldlinesSequence::Documentation() {
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pColorGroup({ "Color" })
-    , _pColorMethod(ColorMethodInfo, OptionProperty::DisplayType::Radio)
-    , _pColorQuantity(ColorQuantityInfo, OptionProperty::DisplayType::Dropdown)
-    , _pColorQuantityMin(ColorQuantityMinInfo)
-    , _pColorQuantityMax(ColorQuantityMaxInfo)
-    , _pColorTablePath(ColorTablePathInfo)
-    , _pColorUniform(
+    , _colorGroup({ "Color" })
+    , _colorMethod(ColorMethodInfo, OptionProperty::DisplayType::Radio)
+    , _colorQuantity(ColorQuantityInfo, OptionProperty::DisplayType::Dropdown)
+    , _colorQuantityMin(ColorQuantityMinInfo)
+    , _colorQuantityMax(ColorQuantityMaxInfo)
+    , _colorTablePath(ColorTablePathInfo)
+    , _colorUniform(
         ColorUniformInfo,
         glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _pColorABlendEnabled(ColorUseABlendingInfo, true)
-    , _pDomainEnabled(DomainEnabledInfo, true)
-    , _pDomainGroup({ "Domain" })
-    , _pDomainX(DomainXInfo)
-    , _pDomainY(DomainYInfo)
-    , _pDomainZ(DomainZInfo)
-    , _pDomainR(DomainRInfo)
-    , _pFlowColor(
+    , _colorABlendEnabled(ColorUseABlendingInfo, true)
+    , _domainEnabled(DomainEnabledInfo, true)
+    , _domainGroup({ "Domain" })
+    , _domainX(DomainXInfo)
+    , _domainY(DomainYInfo)
+    , _domainZ(DomainZInfo)
+    , _domainR(DomainRInfo)
+    , _flowColor(
         FlowColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _pFlowEnabled(FlowEnabledInfo, false)
-    , _pFlowGroup({ "Flow" })
-    , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _pFlowReversed(FlowReversedInfo, false)
-    , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _pMaskingEnabled(MaskingEnabledInfo, false)
-    , _pMaskingGroup({ "Masking" })
-    , _pMaskingMin(MaskingMinInfo)
-    , _pMaskingMax(MaskingMaxInfo)
-    , _pMaskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
-    , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
-    , _pJumpToStartBtn(TimeJumpButtonInfo)
+    , _flowEnabled(FlowEnabledInfo, false)
+    , _flowGroup({ "Flow" })
+    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
+    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    , _flowReversed(FlowReversedInfo, false)
+    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
+    , _maskingEnabled(MaskingEnabledInfo, false)
+    , _maskingGroup({ "Masking" })
+    , _maskingMin(MaskingMinInfo)
+    , _maskingMax(MaskingMaxInfo)
+    , _maskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _jumpToStartBtn(TimeJumpButtonInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Extracts the general information (from the asset file) that 
     // is mandatory for the class to function;
-
-    _inputFileTypeString = p.inputFileType;
-    std::transform(
-        _inputFileTypeString.begin(),
-        _inputFileTypeString.end(),
-        _inputFileTypeString.begin(),
-        [](char c) { return static_cast<char>(tolower(c)); }
-    );
-
-    if (_inputFileTypeString == "osfls") _inputFileType = SourceFileType::Osfls;
-    else if (_inputFileTypeString == "cdf") _inputFileType = SourceFileType::Cdf;
-    else if (_inputFileTypeString == "json") _inputFileType = SourceFileType::Json;
-    else _inputFileType = SourceFileType::Invalid;
-
-    if (_inputFileTypeString == "cdf") {
-        if( p.tracingVariable.has_value()) {
-            _tracingVariable = *p.tracingVariable;
-        }
-        else {
-            _tracingVariable = "b"; //  Magnetic field variable as default
-            LWARNING(fmt::format(
-                "No tracing variable, using default '{}'",
-                _tracingVariable
-            ));
-        }
+    std::string fileTypeString;
+    switch (p.inputFileType) {
+        case Parameters::SourceFileType::cdf:
+            _inputFileType = SourceFileType::Cdf;
+            fileTypeString = "cdf";
+            if( p.tracingVariable.has_value()) {
+                _tracingVariable = *p.tracingVariable;
+            }
+            else {
+                _tracingVariable = "b"; //  Magnetic field variable as default
+                LWARNING(fmt::format(
+                    "No tracing variable, using default '{}'",
+                    _tracingVariable
+                ));
+            }
+            break;
+        case Parameters::SourceFileType::json:
+            _inputFileType = SourceFileType::Json;
+            fileTypeString = "json";
+            break;
+        case Parameters::SourceFileType::osfls:
+            _inputFileType = SourceFileType::Osfls;
+            fileTypeString = "osfls";
+            break;
     }
 
     // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
-    std::string sourcePath = p.sourceFolder;
+    // the files with the same extension as fileTypeString
+    std::filesystem::path sourcePath = p.sourceFolder;
     if (!std::filesystem::is_directory(sourcePath)) {
         LERROR(fmt::format(
             "FieldlinesSequence {} is not a valid directory",
-            sourcePath
+            sourcePath.string()
         ));
     }
 
@@ -356,14 +354,13 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
     std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
-    // Remove all files that don't have _inputFileTypeString as file extension
-    std::string s = _inputFileTypeString;
+    // Remove all files that don't have fileTypeString as file extension
     _sourceFiles.erase(
         std::remove_if(
             _sourceFiles.begin(),
             _sourceFiles.end(),
-            [&s](const std::string& str) {
-                const size_t extLength = s.length();
+            [&fileTypeString](const std::string& str) {
+                const size_t extLength = fileTypeString.length();
                 std::string sub = str.substr(str.length() - extLength, extLength);
                 std::transform(
                     sub.begin(),
@@ -371,7 +368,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                     sub.begin(),
                     [](char c) { return static_cast<char>(::tolower(c)); }
                 );
-                return sub != s;
+                return sub != fileTypeString;
             }
         ),
         _sourceFiles.end()
@@ -379,13 +376,15 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format("{} contains no {} files", sourcePath, _inputFileTypeString));
+        LERROR(fmt::format(
+            "{} contains no {} files", sourcePath.string(), fileTypeString
+        ));
     }
 
     _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
     _extraVars = p.extraVariables.value_or(_extraVars);
-    _pFlowEnabled = p.flowEnabled.value_or(_pFlowEnabled);
-    _pLineWidth = p.lineWidth.value_or(_pLineWidth);
+    _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simluationModel.value_or(_modelStr);
     _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
@@ -434,7 +433,6 @@ void RenderableFieldlinesSequence::initialize() {
     // SOURCE
     switch (_inputFileType) {
         case SourceFileType::Cdf:
-
             if (!getStatesFromCdfFiles()) {
                 return;
             }
@@ -573,55 +571,55 @@ void RenderableFieldlinesSequence::setupProperties() {
     bool hasExtras = (_states[0].nExtraQuantities() > 0);
 
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
-    addProperty(_pColorABlendEnabled);
-    addProperty(_pDomainEnabled);
-    addProperty(_pFlowEnabled);
+    addProperty(_colorABlendEnabled);
+    addProperty(_domainEnabled);
+    addProperty(_flowEnabled);
     if (hasExtras) {
-        addProperty(_pMaskingEnabled);
+        addProperty(_maskingEnabled);
     }
-    addProperty(_pLineWidth);
-    addProperty(_pJumpToStartBtn);
+    addProperty(_lineWidth);
+    addProperty(_jumpToStartBtn);
 
     // ----------------------------- Add Property Groups ----------------------------- //
-    addPropertySubOwner(_pColorGroup);
-    addPropertySubOwner(_pDomainGroup);
-    addPropertySubOwner(_pFlowGroup);
+    addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_domainGroup);
+    addPropertySubOwner(_flowGroup);
     if (hasExtras) {
-        addPropertySubOwner(_pMaskingGroup);
+        addPropertySubOwner(_maskingGroup);
     }
 
     // ------------------------- Add Properties to the groups ------------------------- //
-    _pColorGroup.addProperty(_pColorUniform);
-    _pDomainGroup.addProperty(_pDomainX);
-    _pDomainGroup.addProperty(_pDomainY);
-    _pDomainGroup.addProperty(_pDomainZ);
-    _pDomainGroup.addProperty(_pDomainR);
-    _pFlowGroup.addProperty(_pFlowReversed);
-    _pFlowGroup.addProperty(_pFlowColor);
-    _pFlowGroup.addProperty(_pFlowParticleSize);
-    _pFlowGroup.addProperty(_pFlowParticleSpacing);
-    _pFlowGroup.addProperty(_pFlowSpeed);
+    _colorGroup.addProperty(_colorUniform);
+    _domainGroup.addProperty(_domainX);
+    _domainGroup.addProperty(_domainY);
+    _domainGroup.addProperty(_domainZ);
+    _domainGroup.addProperty(_domainR);
+    _flowGroup.addProperty(_flowReversed);
+    _flowGroup.addProperty(_flowColor);
+    _flowGroup.addProperty(_flowParticleSize);
+    _flowGroup.addProperty(_flowParticleSpacing);
+    _flowGroup.addProperty(_flowSpeed);
     if (hasExtras) {
-        _pColorGroup.addProperty(_pColorMethod);
-        _pColorGroup.addProperty(_pColorQuantity);
-        _pColorGroup.addProperty(_pColorQuantityMin);
-        _pColorGroup.addProperty(_pColorQuantityMax);
-        _pColorGroup.addProperty(_pColorTablePath);
-        _pMaskingGroup.addProperty(_pMaskingMin);
-        _pMaskingGroup.addProperty(_pMaskingMax);
-        _pMaskingGroup.addProperty(_pMaskingQuantity);
+        _colorGroup.addProperty(_colorMethod);
+        _colorGroup.addProperty(_colorQuantity);
+        _colorGroup.addProperty(_colorQuantityMin);
+        _colorGroup.addProperty(_colorQuantityMax);
+        _colorGroup.addProperty(_colorTablePath);
+        _maskingGroup.addProperty(_maskingMin);
+        _maskingGroup.addProperty(_maskingMax);
+        _maskingGroup.addProperty(_maskingQuantity);
 
         // --------------------- Add Options to OptionProperties --------------------- //
-        _pColorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-        _pColorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
+        _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+        _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
         // Add option for each extra quantity. Assumes there are just as many names to
         // extra quantities as there are extra quantities. Also assume that all states in
         // the given sequence have the same extra quantities! */
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
         for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
-            _pColorQuantity.addOption(i, extraNamesVec[i]);
-            _pMaskingQuantity.addOption(i, extraNamesVec[i]);
+            _colorQuantity.addOption(i, extraNamesVec[i]);
+            _maskingQuantity.addOption(i, extraNamesVec[i]);
         }
         // Each quantity should have its own color table and color table range
         // no more, no less
@@ -634,14 +632,14 @@ void RenderableFieldlinesSequence::setupProperties() {
 
     if (hasExtras) {
         // Set defaults
-        _pColorQuantity = 0;
-        _pColorQuantityMin = std::to_string(_colorTableRanges[0].x);
-        _pColorQuantityMax = std::to_string(_colorTableRanges[0].y);
-        _pColorTablePath = _colorTablePaths[0];
+        _colorQuantity = 0;
+        _colorQuantityMin = std::to_string(_colorTableRanges[0].x);
+        _colorQuantityMax = std::to_string(_colorTableRanges[0].y);
+        _colorTablePath = _colorTablePaths[0];
 
-        _pMaskingQuantity = 0;
-        _pMaskingMin = std::to_string(_maskingRanges[0].x);
-        _pMaskingMax = std::to_string(_maskingRanges[0].y);
+        _maskingQuantity = 0;
+        _maskingMin = std::to_string(_maskingRanges[0].x);
+        _maskingMax = std::to_string(_maskingRanges[0].y);
     }
 }
 
@@ -649,62 +647,62 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
     bool hasExtras = (_states[0].nExtraQuantities() > 0);
     if (hasExtras) {
-        _pColorQuantity.onChange([this] {
+        _colorQuantity.onChange([this] {
             _shouldUpdateColorBuffer = true;
-            _pColorQuantityMin = std::to_string(_colorTableRanges[_pColorQuantity].x);
-            _pColorQuantityMax = std::to_string(_colorTableRanges[_pColorQuantity].y);
-            _pColorTablePath = _colorTablePaths[_pColorQuantity];
+            _colorQuantityMin = std::to_string(_colorTableRanges[_colorQuantity].x);
+            _colorQuantityMax = std::to_string(_colorTableRanges[_colorQuantity].y);
+            _colorTablePath = _colorTablePaths[_colorQuantity];
         });
 
-        _pColorTablePath.onChange([this] {
-            _transferFunction->setPath(_pColorTablePath);
-            _colorTablePaths[_pColorQuantity] = _pColorTablePath;
+        _colorTablePath.onChange([this] {
+            _transferFunction->setPath(_colorTablePath);
+            _colorTablePaths[_colorQuantity] = _colorTablePath;
         });
 
-        _pColorQuantityMin.onChange([this] {
+        _colorQuantityMin.onChange([this] {
             const float f = stringToFloat(
-                _pColorQuantityMin,
-                _colorTableRanges[_pColorQuantity].x
+                _colorQuantityMin,
+                _colorTableRanges[_colorQuantity].x
             );
-            _pColorQuantityMin = std::to_string(f);
-            _colorTableRanges[_pColorQuantity].x = f;
+            _colorQuantityMin = std::to_string(f);
+            _colorTableRanges[_colorQuantity].x = f;
         });
 
-        _pColorQuantityMax.onChange([this] {
+        _colorQuantityMax.onChange([this] {
             const float f = stringToFloat(
-                _pColorQuantityMax,
-                _colorTableRanges[_pColorQuantity].y
+                _colorQuantityMax,
+                _colorTableRanges[_colorQuantity].y
             );
-            _pColorQuantityMax = std::to_string(f);
-            _colorTableRanges[_pColorQuantity].y = f;
+            _colorQuantityMax = std::to_string(f);
+            _colorTableRanges[_colorQuantity].y = f;
         });
 
-        _pMaskingQuantity.onChange([this] {
+        _maskingQuantity.onChange([this] {
             _shouldUpdateMaskingBuffer = true;
-            _pMaskingMin = std::to_string(_maskingRanges[_pMaskingQuantity].x);
-            _pMaskingMax = std::to_string(_maskingRanges[_pMaskingQuantity].y);
+            _maskingMin = std::to_string(_maskingRanges[_maskingQuantity].x);
+            _maskingMax = std::to_string(_maskingRanges[_maskingQuantity].y);
         });
 
-        _pMaskingMin.onChange([this] {
+        _maskingMin.onChange([this] {
             const float f = stringToFloat(
-                _pMaskingMin,
-                _maskingRanges[_pMaskingQuantity].x
+                _maskingMin,
+                _maskingRanges[_maskingQuantity].x
             );
-            _pMaskingMin = std::to_string(f);
-            _maskingRanges[_pMaskingQuantity].x = f;
+            _maskingMin = std::to_string(f);
+            _maskingRanges[_maskingQuantity].x = f;
         });
 
-        _pMaskingMax.onChange([this] {
+        _maskingMax.onChange([this] {
             const float f = stringToFloat(
-                _pMaskingMax,
-                _maskingRanges[_pMaskingQuantity].y
+                _maskingMax,
+                _maskingRanges[_maskingQuantity].y
             );
-            _pMaskingMax = std::to_string(f);
-            _maskingRanges[_pMaskingQuantity].y = f;
+            _maskingMax = std::to_string(f);
+            _maskingRanges[_maskingQuantity].y = f;
         });
     }
 
-    _pJumpToStartBtn.onChange([this] {
+    _jumpToStartBtn.onChange([this] {
         global::timeManager->setTimeNextFrame(Time(_startTimes[0]));
     });
 }
@@ -733,7 +731,7 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
             limit = 300; // Should include a long magnetotail
             break;
         case fls::Model::Enlil:
-            _pFlowReversed = true;
+            _flowReversed = true;
             _scalingFactor = fls::AuToMeter;
             limit = 50; // Should include Plutos furthest distance from the Sun
             break;
@@ -744,24 +742,24 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
         default:
             break;
     }
-    _pDomainX.setMinValue(glm::vec2(-limit));
-    _pDomainX.setMaxValue(glm::vec2(limit));
+    _domainX.setMinValue(glm::vec2(-limit));
+    _domainX.setMaxValue(glm::vec2(limit));
 
-    _pDomainY.setMinValue(glm::vec2(-limit));
-    _pDomainY.setMaxValue(glm::vec2(limit));
+    _domainY.setMinValue(glm::vec2(-limit));
+    _domainY.setMaxValue(glm::vec2(limit));
 
-    _pDomainZ.setMinValue(glm::vec2(-limit));
-    _pDomainZ.setMaxValue(glm::vec2(limit));
+    _domainZ.setMinValue(glm::vec2(-limit));
+    _domainZ.setMaxValue(glm::vec2(limit));
 
     // Radial should range from 0 out to a corner of the cartesian box:
     // sqrt(3) = 1.732..., 1.75 is a nice and round number
-    _pDomainR.setMinValue(glm::vec2(0));
-    _pDomainR.setMaxValue(glm::vec2(limit * 1.75f));
+    _domainR.setMinValue(glm::vec2(0));
+    _domainR.setMaxValue(glm::vec2(limit * 1.75f));
 
-    _pDomainX = glm::vec2(-limit, limit);
-    _pDomainY = glm::vec2(-limit, limit);
-    _pDomainZ = glm::vec2(-limit, limit);
-    _pDomainR = glm::vec2(0, limit * 1.5f);
+    _domainX = glm::vec2(-limit, limit);
+    _domainY = glm::vec2(-limit, limit);
+    _domainZ = glm::vec2(-limit, limit);
+    _domainR = glm::vec2(0, limit * 1.5f);
 }
 
 // Extract J2000 time from file names
@@ -834,14 +832,9 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
 RenderableFieldlinesSequence::extractSeedPointsFromFiles() 
 {
     std::vector<std::string> files;
-    std::filesystem::path seedPointDir;
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
     
-    if (std::filesystem::is_directory(_seedPointDirectory)){
-        seedPointDir = absPath(_seedPointDirectory);
-        //_seedPointDirectory = seedPointDir.string();
-    }
-    else {
+    if (!std::filesystem::is_directory(_seedPointDirectory)){
         LERROR(fmt::format(
             "The specified seed point directory: '{}' does not exist",
             _seedPointDirectory
@@ -850,7 +843,7 @@ RenderableFieldlinesSequence::extractSeedPointsFromFiles()
     }
 
     namespace fs = std::filesystem;
-    for (const fs::directory_entry& spFile : fs::directory_iterator(seedPointDir)){
+    for (const fs::directory_entry& spFile : fs::directory_iterator(_seedPointDirectory)){
         std::string seedFilePath = spFile.path().string();
         if (!spFile.is_regular_file() || 
                         seedFilePath.substr(seedFilePath.find_last_of('.')+1) != "txt") {
@@ -977,42 +970,42 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("modelViewProjection",
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewMat));
 
-        _shaderProgram->setUniform("colorMethod",  _pColorMethod);
-        _shaderProgram->setUniform("lineColor",    _pColorUniform);
-        _shaderProgram->setUniform("usingDomain",  _pDomainEnabled);
-        _shaderProgram->setUniform("usingMasking", _pMaskingEnabled);
+        _shaderProgram->setUniform("colorMethod",  _colorMethod);
+        _shaderProgram->setUniform("lineColor",    _colorUniform);
+        _shaderProgram->setUniform("usingDomain",  _domainEnabled);
+        _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
-        if (_pColorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
+        if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
             ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
             _transferFunction->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTable", textureUnit);
             _shaderProgram->setUniform("colorTableRange",
-                                            _colorTableRanges[_pColorQuantity]);
+                                            _colorTableRanges[_colorQuantity]);
         }
 
-        if (_pMaskingEnabled) {
-            _shaderProgram->setUniform("maskingRange", _maskingRanges[_pMaskingQuantity]);
+        if (_maskingEnabled) {
+            _shaderProgram->setUniform("maskingRange", _maskingRanges[_maskingQuantity]);
         }
 
-        _shaderProgram->setUniform("domainLimR", _pDomainR.value() * _scalingFactor);
-        _shaderProgram->setUniform("domainLimX", _pDomainX.value() * _scalingFactor);
-        _shaderProgram->setUniform("domainLimY", _pDomainY.value() * _scalingFactor);
-        _shaderProgram->setUniform("domainLimZ", _pDomainZ.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimR", _domainR.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimX", _domainX.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimY", _domainY.value() * _scalingFactor);
+        _shaderProgram->setUniform("domainLimZ", _domainZ.value() * _scalingFactor);
 
         // Flow/Particles
-        _shaderProgram->setUniform("flowColor",       _pFlowColor);
-        _shaderProgram->setUniform("usingParticles",  _pFlowEnabled);
-        _shaderProgram->setUniform("particleSize",    _pFlowParticleSize);
-        _shaderProgram->setUniform("particleSpacing", _pFlowParticleSpacing);
-        _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
+        _shaderProgram->setUniform("flowColor",       _flowColor);
+        _shaderProgram->setUniform("usingParticles",  _flowEnabled);
+        _shaderProgram->setUniform("particleSize",    _flowParticleSize);
+        _shaderProgram->setUniform("particleSpacing", _flowParticleSpacing);
+        _shaderProgram->setUniform("particleSpeed",   _flowSpeed);
         _shaderProgram->setUniform(
             "time",
-            global::windowDelegate->applicationTime() * (_pFlowReversed ? -1 : 1)
+            global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
         );
 
         bool additiveBlending = false;
-        if (_pColorABlendEnabled) {
+        if (_colorABlendEnabled) {
             additiveBlending = true;
             glDepthMask(false);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -1020,7 +1013,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         glBindVertexArray(_vertexArrayObject);
 #ifndef __APPLE__
-        glLineWidth(_pLineWidth);
+        glLineWidth(_lineWidth);
 #else      
         glLineWidth(1.f);
 #endif
@@ -1178,7 +1171,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 
     bool isSuccessful;
     const std::vector<float>& quantities = _states[_activeStateIndex].extraQuantity(
-        _pColorQuantity,
+        _colorQuantity,
         isSuccessful
     );
 
@@ -1203,7 +1196,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
 
     bool isSuccessful;
     const std::vector<float>& maskings = _states[_activeStateIndex].extraQuantity(
-        _pMaskingQuantity,
+        _maskingQuantity,
         isSuccessful
     );
 

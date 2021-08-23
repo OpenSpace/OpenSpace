@@ -80,7 +80,20 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_plane_time_varying_image");
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_plane_time_varying_image"
+    );
+
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderablePlane::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
+    return doc;
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
@@ -153,8 +166,7 @@ void RenderablePlaneTimeVaryingImage::initialize() {
     extractTriggerTimesFromFileNames();
     computeSequenceEndTime();
         
-    _textureFiles.resize(_sourceFiles.size());
-      
+    _textureFiles.resize(_sourceFiles.size());  
     if (!_isLoadingLazily) {
         loadTexture();
     }
@@ -218,14 +230,16 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
 }
 
 void RenderablePlaneTimeVaryingImage::bindTexture() {
-    _texture->bind();
+    if (_texture) {
+        _texture->bind();
+    }
 }
 
 void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     ZoneScoped
     RenderablePlane::update(data);
         
-    if (!_enabled) {
+    if (!_enabled || _startTimes.size() == 0) {
         return;
     }
 

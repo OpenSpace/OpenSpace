@@ -2,10 +2,10 @@ local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local fluxnodeColorTable = transferFunctions .. "/flux_nodes.txt"
+local fluxnodeColorTable = transferFunctions .. "/flux-nodes.txt"
 local fluxnodeColorTableCMR = transferFunctions .. "/CMR.txt"
-local fluxnodeColorTableEarth = transferFunctions .. "/flux_nodes_grey_scale.txt"
-local fluxnodeColorTableFlow = transferFunctions .. "/flux_nodes_flow.txt"
+local fluxnodeColorTableEarth = transferFunctions .. "/flux-nodes-grey-scale.txt"
+local fluxnodeColorTableFlow = transferFunctions .. "/flux-nodes-flow.txt"
 
 local fluxnodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
@@ -17,7 +17,7 @@ local fluxnodesBinaries = asset.syncedResource({
 -- Fluxnodes from binaries
 local Fluxnodes = {
   Identifier = "MAS_MHD_FluxNodes",
-  Parent = heliosphereTransforms.HNMReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -25,10 +25,10 @@ local Fluxnodes = {
     },
     Rotation = {
       -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-      -- which is what the renderables parent transforms.HNMReferenceFrame.Identifier is
+      -- which is what the renderables parent transforms.HEEQ180ReferenceFrame.Identifier is
       -- referring to. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
       -- longitude was 309.3 degrees.
-      -- Difference from HEEQ => 360-309.3=50.7 
+      -- Difference from HEEQ => 360-309.3=50.7
       -- (or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
       -- Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
       -- => a1 = -129.3 and a2 = 230.7
@@ -59,7 +59,7 @@ local Fluxnodes = {
     Path = "/Solar System/Heliosphere",
     Name = "Fluxnodes"
   }
-} 
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Fluxnodes })
 

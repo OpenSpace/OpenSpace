@@ -33,7 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
- #include <openspace/rendering/transferfunction.h>
+#include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;
@@ -92,7 +92,6 @@ private:
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
-    properties::IntProperty _currentTimestep;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;

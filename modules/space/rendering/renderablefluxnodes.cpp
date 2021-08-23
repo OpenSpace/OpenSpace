@@ -336,7 +336,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
         // path to source folder with the 3 binary files in it
-        std::string sourceFolder;
+        std::filesystem::path sourceFolder [[codegen::directory()]];
         //
         struct TransferFunctions {
             std::string standard;
@@ -353,19 +353,6 @@ namespace {
     };
 #include "renderablefluxnodes_codegen.cpp"
 
-    // Changed everything from dvec3 to vec3
-    glm::vec3 sphericalToCartesianCoord(const glm::vec3& position) {
-        glm::vec3 cartesianPosition;
-
-        // ρsinφcosθ 
-        cartesianPosition.x = position.x * sin(position.z) * cos(position.y);
-        // ρsinφsinθ
-        cartesianPosition.y = position.x * sin(position.z) * sin(position.y);
-        // ρcosφ
-        cartesianPosition.z = position.x * cos(position.z);
-
-        return cartesianPosition;
-    }
 } // namespace
 
 namespace openspace {
@@ -374,69 +361,68 @@ documentation::Documentation RenderableFluxNodes::Documentation() {
     return codegen::doc<Parameters>("space_renderable_flux_nodes");
 }
 
-using namespace properties;
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
     : Renderable(dictionary)
-    , _pGoesEnergyBins(GoesEnergyBinsInfo, OptionProperty::DisplayType::Radio)
-    , _pColorGroup({ "Color" })
-    , _pColorMode(ColorModeInfo, OptionProperty::DisplayType::Radio)
-    , _pScalingmethod(ScalingmethodInfo, OptionProperty::DisplayType::Radio)
-    , _pNodeskipMethod(NodeskipMethodInfo, OptionProperty::DisplayType::Radio)
-    , _pEnhancemethod(EnhanceMethodInfo, OptionProperty::DisplayType::Dropdown)
-    , _pColorTablePath(ColorTablePathInfo)
-    , _pStreamColor(StreamColorInfo,
+    , _goesEnergyBins(GoesEnergyBinsInfo, properties::OptionProperty::DisplayType::Radio)
+    , _colorGroup({ "Color" })
+    , _colorMode(ColorModeInfo, properties::OptionProperty::DisplayType::Radio)
+    , _scalingmethod(ScalingmethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _nodeskipMethod(NodeskipMethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _enhancemethod(EnhanceMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _colorTablePath(ColorTablePathInfo)
+    , _streamColor(StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f))
-    , _pStreamGroup({ "Streams" })
-    , _pNodesamountGroup({ "NodeGroup" })
-    , _pNodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
-    , _pNodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
-    , _pLineWidth(LineWidthInfo, 4.f, 1.f, 20.f)
-    , _pColorTableRange(colorTableRangeInfo)
-    , _pDomainZ(DomainZInfo)
-    , _pFluxColorAlpha(FluxColorAlphaInfo, 0.f, 0.f, 1.f)
-    , _pFluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
-    , _pThresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
-    , _pFilteringLower(FilteringInfo, 0.f, 0.f, 5.f)
-    , _pFilteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
-    , _pAmountofNodes(AmountofNodesInfo, 1, 1, 100)
-    , _pDefaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
-    , _pEarthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
-    , _pFluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
-    , _pRadiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
-    , _pEarthdistGroup({ "Earthfocus" })
-    , _pDistanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1.0f)
-    , _pMisalignedIndex(MisalignedIndexInfo, 0, -5, 20)
-    , _pFlowColor(
+    , _streamGroup({ "Streams" })
+    , _nodesamountGroup({ "NodeGroup" })
+    , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
+    , _nodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
+    , _lineWidth(LineWidthInfo, 4.f, 1.f, 20.f)
+    , _colorTableRange(colorTableRangeInfo)
+    , _domainZ(DomainZInfo)
+    , _fluxColorAlpha(FluxColorAlphaInfo, 0.f, 0.f, 1.f)
+    , _fluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
+    , _thresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
+    , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
+    , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
+    , _amountofNodes(AmountofNodesInfo, 1, 1, 100)
+    , _defaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
+    , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
+    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
+    , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
+    , _earthdistGroup({ "Earthfocus" })
+    , _distanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1.0f)
+    , _misalignedIndex(MisalignedIndexInfo, 0, -5, 20)
+    , _flowColor(
         FlowColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _pFlowEnabled(FlowEnabledInfo, false)
-    , _pInterestingStreamsEnabled(InterestingStreamsInfo, false)
-    , _pFlowGroup({ "Flow" })
-    , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _pFlowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _pUseFlowColor(UseFlowColorInfo, false)
+    , _flowEnabled(FlowEnabledInfo, false)
+    , _interestingStreamsEnabled(InterestingStreamsInfo, false)
+    , _flowGroup({ "Flow" })
+    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
+    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
+    , _useFlowColor(UseFlowColorInfo, false)
     , _scaleFactor(TempInfo1, 150.f, 1.f, 500.f)
-    , _pMaxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
-    , _pNodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
-    , _pCameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
-    , _pDrawingCircles(DrawingCirclesInfo, false)
-    , _pCameraPerspectiveGroup({" CameraPerspective"})
-    , _pDrawingHollow(DrawingHollowInfo, false)
-    , _pGaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
-    , _pRadiusPerspectiveEnabled(RadiusPerspectiveEnabledInfo, true)
-    , _pPerspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
-    , _pMaxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
-    , _pMinNodeSize(MinNodeSizeInfo, 2.f, 1.f, 10.f)
-    , _pPulseEnabled(pulseEnabledInfo, false)
-    , _pGaussianPulseEnabled(gaussianPulseEnabledInfo, false)
-    , _pPulseAlways(AlwaysPulseInfo, false)
+    , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
+    , _nodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
+    , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
+    , _drawingCircles(DrawingCirclesInfo, false)
+    , _cameraPerspectiveGroup({" CameraPerspective"})
+    , _drawingHollow(DrawingHollowInfo, false)
+    , _gaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
+    , _radiusPerspectiveEnabled(RadiusPerspectiveEnabledInfo, true)
+    , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
+    , _maxNodeSize(MaxNodeSizeInfo, 30.f, 1.f, 200.f)
+    , _minNodeSize(MinNodeSizeInfo, 2.f, 1.f, 10.f)
+    , _pulseEnabled(pulseEnabledInfo, false)
+    , _gaussianPulseEnabled(gaussianPulseEnabledInfo, false)
+    , _pulseAlways(AlwaysPulseInfo, false)
 {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -450,7 +436,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     _transferFunctionFlow = 
         std::make_unique<TransferFunction>(p.colorTablePaths.flow);
     
-    _pColorTablePath = p.colorTablePaths.standard;
+    _colorTablePath = p.colorTablePaths.standard;
 
     _binarySourceFolderPath = p.sourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
@@ -480,39 +466,39 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     }
 
     // --------------------- Add Options to OptionProperties --------------------- //
-    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
-    _pGoesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
-    _pColorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
-    _pColorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+    _goesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
+    _goesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin03), "Emin03");
+    _colorMode.addOption(static_cast<int>(ColorMethod::ByFluxValue), "By Flux Value");
+    _colorMode.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
 
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
-    _pScalingmethod.addOption(
+    _scalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
+    _scalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
+    _scalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
+    _scalingmethod.addOption(
         static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
+    _scalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
 
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
-    _pNodeskipMethod.addOption(
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
+    _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
+    _nodeskipMethod.addOption(
         static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
 
-    _pEnhancemethod.addOption(
+    _enhancemethod.addOption(
         static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
-    _pEnhancemethod.addOption(
+    _enhancemethod.addOption(
         static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
-    _pEnhancemethod.addOption(
+    _enhancemethod.addOption(
         static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
-    _pEnhancemethod.addOption(
+    _enhancemethod.addOption(
         static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
 
     if (p.energyBin.has_value()) {
-        _pGoesEnergyBins.setValue(p.energyBin.value());
+        _goesEnergyBins.setValue(p.energyBin.value());
     }
     else { // default int 1 == Emin03 == MeV>100
         LINFO("Assuming default value 1, meaning Emin03");
-        _pGoesEnergyBins.setValue(1);
+        _goesEnergyBins.setValue(1);
     }
 }
 
@@ -521,7 +507,7 @@ void RenderableFluxNodes::initialize() {
 
     populateStartTimes();
 
-    loadNodeData(_pGoesEnergyBins.option().value);
+    loadNodeData(_goesEnergyBins.option().value);
 
     computeSequenceEndTime();
 }
@@ -556,28 +542,28 @@ void RenderableFluxNodes::initializeGL() {
 void RenderableFluxNodes::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
 
-    _pColorTablePath.onChange([this] {
-        _transferFunction->setPath(_pColorTablePath);
+    _colorTablePath.onChange([this] {
+        _transferFunction->setPath(_colorTablePath);
     });
 
-    _pGoesEnergyBins.onChange([this] {
-        loadNodeData(_pGoesEnergyBins.option().value);
+    _goesEnergyBins.onChange([this] {
+        loadNodeData(_goesEnergyBins.option().value);
     });
 }
 
 void RenderableFluxNodes::setModelDependentConstants() {
     // Just used as a default value.
     float limit = 8.f;
-    _pColorTableRange.setMinValue(glm::vec2(-limit));
-    _pColorTableRange.setMaxValue(glm::vec2(limit));
-    _pColorTableRange = glm::vec2(-2.f, 4.f);
+    _colorTableRange.setMinValue(glm::vec2(-limit));
+    _colorTableRange.setMaxValue(glm::vec2(limit));
+    _colorTableRange = glm::vec2(-2.f, 4.f);
 
     float limitZMin = -2.5f;
     float limitZMax = 2.5f;
 
-    _pDomainZ.setMinValue(glm::vec2(limitZMin));
-    _pDomainZ.setMaxValue(glm::vec2(limitZMax));
-    _pDomainZ = glm::vec2(limitZMin, limitZMax);
+    _domainZ.setMinValue(glm::vec2(limitZMin));
+    _domainZ.setMaxValue(glm::vec2(limitZMax));
+    _domainZ = glm::vec2(limitZMin, limitZMax);
 }
 
 void RenderableFluxNodes::loadNodeData(int energybinOption) {
@@ -593,9 +579,9 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
         break;
     }
 
-    std::string file = _binarySourceFolderPath + "\\positions" + energybin;
-    std::string file2 = _binarySourceFolderPath + "\\fluxes" + energybin;
-    std::string file3 = _binarySourceFolderPath + "\\radiuses" + energybin;
+    std::string file = _binarySourceFolderPath.string() + "\\positions" + energybin;
+    std::string file2 = _binarySourceFolderPath.string() + "\\fluxes" + energybin;
+    std::string file3 = _binarySourceFolderPath.string() + "\\radiuses" + energybin;
 
     std::ifstream fileStream(file, std::ifstream::binary);
     std::ifstream fileStream2(file2, std::ifstream::binary);
@@ -654,66 +640,66 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
 
 void RenderableFluxNodes::setupProperties() {
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
-    addProperty(_pGoesEnergyBins);
-    addProperty(_pLineWidth);
-    addProperty(_pMisalignedIndex);
+    addProperty(_goesEnergyBins);
+    addProperty(_lineWidth);
+    addProperty(_misalignedIndex);
     addProperty(_scaleFactor);
         
     // ----------------------------- Add Property Groups ----------------------------- //
-    addPropertySubOwner(_pColorGroup);
-    addPropertySubOwner(_pStreamGroup);
-    addPropertySubOwner(_pNodesamountGroup);
-    addPropertySubOwner(_pEarthdistGroup);
-    addPropertySubOwner(_pCameraPerspectiveGroup);
-    _pEarthdistGroup.addPropertySubOwner(_pFlowGroup);
+    addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_streamGroup);
+    addPropertySubOwner(_nodesamountGroup);
+    addPropertySubOwner(_earthdistGroup);
+    addPropertySubOwner(_cameraPerspectiveGroup);
+    _earthdistGroup.addPropertySubOwner(_flowGroup);
 
     // ------------------------- Add Properties to the groups ------------------------ //
-    _pColorGroup.addProperty(_pColorMode);
-    _pColorGroup.addProperty(_pScalingmethod);
-    _pColorGroup.addProperty(_pColorTableRange);
-    _pColorGroup.addProperty(_pColorTablePath);
-    _pColorGroup.addProperty(_pStreamColor);
-    _pColorGroup.addProperty(_pFluxColorAlpha);
-    _pColorGroup.addProperty(_pFluxColorAlphaIlluminance);
+    _colorGroup.addProperty(_colorMode);
+    _colorGroup.addProperty(_scalingmethod);
+    _colorGroup.addProperty(_colorTableRange);
+    _colorGroup.addProperty(_colorTablePath);
+    _colorGroup.addProperty(_streamColor);
+    _colorGroup.addProperty(_fluxColorAlpha);
+    _colorGroup.addProperty(_fluxColorAlphaIlluminance);
 
-    _pStreamGroup.addProperty(_pThresholdFlux);
-    _pStreamGroup.addProperty(_pFilteringLower);
-    _pStreamGroup.addProperty(_pFilteringUpper);
-    _pStreamGroup.addProperty(_pDomainZ);
+    _streamGroup.addProperty(_thresholdFlux);
+    _streamGroup.addProperty(_filteringLower);
+    _streamGroup.addProperty(_filteringUpper);
+    _streamGroup.addProperty(_domainZ);
 
-    _pNodesamountGroup.addProperty(_pNodeskipMethod);
-    _pNodesamountGroup.addProperty(_pAmountofNodes);
-    _pNodesamountGroup.addProperty(_pDefaultNodeSkip);
-    _pNodesamountGroup.addProperty(_pEarthNodeSkip);
-    _pNodesamountGroup.addProperty(_pNodeSize);
-    _pNodesamountGroup.addProperty(_pNodeSizeLargerFlux);
-    _pNodesamountGroup.addProperty(_pFluxNodeskipThreshold);
-    _pNodesamountGroup.addProperty(_pRadiusNodeSkipThreshold);
-    _pNodesamountGroup.addProperty(_pMaxNodeDistanceSize);
-    _pNodesamountGroup.addProperty(_pNodeDistanceThreshold);
+    _nodesamountGroup.addProperty(_nodeskipMethod);
+    _nodesamountGroup.addProperty(_amountofNodes);
+    _nodesamountGroup.addProperty(_defaultNodeSkip);
+    _nodesamountGroup.addProperty(_earthNodeSkip);
+    _nodesamountGroup.addProperty(_nodeSize);
+    _nodesamountGroup.addProperty(_nodeSizeLargerFlux);
+    _nodesamountGroup.addProperty(_fluxNodeskipThreshold);
+    _nodesamountGroup.addProperty(_radiusNodeSkipThreshold);
+    _nodesamountGroup.addProperty(_maxNodeDistanceSize);
+    _nodesamountGroup.addProperty(_nodeDistanceThreshold);
 
-    _pEarthdistGroup.addProperty(_pDistanceThreshold);
-    _pEarthdistGroup.addProperty(_pEnhancemethod);
-    _pEarthdistGroup.addProperty(_pInterestingStreamsEnabled);
+    _earthdistGroup.addProperty(_distanceThreshold);
+    _earthdistGroup.addProperty(_enhancemethod);
+    _earthdistGroup.addProperty(_interestingStreamsEnabled);
 
-    _pFlowGroup.addProperty(_pFlowEnabled);
-    _pFlowGroup.addProperty(_pFlowColor);
-    _pFlowGroup.addProperty(_pFlowParticleSize);
-    _pFlowGroup.addProperty(_pFlowParticleSpacing);
-    _pFlowGroup.addProperty(_pFlowSpeed);
-    _pFlowGroup.addProperty(_pUseFlowColor);
+    _flowGroup.addProperty(_flowEnabled);
+    _flowGroup.addProperty(_flowColor);
+    _flowGroup.addProperty(_flowParticleSize);
+    _flowGroup.addProperty(_flowParticleSpacing);
+    _flowGroup.addProperty(_flowSpeed);
+    _flowGroup.addProperty(_useFlowColor);
 
-    _pCameraPerspectiveGroup.addProperty(_pCameraPerspectiveEnabled);
-    _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
-    _pCameraPerspectiveGroup.addProperty(_pDrawingCircles);
-    _pCameraPerspectiveGroup.addProperty(_pDrawingHollow);
-    _pCameraPerspectiveGroup.addProperty(_pGaussianAlphaFilter);
-    _pCameraPerspectiveGroup.addProperty(_pRadiusPerspectiveEnabled);
-    _pCameraPerspectiveGroup.addProperty(_pMaxNodeSize);
-    _pCameraPerspectiveGroup.addProperty(_pMinNodeSize);
-    _pCameraPerspectiveGroup.addProperty(_pPulseEnabled);
-    _pCameraPerspectiveGroup.addProperty(_pGaussianPulseEnabled);
-    _pCameraPerspectiveGroup.addProperty(_pPulseAlways);
+    _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
+    _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
+    _cameraPerspectiveGroup.addProperty(_drawingCircles);
+    _cameraPerspectiveGroup.addProperty(_drawingHollow);
+    _cameraPerspectiveGroup.addProperty(_gaussianAlphaFilter);
+    _cameraPerspectiveGroup.addProperty(_radiusPerspectiveEnabled);
+    _cameraPerspectiveGroup.addProperty(_maxNodeSize);
+    _cameraPerspectiveGroup.addProperty(_minNodeSize);
+    _cameraPerspectiveGroup.addProperty(_pulseEnabled);
+    _cameraPerspectiveGroup.addProperty(_gaussianPulseEnabled);
+    _cameraPerspectiveGroup.addProperty(_pulseAlways);
 
     definePropertyCallbackFunctions();
 }
@@ -869,79 +855,79 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         }
         glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
     
-        _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
-        _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
+        _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
+        _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);
         _shaderProgram->setUniform(
             _uniformCache.nodeSizeLargerFlux, 
-            _pNodeSizeLargerFlux
+            _nodeSizeLargerFlux
         );
-        _shaderProgram->setUniform(_uniformCache.thresholdFlux, _pThresholdFlux);
-        _shaderProgram->setUniform(_uniformCache.colorMode, _pColorMode);
-        _shaderProgram->setUniform(_uniformCache.filterLower, _pFilteringLower);
-        _shaderProgram->setUniform(_uniformCache.filterUpper, _pFilteringUpper);
-        _shaderProgram->setUniform(_uniformCache.scalingMode, _pScalingmethod);
+        _shaderProgram->setUniform(_uniformCache.thresholdFlux, _thresholdFlux);
+        _shaderProgram->setUniform(_uniformCache.colorMode, _colorMode);
+        _shaderProgram->setUniform(_uniformCache.filterLower, _filteringLower);
+        _shaderProgram->setUniform(_uniformCache.filterUpper, _filteringUpper);
+        _shaderProgram->setUniform(_uniformCache.scalingMode, _scalingmethod);
         _shaderProgram->setUniform(
             _uniformCache.colorTableRange, 
-            _pColorTableRange.value()
+            _colorTableRange.value()
         );
-        _shaderProgram->setUniform(_uniformCache.domainLimZ, _pDomainZ.value());
-        _shaderProgram->setUniform(_uniformCache.nodeSkip, _pAmountofNodes);
-        _shaderProgram->setUniform(_uniformCache.nodeSkipDefault, _pDefaultNodeSkip);
-        _shaderProgram->setUniform(_uniformCache.nodeSkipEarth, _pEarthNodeSkip);
-        _shaderProgram->setUniform(_uniformCache.nodeSkipMethod, _pNodeskipMethod);
+        _shaderProgram->setUniform(_uniformCache.domainLimZ, _domainZ.value());
+        _shaderProgram->setUniform(_uniformCache.nodeSkip, _amountofNodes);
+        _shaderProgram->setUniform(_uniformCache.nodeSkipDefault, _defaultNodeSkip);
+        _shaderProgram->setUniform(_uniformCache.nodeSkipEarth, _earthNodeSkip);
+        _shaderProgram->setUniform(_uniformCache.nodeSkipMethod, _nodeskipMethod);
         _shaderProgram->setUniform(
             _uniformCache.nodeSkipFluxThreshold, 
-            _pFluxNodeskipThreshold
+            _fluxNodeskipThreshold
         );
         _shaderProgram->setUniform(
             _uniformCache.nodeSkipRadiusThreshold, 
-            _pRadiusNodeSkipThreshold
+            _radiusNodeSkipThreshold
         );
-        _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _pFluxColorAlpha);
+        _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _fluxColorAlpha);
         _shaderProgram->setUniform(
             _uniformCache.fluxColorAlphaIlluminance, 
-            _pFluxColorAlphaIlluminance
+            _fluxColorAlphaIlluminance
         );
         _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
-        _shaderProgram->setUniform(_uniformCache.distanceThreshold, _pDistanceThreshold);
-        _shaderProgram->setUniform(_uniformCache.enhanceMethod, _pEnhancemethod);
-        _shaderProgram->setUniform(_uniformCache.flowColor, _pFlowColor);
-        _shaderProgram->setUniform(_uniformCache.usingParticles, _pFlowEnabled);
-        _shaderProgram->setUniform(_uniformCache.particleSize, _pFlowParticleSize);
-        _shaderProgram->setUniform(_uniformCache.particleSpacing, _pFlowParticleSpacing);
-        _shaderProgram->setUniform(_uniformCache.particleSpeed, _pFlowSpeed);
+        _shaderProgram->setUniform(_uniformCache.distanceThreshold, _distanceThreshold);
+        _shaderProgram->setUniform(_uniformCache.enhanceMethod, _enhancemethod);
+        _shaderProgram->setUniform(_uniformCache.flowColor, _flowColor);
+        _shaderProgram->setUniform(_uniformCache.usingParticles, _flowEnabled);
+        _shaderProgram->setUniform(_uniformCache.particleSize, _flowParticleSize);
+        _shaderProgram->setUniform(_uniformCache.particleSpacing, _flowParticleSpacing);
+        _shaderProgram->setUniform(_uniformCache.particleSpeed, _flowSpeed);
         _shaderProgram->setUniform(
             _uniformCache2.time,
             global::windowDelegate->applicationTime() * -1
         );
-        _shaderProgram->setUniform(_uniformCache2.flowColoring, _pUseFlowColor);
+        _shaderProgram->setUniform(_uniformCache2.flowColoring, _useFlowColor);
         _shaderProgram->setUniform(
             _uniformCache2.maxNodeDistanceSize, 
-            _pMaxNodeDistanceSize
+            _maxNodeDistanceSize
         );
         _shaderProgram->setUniform(
             _uniformCache2.usingCameraPerspective, 
-            _pCameraPerspectiveEnabled
+            _cameraPerspectiveEnabled
         );
-        _shaderProgram->setUniform(_uniformCache2.drawCircles, _pDrawingCircles);
-        _shaderProgram->setUniform(_uniformCache2.drawHollow, _pDrawingHollow);
-        _shaderProgram->setUniform(_uniformCache2.useGaussian, _pGaussianAlphaFilter);
+        _shaderProgram->setUniform(_uniformCache2.drawCircles, _drawingCircles);
+        _shaderProgram->setUniform(_uniformCache2.drawHollow, _drawingHollow);
+        _shaderProgram->setUniform(_uniformCache2.useGaussian, _gaussianAlphaFilter);
         _shaderProgram->setUniform(
             _uniformCache2.usingRadiusPerspective, 
-            _pRadiusPerspectiveEnabled
+            _radiusPerspectiveEnabled
         );
         _shaderProgram->setUniform(
             _uniformCache2.perspectiveDistanceFactor, 
-            _pPerspectiveDistanceFactor
+            _perspectiveDistanceFactor
         );
-        _shaderProgram->setUniform(_uniformCache2.maxNodeSize, _pMaxNodeSize);
-        _shaderProgram->setUniform(_uniformCache2.minNodeSize, _pMinNodeSize);
-        _shaderProgram->setUniform(_uniformCache2.usingPulse, _pPulseEnabled);
+        _shaderProgram->setUniform(_uniformCache2.maxNodeSize, _maxNodeSize);
+        _shaderProgram->setUniform(_uniformCache2.minNodeSize, _minNodeSize);
+        _shaderProgram->setUniform(_uniformCache2.usingPulse, _pulseEnabled);
         _shaderProgram->setUniform(
             _uniformCache2.usingGaussianPulse, 
-            _pGaussianPulseEnabled
+            _gaussianPulseEnabled
         );
-        _shaderProgram->setUniform(_uniformCache2.pulsatingAlways, _pPulseAlways);
+        _shaderProgram->setUniform(_uniformCache2.pulsatingAlways, _pulseAlways);
         
         glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
     
@@ -951,7 +937,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         ghoul::opengl::TextureUnit textureUnitCMR;
         ghoul::opengl::TextureUnit textureUnitEarth;
         ghoul::opengl::TextureUnit textureUnitFlow;
-        if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+        if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             textureUnit.activate();
             _transferFunction->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTable", textureUnit);

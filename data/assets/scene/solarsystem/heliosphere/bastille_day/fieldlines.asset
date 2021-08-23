@@ -2,8 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
-local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+local masVelocityColorTable = transferFunctions .. "/velocity-fieldlines.txt"
+local masDensityColorTable = transferFunctions .. "/density-fieldlines.txt"
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Fieldlines",
@@ -17,7 +17,7 @@ local sunRadius = 6.957E8
 -- Fieldlies from binaries
 local fieldlines = {
   Identifier = "MAS_MHD_Fieldlines",
-  Parent = heliosphereTransforms.HNMReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -25,10 +25,10 @@ local fieldlines = {
     },
     Rotation = {
     -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-    -- which is what the renderables parent transforms.HNMReferenceFrame.Identifier is
+    -- which is what the renderables parent transforms.HEEQ180ReferenceFrame.Identifier is
     -- referring to. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
     -- longitude was 309.3 degrees.
-    -- Difference from HEEQ => 360-309.3=50.7 
+    -- Difference from HEEQ => 360-309.3=50.7
     -- (or 0-309.3 = -309.3 However this leads to the same rotation matrix in the end)
     -- Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
     -- => a1 = -129.3 and a2 = 230.7
@@ -42,8 +42,6 @@ local fieldlines = {
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
-    -- FlowEnabled = false,
-    -- LineWidth = 1.0;
     AlphaBlendlingEnabled = false,
     InputFileType = "osfls",
     ColorTablePaths = {
@@ -67,7 +65,7 @@ local fieldlines = {
     Path = "/Solar System/Heliosphere",
     Name = "MAS Fieldlines"
   }
-} 
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
 

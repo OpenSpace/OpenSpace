@@ -37,8 +37,6 @@
 #include <openspace/rendering/transferfunction.h>
 #include <atomic>
 
-namespace { enum class SourceFileType; }
-
 namespace openspace {
 
 class RenderableFieldlinesSequence : public Renderable {
@@ -58,15 +56,18 @@ public:
 private:
     // ------------------------------------- ENUMS -------------------------------------//
     // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
-    enum class ColorMethod : int {
+    enum class ColorMethod {
         Uniform = 0,
-        ByQuantity
+        ByQuantity = 1
+    };
+    enum class SourceFileType {
+        Cdf = 0,
+        Json = 1,
+        Osfls = 2
     };
 
     // ------------------------------------ STRINGS ------------------------------------//
-    std::string _identifier;                               // Name of the Node!
-    // "cdf", "osfls" or "json"
-    std::string _inputFileTypeString;
+    std::string _identifier;                               // Name of the Node! 
     // cdf, osfls or json
     SourceFileType _inputFileType;
     // Output folder path in case of file conversion
@@ -74,7 +75,7 @@ private:
     // which tracing vaiable to trace. 'b' for fieldline is default
     std::string _tracingVariable;
     // path to directory with seed point files
-    std::string _seedPointDirectory;
+    std::filesystem::path _seedPointDirectory;
     // optional except when using json input
     std::string _modelStr;
     // ------------------------------------- FLAGS -------------------------------------//
@@ -154,66 +155,65 @@ private:
 
     // ---------------------------------- Properties ---------------------------------- //
     // Group to hold the color properties
-    properties::PropertyOwner _pColorGroup;
+    properties::PropertyOwner _colorGroup;
     // Uniform/transfer function/topology?
-    properties::OptionProperty _pColorMethod;
+    properties::OptionProperty _colorMethod;
     // Index of the extra quantity to color lines by
-    properties::OptionProperty _pColorQuantity;
+    properties::OptionProperty _colorQuantity;
     // Color table/transfer function min
-    properties::StringProperty _pColorQuantityMin;
+    properties::StringProperty _colorQuantityMin;
     // Color table/transfer function max
-    properties::StringProperty _pColorQuantityMax;
+    properties::StringProperty _colorQuantityMax;
     // Color table/transfer function for "By Quantity" coloring
-    properties::StringProperty _pColorTablePath;
+    properties::StringProperty _colorTablePath;
     // Uniform Field Line Color
-    properties::Vec4Property _pColorUniform;
+    properties::Vec4Property _colorUniform;
     // Whether or not to use additive blending
-    properties::BoolProperty _pColorABlendEnabled;
+    properties::BoolProperty _colorABlendEnabled;
 
 // Whether or not to use Domain
-    properties::BoolProperty _pDomainEnabled;
+    properties::BoolProperty _domainEnabled;
     // Group to hold the Domain properties
-    properties::PropertyOwner _pDomainGroup;
+    properties::PropertyOwner _domainGroup;
     // Domain Limits along x-axis
-    properties::Vec2Property _pDomainX;
+    properties::Vec2Property _domainX;
     // Domain Limits along y-axis
-    properties::Vec2Property _pDomainY;
+    properties::Vec2Property _domainY;
     // Domain Limits along z-axis
-    properties::Vec2Property _pDomainZ;
+    properties::Vec2Property _domainZ;
     // Domain Limits radially
-    properties::Vec2Property _pDomainR;
+    properties::Vec2Property _domainR;
 
 // Simulated particles' color
-    properties::Vec4Property _pFlowColor;
+    properties::Vec4Property _flowColor;
     // Toggle flow [ON/OFF]
-    properties::BoolProperty _pFlowEnabled;
+    properties::BoolProperty _flowEnabled;
     // Group to hold the flow/particle properties
-    properties::PropertyOwner _pFlowGroup;
+    properties::PropertyOwner _flowGroup;
     // Size of simulated flow particles
-    properties::IntProperty _pFlowParticleSize;
+    properties::IntProperty _flowParticleSize;
     // Size of simulated flow particles
-    properties::IntProperty _pFlowParticleSpacing;
+    properties::IntProperty _flowParticleSpacing;
     // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::BoolProperty _pFlowReversed;
+    properties::BoolProperty _flowReversed;
     // Speed of simulated flow
-    properties::IntProperty _pFlowSpeed;
+    properties::IntProperty _flowSpeed;
 
     // Whether or not to use masking
-    properties::BoolProperty _pMaskingEnabled;
+    properties::BoolProperty _maskingEnabled;
     // Group to hold the masking properties
-    properties::PropertyOwner _pMaskingGroup;
+    properties::PropertyOwner _maskingGroup;
     // Lower limit for allowed values
-    properties::StringProperty _pMaskingMin;
+    properties::StringProperty _maskingMin;
     // Upper limit for allowed values
-    properties::StringProperty _pMaskingMax;
+    properties::StringProperty _maskingMax;
     // Index of the extra quantity to use for masking
-    properties::OptionProperty _pMaskingQuantity;
+    properties::OptionProperty _maskingQuantity;
 
     /// Line width for the line rendering part
-    properties::FloatProperty _pLineWidth;
-
+    properties::FloatProperty _lineWidth;
     // Button which executes a time jump to start of sequence
-    properties::TriggerProperty _pJumpToStartBtn;
+    properties::TriggerProperty _jumpToStartBtn;
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
     void addStateToSequence(FieldlinesState& STATE);

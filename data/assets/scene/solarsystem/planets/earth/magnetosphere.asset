@@ -8,25 +8,21 @@ local fieldlinesDirectory = asset.syncedResource({
   Version = 1
 })
 
--- Fieldlies from binaries
 local earthMagnetosphere = {
   Identifier = "Earths_Magnetosphere",
   Parent = transforms.GSMReferenceFrame.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
-    -- FlowEnabled = false,
     LineWidth = 3.0,
     AlphaBlendlingEnabled = false,
     InputFileType = "osfls",    -- openspace Field lines Sequence
-
     --maskingEnabled = true,
     --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
     LoadAtRuntime = true,
     ScaleToMeters = 1.0,
     SecondsBefore = 24*60*60*365*100,
     SecondsAfter = 24*60*60*365*100,
-    --SimulationModel = "mas",
     Color = {
       Uniform = {1.0, 0.725, 0.75, 1}
     }
@@ -35,7 +31,7 @@ local earthMagnetosphere = {
     Path = "/Solar System/Planets/Earth",
     Name = "Magnetosphere"
   },
-} 
+}
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
 
