@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
@@ -219,6 +220,9 @@ private:
     } _cameraButtonLocations;
 
     std::string _versionString;
+
+    properties::Vec4Property _enabledFontColor;
+    properties::Vec4Property _disabledFontColor;
 };
 
 } // namespace openspace
