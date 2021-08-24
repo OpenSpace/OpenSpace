@@ -61,11 +61,7 @@ namespace openspace::luascriptfunctions {
  * Renders the current camera path
  */
 int renderCameraPath(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 0, 3 },
-        "lua::renderCameraPath"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 3 }, "lua::renderCameraPath");
 
     if (!global::navigationHandler->pathNavigator().hasCurrentPath()) {
         LWARNINGC("Debugging: PathNavigation", "There is no current path to render");
@@ -74,12 +70,13 @@ int renderCameraPath(lua_State* L) {
     const interaction::Path* currentPath =
         global::navigationHandler->pathNavigator().currentPath();
 
-    const int nSteps = (nArguments > 0) ? ghoul::lua::value<int>(L, 1) : 100;
-    bool renderDirections = (nArguments > 1) ? ghoul::lua::value<bool>(L, 2) : false;
+    auto [nSteps, renderDirections, directionLineLength] = ghoul::lua::values<
+        std::optional<int>, std::optional<bool>, std::optional<double>
+    >(L);
 
-    constexpr const double defaultLineLength = 6e7;
-    const double directionLineLength =
-        (nArguments > 2) ? ghoul::lua::value<double>(L, 3) : defaultLineLength;
+    nSteps = nSteps.value_or(100);
+    renderDirections = renderDirections.value_or(false);
+    directionLineLength = directionLineLength.value_or(6e7);
 
     // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
@@ -98,7 +95,7 @@ int renderCameraPath(lua_State* L) {
 
     // Get the poses along the path
     std::vector<CameraPose> poses;
-    const double du = 1.0 / nSteps;
+    const double du = 1.0 / (*nSteps);
     const double length = currentPath->pathLength();
     for (double u = 0.0; u < 1.0; u += du) {
         const CameraPose p = currentPath->interpolatedPose(u * length);
@@ -153,11 +150,12 @@ int renderCameraPath(lua_State* L) {
         );
     };
 
-    auto addDirectionLine = [addPoint, addLineBetweenPoints, directionLineLength]
-                            (const std::string& pointId, const CameraPose& p)
+    auto addDirectionLine = [addPoint, addLineBetweenPoints]
+                            (const std::string& pointId, const CameraPose& p, 
+                             double lineLength)
     {
         const glm::dvec3 dir = glm::normalize(p.rotation * glm::dvec3(0.0, 0.0, -1.0));
-        const glm::dvec3 pointPosition = p.position + directionLineLength * dir;
+        const glm::dvec3 pointPosition = p.position + lineLength * dir;
         const std::string id = fmt::format("{}_orientation", pointId);
 
         addPoint(id, pointPosition);
@@ -166,20 +164,19 @@ int renderCameraPath(lua_State* L) {
 
     // Add first point separately so that we can create first line in for loop
     addPoint(pointIdentifier(0), poses.front().position);
-    if (renderDirections) {
-        addDirectionLine(pointIdentifier(0), poses.front());
+    if (*renderDirections) {
+        addDirectionLine(pointIdentifier(0), poses.front(), *directionLineLength);
     }
 
     for (int i = 1; i < static_cast<int>(poses.size()); i++) {
         addPoint(pointIdentifier(i), poses[i].position);
         addLineBetweenPoints(pointIdentifier(i), pointIdentifier(i - 1), PathColor, 4.f);
 
-        if (renderDirections) {
-            addDirectionLine(pointIdentifier(i), poses[i]);
+        if (*renderDirections) {
+            addDirectionLine(pointIdentifier(i), poses[i], *directionLineLength);
         }
     }
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -195,7 +192,6 @@ int removeRenderedCameraPath(lua_State* L) {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -204,11 +200,7 @@ int removeRenderedCameraPath(lua_State* L) {
  * Renders the control points of the current camera path
  */
 int renderPathControlPoints(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 0, 1 },
-        "lua::renderPathControlPoints"
-    );
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::renderPathControlPoints");
 
     if (!global::navigationHandler->pathNavigator().hasCurrentPath()) {
         LWARNINGC(
@@ -219,7 +211,8 @@ int renderPathControlPoints(lua_State* L) {
     const interaction::Path* currentPath =
         global::navigationHandler->pathNavigator().currentPath();
 
-    const double radius = (nArguments > 0) ? ghoul::lua::value<int>(L, 1) : 2000000;
+    auto [radius] = ghoul::lua::values<std::optional<double>>(L);
+    radius = radius.value_or(2000000.0);
 
     // Parent node. Note that we only render one set of points at a time,
     // so remove any previously rendered ones
@@ -259,7 +252,7 @@ int renderPathControlPoints(lua_State* L) {
                 "Type = 'RenderableSphere',"
                 "Enabled = true,"
                 "Segments = 30,"
-                "Size = " + std::to_string(radius) + ","
+                "Size = " + std::to_string(*radius) + ","
                 "Texture = " + colorTexturePath + ""
             "},"
             "GUI = {"
@@ -274,7 +267,6 @@ int renderPathControlPoints(lua_State* L) {
         );
     }
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -290,7 +282,6 @@ int removePathControlPoints(lua_State* L) {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -298,37 +289,33 @@ int removePathControlPoints(lua_State* L) {
  * Add a set of cartesian axes to the specified scene graph node
  */
 int addCartesianAxes(lua_State* L) {
-    int nArgs = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::addCartesianAxes");
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::addCartesianAxes");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(L, 1);
-    const std::string& axesIdentifier = ghoul::lua::value<std::string>(L, 2);
+    auto [nodeIdentifier, scale] = 
+        ghoul::lua::values<std::string, std::optional<double>>(L);
 
-    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeIdentifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown scene graph node: " + nodeName);
+        return ghoul::lua::luaError(L, "Unknown scene graph node: " + nodeIdentifier);
     }
 
-    double scale;
-    if (nArgs > 2) {
-        scale = ghoul::lua::value<double>(L, 3);
-    }
-    else {
+    if (!scale.has_value()) {
         scale = 2.0 * n->boundingSphere();
         if (n->boundingSphere() < 1E-3) {
             LWARNING("Using zero bounding sphere for scale of created axes. You might "
                 "have to set the scale manually for them to be visible");
-            scale += 1.0;
+            scale = 1.0;
         }
     }
 
-    const std::string identifier = makeIdentifier(axesIdentifier);
+    const std::string identifier = makeIdentifier(nodeIdentifier + "_AxesXYZ");
     const std::string& axes = "{"
         "Identifier = '" + identifier + "',"
-        "Parent = '" + nodeName + "',"
+        "Parent = '" + nodeIdentifier + "',"
         "Transform = { "
             "Scale = {"
                 "Type = 'StaticScale',"
-                "Scale = " + std::to_string(scale) + ""
+                "Scale = " + std::to_string(*scale) + ""
             "}"
         "},"
         "Renderable = {"
@@ -349,7 +336,6 @@ int addCartesianAxes(lua_State* L) {
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
