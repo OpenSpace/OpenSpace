@@ -906,13 +906,15 @@ void OpenSpaceEngine::deinitialize() {
     TransformationManager::deinitialize();
     SpiceManager::deinitialize();
 
+    events::Event* e = global::eventEngine->firstEvent();
+    events::logAllEvents(e);
+
+
     ghoul::fontrendering::FontRenderer::deinitialize();
 
     ghoul::logging::LogManager::deinitialize();
 
     LTRACE("deinitialize(end)");
-
-
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }
 
