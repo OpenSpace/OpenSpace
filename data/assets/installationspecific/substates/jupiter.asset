@@ -53,7 +53,7 @@ local transitions = {
     To = "Europa",
     Action = [[
         ]] .. util.disableLinearFlight() .. [[
-        ]] .. util.setCurveTypeToZoomOverview() .. [[
+        ]] .. util.setCurveType("ZoomOutOverview") .. [[
         openspace.time.setPause(true)
         openspace.pathnavigation.goTo('Europa', true)
         ]] .. util.changeAnchor('Europa', 1) .. [[
@@ -64,7 +64,7 @@ local transitions = {
     To = "Jupiter",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Jupiter', true)
       ]] .. util.changeAnchor('Jupiter', 1) .. [[
@@ -75,7 +75,7 @@ local transitions = {
     To = "Io",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Io', true)
       ]] .. util.changeAnchor('Io', 1) .. [[
@@ -86,7 +86,7 @@ local transitions = {
     To = "Jupiter",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Jupiter', true)
       ]] .. util.changeAnchor('Jupiter', 1) .. [[

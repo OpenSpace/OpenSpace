@@ -84,7 +84,7 @@ local transitions = {
     To = "Saturn",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
       ]] .. util.changeAnchor('Saturn', 1) .. [[
@@ -95,7 +95,7 @@ local transitions = {
     To = "Titan",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Titan', true)
       ]] .. util.changeAnchor('Titan', 1) .. [[
@@ -106,7 +106,7 @@ local transitions = {
     To = "Saturn",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
       ]] .. util.changeAnchor('Saturn', 1) .. [[
@@ -122,7 +122,7 @@ local transitions = {
     To = "Saturn",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
       ]] .. util.changeAnchor('Saturn', 1) .. [[
@@ -138,7 +138,7 @@ local transitions = {
     To = "Saturn",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
       ]] .. util.changeAnchor('Saturn', 1) .. [[

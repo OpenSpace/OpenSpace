@@ -46,7 +46,7 @@ local transitions = {
     To = "Ceres",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Ceres', true)
       ]] .. util.changeAnchor('Ceres', 1) .. [[

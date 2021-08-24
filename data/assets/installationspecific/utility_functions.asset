@@ -76,24 +76,24 @@ local disableLinearFlight = function()
   ]]
 end
 
--- Sets the camera path curve type to the one that has a look at rotation 
--- and zooming out motion to show both targets, if close enough
-local setCurveTypeToZoomOverview = function ()
-  -- PathType 2 = ZoomOutOverview
-  return [[
-    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 2)
-  ]]
-end 
+local setCurveType = function (type)
+  local typeAsInt = 0
+  if (type == "ZoomOutOverview") then
+    typeAsInt = 2
+  elseif (type == "AvoidCollision") then
+    typeAsInt = 0
+  elseif (type == "AvoidCollisionWithLookAt") then
+    typeAsInt = 3
+  end
 
-local setCurveTypeToZoomAvoidCollision = function ()
-  -- PathType 0 = AvoidCollision
   return [[
-    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 0)
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 
+    ]] .. tostring(typeAsInt) .. [[)
   ]]
-end 
+end
 
 -- Append table B to table A
-local appendTable = function(A, B) 
+local appendTable = function(A, B)
   for key, val in pairs(B) do
     table.insert( A, val )
   end
@@ -105,6 +105,5 @@ asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
 asset.export("applyLinearFlight", applyLinearFlight)
 asset.export("disableLinearFlight", disableLinearFlight)
-asset.export("setCurveTypeToZoomOverview", setCurveTypeToZoomOverview)
-asset.export("setCurveTypeToZoomAvoidCollision", setCurveTypeToZoomAvoidCollision)
+asset.export("setCurveType", setCurveType)
 asset.export("appendTable", appendTable)

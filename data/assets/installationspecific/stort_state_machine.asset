@@ -14,7 +14,7 @@ local solarSystemState = {
   -- So, no explicit transition should be needed
   Enter = [[
     ]] .. util.disableLinearFlight() .. [[
-    ]] .. util.setCurveTypeToZoomAvoidCollision() .. [[
+    ]] .. util.setCurveType("AvoidCollision") .. [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
     openspace.pathnavigation.goToHeight(
@@ -93,7 +93,7 @@ local transitions = {
     To = "Earth",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Earth', true)
       ]] .. util.changeAnchor('Earth', 1) .. [[
@@ -109,7 +109,7 @@ local transitions = {
     To = "Mars",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Mars', true)
       ]] .. util.changeAnchor('Mars', 1) .. [[
@@ -125,7 +125,7 @@ local transitions = {
     To = "Ceres",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Ceres', true)
       ]] .. util.changeAnchor('Ceres', 1) .. [[
@@ -141,7 +141,7 @@ local transitions = {
     To = "Jupiter",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Jupiter', true)
       ]] .. util.changeAnchor('Jupiter', 1) .. [[
@@ -157,7 +157,7 @@ local transitions = {
     To = "Saturn",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
       ]] .. util.changeAnchor('Saturn', 1) .. [[
@@ -173,7 +173,7 @@ local transitions = {
     To = "Pluto",
     Action = [[
       ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Pluto', true)
       ]] .. util.changeAnchor('Pluto', 1) .. [[

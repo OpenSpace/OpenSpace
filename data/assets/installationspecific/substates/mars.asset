@@ -1,6 +1,10 @@
 local util = asset.require('./../utility_functions')
 
 ----------------------------------------------------------------
+-- SCENE GRAPH NODES
+----------------------------------------------------------------
+
+----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local marsTargetDistance = 7E6
@@ -16,6 +20,9 @@ local marsState = {
   ]]
 }
 
+-----
+-- Valles Marineris
+-----
 local vallesMarinerisTargetDistance = 7E6
 
 local vallesMarinerisState = {
@@ -29,7 +36,22 @@ local vallesMarinerisState = {
   ]]
 }
 
+-----
+-- Olympus Mons
+-----
 local olympusMonsTargetDistance = 7E6
+local olympusMonsGeo = {
+  lat = 18.65, lon = 226.2, height = 2e6
+}
+
+local olympusMonsNavState = [[{
+  Anchor = "Mars",
+  ReferenceFrame = "Mars",
+  Position = { -2583495, -2316231, 824980.3125 },
+  Up = { 0.5749897956848145, -0.3840242326259613, 0.7224348187446594 },
+  Pitch = 1.0032713413238525,
+  Yaw= -0.012328346259891987
+}]];
 
 local olympusMonsState = {
   Identifier = "OlympusMons",
@@ -42,6 +64,9 @@ local olympusMonsState = {
   ]]
 }
 
+-----
+-- Curiosity
+-----
 local curiosityTargetDistance = 7E6
 
 local curiosityState = {
@@ -60,57 +85,54 @@ local states = { marsState, vallesMarinerisState, olympusMonsState, curiositySta
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+
+local goToMarsOverview = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Mars', true)
+  ]] .. util.changeAnchor('Mars', 1) .. [[
+]]
+
+local goToVallesMarinerisTilted = [[
+  ]] .. util.stopOrbiting() .. [[
+  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.generatePath({ 
+      TargetType = "NavigationState", 
+      NavigationState = ]] .. olympusMonsNavState .. [[
+  })
+]]
+
 local transitions = {
   {
     From = "Mars",
     To = "VallesMarineris",
-    Action = [[
-    ]]
+    Action = goToVallesMarinerisTilted
   },
   {
     From = "VallesMarineris",
     To = "Mars",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Mars', true)
-      ]] .. util.changeAnchor('Mars', 1) .. [[
-    ]]
+    Action = goToMarsOverview
   },
   {
     From = "Mars",
     To = "OlympusMons",
-    Action = [[
-    ]]
+    Action = [[]]
   },
   {
     From = "OlympusMons",
     To = "Mars",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Mars', true)
-      ]] .. util.changeAnchor('Mars', 1) .. [[
-    ]]
+    Action = goToMarsOverview
   },
   {
     From = "Mars",
     To = "Curiosity",
-    Action = [[
-    ]]
+    Action = [[]]
   },
   {
     From = "Curiosity",
     To = "Mars",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveTypeToZoomOverview() .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Mars', true)
-      ]] .. util.changeAnchor('Mars', 1) .. [[
-    ]]
+    Action = goToMarsOverview
   }
 }
 
