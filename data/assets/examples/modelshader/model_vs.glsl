@@ -44,15 +44,15 @@ uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
 void main() {
-    vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
+  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
+  gl_Position = positionScreenSpace;
+  vs_st = in_st;
+  vs_screenSpaceDepth = positionScreenSpace.w;
     
-    vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
 	// TBN matrix for normal mapping
 	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));

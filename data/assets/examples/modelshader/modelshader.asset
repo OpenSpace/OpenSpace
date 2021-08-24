@@ -38,7 +38,7 @@ local model = {
   GUI = {
     Name = "Model Shader",
     Path = "/Example",
-    Description = "Simple animated box model with a custom shader",
+    Description = "Simple box model with a custom shader",
   }
 }
 

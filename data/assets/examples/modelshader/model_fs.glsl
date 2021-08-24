@@ -59,15 +59,13 @@ uniform float opacity = 1.0;
 Fragment getFragment() {
   Fragment frag;
 
-
-  vec3 n;
   if (has_texture_normal) {
-      vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
-      normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-      frag.color.rgb = normalize(TBN * normalAlbedo);
+    vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
+    normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
+    frag.color.rgb = normalize(TBN * normalAlbedo);
   }
   else {
-      frag.color.rgb = normalize(vs_normalViewSpace);
+    frag.color.rgb = normalize(vs_normalViewSpace);
   }
   frag.color.a = 1.0;
   frag.gPosition      = vs_positionCameraSpace;
