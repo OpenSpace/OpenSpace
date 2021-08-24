@@ -219,6 +219,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     _nStates = _sourceFiles.size();
     return true;
 }
+
 void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     _textureFile = nullptr;
 
@@ -324,5 +325,4 @@ void RenderablePlaneTimeVaryingImage::loadTexture() {
         _isLoadingTexture = false;
     }
 }
-
 } // namespace openspace
