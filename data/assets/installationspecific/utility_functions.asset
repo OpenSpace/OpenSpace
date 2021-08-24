@@ -81,10 +81,14 @@ end
 local setCurveTypeToZoomOverview = function ()
   -- PathType 2 = ZoomOutOverview
   return [[
-    openspace.setPropertyValueSingle(
-      "NavigationHandler.PathNavigator.DefaultPathType",
-      2
-    )
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 2)
+  ]]
+end 
+
+local setCurveTypeToZoomAvoidCollision = function ()
+  -- PathType 0 = AvoidCollision
+  return [[
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 0)
   ]]
 end 
 
@@ -102,4 +106,5 @@ asset.export("changeAnchor", changeAnchor)
 asset.export("applyLinearFlight", applyLinearFlight)
 asset.export("disableLinearFlight", disableLinearFlight)
 asset.export("setCurveTypeToZoomOverview", setCurveTypeToZoomOverview)
+asset.export("setCurveTypeToZoomAvoidCollision", setCurveTypeToZoomAvoidCollision)
 asset.export("appendTable", appendTable)

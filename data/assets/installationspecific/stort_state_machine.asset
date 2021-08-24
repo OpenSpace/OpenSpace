@@ -6,10 +6,23 @@ local defaultTime = 654728475 -- 2020 Sep 9, 9:00
 -- SOLAR SYSTEM STATE - to reduce number of transitions
 ----------------------------------------------------------------
 local solarTargetDistance = 3E11
+local solarsystemflightDuration = 9 -- seconds
 
 local solarSystemState = {
-  Identifier = "SolarSystem", 
-  Enter = [[]],
+  Identifier = "SolarSystem",
+  -- Enter function use for all transitions to the solar system.
+  -- So, no explicit transition should be needed
+  Enter = [[
+    ]] .. util.disableLinearFlight() .. [[
+    ]] .. util.setCurveTypeToZoomAvoidCollision() .. [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+    openspace.pathnavigation.goToHeight(
+      'Sun', 
+      ]] .. solarTargetDistance .. [[,
+      ]] .. solarsystemflightDuration .. [[
+    )
+  ]],
   Exit = [[]]
 }
 
@@ -73,11 +86,7 @@ local transitions = {
   -- 1. Earth - SolarSystem
   {
     From = "Earth",
-    To = "SolarSystem",
-    Action =  [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -93,11 +102,7 @@ local transitions = {
   -- 2. Mars - SolarSystem
   {
     From = "Mars",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -113,11 +118,7 @@ local transitions = {
   -- 3. Ceres - SolarSystem
   {
     From = "Ceres",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -133,11 +134,7 @@ local transitions = {
   -- 4. Jupiter - SolarSystem
   {
     From = "Jupiter",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -153,11 +150,7 @@ local transitions = {
   -- 5. Saturn - SolarSystem
   {
     From = "Saturn",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -173,11 +166,7 @@ local transitions = {
   -- 6. Pluto - SolarSystem
   {
     From = "Pluto",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
@@ -193,25 +182,16 @@ local transitions = {
   -- 7. Voyager and Pioneer - SolarSystem
   {
     From = "VoyagerPioneer",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
     To = "VoyagerPioneer",
-    Action = [[]]
   },
   -- 8. Cosmic Background Radiation - SolarSystem
   {
     From = "CBR",
-    To = "SolarSystem",
-    Action = [[
-      ]] .. util.changeAnchor('Sun', 1) .. [[
-      ]] .. util.applyLinearFlight(solarTargetDistance, 1.5) .. [[
-    ]]
+    To = "SolarSystem"
   },
   {
     From = "SolarSystem",
