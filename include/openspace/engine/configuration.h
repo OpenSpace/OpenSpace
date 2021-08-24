@@ -89,6 +89,7 @@ struct Configuration {
 
     bool isCheckingOpenGLState = false;
     bool isLoggingOpenGLCalls = false;
+    bool isPrintingEvents = false;
 
     float shutdownCountdown = 0.f;
 

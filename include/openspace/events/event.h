@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___EVENT___H__
 #define __OPENSPACE_CORE___EVENT___H__
 
+#include <openspace/util/tstring.h>
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
@@ -44,8 +45,6 @@ struct Event {
     enum class Type {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
-        PropertyAdded,
-        PropertyRemoved,
         ParallelConnectionEstablished,
         ParallelConnectionLost,
         ParallelConnectionHostshipGained,
@@ -88,7 +87,7 @@ struct EventSceneGraphNodeAdded : public Event {
     static const Type Type = Event::Type::SceneGraphNodeAdded;
 
     EventSceneGraphNodeAdded(const SceneGraphNode* node_);
-    const SceneGraphNode* node = nullptr;
+    tstring node;
 };
 
 
@@ -96,23 +95,7 @@ struct EventSceneGraphNodeRemoved : public Event {
     static const Type Type = Event::Type::SceneGraphNodeRemoved;
     
     EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
-    const SceneGraphNode* node = nullptr;
-};
-
-
-struct EventPropertyAdded : public Event {
-    static const Type Type = Event::Type::PropertyAdded;
-
-    EventPropertyAdded(const properties::Property* property_);
-    const properties::Property* property = nullptr;
-};
-
-
-struct EventPropertyRemoved : public Event {
-    static const Type Type = Event::Type::PropertyRemoved;
-
-    EventPropertyRemoved(const properties::Property* property_);
-    const properties::Property* property = nullptr;
+    tstring node;
 };
 
 
@@ -147,8 +130,7 @@ struct EventParallelConnectionHostshipLost : public Event {
 struct EventProfileLoadingFinished : public Event {
     static const Type Type = Event::Type::ProfileLoadingFinished;
 
-    EventProfileLoadingFinished(const Profile* profile_);
-    const Profile* profile = nullptr;
+    EventProfileLoadingFinished();
 };
 
 
@@ -163,7 +145,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
     EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
-    const ScreenSpaceRenderable* renderable = nullptr;
+    tstring renderable;
 };
 
 
@@ -171,8 +153,7 @@ struct EventScreenSpaceRenderableRemoved : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
     EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
-
-    const ScreenSpaceRenderable* renderable = nullptr;
+    tstring renderable;
 };
 
 
@@ -183,7 +164,7 @@ struct EventCameraApproachedSceneGraphNode : public Event {
         const SceneGraphNode* node_);
 
     const Camera* camera = nullptr;
-    const SceneGraphNode* node = nullptr;
+    tstring node;
 };
 
 
@@ -194,7 +175,7 @@ struct EventCameraMovedAwayFromSceneGraphNode : public Event {
         const SceneGraphNode* node_);
 
     const Camera* camera = nullptr;
-    const SceneGraphNode* node = nullptr;
+    tstring node;
 };
 
 
@@ -219,8 +200,8 @@ struct EventPlanetEclipsed : public Event {
     static const Type Type = Event::Type::PlanetEclipsed;
 
     EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser);
-    const SceneGraphNode* eclipsee = nullptr;
-    const SceneGraphNode* eclipser = nullptr;
+    tstring eclipsee;
+    tstring eclipser;
 };
 
 
@@ -229,7 +210,7 @@ struct CustomEvent : public Event {
 
     CustomEvent(std::string_view subtype_, const void* payload_);
 
-    const std::string_view subtype;
+    tstring subtype;
     const void* payload = nullptr;
 };
 

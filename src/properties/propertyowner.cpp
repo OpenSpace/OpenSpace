@@ -292,7 +292,6 @@ void PropertyOwner::addProperty(Property* prop) {
             prop->setPropertyOwner(this);
         }
     }
-    global::eventEngine->publishEvent<events::EventPropertyAdded>(prop);
 }
 
 void PropertyOwner::addProperty(Property& prop) {
@@ -364,7 +363,6 @@ void PropertyOwner::removeProperty(Property* prop) {
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
     }
-    global::eventEngine->publishEvent<events::EventPropertyRemoved>(prop);
 }
 
 void PropertyOwner::removeProperty(Property& prop) {

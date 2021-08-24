@@ -72,13 +72,13 @@ namespace {
     // in some random global randoms
 #ifdef WIN32
     constexpr const int TotalSize =
+        sizeof(MemoryManager) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
         sizeof(LuaConsole) +
-        sizeof(MemoryManager) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
         sizeof(OpenSpaceEngine) +
@@ -119,6 +119,14 @@ void create() {
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
     std::byte* currentPos = DataStorage.data();
+#endif // WIN32
+
+#ifdef WIN32
+    memoryManager = new (currentPos) MemoryManager;
+    ghoul_assert(memoryManager, "No memoryManager");
+    currentPos += sizeof(MemoryManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    memoryManager = new MemoryManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -167,14 +175,6 @@ void create() {
     currentPos += sizeof(LuaConsole);
 #else // ^^^ WIN32 / !WIN32 vvv
     luaConsole = new LuaConsole;
-#endif // WIN32
-
-#ifdef WIN32
-    memoryManager = new (currentPos) MemoryManager;
-    ghoul_assert(memoryManager, "No memoryManager");
-    currentPos += sizeof(MemoryManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    memoryManager = new MemoryManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -583,13 +583,6 @@ void destroy() {
     delete missionManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'MemoryManager'");
-#ifdef WIN32
-    memoryManager->~MemoryManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete memoryManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'LuaConsole'");
 #ifdef WIN32
     luaConsole->~LuaConsole();
@@ -630,6 +623,13 @@ void destroy() {
     eventEngine->~EventEngine();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'MemoryManager'");
+#ifdef WIN32
+    memoryManager->~MemoryManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete memoryManager;
 #endif // WIN32
 
     callback::destroy();

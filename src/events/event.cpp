@@ -29,6 +29,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
+#include <openspace/util/tstring.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -42,27 +43,12 @@ namespace openspace::events {
 
 void log(int i, const EventSceneGraphNodeAdded& e) {
     ghoul_assert(e.type == EventSceneGraphNodeAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeAdded: {}", i, e.node->identifier()));
+    LINFO(fmt::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
 }
 
 void log(int i, const EventSceneGraphNodeRemoved& e) {
     ghoul_assert(e.type == EventSceneGraphNodeRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node->identifier()));
-
-}
-
-void log(int i, const EventPropertyAdded& e) {
-    ghoul_assert(e.type == EventPropertyAdded::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] PropertyAdded: {}", i, e.property->fullyQualifiedIdentifier()
-    ));
-}
-
-void log(int i, const EventPropertyRemoved& e) {
-    ghoul_assert(e.type == EventPropertyRemoved::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] PropertyRemoved: {}", i, e.property->fullyQualifiedIdentifier()
-    ));
+    LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
 }
 
 void log(int i, const EventParallelConnectionEstablished& e) {
@@ -87,9 +73,7 @@ void log(int i, const EventParallelConnectionHostshipLost& e) {
 
 void log(int i, const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] ProfileLoadingFinished: {}", i, reinterpret_cast<const void*>(e.profile)
-    ));
+    LINFO(fmt::format("[{}] ProfileLoadingFinished", i));
 }
 
 void log(int i, const EventApplicationShutdownStarted& e) {
@@ -99,24 +83,20 @@ void log(int i, const EventApplicationShutdownStarted& e) {
 
 void log(int i, const EventScreenSpaceRenderableAdded& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable->identifier()
-    ));
+    LINFO(fmt::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
 
 }
 
 void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableRemoved::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable->identifier()
-    ));
+    LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
 }
 
 void log(int i, const EventCameraApproachedSceneGraphNode& e) {
     ghoul_assert(e.type == EventCameraApproachedSceneGraphNode::Type, "Wrong type");
     LINFO(fmt::format(
         "[{}] CameraApproachedSceneGraphNode: {} -> {}",
-        i, reinterpret_cast<const void*>(e.camera), e.node->identifier()
+        i, reinterpret_cast<const void*>(e.camera), e.node
     ));
 }
 
@@ -124,7 +104,7 @@ void log(int i, const EventCameraMovedAwayFromSceneGraphNode& e) {
     ghoul_assert(e.type == EventCameraMovedAwayFromSceneGraphNode::Type, "Wrong type");
     LINFO(fmt::format(
         "[{}] CameraMovedAwayFromSceneGraphNode: {} -> {}",
-        i, reinterpret_cast<const void*>(e.camera), e.node->identifier()
+        i, reinterpret_cast<const void*>(e.camera), e.node
     ));
 }
 
@@ -143,10 +123,7 @@ void log(int i, const EventMissionEventReached& e) {
 
 void log(int i, const EventPlanetEclipsed& e) {
     ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] PlanetEclipsed: {} -> {}",
-        i, e.eclipsee->identifier(), e.eclipser->identifier()
-    ));
+    LINFO(fmt::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
 void log(int i, const CustomEvent& e) {
@@ -163,12 +140,6 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::SceneGraphNodeRemoved:
                 log(i, *static_cast<const EventSceneGraphNodeRemoved*>(e));
-                break;
-            case Event::Type::PropertyAdded:
-                log(i, *static_cast<const EventPropertyAdded*>(e));
-                break;
-            case Event::Type::PropertyRemoved:
-                log(i, *static_cast<const EventPropertyRemoved*>(e));
                 break;
             case Event::Type::ParallelConnectionEstablished:
                 log(i, *static_cast<const EventParallelConnectionEstablished*>(e));
@@ -224,24 +195,15 @@ void logAllEvents(const Event* e) {
 
 EventSceneGraphNodeAdded::EventSceneGraphNodeAdded(const SceneGraphNode* node_)
     : Event(Type)
-    , node(node_)
-{}
-
+{
+    node = temporaryString(node_->identifier());
+}
 
 EventSceneGraphNodeRemoved::EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
     : Event(Type)
-    , node(node_)
-{}
-
-EventPropertyAdded::EventPropertyAdded(const properties::Property* property_)
-    : Event(Type)
-    , property(property_)
-{}
-
-EventPropertyRemoved::EventPropertyRemoved(const properties::Property* property_)
-    : Event(Type)
-    , property(property_)
-{}
+{
+    node = temporaryString(node_->identifier());
+}
 
 EventParallelConnectionEstablished::EventParallelConnectionEstablished()
     : Event(Type)
@@ -259,9 +221,8 @@ EventParallelConnectionHostshipLost::EventParallelConnectionHostshipLost()
     : Event(Type)
 {}
 
-EventProfileLoadingFinished::EventProfileLoadingFinished(const Profile* profile_)
+EventProfileLoadingFinished::EventProfileLoadingFinished()
     : Event(Type)
-    , profile(profile_)
 {}
 
 EventApplicationShutdownStarted::EventApplicationShutdownStarted()
@@ -271,30 +232,34 @@ EventApplicationShutdownStarted::EventApplicationShutdownStarted()
 EventScreenSpaceRenderableAdded::EventScreenSpaceRenderableAdded(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(renderable_)
-{}
+{
+    renderable = temporaryString(renderable_->identifier());
+}
 
 EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(renderable_)
-{}
+{
+    renderable = temporaryString(renderable_->identifier());
+}
 
 EventCameraApproachedSceneGraphNode::EventCameraApproachedSceneGraphNode(
                                                                     const Camera* camera_,
                                                               const SceneGraphNode* node_)
     : Event(Type)
     , camera(camera_)
-    , node(node_)
-{}
+{
+    node = temporaryString(node_->identifier());
+}
 
 EventCameraMovedAwayFromSceneGraphNode::EventCameraMovedAwayFromSceneGraphNode(
                                                                     const Camera* camera_,
                                                               const SceneGraphNode* node_)
     : Event(Type)
     , camera(camera_)
-    , node(node_)
-{}
+{
+    node = temporaryString(node_->identifier());
+}
 
 EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
                                                        const Camera* camera_)
@@ -308,11 +273,12 @@ EventMissionEventReached::EventMissionEventReached()
 {}
 
 EventPlanetEclipsed::EventPlanetEclipsed(const SceneGraphNode* eclipsee_,
-                                         const SceneGraphNode* eclipser)
+                                         const SceneGraphNode* eclipser_)
     : Event(Type)
-    , eclipsee(eclipsee_)
-    , eclipser(eclipser)
-{}
+{
+    eclipsee = temporaryString(eclipsee_->identifier());
+    eclipser = temporaryString(eclipser_->identifier());
+}
 
 CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)
     : Event(Type)

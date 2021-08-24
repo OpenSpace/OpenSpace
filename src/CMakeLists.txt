@@ -178,6 +178,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
   ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/tstring.cpp
   ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
   ${OPENSPACE_BASE_DIR}/src/util/task.cpp
   ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
@@ -385,6 +386,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/tstring.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h

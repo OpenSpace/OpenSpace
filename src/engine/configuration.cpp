@@ -295,6 +295,11 @@ namespace {
         // 'false'
         std::optional<bool> logEachOpenGLCall;
 
+        // Determines whether events are printed as debug messages to the console each
+        // frame. If this value is set it determines the default value of the property of
+        // the OpenSpaceEngine with the same name
+        std::optional<bool> printEvents;
+
         // This value determines whether the initialization of the scene graph should
         // occur multithreaded, that is, whether multiple scene graph nodes should
         // initialize in parallel. The only use for this value is to disable it for
@@ -391,6 +396,7 @@ void parseLuaState(Configuration& configuration) {
         p.useMultithreadedInitialization.value_or(c.useMultithreadedInitialization);
     c.isCheckingOpenGLState = p.checkOpenGLState.value_or(c.isCheckingOpenGLState);
     c.isLoggingOpenGLCalls = p.logEachOpenGLCall.value_or(c.isLoggingOpenGLCalls);
+    c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
     if (p.onScreenTextScaling.has_value()) {

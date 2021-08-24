@@ -22,55 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___EVENTENGINE___H__
-#define __OPENSPACE_CORE___EVENTENGINE___H__
-
-#include <ghoul/misc/memorypool.h>
+#include <string>
+#include <string_view>
 
 namespace openspace {
 
-namespace events { struct Event; }
+using tstring = std::string_view;
 
-class EventEngine {
-public:
-    events::Event* firstEvent() const; // -> begin
-
-    template <typename T, typename... Args>
-    void publishEvent(Args&&... args);
-
-    void postFrameCleanup();
-    
-private:
-    ghoul::MemoryPool<40960> _memory;
-    events::Event* _firstEvent = nullptr;
-    events::Event* _lastEvent = nullptr;
-
-#ifdef _DEBUG
-    static uint64_t nEvents;
-#endif // _DEBUG
-};
-
-//
-// Implementation
-//
-
-template <typename T, typename... Args>
-void EventEngine::publishEvent(Args&&... args) {
-    T* e = _memory.alloc<T>(args...);
-    if (!_firstEvent) {
-        _firstEvent = e;
-        _lastEvent = e;
-    }
-    else {
-        _lastEvent->next = e;
-        _lastEvent = e;
-    }
-
-#ifdef _DEBUG
-    nEvents++;
-#endif // _DEBUG
-}
+tstring temporaryString(const std::string& str);
+tstring temporaryString(std::string_view str);
+tstring temporaryString(const char str[]);
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___EVENTENGINE___H__

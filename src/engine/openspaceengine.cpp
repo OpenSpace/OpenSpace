@@ -99,13 +99,22 @@
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
+
+    openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+        "PrintEvents",
+        "Print Events",
+        "If this is enabled, all events that are propagated through the system are "
+        "printed to the log."
+    };
 } // namespace
 
 namespace openspace {
 
 class Scene;
 
-OpenSpaceEngine::OpenSpaceEngine() {
+OpenSpaceEngine::OpenSpaceEngine()
+    : _printEvents(PrintEventsInfo, false)
+{
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -183,6 +192,8 @@ void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
+
+    _printEvents = global::configuration->isPrintingEvents;
 
     const std::string versionCheckUrl = global::configuration->versionCheckUrl;
     if (!versionCheckUrl.empty()) {
@@ -906,9 +917,10 @@ void OpenSpaceEngine::deinitialize() {
     TransformationManager::deinitialize();
     SpiceManager::deinitialize();
 
-    events::Event* e = global::eventEngine->firstEvent();
-    events::logAllEvents(e);
-
+    if (_printEvents) {
+        events::Event* e = global::eventEngine->firstEvent();
+        events::logAllEvents(e);
+    }
 
     ghoul::fontrendering::FontRenderer::deinitialize();
 
@@ -1114,9 +1126,7 @@ void OpenSpaceEngine::preSynchronization() {
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
-        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>(
-            global::profile
-        );
+        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>();
     }
 
     if (_isFirstRenderingFirstFrame) {
@@ -1221,8 +1231,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         func();
     }
 
-    events::Event* e = global::eventEngine->firstEvent();
-    events::logAllEvents(e);
+    if (_printEvents) {
+        events::Event* e = global::eventEngine->firstEvent();
+        events::logAllEvents(e);
+    }
 
 
     // Testing this every frame has minimal impact on the performance --- abock
@@ -1315,6 +1327,11 @@ void OpenSpaceEngine::postDraw() {
         global::windowDelegate->setSynchronization(true);
         resetPropertyChangeFlags();
         _isFirstRenderingFirstFrame = false;
+    }
+
+    if (_printEvents) {
+        events::Event* e = global::eventEngine->firstEvent();
+        events::logAllEvents(e);
     }
 
     global::eventEngine->postFrameCleanup();
