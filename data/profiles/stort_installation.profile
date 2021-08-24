@@ -93,11 +93,6 @@
   },
   "properties": [
     {
-      "name": "NavigationHandler.PathNavigator.IncludeRoll",
-      "type": "setPropertyValueSingle",
-      "value": "true"
-    },
-    {
       "name": "NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationFactor",
       "type": "setPropertyValueSingle",
       "value": "0.05"
