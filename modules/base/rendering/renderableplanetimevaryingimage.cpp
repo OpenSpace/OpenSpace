@@ -164,17 +164,13 @@ void RenderablePlaneTimeVaryingImage::initialize() {
         return;
     }
     extractTriggerTimesFromFileNames();
-    computeSequenceEndTime();
-        
-    _textureFiles.resize(_sourceFiles.size());  
-    if (!_isLoadingLazily) {
-        loadTexture();
-    }
+    computeSequenceEndTime();    
 }
 
 void RenderablePlaneTimeVaryingImage::initializeGL() {
     RenderablePlane::initializeGL();
 
+    _textureFiles.resize(_sourceFiles.size());  
     for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
             absPath(_sourceFiles[i]).string()
@@ -183,6 +179,9 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
         _textureFiles[i]->uploadTexture();
         _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         _textureFiles[i]->purgeFromRAM();
+    }
+    if (!_isLoadingLazily) {
+        loadTexture();
     }
 }
 
@@ -230,7 +229,7 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
 }
 
 void RenderablePlaneTimeVaryingImage::bindTexture() {
-    if (_texture) {
+    if (_texture && !_textureIsDirty) {
         _texture->bind();
     }
 }
@@ -244,7 +243,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
 
     const double currentTime = data.time.j2000Seconds();
-    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+    bool isInInterval = (currentTime >= _startTimes[0]) &&
         (currentTime < _sequenceEndTime);
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
@@ -261,7 +260,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
     else {
         // not in interval => set everything to false
-        _activeTriggerTimeIndex = 0;
+        _activeTriggerTimeIndex = -1;
         _needsUpdate = false;
     }
 

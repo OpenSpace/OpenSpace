@@ -53,6 +53,7 @@ public:
 
 protected:
     virtual void bindTexture() override;
+    //virtual void unbindTexture() override;
 
 private:
     void loadTexture();
