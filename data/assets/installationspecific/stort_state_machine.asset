@@ -39,7 +39,7 @@ local substateMars = asset.require('./substates/mars')
 ---------------------------------------------------------------- 
 -- 3. CERES STATE
 ----------------------------------------------------------------
-local substateCeres = asset.require('./substates/ceres')
+-- Left out for now (low prio)
 
 ---------------------------------------------------------------- 
 -- 4. JUPITER STATE
@@ -75,7 +75,6 @@ local states = {
 
 util.appendTable(states, substateEarth.states)
 util.appendTable(states, substateMars.states)
-util.appendTable(states, substateCeres.states)
 util.appendTable(states, substateJupiter.states)
 util.appendTable(states, substateSaturn.states)
 util.appendTable(states, substatePluto.states)
@@ -113,22 +112,6 @@ local transitions = {
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Mars', true)
       ]] .. util.changeAnchor('Mars', 1) .. [[
-    ]]
-  },
-  -- 3. Ceres - SolarSystem
-  {
-    From = "Ceres",
-    To = "SolarSystem"
-  },
-  {
-    From = "SolarSystem",
-    To = "Ceres",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Ceres', true)
-      ]] .. util.changeAnchor('Ceres', 1) .. [[
     ]]
   },
   -- 4. Jupiter - SolarSystem
@@ -203,7 +186,6 @@ local transitions = {
 -- Add transitions within each substate
 util.appendTable(transitions, substateEarth.transitions)
 util.appendTable(transitions, substateMars.transitions)
-util.appendTable(transitions, substateCeres.transitions)
 util.appendTable(transitions, substateJupiter.transitions)
 util.appendTable(transitions, substateSaturn.transitions)
 util.appendTable(transitions, substatePluto.transitions)
