@@ -85,6 +85,15 @@ local transitions = {
       openspace.pathnavigation.goTo('Earth', true)
       ]] .. util.changeAnchor('Earth', 1) .. [[
     ]]
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "Moon",
+    To = "SolarSystem"
+  },
+  {
+    From = "Apollo",
+    To = "SolarSystem"
   }
 }
 

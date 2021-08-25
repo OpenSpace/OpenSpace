@@ -52,6 +52,15 @@ local transitions = {
     From = "Pioneer",
     To = "VoyagerPioneer",
     Action = [[]]
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "Voyager",
+    To = "SolarSystem"
+  },
+  {
+    From = "Pioneer",
+    To = "SolarSystem"
   }
 }
 

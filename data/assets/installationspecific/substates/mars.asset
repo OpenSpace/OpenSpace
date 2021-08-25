@@ -1,10 +1,6 @@
 local util = asset.require('./../utility_functions')
 
 ----------------------------------------------------------------
--- SCENE GRAPH NODES
-----------------------------------------------------------------
-
-----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local marsTargetDistance = 7E6
@@ -217,6 +213,7 @@ local transitions = {
     Action = goToMarsOverview
   },
   -- Curiosity
+  -- TODO: curiosity + transitions
   {
     From = "Mars",
     To = "Curiosity",
@@ -226,8 +223,24 @@ local transitions = {
     From = "Curiosity",
     To = "Mars",
     Action = goToMarsOverview
+  },
+  -- Back to SolarSystem from substates
+  {
+    From = "VallesMarinerisOverview",
+    To = "SolarSystem"
+  },
+  {
+    From = "VallesMarinerisClose",
+    To = "SolarSystem"
+  },
+  {
+    From = "OlympusMons",
+    To = "SolarSystem"
+  },
+  {
+    From = "Curiosity",
+    To = "SolarSystem"
   }
-  -- TODO: curiosity + trnasitions
 }
 
 asset.export("states", states)
