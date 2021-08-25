@@ -1197,6 +1197,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
+            global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+                events::EventApplicationShutdown::State::Finished
+            );
             global::windowDelegate->terminate();
             return;
         }
@@ -1230,12 +1233,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
         func();
     }
-
-    if (_printEvents) {
-        events::Event* e = global::eventEngine->firstEvent();
-        events::logAllEvents(e);
-    }
-
 
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
@@ -1329,10 +1326,20 @@ void OpenSpaceEngine::postDraw() {
         _isFirstRenderingFirstFrame = false;
     }
 
+    //
+    // Handle events
+    //
+    const events::Event* e = global::eventEngine->firstEvent();
     if (_printEvents) {
-        events::Event* e = global::eventEngine->firstEvent();
         events::logAllEvents(e);
     }
+    while (e) {
+        // @TODO (abock, 2021-08-25) Need to send all events to a topic to be sent out to
+        // others
+
+        e = e->next;
+    }
+
 
     global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
@@ -1568,12 +1575,17 @@ void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
         _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
     }
     else {
         // Else, we have to enable it
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
-        global::eventEngine->publishEvent<events::EventApplicationShutdownStarted>();
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Started
+        );
     }
 }
 

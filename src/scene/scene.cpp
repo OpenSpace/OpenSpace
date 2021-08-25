@@ -582,6 +582,10 @@ void Scene::updateInterpolations() {
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
+
+        if (i.isExpired) {
+            global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
+        }
     }
 
     _propertyInterpolationInfos.erase(
