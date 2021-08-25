@@ -20,7 +20,6 @@ local goToMarsOverview = [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.time.setPause(true)
   openspace.pathnavigation.goTo('Mars', true)
-  ]] .. util.changeAnchor('Mars', 1) .. [[
 ]]
 
 -----

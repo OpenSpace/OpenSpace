@@ -31,6 +31,12 @@ local ringsState = {
 
 local titanTargetDistance = 36E7
 
+local goToTitan = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Titan', true)
+]]
+
 local titanState = {
   Identifier = "Titan",
   Enter = [[
@@ -73,6 +79,12 @@ local states = { saturnState, ringsState, titanState, cassiniState, huygensState
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+local goToSaturnOverview = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Saturn', true)
+]]
+
 local transitions = {
   {
     From = "Saturn",
@@ -82,35 +94,17 @@ local transitions = {
   {
     From = "SaturnRings",
     To = "Saturn",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Saturn', true)
-      ]] .. util.changeAnchor('Saturn', 1) .. [[
-    ]]
+    Action = goToSaturnOverview
   },
   {
     From = "Saturn",
     To = "Titan",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Titan', true)
-      ]] .. util.changeAnchor('Titan', 1) .. [[
-    ]]
+    Action = goToTitan
   },
   {
     From = "Titan",
     To = "Saturn",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Saturn', true)
-      ]] .. util.changeAnchor('Saturn', 1) .. [[
-    ]]
+    Action = goToSaturnOverview
   },
   {
     From = "Saturn",
@@ -120,13 +114,7 @@ local transitions = {
   {
     From = "Cassini",
     To = "Saturn",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Saturn', true)
-      ]] .. util.changeAnchor('Saturn', 1) .. [[
-    ]]
+    Action = goToSaturnOverview
   },
   {
     From = "Saturn",
@@ -136,13 +124,7 @@ local transitions = {
   {
     From = "Huygens",
     To = "Saturn",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Saturn', true)
-      ]] .. util.changeAnchor('Saturn', 1) .. [[
-    ]]
+    Action = goToSaturnOverview
   },
   -- Back to SolarSystem from substates
   {

@@ -95,7 +95,6 @@ local transitions = {
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Earth', true)
-      ]] .. util.changeAnchor('Earth', 1) .. [[
     ]]
   },
   -- 2. Mars - SolarSystem
@@ -107,11 +106,9 @@ local transitions = {
     From = "SolarSystem",
     To = "Mars",
     Action = [[
-      ]] .. util.disableLinearFlight() .. [[
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Mars', true)
-      ]] .. util.changeAnchor('Mars', 1) .. [[
     ]]
   },
   -- 4. Jupiter - SolarSystem
@@ -123,11 +120,9 @@ local transitions = {
     From = "SolarSystem",
     To = "Jupiter",
     Action = [[
-      ]] .. util.disableLinearFlight() .. [[
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Jupiter', true)
-      ]] .. util.changeAnchor('Jupiter', 1) .. [[
     ]]
   },
   -- 5. Saturn - SolarSystem
@@ -139,11 +134,9 @@ local transitions = {
     From = "SolarSystem",
     To = "Saturn",
     Action = [[
-      ]] .. util.disableLinearFlight() .. [[
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Saturn', true)
-      ]] .. util.changeAnchor('Saturn', 1) .. [[
     ]]
   },
   -- 6. Pluto - SolarSystem
@@ -155,11 +148,9 @@ local transitions = {
     From = "SolarSystem",
     To = "Pluto",
     Action = [[
-      ]] .. util.disableLinearFlight() .. [[
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Pluto', true)
-      ]] .. util.changeAnchor('Pluto', 1) .. [[
     ]]
   },
   -- 7. Voyager and Pioneer - SolarSystem

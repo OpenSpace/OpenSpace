@@ -56,7 +56,6 @@ local transitions = {
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Moon', true)
-      ]] .. util.changeAnchor('Moon', 1) .. [[
     ]]
   },
   {
@@ -67,7 +66,6 @@ local transitions = {
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Earth', true)
-      ]] .. util.changeAnchor('Earth', 1) .. [[
     ]]
   },
   {
@@ -83,7 +81,6 @@ local transitions = {
       ]] .. util.setCurveType("ZoomOutOverview") .. [[
       openspace.time.setPause(true)
       openspace.pathnavigation.goTo('Earth', true)
-      ]] .. util.changeAnchor('Earth', 1) .. [[
     ]]
   },
   -- Back to SolarSystem from substates

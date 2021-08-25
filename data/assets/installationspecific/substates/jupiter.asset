@@ -18,6 +18,12 @@ local jupiterState = {
 
 local europaTargetDistance = 1e12
 
+local goToEuropa = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Europa', true)
+]]
+
 local europaState = {
   Identifier = "Europa",
   Enter = [[
@@ -30,6 +36,12 @@ local europaState = {
 }
 
 local ioTargetDistance = 1e12
+
+local goToIo = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Io', true)
+]]
 
 local ioState = {
   Identifier = "Io",
@@ -47,50 +59,44 @@ local states = { jupiterState, europaState, ioState }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+local goToJupiter = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Jupiter', true)
+]]
+
 local transitions = {
+  -- Europa
   {
     From = "Jupiter",
     To = "Europa",
-    Action = [[
-        ]] .. util.disableLinearFlight() .. [[
-        ]] .. util.setCurveType("ZoomOutOverview") .. [[
-        openspace.time.setPause(true)
-        openspace.pathnavigation.goTo('Europa', true)
-        ]] .. util.changeAnchor('Europa', 1) .. [[
-    ]]
+    Action = goToEuropa
   },
   {
     From = "Europa",
     To = "Jupiter",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Jupiter', true)
-      ]] .. util.changeAnchor('Jupiter', 1) .. [[
-    ]]
+    Action = goToJupiter
   },
+  {
+    From = "Europa",
+    To = "Io",
+    Action = goToIo
+  },
+  {
+    From = "Io",
+    To = "Europa",
+    Action = goToEuropa
+  },
+    -- Io
   {
     From = "Jupiter",
     To = "Io",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Io', true)
-      ]] .. util.changeAnchor('Io', 1) .. [[
-    ]]
+    Action = goToIo
   },
   {
     From = "Io",
     To = "Jupiter",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Jupiter', true)
-      ]] .. util.changeAnchor('Jupiter', 1) .. [[
-    ]]
+    Action = goToJupiter
   },
   -- Back to SolarSystem from substates
   {
