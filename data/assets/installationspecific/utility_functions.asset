@@ -20,6 +20,10 @@ local stopOrbiting = function()
       "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
       false
     )
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
+      false
+    )
   ]]
 end
 
@@ -76,6 +80,18 @@ local disableLinearFlight = function()
   ]]
 end
 
+local enableRoll = function()
+  return [[
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", true)
+  ]]
+end
+
+local disableRoll = function()
+  return [[
+    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false)
+  ]]
+end
+
 local setCurveType = function (type)
   local typeAsInt = 0
   if (type == "ZoomOutOverview") then
@@ -105,5 +121,7 @@ asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
 asset.export("applyLinearFlight", applyLinearFlight)
 asset.export("disableLinearFlight", disableLinearFlight)
+asset.export("enableRoll", enableRoll)
+asset.export("disableRoll", disableRoll)
 asset.export("setCurveType", setCurveType)
 asset.export("appendTable", appendTable)
