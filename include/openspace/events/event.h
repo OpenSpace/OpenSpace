@@ -27,6 +27,7 @@
 
 #include <openspace/util/tstring.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
     namespace properties { class Property; }
@@ -42,6 +43,18 @@ namespace openspace {
 namespace openspace::events {
 
 struct Event {
+    // Steps to add a new event type:
+    //  1. Add a new entry into this enum list
+    //  2. Create a new subclass of Event in this file with a constructor that sets the
+    //     Event's `type` to this new enum entry
+    //  3. In the cpp file, add a new `log` message that takes the new type as an argument
+    //     and that prints something useful when the log is encountered and the user wants
+    //     to see all events
+    //  4. If the new event type has any parameters it takes in its constructor, go into
+    //     the `toParameter` function and add a case label for the new enum type and 
+    //     return a dictionary with these parameters. This dictionary is passed to actions
+    //     if they are triggered by events
+    //  5. Add the new enum entry into the `toString` and `fromString` methods
     enum class Type {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
@@ -77,6 +90,11 @@ template <typename T>
 bool isType(Event* e) {
     return e->type == T::Type;
 }
+
+std::string_view toString(Event::Type type);
+Event::Type fromString(std::string_view str);
+
+ghoul::Dictionary toParameter(const Event& e);
 
 void logAllEvents(const Event* e);
 

@@ -24,6 +24,11 @@
 
 #include <openspace/events/eventengine.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/actionmanager.h>
+
+#include "eventengine_lua.inl"
+
 namespace openspace {
 
 #ifdef _DEBUG
@@ -42,5 +47,66 @@ void EventEngine::postFrameCleanup() {
     nEvents = 0;
 #endif // _DEBUG
 }
+
+void EventEngine::registerEventAction(events::Event::Type type,
+                                      std::string actionIdentifier)
+{
+    const auto it = _eventActions.find(type);
+    if (it != _eventActions.end()) {
+        it->second.push_back(std::move(actionIdentifier));
+    }
+    else {
+        std::vector<std::string> actions;
+        actions.push_back(std::move(actionIdentifier));
+        _eventActions[type] = std::move(actions);
+    }
+}
+
+void EventEngine::unregisterEventAction(events::Event::Type type,
+                                        const std::string& actionIdentifier)
+{
+    const auto it = _eventActions.find(type);
+    if (it != _eventActions.end()) {
+        const auto jt = std::find(it->second.begin(), it->second.end(), actionIdentifier);
+        if (jt != it->second.end()) {
+            it->second.erase(jt);
+        }
+    }
+}
+
+void EventEngine::triggerActions() const {
+    if (_eventActions.empty()) {
+        // Nothing to do here
+        return;
+    }
+
+    const events::Event* e = _firstEvent;
+    while (e) {
+        const auto it = _eventActions.find(e->type);
+        if (it != _eventActions.end()) {
+            ghoul::Dictionary params = toParameter(*e);
+            for (const std::string& action : it->second) {
+                global::actionManager->triggerAction(action, params);
+            }
+        }
+
+        e = e->next;
+    }
+}
+
+scripting::LuaLibrary EventEngine::luaLibrary() {
+    scripting::LuaLibrary res;
+    res.name = "event";
+    res.functions.push_back({
+        "registerEventAction",
+        &luascriptfunctions::registerEventAction,
+        {},
+        "string, string",
+        "Registers an action (second parameter) to be executed whenever an event (first "
+        "parameter is encountered."
+    });
+    return res;
+}
+
 
 } // namespace openspace

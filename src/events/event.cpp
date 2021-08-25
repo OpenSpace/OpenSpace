@@ -144,6 +144,179 @@ void log(int i, const CustomEvent& e) {
     LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
 }
 
+std::string_view toString(Event::Type type) {
+    switch (type) {
+        case Event::Type::SceneGraphNodeAdded: return "SceneGraphNodeAdded";
+        case Event::Type::SceneGraphNodeRemoved: return "SceneGraphNodeRemoved";
+        case Event::Type::ParallelConnectionEstablished:
+            return "ParallelConnectionEstablished";
+        case Event::Type::ParallelConnectionLost: return "ParallelConnectionLost";
+        case Event::Type::ParallelConnectionHostshipGained:
+            return "ParallelConnectionHostshipGained";
+        case Event::Type::ParallelConnectionHostshipLost:
+            return "ParallelConnectionHostshipLost";
+        case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
+        case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
+        case Event::Type::ScreenSpaceRenderableAdded: return "ScreenSpaceRenderableAdded";
+        case Event::Type::ScreenSpaceRenderableRemoved:
+            return "ScreenSpaceRenderableRemoved";
+        case Event::Type::CameraApproachedSceneGraphNode:
+            return "CameraApproachedSceneGraphNode";
+        case Event::Type::CameraMovedAwayFromSceneGraphNode:
+            return "CameraMovedAwayFromSceneGraphNode";
+        case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
+        case Event::Type::MissionEventReached: return "MissionEventReached";
+        case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
+        case Event::Type::InterpolationFinished: return "InterpolationFinished";
+        case Event::Type::Custom: return "Custom";
+        default:
+            throw ghoul::MissingCaseException();
+    }
+}
+
+Event::Type fromString(std::string_view str) {
+    if (str == "SceneGraphNodeAdded") {
+        return Event::Type::SceneGraphNodeAdded;
+    }
+    else if (str == "SceneGraphNodeRemoved") {
+        return Event::Type::SceneGraphNodeRemoved;
+    }
+    else if (str == "ParallelConnectionEstablished") {
+        return Event::Type::ParallelConnectionEstablished;
+    }
+    else if (str == "ParallelConnectionLost") {
+        return Event::Type::ParallelConnectionLost;
+    }
+    else if (str == "ParallelConnectionHostshipGained") {
+        return Event::Type::ParallelConnectionHostshipGained;
+    }
+    else if (str == "ParallelConnectionHostshipLost") {
+        return Event::Type::ParallelConnectionHostshipLost;
+    }
+    else if (str == "ProfileLoadingFinished") {
+        return Event::Type::ProfileLoadingFinished;
+    }
+    else if (str == "ApplicationShutdown") {
+        return Event::Type::ApplicationShutdown;
+    }
+    else if (str == "ScreenSpaceRenderableAdded") {
+        return Event::Type::ScreenSpaceRenderableAdded;
+    }
+    else if (str == "ScreenSpaceRenderableRemoved") {
+        return Event::Type::ScreenSpaceRenderableRemoved;
+    }
+    else if (str == "CameraApproachedSceneGraphNode") {
+        return Event::Type::CameraApproachedSceneGraphNode;
+    }
+    else if (str == "CameraMovedAwayFromSceneGraphNode") {
+        return Event::Type::CameraMovedAwayFromSceneGraphNode;
+    }
+    else if (str == "TimeOfInterestReached") {
+        return Event::Type::TimeOfInterestReached;
+    }
+    else if (str == "MissionEventReached") {
+        return Event::Type::MissionEventReached;
+    }
+    else if (str == "PlanetEclipsed") {
+        return Event::Type::PlanetEclipsed;
+    }
+    else if (str == "InterpolationFinished") {
+        return Event::Type::InterpolationFinished;
+    }
+    else if (str == "Custom") {
+        return Event::Type::Custom;
+    }
+
+    throw ghoul::MissingCaseException();
+}
+
+ghoul::Dictionary toParameter(const Event& e) {
+    ghoul::Dictionary d;
+    switch (e.type) {
+        case Event::Type::SceneGraphNodeAdded:
+            d.setValue(
+                "Node",
+                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).node)
+            );
+            break;
+        case Event::Type::SceneGraphNodeRemoved:
+            d.setValue(
+                "Node",
+                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).node)
+            );
+            break;
+        case Event::Type::ApplicationShutdown:
+            switch (static_cast<const EventApplicationShutdown&>(e).state) {
+                case EventApplicationShutdown::State::Started:
+                    d.setValue("State", std::string("Started"));
+                    break;
+                case EventApplicationShutdown::State::Aborted:
+                    d.setValue("State", std::string("Aborted"));
+                    break;
+                case EventApplicationShutdown::State::Finished:
+                    d.setValue("State", std::string("Finished"));
+                    break;
+            }
+            break;
+        case Event::Type::ScreenSpaceRenderableAdded:
+            d.setValue(
+                "Renderable",
+                std::string(
+                    static_cast<const EventScreenSpaceRenderableAdded&>(e).renderable
+                )
+            );
+            break;
+        case Event::Type::ScreenSpaceRenderableRemoved:
+            d.setValue(
+                "Renderable",
+                std::string(
+                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).renderable
+                )
+            );
+            break;
+        case Event::Type::CameraApproachedSceneGraphNode:
+            d.setValue(
+                "Node",
+                std::string(
+                    static_cast<const EventCameraApproachedSceneGraphNode&>(e).node
+                )
+            );
+            break;
+        case Event::Type::CameraMovedAwayFromSceneGraphNode:
+            d.setValue(
+                "Node",
+                std::string(
+                    static_cast<const EventCameraMovedAwayFromSceneGraphNode&>(e).node
+                )
+            );
+            break;
+        case Event::Type::PlanetEclipsed:
+            d.setValue(
+                "Eclipsee",
+                std::string(static_cast<const EventPlanetEclipsed&>(e).eclipsee)
+            );
+            d.setValue(
+                "Eclipser",
+                std::string(static_cast<const EventPlanetEclipsed&>(e).eclipser)
+            );
+            break;
+        case Event::Type::InterpolationFinished:
+            d.setValue(
+                "Property",
+                std::string(static_cast<const EventInterpolationFinished&>(e).property)
+            );
+            break;
+        case Event::Type::Custom:
+            d.setValue(
+                "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
+            );
+            break;
+        default:
+            break;
+    }
+    return d;
+}
+
 void logAllEvents(const Event* e) {
     int i = 0;
     while (e) {

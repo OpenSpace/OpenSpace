@@ -1,0 +1,55 @@
+local hide_my_trail = {
+  Identifier = "os.hide_my_trail",
+  Name = "Hide My Trail",
+  Command = [[
+    local node
+    if is_declared("args") then
+      node = args.Node
+    else
+      node = openspace.navigation.getNavigationState().Anchor
+    end
+    
+    if openspace.hasSceneGraphNode(node .. "Trail") then
+      openspace.setPropertyValue("Scene." .. node .. "Trail.Renderable.Enabled", false)
+    elseif openspace.hasSceneGraphNode(node .. "_trail") then
+      openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", false)
+    end
+  ]],
+  Documentation = "Hides the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
+  GuiPath = "/",
+  IsLocal = true
+}
+asset.export("hide_my_trail", hide_my_trail.Identifier)
+
+local show_my_trail = {
+  Identifier = "os.show_my_trail",
+  Name = "Show My Trail",
+  Command = [[
+    local node
+    if is_declared("args") then
+      node = args.Node
+    else
+      node = openspace.navigation.getNavigationState().Anchor
+    end
+    
+    if openspace.hasSceneGraphNode(node .. "Trail") then
+      openspace.setPropertyValue("Scene." .. node .. "Trail.Renderable.Enabled", true)
+    elseif openspace.hasSceneGraphNode(node .. "_trail") then
+      openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", true)
+    end
+  ]],
+  Documentation = "Shows the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
+  GuiPath = "/",
+  IsLocal = true
+}
+asset.export("show_my_trail", show_my_trail.Identifier)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(hide_my_trail)
+  openspace.action.registerAction(show_my_trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(hide_my_trail.Identifier)
+  openspace.action.removeAction(show_my_trail.Identifier)
+end)

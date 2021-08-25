@@ -45,6 +45,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/eventengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
@@ -228,6 +229,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
   ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/action.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/actionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h

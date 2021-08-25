@@ -92,7 +92,7 @@ void ActionManager::triggerAction(const std::string& identifier,
     }
     else {
         global::scriptEngine->queueScript(
-            fmt::format("local args = {}\n{}", ghoul::formatLua(arguments), a.command),
+            fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
             scripting::ScriptEngine::RemoteScripting(a.synchronization)
         );
     }

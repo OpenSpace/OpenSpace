@@ -25,7 +25,10 @@
 #ifndef __OPENSPACE_CORE___EVENTENGINE___H__
 #define __OPENSPACE_CORE___EVENTENGINE___H__
 
+#include <openspace/events/event.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/memorypool.h>
+#include <unordered_map>
 
 namespace openspace {
 
@@ -33,44 +36,80 @@ namespace events { struct Event; }
 
 class EventEngine {
 public:
-    events::Event* firstEvent() const; // -> begin
+    /**
+     * This function returns the first event stored in the EventEngine, or \c nullptr if
+     * no event exists. To navigate the full list of events, you can access the returned
+     * Event's next function. If the end of the list is reached, the next pointer will be
+     * a nullptr
+     * 
+     * \return The first event stored in the EventEngine or nullptr if no event exists
+     */
+    events::Event* firstEvent() const;
 
+    /**
+     * Publish a new event of type T by providing optional arguments Args to the Event's
+     * constructor. An example of usage is
+     * <code>engine.publishEvent<MyEvent>("a", 2.0);</code> which would call the
+     * constructor of \c MyEvent with a <code>const char*</code> and \c double parameter.
+     * 
+     * \param args The arguments that are passed to the constructor of T
+     * \tparam T The subclass of Event that is to be published
+     */
     template <typename T, typename... Args>
     void publishEvent(Args&&... args);
 
+    /**
+     * This function cleans up the memory for all published events.After this function
+     * has been called, no previously published events are valid any longer. This means
+     * that pointers retrieved from events before this call must be kept beyond this call.
+     */
     void postFrameCleanup();
+
+    /**
+     * Registers a new action for a specific event type.
+     *
+     * \param type The type for which a new action is registered
+     * \param actionIdentifier The identifier of the action that will be triggered the
+     *        identifier must not exist at this moment, but must exist by the time the
+     *        event is encountered next
+     */
+    void registerEventAction(events::Event::Type type, std::string actionIdentifier);
+
+    /**
+     * Removing registration for a type/action combination.
+     * 
+     * /param type The type of the action that should be unregistered
+     * \param actionIdentifier The identifier of the action that should be unregistered
+     */
+    void unregisterEventAction(events::Event::Type type,
+        const std::string& actionIdentifier);
+
+    /**
+     * Triggers all actions that are registered for events that are in the current event
+     * queue
+     */
+    void triggerActions() const;
+
+    static scripting::LuaLibrary luaLibrary();
     
 private:
-    ghoul::MemoryPool<40960> _memory;
+    /// The storage space in which Events are stored
+    ghoul::MemoryPool<4096> _memory;
+    /// The first event in the chain of events stored in the memory pool
     events::Event* _firstEvent = nullptr;
+    /// The last event in the chain of events stored in the memory pool
     events::Event* _lastEvent = nullptr;
 
+    std::unordered_map<events::Event::Type, std::vector<std::string>> _eventActions;
+
 #ifdef _DEBUG
+    /// Stores the total number of events during this frame for debugging purposes
     static uint64_t nEvents;
 #endif // _DEBUG
 };
 
-//
-// Implementation
-//
-
-template <typename T, typename... Args>
-void EventEngine::publishEvent(Args&&... args) {
-    T* e = _memory.alloc<T>(args...);
-    if (!_firstEvent) {
-        _firstEvent = e;
-        _lastEvent = e;
-    }
-    else {
-        _lastEvent->next = e;
-        _lastEvent = e;
-    }
-
-#ifdef _DEBUG
-    nEvents++;
-#endif // _DEBUG
-}
-
 } // namespace openspace
+
+#include "eventengine.inl"
 
 #endif // __OPENSPACE_CORE___EVENTENGINE___H__
