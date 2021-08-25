@@ -58,12 +58,6 @@ public:
     Waypoint endPoint() const;
 
     /**
-     * Return the specified duration for the path, in seconds. Note that the time it
-     * takes to actually traverse the path will not exactly match the provided duration 
-     */
-    double duration() const;
-
-    /**
      * Return the total length of the the curve for the path, in meters
      */
     double pathLength() const;
@@ -128,7 +122,6 @@ private:
 
     Waypoint _start;
     Waypoint _end;
-    double _duration; // seconds
     Type _type;
 
     std::unique_ptr<PathCurve> _curve;
