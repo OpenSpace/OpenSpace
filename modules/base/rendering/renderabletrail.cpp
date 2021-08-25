@@ -338,7 +338,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
 
 #if !defined(__APPLE__)
-    glm::ivec2 resolution = global::renderEngine->renderingResolution();
     GLint viewport[4];
     global::renderEngine->openglStateCache().viewport(viewport);
     _programObject->setUniform(

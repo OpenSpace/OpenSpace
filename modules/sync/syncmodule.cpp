@@ -31,6 +31,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -39,6 +40,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
+
+#include "syncmodule_lua.inl"
 
 namespace {
     constexpr const char* KeyHttpSynchronizationRepositories =
@@ -138,6 +141,35 @@ std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
         HttpSynchronization::Documentation()
     };
+}
+
+scripting::LuaLibrary SyncModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "sync";
+    res.functions = {
+        {
+            "syncResource",
+            &luascriptfunctions::syncResource,
+            {},
+            "string, number",
+            "Synchronizes the http resource identified by the name passed as the "
+            "first parameter and the version provided as the second parameter. The "
+            "application will hang while the data is being downloaded"
+        },
+        {
+            "unsyncResource",
+            &luascriptfunctions::unsyncResource,
+            {},
+            "string [, number]",
+            "Unsynchronizes the http resources identified by the name passed as the "
+            "first parameter by removing all data that was downloaded as part of the "
+            "original synchronization. If the second parameter is provided, is it "
+            "the version of the resources that is unsynchronized, if the parameter "
+            "is not provided, all versions for the specified http resource are "
+            "removed."
+        }
+    };
+    return res;
 }
 
 } // namespace openspace

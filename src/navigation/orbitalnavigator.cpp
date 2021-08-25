@@ -572,7 +572,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Calculate a position handle based on the camera position in world space
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
         // Use the interaction sphere to get an approximate distance to the node surface
-        double nodeRadius = static_cast<double>(_anchorNode->interactionSphere());
+        double nodeRadius = _anchorNode->interactionSphere();
         double distFromCameraToFocus =
             glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 

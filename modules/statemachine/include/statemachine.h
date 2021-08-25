@@ -68,4 +68,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
+#endif // __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
