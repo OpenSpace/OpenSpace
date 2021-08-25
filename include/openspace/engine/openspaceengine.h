@@ -108,14 +108,16 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void loadSingleAsset(const std::string& assetPath);
+    void loadAsset_init(const std::string assetName);
+    void loadAsset_postInit(const std::string assetName);
     void loadFonts();
 
     void runGlobalCustomizationScripts();
     void configureLogging();
     std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
-    void loadInitAssetSection(const std::string profileSectionName);
+    void loadInitAssetSection(std::string& initAssetOutput,
+        std::string profileSectionName);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;

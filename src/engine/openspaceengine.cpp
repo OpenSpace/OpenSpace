@@ -688,10 +688,10 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
     _scheduledAssetPathToLoad = std::move(assetPath);
 }
 
-void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
+void OpenSpaceEngine::loadAsset_init(const std::string assetName) {
     ZoneScoped
 
-    LTRACE("OpenSpaceEngine::loadSingleAsset(begin)");
+    LTRACE("OpenSpaceEngine::loadAsset_init(begin)");
 
     global::windowDelegate->setBarrier(false);
     global::windowDelegate->setSynchronization(false);
@@ -700,7 +700,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         global::windowDelegate->setBarrier(true);
     };
 
-    if (assetPath.empty()) {
+    if (assetName.empty()) {
         return;
     }
     if (_scene) {
@@ -751,7 +751,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _assetManager->removeAll();
-    _assetManager->add(assetPath);
+    _assetManager->add(assetName);
 
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
@@ -863,7 +863,16 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     _writeDocumentationTask = std::async(&OpenSpaceEngine::writeSceneDocumentation, this);
 
-    LTRACE("OpenSpaceEngine::loadSingleAsset(end)");
+    LTRACE("OpenSpaceEngine::loadAsset_init(end)");
+}
+
+void OpenSpaceEngine::loadAsset_postInit(const std::string assetName) {
+    ZoneScoped
+
+    LTRACE("OpenSpaceEngine::loadAsset_init(begin)");
+    _assetManager->add(assetName);
+    _assetManager->update();
+    LTRACE("OpenSpaceEngine::loadAsset_postInit(end)");
 }
 
 void OpenSpaceEngine::deinitialize() {
@@ -1098,23 +1107,37 @@ void OpenSpaceEngine::preSynchronization() {
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
         global::profile->ignoreUpdates = true;
-        loadSingleAsset(_scheduledAssetPathToLoad);
+        loadAsset_init(_scheduledAssetPathToLoad);
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
     }
     else if (!_hasInitializedProfile) {
-        loadInitAssetSection("_meta");
-        loadInitAssetSection("_addedAssets");
-        loadInitAssetSection("_modules");
-        loadInitAssetSection("_actions");
-        loadInitAssetSection("_keybinds");
-        loadInitAssetSection("_time");
-        loadInitAssetSection("_deltaTimes");
-        loadInitAssetSection("_markNodes");
-        loadInitAssetSection("_properties");
-        loadInitAssetSection("_camera");
+        std::string combinedAssetInitStr;
+        loadInitAssetSection(combinedAssetInitStr, "_meta");
+        loadInitAssetSection(combinedAssetInitStr, "_addedAssets");
+        combinedAssetInitStr += "asset.onInitialize(function()\n";
+        loadInitAssetSection(combinedAssetInitStr, "_modules");
+        loadInitAssetSection(combinedAssetInitStr, "_actions");
+        loadInitAssetSection(combinedAssetInitStr, "_keybinds");
+        loadInitAssetSection(combinedAssetInitStr, "_time");
+        loadInitAssetSection(combinedAssetInitStr, "_deltaTimes");
+        loadInitAssetSection(combinedAssetInitStr, "_markNodes");
+        loadInitAssetSection(combinedAssetInitStr, "_properties");
+        loadInitAssetSection(combinedAssetInitStr, "_camera");
+        combinedAssetInitStr += "end)\n";
+
+        std::string outputScenePath = absPath("${TEMPORARY}").string() +
+            "/combinedInit.asset";
+        std::ofstream combinedInitAsset(outputScenePath);
+        combinedInitAsset << combinedAssetInitStr;
+
+        global::profile->ignoreUpdates = true;
+        loadAsset_init(outputScenePath);
+        global::profile->ignoreUpdates = false;
+        resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
+
         _hasInitializedProfile = true;
     }
 
@@ -1145,10 +1168,6 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
-        if (!_hasInitializedProfile) {
-            loadInitAssetSection("_addedScripts");
-        }
-
         if (_scene) {
             Camera* camera = _scene->camera();
             if (camera) {
@@ -1168,23 +1187,39 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (!_hasInitializedProfile) {
+        std::string outputScenePath = absPath("${TEMPORARY}").string() +
+            "/combinedPostInit.asset";
+        std::ofstream combinedPostInitAsset(outputScenePath);
+        std::string profilePostInitAsset = "asset.onInitialize(function()\n";
+        profilePostInitAsset  += fmt::format(
+            "{}_{}{}",
+            global::configuration->profileOutPrefixName,
+            "_addedScripts",
+            global::profile->assetFileExtension
+        );
+        profilePostInitAsset += "end)\n";
+        combinedPostInitAsset << profilePostInitAsset;
+
+        loadAsset_postInit(outputScenePath);
+
         _hasInitializedProfile = true;
     }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
-void OpenSpaceEngine::loadInitAssetSection(const std::string profileSectionName) {
-    std::string assetFilename = fmt::format(
+void OpenSpaceEngine::loadInitAssetSection(std::string& initAssetOutput,
+                                           std::string profileSectionName)
+{
+    std::string filename = fmt::format(
         "{}_{}{}",
         global::configuration->profileOutPrefixName,
         profileSectionName,
         global::profile->assetFileExtension
     );
+    std::ifstream in(filename);
+    initAssetOutput.append(std::string(std::istreambuf_iterator<char>(in),
+        std::istreambuf_iterator<char>()));
     LINFO(fmt::format("Loading profile subsection {}", profileSectionName));
-    global::profile->ignoreUpdates = true;
-    loadSingleAsset(assetFilename);
-    global::profile->ignoreUpdates = false;
-    resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {

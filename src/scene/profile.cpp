@@ -827,7 +827,7 @@ std::string convertToAsset_modules(const Profile& p) {
 std::string convertToAsset_actions(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     for (const Profile::Action& action : p.actions) {
         const std::string name = action.name.empty() ? action.identifier : action.name;
         output += fmt::format(
@@ -839,7 +839,6 @@ std::string convertToAsset_actions(const Profile& p) {
             action.isLocal ? "true" : "false"
         );
     }
-    output += "end)\n";
 
     return output;
 }
@@ -847,13 +846,12 @@ std::string convertToAsset_actions(const Profile& p) {
 std::string convertToAsset_keybinds(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     for (size_t i = 0; i < p.keybindings.size(); ++i) {
         const Profile::Keybinding& k = p.keybindings[i];
         const std::string key = keyToString(k.key);
         output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
-    output += "end)\n";
 
     return output;
 }
@@ -861,7 +859,7 @@ std::string convertToAsset_keybinds(const Profile& p) {
 std::string convertToAsset_time(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     switch (p.time->type) {
     case Profile::Time::Type::Absolute:
         output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
@@ -876,7 +874,6 @@ std::string convertToAsset_time(const Profile& p) {
     default:
         throw ghoul::MissingCaseException();
     }
-    output += "end)\n";
 
     return output;
 }
@@ -884,7 +881,7 @@ std::string convertToAsset_time(const Profile& p) {
 std::string convertToAsset_deltaTimes(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     {
         std::string times;
         for (double d : p.deltaTimes) {
@@ -892,7 +889,6 @@ std::string convertToAsset_deltaTimes(const Profile& p) {
         }
         output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
     }
-    output += "end)\n";
 
     return output;
 }
@@ -900,7 +896,7 @@ std::string convertToAsset_deltaTimes(const Profile& p) {
 std::string convertToAsset_markNodes(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     {
         std::string nodes;
         for (const std::string& n : p.markNodes) {
@@ -908,7 +904,6 @@ std::string convertToAsset_markNodes(const Profile& p) {
         }
         output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
-    output += "end)\n";
 
     return output;
 }
@@ -916,7 +911,7 @@ std::string convertToAsset_markNodes(const Profile& p) {
 std::string convertToAsset_properties(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     for (const Profile::Property& prop : p.properties) {
         switch (prop.setType) {
         case Profile::Property::SetType::SetPropertyValue:
@@ -934,7 +929,6 @@ std::string convertToAsset_properties(const Profile& p) {
             throw ghoul::MissingCaseException();
         }
     }
-    output += "end)\n";
 
     return output;
 }
@@ -942,7 +936,7 @@ std::string convertToAsset_properties(const Profile& p) {
 std::string convertToAsset_camera(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     if (p.camera.has_value()) {
         output += std::visit(
             overloaded {
@@ -994,7 +988,6 @@ std::string convertToAsset_camera(const Profile& p) {
             *p.camera
                     );
     }
-    output += "end)\n";
 
     return output;
 }
@@ -1002,11 +995,10 @@ std::string convertToAsset_camera(const Profile& p) {
 std::string convertToAsset_addedScripts(const Profile& p) {
     ZoneScoped
 
-    std::string output = "asset.onInitialize(function()\n";
+    std::string output;
     for (const std::string& a : p.additionalScripts) {
         output += fmt::format("  {}\n", a);
     }
-    output += "end)\n";
 
     return output;
 }
