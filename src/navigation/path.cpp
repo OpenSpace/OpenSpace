@@ -107,18 +107,18 @@ Path::Path(Waypoint start, Waypoint end, Type type,
             throw ghoul::MissingCaseException();
     }
 
-    _duration = duration.value_or(std::log(pathLength()));
+    // Compute speed factor to match any given duration, by traversing the path and
+    // computing how much faster/slower it should be
+    _speedFactorFromDuration = 1.0;
+    if (duration.has_value()) {
+        constexpr const double dt = 0.05; // 20 fps
+        while (!hasReachedEnd()) {
+            traversePath(dt);
+        }
 
-    // Compute speed factor to match the generated path length and duration, by
-    // traversing the path and computing how much faster/slower it should be
-    const int nSteps = 500;
-    const double dt = (_duration / nSteps) > 0.01 ? (_duration / nSteps) : 0.01;
-
-    while (!hasReachedEnd()) {
-        traversePath(dt);
+        // We now know how long it took to traverse the path. Use that
+        _speedFactorFromDuration = _progressedTime / *duration;
     }
-
-    _speedFactorFromDuration = _progressedTime / _duration;
 
     // Reset playback variables
     _traveledDistance = 0.0;
@@ -128,8 +128,6 @@ Path::Path(Waypoint start, Waypoint end, Type type,
 Waypoint Path::startPoint() const { return _start; }
 
 Waypoint Path::endPoint() const { return _end; }
-
-double Path::duration() const { return _duration; }
 
 double Path::pathLength() const { return _curve->length(); }
 
