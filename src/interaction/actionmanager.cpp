@@ -26,6 +26,7 @@
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
@@ -81,7 +82,14 @@ void ActionManager::triggerAction(const std::string& identifier,
                                   const ghoul::Dictionary& arguments) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
-    ghoul_assert(hasAction(identifier), "Action was not found in the list");
+
+    if (!hasAction(identifier)) {
+        LWARNINGC(
+            "ActionManager",
+            fmt::format("Action '{}' not found in the list", identifier)
+        );
+        return;
+    }
 
     const Action& a = action(identifier);
     if (arguments.isEmpty()) {

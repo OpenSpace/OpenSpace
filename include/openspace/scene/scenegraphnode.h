@@ -128,6 +128,9 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
+    const std::vector<std::string>& onEnterAction() const;
+    const std::vector<std::string>& onExitAction() const;
+
     double boundingSphere() const;
     double interactionSphere() const;
 
@@ -154,6 +157,9 @@ private:
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene = nullptr;
+
+    std::vector<std::string> _onEnterAction;
+    std::vector<std::string> _onExitAction;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)

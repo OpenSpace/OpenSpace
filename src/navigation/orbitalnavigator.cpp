@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -735,6 +736,14 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     {
         _inAnchorSphere = false;
 
+        if (!_anchorNode->onExitAction().empty()) {
+            ghoul::Dictionary d;
+            d.setValue("Node", _anchorNode->identifier());
+            for (const std::string& action : _anchorNode->onExitAction()) {
+                global::actionManager->triggerAction(action, d);
+            }
+        }
+
         global::eventEngine->publishEvent<events::EventCameraMovedAwayFromSceneGraphNode>(
             _camera, _anchorNode
         );
@@ -743,6 +752,15 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
              currDistance < d * (InteractionMultiplier - InteractionHystersis))
     {
         _inAnchorSphere = true;
+
+        if (!_anchorNode->onEnterAction().empty()) {
+            ghoul::Dictionary d;
+            d.setValue("Node", _anchorNode->identifier());
+            for (const std::string& action : _anchorNode->onEnterAction()) {
+                global::actionManager->triggerAction(action, d);
+            }
+        }
+
         global::eventEngine->publishEvent<events::EventCameraApproachedSceneGraphNode>(
             _camera, _anchorNode
         );

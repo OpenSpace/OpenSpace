@@ -208,6 +208,14 @@ namespace {
         // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
         std::optional<Transform> transform;
 
+        // One or multiple actions that are executed whenever the camera is focussed on
+        // this scene graph node and if it enters the interaction sphere of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onEnter;
+
+        // One or multiple actions that are executed whenever the camera is focussed on
+        // this scene graph node and if it exits the interaction sphere of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
+
         // Specifies the time frame for when this node should be active
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
@@ -376,6 +384,24 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
+    }
+
+    if (p.onEnter.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onEnter)) {
+            result->_onEnterAction = { std::get<std::string>(*p.onEnter) };
+        }
+        else {
+            result->_onEnterAction = std::get<std::vector<std::string>>(*p.onEnter);
+        }
+    }
+
+    if (p.onExit.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onExit)) {
+            result->_onExitAction = { std::get<std::string>(*p.onExit) };
+        }
+        else {
+            result->_onExitAction = std::get<std::vector<std::string>>(*p.onExit);
+        }
     }
 
     if (p.tag.has_value()) {
@@ -1064,6 +1090,14 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
         nodes.push_back(child.get());
     }
     return nodes;
+}
+
+const std::vector<std::string>& SceneGraphNode::onEnterAction() const {
+    return _onEnterAction;
+}
+
+const std::vector<std::string>& SceneGraphNode::onExitAction() const {
+    return _onExitAction;
 }
 
 double SceneGraphNode::boundingSphere() const {
