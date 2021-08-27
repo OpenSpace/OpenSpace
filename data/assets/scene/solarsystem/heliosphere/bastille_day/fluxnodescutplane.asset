@@ -21,7 +21,7 @@ local EquatorialCutplane = {
   Transform = {
     Rotation = {
     -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
-    -- which is what the renderables parent transforms.HEEQ180ReferenceFrame.Identifier is
+    -- which is what the renderables parent transforms.HEEQ180ReferenceFrame. Identifier is
     -- referring to. At the reference time, MAS_seq = 0, 2000-07-14T08:33:37.105 the Carrington
     -- longitude was 309.3 degrees.
     -- Difference from HEEQ => 360-309.3=50.7

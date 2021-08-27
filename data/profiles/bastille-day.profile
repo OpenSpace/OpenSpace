@@ -8,7 +8,6 @@
     "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
     "scene/solarsystem/heliosphere/bastille_day/fluxnodescutplane",
     "scene/solarsystem/heliosphere/bastille_day/fluxnodeslegend",
-    "scene/solarsystem/heliosphere/bastille_day/focuspoint",
     "scene/solarsystem/heliosphere/bastille_day/lightindicator",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",

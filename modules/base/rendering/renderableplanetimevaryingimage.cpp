@@ -38,7 +38,6 @@
 #include <ghoul/io/texture/texturereader.h>
 // Test debugging tools more then logmanager
 #include <ghoul/logging/logmanager.h>
-//#include <ghoul/logging/consolelog.h>
 #include <optional>
 
 namespace {
@@ -271,6 +270,11 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 }
+
+//void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
+//    RenderablePlane::render(data, t);
+//    glDisable(GL_CULL_FACE);
+//}
 
 // Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {

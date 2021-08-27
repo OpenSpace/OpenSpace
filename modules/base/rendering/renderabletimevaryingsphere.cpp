@@ -283,8 +283,8 @@ void RenderableTimeVaryingSphere::initializeGL() {
     if (!success) {
         return;
     }
-    computeSequenceEndTime();
 
+    computeSequenceEndTime();
     loadTexture();
 }
 
@@ -575,5 +575,4 @@ void RenderableTimeVaryingSphere::loadTexture() {
         _isLoadingTexture = false;
     }
 }
-
 } // namespace openspace

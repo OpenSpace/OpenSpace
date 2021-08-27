@@ -2,12 +2,12 @@ local TexturesPath = asset.syncedResource({
   Name = "Bastille Day Magnetogram",
   Type = "HttpSynchronization",
   Identifier = "bastille_day_magnetogram",
-  Version = 2
+  Version = 3
 })
 
 asset.export("TexturesPath", TexturesPath)
 
--- Torok, T., Downs, C., Linker, J. A., Lionello, R., Titov, V. S., Mikic, Z., Riley, P., Caplan, R. M., and Wijaya, J. (2018). 
+-- Torok, T., Downs, C., Linker, J. A., Lionello, R., Titov, V. S., Mikic, Z., Riley, P., Caplan, R. M., and Wijaya, J. (2018).
 -- Sun-to-Earth MHD Simulation of the 2000 July 14 Bastille Day Eruption.
 -- ApJ,
 -- 856:75.
