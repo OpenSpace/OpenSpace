@@ -723,17 +723,21 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     _camera->setPositionVec3(pose.position);
     _camera->setRotation(composeCameraRotation(camRot));
 
-    const double prevDistance = glm::distance(anchorPos, prevCameraPosition);
     const double currDistance = glm::distance(anchorPos, pose.position);
-    constexpr const double SphereDistanceFudge = 5.0;
-    const double sphereDistance = _anchorNode->interactionSphere() * SphereDistanceFudge;
-    if (prevDistance > sphereDistance && currDistance < sphereDistance) {
-        global::eventEngine->publishEvent<events::EventCameraApproachedSceneGraphNode>(
+    const double d = _anchorNode->interactionSphere();
+    if (_inAnchorSphere &&
+        currDistance > d * (InteractionMultiplier + InteractionHystersis))
+    {
+        _inAnchorSphere = false;
+        global::eventEngine->publishEvent<events::EventCameraMovedAwayFromSceneGraphNode>(
             _camera, _anchorNode
         );
     }
-    else if (prevDistance < sphereDistance && currDistance > sphereDistance) {
-        global::eventEngine->publishEvent<events::EventCameraMovedAwayFromSceneGraphNode>(
+    else if (!_inAnchorSphere &&
+             currDistance < d * (InteractionMultiplier - InteractionHystersis))
+    {
+        _inAnchorSphere = true;
+        global::eventEngine->publishEvent<events::EventCameraApproachedSceneGraphNode>(
             _camera, _anchorNode
         );
     }
