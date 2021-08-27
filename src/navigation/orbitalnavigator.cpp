@@ -355,7 +355,12 @@ OrbitalNavigator::OrbitalNavigator()
         }
         SceneGraphNode* node = sceneGraphNode(_anchor.value());
         if (node) {
+            const SceneGraphNode* previousAnchor = _anchorNode;
             setAnchorNode(node);
+            global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
+                previousAnchor,
+                node
+            );
         }
         else {
             LERROR(fmt::format(
@@ -729,6 +734,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         currDistance > d * (InteractionMultiplier + InteractionHystersis))
     {
         _inAnchorSphere = false;
+
         global::eventEngine->publishEvent<events::EventCameraMovedAwayFromSceneGraphNode>(
             _camera, _anchorNode
         );
@@ -825,8 +831,14 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
 void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
                                     bool resetVelocitiesOnChange)
 {
+    const SceneGraphNode* previousAnchor = _anchorNode;
     setAnchorNode(focusNode, resetVelocitiesOnChange);
     setAimNode(nullptr);
+
+    global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
+        previousAnchor,
+        focusNode
+    );
 }
 
 void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {

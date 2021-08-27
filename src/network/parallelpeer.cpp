@@ -563,16 +563,24 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
 
 
         if (isDisconnected && wasConnected) {
-            ee->publishEvent<events::EventParallelConnectionLost>();
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Lost
+            );
         }
         if (isConnected && wasDisconnected) {
-            ee->publishEvent<events::EventParallelConnectionEstablished>();
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Established
+            );
         }
         if (isHost && (wasClient || wasDisconnected)) {
-            ee->publishEvent<events::EventParallelConnectionHostshipGained>();
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipGained
+            );
         }
         if ((isClient || isDisconnected) && wasHost) {
-            ee->publishEvent<events::EventParallelConnectionHostshipLost>();
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipLost
+            );
         }
     }
     if (isHost()) {

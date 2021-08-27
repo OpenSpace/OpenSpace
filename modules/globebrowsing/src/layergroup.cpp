@@ -148,7 +148,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
-    global::eventEngine->publishEvent<events::CustomEvent>("AddLayer", ptr);
+    global::eventEngine->publishEvent<events::EventLayerAdded>(ptr->identifier());
     return ptr;
 }
 
@@ -164,9 +164,8 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
-            global::eventEngine->publishEvent<events::CustomEvent>(
-                "RemoveLayer",
-                it->get()
+            global::eventEngine->publishEvent<events::EventLayerRemoved>(
+                it->get()->identifier()
             );
             update();
             if (_onChangeCallback) {

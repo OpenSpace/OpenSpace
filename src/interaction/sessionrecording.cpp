@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/tasks/convertrecfileversiontask.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/keyframenavigator.h>
@@ -461,6 +462,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         (_playbackForceSimTimeAtStart ? 1 : 0)
     ));
 
+    global::eventEngine->publishEvent<events::EventSessionRecordingStarted>();
     initializePlayback_triggerStart();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
@@ -586,6 +588,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
             _state = SessionState::Idle;
             _cleanupNeeded = true;
             LINFO("Playback session finished");
+            global::eventEngine->publishEvent<events::EventSessionRecordingFinished>();
         }
     }
 }
@@ -606,6 +609,7 @@ void SessionRecording::stopPlayback() {
         _state = SessionState::Idle;
         _cleanupNeeded = true;
         LINFO("Session playback stopped");
+        global::eventEngine->publishEvent<events::EventSessionRecordingFinished>();
     }
 }
 

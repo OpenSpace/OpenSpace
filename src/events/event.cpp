@@ -51,24 +51,18 @@ void log(int i, const EventSceneGraphNodeRemoved& e) {
     LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
 }
 
-void log(int i, const EventParallelConnectionEstablished& e) {
-    ghoul_assert(e.type == EventParallelConnectionEstablished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ParallelConnectionEstablished", i));
-}
-
-void log(int i, const EventParallelConnectionLost& e) {
-    ghoul_assert(e.type == EventParallelConnectionLost::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ParallelConnectionLost", i));
-}
-
-void log(int i, const EventParallelConnectionHostshipGained& e) {
-    ghoul_assert(e.type == EventParallelConnectionHostshipGained::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ParallelConnectionHostshipGained", i));
-}
-
-void log(int i, const EventParallelConnectionHostshipLost& e) {
-    ghoul_assert(e.type == EventParallelConnectionHostshipLost::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ParallelConnectionHostshipLost", i));
+void log(int i, const EventParallelConnection& e) {
+    ghoul_assert(e.type == EventParallelConnection::Type, "Wrong type");
+    std::string_view state = [](EventParallelConnection::State s) {
+        switch (s) {
+            case EventParallelConnection::State::Established:    return "Established";
+            case EventParallelConnection::State::Lost:           return "Lost";
+            case EventParallelConnection::State::HostshipGained: return "HostshipGained";
+            case EventParallelConnection::State::HostshipLost:   return "HostshipLost";
+            default:                                  throw ghoul::MissingCaseException();
+        }
+    }(e.state);
+    LINFO(fmt::format("[{}] ParallelConnection ({})", i, state));
 }
 
 void log(int i, const EventProfileLoadingFinished& e) {
@@ -139,6 +133,31 @@ void log(int i, const EventInterpolationFinished& e) {
     LINFO(fmt::format("[{}] InterpolationFinished", i));
 }
 
+void log(int i, const EventFocusNodeChanged& e) {
+    ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
+    LINFO(fmt::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
+}
+
+void log(int i, const EventLayerAdded& e) {
+    ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
+    LINFO(fmt::format("[{}] LayerAdded: {}", i, e.layer));
+}
+
+void log(int i, const EventLayerRemoved& e) {
+    ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
+    LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
+}
+
+void log(int i, const EventSessionRecordingStarted& e) {
+    ghoul_assert(e.type == EventSessionRecordingStarted::Type, "Wrong type");
+    LINFO(fmt::format("[{}] SessionRecordingStarted", i));
+}
+
+void log(int i, const EventSessionRecordingFinished& e) {
+    ghoul_assert(e.type == EventSessionRecordingFinished::Type, "Wrong type");
+    LINFO(fmt::format("[{}] SessionRecordingFinished", i));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
@@ -148,13 +167,7 @@ std::string_view toString(Event::Type type) {
     switch (type) {
         case Event::Type::SceneGraphNodeAdded: return "SceneGraphNodeAdded";
         case Event::Type::SceneGraphNodeRemoved: return "SceneGraphNodeRemoved";
-        case Event::Type::ParallelConnectionEstablished:
-            return "ParallelConnectionEstablished";
-        case Event::Type::ParallelConnectionLost: return "ParallelConnectionLost";
-        case Event::Type::ParallelConnectionHostshipGained:
-            return "ParallelConnectionHostshipGained";
-        case Event::Type::ParallelConnectionHostshipLost:
-            return "ParallelConnectionHostshipLost";
+        case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::ScreenSpaceRenderableAdded: return "ScreenSpaceRenderableAdded";
@@ -168,6 +181,11 @@ std::string_view toString(Event::Type type) {
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
         case Event::Type::InterpolationFinished: return "InterpolationFinished";
+        case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
+        case Event::Type::LayerAdded: return "LayerAdded";
+        case Event::Type::LayerRemoved: return "LayerRemoved";
+        case Event::Type::SessionRecordingStarted: return "SessionRecordingStarted";
+        case Event::Type::SessionRecordingFinished: return "SessionRecordingFinished";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -181,17 +199,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "SceneGraphNodeRemoved") {
         return Event::Type::SceneGraphNodeRemoved;
     }
-    else if (str == "ParallelConnectionEstablished") {
-        return Event::Type::ParallelConnectionEstablished;
-    }
-    else if (str == "ParallelConnectionLost") {
-        return Event::Type::ParallelConnectionLost;
-    }
-    else if (str == "ParallelConnectionHostshipGained") {
-        return Event::Type::ParallelConnectionHostshipGained;
-    }
-    else if (str == "ParallelConnectionHostshipLost") {
-        return Event::Type::ParallelConnectionHostshipLost;
+    else if (str == "ParallelConnection") {
+        return Event::Type::ParallelConnection;
     }
     else if (str == "ProfileLoadingFinished") {
         return Event::Type::ProfileLoadingFinished;
@@ -223,6 +232,21 @@ Event::Type fromString(std::string_view str) {
     else if (str == "InterpolationFinished") {
         return Event::Type::InterpolationFinished;
     }
+    else if (str == "FocusNodeChanged") {
+        return Event::Type::FocusNodeChanged;
+    }
+    else if (str == "LayerAdded") {
+        return Event::Type::LayerAdded;
+    }
+    else if (str == "LayerRemoved") {
+        return Event::Type::LayerRemoved;
+    }
+    else if (str == "SessionRecordingStarted") {
+        return Event::Type::SessionRecordingStarted;
+    }
+    else if (str == "SessionRecordingFinished") {
+        return Event::Type::SessionRecordingFinished;
+    }
     else if (str == "Custom") {
         return Event::Type::Custom;
     }
@@ -244,6 +268,24 @@ ghoul::Dictionary toParameter(const Event& e) {
                 "Node",
                 std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).node)
             );
+            break;
+        case Event::Type::ParallelConnection:
+            switch (static_cast<const EventParallelConnection&>(e).state) {
+                case EventParallelConnection::State::Established:
+                    d.setValue("State", std::string("Established"));
+                    break;
+                case EventParallelConnection::State::Lost:
+                    d.setValue("State", std::string("Lost"));
+                    break;
+                case EventParallelConnection::State::HostshipGained:                        
+                    d.setValue("State", std::string("HostshipGained"));
+                    break;
+                case EventParallelConnection::State::HostshipLost:
+                    d.setValue("State", std::string("HostshipLost"));
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
             break;
         case Event::Type::ApplicationShutdown:
             switch (static_cast<const EventApplicationShutdown&>(e).state) {
@@ -306,6 +348,28 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventInterpolationFinished&>(e).property)
             );
             break;
+        case Event::Type::FocusNodeChanged:
+            d.setValue(
+                "OldNode",
+                std::string(static_cast<const EventFocusNodeChanged&>(e).oldNode)
+            );
+            d.setValue(
+                "NewNode",
+                std::string(static_cast<const EventFocusNodeChanged&>(e).newNode)
+            );
+            break;
+        case Event::Type::LayerAdded:
+            d.setValue(
+                "Layer",
+                std::string(static_cast<const EventLayerAdded&>(e).layer)
+            );
+            break;
+        case Event::Type::LayerRemoved:
+            d.setValue(
+                "Layer",
+                std::string(static_cast<const EventLayerRemoved&>(e).layer)
+            );
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
@@ -327,17 +391,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::SceneGraphNodeRemoved:
                 log(i, *static_cast<const EventSceneGraphNodeRemoved*>(e));
                 break;
-            case Event::Type::ParallelConnectionEstablished:
-                log(i, *static_cast<const EventParallelConnectionEstablished*>(e));
-                break;
-            case Event::Type::ParallelConnectionLost:
-                log(i, *static_cast<const EventParallelConnectionLost*>(e));
-                break;
-            case Event::Type::ParallelConnectionHostshipGained:
-                log(i, *static_cast<const EventParallelConnectionHostshipGained*>(e));
-                break;
-            case Event::Type::ParallelConnectionHostshipLost:
-                log(i, *static_cast<const EventParallelConnectionHostshipLost*>(e));
+            case Event::Type::ParallelConnection:
+                log(i, *static_cast<const EventParallelConnection*>(e));
                 break;
             case Event::Type::ProfileLoadingFinished:
                 log(i, *static_cast<const EventProfileLoadingFinished*>(e));
@@ -369,6 +424,21 @@ void logAllEvents(const Event* e) {
             case Event::Type::InterpolationFinished:
                 log(i, *static_cast<const EventInterpolationFinished*>(e));
                 break;
+            case Event::Type::FocusNodeChanged:
+                log(i, *static_cast<const EventFocusNodeChanged*>(e));
+                break;
+            case Event::Type::LayerAdded:
+                log(i, *static_cast<const EventLayerAdded*>(e));
+                break;
+            case Event::Type::LayerRemoved:
+                log(i, *static_cast<const EventLayerRemoved*>(e));
+                break;
+            case Event::Type::SessionRecordingStarted:
+                log(i, *static_cast<const EventSessionRecordingStarted*>(e));
+                break;
+            case Event::Type::SessionRecordingFinished:
+                log(i, *static_cast<const EventSessionRecordingFinished*>(e));
+                break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
@@ -392,20 +462,9 @@ EventSceneGraphNodeRemoved::EventSceneGraphNodeRemoved(const SceneGraphNode* nod
     , node(temporaryString(node_->identifier()))
 {}
 
-EventParallelConnectionEstablished::EventParallelConnectionEstablished()
+EventParallelConnection::EventParallelConnection(State state_)
     : Event(Type)
-{}
-
-EventParallelConnectionLost::EventParallelConnectionLost()
-    : Event(Type)
-{}
-
-EventParallelConnectionHostshipGained::EventParallelConnectionHostshipGained()
-    : Event(Type)
-{}
-
-EventParallelConnectionHostshipLost::EventParallelConnectionHostshipLost()
-    : Event(Type)
+    , state(state_)
 {}
 
 EventProfileLoadingFinished::EventProfileLoadingFinished()
@@ -467,6 +526,33 @@ EventInterpolationFinished::EventInterpolationFinished(
                                                     const properties::Property* property_)
     : Event(Type)
     , property(temporaryString(property_->fullyQualifiedIdentifier()))
+{}
+
+EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
+                                            const SceneGraphNode* newNode_)
+    : Event(Type)
+    , oldNode(oldNode_ ? temporaryString(oldNode_->identifier()) : "")
+    , newNode(temporaryString(newNode_->identifier()))
+{
+    ghoul_assert(newNode_, "There must be a new node");
+}
+
+EventLayerAdded::EventLayerAdded(std::string_view layer)
+    : Event(Type)
+    , layer(temporaryString(layer))
+{}
+
+EventLayerRemoved::EventLayerRemoved(std::string_view layer)
+    : Event(Type)
+    , layer(temporaryString(layer))
+{}
+
+EventSessionRecordingStarted::EventSessionRecordingStarted()
+    : Event(Type)
+{}
+
+EventSessionRecordingFinished::EventSessionRecordingFinished()
+    : Event(Type)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)

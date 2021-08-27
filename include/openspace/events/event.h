@@ -38,7 +38,7 @@ namespace openspace {
     class SceneGraphNode;
     class ScreenSpaceRenderable;
     class Time;
-} // namepsace opensppace
+} // namespace openspace
 
 namespace openspace::events {
 
@@ -49,19 +49,17 @@ struct Event {
     //     Event's `type` to this new enum entry
     //  3. In the cpp file, add a new `log` message that takes the new type as an argument
     //     and that prints something useful when the log is encountered and the user wants
-    //     to see all events
-    //  4. If the new event type has any parameters it takes in its constructor, go into
+    //     to see all events.
+    //  4. Add a new case into the logAllEvents function that handles the new enum entry
+    //  5. If the new event type has any parameters it takes in its constructor, go into
     //     the `toParameter` function and add a case label for the new enum type and 
     //     return a dictionary with these parameters. This dictionary is passed to actions
     //     if they are triggered by events
-    //  5. Add the new enum entry into the `toString` and `fromString` methods
+    //  6. Add the new enum entry into the `toString` and `fromString` methods
     enum class Type {
         SceneGraphNodeAdded,
         SceneGraphNodeRemoved,
-        ParallelConnectionEstablished,
-        ParallelConnectionLost,
-        ParallelConnectionHostshipGained,
-        ParallelConnectionHostshipLost,
+        ParallelConnection,
         ProfileLoadingFinished,
         ApplicationShutdown,
         ScreenSpaceRenderableAdded,
@@ -72,6 +70,11 @@ struct Event {
         MissionEventReached,
         PlanetEclipsed,
         InterpolationFinished,
+        FocusNodeChanged,
+        LayerAdded,
+        LayerRemoved,
+        SessionRecordingStarted,
+        SessionRecordingFinished,
         Custom
     };
     Event(Type type_) : type(type_) {}
@@ -118,31 +121,17 @@ struct EventSceneGraphNodeRemoved : public Event {
 };
 
 
-struct EventParallelConnectionEstablished : public Event {
-    static const Type Type = Event::Type::ParallelConnectionEstablished;
+struct EventParallelConnection : public Event {
+    static const Type Type = Event::Type::ParallelConnection;
 
-    EventParallelConnectionEstablished();
-};
-
-
-struct EventParallelConnectionLost : public Event {
-    static const Type Type = Event::Type::ParallelConnectionLost;
-
-    EventParallelConnectionLost();
-};
-
-
-struct EventParallelConnectionHostshipGained : public Event {
-    static const Type Type = Event::Type::ParallelConnectionHostshipGained;
-
-    EventParallelConnectionHostshipGained();
-};
-
-
-struct EventParallelConnectionHostshipLost : public Event {
-    static const Type Type = Event::Type::ParallelConnectionHostshipLost;
-
-    EventParallelConnectionHostshipLost();
+    enum class State : uint8_t {
+        Established,
+        Lost,
+        HostshipGained,
+        HostshipLost
+    };
+    EventParallelConnection(State state_);
+    State state;
 };
 
 
@@ -239,6 +228,45 @@ struct EventInterpolationFinished : public Event {
 
     EventInterpolationFinished(const properties::Property* property_);
     const tstring property;
+};
+
+
+struct EventFocusNodeChanged : public Event {
+    static const Type Type = Event::Type::FocusNodeChanged;
+
+    EventFocusNodeChanged(const SceneGraphNode* oldNode_, const SceneGraphNode* newNode_);
+    const tstring oldNode;
+    const tstring newNode;
+};
+
+
+struct EventLayerAdded : public Event {
+    static const Type Type = Event::Type::LayerAdded;
+
+    EventLayerAdded(std::string_view layer);
+    const tstring layer;
+};
+
+
+struct EventLayerRemoved : public Event {
+    static const Type Type = Event::Type::LayerRemoved;
+
+    EventLayerRemoved(std::string_view layer);
+    const tstring layer;
+};
+
+
+struct EventSessionRecordingStarted : public Event {
+    static const Type Type = Event::Type::SessionRecordingStarted;
+
+    EventSessionRecordingStarted();
+};
+
+
+struct EventSessionRecordingFinished : public Event {
+    static const Type Type = Event::Type::SessionRecordingFinished;
+
+    EventSessionRecordingFinished();
 };
 
 
