@@ -36,7 +36,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 
-class PropertiesDialog : public QDialog {
+class PropertiesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -46,7 +46,8 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    PropertiesDialog(openspace::Profile& profile, QWidget* parent);
+    PropertiesDialog(QWidget* parent,
+        std::vector<openspace::Profile::Property>* properties);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -73,8 +74,8 @@ private:
     bool areRequiredFormsFilled();
     bool isLineEmpty(int index);
 
-    openspace::Profile& _profile;
-    std::vector<openspace::Profile::Property> _data;
+    std::vector<openspace::Profile::Property>* _properties = nullptr;
+    std::vector<openspace::Profile::Property> _propertyData;
     bool _editModeNewItem = false;
 
     QListWidget* _list = nullptr;

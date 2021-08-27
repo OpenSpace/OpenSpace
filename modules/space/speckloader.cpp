@@ -40,7 +40,10 @@ namespace {
     constexpr const int8_t LabelCacheFileVersion = 10;
     constexpr const int8_t ColorCacheFileVersion = 10;
 
-    constexpr bool startsWith(std::string_view lhs, std::string_view rhs) noexcept {
+    bool startsWith(std::string lhs, std::string_view rhs) noexcept {
+        for (size_t i = 0; i < lhs.size(); i++) {
+            lhs[i] = static_cast<char>(tolower(lhs[i]));
+        }
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
 
@@ -50,7 +53,7 @@ namespace {
         // 3. Remove all spaces from the new beginning
         // 4. Remove all spaces from the end
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
@@ -58,11 +61,11 @@ namespace {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line[0] == ' ') {
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t')) {
             line = line.substr(1);
         }
 
-        while (!line.empty() && line.back() == ' ') {
+        while (!line.empty() && (line.back() == ' ' || line.back() == '\t')) {
             line = line.substr(0, line.size() - 1);
         }
     }
@@ -99,23 +102,21 @@ namespace {
             std::is_same_v<T, openspace::speck::ColorMap>
         );
 
-        std::string cachePath = FileSys.cacheManager()->cachedFilename(speckPath);
+        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(speckPath);
 
-        if (std::filesystem::exists(cachePath)) {
+        if (std::filesystem::exists(cached)) {
             LINFOC(
                 "SpeckLoader",
-                fmt::format(
-                    "Cached file '{}' used for file {}", cachePath, speckPath
-                )
+                fmt::format("Cached file {} used for file {}", cached, speckPath)
             );
 
-            std::optional<T> dataset = loadCacheFunction(cachePath);
+            std::optional<T> dataset = loadCacheFunction(cached);
             if (dataset.has_value()) {
                 // We could load the cache file and we are now done with this
                 return *dataset;
             }
             else {
-                FileSys.cacheManager()->removeCacheFile(cachePath);
+                FileSys.cacheManager()->removeCacheFile(cached);
             }
         }
         LINFOC("SpeckLoader", fmt::format("Loading file {}", speckPath));
@@ -123,7 +124,7 @@ namespace {
 
         if (!dataset.entries.empty()) {
             LINFOC("SpeckLoader", "Saving cache");
-            saveCacheFunction(dataset, cachePath);
+            saveCacheFunction(dataset, cached);
         }
         return dataset;
     }
@@ -547,7 +548,7 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open speck file '{}'", path));
+        throw ghoul::RuntimeError(fmt::format("Failed to open speck file {}", path));
     }
 
     Labelset res;
@@ -582,7 +583,7 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
             // included in the speck file)
             if (res.textColorIndex != -1) {
                 throw ghoul::RuntimeError(fmt::format(
-                    "Error loading label file '{}': Textcolor defined twice", path
+                    "Error loading label file {}: Textcolor defined twice", path
                 ));
             }
 
@@ -621,7 +622,7 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
         // data section of the file
         if (!std::isdigit(line[0]) && line[0] != '-') {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading label file '{}': Header information and datasegment "
+                "Error loading label file {}: Header information and datasegment "
                 "intermixed", path
             ));
         }
@@ -640,7 +641,7 @@ Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
 
         if (!startsWith(rest, "text")) {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading label file '{}': File contains some value between "
+                "Error loading label file {}: File contains some value between "
                 "positions and text label, which is unsupported", path
             ));
         }
@@ -755,7 +756,7 @@ ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open speck file '{}'", path));
+        throw ghoul::RuntimeError(fmt::format("Failed to open speck file {}", path));
     }
 
     ColorMap res;

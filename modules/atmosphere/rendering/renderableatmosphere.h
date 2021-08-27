@@ -72,7 +72,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
+    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
     void updateAtmosphereParameters();
 
     properties::FloatProperty _atmosphereHeight;
@@ -85,7 +85,7 @@ private:
     properties::Vec3Property _ozoneCoeff;
     properties::FloatProperty _mieHeightScale;
     properties::Vec3Property _mieScatteringCoeff;
-    properties::FloatProperty _mieScatteringExtinctionPropCoefficient;
+    properties::FloatProperty _mieScatteringExtinctionPropCoeff;
     properties::FloatProperty _miePhaseConstant;
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
@@ -98,7 +98,7 @@ private:
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture = false;
-    float _preCalculatedTexturesScale = 1.f;
+    float _textureScale = 1.f;
 
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 

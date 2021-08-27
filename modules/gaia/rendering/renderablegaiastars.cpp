@@ -2131,9 +2131,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
-                ));
+                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 
@@ -2188,28 +2186,29 @@ bool RenderableGaiaStars::readDataFile() {
 
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
-    LINFO("Loading data file: " + _filePath.value());
+    std::filesystem::path file = absPath(_filePath.value());
+    LINFO(fmt::format("Loading data file: {}", file));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:
             // Read raw fits file and construct Octree.
-            nReadStars = readFitsFile(_filePath);
+            nReadStars = readFitsFile(file);
             break;
         case gaia::FileReaderOption::Speck:
             // Read raw speck file and construct Octree.
-            nReadStars = readSpeckFile(_filePath);
+            nReadStars = readSpeckFile(file);
             break;
         case gaia::FileReaderOption::BinaryRaw:
             // Stars are stored in an ordered binary file.
-            nReadStars = readBinaryRawFile(_filePath);
+            nReadStars = readBinaryRawFile(file);
             break;
         case gaia::FileReaderOption::BinaryOctree:
             // Octree already constructed and stored as a binary file.
-            nReadStars = readBinaryOctreeFile(_filePath);
+            nReadStars = readBinaryOctreeFile(file);
             break;
         case gaia::FileReaderOption::StreamOctree:
             // Read Octree structure from file, without data.
-            nReadStars = readBinaryOctreeStructureFile(_filePath);
+            nReadStars = readBinaryOctreeStructureFile(file.string());
             break;
         default:
             LERROR("Wrong FileReaderOption - no data file loaded!");
@@ -2218,13 +2217,13 @@ bool RenderableGaiaStars::readDataFile() {
 
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
-    LINFO("Dataset contains a total of " + std::to_string(nReadStars) + " stars.");
+    LINFO(fmt::format("Dataset contains a total of {} stars", nReadStars));
     _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
 
     return nReadStars > 0;
 }
 
-int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
+int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
@@ -2248,7 +2247,7 @@ int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
+int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
@@ -2266,7 +2265,7 @@ int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath) {
     std::vector<float> fullData;
     int nReadStars = 0;
 
@@ -2299,14 +2298,14 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading raw binary file!", filePath
+            "Error opening file '{}' for loading raw binary file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& filePath) {
     int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
@@ -2317,26 +2316,28 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", filePath
+            "Error opening file '{}' for loading binary Octree file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeStructureFile(const std::string& folderPath) {
+int RenderableGaiaStars::readBinaryOctreeStructureFile(
+                                                  const std::filesystem::path& folderPath)
+{
     int nReadStars = 0;
-    std::string indexFile = folderPath + "index.bin";
+    std::string indexFile = folderPath.string() + "index.bin";
 
     std::ifstream fileStream(indexFile, std::ifstream::binary);
     if (fileStream.good()) {
-        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath);
+        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath.string());
 
         fileStream.close();
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", indexFile
+            "Error opening file '{}' for loading binary Octree file", indexFile
         ));
         return nReadStars;
     }

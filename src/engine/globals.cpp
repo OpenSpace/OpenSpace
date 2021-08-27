@@ -32,14 +32,14 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
@@ -90,12 +90,12 @@ namespace {
         sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
+        sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
-        sizeof(interaction::ShortcutManager) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
@@ -273,6 +273,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    actionManager = new (currentPos) interaction::ActionManager;
+    ghoul_assert(actionManager, "No action manager");
+    currentPos += sizeof(interaction::ActionManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    actionManager = new interaction::ActionManager;
+#endif // WIN32
+
+#ifdef WIN32
     interactionMonitor = new (currentPos) interaction::InteractionMonitor;
     ghoul_assert(interactionMonitor, "No interactionMonitor");
     currentPos += sizeof(interaction::InteractionMonitor);
@@ -318,14 +326,6 @@ void create() {
     currentPos += sizeof(interaction::SessionRecording);
 #else // ^^^ WIN32 / !WIN32 vvv
     sessionRecording = new interaction::SessionRecording(true);
-#endif // WIN32
-
-#ifdef WIN32
-    shortcutManager = new (currentPos) interaction::ShortcutManager;
-    ghoul_assert(shortcutManager, "No shortcutManager");
-    currentPos += sizeof(interaction::ShortcutManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    shortcutManager = new interaction::ShortcutManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -433,13 +433,6 @@ void destroy() {
     delete rootPropertyOwner;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'ShortcutManager'");
-#ifdef WIN32
-    shortcutManager->~ShortcutManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete shortcutManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'SessionRecording'");
 #ifdef WIN32
     sessionRecording->~SessionRecording();
@@ -480,6 +473,13 @@ void destroy() {
     interactionMonitor->~InteractionMonitor();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete interactionMonitor;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destorying 'ActionManager'");
+#ifdef WIN32
+    actionManager->~ActionManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete actionManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Configuration'");

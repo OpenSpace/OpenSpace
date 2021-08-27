@@ -179,6 +179,14 @@ namespace {
         "Enables shadow mapping algorithm. Used by renderable rings too."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderAtDistanceInfo = {
+        "RenderAtDistance",
+        "Render at Distance",
+        "Tells the rendering engine not to perform distance based performance culling "
+        "for this globe. Turning this property on will let the globe to be seen at far "
+        "away distances when normally it would be hidden."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
@@ -229,6 +237,9 @@ namespace {
         // Specifies whether the planet should be shaded by the primary light source or
         // not. If it is disabled, all parts of the planet are illuminated
         std::optional<bool> performShading;
+
+        // Specifies if distance culling should be disabled.
+        std::optional<bool> renderAtDistance;
 
         // A list of all the layers that should be added
         std::map<std::string, ghoul::Dictionary> layers
@@ -508,6 +519,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
         BoolProperty(ShadowMappingInfo, false),
+        BoolProperty(RenderAtDistanceInfo, false),
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7),
         FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
@@ -549,6 +561,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.performShading =
         p.performShading.value_or(_generalProperties.performShading);
 
+    _generalProperties.renderAtDistance =
+        p.renderAtDistance.value_or(_generalProperties.renderAtDistance);
 
     // Init layer manager
     // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
@@ -560,6 +574,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
+    addProperty(_generalProperties.renderAtDistance);
 
     if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
@@ -711,7 +726,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     constexpr int res = 2880;
     const double distance = res * boundingSphere() / tfov;
 
-    if (distanceToCamera < distance) {
+    if ((distanceToCamera < distance) || (_generalProperties.renderAtDistance)) {
         try {
             // Before Shadows
             _globeLabelsComponent.draw(data);

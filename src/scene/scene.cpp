@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scene.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -34,7 +35,6 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
@@ -474,6 +474,15 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
+std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        return global::sessionRecording->currentPlaybackInterpolationTime();
+    }
+    else {
+        return std::chrono::steady_clock::now();
+    }
+}
+
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
                              ghoul::EasingFunction easingFunction)
 {
@@ -496,11 +505,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    std::chrono::steady_clock::time_point now = (
-        global::sessionRecording->isSavingFramesDuringPlayback()     ?
-        global::sessionRecording->currentPlaybackInterpolationTime() :
-        std::chrono::steady_clock::now()
-    );
+    std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
             info.beginTime = now;
@@ -550,13 +555,7 @@ void Scene::updateInterpolations() {
 
     using namespace std::chrono;
 
-    steady_clock::time_point now;
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-        now = global::sessionRecording->currentPlaybackInterpolationTime();
-    }
-    else {
-        now = steady_clock::now();
-    }
+    steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(

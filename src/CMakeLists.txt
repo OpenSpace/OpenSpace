@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/openspace.cpp
+  ${OPENSPACE_BASE_DIR}/src/camera/camera.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
@@ -42,6 +43,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
@@ -49,17 +52,11 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/sessionrecording_lua.inl
-  ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecfileversiontask.cpp
@@ -67,6 +64,18 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/avoidcollisioncurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurves/zoomoutoverviewcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/keyframenavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationhandler_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/navigationstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/orbitalnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/path.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathcurve.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator.cpp
+  ${OPENSPACE_BASE_DIR}/src/navigation/pathnavigator_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/navigation/waypoint.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
   ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
@@ -108,7 +117,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/query/query.cpp
-  ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
@@ -151,7 +159,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/collisionhelper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/coordinateconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
@@ -180,6 +188,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/touch.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/universalhelpers.cpp
   ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
@@ -195,6 +204,8 @@ if (APPLE)
 endif ()
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/camera/camerapose.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -212,6 +223,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/action.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/actionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
@@ -222,21 +235,27 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/avoidcollisioncurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurves/zoomoutoverviewcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/keyframenavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationhandler.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/navigationstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/orbitalnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/path.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathcurve.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/pathnavigator.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/navigation/waypoint.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
@@ -284,7 +303,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
@@ -298,7 +316,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/texturecomponent.h
@@ -325,7 +342,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/collisionhelper.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
@@ -364,6 +381,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
@@ -463,10 +481,6 @@ endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
-
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
 
 # Just in case, create the bin directory
 add_custom_command(

@@ -27,15 +27,15 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
@@ -47,10 +47,8 @@ int addLayer(lua_State* L) {
     ZoneScoped
 
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
-
-    // String arguments
-    const std::string& globeName = ghoul::lua::value<std::string>(L, 1);
-    const std::string& layerGroupName = ghoul::lua::value<std::string>(L, 2);
+    auto [globeName, layerGroupName, layerDict] =
+        ghoul::lua::values<std::string, std::string, ghoul::Dictionary>(L);
 
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
@@ -73,23 +71,10 @@ int addLayer(lua_State* L) {
     }
 
     // Get the dictionary defining the layer
-    ghoul::Dictionary d;
-    try {
-        ghoul::lua::luaDictionaryFromState(L, d);
-    }
-    catch (const ghoul::lua::LuaFormatException& e) {
-        LERRORC("addLayerFromDictionary", e.what());
-        lua_settop(L, 0);
-        return 0;
-    }
-    lua_settop(L, 0);
-
-    Layer* layer = globe->layerManager().addLayer(groupID, d);
+    Layer* layer = globe->layerManager().addLayer(groupID, layerDict);
     if (layer) {
         layer->initialize();
     }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -98,11 +83,8 @@ int addLayer(lua_State* L) {
  */
 int deleteLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::deleteLayer");
-
-    const std::string& globeName = luaL_checkstring(L, 1);
-    const std::string& layerGroupName = luaL_checkstring(L, 2);
-    const std::string& layerName = luaL_checkstring(L, 3);
-    lua_pop(L, 3);
+    auto [globeName, layerGroupName, layerName] =
+        ghoul::lua::values<std::string, std::string, std::string>(L);
 
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
@@ -125,17 +107,12 @@ int deleteLayer(lua_State* L) {
     }
 
     globe->layerManager().deleteLayer(groupID, layerName);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int getLayers(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::getLayers");
-
-    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
-    const std::string& layer = ghoul::lua::value<std::string>(L, 2);
-    lua_pop(L, 2);
+    auto [globeIdentifier, layer] = ghoul::lua::values<std::string, std::string>(L);
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -168,12 +145,8 @@ int getLayers(lua_State* L) {
 
 int moveLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::moveLayer");
-
-    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
-    const std::string& layer = ghoul::lua::value<std::string>(L, 2);
-    int oldPosition = ghoul::lua::value<int>(L, 3);
-    int newPosition = ghoul::lua::value<int>(L, 4);
-    lua_pop(L, 4);
+    auto [globeIdentifier, layer, oldPosition, newPosition] =
+        ghoul::lua::values<std::string, std::string, int, int>(L);
 
     if (oldPosition == newPosition) {
         return 0;
@@ -197,22 +170,16 @@ int moveLayer(lua_State* L) {
 
     globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
     lg.moveLayers(oldPosition, newPosition);
-
     return 0;
 }
 
 int goToChunk(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::goToChunk");
+    auto [identifier, x, y, level] = ghoul::lua::values<std::string, int, int, int>(L);
 
-    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
-    const int x = ghoul::lua::value<int>(L, 2);
-    const int y = ghoul::lua::value<int>(L, 3);
-    const int level = ghoul::lua::value<int>(L, 4);
-    lua_pop(L, 4);
-
-    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    SceneGraphNode* n = sceneGraphNode(identifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+        return ghoul::lua::luaError(L, "Unknown globe name: " + identifier);
     }
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
@@ -221,22 +188,18 @@ int goToChunk(lua_State* L) {
     }
 
     global::moduleEngine->module<GlobeBrowsingModule>()->goToChunk(*globe, x, y, level);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int goToGeo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToGeo");
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToGeo");
 
     // Check if the user provided a Scene graph node identifier as the first argument.
     // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber
     const bool providedGlobeIdentifier = !lua_isnumber(L, 1);
-    const int parameterOffset = providedGlobeIdentifier ? 1 : 0;
-
     const SceneGraphNode* n;
     if (providedGlobeIdentifier) {
-        const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+        const std::string& globeIdentifier = ghoul::lua::value<std::string>(L);
         n = sceneGraphNode(globeIdentifier);
         if (!n) {
             return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
@@ -249,8 +212,64 @@ int goToGeo(lua_State* L) {
         }
     }
 
-    const double latitude = ghoul::lua::value<double>(L, parameterOffset + 1);
-    const double longitude = ghoul::lua::value<double>(L, parameterOffset + 2);
+    auto [latitude, longitude, altitude] =
+        ghoul::lua::values<double, double, std::optional<double>>(L);
+
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        if (providedGlobeIdentifier) {
+            return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+        }
+        else {
+            return ghoul::lua::luaError(
+                L,
+                "Current anchor node is not a RenderableGlobe. Either change the anchor "
+                "to a globe, or specify a globe identifier as the first argument"
+            );
+        }
+    }
+
+    if (altitude.has_value()) {
+        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
+            *globe,
+            latitude,
+            longitude,
+            *altitude
+        );
+    }
+    else {
+        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
+            *globe,
+            latitude,
+            longitude
+        );
+    }
+    return 0;
+}
+
+int flyToGeo(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 3, 6 }, "lua::flyToGeo");
+
+    // Check if the user provided a Scene graph node identifier as the first argument.
+    // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber
+    const bool providedGlobeIdentifier = !lua_isnumber(L, 1);
+    const int parameterOffset = providedGlobeIdentifier ? 1 : 0;
+
+    const SceneGraphNode* n;
+    if (providedGlobeIdentifier) {
+        const std::string& globeIdentifier =
+            ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+        n = sceneGraphNode(globeIdentifier);
+        if (!n) {
+            return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+        }
+    }
+    else {
+        n = global::navigationHandler->orbitalNavigator().anchorNode();
+        if (!n) {
+            return ghoul::lua::luaError(L, "No anchor node is set.");
+        }
+    }
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
@@ -266,20 +285,71 @@ int goToGeo(lua_State* L) {
         }
     }
 
-    if (nArguments == parameterOffset + 2) {
-        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
-            *globe, latitude, longitude
-        );
+    const double latitude =
+        ghoul::lua::value<double>(L, parameterOffset + 1, ghoul::lua::PopValue::No);
+    const double longitude =
+        ghoul::lua::value<double>(L, parameterOffset + 2, ghoul::lua::PopValue::No);
+    const double altitude =
+        ghoul::lua::value<double>(L, parameterOffset + 3, ghoul::lua::PopValue::No);
+
+    // Compute the relative position based on the input values
+    auto module = global::moduleEngine->module<GlobeBrowsingModule>();
+    const glm::dvec3 positionModelCoords = module->cartesianCoordinatesFromGeo(
+        *globe,
+        latitude,
+        longitude,
+        altitude
+    );
+
+    using namespace std::string_literals;
+    ghoul::Dictionary instruction;
+    instruction.setValue("TargetType", "Node"s);
+    instruction.setValue("Target", n->identifier());
+    instruction.setValue("Position", positionModelCoords);
+
+    // Handle the two optional arguments: duration and use target's up direction argument
+    // The user can either provide both, or one of them
+    if (nArguments >= parameterOffset + 4) {
+        const int firstLocation = parameterOffset + 4;
+        const bool firstIsNumber = (lua_isnumber(L, firstLocation) != 0);
+        const bool firstIsBool = (lua_isboolean(L, firstLocation) != 0);
+
+        if (!(firstIsNumber || firstIsBool)) {
+            const char* msg = lua_pushfstring(
+                L,
+                "%s or %s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                lua_typename(L, LUA_TBOOLEAN),
+                luaL_typename(L, -1)
+            );
+            return ghoul::lua::luaError(
+                L, fmt::format("bad argument #{} ({})", firstLocation, msg)
+            );
+        }
+
+        int location = firstLocation;
+        if (firstIsBool) {
+            const bool useUpFromTarget = (lua_toboolean(L, location) == 1);
+            instruction.setValue("UseTargetUpDirection", useUpFromTarget);
+
+            if (nArguments > location) {
+                location++;
+            }
+        }
+
+        if (firstIsNumber || nArguments > firstLocation) {
+            double duration =
+                ghoul::lua::value<double>(L, location, ghoul::lua::PopValue::No);
+            constexpr const double Epsilon = 1e-5;
+            if (duration <= Epsilon) {
+                return ghoul::lua::luaError(L, "Duration must be larger than zero");
+            }
+            instruction.setValue("Duration", duration);
+        }
     }
-    else if (nArguments == parameterOffset + 3) {
-        const double altitude = ghoul::lua::value<double>(L, parameterOffset + 3);
-        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
-            *globe,
-            latitude,
-            longitude,
-            altitude
-        );
-    }
+
+    global::navigationHandler->pathNavigator().createPath(instruction);
+    global::navigationHandler->pathNavigator().startPath();
 
     lua_settop(L, 0);
 
@@ -287,14 +357,10 @@ int goToGeo(lua_State* L) {
     return 0;
 }
 
-int getGeoPosition(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getGeoPosition");
-
-    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
-    const double latitude = ghoul::lua::value<double>(L, 2);
-    const double longitude = ghoul::lua::value<double>(L, 3);
-    const double altitude = ghoul::lua::value<double>(L, 4);
-    lua_pop(L, 4);
+int getLocalPositionFromGeo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getLocalPositionFromGeo");
+    auto [globeIdentifier, latitude, longitude, altitude] =
+        ghoul::lua::values<std::string, double, double, double>(L);
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
@@ -306,16 +372,8 @@ int getGeoPosition(lua_State* L) {
     }
 
     GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
-    glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
-        *globe,
-        latitude,
-        longitude,
-        altitude
-    );
-
-    ghoul::lua::push(L, pos.x, pos.y, pos.z);
-
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
+    glm::vec3 p = mod.cartesianCoordinatesFromGeo(*globe, latitude, longitude, altitude);
+    ghoul::lua::push(L, p.x, p.y, p.z);
     return 3;
 }
 
@@ -345,72 +403,48 @@ int getGeoPositionForCamera(lua_State* L) {
                                   posHandle.centerToReferenceSurface);
 
     ghoul::lua::push(L, glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);
-
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
 }
 
 int loadWMSCapabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
-
-    std::string name = ghoul::lua::value<std::string>(L, 1);
-    std::string globe = ghoul::lua::value<std::string>(L, 2);
-    std::string url = ghoul::lua::value<std::string>(L, 3);
+    auto [name, globe, url] =
+        ghoul::lua::values<std::string, std::string, std::string>(L);
 
     global::moduleEngine->module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
         std::move(globe),
         std::move(url)
     );
-
-    lua_pop(L, 3);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeWMSServer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
-
-    const std::string& name = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string name = ghoul::lua::value<std::string>(L);
 
     global::moduleEngine->module<GlobeBrowsingModule>()->removeWMSServer(name);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int capabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
+    const std::string name = ghoul::lua::value<std::string>(L);
 
-    const std::string& name = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     GlobeBrowsingModule::Capabilities cap =
         global::moduleEngine->module<GlobeBrowsingModule>()->capabilities(name);
 
     lua_newtable(L);
-    for (unsigned long i = 0; i < cap.size(); ++i) {
+    for (size_t i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
 
         lua_newtable(L);
-
         ghoul::lua::push(L, "Name", l.name);
         lua_settable(L, -3);
-
         ghoul::lua::push(L, "URL", l.url);
         lua_settable(L, -3);
-
         lua_rawseti(L, -2, i + 1);
     }
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

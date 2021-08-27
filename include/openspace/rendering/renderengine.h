@@ -32,7 +32,9 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
 #include <filesystem>
 
@@ -54,7 +56,6 @@ namespace scripting { struct LuaLibrary; }
 class Camera;
 class RaycasterManager;
 class DeferredcasterManager;
-class Renderer;
 class Scene;
 class SceneManager;
 class ScreenLog;
@@ -63,12 +64,6 @@ struct ShutdownInformation;
 
 class RenderEngine : public properties::PropertyOwner {
 public:
-    enum class RendererImplementation {
-        Framebuffer = 0,
-        ABuffer,
-        Invalid
-    };
-
     RenderEngine();
     ~RenderEngine();
 
@@ -79,9 +74,6 @@ public:
     void setScene(Scene* scene);
     Scene* scene();
     void updateScene();
-
-    const Renderer& renderer() const;
-    RendererImplementation rendererImplementation() const;
 
     ghoul::opengl::OpenGLStateCache& openglStateCache();
 
@@ -121,22 +113,9 @@ public:
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    void preRaycast(ghoul::opengl::ProgramObject& programObject);
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    void postRaycast(ghoul::opengl::ProgramObject& programObject);
-
-    /**
      * Set the camera to use for rendering
      */
     void setCamera(Camera* camera);
-
-
-    void setRendererFromString(const std::string& renderingMethod);
 
     /**
      * Lets the renderer update the data to be brought into the rendererer programs
@@ -176,9 +155,6 @@ public:
     uint64_t frameNumber() const;
 
 private:
-    void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& renderingMethod) const;
-
     void renderScreenLog();
     void renderVersionInformation();
     void renderCameraInformation();
@@ -188,13 +164,12 @@ private:
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
 
-    std::unique_ptr<Renderer> _renderer;
-    RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
+    FramebufferRenderer _renderer;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
-    ghoul::opengl::OpenGLStateCache* _openglStateCache;
+    ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
@@ -245,6 +220,9 @@ private:
     } _cameraButtonLocations;
 
     std::string _versionString;
+
+    properties::Vec4Property _enabledFontColor;
+    properties::Vec4Property _disabledFontColor;
 };
 
 } // namespace openspace

@@ -37,8 +37,9 @@
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -398,20 +399,38 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "the surface of the specified globe."
         },
         {
-            "getGeoPosition",
-            &globebrowsing::luascriptfunctions::getGeoPosition,
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            "flyToGeo", 
+            &globebrowsing::luascriptfunctions::flyToGeo,
+            {},
+            "[string], number, number, number [, bool, number]",
+            "Fly the camera to geographic coordinates of a globe, using the path "
+            "navigation system. The first (optional) argument is the identifier of a "
+            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
+            "current anchor will be used. The second and third argument is latitude and "
+            "longitude (degrees). The fourth argument is the altitude, in meters. The "
+            "last two optional arguments are: a bool specifying whether the up vector "
+            "at the target position should be set to the globe's North vector, and a "
+            "duration for the motion, in seconds. Either of the two can be left out."
+        },
+        {
+            "getLocalPositionFromGeo",
+            &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
             {},
             "string, number, number, number",
-            "Returns the specified surface position on the globe identified by the first "
-            "argument, as three floating point values - latitude, longitude and altitude "
-            "(degrees and meters)."
+            "Returns a position in the local Cartesian coordinate system of the globe "
+            "identified by the first argument, that corresponds to the given geographic "
+            "coordinates: latitude, longitude and altitude (in degrees and meters). In "
+            "the local coordinate system, the position (0,0,0) corresponds to the "
+            "globe's center."
         },
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
             {},
             "void",
-            "Get geographic coordinates of the camera poosition in latitude, "
+            "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
         },
         {
@@ -597,7 +616,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
         Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
     );
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     state.anchor = globe.owner()->identifier();
     state.referenceFrame = globe.owner()->identifier();
     state.position = positionModelSpace;

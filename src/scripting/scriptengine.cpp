@@ -214,15 +214,11 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
     return true;
 }
 
-bool ScriptEngine::runScriptFile(const std::string& filename) {
+bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
     ZoneScoped
 
-    if (filename.empty()) {
-        LWARNING("Filename was empty");
-        return false;
-    }
     if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(fmt::format("Script with name '{}' did not exist", filename));
+        LERROR(fmt::format("Script with name {} did not exist", filename));
         return false;
     }
 
@@ -426,6 +422,13 @@ void ScriptEngine::addBaseLibrary() {
                 {},
                 "string",
                 "Checks whether the provided file exists."
+            },
+            {
+                "readFile",
+                &luascriptfunctions::readFile,
+                {},
+                "string",
+                "Reads a file from disk and return its contents"
             },
             {
                 "directoryExists",
@@ -649,14 +652,17 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
-            LDEBUG(fmt::format("Using script log file '{}'", _logFilename));
+            LDEBUG(fmt::format(
+                "Using script log file {}", std::filesystem::path(_logFilename)
+            ));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
                 LERROR(fmt::format(
-                    "Could not open file '{}' for logging scripts", _logFilename
+                    "Could not open file {} for logging scripts",
+                    std::filesystem::path(_logFilename)
                 ));
 
                 return false;
@@ -688,7 +694,7 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    std::lock_guard guard(_slaveScriptsMutex);
     while (!_incomingScripts.empty()) {
         QueueItem item = std::move(_incomingScripts.front());
         _incomingScripts.pop();
@@ -722,7 +728,7 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped
 
-    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    std::lock_guard guard(_slaveScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
@@ -751,7 +757,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+        std::lock_guard guard(_slaveScriptsMutex);
         while (!_slaveScriptQueue.empty()) {
             try {
                 runScript(_slaveScriptQueue.front());

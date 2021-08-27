@@ -1,4 +1,46 @@
 {
+  "actions": [
+    {
+      "documentation": "Toggle trails on or off for satellites around Earth",
+      "gui_path": "/Earth",
+      "identifier": "profile.toggle.satellitetrails",
+      "is_local": false,
+      "name": "Toggle satellite trails",
+      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle points and labels for the Lagrangian points for Earth Sun system",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.lagrangianpoints",
+      "is_local": false,
+      "name": "Toggle Lagrangian points",
+      "script": "local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.hudf",
+      "is_local": false,
+      "name": "Toggle Hubble Ultra Deep Field",
+      "script": "local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle L2 label, point and line",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.l2",
+      "is_local": false,
+      "name": "Toggle L2",
+      "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle James Webb Space Telecope field of view and view band",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.jwst_fov",
+      "is_local": false,
+      "name": "Toggle JWST field of view and view band",
+      "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",
@@ -38,44 +80,24 @@
   ],
   "keybindings": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.satellitetrails",
+      "key": "S"
     },
     {
-      "documentation": "Toggle points and labels for the Lagrangian points for Earth Sun system",
-      "gui_path": "/JWST",
-      "is_local": false,
-      "key": "P",
-      "name": "Toggle Lagrangian points",
-      "script": "local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.lagrangianpoints",
+      "key": "P"
     },
     {
-      "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
-      "gui_path": "/JWST",
-      "is_local": false,
-      "key": "U",
-      "name": "Toggle Hubble Ultra Deep Field",
-      "script": "local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.hudf",
+      "key": "U"
     },
     {
-      "documentation": "Toggle L2 label, point and line",
-      "gui_path": "/JWST",
-      "is_local": false,
-      "key": "O",
-      "name": "Toggle L2",
-      "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.l2",
+      "key": "O"
     },
     {
-      "documentation": "Toggle James Webb Space Telecope field of view and view band",
-      "gui_path": "/JWST",
-      "is_local": false,
-      "key": "V",
-      "name": "Toggle JWST field of view and view band",
-      "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.jwst_fov",
+      "key": "V"
     }
   ],
   "mark_nodes": [
@@ -107,6 +129,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

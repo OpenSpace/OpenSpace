@@ -338,7 +338,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
 
 #if !defined(__APPLE__)
-    glm::ivec2 resolution = global::renderEngine->renderingResolution();
     GLint viewport[4];
     global::renderEngine->openglStateCache().viewport(viewport);
     _programObject->setUniform(
@@ -430,14 +429,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
     _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
-    const bool usingFramebufferRenderer =
-        global::renderEngine->rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
-
-    if (usingFramebufferRenderer) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
+    glDepthMask(false);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     const bool renderLines = (_appearance.renderingModes == RenderingModeLines) ||
                              (_appearance.renderingModes == RenderingModeLinesPoints);
@@ -508,10 +501,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    if (usingFramebufferRenderer) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(true);
 
     _programObject->deactivate();
 }

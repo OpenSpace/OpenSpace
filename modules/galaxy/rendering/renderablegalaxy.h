@@ -64,7 +64,7 @@ private:
         std::vector<glm::vec3> color;
     };
     Result loadPointFile();
-    Result loadCachedFile(const std::string& file);
+    Result loadCachedFile(const std::filesystem::path& file);
 
     glm::vec3 _volumeSize = glm::vec3(0.f);
     glm::vec3 _pointScaling = glm::vec3(0.f);

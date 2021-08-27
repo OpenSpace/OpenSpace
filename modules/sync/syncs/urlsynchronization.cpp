@@ -192,7 +192,7 @@ void UrlSynchronization::start() {
                 &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
             {
                 if (p.totalBytesKnown) {
-                    std::lock_guard<std::mutex> guard(fileSizeMutex);
+                    std::lock_guard guard(fileSizeMutex);
                     fileSizes[url] = p.totalBytes;
 
                     if (!_nTotalBytesKnown && startedAllDownloads &&

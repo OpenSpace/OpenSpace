@@ -253,21 +253,13 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 break;
             case Parameters::Type::ImageSequence:
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(source),
-                        translations
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
                 break;
             case Parameters::Type::Hybrid:
                 // first read labels
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(source),
-                        translations
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
 
                 if (p.eventFile.has_value()) {
@@ -297,11 +289,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
             case Parameters::Type::ImageAndInstrumentTimes:
             {
                 parsers.push_back(
-                    std::make_unique<LabelParser>(
-                        identifier,
-                        std::move(source),
-                        translations
-                    )
+                    std::make_unique<LabelParser>(std::move(source), translations)
                 );
 
                 if (!p.timesSequence.has_value()) {

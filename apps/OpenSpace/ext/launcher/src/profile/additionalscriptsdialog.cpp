@@ -33,18 +33,19 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <sstream>
 
-AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
-                                                 QWidget* parent)
+AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
+                                                 std::vector<std::string>* scripts)
     : QDialog(parent)
-    , _profile(profile)
+    , _scripts(scripts)
+    , _scriptsData(*_scripts)
 {
     setWindowTitle("Additional Scripts");
     createWidgets();
 
-    std::vector<std::string> scripts = _profile.additionalScripts();
     std::string scriptText = std::accumulate(
-        scripts.begin(), scripts.end(),
+        _scriptsData.begin(), _scriptsData.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
     );
     _textScripts->setText(QString::fromStdString(std::move(scriptText)));
@@ -95,7 +96,7 @@ void AdditionalScriptsDialog::parseScript() {
         std::getline(iss, s);
         additionalScripts.push_back(std::move(s));
     }
-    _profile.setAdditionalScripts(additionalScripts);
+    *_scripts = std::move(additionalScripts);
     accept();
 }
 

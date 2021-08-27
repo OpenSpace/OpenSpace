@@ -28,8 +28,8 @@
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -1112,22 +1112,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto renderer = global::renderEngine->rendererImplementation();
-            const bool usingFBufferRenderer = renderer ==
-                                        RenderEngine::RendererImplementation::Framebuffer;
-
-            const bool usingABufferRenderer = renderer ==
-                                        RenderEngine::RendererImplementation::ABuffer;
-
-            if (usingABufferRenderer) {
-                _shaderProgram->setUniform("usingAdditiveBlending", _pColorABlendEnabled);
-            }
-
-            additiveBlending = usingFBufferRenderer;
-            if (additiveBlending) {
-                glDepthMask(false);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            }
+            additiveBlending = true;
+            glDepthMask(false);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         }
 
         glBindVertexArray(_vertexArrayObject);
