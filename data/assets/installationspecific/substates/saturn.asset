@@ -86,6 +86,13 @@ local goToSaturnOverview = [[
 ]]
 
 local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "Saturn",
+    Action = goToSaturnOverview
+  },
+  -- Rings
   {
     From = "Saturn",
     To = "SaturnRings",
@@ -96,6 +103,7 @@ local transitions = {
     To = "Saturn",
     Action = goToSaturnOverview
   },
+  -- Titan
   {
     From = "Saturn",
     To = "Titan",
@@ -106,6 +114,7 @@ local transitions = {
     To = "Saturn",
     Action = goToSaturnOverview
   },
+  -- Cassini - Huygens
   {
     From = "Saturn",
     To = "Cassini",

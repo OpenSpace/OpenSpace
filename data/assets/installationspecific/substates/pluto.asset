@@ -21,7 +21,20 @@ local states = { plutoState }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
-local transitions = { }
+local goToPluto = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Pluto', true)
+]]
+
+local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "Pluto",
+    Action = goToPluto
+  }
+}
 
 asset.export("states", states)
 asset.export("transitions", transitions)

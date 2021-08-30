@@ -66,6 +66,12 @@ local goToJupiter = [[
 ]]
 
 local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "Jupiter",
+    Action = goToJupiter
+  },
   -- Europa
   {
     From = "Jupiter",

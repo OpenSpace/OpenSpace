@@ -87,71 +87,25 @@ local transitions = {
     From = "Earth",
     To = "SolarSystem"
   },
-  {
-    From = "SolarSystem",
-    To = "Earth",
-    Action = [[
-      ]] .. util.disableLinearFlight() .. [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Earth', true)
-    ]]
-  },
   -- 2. Mars - SolarSystem
   {
     From = "Mars",
     To = "SolarSystem"
-  },
-  {
-    From = "SolarSystem",
-    To = "Mars",
-    Action = [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Mars', true)
-    ]]
   },
   -- 4. Jupiter - SolarSystem
   {
     From = "Jupiter",
     To = "SolarSystem"
   },
-  {
-    From = "SolarSystem",
-    To = "Jupiter",
-    Action = [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Jupiter', true)
-    ]]
-  },
   -- 5. Saturn - SolarSystem
   {
     From = "Saturn",
     To = "SolarSystem"
   },
-  {
-    From = "SolarSystem",
-    To = "Saturn",
-    Action = [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Saturn', true)
-    ]]
-  },
   -- 6. Pluto - SolarSystem
   {
     From = "Pluto",
     To = "SolarSystem"
-  },
-  {
-    From = "SolarSystem",
-    To = "Pluto",
-    Action = [[
-      ]] .. util.setCurveType("ZoomOutOverview") .. [[
-      openspace.time.setPause(true)
-      openspace.pathnavigation.goTo('Pluto', true)
-    ]]
   },
   -- 7. Voyager and Pioneer - SolarSystem
   {
@@ -162,11 +116,6 @@ local transitions = {
   {
     From = "CBR",
     To = "SolarSystem"
-  },
-  {
-    From = "SolarSystem",
-    To = "CBR",
-    Action = util.applyLinearFlight(substateCBR.cbrTargetDistance, 1.5)
   }
 }
 

@@ -21,8 +21,14 @@ local states = { cbrState }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
-local transitions = {}
+local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "CBR",
+    Action = util.applyLinearFlight(cbrTargetDistance, 1.5)
+  }
+}
 
 asset.export("states", states)
 asset.export("transitions", transitions)
-asset.export("cbrTargetDistance", cbrTargetDistance)

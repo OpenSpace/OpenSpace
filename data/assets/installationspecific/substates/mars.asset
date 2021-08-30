@@ -148,6 +148,12 @@ local states = {
 ----------------------------------------------------------------
 
 local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "Mars",
+    Action = goToMarsOverview
+  },
   -- Valles Marineris - overview
   {
     From = "Mars",

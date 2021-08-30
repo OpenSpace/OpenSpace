@@ -48,6 +48,18 @@ local states = { earthState, moonState, apolloState }
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "Earth",
+    Action = [[
+      ]] .. util.disableLinearFlight() .. [[
+      ]] .. util.setCurveType("ZoomOutOverview") .. [[
+      openspace.time.setPause(true)
+      openspace.pathnavigation.goTo('Earth', true)
+    ]]
+  },
+  -- Moon
   {
     From = "Earth",
     To = "Moon",
@@ -68,6 +80,7 @@ local transitions = {
       openspace.pathnavigation.goTo('Earth', true)
     ]]
   },
+  -- Apollo
   {
     From = "Earth",
     To = "Apollo",
