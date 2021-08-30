@@ -1,11 +1,9 @@
 local util = asset.require('./utility_functions')
 
-local defaultTime = 654728475 -- 2020 Sep 9, 9:00
-
 ---------------------------------------------------------------- 
 -- SOLAR SYSTEM STATE - to reduce number of transitions
 ----------------------------------------------------------------
-local solarTargetDistance = 3E11
+local solarTargetDistance = 1079252848800 -- 1 lighthour
 local solarsystemflightDuration = 9 -- seconds
 
 local solarSystemState = {
