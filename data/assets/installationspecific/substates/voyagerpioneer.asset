@@ -66,8 +66,16 @@ local voyagerPioneerState = {
   Identifier = "VoyagerPioneer"
 }
 
+-- 1973 Pioneers reaches Jupiter
+local time1973 = "1973-11-25T12:58:03.505";
+local year1973state = {
+  Identifier = "1973",
+  Enter = util.applyLinearFlight(1.5E12, 1.2),
+  Exit = [[]]
+}
+
 -- 1974 Pioneers reaches Jupiter
-local time1974 = "1973-11-25T12:58:03.505";
+local time1974 = "1974-11-25T12:58:03.505";
 local year1974state = {
   Identifier = "1974",
   Enter = util.applyLinearFlight(1.5E12, 1.2),
@@ -108,7 +116,8 @@ local year1989state = {
 
 local states = {
   voyagerPioneerState,
-  year1974state,
+  year1973state,
+  year197state,
   year1977state,
   year1979state,
   year1986state,
@@ -141,6 +150,70 @@ local transitions = {
       ]] .. util.stopOrbiting() .. [[
       ]] .. fadeOutTrails() .. [[
     ]]
+  },
+  -- 1973
+  {
+    From = "VoyagerPioneer",
+    To = "1973",
+    Action = setTime(time1973)
+  },
+  {
+    From = "1973",
+    To = "VoyagerPioneer",
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
+  },
+  {
+    From = "1974",
+    To = "1973",
+    Action = interpolateTime(time1973)
+  },
+  {
+    From = "1973",
+    To = "1974",
+    Action = interpolateTime(time1974)
+  },
+  {
+    From = "1973",
+    To = "1979",
+    Action = interpolateTime(time1979)
+  },
+  {
+    From = "1979",
+    To = "1973",
+    Action = interpolateTime(time1973)
+  },
+  {
+    From = "1973",
+    To = "1986",
+    Action = interpolateTime(time1986)
+  },
+  {
+    From = "1986",
+    To = "1973",
+    Action = interpolateTime(time1973)
+  },
+  {
+    From = "1973",
+    To = "1989",
+    Action = interpolateTime(time1989)
+  },
+  {
+    From = "1989",
+    To = "1973",
+    Action = interpolateTime(time1973)
+  },
+  {
+    From = "1973",
+    To = "1977",
+    Action = interpolateTime(time1977)
+  },
+  {
+    From = "1977",
+    To = "1973",
+    Action = interpolateTime(time1973)
   },
   -- 1974
   {
@@ -313,6 +386,10 @@ local transitions = {
     Action = interpolateTime(time1989)
   },
   -- Back to SolarSystem from substates
+  {
+    From = "1973",
+    To = "SolarSystem"
+  },
   {
     From = "1974",
     To = "SolarSystem"
