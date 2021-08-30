@@ -43,20 +43,12 @@ local vallesMarinerisAboveNavState = [[{
 
 local goToVMClose = [[
   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  openspace.time.setPause(true)
-  openspace.pathnavigation.generatePath({
-    TargetType = "NavigationState", 
-    NavigationState = ]] .. vallesMarinerisTiltedNavState .. [[
-  })
+  ]] .. util.flyToNavState(vallesMarinerisTiltedNavState) .. [[
 ]]
 
 local goToVMOverview = [[
   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  openspace.time.setPause(true)
-  openspace.pathnavigation.generatePath({
-    TargetType = "NavigationState", 
-    NavigationState = ]] .. vallesMarinerisAboveNavState .. [[
-  })
+  ]] .. util.flyToNavState(vallesMarinerisAboveNavState) .. [[
 ]]
 
 local vallesMarinerisCloseState = {

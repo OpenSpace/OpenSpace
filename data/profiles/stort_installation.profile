@@ -150,11 +150,31 @@
       "name": "{moonTrail_minor}.Renderable.Appearance.Color",
       "type": "setPropertyValue",
       "value": "{0.3, 0.5, 0.5}"
+    },
+    {
+      "name": "Scene.Voyager1.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.424000, 1.000000, 0.404000}"
+    },
+    {
+      "name": "Scene.Voyager2.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.424000, 1.000000, 0.404000}"
+    },
+    {
+      "name": "Scene.Pioneer10.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.910000, 0.478000, 0.976000}"
+    },
+    {
+      "name": "Scene.Pioneer11.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.910000, 0.478000, 0.976000}"
     }
   ],
   "time": {
     "type": "absolute",
-    "value": "2020-09-30T09:00:00"
+    "value": "2021-08-27T12:58:03.505"
   },
   "version": {
     "major": 1,

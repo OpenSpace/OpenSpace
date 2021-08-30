@@ -14,6 +14,19 @@ local orbitOnArrival = function()
   ]]
 end
 
+local orbitConstantLatitudeOnArrival = function()
+  return [[
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+      1 -- OrbitAtConstantLatitude
+    )
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
+      true
+    )
+  ]]
+end
+
 local stopOrbiting = function()
   return [[
     openspace.setPropertyValueSingle(
@@ -95,7 +108,16 @@ local disableRoll = function()
   ]]
 end
 
-local setCurveType = function (type)
+local flyToNavState = function(state)
+  return [[ 
+    openspace.time.setPause(true)
+    openspace.pathnavigation.generatePath({
+      TargetType = "NavigationState", NavigationState = ]] .. state .. [[
+    })
+  ]]
+end
+
+local setCurveType = function(type)
   local typeAsInt = 0
   if (type == "ZoomOutOverview") then
     typeAsInt = 2
@@ -119,6 +141,7 @@ local appendTable = function(A, B)
 end
 
 asset.export("orbitOnArrival", orbitOnArrival)
+asset.export("orbitConstantLatitudeOnArrival", orbitConstantLatitudeOnArrival)
 asset.export("stopOrbiting", stopOrbiting)
 asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
@@ -126,5 +149,6 @@ asset.export("applyLinearFlight", applyLinearFlight)
 asset.export("disableLinearFlight", disableLinearFlight)
 asset.export("enableRoll", enableRoll)
 asset.export("disableRoll", disableRoll)
+asset.export("flyToNavState", flyToNavState)
 asset.export("setCurveType", setCurveType)
 asset.export("appendTable", appendTable)

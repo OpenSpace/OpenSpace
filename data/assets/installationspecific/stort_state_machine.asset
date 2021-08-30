@@ -81,6 +81,8 @@ util.appendTable(states, substatePluto.states)
 util.appendTable(states, substateVoyagerPioneer.states)
 util.appendTable(states, substateCBR.states)
 
+-- @TODO: we probably want indivudual behavior for the transitions from the 
+-- different states
 local transitions = {
   -- 1. Earth - SolarSystem
   {
@@ -108,10 +110,7 @@ local transitions = {
     To = "SolarSystem"
   },
   -- 7. Voyager and Pioneer - SolarSystem
-  {
-    From = "VoyagerPioneer",
-    To = "SolarSystem"
-  },
+  -- In substate
   -- 8. Cosmic Background Radiation - SolarSystem
   {
     From = "CBR",

@@ -4,19 +4,17 @@ local util = asset.require('./../utility_functions')
 -- HELPERS
 ----------------------------------------------------------------
 local setTime = function(time)
-  return  "openspace.time.setTime('" .. time .. "')"
+  return "openspace.time.setTime('" .. time .. "')"
 end
 
 local interpolateTime = function(time)
   local duration = 4.0
-  return  "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
+  return "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
 end
 
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local voyagerPioneerTargetDistance = 36E7
-
 local identifiers = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
 
 local fadeInTrails = [[
@@ -50,25 +48,29 @@ local fadeOutTrails = function()
   return str
 end
 
-local time2021 = "2021-08-27T12:58:03.505"
+-- OBS! Should match the time in the profile, or at least in the SolarSystem state
+local today = "2021-08-27T12:58:03.505"
+
+local voyagerPioneerNavigationState = [[{
+  Anchor = "Sun",
+  Pitch = 4.8502868388310596e-15,
+  Position = { 14097490002262.918, 6855666924101.269, 34182234858284.91 },
+  ReferenceFrame = "Root",
+  Up = { -0.2122075783104489, 0.971316980781961, -0.10729057065851644 },
+  Yaw = -8.616371505176941e-15
+}]]
+
+local doLinearFlightTo2021View = util.applyLinearFlight(3.6E13, 1.2)
 
 local voyagerPioneerState = {
-  Identifier = "VoyagerPioneer",
-  Enter = [[
-    ]] .. util.applyLinearFlight(3.6E13, 1.2) .. [[
-    ]] .. fadeInTrails() .. [[
-  ]],
-  Exit = [[
-    ]] .. util.disableLinearFlight() .. [[
-    ]] .. fadeInTrails() .. [[
-  ]]
+  Identifier = "VoyagerPioneer"
 }
 
 -- 1974 Pioneers reaches Jupiter
-local time1974 = "1974-01-01T12:58:03.505";
+local time1974 = "1973-11-25T12:58:03.505";
 local year1974state = {
   Identifier = "1974",
-  Enter = util.applyLinearFlight(2.3E12, 1.2),
+  Enter = util.applyLinearFlight(1.5E12, 1.2),
   Exit = [[]]
 }
 
@@ -76,7 +78,7 @@ local year1974state = {
 local time1977 = "1977-11-01T12:58:03.505";
 local year1977state = {
   Identifier = "1977",
-  Enter = util.applyLinearFlight(2.3E12, 1.2),
+  Enter = util.applyLinearFlight(1.5E12, 1.2),
   Exit = [[]]
 }
 
@@ -84,10 +86,9 @@ local year1977state = {
 local time1979 = "1979-09-09T12:58:03.505";
 local year1979state = {
   Identifier = "1979",
-  Enter = util.applyLinearFlight(2.3E12, 1.2),
+  Enter = util.applyLinearFlight(3.0E12, 1.2),
   Exit = [[]]
 }
-
 
 -- 1986 Voyager 2 reacher Uranus
 local time1986 = "1986-01-24T12:58:03.505";
@@ -119,11 +120,27 @@ local states = {
 ----------------------------------------------------------------
 
 local transitions = {
-  -- Transition to this state
+  -- Transition to/from this state
   {
     From = "SolarSystem",
     To = "VoyagerPioneer",
-    Action = setTime(time2021)
+    Action = [[ 
+      ]] .. setTime(today) .. [[
+      ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+      ]] .. util.orbitConstantLatitudeOnArrival() .. [[
+      ]] .. util.enableRoll() .. [[
+      ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
+      ]] .. fadeInTrails() .. [[
+    ]]
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "SolarSystem",
+    Action = [[
+      ]] .. util.disableRoll() .. [[
+      ]] .. util.stopOrbiting() .. [[
+      ]] .. fadeOutTrails() .. [[
+    ]]
   },
   -- 1974
   {
@@ -134,7 +151,10 @@ local transitions = {
   {
     From = "1974",
     To = "VoyagerPioneer",
-    Action = setTime(time2021)
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
   },
   {
     From = "1974",
@@ -185,7 +205,10 @@ local transitions = {
   {
     From = "1977",
     To = "VoyagerPioneer",
-    Action = setTime(time2021)
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
   },
   {
     From = "1977",
@@ -221,12 +244,15 @@ local transitions = {
   {
     From = "VoyagerPioneer",
     To = "1979",
-    Action = setTime(time1979)
+    Action = interpolateTime(time1979)
   },
   {
     From = "1979",
     To = "VoyagerPioneer",
-    Action = setTime(time2021)
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
   },
   {
     From = "1979",
@@ -252,12 +278,15 @@ local transitions = {
   {
     From = "1986",
     To = "VoyagerPioneer",
-    Action = interpolateTime(time2021)
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
   },
   {
     From = "VoyagerPioneer",
     To = "1986",
-    Action = setTime(time1986)
+    Action = interpolateTime(time1986)
   },
   {
     From = "1986",
@@ -273,12 +302,15 @@ local transitions = {
   {
     From = "1989",
     To = "VoyagerPioneer",
-    Action = interpolateTime(time2021)
+    Action = [[
+      ]] .. interpolateTime(today) .. [[
+      ]] .. doLinearFlightTo2021View .. [[
+    ]]
   },
   {
     From = "VoyagerPioneer",
     To = "1989",
-    Action = setTime(time1989)
+    Action = interpolateTime(time1989)
   },
   -- Back to SolarSystem from substates
   {
