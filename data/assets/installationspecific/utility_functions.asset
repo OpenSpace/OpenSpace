@@ -54,7 +54,10 @@ local changeAnchor = function(name, interpolationTime)
   ]]
 end
 
-local applyLinearFlight = function(height, zoomSpeedFactor) 
+local applyLinearFlight = function(height, zoomSpeedFactor)
+  if (zoomSpeedFactor == nil) then
+    zoomSpeedFactor = 3.5 -- the default value
+  end
   return [[
     openspace.setPropertyValueSingle(
       'NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance',

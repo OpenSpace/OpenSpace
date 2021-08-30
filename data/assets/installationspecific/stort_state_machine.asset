@@ -158,10 +158,6 @@ local transitions = {
     From = "VoyagerPioneer",
     To = "SolarSystem"
   },
-  {
-    From = "SolarSystem",
-    To = "VoyagerPioneer",
-  },
   -- 8. Cosmic Background Radiation - SolarSystem
   {
     From = "CBR",

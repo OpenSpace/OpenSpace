@@ -1,65 +1,304 @@
 local util = asset.require('./../utility_functions')
 
 ----------------------------------------------------------------
+-- HELPERS
+----------------------------------------------------------------
+local setTime = function(time)
+  return  "openspace.time.setTime('" .. time .. "')"
+end
+
+local interpolateTime = function(time)
+  local duration = 4.0
+  return  "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
+end
+
+----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local voyagerPioneerTargetDistance = 36E7
 
+local identifiers = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
+
+local fadeInTrails = [[
+  openspace.setPropertyValueSingle("Scene.Voyager1.Renderable.Opacity", 1.0, 3.0);
+]]
+
+local fadeInTrails = function()
+  local str = ""
+  for key,identifier in ipairs(identifiers) do
+    str = str .. [[
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Enabled", true
+      );
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Opacity", 1.0, 3.0
+      );
+    ]]
+  end
+  return str
+end
+
+local fadeOutTrails = function()
+  local str = ""
+  for key,identifier in ipairs(identifiers) do
+    str = str .. [[
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Opacity", 0.0, 3.0
+      );
+    ]]
+  end
+  return str
+end
+
+local time2021 = "2021-08-27T12:58:03.505"
+
 local voyagerPioneerState = {
   Identifier = "VoyagerPioneer",
-  Enter = [[]],
+  Enter = [[
+    ]] .. util.applyLinearFlight(3.6E13, 1.2) .. [[
+    ]] .. fadeInTrails() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.disableLinearFlight() .. [[
+    ]] .. fadeInTrails() .. [[
+  ]]
+}
+
+-- 1974 Pioneers reaches Jupiter
+local time1974 = "1974-01-01T12:58:03.505";
+local year1974state = {
+  Identifier = "1974",
+  Enter = util.applyLinearFlight(2.3E12, 1.2),
   Exit = [[]]
 }
 
-local VoyagerTargetDistance = 2E9
-
-local voyagerState = {
-  Identifier = "Voyager",
-  Enter = [[]],
+-- 1977 Voyagers launches
+local time1977 = "1977-11-01T12:58:03.505";
+local year1977state = {
+  Identifier = "1977",
+  Enter = util.applyLinearFlight(2.3E12, 1.2),
   Exit = [[]]
 }
 
-local pioneerTargetDistance = 2E9
-
-local pioneerState = {
-  Identifier = "Pioneer",
-  Enter = [[]],
+-- 1979 Pioneers reaches Saturn, Voyagers reaches Jupiter
+local time1979 = "1979-09-09T12:58:03.505";
+local year1979state = {
+  Identifier = "1979",
+  Enter = util.applyLinearFlight(2.3E12, 1.2),
   Exit = [[]]
 }
 
-local states = { voyagerPioneerState, voyagerState, pioneerState }
+
+-- 1986 Voyager 2 reacher Uranus
+local time1986 = "1986-01-24T12:58:03.505";
+local year1986state = {
+  Identifier = "1986",
+  Enter = util.applyLinearFlight(6.9E12, 1.2),
+  Exit = [[]]
+}
+
+-- 1989 Voyager 2 reacher Neptune
+local time1989 = "1989-09-09T12:58:03.505";
+local year1989state = {
+  Identifier = "1989",
+  Enter = util.applyLinearFlight(9.7E12, 1.2),
+  Exit = [[]]
+}
+
+local states = {
+  voyagerPioneerState,
+  year1974state,
+  year1977state,
+  year1979state,
+  year1986state,
+  year1989state
+}
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+
 local transitions = {
+  -- Transition to this state
+  {
+    From = "SolarSystem",
+    To = "VoyagerPioneer",
+    Action = setTime(time2021)
+  },
+  -- 1974
   {
     From = "VoyagerPioneer",
-    To = "Voyager",
-    Action = [[]]
+    To = "1974",
+    Action = setTime(time1974)
   },
   {
-    From = "Voyager",
+    From = "1974",
     To = "VoyagerPioneer",
-    Action = [[]]
+    Action = setTime(time2021)
+  },
+  {
+    From = "1974",
+    To = "1979",
+    Action = interpolateTime(time1979)
+  },
+  {
+    From = "1979",
+    To = "1974",
+    Action = interpolateTime(time1974)
+  },
+  {
+    From = "1974",
+    To = "1986",
+    Action = interpolateTime(time1986)
+  },
+  {
+    From = "1986",
+    To = "1974",
+    Action = interpolateTime(time1974)
+  },
+  {
+    From = "1974",
+    To = "1989",
+    Action = interpolateTime(time1989)
+  },
+  {
+    From = "1989",
+    To = "1974",
+    Action = interpolateTime(time1974)
+  },
+  {
+    From = "1974",
+    To = "1977",
+    Action = interpolateTime(time1977)
+  },
+  {
+    From = "1977",
+    To = "1974",
+    Action = interpolateTime(time1974)
+  },
+  -- 1977
+  {
+    From = "VoyagerPioneer",
+    To = "1977",
+    Action = setTime(time1977)
+  },
+  {
+    From = "1977",
+    To = "VoyagerPioneer",
+    Action = setTime(time2021)
+  },
+  {
+    From = "1977",
+    To = "1979",
+    Action = interpolateTime(time1979)
+  },
+  {
+    From = "1979",
+    To = "1977",
+    Action = interpolateTime(time1977)
+  },
+  {
+    From = "1977",
+    To = "1986",
+    Action = interpolateTime(time1986)
+  },
+  {
+    From = "1986",
+    To = "1977",
+    Action = interpolateTime(time1977)
+  },
+  {
+    From = "1977",
+    To = "1989",
+    Action = interpolateTime(time1989)
+  },
+  {
+    From = "1989",
+    To = "1977",
+    Action = interpolateTime(time1977)
+  },
+  -- 1979
+  {
+    From = "VoyagerPioneer",
+    To = "1979",
+    Action = setTime(time1979)
+  },
+  {
+    From = "1979",
+    To = "VoyagerPioneer",
+    Action = setTime(time2021)
+  },
+  {
+    From = "1979",
+    To = "1986",
+    Action = interpolateTime(time1986)
+  },
+  {
+    From = "1986",
+    To = "1979",
+    Action = interpolateTime(time1979)
+  },
+  {
+    From = "1979",
+    To = "1989",
+    Action = interpolateTime(time1989)
+  },
+  {
+    From = "1989",
+    To = "1979",
+    Action = interpolateTime(time1979)
+  },
+  -- 1986
+  {
+    From = "1986",
+    To = "VoyagerPioneer",
+    Action = interpolateTime(time2021)
   },
   {
     From = "VoyagerPioneer",
-    To = "Pioneer",
-    Action = [[]]
+    To = "1986",
+    Action = setTime(time1986)
   },
   {
-    From = "Pioneer",
+    From = "1986",
+    To = "1989",
+    Action = interpolateTime(time1989)
+  },
+  {
+    From = "1989",
+    To = "1986",
+    Action = interpolateTime(time1986)
+  },
+  -- 1989
+  {
+    From = "1989",
     To = "VoyagerPioneer",
-    Action = [[]]
+    Action = interpolateTime(time2021)
+  },
+  {
+    From = "VoyagerPioneer",
+    To = "1989",
+    Action = setTime(time1989)
   },
   -- Back to SolarSystem from substates
   {
-    From = "Voyager",
+    From = "1974",
     To = "SolarSystem"
   },
   {
-    From = "Pioneer",
+    From = "1977",
+    To = "SolarSystem"
+  },
+  {
+    From = "1979",
+    To = "SolarSystem"
+  },
+  {
+    From = "1986",
+    To = "SolarSystem"
+  },
+  {
+    From = "1989",
     To = "SolarSystem"
   }
 }
