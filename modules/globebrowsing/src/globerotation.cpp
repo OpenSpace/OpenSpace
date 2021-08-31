@@ -177,7 +177,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     if (!_globeNode) {
         // @TODO(abock): The const cast should be removed on a redesign of the rotation
         //               to make the matrix function not constant. Const casting this
-        //               away is fine as the factories that create the translations don't
+        //               away is fine as the factories that create the rotations don't
         //               create them as constant objects
         const_cast<GlobeRotation*>(this)->findGlobe();
         _matrixIsDirty = true;
