@@ -42,19 +42,19 @@ namespace {
         "The globe on which the longitude/latitude is specified"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
-        "Longitude",
-        "Longitude",
-        "The longitude of the location on the globe's surface. The value can range from "
-        "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
+        "globe. The default value is 0.0"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
+        "Longitude",
+        "Longitude",
+        "The longitude of the location on the globe's surface. The value can range from "
+        "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0"
     };
 
@@ -80,11 +80,11 @@ namespace {
         std::string globe
             [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude;
-
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
+
+        // [[codegen::verbatim(LongitudeInfo.description)]]
+        std::optional<double> longitude;
 
         // [[codegen::verbatim(AltitudeInfo.description)]]
         std::optional<double> altitude;
@@ -103,8 +103,8 @@ documentation::Documentation GlobeTranslation::Documentation() {
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
-    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
+    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
 {
@@ -116,13 +116,13 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
         _positionIsDirty = true;
     });
 
-    _longitude = p.longitude.value_or(_longitude);
-    _longitude.onChange([this]() { _positionIsDirty = true; });
-    addProperty(_longitude);
-
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { _positionIsDirty = true; });
     addProperty(_latitude);
+
+    _longitude = p.longitude.value_or(_longitude);
+    _longitude.onChange([this]() { _positionIsDirty = true; });
+    addProperty(_longitude);
 
     _altitude = p.altitude.value_or(_altitude);
     _altitude.setExponent(8.f);

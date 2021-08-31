@@ -43,19 +43,19 @@ namespace {
         "The globe on which the longitude/latitude is specified"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
-        "Longitude",
-        "Longitude",
-        "The longitude of the location on the globe's surface. The value can range from "
-        "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
+        "globe. The default value is 0.0."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
+        "Longitude",
+        "Longitude",
+        "The longitude of the location on the globe's surface. The value can range from "
+        "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0."
     };
 
@@ -79,11 +79,11 @@ namespace {
         std::string globe
             [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude;
-
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
+
+        // [[codegen::verbatim(LongitudeInfo.description)]]
+        std::optional<double> longitude;
 
         // [[codegen::verbatim(AngleInfo.description)]]
         std::optional<double> angle;
@@ -102,8 +102,8 @@ documentation::Documentation GlobeRotation::Documentation() {
 
 GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
-    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
+    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)
     , _useHeightmap(UseHeightmapInfo, false)
 {
@@ -115,13 +115,13 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
         _matrixIsDirty = true;
     });
 
-    _longitude = p.longitude.value_or(_longitude);
-    _longitude.onChange([this]() { _matrixIsDirty = true; });
-    addProperty(_longitude);
-
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { _matrixIsDirty = true; });
     addProperty(_latitude);
+
+    _longitude = p.longitude.value_or(_longitude);
+    _longitude.onChange([this]() { _matrixIsDirty = true; });
+    addProperty(_longitude);
 
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
     _useHeightmap.onChange([this]() { _matrixIsDirty = true; });
