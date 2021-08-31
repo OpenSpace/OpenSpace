@@ -1,11 +1,11 @@
 local action = asset.require('actions/toggle_trail')
 
 asset.onInitialize(function()
-  openspace.event.registerEventAction("CameraApproachedSceneGraphNode", action.hide_my_trail);
-  openspace.event.registerEventAction("CameraMovedAwayFromSceneGraphNode", action.show_my_trail);
+  openspace.event.registerEventAction("CameraTransition", action.hide_my_trail);
+  openspace.event.registerEventAction("CameraTransition", action.show_my_trail);
 end)
 
 asset.onDeinitialize(function()
-  openspace.event.unregisterEventAction("CameraApproachedSceneGraphNode", action.hide_my_trail);
-  openspace.event.unregisterEventAction("CameraMovedAwayFromSceneGraphNode", action.show_my_trail);
+  openspace.event.unregisterEventAction("CameraTransition", action.hide_my_trail);
+  openspace.event.unregisterEventAction("CameraTransition", action.show_my_trail);
 end)

@@ -39,6 +39,8 @@ namespace {
     constexpr const char _loggerCat[] = "EventInfo";
 } // namespace
 
+using namespace std::string_literals;
+
 namespace openspace::events {
 
 void log(int i, const EventSceneGraphNodeAdded& e) {
@@ -94,19 +96,22 @@ void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
 }
 
-void log(int i, const EventCameraApproachedSceneGraphNode& e) {
+void log(int i, const EventCameraTransition& e) {
     ghoul_assert(e.type == EventCameraApproachedSceneGraphNode::Type, "Wrong type");
-    LINFO(fmt::format(
-        "[{}] CameraApproachedSceneGraphNode: {} -> {}",
-        i, reinterpret_cast<const void*>(e.camera), e.node
-    ));
-}
+    auto toString = [](EventCameraTransition::Location location) {
+        switch (location) {
+            case EventCameraTransition::Location::Outside:        return "Outside";
+            case EventCameraTransition::Location::ApproachSphere: return "ApproachSphere";
+            case EventCameraTransition::Location::ReachedSphere:  return "ReachedSphere";
+            default:                                  throw ghoul::MissingCaseException();
+        }
+    };
+    std::string_view b = toString(e.before);
+    std::string_view a = toString(e.after);
 
-void log(int i, const EventCameraMovedAwayFromSceneGraphNode& e) {
-    ghoul_assert(e.type == EventCameraMovedAwayFromSceneGraphNode::Type, "Wrong type");
     LINFO(fmt::format(
-        "[{}] CameraMovedAwayFromSceneGraphNode: {} -> {}",
-        i, reinterpret_cast<const void*>(e.camera), e.node
+        "[{}] CameraTransition: {}, {} ({} -> {})",
+        i, reinterpret_cast<const void*>(e.camera), e.node, b, a
     ));
 }
 
@@ -173,10 +178,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ScreenSpaceRenderableAdded: return "ScreenSpaceRenderableAdded";
         case Event::Type::ScreenSpaceRenderableRemoved:
             return "ScreenSpaceRenderableRemoved";
-        case Event::Type::CameraApproachedSceneGraphNode:
-            return "CameraApproachedSceneGraphNode";
-        case Event::Type::CameraMovedAwayFromSceneGraphNode:
-            return "CameraMovedAwayFromSceneGraphNode";
+        case Event::Type::CameraTransition: return "CameraTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
@@ -214,11 +216,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "ScreenSpaceRenderableRemoved") {
         return Event::Type::ScreenSpaceRenderableRemoved;
     }
-    else if (str == "CameraApproachedSceneGraphNode") {
-        return Event::Type::CameraApproachedSceneGraphNode;
-    }
-    else if (str == "CameraMovedAwayFromSceneGraphNode") {
-        return Event::Type::CameraMovedAwayFromSceneGraphNode;
+    else if (str == "CameraTransition") {
+        return Event::Type::CameraTransition;
     }
     else if (str == "TimeOfInterestReached") {
         return Event::Type::TimeOfInterestReached;
@@ -272,16 +271,16 @@ ghoul::Dictionary toParameter(const Event& e) {
         case Event::Type::ParallelConnection:
             switch (static_cast<const EventParallelConnection&>(e).state) {
                 case EventParallelConnection::State::Established:
-                    d.setValue("State", std::string("Established"));
+                    d.setValue("State", "Established"s);
                     break;
                 case EventParallelConnection::State::Lost:
-                    d.setValue("State", std::string("Lost"));
+                    d.setValue("State", "Lost"s);
                     break;
                 case EventParallelConnection::State::HostshipGained:                        
-                    d.setValue("State", std::string("HostshipGained"));
+                    d.setValue("State", "HostshipGained"s);
                     break;
                 case EventParallelConnection::State::HostshipLost:
-                    d.setValue("State", std::string("HostshipLost"));
+                    d.setValue("State", "HostshipLost"s);
                     break;
                 default:
                     throw ghoul::MissingCaseException();
@@ -290,13 +289,13 @@ ghoul::Dictionary toParameter(const Event& e) {
         case Event::Type::ApplicationShutdown:
             switch (static_cast<const EventApplicationShutdown&>(e).state) {
                 case EventApplicationShutdown::State::Started:
-                    d.setValue("State", std::string("Started"));
+                    d.setValue("State", "Started"s);
                     break;
                 case EventApplicationShutdown::State::Aborted:
-                    d.setValue("State", std::string("Aborted"));
+                    d.setValue("State", "Aborted"s);
                     break;
                 case EventApplicationShutdown::State::Finished:
-                    d.setValue("State", std::string("Finished"));
+                    d.setValue("State", "Finished"s);
                     break;
             }
             break;
@@ -316,21 +315,33 @@ ghoul::Dictionary toParameter(const Event& e) {
                 )
             );
             break;
-        case Event::Type::CameraApproachedSceneGraphNode:
+        case Event::Type::CameraTransition:
             d.setValue(
                 "Node",
-                std::string(
-                    static_cast<const EventCameraApproachedSceneGraphNode&>(e).node
-                )
+                std::string(static_cast<const EventCameraTransition&>(e).node)
             );
-            break;
-        case Event::Type::CameraMovedAwayFromSceneGraphNode:
-            d.setValue(
-                "Node",
-                std::string(
-                    static_cast<const EventCameraMovedAwayFromSceneGraphNode&>(e).node
-                )
-            );
+            switch (static_cast<const EventCameraTransition&>(e).before) {
+                case EventCameraTransition::Location::Outside:
+                    d.setValue("Before", "Outside"s);
+                    break;
+                case EventCameraTransition::Location::ApproachSphere:
+                    d.setValue("Before", "ApproachSphere"s);
+                    break;
+                case EventCameraTransition::Location::ReachedSphere:
+                    d.setValue("Before", "ReachedSphere"s);
+                    break;
+            }
+            switch (static_cast<const EventCameraTransition&>(e).after) {
+                case EventCameraTransition::Location::Outside:
+                    d.setValue("After", "Outside"s);
+                    break;
+                case EventCameraTransition::Location::ApproachSphere:
+                    d.setValue("After", "ApproachSphere"s);
+                    break;
+                case EventCameraTransition::Location::ReachedSphere:
+                    d.setValue("After", "ReachedSphere"s);
+                    break;
+            }
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
@@ -406,11 +417,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::ScreenSpaceRenderableRemoved:
                 log(i, *static_cast<const EventScreenSpaceRenderableRemoved*>(e));
                 break;
-            case Event::Type::CameraApproachedSceneGraphNode:
-                log(i, *static_cast<const EventCameraApproachedSceneGraphNode*>(e));
-                break;
-            case Event::Type::CameraMovedAwayFromSceneGraphNode:
-                log(i, *static_cast<const EventCameraMovedAwayFromSceneGraphNode*>(e));
+            case Event::Type::CameraTransition:
+                log(i, *static_cast<const EventCameraTransition*>(e));
                 break;
             case Event::Type::TimeOfInterestReached:
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
@@ -488,20 +496,14 @@ EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
     , renderable(temporaryString(renderable_->identifier()))
 {}
 
-EventCameraApproachedSceneGraphNode::EventCameraApproachedSceneGraphNode(
-                                                                    const Camera* camera_,
-                                                              const SceneGraphNode* node_)
+EventCameraTransition::EventCameraTransition(const Camera* camera_,
+                                             const SceneGraphNode* node_,
+                                             Location before_, Location after_)
     : Event(Type)
     , camera(camera_)
     , node(temporaryString(node_->identifier()))
-{}
-
-EventCameraMovedAwayFromSceneGraphNode::EventCameraMovedAwayFromSceneGraphNode(
-                                                                    const Camera* camera_,
-                                                              const SceneGraphNode* node_)
-    : Event(Type)
-    , camera(camera_)
-    , node(temporaryString(node_->identifier()))
+    , before(before_)
+    , after(after_)
 {}
 
 EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,

@@ -731,38 +731,98 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     const double currDistance = glm::distance(anchorPos, pose.position);
     const double d = _anchorNode->interactionSphere();
-    if (_inAnchorSphere &&
-        currDistance > d * (InteractionMultiplier + InteractionHystersis))
-    {
-        _inAnchorSphere = false;
+    const double af = _anchorNode->approachFactor();
+    const double rf = _anchorNode->reachFactor();
 
-        if (!_anchorNode->onExitAction().empty()) {
-            ghoul::Dictionary d;
-            d.setValue("Node", _anchorNode->identifier());
-            for (const std::string& action : _anchorNode->onExitAction()) {
-                global::actionManager->triggerAction(action, d);
+    using namespace std::string_literals;
+    if (_inAnchorApproachSphere) {
+        if (currDistance > d * (af + InteractionHystersis)) {
+            // We left the approach sphere outwards
+            _inAnchorApproachSphere = false;
+
+            if (!_anchorNode->onExitAction().empty()) {
+                ghoul::Dictionary dict;
+                dict.setValue("Node", _anchorNode->identifier());
+                dict.setValue("Before", "Approach"s);
+                dict.setValue("After", "Outside"s);
+                for (const std::string& action : _anchorNode->onExitAction()) {
+                    global::actionManager->triggerAction(action, dict);
+                }
+            }
+
+            global::eventEngine->publishEvent<events::EventCameraTransition>(
+                _camera,
+                _anchorNode,
+                events::EventCameraTransition::Location::ApproachSphere,
+                events::EventCameraTransition::Location::Outside
+            );
+        }
+        else if (currDistance < d * (rf - InteractionHystersis)) {
+            // We transitioned from the approach sphere into the reach sphere
+            _inAnchorApproachSphere = false;
+            _inAnchorReachSphere = true;
+
+            if (!_anchorNode->onReachAction().empty()) {
+                ghoul::Dictionary dict;
+                dict.setValue("Node", _anchorNode->identifier());
+                dict.setValue("Before", "Approach"s);
+                dict.setValue("After", "ReachedSphere"s);
+                for (const std::string& action : _anchorNode->onReachAction()) {
+                    global::actionManager->triggerAction(action, dict);
+                }
+            }
+
+            global::eventEngine->publishEvent<events::EventCameraTransition>(
+                _camera,
+                _anchorNode,
+                events::EventCameraTransition::Location::ApproachSphere,
+                events::EventCameraTransition::Location::ReachedSphere
+            );
+        }
+    }
+    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHystersis)) {
+        // We transitioned from the reach sphere to the approach sphere
+        _inAnchorReachSphere = false;
+        _inAnchorApproachSphere = true;
+
+        if (!_anchorNode->onMoveAwayAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", _anchorNode->identifier());
+            dict.setValue("Before", "ReachedSphere"s);
+            dict.setValue("After", "ApproachSphere"s);
+            for (const std::string& action : _anchorNode->onMoveAwayAction()) {
+                global::actionManager->triggerAction(action, dict);
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraMovedAwayFromSceneGraphNode>(
-            _camera, _anchorNode
+        global::eventEngine->publishEvent<events::EventCameraTransition>(
+            _camera,
+            _anchorNode,
+            events::EventCameraTransition::Location::ReachedSphere,
+            events::EventCameraTransition::Location::ApproachSphere
         );
     }
-    else if (!_inAnchorSphere &&
-             currDistance < d * (InteractionMultiplier - InteractionHystersis))
+    else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
+             currDistance < d * (af - InteractionHystersis))
     {
-        _inAnchorSphere = true;
+        // We moved into the approach sphere
+        _inAnchorApproachSphere = true;
 
-        if (!_anchorNode->onEnterAction().empty()) {
-            ghoul::Dictionary d;
-            d.setValue("Node", _anchorNode->identifier());
-            for (const std::string& action : _anchorNode->onEnterAction()) {
-                global::actionManager->triggerAction(action, d);
+        if (!_anchorNode->onApproachAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", _anchorNode->identifier());
+            dict.setValue("Before", "Outside"s);
+            dict.setValue("After", "ApproachSphere"s);
+            for (const std::string& action : _anchorNode->onApproachAction()) {
+                global::actionManager->triggerAction(action, dict);
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraApproachedSceneGraphNode>(
-            _camera, _anchorNode
+        global::eventEngine->publishEvent<events::EventCameraTransition>(
+            _camera,
+            _anchorNode,
+            events::EventCameraTransition::Location::Outside,
+            events::EventCameraTransition::Location::ApproachSphere
         );
     }
 }

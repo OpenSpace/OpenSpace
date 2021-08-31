@@ -64,8 +64,7 @@ struct Event {
         ApplicationShutdown,
         ScreenSpaceRenderableAdded,
         ScreenSpaceRenderableRemoved,
-        CameraApproachedSceneGraphNode,
-        CameraMovedAwayFromSceneGraphNode,
+        CameraTransition,
         TimeOfInterestReached,
         MissionEventReached,
         PlanetEclipsed,
@@ -172,25 +171,20 @@ struct EventScreenSpaceRenderableRemoved : public Event {
 };
 
 
-struct EventCameraApproachedSceneGraphNode : public Event {
-    static const Type Type = Event::Type::CameraApproachedSceneGraphNode;
+struct EventCameraTransition : public Event {
+    static const Type Type = Event::Type::CameraTransition;
 
-    EventCameraApproachedSceneGraphNode(const Camera* camera_,
-        const SceneGraphNode* node_);
-
-    const Camera* camera = nullptr;
-    const tstring node;
-};
-
-
-struct EventCameraMovedAwayFromSceneGraphNode : public Event {
-    static const Type Type = Event::Type::CameraMovedAwayFromSceneGraphNode;
-
-    EventCameraMovedAwayFromSceneGraphNode(const Camera* camera_,
-        const SceneGraphNode* node_);
+    enum class Location {
+        Outside,
+        ApproachSphere,
+        ReachedSphere
+    };
+    EventCameraTransition(const Camera* camera_, const SceneGraphNode* node_, Location before_, Location after_);
 
     const Camera* camera = nullptr;
     const tstring node;
+    const Location before;
+    const Location after;
 };
 
 

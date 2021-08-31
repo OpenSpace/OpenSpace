@@ -26,11 +26,12 @@ namespace openspace::luascriptfunctions {
 
 int registerEventAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::registerEventAction");
-    auto [event, action] = ghoul::lua::values<std::string, std::string>(L);
+    auto [event, action, filter] =
+        ghoul::lua::values<std::string, std::string, std::optional<ghoul::Dictionary>>(L);
 
     events::Event::Type type = events::fromString(event);
 
-    global::eventEngine->registerEventAction(type, std::move(action));
+    global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
     return 0;
 }
 

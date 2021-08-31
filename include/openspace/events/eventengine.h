@@ -72,8 +72,12 @@ public:
      * \param actionIdentifier The identifier of the action that will be triggered the
      *        identifier must not exist at this moment, but must exist by the time the
      *        event is encountered next
+     * \param filter If the filter is provided, it describes the event parameters that are
+     *        checked and only if an event passes the filter, the corresponding action is
+     *        triggered
      */
-    void registerEventAction(events::Event::Type type, std::string actionIdentifier);
+    void registerEventAction(events::Event::Type type, std::string actionIdentifier,
+        std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
      * Removing registration for a type/action combination.
@@ -100,7 +104,11 @@ private:
     /// The last event in the chain of events stored in the memory pool
     events::Event* _lastEvent = nullptr;
 
-    std::unordered_map<events::Event::Type, std::vector<std::string>> _eventActions;
+    struct ActionInfo {
+        std::string action;
+        std::optional<ghoul::Dictionary> filter;
+    };
+    std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
 
 #ifdef _DEBUG
     /// Stores the total number of events during this frame for debugging purposes

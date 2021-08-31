@@ -49,16 +49,18 @@ void EventEngine::postFrameCleanup() {
 }
 
 void EventEngine::registerEventAction(events::Event::Type type,
-                                      std::string actionIdentifier)
+                                      std::string actionIdentifier,
+                                      std::optional<ghoul::Dictionary> filter)
 {
+    ActionInfo ai;
+    ai.action = std::move(actionIdentifier);
+    ai.filter = std::move(filter);
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
-        it->second.push_back(std::move(actionIdentifier));
+        it->second.push_back(ai);
     }
     else {
-        std::vector<std::string> actions;
-        actions.push_back(std::move(actionIdentifier));
-        _eventActions[type] = std::move(actions);
+        _eventActions[type] = { std::move(ai) };
     }
 }
 
@@ -85,8 +87,10 @@ void EventEngine::triggerActions() const {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
             ghoul::Dictionary params = toParameter(*e);
-            for (const std::string& action : it->second) {
-                global::actionManager->triggerAction(action, params);
+            for (const ActionInfo& ai : it->second) {
+                // @TODO Check against filter
+
+                global::actionManager->triggerAction(ai.action, params);
             }
         }
 
@@ -101,9 +105,11 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         "registerEventAction",
         &luascriptfunctions::registerEventAction,
         {},
-        "string, string",
+        "string, string [, table]",
         "Registers an action (second parameter) to be executed whenever an event (first "
-        "parameter is encountered."
+        "parameter is encountered. If the optional third parameter is provided, it "
+        "describes a filter that the event is being checked against and only if it "
+        "passes the filter, the action is triggered"
     });
     return res;
 }
