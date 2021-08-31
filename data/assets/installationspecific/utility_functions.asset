@@ -133,6 +133,15 @@ local setCurveType = function(type)
   ]]
 end
 
+local setTime = function(time)
+  return "openspace.time.setTime('" .. time .. "')"
+end
+
+local interpolateTime = function(time)
+  local duration = 4.0
+  return "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
+end
+
 -- Append table B to table A
 local appendTable = function(A, B)
   for key, val in pairs(B) do
