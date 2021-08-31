@@ -45,11 +45,13 @@ public:
 
 private:
     void findGlobe();
+    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
     properties::StringProperty _globe;
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _latitude;
     properties::DoubleProperty _angle;
+    properties::BoolProperty _useHeightmap;
 
     RenderableGlobe* _globeNode = nullptr;
 

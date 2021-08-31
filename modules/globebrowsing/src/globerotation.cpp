@@ -24,10 +24,12 @@
 
 #include <modules/globebrowsing/src/globerotation.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
@@ -46,7 +48,7 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
@@ -54,14 +56,22 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
         "Angle",
         "Angle",
         "A rotation angle that can be used to rotate the object around its own y-axis, "
-        "which will be pointing out of the globe's surface. "
+        "which will be pointing out of the globe's surface."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+        "UseHeightmap",
+        "Use Heightmap",
+        "If set to true, the heightmap will be used when computing the surface normal. "
+        "This means that the object will be rotated to lay flat on the surface at the "
+        "given coordinate and follow the shape of the landscape."
     };
 
     struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
@@ -77,6 +87,9 @@ namespace {
 
         // [[codegen::verbatim(AngleInfo.description)]]
         std::optional<double> angle;
+
+        // [[codegen::verbatim(UseHeightmapInfo.description)]]
+        std::optional<bool> useHeightmap;
     };
 #include "globerotation_codegen.cpp"
 } // namespace
@@ -92,6 +105,7 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _angle(AngleInfo, 0.0, 0.0, 360.0)
+    , _useHeightmap(UseHeightmapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -108,6 +122,10 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { _matrixIsDirty = true; });
     addProperty(_latitude);
+
+    _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
+    _useHeightmap.onChange([this]() { _matrixIsDirty = true; });
+    addProperty(_useHeightmap);
 
     _angle = p.angle.value_or(_angle);
     _angle.onChange([this]() { _matrixIsDirty = true; });
@@ -131,18 +149,68 @@ void GlobeRotation::findGlobe() {
     }
 }
 
+glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const
+{
+    ghoul_assert(_globeNode, "Globe cannot be nullptr");
+
+    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
+    glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
+        *_globeNode,
+        latitude,
+        longitude,
+        0.0
+    );
+
+    SurfacePositionHandle h =
+        _globeNode->calculateSurfacePositionHandle(groundPos);
+
+    // Compute position including heightmap
+    return mod.cartesianCoordinatesFromGeo(
+        *_globeNode,
+        latitude,
+        longitude,
+        h.heightToSurface
+    );
+}
+
 glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
+    if (!_globeNode) {
+        // @TODO(abock): The const cast should be removed on a redesign of the rotation
+        //               to make the matrix function not constant. Const casting this
+        //               away is fine as the factories that create the translations don't
+        //               create them as constant objects
+        const_cast<GlobeRotation*>(this)->findGlobe();
+        _matrixIsDirty = true;
+    }
+
+    if (_useHeightmap) {
+        // If we use the heightmap, we have to compute the height every frame
+        _matrixIsDirty = true;
+    }
+
     if (!_matrixIsDirty) {
         return _matrix;
     }
 
-    // Compute vector outwards of globe
-    float latitudeRad = glm::radians(static_cast<float>(_latitude));
-    float longitudeRad = glm::radians(static_cast<float>(_longitude));
+    // Compute vector that points out of globe surface
+    glm::dvec3 yAxis = glm::dvec3(0.0);
+    if (_useHeightmap) {
+        const double angleDiff = 0.00001; // corresponds to a meter-ish
+        const glm::vec3 posCenter = computeSurfacePosition(_latitude, _longitude);
+        const glm::vec3 pos1 = computeSurfacePosition(_latitude, _longitude + angleDiff);
+        const glm::vec3 pos2 = computeSurfacePosition(_latitude + angleDiff, _longitude);
 
-    glm::dvec3 yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
-        { latitudeRad, longitudeRad }
-    );
+        const glm::vec3 v1 = pos1 - posCenter;
+        const glm::vec3 v2 = pos2 - posCenter;
+        yAxis = glm::dvec3(glm::cross(v1, v2));
+    } 
+    else {
+        float latitudeRad = glm::radians(static_cast<float>(_latitude));
+        float longitudeRad = glm::radians(static_cast<float>(_longitude));
+        yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
+            { latitudeRad, longitudeRad }
+        );
+    }
     yAxis = glm::normalize(yAxis);
 
     const glm::dvec3 n = glm::vec3(0.0, 0.0, 1.0);
