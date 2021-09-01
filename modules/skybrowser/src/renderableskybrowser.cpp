@@ -69,7 +69,7 @@ namespace openspace {
         , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
         , _reload(ReloadInfo)
         , _fov(70.f)
-        , _connectToWwt(true)
+        , _connectToWwt(false)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -221,20 +221,24 @@ namespace openspace {
     }
 
     void RenderableSkyBrowser::connectToWwt() {
+        // If the camera is already synced, the browser is already initialized
+        if (!_connectToWwt) {
+            _connectToWwt = true;
+            // Start a thread to enable user interaction while sending the calls to WWT
+            _threadWwtMessages = std::thread([&] {
+                while (_connectToWwt) {
 
-        // Start a thread to enable user interaction while sending the calls to WWT
-        _threadWwtMessages = std::thread([&] {
-            while (_connectToWwt) {
+                    glm::dvec2 aim{ 0.0 };
+                    // Send a message just to establish contact
+                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _fov, 0.0);
+                    sendMessageToWWT(message);
 
-                glm::dvec2 aim { 0.0 };
-                // Send a message just to establish contact
-                ghoul::Dictionary message = wwtmessage::moveCamera(aim, _fov, 0.0);
-                sendMessageToWWT(message);
-
-                // Sleep so we don't bombard WWT with too many messages
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            }
-        });
+                    // Sleep so we don't bombard WWT with too many messages
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                }
+                });
+        }
+      
     }
 
     void RenderableSkyBrowser::stopConnectingToWwt() {

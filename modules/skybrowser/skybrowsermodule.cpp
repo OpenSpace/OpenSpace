@@ -547,6 +547,7 @@ void SkyBrowserModule::createTargetBrowserPair() {
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    //std::string localHostUrl = "http://localhost:8000";
 
     const std::string browser = "{"
             "Identifier = '" + idBrowser + "',"
@@ -592,6 +593,11 @@ void SkyBrowserModule::createTargetBrowserPair() {
 
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.connectBrowserTarget('" + idTarget + "');",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
@@ -751,8 +757,6 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
         double rotationAngle = smallestAngle * deltaTime;
         // Create the rotation matrix for local camera space
         glm::dvec3 rotationAxis = glm::normalize(glm::cross(_coordsStartAnimation, _coordsToAnimateTo));
-        glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
-        glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(rotationAxis, 1.0);
         glm::dmat4 rotmat = glm::rotate(rotationAngle, rotationAxis);
         // Rotate
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotmat));

@@ -39,7 +39,8 @@ namespace {
     };
 
     constexpr const std::array<const char*, 8> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture", "showCrosshair", "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
+        "ModelTransform", "ViewProjectionMatrix", "texture", "showCrosshair", 
+        "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
@@ -75,7 +76,8 @@ namespace {
 namespace openspace {
     ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
-        , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
+        , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), 
+            glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 0.6f, 0.1f, 70.f)
         , _borderColor(220, 220, 220)
@@ -106,7 +108,10 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-        _cartesianPosition.setValue(glm::dvec3(_cartesianPosition.value().x, _cartesianPosition.value().y, skybrowser::SCREENSPACE_Z));
+        glm::dvec3 startPos{ _cartesianPosition.value().x, _cartesianPosition.value().y, 
+            skybrowser::SCREENSPACE_Z };
+
+        _cartesianPosition.setValue(startPos);
         //_useRadiusAzimuthElevation.setValue(true);
 
         // Always make sure that the target and browser are visible together
@@ -131,7 +136,9 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::setConnectedBrowser() {
-        _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+        ScreenSpaceRenderable* browser = global::renderEngine->screenSpaceRenderable(
+            _skyBrowserID.value());
+        _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(browser);
         return _skyBrowser;
     }
 
@@ -178,8 +185,7 @@ namespace openspace {
         // The _scale us how much of the windows height the
         // browser covers: eg a browser that covers 0.25 of the 
         // height of the window will have scale = 0.25
-        float textureRatio =
-            static_cast<float>(_targetDimensions.value().x) / static_cast<float>(_targetDimensions.value().y);
+        float textureRatio = _targetDimensions.value().x / _targetDimensions.value().y;
 
         glm::mat4 scale = glm::scale(
             glm::mat4(1.f),
@@ -221,19 +227,27 @@ namespace openspace {
 
         glDisable(GL_CULL_FACE);
        
-        glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
+        glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
+            localRotationMatrix() * scaleMatrix();
         float borderWidth = 0.0016f/_scale.value();
-        float showCrosshairInTargetThreshold = 2.f; // show crosshair and target when browser FOV < 2 degrees
+
         glm::vec2 targetDim;
-        bool showCrosshair;
-        bool showCrosshairInTarget;
-        _targetDimensions.value() == glm::vec2(0) ? targetDim = glm::vec2(1) : targetDim = _targetDimensions.value();
+        if(_targetDimensions.value() == glm::vec2(0)) {
+            targetDim = glm::vec2(1);
+        }
+        else {
+            targetDim = _targetDimensions.value();
+        }
         _shader->activate();
 
-        _fieldOfView < showCrosshairInTargetThreshold && _fieldOfView > _showCrosshairThreshold ? showCrosshairInTarget = true : showCrosshairInTarget = false;
-        _fieldOfView < _showCrosshairThreshold ? showCrosshair = true : showCrosshair = false;
-
-        _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
+        // Show crosshair and target when browser FOV < 2 degrees
+        float showCrosshairInTargetThreshold = 2.f;
+        bool showOnlyCrosshair;
+        bool showCrosshairInTarget;
+        showOnlyCrosshair = _fieldOfView < _showCrosshairThreshold;
+        showCrosshairInTarget = _fieldOfView < showCrosshairInTargetThreshold && !showOnlyCrosshair;
+        
+        _shader->setUniform(_uniformCache.showCrosshair, showOnlyCrosshair);
         _shader->setUniform(_uniformCache.showCrosshairInTarget, showCrosshairInTarget);
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
@@ -291,9 +305,9 @@ namespace openspace {
     glm::dvec3 ScreenSpaceSkyTarget::getTargetDirectionGalactic() {
         // Get camera view direction and orthogonal coordinate system of camera view direction
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-        glm::dvec3 targetPosWorldSpace = glm::inverse(global::navigationHandler->camera()->combinedViewMatrix()) * glm::dvec4(_cartesianPosition.value(), 1.0);
-        glm::dvec3 targetDirection = glm::normalize(targetPosWorldSpace - camPos);
-
+        //glm::dvec3 targetPosWorldSpace = glm::inverse(global::navigationHandler->camera()->combinedViewMatrix()) * glm::dvec4(_cartesianPosition.value(), 1.0);
+        //glm::dvec3 targetDirection = glm::normalize(targetPosWorldSpace - camPos);
+        glm::dvec3 targetDirection = glm::normalize(glm::inverse(global::navigationHandler->camera()->viewRotationMatrix()) * glm::dvec4(_cartesianPosition.value(), 1.0));
         return targetDirection;
     }
 
@@ -402,7 +416,7 @@ namespace openspace {
     void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd,
         bool lockAfterwards) {
         // Save the Cartesian celestial coordinates for animation
-        // to make sure wrap around works
+        // The coordinates are Cartesian to avoid wrap-around issues
         _coordsToAnimateTo = glm::normalize(skybrowser::sphericalToCartesian(coordsEnd));
         _coordsStartAnimation = glm::normalize(skybrowser::sphericalToCartesian(
             getTargetDirectionCelestial()));

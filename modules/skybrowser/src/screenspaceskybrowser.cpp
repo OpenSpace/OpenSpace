@@ -79,7 +79,7 @@ namespace openspace {
         , _vfieldOfView(ZoomInfo, 10.f, 0.1f, 70.f)
         , _borderColor(BorderColorInfo, glm::ivec3(rand() % 256, rand() % 256, rand() % 256))
         , _skyTargetID(TargetIDInfo)
-        , _camIsSyncedWWT(true)
+        , _camIsSyncedWWT(false)
         , _skyTarget(nullptr)
     {
         // Ensure the color of the border is bright enough.
@@ -156,12 +156,18 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::initializeBrowser() {
-        // Set border color
-        setBorderColor(_borderColor.value());
-        // Connect to target
-        setConnectedTarget();
-        // Track target
-        WWTfollowCamera();
+        // If the camera is already synced, the browser is already initialized
+        if (!_camIsSyncedWWT) {
+            _camIsSyncedWWT = true;
+            // Set border color
+            setBorderColor(_borderColor.value());
+            // Connect to target if they haven't been connected
+            if (!_skyTarget) {
+                setConnectedTarget();
+            }
+            // Track target
+            WWTfollowCamera();
+        }
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {

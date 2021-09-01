@@ -2,17 +2,17 @@ local assetHelper = asset.require('util/asset_helper')
 
 local targetId= "SkyTarget0"
 local browserId = "SkyBrowser0"
+local serverUrl = "https://data.openspaceproject.com/dist/skybrowser/page/"
+--local localHostUrl = "http://localhost:8000"
 
 local browser = {
    Type = "ScreenSpaceSkyBrowser",
    Identifier = browserId,
    Name = "Sky Browser",
-   Url = "https://data.openspaceproject.com/dist/skybrowser/page/",
+   Url = serverUrl,
    FaceCamera = false,
    TargetID = targetId,
    CartesianPosition = {-1.0, -0.5, -2.1},
-   UseRadiusAzimuthElevation = false,
-   RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
 };
 
 local target = {
@@ -21,8 +21,6 @@ local target = {
    Name = "Sky Target",
    FaceCamera = false,
    BrowserID = browserId,
-   UseRadiusAzimuthElevation = false,
-   RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
 };
 
 asset.onInitialize(function ()
