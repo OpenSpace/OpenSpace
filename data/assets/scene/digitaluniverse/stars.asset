@@ -78,7 +78,7 @@ local sunstar = {
     }
   },
   GUI = {
-    Name = "Sun",
+    Name = "Sun Star",
     Path = "/Milky Way/Stars",
     Description = [[Individual star to represent the sun when outside of the solar
       system]]

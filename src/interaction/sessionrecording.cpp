@@ -24,20 +24,20 @@
 
 #include <openspace/interaction/sessionrecording.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/tasks/convertrecfileversiontask.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
@@ -463,6 +463,8 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     initializePlayback_triggerStart();
 
+    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+
     return true;
 }
 
@@ -472,6 +474,8 @@ void SessionRecording::initializePlayback_time(double now) {
     _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
+    _saveRenderingCurrentApplicationTime_interpolation =
+        global::windowDelegate->applicationTime();
     _saveRenderingClockInterpolation_countsPerSec =
         system_clock::duration::period::den / system_clock::duration::period::num;
     _playbackPauseOffset = 0.0;
@@ -1176,9 +1180,12 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 }
 
 std::chrono::steady_clock::time_point
-SessionRecording::currentPlaybackInterpolationTime() const
-{
+SessionRecording::currentPlaybackInterpolationTime() const {
     return _saveRenderingCurrentRecordedTime_interpolation;
+}
+
+double SessionRecording::currentApplicationInterpolationTime() const {
+    return _saveRenderingCurrentApplicationTime_interpolation;
 }
 
 bool SessionRecording::playbackCamera() {
@@ -1798,6 +1805,8 @@ void SessionRecording::moveAheadInTime() {
                 _saveRenderingCurrentRecordedTime_interpolation +=
                     _saveRenderingDeltaTime_interpolation_usec;
                 _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentApplicationTime_interpolation +=
+                    _saveRenderingDeltaTime;
                 global::renderEngine->takeScreenshot();
             }
         }

@@ -38,20 +38,8 @@ namespace openspace::luascriptfunctions {
 
 int loadKernel(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
+    std::string argument = ghoul::lua::value<std::string>(L);
 
-    bool isString = (lua_isstring(L, 1) == 1);
-    if (!isString) {
-        LERROR(fmt::format(
-            "{}: Expected argument of type 'string'", ghoul::lua::errorLocation(L)
-        ));
-        return 0;
-    }
-
-    std::string argument = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
     if (!std::filesystem::is_regular_file(argument)) {
         return ghoul::lua::luaError(
             L,
@@ -59,10 +47,7 @@ int loadKernel(lua_State* L) {
         );
     }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
-
-    lua_pushnumber(L, result);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    ghoul::lua::push(L, result);
     return 1;
 }
 
@@ -72,37 +57,16 @@ int loadKernel(lua_State* L) {
  * automatically resolved.
  */
 int unloadKernel(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadKernel");
+    std::variant<std::string, unsigned int> argument = 
+        ghoul::lua::value<std::variant<std::string, unsigned int>>(L);
 
-    bool isString = (lua_isstring(L, 1) == 1);
-    bool isNumber = (lua_isnumber(L, 1) == 1);
-
-    if (!isString && !isNumber) {
-        LERRORC(
-            "loadKernel",
-            fmt::format(
-                "{}: Expected argument of type 'string' or 'number'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+    if (std::holds_alternative<std::string>(argument)) {
+        SpiceManager::ref().unloadKernel(std::get<std::string>(argument));
     }
-
-    if (isString) {
-        std::string argument = ghoul::lua::value<std::string>(L, 1);
-        SpiceManager::ref().unloadKernel(argument);
+    else {
+        SpiceManager::ref().unloadKernel(std::get<unsigned int>(argument));
     }
-
-    if (isNumber) {
-        unsigned int argument = ghoul::lua::value<unsigned int>(L, 1);
-        SpiceManager::ref().unloadKernel(argument);
-    }
-
-    lua_settop(L, 0);
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -111,13 +75,9 @@ int unloadKernel(lua_State* L) {
  * Returns the list of bodies loaded into the spicemanager
  */
 int spiceBodies(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1,2 }, "lua::getSpiceBodies");
-    bool isBool = (lua_isboolean(L, 1) == 1);
-    const bool buildInBodies = isBool ? ghoul::lua::value<bool>(L, 1) : false;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::spiceBodies");
+    const bool buildInBodies = ghoul::lua::value<bool>(L);
 
-    isBool = (lua_isboolean(L, 2) == 1);
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    lua_settop(L, 0);
     std::vector<std::pair<int, std::string>> bodies = SpiceManager::ref().spiceBodies(
         buildInBodies
     );
@@ -132,34 +92,19 @@ int spiceBodies(lua_State* L) {
         lua_rawset(L, -3);
         lua_rawseti(L, -2, number);
         ++number;
-
-        if (printValues) {
-            LINFO(fmt::format("Body id '{}' and name: {}", body.first, body.second));
-        }
     }
-
     return 1;
 }
 
-//internal function for getSpk and getCk coverages
+// internal function for getSpk and getCk coverages
 void buildLuaCoverageStack(lua_State* L,
-                           const std::vector<std::pair<double, double>>& coverage,
-                           bool printValues)
+                           const std::vector<std::pair<double, double>>& coverage)
 {
-    lua_settop(L, 0);
     lua_newtable(L);
     int number = 1;
     for (const std::pair<double, double>& window : coverage) {
         std::string start = SpiceManager::ref().dateFromEphemerisTime(window.first);
         std::string end = SpiceManager::ref().dateFromEphemerisTime(window.second);
-
-        if (printValues) {
-            LINFO(fmt::format(
-                "Coverage start {} and end: {}",
-                SpiceManager::ref().dateFromEphemerisTime(window.first),
-                SpiceManager::ref().dateFromEphemerisTime(window.second)
-            ));
-        }
 
         lua_newtable(L);
         ghoul::lua::push(L, 1, start);
@@ -172,97 +117,45 @@ void buildLuaCoverageStack(lua_State* L,
 }
 
 /**
- * getSpkCoverage({string, bool(optional)}):
+ * spkCoverage(string):
  * Returns the spk coverage for given body
  */
 int spkCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getSpkCoverage");
-    const bool isString = (lua_isstring(L, 1) == 1);
-    const bool isBool = (lua_isboolean(L, 2) == 1);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::spkCoverage");
+    std::string argument = ghoul::lua::value<std::string>(L);
 
-    if (!isString) {
-        LERRORC(
-            "getSpkCoverage",
-            fmt::format(
-                "{}: Expected argument of type 'string'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string argument = ghoul::lua::value<std::string>(L, 1);
-
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument), printValues);
-
+    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument));
     return 1;
 }
 
 /**
- * getCkCoverage({string, bool(optional)}):
+ * ckCoverage(string):
  * Returns the spk coverage for given body
  */
 int ckCoverage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getCkCoverage");
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::ckCoverage");
+    std::string argument = ghoul::lua::value<std::string>(L);
 
-    const bool isString = (lua_isstring(L, 1) == 1);
-    const bool isBool = (lua_isboolean(L, 2) == 1);
-
-    if (!isString) {
-        LERRORC(
-            "getCkCoverage",
-            fmt::format(
-                "{}: Expected argument of type 'string'",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string argument = ghoul::lua::value<std::string>(L, 1);
-    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
-    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument), printValues);
-
+    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument));
     return 1;
 }
 
 /**
  * rotationMatrix({string, string, string}):
- * Returns the rotationMatrix for a given body in a frame of reference
- * at a specific time.
+ * Returns the rotationMatrix for a given body in a frame of reference at a specific time
  */
 int rotationMatrix(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::rotationMatrix");
+    auto [body, frame, date] =
+        ghoul::lua::values<std::string, std::string, std::string>(L);
 
-    const bool isString = (lua_isstring(L, 1) == 1) &&
-        (lua_isstring(L, 2) == 1) && (lua_isstring(L, 3) == 1);
-
-    if (!isString) {
-        LERRORC(
-            "rotationMatrix",
-            fmt::format(
-                "{}: Expected argument of type 'string' for all three agruments",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string body = ghoul::lua::value<std::string>(L, 1);
-    std::string frame = ghoul::lua::value<std::string>(L, 2);
-    std::string date = ghoul::lua::value<std::string>(L, 3);
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
-    glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix
-    (body, frame, ephemerisTime);
+    glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix(
+        body,
+        frame,
+        ephemerisTime
+    );
     ghoul::lua::push(L, 1, rotationMatrix);
-
     return 1;
 }
 
@@ -273,31 +166,17 @@ int rotationMatrix(lua_State* L) {
  */
 int position(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::position");
+    auto [target, observer, frame, date] =
+        ghoul::lua::values<std::string, std::string, std::string, std::string>(L);
 
-    const bool isString = (lua_isstring(L, 1) == 1) &&
-        (lua_isstring(L, 2) == 1) &&
-        (lua_isstring(L, 3) == 1) &&
-        (lua_isstring(L, 4) == 1);
-
-    if (!isString) {
-        LERRORC(
-            "position",
-            fmt::format(
-                "{}: Expected argument of type 'string' for all four agruments",
-                ghoul::lua::errorLocation(L)
-            )
-        );
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    std::string target = ghoul::lua::value<std::string>(L, 1);
-    std::string observer = ghoul::lua::value<std::string>(L, 2);
-    std::string frame = ghoul::lua::value<std::string>(L, 3);
-    std::string date = ghoul::lua::value<std::string>(L, 4);
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
-    glm::dvec3 postion = SpiceManager::ref().targetPosition(target, observer, frame, {}, ephemerisTime);
+    glm::dvec3 postion = SpiceManager::ref().targetPosition(
+        target,
+        observer,
+        frame,
+        {},
+        ephemerisTime
+    );
     ghoul::lua::push(L, 1, postion);
 
     return 1;

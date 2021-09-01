@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -32,7 +33,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>

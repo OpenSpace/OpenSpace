@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 #define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 
-#include "profile/keybindingsdialog.h"
 #include <QDialog>
 #include <QListWidget>
 
-class ScriptlogDialog : public QDialog {
+class ScriptlogDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

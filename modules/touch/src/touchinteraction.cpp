@@ -31,16 +31,16 @@
 
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/touch/include/directinputsolver.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>

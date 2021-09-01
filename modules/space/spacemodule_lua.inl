@@ -30,48 +30,38 @@ int convertFromRaDec(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertFromRaDec");
 
     glm::dvec2 degrees = glm::dvec2(0.0);
-    if (lua_type(L, 1) == LUA_TSTRING && lua_type(L, 2) == LUA_TSTRING) {
-        std::string ra = ghoul::lua::value<std::string>(L, 1);
-        std::string dec = ghoul::lua::value<std::string>(L, 2);
+    if (ghoul::lua::hasValue<std::string>(L, 1) &&
+        ghoul::lua::hasValue<std::string>(L, 2))
+    {
+        auto [ra, dec] = ghoul::lua::values<std::string, std::string>(L);
         degrees = icrsToDecimalDegrees(ra, dec);
     }
-    else if (lua_type(L, 1) == LUA_TNUMBER && lua_type(L, 2) == LUA_TNUMBER) {
-        degrees.x = ghoul::lua::value<double>(L, 1);
-        degrees.y = ghoul::lua::value<double>(L, 2);
+    else if (ghoul::lua::hasValue<double>(L, 1) && ghoul::lua::hasValue<double>(L, 2)) {
+        auto [x, y] = ghoul::lua::values<double, double>(L);
+        degrees.x = x;
+        degrees.y = y;
     }
     else {
-        throw ghoul::lua::LuaRuntimeException("lua::convertFromRaDec: Ra and Dec have to "
-            "be of the same type, either String or Number"
+        throw ghoul::lua::LuaRuntimeException(
+            "Ra and Dec have to be of the same type, either String or Number"
         );
     }
 
-    double distance = ghoul::lua::value<double>(L, 3);
-    lua_settop(L, 0);
-
+    double distance = ghoul::lua::value<double>(L);
     glm::dvec3 pos = icrsToGalacticCartesian(degrees.x, degrees.y, distance);
     ghoul::lua::push(L, pos);
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
 int convertToRaDec(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::convertToRaDec");
+    auto [x, y, z] = ghoul::lua::values<double, double, double>(L);
 
-    double x = ghoul::lua::value<double>(L, 1);
-    double y = ghoul::lua::value<double>(L, 2);
-    double z = ghoul::lua::value<double>(L, 3);
-    lua_settop(L, 0);
+    glm::dvec3 deg = galacticCartesianToIcrs(x, y, z);
+    std::pair<std::string, std::string> raDecPair = decimalDegreesToIcrs(deg.x, deg.y);
 
-    glm::dvec3 degrees = galacticCartesianToIcrs(x, y, z);
-    std::pair<std::string, std::string> raDecPair
-        = decimalDegreesToIcrs(degrees.x, degrees.y);
-
-    ghoul::lua::push(L, raDecPair.first);  // Ra
-    ghoul::lua::push(L, raDecPair.second); // Dec
-    ghoul::lua::push(L, degrees.z);        // Distance
-
-    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
+    // Ra, Dec, Distance
+    ghoul::lua::push(L, raDecPair.first, raDecPair.second, deg.z);
     return 3;
 }
 

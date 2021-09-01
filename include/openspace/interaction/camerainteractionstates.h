@@ -58,6 +58,12 @@ public:
 
     void resetVelocities();
 
+    /*
+     * Returns true if any of the velocities are larger than zero,
+     * i.e. wether an interaction happened
+     */
+    bool hasNonZeroVelocities();
+
 protected:
     struct InteractionState {
         InteractionState(double scaleFactor);

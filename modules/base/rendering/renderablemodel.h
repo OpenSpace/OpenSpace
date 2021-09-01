@@ -101,6 +101,8 @@ private:
     properties::BoolProperty _enableOpacityBlending;
     properties::OptionProperty _blendingFuncOption;
 
+    std::string _vertexShaderPath;
+    std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
