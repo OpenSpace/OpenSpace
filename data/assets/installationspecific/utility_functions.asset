@@ -133,12 +133,14 @@ local setCurveType = function(type)
   ]]
 end
 
+-- Note that this uses the string representation of time
 local setTime = function(time)
   return "openspace.time.setTime('" .. time .. "')"
 end
 
-local interpolateTime = function(time)
-  local duration = 4.0
+-- Note that this uses the string representation of time
+local interpolateTime = function(time, duration)
+  duration = duration or 4.0 -- 4 seconds is default
   return "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
 end
 
@@ -160,4 +162,6 @@ asset.export("enableRoll", enableRoll)
 asset.export("disableRoll", disableRoll)
 asset.export("flyToNavState", flyToNavState)
 asset.export("setCurveType", setCurveType)
+asset.export("setTime", setTime)
+asset.export("interpolateTime", interpolateTime)
 asset.export("appendTable", appendTable)
