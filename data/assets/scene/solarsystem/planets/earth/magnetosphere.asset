@@ -17,8 +17,11 @@ local earthMagnetosphere = {
     LineWidth = 3.0,
     AlphaBlendlingEnabled = false,
     InputFileType = "osfls",    -- openspace Field lines Sequence
-    --maskingEnabled = true,
-    --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
+    MaskingEnabled = true,
+    --MaskingQuantity = 5.0,      -- corresponds to "topology"
+    --MaskingMinLimit = -0.0, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
+    --MaskingMaxLimit = 0.0,
+    --MaskingRanges = {-0, 0},
     LoadAtRuntime = true,
     ScaleToMeters = 1.0,
     SecondsBefore = 24*60*60*365*100,

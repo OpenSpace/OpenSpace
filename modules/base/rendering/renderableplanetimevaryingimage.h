@@ -48,7 +48,7 @@ public:
     bool isReady() const override;
 
     void update(const UpdateData& data) override;
-    //void render(const RenderData& data, RendererTasks&);
+    void render(const RenderData& data, RendererTasks&);
 
     static documentation::Documentation Documentation();
 

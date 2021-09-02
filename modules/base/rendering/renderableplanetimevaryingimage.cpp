@@ -271,10 +271,10 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
 }
 
-//void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
-//    RenderablePlane::render(data, t);
-//    glDisable(GL_CULL_FACE);
-//}
+void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
+    glDisable(GL_CULL_FACE);
+    RenderablePlane::render(data, t);
+}
 
 // Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
