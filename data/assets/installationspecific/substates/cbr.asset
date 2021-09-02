@@ -3,30 +3,71 @@ local util = asset.require('./../utility_functions')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local cbrTargetDistance = 36E7
+local maxOpacity = 0.3
+local opacityUri = "Scene.Planck.Renderable.Opacity"
+
+local cbrDistance = 1079252848800 -- 1 light year
 
 local cbrState = {
     Identifier = "CBR",
     Enter = [[
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        openspace.setPropertyValueSingle("Scene.Planck.Renderable.DisableFadeInOut", true)
+        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 2) .. [[
     ]],
     Exit = [[
+        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
         ]] .. util.stopOrbiting() .. [[
     ]]
 }
 
-local states = { cbrState }
+-- TODO: gotta do the fading on the webpage
+local edgeOfUniverseDistance = 10E26 -- 1 light year
+
+local edgeOfUniverseState = {
+    Identifier = "EdgeOfUniverse",
+    Enter = [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+        ]] .. util.startOrbiting() .. [[
+        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 5) .. [[
+    ]],
+    Exit = [[
+        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
+
+local states = { cbrState, edgeOfUniverseState }
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 local transitions = {
-  -- Transition to this state
+  -- Transition to/from this state
   {
-    From = "SolarSystem",
+    From = "Home",
+    To = "CBR"
+  },
+  {
+    From = "CBR",
+    To = "Home"
+  },
+  -- CBR
+  {
+    From = "CBR",
+    To = "EdgeOfUniverse",
+    Action = util.applyLinearFlight(edgeOfUniverseDistance, 2)
+  },
+  {
+    From = "EdgeOfUniverse",
     To = "CBR",
-    Action = util.applyLinearFlight(cbrTargetDistance, 1.5)
+    Action = util.applyLinearFlight(cbrDistance, 2)
+  },
+  -- Back from substates
+  {
+    From = "EdgeOfUniverse",
+    To = "Home"
   }
 }
 

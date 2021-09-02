@@ -170,6 +170,11 @@
       "name": "Scene.Pioneer11.Renderable.Appearance.Color",
       "type": "setPropertyValueSingle",
       "value": "{0.910000, 0.478000, 0.976000}"
+    },
+    {
+      "name": "Scene.Planck.Renderable.Opacity",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
     }
   ],
   "time": {

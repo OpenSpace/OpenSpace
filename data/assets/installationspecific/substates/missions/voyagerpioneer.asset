@@ -1,4 +1,4 @@
-local util = asset.require('./../utility_functions')
+local util = asset.require('./../../utility_functions')
 
 ----------------------------------------------------------------
 -- STATES
@@ -126,7 +126,7 @@ local onLeavingMainStateAction = [[
 local transitions = {
   -- Transition to/from this state
   {
-    From = "SolarSystem",
+    From = "Home",
     To = "VoyagerPioneer",
     Action = [[ 
       ]] .. util.setTime(today) .. [[
@@ -139,7 +139,7 @@ local transitions = {
   },
   {
     From = "VoyagerPioneer",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   -- 1973
@@ -379,32 +379,32 @@ local transitions = {
   -- Back to SolarSystem from substates
   {
     From = "1973",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   {
     From = "1974",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   {
     From = "1977",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   {
     From = "1979",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   {
     From = "1986",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   },
   {
     From = "1989",
-    To = "SolarSystem",
+    To = "Home",
     Action = onLeavingMainStateAction
   }
 }

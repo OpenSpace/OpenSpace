@@ -1,6 +1,8 @@
 ---------------------------------------------------------------- 
 -- GENERAL USEFUL THINGS
 ----------------------------------------------------------------
+
+-- Use to orbit after a camera path
 local orbitOnArrival = function()
   return [[
     openspace.setPropertyValueSingle(
@@ -14,6 +16,7 @@ local orbitOnArrival = function()
   ]]
 end
 
+-- Use to orbit at constant latitude after a camera path
 local orbitConstantLatitudeOnArrival = function()
   return [[
     openspace.setPropertyValueSingle(
@@ -22,6 +25,20 @@ local orbitConstantLatitudeOnArrival = function()
     )
     openspace.setPropertyValueSingle(
       "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
+      true
+    )
+  ]]
+end
+
+-- Use to immediately trigger an orbiting idle behavior
+local startOrbiting = function()
+  return [[
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+      0 -- Orbit
+    )
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
       true
     )
   ]]
@@ -144,6 +161,17 @@ local interpolateTime = function(time, duration)
   return "openspace.time.interpolateTime('" .. time .. "', " .. tostring(duration) .. ")"
 end
 
+local interpolateProperty = function(uri, value, duration)
+  duration = duration or 1.0
+  return [[
+    openspace.setPropertyValueSingle(
+      ']] .. uri .. [[',
+      ]] .. tostring(value) .. [[,
+      ]] .. tostring(duration) .. [[
+    )
+  ]]
+end
+
 -- Append table B to table A
 local appendTable = function(A, B)
   for key, val in pairs(B) do
@@ -153,6 +181,7 @@ end
 
 asset.export("orbitOnArrival", orbitOnArrival)
 asset.export("orbitConstantLatitudeOnArrival", orbitConstantLatitudeOnArrival)
+asset.export("startOrbiting", startOrbiting)
 asset.export("stopOrbiting", stopOrbiting)
 asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
@@ -164,4 +193,5 @@ asset.export("flyToNavState", flyToNavState)
 asset.export("setCurveType", setCurveType)
 asset.export("setTime", setTime)
 asset.export("interpolateTime", interpolateTime)
+asset.export("interpolateProperty", interpolateProperty)
 asset.export("appendTable", appendTable)

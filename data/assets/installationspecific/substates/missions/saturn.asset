@@ -1,4 +1,4 @@
-local util = asset.require('./../utility_functions')
+local util = asset.require('./../../utility_functions')
 
 ----------------------------------------------------------------
 -- STATES
@@ -88,7 +88,7 @@ local goToSaturnOverview = [[
 local transitions = {
   -- Transition to this state
   {
-    From = "SolarSystem",
+    From = "Home",
     To = "Saturn",
     Action = goToSaturnOverview
   },
@@ -138,19 +138,19 @@ local transitions = {
   -- Back to SolarSystem from substates
   {
     From = "SaturnRings",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "Titan",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "Cassini",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "Huygens",
-    To = "SolarSystem"
+    To = "Home"
   }
 }
 

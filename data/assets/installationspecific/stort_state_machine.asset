@@ -1,13 +1,13 @@
 local util = asset.require('./utility_functions')
 
 ---------------------------------------------------------------- 
--- SOLAR SYSTEM STATE - to reduce number of transitions
+-- STATES
 ----------------------------------------------------------------
 local solarTargetDistance = 1079252848800 -- 1 lighthour
 local solarsystemflightDuration = 9 -- seconds
 
-local solarSystemState = {
-  Identifier = "SolarSystem",
+local homeState = {
+  Identifier = "Home",
   -- Enter function use for all transitions to the solar system.
   -- So, no explicit transition should be needed
   Enter = [[
@@ -24,109 +24,71 @@ local solarSystemState = {
   Exit = [[]]
 }
 
----------------------------------------------------------------- 
--- 1. EARTH STATE
-----------------------------------------------------------------
-local substateEarth = asset.require('./substates/earth')
+-- An empty state that wil just be used to show a page in the GUI where the 
+-- user can fly to the planets in the solar system
+local solarSystemState = {
+  Identifier = "SolarSystem"
+}
 
----------------------------------------------------------------- 
--- 2. MARS STATE
-----------------------------------------------------------------
-local substateMars = asset.require('./substates/mars')
+local substateMoon = asset.require('./substates/missions/moon')
 
----------------------------------------------------------------- 
--- 3. CERES STATE
-----------------------------------------------------------------
--- Left out for now (low prio)
+local substateMars = asset.require('./substates/missions/mars')
 
----------------------------------------------------------------- 
--- 4. JUPITER STATE
-----------------------------------------------------------------
-local substateJupiter = asset.require('./substates/jupiter')
+local substateSaturn = asset.require('./substates/missions/saturn')
 
-----------------------------------------------------------------
--- 5. SATURN STATE
-----------------------------------------------------------------
-local substateSaturn = asset.require('./substates/saturn')
+local substateVoyagerPioneer = asset.require('./substates/missions/voyagerpioneer.asset')
 
----------------------------------------------------------------- 
--- 6. PLUTO STATE
-----------------------------------------------------------------
-local substatePluto = asset.require('./substates/pluto')
-
-----------------------------------------------------------------
--- 7. VOYAGER AND PIONEER STATE
-----------------------------------------------------------------
-local substateVoyagerPioneer = asset.require('./substates/voyagerpioneer.asset')
-
-----------------------------------------------------------------
--- 8. COSMIC BACKGROUND RADIATION STATE
-----------------------------------------------------------------
 local substateCBR = asset.require('./substates/cbr.asset')
 
----------------------------------------------------------------- 
--- COMBINE STATES AND TRANSITIONS
-----------------------------------------------------------------
 local states = {
+  homeState,
   solarSystemState
 }
 
-util.appendTable(states, substateEarth.states)
+util.appendTable(states, substateMoon.states)
 util.appendTable(states, substateMars.states)
-util.appendTable(states, substateJupiter.states)
 util.appendTable(states, substateSaturn.states)
-util.appendTable(states, substatePluto.states)
 util.appendTable(states, substateVoyagerPioneer.states)
 util.appendTable(states, substateCBR.states)
 
--- @TODO: we probably want indivudual behavior for the transitions from the 
--- different states
+---------------------------------------------------------------- 
+-- TRANSITIONS
+----------------------------------------------------------------
 local transitions = {
-  -- 1. Earth - SolarSystem
+  -- SolarSystem <-> Home
   {
-    From = "Earth",
+    From = "SolarSystem",
+    To = "Home"
+  },
+  {
+    From = "Home",
     To = "SolarSystem"
   },
-  -- 2. Mars - SolarSystem
+  -- Moon <-> Home -- In substate 
+  -- Mars <-> Home
   {
     From = "Mars",
-    To = "SolarSystem"
+    To = "Home"
   },
-  -- 4. Jupiter - SolarSystem
-  {
-    From = "Jupiter",
-    To = "SolarSystem"
-  },
-  -- 5. Saturn - SolarSystem
+  -- Saturn <-> Home
   {
     From = "Saturn",
-    To = "SolarSystem"
-  },
-  -- 6. Pluto - SolarSystem
-  {
-    From = "Pluto",
-    To = "SolarSystem"
-  },
-  -- 7. Voyager and Pioneer - SolarSystem
-  -- In substate
-  -- 8. Cosmic Background Radiation - SolarSystem
-  {
-    From = "CBR",
-    To = "SolarSystem"
+    To = "Home"
   }
+  -- Voyager and Pioneer <-> Home -- In substate
+
+  -- Cosmic Background Radiation <-> Home -- In substate
 }
 
 -- Add transitions within each substate
-util.appendTable(transitions, substateEarth.transitions)
+util.appendTable(transitions, substateMoon.transitions)
 util.appendTable(transitions, substateMars.transitions)
-util.appendTable(transitions, substateJupiter.transitions)
 util.appendTable(transitions, substateSaturn.transitions)
-util.appendTable(transitions, substatePluto.transitions)
 util.appendTable(transitions, substateVoyagerPioneer.transitions)
 util.appendTable(transitions, substateCBR.transitions)
 
 asset.onInitialize(function()
-    openspace.statemachine.createStateMachine(states, transitions, "SolarSystem")
+    openspace.statemachine.createStateMachine(states, transitions, "Home")
 
     -- OBS: the following line should be set in the profile
     openspace.time.setPause(true) -- However, this does not work

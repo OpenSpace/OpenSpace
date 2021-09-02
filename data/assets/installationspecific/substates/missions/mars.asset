@@ -1,4 +1,4 @@
-local util = asset.require('./../utility_functions')
+local util = asset.require('./../../utility_functions')
 
 ----------------------------------------------------------------
 -- STATES
@@ -25,6 +25,9 @@ local goToMarsOverview = [[
 -----
 -- Valles Marineris
 -----
+
+-- TODO: Use a date where valles marineris is actually visible..
+
 local vallesMarinerisTargetDistance = 7E6
 
 local vallesMarinerisTiltedNavState = [[{
@@ -142,7 +145,7 @@ local states = {
 local transitions = {
   -- Transition to this state
   {
-    From = "SolarSystem",
+    From = "Home",
     To = "Mars",
     Action = goToMarsOverview
   },
@@ -224,19 +227,19 @@ local transitions = {
   -- Back to SolarSystem from substates
   {
     From = "VallesMarinerisOverview",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "VallesMarinerisClose",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "OlympusMons",
-    To = "SolarSystem"
+    To = "Home"
   },
   {
     From = "Curiosity",
-    To = "SolarSystem"
+    To = "Home"
   }
 }
 
