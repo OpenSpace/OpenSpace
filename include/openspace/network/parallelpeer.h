@@ -75,6 +75,7 @@ public:
     */
     static scripting::LuaLibrary luaLibrary();
     ParallelConnection::Status status();
+    ParallelConnection::ViewStatus viewStatus();
     int nConnections();
     ghoul::Event<>& connectionEvent();
 
@@ -93,13 +94,14 @@ private:
     void sendTimeTimeline();
 
     void setStatus(ParallelConnection::Status status);
+    void setViewStatus();
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
 
-    bool independentView();
+    bool hasIndependentView();
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
@@ -112,7 +114,7 @@ private:
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
-    properties::BoolProperty _independentView;
+    properties::BoolProperty _hasIndependentView;
 
     double _lastTimeKeyframeTimestamp = 0.0;
     double _lastCameraKeyframeTimestamp = 0.0;
@@ -122,6 +124,9 @@ private:
     std::atomic<size_t> _nConnections = 0;
     std::atomic<ParallelConnection::Status> _status =
         ParallelConnection::Status::Disconnected;
+
+    std::atomic<ParallelConnection::ViewStatus> _viewStatus =
+        ParallelConnection::ViewStatus::HostView;
 
     std::string _hostName;
 

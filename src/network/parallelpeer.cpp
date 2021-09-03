@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/fmt.h>
 
 #include "parallelpeer_lua.inl"
 
@@ -99,7 +100,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IndependentViewInfo = {
         "IndependentView",
         "Independent View",
-        "blabla" // @TODO Missing documentation
+        "Enables host-independent camera viewpoint. Has no effect for the host."
     };
 } // namespace
 
@@ -115,7 +116,7 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _independentView(IndependentViewInfo)
+    , _hasIndependentView(IndependentViewInfo)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
 {
@@ -130,7 +131,11 @@ ParallelPeer::ParallelPeer()
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
 
-    addProperty(_independentView);
+    addProperty(_hasIndependentView);
+
+    _hasIndependentView.onChange([this]() {
+        setViewStatus();
+    });
 }
 
 ParallelPeer::~ParallelPeer() {
@@ -144,6 +149,7 @@ void ParallelPeer::connect() {
     disconnect();
 
     setStatus(ParallelConnection::Status::Connecting);
+    setViewStatus();
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
@@ -518,22 +524,24 @@ void ParallelPeer::preSynchronization() {
         _receiveBuffer.pop_front();
     }
 
-    if (isHost()) {
-        double now = global::windowDelegate->applicationTime();
+    double now = global::windowDelegate->applicationTime();
 
+    if (isHost() || hasIndependentView()) {
+        // Allow view-independent peers to send camera information...
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
             _lastCameraKeyframeTimestamp = now;
         }
-        if (_timeTimelineChanged ||
-            _lastTimeKeyframeTimestamp + _timeKeyframeInterval < now)
-        {
-            sendTimeTimeline();
-            _lastTimeKeyframeTimestamp = now;
-            _timeJumped = false;
-            _timeTimelineChanged = false;
-        }
     }
+    // ...but not time information, which is host-exclusive.
+    if (isHost() && (_timeTimelineChanged ||
+         _lastTimeKeyframeTimestamp + _timeKeyframeInterval < now))
+    {
+        sendTimeTimeline();
+        _lastTimeKeyframeTimestamp = now;
+        _timeJumped = false;
+        _timeTimelineChanged = false;
+        }
     if (_shouldDisconnect) {
         disconnect();
     }
@@ -569,6 +577,24 @@ ParallelConnection::Status ParallelPeer::status() {
     return _status;
 }
 
+void ParallelPeer::setViewStatus() {
+    if (isHost() && viewStatus() != ParallelConnection::ViewStatus::Host) {
+        _viewStatus = ParallelConnection::ViewStatus::Host;
+    }
+    else if (hasIndependentView() && viewStatus() != ParallelConnection::ViewStatus::IndependentView) {
+        _viewStatus = ParallelConnection::ViewStatus::IndependentView;
+        LINFO(fmt::format("{} is now using host-independent viewpoint.", _name));
+    }
+    else if (!hasIndependentView() && viewStatus() != ParallelConnection::ViewStatus::HostView) {
+        _viewStatus = ParallelConnection::ViewStatus::HostView;
+        LINFO(fmt::format("{} is now using the host's viewpoint.", _name));
+    }
+}
+
+ParallelConnection::ViewStatus ParallelPeer::viewStatus() {
+    return _viewStatus;
+}
+
 void ParallelPeer::setNConnections(size_t nConnections) {
     if (_nConnections != nConnections) {
         _nConnections = nConnections;
@@ -584,8 +610,8 @@ bool ParallelPeer::isHost() {
     return _status == ParallelConnection::Status::Host;
 }
 
-bool ParallelPeer::independentView() {
-    return false;
+bool ParallelPeer::hasIndependentView() {
+    return _hasIndependentView;
 }
 
 void ParallelPeer::setHostName(const std::string& hostName) {
@@ -643,7 +669,7 @@ void ParallelPeer::sendCameraKeyframe() {
 }
 
 void ParallelPeer::sendTimeTimeline() {
-    // Create a keyframe with current position and orientation of camera
+    // Create a keyframe with current timeline position
     const Timeline<TimeKeyframeData>& timeline = global::timeManager->timeline();
     std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
 
@@ -665,7 +691,7 @@ void ParallelPeer::sendTimeTimeline() {
         timelineMessage._keyframes.push_back(kfMessage);
     }
 
-    // Case 2: Send one keyframe to represent the curernt time.
+    // Case 2: Send one keyframe to represent the current time.
     // If time jumped this frame, this is represented in the keyframe.
     if (timeline.nKeyframes() == 0) {
         datamessagestructures::TimeKeyframe kfMessage;

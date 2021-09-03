@@ -42,6 +42,12 @@ public:
         Host
     };
 
+    enum class ViewStatus : uint32_t {
+        Host = 0,
+        IndependentView,
+        HostView
+    };
+
     enum class MessageType : uint32_t {
         Authentication = 0,
         Data,
