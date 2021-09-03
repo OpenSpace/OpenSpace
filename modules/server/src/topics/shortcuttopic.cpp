@@ -47,6 +47,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     std::vector<nlohmann::json> json;
     for (const interaction::Action& action : global::actionManager->actions()) {
         nlohmann::json shortcutJson = {
+            { "identifier", action.identifier },
             { "name", action.name },
             { "script", action.command },
             { "synchronization", static_cast<bool>(action.synchronization) },
@@ -77,11 +78,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
                     { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
-            { "name", action.name },
-            { "script", action.command },
-            { "synchronization", static_cast<bool>(action.synchronization) },
-            { "documentation", action.documentation },
-            { "guiPath", action.guiPath },
+            { "action", action.name },
         };
         json.push_back(shortcutJson);
     }
