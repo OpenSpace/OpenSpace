@@ -13,7 +13,7 @@ local cbrState = {
     Identifier = "CBR",
     Enter = [[
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.orbitOnArrival() .. [[
+        ]] .. util.startOrbiting() .. [[
         openspace.setPropertyValueSingle("Scene.Planck.Renderable.DisableFadeInOut", true)
         ]] .. util.interpolateProperty(opacityUri, maxOpacity, 2) .. [[
     ]],
@@ -31,7 +31,7 @@ local edgeOfUniverseState = {
     Enter = [[
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.startOrbiting() .. [[
-        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 5) .. [[
+        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 6) .. [[
     ]],
     Exit = [[
         ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
@@ -52,8 +52,8 @@ local transitions = {
   },
   {
     From = "CBR",
-    To = "Home",
-    Action = flyHome.linearFlight
+    To = "Home"
+    -- No action. Should already be at the desired distance
   },
   -- CBR
   {
