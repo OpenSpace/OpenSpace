@@ -162,7 +162,7 @@ private:
     // Used to save property for later initialization
     int _colorQuantityTemp = 0;
     // Color table/transfer function min and max range
-    properties::Vec2Property _colorMinMax;
+    properties::Vec2Property _colorQuantityMinMax;
     // Color table/transfer function for "By Quantity" coloring
     properties::StringProperty _colorTablePath;
     // Uniform Field Line Color

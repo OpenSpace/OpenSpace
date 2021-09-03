@@ -240,24 +240,9 @@ namespace {
         std::optional<double> manualTimeOffset;
     };
 #include "renderablefieldlinessequence_codegen.cpp"
-
-    float stringToFloat(const std::string& input, float backupValue = 0.f) {
-        float tmp;
-        try {
-            tmp = std::stof(input);
-        }
-        catch (const std::invalid_argument& ia) {
-            LWARNING(fmt::format(
-                "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
-            ));
-            return backupValue;
-        }
-        return tmp;
-    }
 } // namespace
 
 namespace openspace {
-using namespace properties;
 
 documentation::Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
@@ -267,9 +252,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorGroup({ "Color" })
-    , _colorMethod(ColorMethodInfo, OptionProperty::DisplayType::Radio)
-    , _colorQuantity(ColorQuantityInfo, OptionProperty::DisplayType::Dropdown)
-    , _colorMinMax(ColorMinMaxInfo)
+    , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
+    , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _colorQuantityMinMax(
+        ColorMinMaxInfo, glm::vec2(-0, 100), glm::vec2(-5000), glm::vec2(5000)
+      )
     , _colorTablePath(ColorTablePathInfo)
     , _colorUniform(
         ColorUniformInfo,
@@ -298,8 +285,12 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
-    , _maskingMinMax(MaskingMinMaxInfo)
-    , _maskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
+    , _maskingMinMax(
+        MaskingMinMaxInfo, glm::vec2(0,100), glm::vec2(-5000), glm::vec2(5000)
+      )
+    , _maskingQuantity(
+        MaskingQuantityInfo, properties::OptionProperty::DisplayType::Dropdown
+      )
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
 {
@@ -623,8 +614,8 @@ void RenderableFieldlinesSequence::setupProperties() {
     if (hasExtras) {
         _colorGroup.addProperty(_colorMethod);
         _colorGroup.addProperty(_colorQuantity);
-        _colorMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        _colorGroup.addProperty(_colorMinMax);
+        _colorQuantityMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        _colorGroup.addProperty(_colorQuantityMinMax);
         _colorGroup.addProperty(_colorTablePath);
         _maskingGroup.addProperty(_maskingQuantity);
         _maskingMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);
@@ -652,7 +643,7 @@ void RenderableFieldlinesSequence::setupProperties() {
     if (hasExtras) {
         // Set defaults
         _colorQuantity = _colorQuantityTemp;
-        _colorMinMax = _colorTableRanges[_colorQuantity];
+        _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
         _colorTablePath = _colorTablePaths[0];
 
         _maskingQuantity = _maskingQuantityTemp;
@@ -666,7 +657,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     if (hasExtras) {
         _colorQuantity.onChange([this] {
             _shouldUpdateColorBuffer = true;
-            _colorMinMax = _colorTableRanges[_colorQuantity];
+            _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
             _colorTablePath = _colorTablePaths[_colorQuantity];
         });
 
@@ -675,8 +666,8 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             _colorTablePaths[_colorQuantity] = _colorTablePath;
         });
 
-        _colorMinMax.onChange([this] {
-            _colorTableRanges[_colorQuantity] = _colorMinMax;
+        _colorQuantityMinMax.onChange([this] {
+            _colorTableRanges[_colorQuantity] = _colorQuantityMinMax;
         });
 
         _maskingQuantity.onChange([this] {
