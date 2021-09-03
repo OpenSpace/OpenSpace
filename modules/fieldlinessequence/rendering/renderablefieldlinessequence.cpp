@@ -256,7 +256,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _colorQuantity(ColorQuantityInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _colorQuantityMinMax(
         ColorMinMaxInfo, glm::vec2(-0, 100), glm::vec2(-5000), glm::vec2(5000)
-      )
+    )
     , _colorTablePath(ColorTablePathInfo)
     , _colorUniform(
         ColorUniformInfo,
@@ -287,10 +287,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _maskingGroup({ "Masking" })
     , _maskingMinMax(
         MaskingMinMaxInfo, glm::vec2(0,100), glm::vec2(-5000), glm::vec2(5000)
-      )
+    )
     , _maskingQuantity(
         MaskingQuantityInfo, properties::OptionProperty::DisplayType::Dropdown
-      )
+    )
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
 {
