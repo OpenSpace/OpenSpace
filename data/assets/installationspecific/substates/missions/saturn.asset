@@ -1,4 +1,5 @@
 local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
 
 ----------------------------------------------------------------
 -- STATES
@@ -86,11 +87,16 @@ local goToSaturnOverview = [[
 ]]
 
 local transitions = {
-  -- Transition to this state
+  -- Transition to/from this state
   {
     From = "Home",
     To = "Saturn",
     Action = goToSaturnOverview
+  },
+  {
+    From = "Saturn",
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   -- Rings
   {
@@ -138,19 +144,23 @@ local transitions = {
   -- Back to SolarSystem from substates
   {
     From = "SaturnRings",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   {
     From = "Titan",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   {
     From = "Cassini",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   {
     From = "Huygens",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   }
 }
 

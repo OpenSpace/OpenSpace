@@ -1,0 +1,19 @@
+local util = asset.require('./utility_functions')
+
+local solarTargetDistance = 1079252848800 -- 1 lighthour
+local solarsystemflightDuration = 9 -- seconds
+
+-- ]] .. util.setCurveType("ZoomOutOverview") .. [[
+local cameraPath = [[
+  ]] .. util.disableLinearFlight() .. [[
+  openspace.pathnavigation.goToHeight(
+    'Sun', 
+    ]] .. solarTargetDistance .. [[,
+    ]] .. solarsystemflightDuration .. [[
+  )
+]]
+
+local linearFlight = util.applyLinearFlight(solarTargetDistance, 1.2)
+
+asset.export("cameraPath", cameraPath)
+asset.export("linearFlight", linearFlight)

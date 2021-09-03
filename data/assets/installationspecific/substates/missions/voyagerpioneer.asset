@@ -1,4 +1,5 @@
 local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
 
 ----------------------------------------------------------------
 -- STATES
@@ -118,6 +119,7 @@ local states = {
 -- The action we want to happen when moving from any of the substates back
 -- to the SolarSystem state
 local onLeavingMainStateAction = [[
+  ]] .. flyHome.linearFlight .. [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[
   ]] .. fadeOutTrails() .. [[

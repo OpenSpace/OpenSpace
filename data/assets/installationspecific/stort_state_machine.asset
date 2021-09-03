@@ -1,27 +1,21 @@
 local util = asset.require('./utility_functions')
+local flyHome = asset.require('./fly_home_alternatives')
 
 ---------------------------------------------------------------- 
 -- STATES
 ----------------------------------------------------------------
-local solarTargetDistance = 1079252848800 -- 1 lighthour
-local solarsystemflightDuration = 9 -- seconds
+local startState = {
+  Identifier = "Start",
+}
 
 local homeState = {
   Identifier = "Home",
-  -- Enter function use for all transitions to the solar system.
-  -- So, no explicit transition should be needed
   Enter = [[
-    ]] .. util.disableLinearFlight() .. [[
-    ]] .. util.setCurveType("AvoidCollision") .. [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.startOrbiting() .. [[
     ]] .. util.orbitOnArrival() .. [[
-    openspace.pathnavigation.goToHeight(
-      'Sun', 
-      ]] .. solarTargetDistance .. [[,
-      ]] .. solarsystemflightDuration .. [[
-    )
   ]],
-  Exit = [[]]
+  Exit = util.stopOrbiting()
 }
 
 -- An empty state that wil just be used to show a page in the GUI where the 
@@ -30,17 +24,17 @@ local solarSystemState = {
   Identifier = "SolarSystem"
 }
 
+-- Missions
 local substateMoon = asset.require('./substates/missions/moon')
-
 local substateMars = asset.require('./substates/missions/mars')
-
 local substateSaturn = asset.require('./substates/missions/saturn')
-
 local substateVoyagerPioneer = asset.require('./substates/missions/voyagerpioneer.asset')
 
+-- Others
 local substateCBR = asset.require('./substates/cbr.asset')
 
 local states = {
+  startState,
   homeState,
   solarSystemState
 }
@@ -55,32 +49,24 @@ util.appendTable(states, substateCBR.states)
 -- TRANSITIONS
 ----------------------------------------------------------------
 local transitions = {
+  {
+    From = "Start",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
   -- SolarSystem <-> Home
   {
     From = "SolarSystem",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   {
     From = "Home",
     To = "SolarSystem"
   },
-  -- Moon <-> Home -- In substate 
-  -- Mars <-> Home
-  {
-    From = "Mars",
-    To = "Home"
-  },
-  -- Saturn <-> Home
-  {
-    From = "Saturn",
-    To = "Home"
-  }
-  -- Voyager and Pioneer <-> Home -- In substate
-
-  -- Cosmic Background Radiation <-> Home -- In substate
+  -- The rest are in the substates
 }
 
--- Add transitions within each substate
 util.appendTable(transitions, substateMoon.transitions)
 util.appendTable(transitions, substateMars.transitions)
 util.appendTable(transitions, substateSaturn.transitions)
@@ -88,8 +74,9 @@ util.appendTable(transitions, substateVoyagerPioneer.transitions)
 util.appendTable(transitions, substateCBR.transitions)
 
 asset.onInitialize(function()
-    openspace.statemachine.createStateMachine(states, transitions, "Home")
-
     -- OBS: the following line should be set in the profile
     openspace.time.setPause(true) -- However, this does not work
+
+    openspace.statemachine.createStateMachine(states, transitions, "Start")
+    openspace.statemachine.goToState("Home")
 end)

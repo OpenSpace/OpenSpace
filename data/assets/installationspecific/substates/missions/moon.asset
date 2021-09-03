@@ -1,4 +1,5 @@
 local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
 
 ----------------------------------------------------------------
 -- STATES
@@ -50,7 +51,8 @@ local transitions = {
   },
   {
     From = "Moon",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   },
   -- Apollo
   {
@@ -65,7 +67,8 @@ local transitions = {
   -- Back to SolarSystem from substates
   {
     From = "Apollo",
-    To = "Home"
+    To = "Home",
+    Action = flyHome.cameraPath
   }
 }
 
