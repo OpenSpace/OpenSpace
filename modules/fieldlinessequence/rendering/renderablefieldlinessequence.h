@@ -129,7 +129,6 @@ private:
 
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
-    std::unique_ptr<ghoul::Dictionary> _dictionary;
     // Used for 'runtime-states' when switching out current state to a new state
     std::unique_ptr<FieldlinesState> _newState;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
@@ -160,10 +159,10 @@ private:
     properties::OptionProperty _colorMethod;
     // Index of the extra quantity to color lines by
     properties::OptionProperty _colorQuantity;
-    // Color table/transfer function min
-    properties::StringProperty _colorQuantityMin;
-    // Color table/transfer function max
-    properties::StringProperty _colorQuantityMax;
+    // Used to save property for later initialization
+    int _colorQuantityTemp = 0;
+    // Color table/transfer function min and max range
+    properties::Vec2Property _colorMinMax;
     // Color table/transfer function for "By Quantity" coloring
     properties::StringProperty _colorTablePath;
     // Uniform Field Line Color
@@ -203,12 +202,12 @@ private:
     properties::BoolProperty _maskingEnabled;
     // Group to hold the masking properties
     properties::PropertyOwner _maskingGroup;
-    // Lower limit for allowed values
-    properties::StringProperty _maskingMin;
-    // Upper limit for allowed values
-    properties::StringProperty _maskingMax;
+    // Lower and upper range limit for allowed values
+    properties::Vec2Property _maskingMinMax;
     // Index of the extra quantity to use for masking
     properties::OptionProperty _maskingQuantity;
+    // used to save property for later initialization
+    int _maskingQuantityTemp = 0;
 
     /// Line width for the line rendering part
     properties::FloatProperty _lineWidth;

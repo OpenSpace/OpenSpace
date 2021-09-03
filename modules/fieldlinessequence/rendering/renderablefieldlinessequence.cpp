@@ -63,15 +63,10 @@ namespace {
         "Quantity to Color By",
         "Quantity used to color lines if the 'By Quantity' color method is selected."
     };
-    constexpr openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMin",
         "ColorTable Min Value",
-        "Value to map to the lowest end of the color table."
-    };
-    constexpr openspace::properties::Property::PropertyInfo ColorQuantityMaxInfo = {
-        "ColorQuantityMax",
-        "ColorTable Max Value",
-        "Value to map to the highest end of the color table."
+        "Value to map to the lowest and highest end of the color table."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
@@ -152,15 +147,10 @@ namespace {
         "temperature is between 10 and 20 degrees. Also used for masking out line "
         "topologies like solar wind & closed lines."
     };
-    constexpr openspace::properties::Property::PropertyInfo MaskingMinInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
-        "Lower limit of the valid masking range"
-    };
-    constexpr openspace::properties::Property::PropertyInfo MaskingMaxInfo = {
-        "MaskingMaxLimit",
-        "Upper Limit",
-        "Upper limit of the valid masking range"
+        "Lower and upper limit of the valid masking range"
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
@@ -215,13 +205,25 @@ namespace {
         // Values should be paths to .txt files
         std::optional<std::vector<std::string>> colorTablePaths;
 
+        // [[codegen::verbatim(ColorMethodInfo.description)]]
+        std::optional<std::string> colorMethod;
+
+        // [[codegen::verbatim(ColorQuantityInfo.description)]]
+        std::optional<int> colorQuantity;
+
         // Values should be entered as {X, Y}, where X & Y are numbers
         std::optional<std::vector<glm::vec2>> colorTableRanges;
         
         // Enables Flow
         std::optional<bool> flowEnabled;
 
-        // Values should be entered as {X, Y}, where X & Y are numbers
+        // [[codegen::verbatim(MaskingEnabledInfo.description)]]
+        std::optional<bool> maskingEnabled;
+
+        // [[codegen::verbatim(MaskingQuantityInfo.description)]]
+        std::optional<int> MaskingQuantity;
+
+        // Values should be entered as {{X, Y},{X, Y}} where X & Y are numbers
         std::optional<std::vector<glm::vec2>> maskingRanges;
         
         // Value should be path to folder where states are saved. Specifying this
@@ -267,8 +269,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _colorGroup({ "Color" })
     , _colorMethod(ColorMethodInfo, OptionProperty::DisplayType::Radio)
     , _colorQuantity(ColorQuantityInfo, OptionProperty::DisplayType::Dropdown)
-    , _colorQuantityMin(ColorQuantityMinInfo)
-    , _colorQuantityMax(ColorQuantityMaxInfo)
+    , _colorMinMax(ColorMinMaxInfo)
     , _colorTablePath(ColorTablePathInfo)
     , _colorUniform(
         ColorUniformInfo,
@@ -297,8 +298,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
     , _maskingEnabled(MaskingEnabledInfo, false)
     , _maskingGroup({ "Masking" })
-    , _maskingMin(MaskingMinInfo)
-    , _maskingMax(MaskingMaxInfo)
+    , _maskingMinMax(MaskingMinMaxInfo)
     , _maskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _jumpToStartBtn(TimeJumpButtonInfo)
@@ -381,13 +381,34 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         ));
     }
 
-    _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simluationModel.value_or(_modelStr);
     _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
+    _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
+    _maskingQuantityTemp = p.MaskingQuantity.value_or(_maskingQuantityTemp);
+    _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
+
+    _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
+    _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
+    if (p.colorMethod.has_value()) {
+        if (p.colorMethod.value() == "Uniform") {
+            _colorMethod = static_cast<int>(ColorMethod::Uniform);
+        }
+        else {
+            _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
+        }
+    }
+    else {
+        _colorMethod = static_cast<int>(ColorMethod::Uniform);
+    }
+
+    if (p.colorQuantity.has_value()) {
+        _colorMethod = static_cast<int>(ColorMethod::ByQuantity);
+        _colorQuantityTemp = p.colorQuantity.value_or(_colorQuantityTemp);
+    }
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
@@ -406,7 +427,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _maskingRanges = *p.maskingRanges;
     }
     else {
-        _maskingRanges.push_back(glm::dvec2(-100000, 100000)); // Just some default values
+        _maskingRanges.push_back(glm::vec2(-100000, 100000)); // Just some default values
     }
 
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
@@ -602,16 +623,14 @@ void RenderableFieldlinesSequence::setupProperties() {
     if (hasExtras) {
         _colorGroup.addProperty(_colorMethod);
         _colorGroup.addProperty(_colorQuantity);
-        _colorGroup.addProperty(_colorQuantityMin);
-        _colorGroup.addProperty(_colorQuantityMax);
+        _colorMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        _colorGroup.addProperty(_colorMinMax);
         _colorGroup.addProperty(_colorTablePath);
-        _maskingGroup.addProperty(_maskingMin);
-        _maskingGroup.addProperty(_maskingMax);
         _maskingGroup.addProperty(_maskingQuantity);
+        _maskingMinMax.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        _maskingGroup.addProperty(_maskingMinMax);
 
         // --------------------- Add Options to OptionProperties --------------------- //
-        _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
-        _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
         // Add option for each extra quantity. Assumes there are just as many names to
         // extra quantities as there are extra quantities. Also assume that all states in
         // the given sequence have the same extra quantities! */
@@ -632,14 +651,12 @@ void RenderableFieldlinesSequence::setupProperties() {
 
     if (hasExtras) {
         // Set defaults
-        _colorQuantity = 0;
-        _colorQuantityMin = std::to_string(_colorTableRanges[0].x);
-        _colorQuantityMax = std::to_string(_colorTableRanges[0].y);
+        _colorQuantity = _colorQuantityTemp;
+        _colorMinMax = _colorTableRanges[_colorQuantity];
         _colorTablePath = _colorTablePaths[0];
 
-        _maskingQuantity = 0;
-        _maskingMin = std::to_string(_maskingRanges[0].x);
-        _maskingMax = std::to_string(_maskingRanges[0].y);
+        _maskingQuantity = _maskingQuantityTemp;
+        _maskingMinMax = _maskingRanges[_colorQuantity];
     }
 }
 
@@ -649,8 +666,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     if (hasExtras) {
         _colorQuantity.onChange([this] {
             _shouldUpdateColorBuffer = true;
-            _colorQuantityMin = std::to_string(_colorTableRanges[_colorQuantity].x);
-            _colorQuantityMax = std::to_string(_colorTableRanges[_colorQuantity].y);
+            _colorMinMax = _colorTableRanges[_colorQuantity];
             _colorTablePath = _colorTablePaths[_colorQuantity];
         });
 
@@ -659,46 +675,17 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             _colorTablePaths[_colorQuantity] = _colorTablePath;
         });
 
-        _colorQuantityMin.onChange([this] {
-            const float f = stringToFloat(
-                _colorQuantityMin,
-                _colorTableRanges[_colorQuantity].x
-            );
-            _colorQuantityMin = std::to_string(f);
-            _colorTableRanges[_colorQuantity].x = f;
-        });
-
-        _colorQuantityMax.onChange([this] {
-            const float f = stringToFloat(
-                _colorQuantityMax,
-                _colorTableRanges[_colorQuantity].y
-            );
-            _colorQuantityMax = std::to_string(f);
-            _colorTableRanges[_colorQuantity].y = f;
+        _colorMinMax.onChange([this] {
+            _colorTableRanges[_colorQuantity] = _colorMinMax;
         });
 
         _maskingQuantity.onChange([this] {
             _shouldUpdateMaskingBuffer = true;
-            _maskingMin = std::to_string(_maskingRanges[_maskingQuantity].x);
-            _maskingMax = std::to_string(_maskingRanges[_maskingQuantity].y);
+            _maskingMinMax = _maskingRanges[_maskingQuantity];
         });
 
-        _maskingMin.onChange([this] {
-            const float f = stringToFloat(
-                _maskingMin,
-                _maskingRanges[_maskingQuantity].x
-            );
-            _maskingMin = std::to_string(f);
-            _maskingRanges[_maskingQuantity].x = f;
-        });
-
-        _maskingMax.onChange([this] {
-            const float f = stringToFloat(
-                _maskingMax,
-                _maskingRanges[_maskingQuantity].y
-            );
-            _maskingMax = std::to_string(f);
-            _maskingRanges[_maskingQuantity].y = f;
+        _maskingMinMax.onChange([this] {
+            _maskingRanges[_maskingQuantity] = _maskingMinMax;
         });
     }
 
