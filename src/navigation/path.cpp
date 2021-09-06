@@ -217,11 +217,13 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
     }
 
     // Handle up vector separately
+    // @TODO (2021-09-06 emmbr) This actually does not interpolate the up vector of the
+    // camera, but just the "hint" up vector for the lookAt. This leads to fast rolling
+    // when the up vector gets close to the camera's forward vector. Should be improved
+    // so any rolling is spread out over the entire motion instead
+    double tUp = ghoul::sineEaseInOut(t);
     glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
     glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-
-    double tUp = helpers::shiftAndScale(t, t1, t2);
-    tUp = ghoul::sineEaseInOut(tUp);
     glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
 
     return ghoul::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
