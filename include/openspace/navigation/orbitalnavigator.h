@@ -199,7 +199,8 @@ private:
     struct IdleBehavior : public properties::PropertyOwner {
         enum Behavior {
             Orbit = 0,
-            OrbitAtConstantLat
+            OrbitAtConstantLat,
+            OrbitAroundUp
         };
 
         IdleBehavior();
@@ -369,20 +370,36 @@ private:
         glm::dquat& localRotation, glm::dquat& globalRotation);
 
     /**
-     * IdleBehavior::Behavior::Orbit
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
-     * and global rotation of the camera
+     * and global rotation of the camera. 
+     * 
+     * Used for IdleBehavior::Behavior::Orbit
+     * 
+     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param position The position of the camera. Will be changed by the function
+     * \param globalRotation The camera's global rotation. Will be changed by the function
+     * \param speedScale A speed scale that controls the speed of the motion
      */
     void orbitAnchor(double deltaTime, glm::dvec3& position,
         glm::dquat& globalRotation, double speedScale);
 
     /**
-     * IdleBehavior::Behavior::OrbitAtConstantLat
-     * Orbit the current anchor node, but stay on the current latitude band. Note that
-     * this creates a rolling motion if looking at any of the anchor's poles, and should
-     * be used with care
+     * Orbit the current anchor node, by adding a rotation around the given axis. For 
+     * example, when the axis is the north vector, the camera will stay on the current 
+     * latitude band. Note that this creates a rolling motion if the camera's forward 
+     * vector coincides with the axis, and should be used with care. 
+     * 
+     * Used for:
+     * IdleBehavior::Behavior::OrbitAtConstantLat ( axis = north = z-axis ) and
+     * IdleBehavior::Behavior::OrbitAroundUp ( axis = up = y-axis )
+     * 
+     * \param axis The axis to arbit around, given in model coordinates of the anchor
+     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param position The position of the camera. Will be changed by the function
+     * \param globalRotation The camera's global rotation. Will be changed by the function
+     * \param speedScale A speed scale that controls the speed of the motion
      */
-    void orbitAtConstantLatitude(double deltaTime, glm::dvec3& position,
+    void orbitAroundAxis(const glm::dvec3 axis, double deltaTime, glm::dvec3& position,
         glm::dquat& globalRotation, double speedScale);
 };
 
