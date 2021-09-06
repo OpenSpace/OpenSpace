@@ -40,7 +40,7 @@ namespace {
 
     constexpr const std::array<const char*, 8> UniformNames = {
         "ModelTransform", "ViewProjectionMatrix", "texture", "showCrosshair", 
-        "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
+        "showRectangle", "borderWidth", "targetDimensions", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
@@ -55,6 +55,13 @@ namespace {
         "CrosshairThreshold",
         "Crosshair Threshold Info",
         "tjobidabidobidabidopp plupp"
+    }; 
+    
+    constexpr const openspace::properties::Property::PropertyInfo RectangleThresholdInfo =
+    {
+        "RectangleThreshold",
+        "Rectangle Threshold Info",
+        "tjobidabidobidabidopp plupp"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
@@ -67,6 +74,9 @@ namespace {
 
         // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
         std::optional<float> crosshairThreshold;
+
+        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
+        std::optional<float> rectangleThreshold;
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -79,7 +89,8 @@ namespace openspace {
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), 
             glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
-        , _showCrosshairThreshold(CrosshairThresholdInfo, 0.6f, 0.1f, 70.f)
+        , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
+        , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
         , _borderColor(220, 220, 220)
         , _skyBrowser(nullptr)
     {
@@ -88,10 +99,12 @@ namespace openspace {
         _targetDimensions = p.targetDimensions.value_or(_targetDimensions);
         _skyBrowserID = p.browserID.value_or(_skyBrowserID);
         _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
+        _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
         
         addProperty(_targetDimensions);  
         addProperty(_skyBrowserID);
         addProperty(_showCrosshairThreshold);
+        addProperty(_showRectangleThreshold);
 
         _skyBrowserID.onChange([&]() {
             setConnectedBrowser();
@@ -240,15 +253,11 @@ namespace openspace {
         }
         _shader->activate();
 
-        // Show crosshair and target when browser FOV < 2 degrees
-        float showCrosshairInTargetThreshold = 2.f;
-        bool showOnlyCrosshair;
-        bool showCrosshairInTarget;
-        showOnlyCrosshair = _fieldOfView < _showCrosshairThreshold;
-        showCrosshairInTarget = _fieldOfView < showCrosshairInTargetThreshold && !showOnlyCrosshair;
-        
-        _shader->setUniform(_uniformCache.showCrosshair, showOnlyCrosshair);
-        _shader->setUniform(_uniformCache.showCrosshairInTarget, showCrosshairInTarget);
+        bool showCrosshair = _fieldOfView < _showCrosshairThreshold;
+        bool showRect = _fieldOfView > _showRectangleThreshold;
+       
+        _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
+        _shader->setUniform(_uniformCache.showRectangle, showRect);
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
@@ -316,7 +325,7 @@ namespace openspace {
         glm::ivec2 windowRatio = global::windowDelegate->currentWindowSize();
 
         float verticFOV = horizFOV * (static_cast<float>(windowRatio.y) / static_cast<float>(windowRatio.x));
-        _scale = std::max((VFOV / verticFOV),(_showCrosshairThreshold.value()/ verticFOV));
+        _scale = std::max((VFOV / verticFOV),(_showRectangleThreshold.value()/ verticFOV));
         
         _fieldOfView = VFOV;
     }

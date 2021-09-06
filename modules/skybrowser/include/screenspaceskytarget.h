@@ -63,9 +63,11 @@ namespace openspace {
     
         properties::Vec2Property _targetDimensions;
         properties::FloatProperty _showCrosshairThreshold;
+        properties::FloatProperty _showRectangleThreshold;
+
         std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-        UniformCache(modelTransform, viewProj, texture, showCrosshair, showCrosshairInTarget, borderWidth, targetDimensions, borderColor) _uniformCache;
+        UniformCache(modelTransform, viewProj, texture, showCrosshair, showRectangle, borderWidth, targetDimensions, borderColor) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
         float _fieldOfView = 100.f;

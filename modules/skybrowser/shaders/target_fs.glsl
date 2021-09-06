@@ -2,69 +2,83 @@ uniform sampler2D texture;
 uniform float borderWidth;
 uniform vec2 targetDimensions;
 uniform bool showCrosshair;
-uniform bool showCrosshairInTarget;
+uniform bool showRectangle;
 uniform vec4 borderColor;
-
 
 in vec2 vs_st;
 in vec4 vs_position;
 
+// A factor which states how much thicker vertical lines are rendered than horizontal
+// This compensates for the optical illusion that vertical lines appear thinner
+#define VERTICAL_THICKNESS 1.15f
 
-float crossLine(in float _width, in float _coord) {
-    float center = 0.5f;
-    float line = smoothstep(center, center+(_width/2), _coord)
-               - smoothstep(center-(_width/2), center, _coord);
-    return line;
+float line(in float _lineCenter, in float _lineWidth, in float _coord) {
+  // Calculate edges of line
+  float start_edge = _lineCenter - (_lineWidth * 0.5f);
+  float end_edge = _lineCenter + (_lineWidth * 0.5f);
+
+  // Create line
+  float line = step(start_edge, _coord) - step(end_edge, _coord);
+
+  return line;
+}
+
+float rectangle(in float _linewidth_y, in float _ratio, in vec2 _coord) {
+  // Calculate the widths and centers for the lines
+  float linewidth_x = _linewidth_y * _ratio * VERTICAL_THICKNESS;
+  float linecenter_x = linewidth_x * 0.5f;
+  float linecenter_y = _linewidth_y * 0.5f;
+
+  // Create the four lines for the rectangle
+  float l = line(linecenter_x, linewidth_x, _coord.x);
+  float r = line(1.0f - linecenter_x, linewidth_x, _coord.x);
+  float b = line(linecenter_y, _linewidth_y, _coord.y);
+  float t = line(1.0f - linecenter_y, _linewidth_y, _coord.y);
+
+  // Add all lines together
+  return l + r + b + t;
+}
+
+float crosshair(in float _linewidth, in float _ratio, in vec2 _coord) {
+  float center = 0.5f;
+  float crosshair_vertical = line(center, _linewidth * _ratio * VERTICAL_THICKNESS, _coord.x);
+  float crosshair_horizontal = line(center, _linewidth, _coord.y);
+
+  return crosshair_horizontal + crosshair_vertical;
+}
+
+float filledRectangle(in float _size, in float _ratio, in vec2 _coord) {
+  float center = 0.5f;
+  float horizontal = line(center, _size, _coord.y);
+  float vertical = line(center, _size, _coord.x);
+
+  return horizontal * vertical;
 }
 
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    Fragment frag;
-
-    float ratio = targetDimensions.y / targetDimensions.x;
-
-    // draw square border
-    float border_bl = step(borderWidth*ratio, vs_st.x) * step(borderWidth*ratio, (1.0)-vs_st.x);
-    float border_tr = step(borderWidth, vs_st.y) * step(borderWidth, (1.0)-vs_st.y);
-    vec3 border = vec3(border_bl*border_tr);
-
-    // draw crosshair inside square border
-    float crosshair_border_linewidth = 0.06f;
-    float border_crosshair_bl = step(borderWidth*ratio*4, vs_st.x) * step(borderWidth*ratio*4, (1.0)-vs_st.x);
-    float border_crosshair_tr = step(borderWidth*4, vs_st.y) * step(borderWidth*4, (1.0)-vs_st.y);
-    vec3 crosshair_small = vec3(border_crosshair_bl*border_crosshair_tr);
-
-    vec3 crosshair_inside_border = vec3(crossLine(crosshair_small.x * crosshair_border_linewidth, (vs_st).x)
-    + crossLine(crosshair_small.y * crosshair_border_linewidth, (vs_st).y));
-    vec3 crosshair_and_border =  (1.0 - border) + crosshair_inside_border;
-
-    // draw crosshair
-    float crosshair_linewidth = 0.14f;
-    vec3 crosshair = vec3(crossLine(crosshair_linewidth*ratio*1.1, vs_st.x) + crossLine(crosshair_linewidth, vs_st.y));
-
-    // show crosshair or border or both
-    frag.color = vec4(1,1,1,1);
-    frag.color.rgba = vec4(borderColor);
+    float _ratio = targetDimensions.y / targetDimensions.x;
+    float _crosshair = 0.0f;
+    float _rectangle = 0.0f;
 
     if(showCrosshair) {
-        frag.color.rgba = vec4(borderColor);
-        if(crosshair == vec3(0.0)) {
-            frag.color.a = 0.0;
-        }
+      _crosshair = crosshair(borderWidth, _ratio, vs_st);
     }
-    else if(showCrosshairInTarget) {
-        frag.color.rgba = vec4(borderColor);
-        if(crosshair_and_border == vec3(0.0)) {
-            frag.color.a = 0.0;
-        }
 
+    if(showRectangle) {
+      _rectangle = rectangle(borderWidth, _ratio, vs_st);
     }
-    else {
-        if(border == vec3(1.0)) {
-            frag.color.a = 0.0;
-        }
+
+    // If both rectangle and crosshair are displayed, draw crosshair a bit smaller
+    if(showCrosshair && showRectangle) {
+      _crosshair *= filledRectangle(borderWidth * 7.0f, _ratio, vs_st);
     }
+
+    float result = clamp(_crosshair + _rectangle, 0.0, 1.0);
+
+    Fragment frag;
+    frag.color = vec4(vec3(borderColor), result);
 
     return frag;
 }
