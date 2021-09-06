@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
 
-#include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -35,29 +35,30 @@ namespace openspace::globebrowsing {
 
 class RenderableGlobe;
 
-class GlobeTranslation : public Translation {
+class GlobeRotation : public Rotation {
 public:
-    GlobeTranslation(const ghoul::Dictionary& dictionary);
+    GlobeRotation(const ghoul::Dictionary& dictionary);
 
-    glm::dvec3 position(const UpdateData& data) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void fillAttachedNode();
+    void findGlobe();
+    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
     properties::StringProperty _globe;
     properties::DoubleProperty _latitude;
     properties::DoubleProperty _longitude;
-    properties::DoubleProperty _altitude;
+    properties::DoubleProperty _angle;
     properties::BoolProperty _useHeightmap;
 
-    RenderableGlobe* _attachedNode = nullptr;
+    RenderableGlobe* _globeNode = nullptr;
 
-    mutable bool _positionIsDirty = true;
-    mutable glm::dvec3 _position = glm::dvec3(0.0);
+    mutable bool _matrixIsDirty = true;
+    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
