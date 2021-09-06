@@ -113,20 +113,20 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _globe = p.globe;
 
     _latitude = p.latitude.value_or(_latitude);
-    _latitude.onChange([this]() { _positionIsDirty = true; });
+    _latitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_latitude);
 
     _longitude = p.longitude.value_or(_longitude);
-    _longitude.onChange([this]() { _positionIsDirty = true; });
+    _longitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_longitude);
 
     _altitude = p.altitude.value_or(_altitude);
     _altitude.setExponent(8.f);
-    _altitude.onChange([this]() { _positionIsDirty = true; });
+    _altitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_altitude);
 
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
-    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
+    _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
 }
 
@@ -145,6 +145,11 @@ void GlobeTranslation::fillAttachedNode() {
             _globe = _attachedNode->identifier();
         }
     }
+}
+
+void GlobeTranslation::setUpdateVariables() {
+    _positionIsDirty = true;
+    requireUpdate();
 }
 
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {

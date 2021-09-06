@@ -112,19 +112,19 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     _globe = p.globe;
 
     _latitude = p.latitude.value_or(_latitude);
-    _latitude.onChange([this]() { _matrixIsDirty = true; });
+    _latitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_latitude);
 
     _longitude = p.longitude.value_or(_longitude);
-    _longitude.onChange([this]() { _matrixIsDirty = true; });
+    _longitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_longitude);
 
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
-    _useHeightmap.onChange([this]() { _matrixIsDirty = true; });
+    _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
 
     _angle = p.angle.value_or(_angle);
-    _angle.onChange([this]() { _matrixIsDirty = true; });
+    _angle.onChange([this]() { setUpdateVariables(); });
     addProperty(_angle);
 }
 
@@ -143,6 +143,11 @@ void GlobeRotation::findGlobe() {
             _globe = _globeNode->identifier();
         }
     }
+}
+
+void GlobeRotation::setUpdateVariables() {
+    _matrixIsDirty = true;
+    requireUpdate();
 }
 
 glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const

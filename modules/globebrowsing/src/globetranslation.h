@@ -45,6 +45,7 @@ public:
 
 private:
     void fillAttachedNode();
+    void setUpdateVariables();
 
     properties::StringProperty _globe;
     properties::DoubleProperty _latitude;
