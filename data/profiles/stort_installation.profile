@@ -29,7 +29,8 @@
     "base",
     "scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11",
     "scene/solarsystem/planets/earth/satellites/misc/iss",
-    "installationspecific/stort_state_machine"
+    "installationspecific/stort_state_machine",
+    "installationspecific/substates/missions/cassini/trail"
   ],
   "camera": {
     "altitude": 17000000.0,

@@ -1,0 +1,154 @@
+--[[**************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2021                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ *************************************************************************************]]--
+
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('./transforms')
+
+local model = asset.syncedResource({
+  Name = "Cassini Model",
+  Type = "HttpSynchronization",
+  Identifier = "cassini_model",
+  Version = 2
+})
+
+-- Timeline
+local launchTime = "1997 OCT 15 09:27:11.572"
+local beginSaturnOrbit = "2004 JUN 16 08:14:57.000"
+local aprilStart = "2017 APR 02 00:01:12.557"
+local aprilEnd = "2017 MAY 07 00:01:09.153"
+local endCassini = "2017 SEP 15 10:34:05.000"
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL in relation to SSB                                                     --
+------------------------------------------------------------------------------------------
+local Cassini_SSB = {
+  Identifier = "Cassini_SSB",
+  Parent = transforms.CassiniSSB.Identifier, 
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Cassini_SSB",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInverted = true
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources =
+      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = endCassini
+  },
+  GUI = {
+    Name = "Cassini Model (SSB)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model in relation to SSB"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL with SPICE rotation in relation to Saturn (April 2017)                 --
+------------------------------------------------------------------------------------------
+local Cassini_ROT = {
+  Identifier = "Cassini_ROT",
+  Parent = transforms.CassiniROT.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI_ROT",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources =
+      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = aprilStart,
+    End = aprilEnd
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini Model (SAT, April 2017)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model with SPICE rotation in relation to Saturn (April 2017)"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI MODEL in relation to Saturn                                                  --
+------------------------------------------------------------------------------------------
+local Cassini_SAT = {
+  Identifier = "Cassini_SAT",
+  Parent = transforms.CassiniSAT.Identifier, 
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Cassini_SAT",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = "Sun",
+      YAxisInverted = true
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "CASSINI",
+    GeometryFile = model .. "/Cassini.glb",
+    LightSources =
+      assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+  },
+  TimeFrame = {
+    Type = "TimeFrameUnion",
+    TimeFrames = {
+      {
+        Type = "TimeFrameInterval",
+        Start = beginSaturnOrbit,
+        End = aprilStart
+      },
+      {
+        Type = "TimeFrameInterval",
+        Start = aprilEnd,
+        End = endCassini
+      }
+    }
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Cassini Model (SAT)",
+    Path = "/Solar System/Missions/Cassini",
+    Description = "Cassini model in relation to Saturn"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+  Cassini_SSB,
+  Cassini_ROT,
+  Cassini_SAT
+})

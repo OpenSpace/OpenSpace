@@ -1,0 +1,122 @@
+--[[**************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2021                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ *************************************************************************************]]--
+
+local kernels = asset.syncedResource({
+  Name = "Cassini Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "cassini_kernels",
+  Version = 1
+})
+
+local ephemerisKernels = {
+  kernels .. "/sclk/cas00172.tsc",
+
+  kernels .. "/lsk/naif0012.tls",
+
+  kernels .. "/fk/cas_v41.tf",
+
+  kernels .. "/ck/03001_04001pa_gapfill_v01.bc",      -- -82000 | 2003 OCT 19 16:01:15.069 - 2004 JAN 01 00:01:05.201 |
+  kernels .. "/ck/04001_05001pa_gapfill_v14.bc",      -- -82000 | 2004 JAN 09 12:09:22.084 - 2005 JAN 01 00:01:05.182 |
+  kernels .. "/ck/05001_06001pa_gapfill_v14.bc",      -- -82000 | 2005 JAN 01 00:01:04.182 - 2006 JAN 01 00:01:06.183 |
+  kernels .. "/ck/06001_07001pa_gapfill_v14.bc",      -- -82000 | 2006 JAN 01 00:01:05.183 - 2007 JAN 01 00:01:06.184 |
+  kernels .. "/ck/07001_08001pa_gapfill_v14.bc",      -- -82000 | 2007 JAN 01 00:01:05.184 - 2008 JAN 01 00:01:06.183 |
+  kernels .. "/ck/08001_09001pa_gapfill_v14.bc",      -- -82000 | 2008 JAN 01 00:01:05.183 - 2009 JAN 01 00:01:07.183 |
+  kernels .. "/ck/09001_10001pa_gapfill_v14.bc",      -- -82000 | 2009 JAN 01 00:01:06.183 - 2010 JAN 01 00:01:07.183 |
+  kernels .. "/ck/10001_11001pa_gapfill_v14.bc",      -- -82000 | 2010 JAN 01 00:01:06.183 - 2011 JAN 01 00:01:07.184 |
+  kernels .. "/ck/11001_12001pa_gapfill_v14.bc",      -- -82000 | 2011 JAN 01 00:01:06.184 - 2012 JAN 01 00:01:07.183 |
+  kernels .. "/ck/12001_13001pa_gapfill_v14.bc",      -- -82000 | 2012 JAN 01 00:01:06.183 - 2013 JAN 01 00:01:08.183 |
+  kernels .. "/ck/13001_14001pa_gapfill_v14.bc",      -- -82000 | 2013 JAN 01 00:01:07.183 - 2014 JAN 01 00:01:08.184 |
+  kernels .. "/ck/14001_15001pa_gapfill_v14.bc",      -- -82000 | 2014 JAN 01 00:01:07.184 - 2015 JAN 01 00:01:08.183 |
+  kernels .. "/ck/15001_16001pa_gapfill_v14.bc",      -- -82000 | 2015 JAN 01 00:01:07.183 - 2016 JAN 01 00:01:09.183 |
+  kernels .. "/ck/16001_17001pa_gapfill_v14.bc",      -- -82000 | 2016 JAN 01 00:01:08.183 - 2017 JAN 01 00:01:09.183 |
+  kernels .. "/ck/17001_18001pa_gapfill_v14.bc",      -- -82000 | 2017 JAN 01 00:01:08.183 - 2017 JUL 10 01:15:09.187 | 
+  kernels .. "/ck/17087_17092ra.bc",                  -- -82000 | 2017 MAR 28 00:01:11.326 - 2017 APR 02 00:01:08.557 |
+  kernels .. "/ck/17092_17097ra.bc",                  -- -82000 | 2017 APR 02 00:01:12.557 - 2017 APR 07 00:01:05.788 |
+  kernels .. "/ck/17096_17096ra.bc",                  -- -82000 | 2017 APR 06 00:21:10.334 - 2017 APR 06 07:55:06.160 |
+  kernels .. "/ck/17097_17102ra.bc",                  -- -82000 | 2017 APR 07 00:01:09.788 - 2017 APR 12 00:01:07.019 |
+  kernels .. "/ck/17102_17107ra.bc",                  -- -82000 | 2017 APR 12 00:01:11.019 - 2017 APR 17 00:01:08.246 |
+  kernels .. "/ck/17107_17112ra.bc",                  -- -82000 | 2017 APR 17 00:01:12.246 - 2017 APR 22 00:01:05.473 |
+  kernels .. "/ck/17110_17110ra.bc",                  -- -82000 | 2017 APR 20 08:01:10.397 - 2017 APR 20 16:03:06.212 |
+  kernels .. "/ck/17111_17112ra.bc",                  -- -82000 | 2017 APR 21 20:51:09.546 - 2017 APR 22 12:11:05.192 |
+  kernels .. "/ck/17112_17117ra.bc",                  -- -82000 | 2017 APR 22 00:01:09.473 - 2017 APR 27 00:01:06.699 |
+  kernels .. "/ck/17117_17122ra.bc",                  -- -82000 | 2017 APR 27 00:01:10.699 - 2017 MAY 02 00:01:07.926 |
+  kernels .. "/ck/17122_17127ra.bc",                  -- -82000 | 2017 MAY 02 00:01:11.926 - 2017 MAY 07 00:01:09.153 |
+  kernels .. "/ck/17091_17120ca_ISS.bc",              -- -82000 | 2017 APR 01 23:27:24.417 - 2017 APR 29 09:04:24.235 | gaps (see brief -dump)
+  kernels .. "/ck/17121_17151ca_ISS.bc",              -- -82000 | 2017 MAY 01 21:13:27.837 - 2017 MAY 30 15:32:39.886 | gaps (see brief -dump)
+  kernels .. "/ck/17102_17102pa_lud_170329.bc",       -- -82000 | 2017 APR 12 11:29:09.131 - 2017 APR 12 15:00:28.994 |
+  kernels .. "/ck/17104_17145pa_cont_hga_dustram.bc", -- -82000 | 2017 APR 14 14:56:09.128 - 2017 MAY 25 08:58:01.866 |
+
+  -- kernels .. "/pck/aegaeon_mst2013.bpc",
+  -- kernels .. "/pck/atlas_mst2018.bpc",
+  -- kernels .. "/pck/calypso_mst2013.bpc",
+  -- kernels .. "/pck/cpck15Dec2017.tpc",
+  -- kernels .. "/pck/daphnis_mst2018.bpc",
+  -- kernels .. "/pck/enceladus_mst2016.bpc",
+  -- kernels .. "/pck/epimetheus_mst2013.bpc",
+  -- kernels .. "/pck/helene_mst2013.bpc",
+  -- kernels .. "/pck/janus_mst2013.bpc",
+  -- kernels .. "/pck/methone_mst2013.bpc",
+  -- kernels .. "/pck/pallene_mst2013.bpc",
+  -- kernels .. "/pck/pan_mst2018.bpc",
+  -- kernels .. "/pck/telesto_mst2013.bpc",
+
+  kernels .. "/ik/cas_caps_v03.ti",  -- cassini plasma spectrometer
+  kernels .. "/ik/cas_cda_v01.ti",   -- cosmic dust analyzer
+  kernels .. "/ik/cas_cirs_v10.ti",  -- composite infrared spectrometer
+  kernels .. "/ik/cas_inms_v02.ti",  -- ion & neutral mass spectrometer
+  kernels .. "/ik/cas_iss_v10.ti",   -- imaging science subsystem               | images + NAC & WAC
+  kernels .. "/ik/cas_mag_v01.ti",   -- magnetometer
+  kernels .. "/ik/cas_mimi_v11.ti",  -- magnetospheric imaging instrument
+  kernels .. "/ik/cas_radar_v11.ti", -- radar                                   | images
+  kernels .. "/ik/cas_rpws_v01.ti",  -- radio & plasma wave science
+  kernels .. "/ik/cas_rss_v03.ti",   -- radio science subsystem
+  kernels .. "/ik/cas_sru_v02.ti",   -- stellar reference unit detectors
+  kernels .. "/ik/cas_uvis_v07.ti",  -- ultraviolet imaging spectograph
+  kernels .. "/ik/cas_vims_v06.ti",  -- visible & infrared mapping spectrometer | images
+
+  kernels .. "/spk/040225_OPK_TBM22_TCP1.bsp",        -- 2004 NOV 21 08:44:53.000 - 2005 JAN 15 11:06:00.000 (-82) |
+  kernels .. "/spk/040513AP_OPK_04122_08222.bsp",     -- 2004 MAY 01 12:00:00.000 - 2008 AUG 09 00:00:00.000 (-82) | 2004 DEC 25 02:01:04.183 - 2005 JAN 14 09:07:00.000 (-150) |
+  kernels .. "/spk/041001AP_OPK_04275_08222.bsp",     -- 2004 OCT 01 12:00:00.000 - 2008 AUG 09 00:00:00.000 (-82) | 2004 DEC 25 02:01:04.183 - 2005 JAN 14 09:07:00.000 (-150) |
+  kernels .. "/spk/171215R_SCPSEops_97288_17258.bsp", -- 1997 OCT 15 09:27:11.572 - 2017 SEP 15 10:34:00.000 (-82) | 2004 NOV 24 00:00:00.000 - 2005 JAN 14 09:06:56.706 (-150) | see brief for rest of bodies
+}
+
+local pckKernels = {
+  kernels .. "/pck/aegaeon_mst2013.bpc",
+  kernels .. "/pck/atlas_mst2018.bpc",
+  kernels .. "/pck/calypso_mst2013.bpc",
+  kernels .. "/pck/cpck15Dec2017.tpc",
+  kernels .. "/pck/daphnis_mst2018.bpc",
+  kernels .. "/pck/enceladus_mst2016.bpc",
+  kernels .. "/pck/epimetheus_mst2013.bpc",
+  kernels .. "/pck/helene_mst2013.bpc",
+  kernels .. "/pck/janus_mst2013.bpc",
+  kernels .. "/pck/methone_mst2013.bpc",
+  kernels .. "/pck/pallene_mst2013.bpc",
+  kernels .. "/pck/pan_mst2018.bpc",
+  kernels .. "/pck/telesto_mst2013.bpc",
+}
+
+asset.export("kernels", kernels)
+asset.export("ephemerisKernels", ephemerisKernels)
+asset.export("pckKernels", pckKernels)

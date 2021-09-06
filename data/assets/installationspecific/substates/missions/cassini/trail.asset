@@ -1,0 +1,410 @@
+--[[**************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2021                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ *************************************************************************************]]--
+
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local saturnTransforms = asset.require('scene/solarsystem/planets/saturn/transforms')
+local kernels = asset.require('./kernels')
+
+-- Timeline
+local launchTime = "1997 OCT 15 09:27:11.572"
+local firstVenusFlyby = "1998 APR 26 13:33:59.000"
+local secondVenusFlyby = "1999 JUN 24 20:19:19.000"
+local earthMoonFlyby = "1999 AUG 18 03:26:22.000"
+local jupiterFlyby = "2001 JAN 04 11:00:00.000"
+local orbitInsertion = "2004 JUN 30 06:32:25.000" -- 2004 JUN 16 08:14:57.000
+local beginSaturnOrbit = "2004 JUN 16 08:14:57.000"
+local missionEquinoxStart = "2008 AUG 09 00:00:00.000" -- get better times
+local missionSolsticeStart = "2010 NOV 24 00:00:00.000" -- get better times
+local startGrandFinale = "2017 APR 26 8:13:23.642" -- i made up the time (date is right tho)
+local endCassini = "2017 SEP 15 10:34:05.000" -- should be 00s
+
+local huygensDetach = "2004 NOV 21 08:44:53.000"
+local endHuygens = "2005 JAN 15 11:06:00.000"
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Launch to Venus                                    --
+------------------------------------------------------------------------------------------
+local earthVenus = {
+  Identifier = "earthVenus",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.21, 0.00, 0.78 },
+    StartTime = launchTime,
+    EndTime = firstVenusFlyby,
+    SampleInterval = 400,
+    Enabled = false 
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = launchTime,
+    End = firstVenusFlyby
+  },
+  GUI = {
+    Name = "Launch - Venus (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from launch to first Venus flyby"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Venus to Venus                                     --
+------------------------------------------------------------------------------------------
+local venusVenus = {
+  Identifier = "venusVenus",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier, 
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.34, 0.00, 0.78 },
+    StartTime = firstVenusFlyby,
+    EndTime = secondVenusFlyby,
+    SampleInterval = 400,
+    Enabled = false 
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = firstVenusFlyby,
+    End = secondVenusFlyby
+  },
+  GUI = {
+    Name = "Venus - Venus (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from Venus to second Venus flyby"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Venus to Earth                                     --
+------------------------------------------------------------------------------------------
+local venusEarth = {
+  Identifier = "venusEarth",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.47, 0.00, 0.78 },
+    StartTime = secondVenusFlyby,
+    EndTime = earthMoonFlyby,
+    SampleInterval = 400,
+    Enabled = false 
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = secondVenusFlyby,
+    End = earthMoonFlyby
+  },
+  GUI = {
+    Name = "Venus - Earth (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from Venus to Earth flyby"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Earth to Jupiter                                   --
+------------------------------------------------------------------------------------------
+local earthJupiter = {
+  Identifier = "earthJupiter",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.60, 0.00, 0.78 },
+    StartTime = earthMoonFlyby,
+    EndTime = jupiterFlyby,
+    SampleInterval = 400,
+    Enabled = false 
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = earthMoonFlyby,
+    End = jupiterFlyby
+  },
+  GUI = {
+    Name = "Earth - Jupiter (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from Earth to Jupiter flyby"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Jupiter to Saturn                                  --
+------------------------------------------------------------------------------------------
+local jupiterSaturn = {
+  Identifier = "jupiterSaturn",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.73, 0.00, 0.78 },
+    StartTime = jupiterFlyby,
+    EndTime = orbitInsertion,
+    SampleInterval = 400,
+    Enabled = false 
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = jupiterFlyby,
+    End = orbitInsertion
+  },
+  GUI = {
+    Name = "Jupiter - Saturn (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from Jupiter to Saturn"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to SSB, Orbital insertion to Cassini end                   --
+-- This trail continues to the end of Cassini to show a solsystem perspective           --
+------------------------------------------------------------------------------------------
+local saturnEnd = {
+  Identifier = "saturnEnd",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SUN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.73, 0.08, 0.78 },
+    StartTime = orbitInsertion,
+    EndTime = endCassini, -- if want "accurate trail", change to orbitInsertion
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = orbitInsertion,
+    End = endCassini
+  },
+  GUI = {
+    Name = "Saturn - End (SSB)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail from Saturn to End in relation to SSB"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to Saturn, Primary mission                                 --
+------------------------------------------------------------------------------------------
+local primaryMission = {
+  Identifier = "primaryMission",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.34, 0.06, 0.85 },
+    StartTime = beginSaturnOrbit,
+    EndTime = missionEquinoxStart,
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = beginSaturnOrbit,
+    End = missionEquinoxStart
+  },
+  GUI = {
+    Name = "Primary Mission (SAT)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail of the Primary mission"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to Saturn, Equinox mission                                 --
+------------------------------------------------------------------------------------------
+local equinoxMission = {
+  Identifier = "equinoxMission",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.54, 0.06, 0.85 },
+    StartTime = missionEquinoxStart,
+    EndTime = missionSolsticeStart,
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = missionEquinoxStart,
+    End = missionSolsticeStart
+  },
+  GUI = {
+    Name = "Equinox Mission (SAT)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail of the Equinox mission"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to Saturn, Solstice mission                                --
+------------------------------------------------------------------------------------------
+local solsticeMission = {
+  Identifier = "solsticeMission",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.74, 0.06, 0.85 },
+    StartTime = missionSolsticeStart,
+    EndTime = startGrandFinale,
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = missionSolsticeStart,
+    End = startGrandFinale
+  },
+  GUI = {
+    Name = "Solstice Mission (SAT)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail of the Solstice mission"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- CASSINI Trail in relation to Saturn, the Grand Finale                                --
+------------------------------------------------------------------------------------------
+local grandFinale = {
+  Identifier = "grandFinale",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-82", -- Cassini
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.76, 0.26, 0.85 },
+    StartTime = startGrandFinale,
+    EndTime = endCassini,
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = startGrandFinale,
+    End = endCassini
+  },
+  GUI = {
+    Name = "The Grand Finale (SAT)",
+    Path = "/Solar System/Missions/Cassini/Trails",
+    Description = "Cassini trail of the Grand Finale"
+  }
+}
+
+------------------------------------------------------------------------------------------
+-- HUYGENS Trail in relation to Saturn                                                  --
+------------------------------------------------------------------------------------------
+local huygensTrail = { 
+  Identifier = "huygensTrail",
+  Parent = saturnTransforms.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "-150", -- Huygens
+      Observer = "SATURN",
+      Kernels = kernels.ephemerisKernels
+    },
+    Color = { 0.09, 0.00, 0.99 },
+    StartTime = huygensDetach,
+    EndTime = endHuygens,
+    SampleInterval = 400,
+    Enabled = false
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = huygensDetach,
+    End = endHuygens
+  },
+  GUI = {
+    Name = "Huygens Trail (SAT)",
+    Path = "/Solar System/Missions/Cassini/Huygens Probe",
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  earthVenus,
+  venusVenus,
+  venusEarth,
+  earthJupiter,
+  jupiterSaturn,
+  saturnEnd,
+  primaryMission,
+  equinoxMission,
+  solsticeMission,
+  grandFinale,
+  huygensTrail,
+})
