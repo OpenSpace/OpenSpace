@@ -111,10 +111,6 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
-    _globe.onChange([this]() {
-        fillAttachedNode();
-        _positionIsDirty = true;
-    });
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { _positionIsDirty = true; });
@@ -170,10 +166,10 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
+    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (_useHeightmap) {
-        glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
+        glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,
@@ -183,7 +179,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         SurfacePositionHandle h =
             _attachedNode->calculateSurfacePositionHandle(groundPos);
 
-        _position = mod.cartesianCoordinatesFromGeo(
+        _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,
@@ -192,7 +188,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
     else {
-        _position = mod.cartesianCoordinatesFromGeo(
+        _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,

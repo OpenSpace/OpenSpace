@@ -110,10 +110,6 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
-    _globe.onChange([this]() {
-        findGlobe();
-        _matrixIsDirty = true;
-    });
 
     _latitude = p.latitude.value_or(_latitude);
     _latitude.onChange([this]() { _matrixIsDirty = true; });
@@ -153,8 +149,8 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 {
     ghoul_assert(_globeNode, "Globe cannot be nullptr");
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
-    glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
+    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
+    glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
         *_globeNode,
         latitude,
         longitude,
@@ -165,7 +161,7 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
         _globeNode->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
-    return mod.cartesianCoordinatesFromGeo(
+    return mod->cartesianCoordinatesFromGeo(
         *_globeNode,
         latitude,
         longitude,
@@ -203,7 +199,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         const glm::vec3 v1 = pos1 - posCenter;
         const glm::vec3 v2 = pos2 - posCenter;
         yAxis = glm::dvec3(glm::cross(v1, v2));
-    } 
+    }
     else {
         float latitudeRad = glm::radians(static_cast<float>(_latitude));
         float longitudeRad = glm::radians(static_cast<float>(_longitude));
@@ -213,14 +209,15 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     }
     yAxis = glm::normalize(yAxis);
 
-    const glm::dvec3 n = glm::vec3(0.0, 0.0, 1.0);
-    glm::dvec3 zAxis = glm::dvec3(0.0);
-    zAxis.x = yAxis.y * n.z - yAxis.z * n.y;
-    zAxis.y = yAxis.z * n.x - yAxis.x * n.z;
-    zAxis.z = yAxis.x * n.y - yAxis.y * n.x;
+    constexpr const glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
+    glm::dvec3 zAxis = glm::dvec3(
+        zAxis.x = yAxis.y * n.z - yAxis.z * n.y,
+        zAxis.y = yAxis.z * n.x - yAxis.x * n.z,
+        zAxis.z = yAxis.x * n.y - yAxis.y * n.x
+    );
     zAxis = glm::normalize(zAxis);
 
-    glm::dvec3 xAxis = glm::normalize(glm::cross(yAxis, zAxis));
+    const glm::dvec3 xAxis = glm::normalize(glm::cross(yAxis, zAxis));
     const glm::dmat3 mat = {
         xAxis.x, xAxis.y, xAxis.z,
         yAxis.x, yAxis.y, yAxis.z,
