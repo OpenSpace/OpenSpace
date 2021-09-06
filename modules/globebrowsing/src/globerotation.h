@@ -45,6 +45,7 @@ public:
 
 private:
     void findGlobe();
+    void setUpdateVariables();
     glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
     properties::StringProperty _globe;
