@@ -113,7 +113,7 @@ namespace openspace {
         
         _vfieldOfView.onChange([&]() {
             if (_skyTarget) {
-                _skyTarget->updateFOV(_vfieldOfView);
+                _skyTarget->setVerticalFOV(_vfieldOfView);
             }
             });
         

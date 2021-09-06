@@ -328,7 +328,7 @@ SkyBrowserModule::SkyBrowserModule()
                         to_browser(lastObj)->setBorderColor(to_browser(lastObj)->getColor() - highlightAddition);
                     }
                     else if (to_target(lastObj)) {
-                        to_target(lastObj)->setBorderColor(to_target(lastObj)->getColor() - highlightAddition);
+                        to_target(lastObj)->setColor(to_target(lastObj)->getColor() - highlightAddition);
                     }
 
                     // Add highlight
@@ -336,7 +336,7 @@ SkyBrowserModule::SkyBrowserModule()
                         to_browser(_mouseOnObject)->setBorderColor(to_browser(_mouseOnObject)->getColor() + highlightAddition);
                     }
                     else if (to_target(_mouseOnObject)) {
-                        to_target(_mouseOnObject)->setBorderColor(to_target(_mouseOnObject)->getColor() + highlightAddition);
+                        to_target(_mouseOnObject)->setColor(to_target(_mouseOnObject)->getColor() + highlightAddition);
                     }
                 }
                 

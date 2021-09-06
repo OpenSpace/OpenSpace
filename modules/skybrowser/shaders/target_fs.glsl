@@ -1,9 +1,8 @@
-uniform sampler2D texture;
-uniform float borderWidth;
-uniform vec2 targetDimensions;
+uniform float lineWidth;
+uniform vec2 dimensions;
 uniform bool showCrosshair;
 uniform bool showRectangle;
-uniform vec4 borderColor;
+uniform vec4 lineColor;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -58,27 +57,28 @@ float filledRectangle(in float _size, in float _ratio, in vec2 _coord) {
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    float _ratio = targetDimensions.y / targetDimensions.x;
+    float _ratio = dimensions.y / dimensions.x;
     float _crosshair = 0.0f;
     float _rectangle = 0.0f;
 
     if(showCrosshair) {
-      _crosshair = crosshair(borderWidth, _ratio, vs_st);
+      _crosshair = crosshair(lineWidth, _ratio, vs_st);
     }
 
     if(showRectangle) {
-      _rectangle = rectangle(borderWidth, _ratio, vs_st);
+      _rectangle = rectangle(lineWidth, _ratio, vs_st);
     }
 
     // If both rectangle and crosshair are displayed, draw crosshair a bit smaller
     if(showCrosshair && showRectangle) {
-      _crosshair *= filledRectangle(borderWidth * 7.0f, _ratio, vs_st);
+      _crosshair *= filledRectangle(lineWidth * 7.0f, _ratio, vs_st);
     }
 
     float result = clamp(_crosshair + _rectangle, 0.0, 1.0);
 
     Fragment frag;
-    frag.color = vec4(vec3(borderColor), result);
+    frag.color = lineColor;
+    frag.color.a *= result;
 
     return frag;
 }
