@@ -18,10 +18,10 @@ local homeState = {
   Exit = util.stopOrbiting()
 }
 
--- An empty state that will just be used to show a page in the GUI where the 
--- user can fly to the planets and moons in the solar system
-local globesState = {
-  Identifier = "Globes"
+-- An empty state that wil just be used to show a page in the GUI where the 
+-- user can fly to the planets in the solar system
+local solarSystemState = {
+  Identifier = "SolarSystem"
 }
 
 -- Missions
@@ -36,7 +36,7 @@ local substateCBR = asset.require('./substates/cbr.asset')
 local states = {
   startState,
   homeState,
-  globesState
+  solarSystemState
 }
 
 util.appendTable(states, substateMoon.states)
@@ -54,15 +54,15 @@ local transitions = {
     To = "Home",
     Action = flyHome.cameraPath
   },
-  -- Globes <-> Home
+  -- SolarSystem <-> Home
   {
-    From = "Globes",
+    From = "SolarSystem",
     To = "Home",
     Action = flyHome.cameraPath
   },
   {
     From = "Home",
-    To = "Globes"
+    To = "SolarSystem"
   },
   -- The rest are in the substates
 }
