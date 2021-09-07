@@ -32,6 +32,7 @@ local substateVoyagerPioneer = asset.require('./substates/missions/voyagerpionee
 
 -- Others
 local substateCBR = asset.require('./substates/cbr.asset')
+local substateExoplanets = asset.require('./substates/exoplanets.asset')
 
 local states = {
   startState,
@@ -44,6 +45,7 @@ util.appendTable(states, substateMars.states)
 util.appendTable(states, substateSaturn.states)
 util.appendTable(states, substateVoyagerPioneer.states)
 util.appendTable(states, substateCBR.states)
+util.appendTable(states, substateExoplanets.states)
 
 ---------------------------------------------------------------- 
 -- TRANSITIONS
@@ -72,6 +74,7 @@ util.appendTable(transitions, substateMars.transitions)
 util.appendTable(transitions, substateSaturn.transitions)
 util.appendTable(transitions, substateVoyagerPioneer.transitions)
 util.appendTable(transitions, substateCBR.transitions)
+util.appendTable(transitions, substateExoplanets.transitions)
 
 asset.onInitialize(function()
     -- OBS: the following line should be set in the profile

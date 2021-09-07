@@ -176,6 +176,16 @@
       "name": "Scene.Planck.Renderable.Opacity",
       "type": "setPropertyValueSingle",
       "value": "0.0"
+    },
+    {
+      "name": "Scene.Exoplanets.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Exoplanets.Renderable.Opacity",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
     }
   ],
   "time": {

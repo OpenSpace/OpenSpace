@@ -1,0 +1,44 @@
+local util = asset.require('./../utility_functions')
+local flyHome = asset.require('./../fly_home_alternatives')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local opacityUri = "Scene.Exoplanets.Renderable.Opacity"
+
+local exoplanetsState = {
+    Identifier = "Exoplanets",
+    Enter = [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+        ]] .. util.startOrbiting() .. [[
+        ]] .. util.interpolateProperty(opacityUri, 1.0, 2) .. [[
+    ]],
+    Exit = [[
+        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
+
+-- Idea on additional state: Go to Trappist-1
+-- Has multiple planets in the habitable zone!
+
+local states = { exoplanetsState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "Exoplanets"
+  },
+  {
+    From = "Exoplanets",
+    To = "Home"
+    -- No action. Should already be at the desired distance
+  }
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)
