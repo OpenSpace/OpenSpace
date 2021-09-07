@@ -54,6 +54,8 @@ public:
         ConnectionStatus,
         HostshipRequest,
         HostshipResignation,
+        IndependentViewRequest,
+        IndependentViewResignation,
         NConnections,
         Disconnection
     };

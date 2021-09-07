@@ -153,6 +153,8 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
         case ParallelConnection::MessageType::HostshipResignation:
             handleHostshipResignation(*peer);
             break;
+        case ParallelConnection::MessageType::IndependentViewRequest:
+            break;
         case ParallelConnection::MessageType::Disconnection:
             disconnect(*peer);
             break;
