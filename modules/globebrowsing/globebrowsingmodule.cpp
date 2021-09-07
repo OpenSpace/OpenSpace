@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
@@ -273,6 +274,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Translation factory was not created");
     fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
+
+    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul_assert(fRotation, "Rotation factory was not created");
+    fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
