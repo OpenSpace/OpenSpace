@@ -1,0 +1,48 @@
+local util = asset.require('./../../utility_functions')
+local flyHome = asset.require('./../../fly_home_alternatives')
+
+----------------------------------------------------------------
+-- STATES
+----------------------------------------------------------------
+local moonTargetDistance = 1.5E7
+
+local flyToMoon = [[
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Moon', true)
+]]
+
+local apolloMainState = {
+  Identifier = "Apollo",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+local states = { apolloMainState }
+
+----------------------------------------------------------------
+-- TRANSITIONS within this substate
+----------------------------------------------------------------
+local transitions = {
+  -- Transition to/from this state
+  {
+    From = "Home",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  {
+    From = "Apollo",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
+  -- Back to SolarSystem from substates
+}
+
+asset.export("states", states)
+asset.export("transitions", transitions)

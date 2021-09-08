@@ -6,8 +6,8 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 ----------------------------------------------------------------
 local marsTargetDistance = 7E6
 
-local marsState = {
-  Identifier = "Mars",
+local marsRoversState = {
+  Identifier = "MarsRovers",
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
@@ -28,6 +28,7 @@ local goToMarsOverview = [[
 -----
 
 -- TODO: Use a date where valles marineris is actually visible..
+-- TODO: move these places to the webpage only.
 
 local vallesMarinerisTargetDistance = 7E6
 
@@ -132,7 +133,7 @@ local curiosityState = {
 }
 
 local states = {
-  marsState,
+  marsRoversState,
   vallesMarinerisCloseState,
   vallesMarinerisOverviewState,
   olympusMonsState,
@@ -147,23 +148,23 @@ local transitions = {
   -- Transition to/from this state
   {
     From = "Home",
-    To = "Mars",
+    To = "MarsRovers",
     Action = goToMarsOverview
   },
   {
-    From = "Mars",
+    From = "MarsRovers",
     To = "Home",
     Action = flyHome.cameraPath
   },
   -- Valles Marineris - overview
   {
-    From = "Mars",
+    From = "MarsRovers",
     To = "VallesMarinerisOverview",
     Action = goToVMOverview
   },
   {
     From = "VallesMarinerisOverview",
-    To = "Mars",
+    To = "MarsRovers",
     Action = goToMarsOverview
   },
   {
@@ -188,13 +189,13 @@ local transitions = {
   },
     -- Valles Marineris - close
   {
-    From = "Mars",
+    From = "MarsRovers",
     To = "VallesMarinerisClose",
     Action = goToVMClose
   },
   {
     From = "VallesMarinerisClose",
-    To = "Mars",
+    To = "MarsRovers",
     Action = goToMarsOverview
   },
   {
@@ -209,25 +210,25 @@ local transitions = {
   },
   -- Olympus Mons
   {
-    From = "Mars",
+    From = "MarsRovers",
     To = "OlympusMons",
     Action = goToOlympusMons
   },
   {
     From = "OlympusMons",
-    To = "Mars",
+    To = "MarsRovers",
     Action = goToMarsOverview
   },
   -- Curiosity
   -- TODO: curiosity + transitions
   {
-    From = "Mars",
+    From = "MarsRovers",
     To = "Curiosity",
     Action = [[]]
   },
   {
     From = "Curiosity",
-    To = "Mars",
+    To = "MarsRovers",
     Action = goToMarsOverview
   },
   -- Back to SolarSystem from substates

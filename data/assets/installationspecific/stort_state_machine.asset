@@ -25,14 +25,14 @@ local solarSystemState = {
 }
 
 -- Missions
-local substateMoon = asset.require('./substates/missions/moon')
-local substateMars = asset.require('./substates/missions/mars')
-local substateSaturn = asset.require('./substates/missions/saturn')
-local substateVoyagerPioneer = asset.require('./substates/missions/voyagerpioneer.asset')
+local substateApollo = asset.require('./substates/missions/apollo')
+local substateMarsRovers = asset.require('./substates/missions/mars_rovers')
+local substateCassini = asset.require('./substates/missions/cassini')
+local substateVoyagerPioneer = asset.require('./substates/missions/voyager_pioneer')
 
 -- Others
-local substateCBR = asset.require('./substates/cbr.asset')
-local substateExoplanets = asset.require('./substates/exoplanets.asset')
+local substateCBR = asset.require('./substates/cbr')
+local substateExoplanets = asset.require('./substates/exoplanets')
 
 local states = {
   startState,
@@ -40,9 +40,9 @@ local states = {
   solarSystemState
 }
 
-util.appendTable(states, substateMoon.states)
-util.appendTable(states, substateMars.states)
-util.appendTable(states, substateSaturn.states)
+util.appendTable(states, substateApollo.states)
+util.appendTable(states, substateMarsRovers.states)
+util.appendTable(states, substateCassini.states)
 util.appendTable(states, substateVoyagerPioneer.states)
 util.appendTable(states, substateCBR.states)
 util.appendTable(states, substateExoplanets.states)
@@ -69,9 +69,9 @@ local transitions = {
   -- The rest are in the substates
 }
 
-util.appendTable(transitions, substateMoon.transitions)
-util.appendTable(transitions, substateMars.transitions)
-util.appendTable(transitions, substateSaturn.transitions)
+util.appendTable(transitions, substateApollo.transitions)
+util.appendTable(transitions, substateMarsRovers.transitions)
+util.appendTable(transitions, substateCassini.transitions)
 util.appendTable(transitions, substateVoyagerPioneer.transitions)
 util.appendTable(transitions, substateCBR.transitions)
 util.appendTable(transitions, substateExoplanets.transitions)

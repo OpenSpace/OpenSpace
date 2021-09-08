@@ -4,17 +4,8 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local moonTargetDistance = 1.5E7
-
-local goToMoon = [[
-  ]] .. util.disableLinearFlight() .. [[
-  ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.time.setPause(true)
-  openspace.pathnavigation.goTo('Moon', true)
-]]
-
-local moonState = {
-  Identifier = "Moon",
+local cassiniState = {
+  Identifier = "Cassini",
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
@@ -24,10 +15,8 @@ local moonState = {
   ]]
 }
 
-local apolloTargetDistance = 1.5E7
-
-local apolloState = {
-  Identifier = "Apollo",
+local huygensState = {
+  Identifier = "Huygens",
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
@@ -37,36 +26,43 @@ local apolloState = {
   ]]
 }
 
-local states = { moonState, apolloState }
+local states = { cassiniState, huygensState }
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+local goToSaturnOverview = [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Saturn', true)
+]]
+
 local transitions = {
   -- Transition to/from this state
   {
     From = "Home",
-    To = "Moon",
-    Action = goToMoon
+    To = "Cassini",
+    Action = goToSaturnOverview
   },
   {
-    From = "Moon",
+    From = "Cassini",
     To = "Home",
     Action = flyHome.cameraPath
   },
-  -- Apollo
+  -- Cassini - Huygens
   {
-    From = "Moon",
-    To = "Apollo"
+    From = "Cassini",
+    To = "Huygens",
+    Action = [[]]
   },
   {
-    From = "Apollo",
-    To = "Moon",
-    Action =  goToMoon
+    From = "Huygens",
+    To = "Cassini",
+    Action = goToSaturnOverview
   },
   -- Back to SolarSystem from substates
   {
-    From = "Apollo",
+    From = "Huygens",
     To = "Home",
     Action = flyHome.cameraPath
   }
