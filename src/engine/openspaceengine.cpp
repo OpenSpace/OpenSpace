@@ -1128,6 +1128,9 @@ void OpenSpaceEngine::preSynchronization() {
         global::navigationHandler->setFromProfile_camera(*global::profile);
         global::actionManager->setFromProfile_actions(*global::profile);
         global::keybindingManager->setFromProfile_keybindings(*global::profile);
+        global::moduleEngine->setFromProfile_modules(*global::profile);
+        global::renderEngine->scene()->setFromProfile_markInterestingNodes(
+            *global::profile);
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
 

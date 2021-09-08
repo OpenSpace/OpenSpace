@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MODULEENGINE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/scene/profile.h>
 
 #include <map>
 #include <memory>
@@ -115,6 +116,14 @@ public:
      * \return The combined minimum OpenGL version
      */
     ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
+
+    /**
+     * Reads a list of modules from a profile, and executes scripts based on whether or
+     * not the corresponding module is loaded.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_modules(const Profile& p);
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the

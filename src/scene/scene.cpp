@@ -35,6 +35,7 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
@@ -679,6 +680,21 @@ void Scene::property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
             }
             ghoul::lua::push(L, stringRepresentation);
         }
+    }
+}
+
+void Scene::setFromProfile_markInterestingNodes(const Profile& p) {
+    std::string nodesToMark;
+    for (auto node : p.markNodes) {
+        nodesToMark += fmt::format("[[{}]],", node);
+    }
+    if (!nodesToMark.empty()) {
+        std::string markCmd = fmt::format("openspace.markInterestingNodes({{ {} }});",
+            nodesToMark);
+        global::scriptEngine->queueScript(
+            markCmd,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 

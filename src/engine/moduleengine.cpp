@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -161,6 +162,29 @@ ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
     }
 
     return version;
+}
+
+void ModuleEngine::setFromProfile_modules(const Profile& p)
+{
+    for (Profile::Module mod : p.modules) {
+        const std::vector<OpenSpaceModule*>& m = modules();
+        if (std::find(m.begin(), m.end(), mod.name) != m.end()) {
+            if (mod.loadedInstruction.has_value()) {
+                global::scriptEngine->queueScript(
+                    mod.loadedInstruction.value(),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+        else {
+            if (mod.notLoadedInstruction.has_value()) {
+                global::scriptEngine->queueScript(
+                    mod.notLoadedInstruction.value(),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+    }
 }
 
 scripting::LuaLibrary ModuleEngine::luaLibrary() {

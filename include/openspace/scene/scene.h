@@ -264,6 +264,15 @@ public:
     void property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
         const std::string& value);
 
+    /**
+     * Reads list of nodes from profile to be marked as interesting nodes.
+     * If any nodes are listed, a script to mark these will be queued with the
+     * script engine.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_markInterestingNodes(const Profile& p);
+
 private:
     /**
      * Update dependencies.
