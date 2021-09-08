@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
+#include <openspace/scene/scene.h>
 
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
@@ -742,17 +743,17 @@ scripting::LuaLibrary Profile::luaLibrary() {
 }
 
 void convertToSeparatedAssets(const std::string filePre, const Profile& p) {
-    convertSectionToAssetFile(filePre, p, "_meta", convertToAsset_meta);
-    convertSectionToAssetFile(filePre, p, "_addedAssets", convertToAsset_addedAssets);
-    convertSectionToAssetFile(filePre, p, "_modules", convertToAsset_modules);
-    convertSectionToAssetFile(filePre, p, "_actions", convertToAsset_actions);
-    convertSectionToAssetFile(filePre, p, "_keybinds", convertToAsset_keybinds);
-    convertSectionToAssetFile(filePre, p, "_time", convertToAsset_time);
-    convertSectionToAssetFile(filePre, p, "_deltaTimes", convertToAsset_deltaTimes);
-    convertSectionToAssetFile(filePre, p, "_markNodes", convertToAsset_markNodes);
-    convertSectionToAssetFile(filePre, p, "_properties", convertToAsset_properties);
-    convertSectionToAssetFile(filePre, p, "_camera", convertToAsset_camera);
-    convertSectionToAssetFile(filePre, p, "_addedScripts", convertToAsset_addedScripts);
+    convertSectionToAssetFile(filePre, p, "meta", convertToAsset_meta);
+    convertSectionToAssetFile(filePre, p, "addedAssets", convertToAsset_addedAssets);
+    convertSectionToAssetFile(filePre, p, "modules", convertToAsset_modules);
+    convertSectionToAssetFile(filePre, p, "actions", convertToAsset_actions);
+    convertSectionToAssetFile(filePre, p, "keybinds", convertToAsset_keybinds);
+    convertSectionToAssetFile(filePre, p, "time", convertToAsset_time);
+    convertSectionToAssetFile(filePre, p, "deltaTimes", convertToAsset_deltaTimes);
+    convertSectionToAssetFile(filePre, p, "markNodes", convertToAsset_markNodes);
+    convertSectionToAssetFile(filePre, p, "properties", convertToAsset_properties);
+    convertSectionToAssetFile(filePre, p, "camera", convertToAsset_camera);
+    convertSectionToAssetFile(filePre, p, "addedScripts", convertToAsset_addedScripts);
 }
 
 void convertSectionToAssetFile(const std::string profilePrefix, const Profile& p,
@@ -831,7 +832,7 @@ std::string convertToAsset_actions(const Profile& p) {
     for (const Profile::Action& action : p.actions) {
         const std::string name = action.name.empty() ? action.identifier : action.name;
         output += fmt::format(
-            "  openspace.action.registerAction({{"
+            "openspace.action.registerAction({{"
             "Identifier=[[{}]], Command=[[{}]], Name=[[{}]], Documentation=[[{}]], "
             "GuiPath=[[{}]], IsLocal={}"
             "}})\n",
@@ -850,7 +851,7 @@ std::string convertToAsset_keybinds(const Profile& p) {
     for (size_t i = 0; i < p.keybindings.size(); ++i) {
         const Profile::Keybinding& k = p.keybindings[i];
         const std::string key = keyToString(k.key);
-        output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
+        output += fmt::format("openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
     }
 
     return output;
@@ -862,14 +863,14 @@ std::string convertToAsset_time(const Profile& p) {
     std::string output;
     switch (p.time->type) {
     case Profile::Time::Type::Absolute:
-        output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
+        output += fmt::format("openspace.time.setTime(\"{}\")\n", p.time->value);
         break;
     case Profile::Time::Type::Relative:
-        output += "  local now = openspace.time.currentWallTime();\n";
+        output += "local now = openspace.time.currentWallTime();\n";
         output += fmt::format(
-            "  local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
+            "local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
         );
-        output += "  openspace.time.setTime(prev);\n";
+        output += "openspace.time.setTime(prev);\n";
         break;
     default:
         throw ghoul::MissingCaseException();
@@ -887,7 +888,7 @@ std::string convertToAsset_deltaTimes(const Profile& p) {
         for (double d : p.deltaTimes) {
             times += fmt::format("{}, ", d);
         }
-        output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
+        output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
     }
 
     return output;
@@ -902,7 +903,7 @@ std::string convertToAsset_markNodes(const Profile& p) {
         for (const std::string& n : p.markNodes) {
             nodes += fmt::format("[[{}]],", n);
         }
-        output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
+        output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     return output;
@@ -916,12 +917,12 @@ std::string convertToAsset_properties(const Profile& p) {
         switch (prop.setType) {
         case Profile::Property::SetType::SetPropertyValue:
             output += fmt::format(
-                "  openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
+                "openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
             );
             break;
         case Profile::Property::SetType::SetPropertyValueSingle:
             output += fmt::format(
-                "  openspace.setPropertyValueSingle(\"{}\", {});\n",
+                "openspace.setPropertyValueSingle(\"{}\", {});\n",
                 prop.name, prop.value
             );
             break;
@@ -942,7 +943,7 @@ std::string convertToAsset_camera(const Profile& p) {
             overloaded {
                 [](const Profile::CameraNavState& c) {
                     std::string result;
-                    result += "  openspace.navigation.setNavigationState({";
+                    result += "openspace.navigation.setNavigationState({";
                     result += fmt::format("Anchor = [[{}]], ", c.anchor);
                     if (c.aim.has_value()) {
                         result += fmt::format("Aim = [[{}]], ", *c.aim);
@@ -973,13 +974,13 @@ std::string convertToAsset_camera(const Profile& p) {
                 [](const Profile::CameraGoToGeo& c) {
                     if (c.altitude.has_value()) {
                         return fmt::format(
-                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
                             c.anchor, c.latitude, c.longitude, *c.altitude
                         );
                     }
                     else {
                         return fmt::format(
-                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
                             c.anchor, c.latitude, c.longitude
                         );
                     }
@@ -997,10 +998,14 @@ std::string convertToAsset_addedScripts(const Profile& p) {
 
     std::string output;
     for (const std::string& a : p.additionalScripts) {
-        output += fmt::format("  {}\n", a);
+        output += fmt::format("{}\n", a);
     }
 
     return output;
+}
+
+std::vector<std::string>& additionalScripts(Profile& p) {
+    return p.additionalScripts;
 }
 
 }  // namespace openspace

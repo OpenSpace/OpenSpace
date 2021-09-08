@@ -602,6 +602,86 @@ const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
 }
 
+void Scene::createInitialAssetToLoad(const Profile& p, const std::string& assetFilename)
+{
+    std::ofstream converted(assetFilename);
+    std::string output;
+    //Meta
+    if (p.meta.has_value()) {
+        output += "asset.meta = {\n";
+
+        if (p.meta->name.has_value()) {
+            output += fmt::format("  Name = [[{}]],\n", *p.meta->name);
+        }
+        if (p.meta->version.has_value()) {
+            output += fmt::format("  Version = [[{}]],\n", *p.meta->version);
+        }
+        if (p.meta->description.has_value()) {
+            output += fmt::format("  Description = [[{}]],\n", *p.meta->description);
+        }
+        if (p.meta->author.has_value()) {
+            output += fmt::format("  Author = [[{}]],\n", *p.meta->author);
+        }
+        if (p.meta->url.has_value()) {
+            output += fmt::format("  URL = [[{}]],\n", *p.meta->url);
+        }
+        if (p.meta->license.has_value()) {
+            output += fmt::format("  License = [[{}]]\n", *p.meta->license);
+        }
+
+        output += "}\n\n";
+    }
+
+    // Assets
+    for (const std::string& asset : p.assets) {
+        output += fmt::format("asset.require(\"{}\");\n", asset);
+    }
+
+    converted << output;
+}
+
+void Scene::setFromProfile_properties(const Profile& p) {
+    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+
+    for (const Profile::Property& prop : p.properties) {
+        std::string uriOrRegex = prop.name;
+        std::string groupName;
+        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+            // Remove group name from start of regex and replace with '*'
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        }
+        ghoul::lua::push(L, uriOrRegex);
+        ghoul::lua::push(L, 0.0);
+        // Later functions expect the value to be at the last position on the stack
+        property_pushValueFromProfileToLuaState(L, prop.value);
+
+        applyRegularExpression(
+            L,
+            uriOrRegex,
+            allProperties(),
+            0.0,
+            groupName,
+            ghoul::EasingFunction::Linear
+        );
+        //Clear lua state stack
+        lua_settop(L, 0);
+    }
+}
+
+void Scene::property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+    const std::string& value)
+{
+    if (!luascriptfunctions::convertStringToLuaAndPush_bool(L, value)) {
+        if (!luascriptfunctions::convertStringToLuaAndPush_float(L, value)) {
+            std::string stringRepresentation = value;
+            if (value.compare("nil") != 0) {
+                stringRepresentation = "[[" + stringRepresentation + "]]";
+            }
+            ghoul::lua::push(L, stringRepresentation);
+        }
+    }
+}
+
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",

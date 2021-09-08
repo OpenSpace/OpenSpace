@@ -314,6 +314,15 @@ std::string convertToAsset_camera(const Profile& p);
  */
 std::string convertToAsset_addedScripts(const Profile& p);
 
+/**
+ * Function to retrieve the individual additional script lines included in the profile
+ *
+ * \param p The profile that should be processed
+ *
+ * \return vector of strings containing the individual script lines
+ */
+std::vector<std::string>& additionalScripts(Profile& p);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROFILE___H__

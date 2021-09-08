@@ -868,4 +868,19 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     return _previousApplicationTime;
 }
 
+void TimeManager::setFromProfile_time(const Profile& p) {
+    Time t;
+
+    if (p.time->type == Profile::Time::Type::Relative) {
+        t.setFromProfile_timeRelative(p.time->value);
+    }
+    else if (p.time->type == Profile::Time::Type::Absolute) {
+        t.setFromProfile_timeAbsolute(p.time->value);
+    }
+}
+
+void TimeManager::setFromProfile_deltaTimes(const Profile& p) {
+    global::timeManager->setDeltaTimeSteps(p.deltaTimes);
+}
+
 } // namespace openspace

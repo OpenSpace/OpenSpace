@@ -36,6 +36,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -333,7 +334,7 @@ void OpenSpaceEngine::initialize() {
 
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
-            convertToSeparatedAssets(outputProfilePrefix, *global::profile);
+            //convertToSeparatedAssets(outputProfilePrefix, *global::profile);
 
             global::configuration->profileOutPrefixName = outputProfilePrefix;
             global::configuration->usingProfile = true;
@@ -751,7 +752,9 @@ void OpenSpaceEngine::loadAsset_init(const std::string assetName) {
     }
 
     _assetManager->removeAll();
-    _assetManager->add(assetName);
+    for (auto a : global::profile->assets) {
+        _assetManager->add(a);
+    }
 
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
@@ -1114,27 +1117,17 @@ void OpenSpaceEngine::preSynchronization() {
         _scheduledAssetPathToLoad.clear();
     }
     else if (!_hasInitializedProfile) {
-        std::string combinedAssetInitStr;
-        loadInitAssetSection(combinedAssetInitStr, "_meta");
-        loadInitAssetSection(combinedAssetInitStr, "_addedAssets");
-        combinedAssetInitStr += "asset.onInitialize(function()\n";
-        loadInitAssetSection(combinedAssetInitStr, "_modules");
-        loadInitAssetSection(combinedAssetInitStr, "_actions");
-        loadInitAssetSection(combinedAssetInitStr, "_keybinds");
-        loadInitAssetSection(combinedAssetInitStr, "_time");
-        loadInitAssetSection(combinedAssetInitStr, "_deltaTimes");
-        loadInitAssetSection(combinedAssetInitStr, "_markNodes");
-        loadInitAssetSection(combinedAssetInitStr, "_properties");
-        loadInitAssetSection(combinedAssetInitStr, "_camera");
-        combinedAssetInitStr += "end)\n";
-
-        std::string outputScenePath = absPath("${TEMPORARY}").string() +
-            "/combinedInit.asset";
-        std::ofstream combinedInitAsset(outputScenePath);
-        combinedInitAsset << combinedAssetInitStr;
-
+        std::string outputScenePath = absPath("${TEMPORARY}/initAsset.asset").string();
         global::profile->ignoreUpdates = true;
+        global::renderEngine->scene()->createInitialAssetToLoad(*global::profile,
+            outputScenePath);
         loadAsset_init(outputScenePath);
+        global::renderEngine->scene()->setFromProfile_properties(*global::profile);
+        global::timeManager->setFromProfile_time(*global::profile);
+        global::timeManager->setFromProfile_deltaTimes(*global::profile);
+        global::navigationHandler->setFromProfile_camera(*global::profile);
+        global::actionManager->setFromProfile_actions(*global::profile);
+        global::keybindingManager->setFromProfile_keybindings(*global::profile);
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
 
@@ -1187,8 +1180,16 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (!_hasInitializedProfile) {
-        std::string outputScenePath = absPath("${TEMPORARY}").string() +
-            "/combinedPostInit.asset";
+        std::string output;
+        for (const std::string& a : global::profile->additionalScripts) {
+            global::scriptEngine->queueScript(
+                a,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+
+/*      std::string outputScenePath
+            = absPath("${TEMPORARY}/combinePostInit.asset").string();
         std::ofstream combinedPostInitAsset(outputScenePath);
         std::string profilePostInitAsset = "asset.onInitialize(function()\n";
         profilePostInitAsset  += fmt::format(
@@ -1201,6 +1202,7 @@ void OpenSpaceEngine::preSynchronization() {
         combinedPostInitAsset << profilePostInitAsset;
 
         loadAsset_postInit(outputScenePath);
+*/
 
         _hasInitializedProfile = true;
     }

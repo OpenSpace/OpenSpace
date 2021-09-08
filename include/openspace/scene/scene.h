@@ -27,7 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
@@ -232,6 +234,35 @@ public:
      * scene graph
      */
     static scripting::LuaLibrary luaLibrary();
+
+    /**
+     * Creates an initial asset file to load, which contains:
+     *   1. Meta information
+     *   2. Assets to include
+     *
+     * \param p The Profile to be read.
+     */
+    void createInitialAssetToLoad(const Profile& p, const std::string& assetFilename);
+
+    /**
+     * Sets a property using the 'properties' contents of a profile. The function will
+     * loop through each setProperty command. A property may be set to a bool, float,
+     * or string value (which must be converted because a Profile stores all values
+     * as strings)
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_properties(const Profile& p);
+
+    /**
+     * Accepts string version of a property value from a profile, converts it to the
+     * appropriate type, and then pushes the value onto the lua state.
+     *
+     * \param L the lua state to push value to
+     * \param value string representation of the value with which to set property
+     */
+    void property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+        const std::string& value);
 
 private:
     /**

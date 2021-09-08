@@ -35,6 +35,10 @@
 
 #include "keybindingmanager_lua.inl"
 
+namespace {
+    constexpr const char* _loggerCat = "KeyBindingManager";
+} // namespace
+
 namespace openspace::interaction {
 
 KeybindingManager::KeybindingManager()
@@ -136,6 +140,23 @@ std::string KeybindingManager::generateJson() const {
     json << "]";
 
     return json.str();
+}
+
+void KeybindingManager::setFromProfile_keybindings(const Profile& p)
+{
+    for (Profile::Keybinding k : p.keybindings) {
+        if (k.action.empty()) {
+            LERROR("Action must not be empty");
+        }
+        if (!global::actionManager->hasAction(k.action)) {
+            LERROR(fmt::format("Action '{}' does not exist", k.action));
+        }
+        if (k.key.key == openspace::Key::Unknown) {
+            LERROR(fmt::format("Could not find key '{}'",
+                std::to_string(static_cast<uint16_t>(k.key.key))));
+        }
+        bindKey(k.key.key, k.key.modifier, k.action);
+    }
 }
 
 scripting::LuaLibrary KeybindingManager::luaLibrary() {

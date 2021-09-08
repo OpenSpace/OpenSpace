@@ -29,9 +29,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,6 +45,10 @@
 #include <fstream>
 
 namespace {
+    // Helper structs for the visitor pattern of the std::variant
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
     constexpr const char* _loggerCat = "NavigationHandler";
 
     const double Epsilon = 1E-7;
@@ -432,6 +438,48 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator.joystickStates().buttonCommand(button);
+}
+
+void NavigationHandler::setFromProfile_camera(const Profile& p) {
+    std::visit(
+        overloaded {
+            [this](const Profile::CameraNavState& navStateProfile) {
+                NavigationState nav;
+                nav.anchor = navStateProfile.anchor;
+                if (navStateProfile.aim.has_value()) {
+                    nav.aim = navStateProfile.aim.value();
+                }
+                if (nav.referenceFrame.empty()) {
+                    nav.referenceFrame = "Root";
+                }
+                nav.position = navStateProfile.position;
+                if (navStateProfile.up.has_value()) {
+                    nav.up = navStateProfile.up;
+                }
+                if (navStateProfile.yaw.has_value()) {
+                    nav.yaw = navStateProfile.yaw.value();
+                }
+                if (navStateProfile.pitch.has_value()) {
+                    nav.pitch = navStateProfile.pitch.value();
+                }
+                _pendingNavigationState.reset();
+                _pendingNavigationState = std::move(nav);
+            },
+            [this](const Profile::CameraGoToGeo& geo) {
+                std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
+                    "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
+                if (geo.altitude.has_value()) {
+                    geoScript += fmt::format(", {}", geo.altitude.value());
+                }
+                geoScript += ")";
+                global::scriptEngine->queueScript(
+                    geoScript,
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        },
+        p.camera.value()
+    );
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

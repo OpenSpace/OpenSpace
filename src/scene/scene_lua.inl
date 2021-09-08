@@ -26,8 +26,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/scene/profile.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -970,6 +973,43 @@ int worldRotation(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * convertStringToLuaAndPush_bool(lua_State*, string):
+ * Used to convert a string value from a text file (e.g. profile) to a lua bool type.
+ * If string value is a bool, the value gets pushed to the lua_State, and returns true.
+ * If string value is not a bool, the lua_State is unchanged and returns false.
+ */
+bool convertStringToLuaAndPush_bool(lua_State* L, std::string s) {
+    if (s.compare("true") == 0) {
+        ghoul::lua::push(L, true);
+        return true;
+    }
+    else if (s.compare("false") == 0) {
+        ghoul::lua::push(L, false);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * \ingroup LuaScripts
+ * convertStringToLuaAndPush_float(lua_State*, string):
+ * Used to convert a string value from a text file (e.g. profile) to a lua float type.
+ * If string value is a float, the value gets pushed to the lua_State, and returns true.
+ * If string value is not a float, the lua_State is unchanged and returns false.
+ */
+bool convertStringToLuaAndPush_float(lua_State* L, std::string s) {
+    try {
+        float converted = std::stof(s);
+        ghoul::lua::push(L, converted);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
 }
 
 }  // namespace openspace::luascriptfunctions
