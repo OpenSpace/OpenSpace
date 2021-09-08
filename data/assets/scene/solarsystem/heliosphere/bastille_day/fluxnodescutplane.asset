@@ -29,7 +29,7 @@ local EquatorialCutplane = {
     -- Since OpenSpace supports HEEQ180 and not HEEQ, 180 was added or subtracted
     -- => a1 = -129.3 and a2 = 230.7
     -- Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
-	  Type = "FixedRotation",
+      Type = "FixedRotation",
       XAxis = { -0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0 },
       YAxis = { 0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0 },
       ZAxis = { 0.0, 0.0, 1.0 }
@@ -37,9 +37,9 @@ local EquatorialCutplane = {
   },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57*10^11,
-    Enabled = false,
-    Texture = TexturesPathEquitorial,
+    Size = 1.57E11,
+    Enabled = true,
+    SourceFolder = TexturesPathEquitorial,
     BlendMode = "Normal",
     MirrorBackside = false,
     Opacity = 0.7
@@ -61,9 +61,9 @@ local MeridialCutplane = {
   },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57*10^11,
-    Enabled = false,
-    Texture = TexturesPathMeridial,
+    Size = 1.57E11,
+    Enabled = true,
+    SourceFolder = TexturesPathMeridial,
     BlendMode = "Normal",
     MirrorBackside = false,
     Opacity = 0.7
@@ -71,7 +71,7 @@ local MeridialCutplane = {
   GUI = {
     Name = "Cutplane Meridial",
     Path = "/Solar System/Heliosphere"
-  },
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { EquatorialCutplane, MeridialCutplane})

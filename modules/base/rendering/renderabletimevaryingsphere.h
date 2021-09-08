@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RenderableTimeVaryingSphere___H__
-#define __OPENSPACE_MODULE_BASE___RenderableTimeVaryingSphere___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -108,4 +108,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RenderableTimeVaryingSphere___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__

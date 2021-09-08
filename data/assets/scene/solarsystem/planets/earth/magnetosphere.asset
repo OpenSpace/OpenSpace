@@ -31,7 +31,7 @@ local earthMagnetosphere = {
     SecondsBefore = 24*60*60*365*100,
     SecondsAfter = 24*60*60*365*100,
     Color = {
-      Uniform = {1.0, 0.725, 0.75, 1}
+      Uniform = { 1.0, 0.725, 0.75, 1.0 }
     }
   },
   GUI = {

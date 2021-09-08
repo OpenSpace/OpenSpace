@@ -31,15 +31,14 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/crc32.h>
-
 #include <filesystem>
 #include <optional>
 
@@ -60,9 +59,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
-        "This value specifies a directory of images that are loaded from disk and is used"
-        "as a texture that is applied to this sphere. The images are expected to be an"
-        "equirectangular projection."
+        "This value specifies a directory of images that are loaded from disk and is "
+        "used as a texture that is applied to this sphere. The images are expected to "
+        "be an equirectangular projection."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {

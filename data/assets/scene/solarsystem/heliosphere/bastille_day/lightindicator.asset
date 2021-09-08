@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local travelSpeedIndicator = {
   Identifier = "travelSpeedIndicator",
@@ -14,7 +15,7 @@ local travelSpeedIndicator = {
   },
   Renderable = {
     Type = "RenderableTravelSpeed",
-    Target = "Earth",    --name of scene graph node. Earth by default
+    Target = earthTransforms.EarthCenter.Identifier,    --name of scene graph node. Earth by default
     LineWidth = 4,
     IndicatorLength = 10,
     FadeLength = 10

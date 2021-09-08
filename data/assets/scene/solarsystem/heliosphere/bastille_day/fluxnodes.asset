@@ -1,11 +1,11 @@
 local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
-local transferFunctions = asset.localResource("transferfunctions")
-local fluxnodeColorTable = transferFunctions .. "/flux-nodes.txt"
-local fluxnodeColorTableCMR = transferFunctions .. "/CMR.txt"
-local fluxnodeColorTableEarth = transferFunctions .. "/flux-nodes-grey-scale.txt"
-local fluxnodeColorTableFlow = transferFunctions .. "/flux-nodes-flow.txt"
+--local transferFunctions = asset.localResource("transferfunctions")
+local fluxnodeColorTable = asset.localResource("transferfunctions/flux-nodes.txt")
+local fluxnodeColorTableCMR = asset.localResource("transferfunctions/CMR.txt")
+local fluxnodeColorTableEarth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt")
+local fluxnodeColorTableFlow = asset.localResource("transferfunctions/flux-nodes-flow.txt")
 
 local fluxnodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
@@ -19,10 +19,6 @@ local Fluxnodes = {
   Identifier = "MAS_MHD_FluxNodes",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1
-    },
     Rotation = {
       -- This is a rotation matrix to go from Carrington longitude referens frame to HEEQ180
       -- which is what the renderables parent transforms.HEEQ180ReferenceFrame. Identifier is
@@ -34,26 +30,30 @@ local Fluxnodes = {
       -- => a1 = -129.3 and a2 = 230.7
       -- Rotation matrix: (cos a, -sin a, 0)(sin a, cos a, 0)(0, 0, 1) leads to the result.
       Type = "FixedRotation",
-        XAxis = { -0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0 },
-        YAxis = { 0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0 },
-        ZAxis = { 0.0, 0.0, 1.0 }
+      XAxis = { -0.63338087262755016203262119192353, -0.77384020972650618518999944537717, 0.0 },
+      YAxis = { 0.77384020972650618518999944537717, -0.63338087262755016203262119192353, 0.0 },
+      ZAxis = { 0.0, 0.0, 1.0 }
     }
   },
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxnodesBinaries,
     ColorTablePaths = {
-      Standard = fluxnodeColorTable,
-      CMR = fluxnodeColorTableCMR,
-      Earth = fluxnodeColorTableEarth,
-      Flow = fluxnodeColorTableFlow,
+      --Standard = fluxnodeColorTable,
+      Standard = asset.localResource("transferfunctions/flux-nodes.txt"),
+      --CMR = fluxnodeColorTableCMR,
+      CMR = asset.localResource("transferfunctions/CMR.txt"),
+      --Earth = fluxnodeColorTableEarth,
+      Earth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt"),
+      --Flow = fluxnodeColorTableFlow,
+      Flow = asset.localResource("transferfunctions/flux-nodes-flow.txt")
     },
 
     LoadAtRuntime = true,
     ScaleToMeters = 1.0,
     SecondsBefore = 24*60*60,
     SecondsAfter = 24*60*60,
-    Enabled = false
+    Enabled = true
   },
   GUI = {
     Path = "/Solar System/Heliosphere",

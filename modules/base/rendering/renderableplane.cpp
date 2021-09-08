@@ -63,7 +63,7 @@ namespace {
         "Mirror backside of image plane",
         "If this value is set to false, the image plane will not be mirrored when "
         "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is desplaying text for example."
+        "data at a specific location, but not if it is displaying text for example."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {

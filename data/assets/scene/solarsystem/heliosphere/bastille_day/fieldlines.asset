@@ -1,9 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
-local transferFunctions = asset.localResource("transferfunctions")
-local masVelocityColorTable = transferFunctions .. "/velocity-fieldlines.txt"
-local masDensityColorTable = transferFunctions .. "/density-fieldlines.txt"
+--local transferFunctions = asset.localResource("transferfunctions")
+--local masVelocityColorTable = transferFunctions .. "/velocity-fieldlines.txt"
+--local masDensityColorTable = transferFunctions .. "/density-fieldlines.txt"
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Fieldlines",
@@ -45,8 +45,10 @@ local fieldlines = {
     AlphaBlendlingEnabled = false,
     InputFileType = "osfls",
     ColorTablePaths = {
-      masDensityColorTable,
-      masVelocityColorTable,
+      asset.localResource("transferfunctions/density-fieldlines.txt"),
+      asset.localResource("transferfunctions/velocity-fieldlines.txt")
+      --masDensityColorTable,
+      --masVelocityColorTable,
     },
     ColorTableMinMax = {
       { 0, 1000000 },

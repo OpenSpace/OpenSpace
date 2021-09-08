@@ -15,7 +15,7 @@ local EUV_Layer = {
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
     Size = 6.96E8, -- Slightly bigger than the sun renderable,
-    Enabled = false,
+    Enabled = true,
     TextureSource = textureSourcePath,
     --BlendMode = "Additive",
     Opacity = 1,
@@ -24,7 +24,7 @@ local EUV_Layer = {
   GUI = {
     Name = "EUV_Layer",
     Path = "/Solar System/Sun"
-  },
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { EUV_Layer })

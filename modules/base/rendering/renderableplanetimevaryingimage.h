@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__
-#define __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANETIMEVARYINGIMAGE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANETIMEVARYINGIMAGE___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
@@ -45,10 +45,8 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool isReady() const override;
-
     void update(const UpdateData& data) override;
-    void render(const RenderData& data, RendererTasks&);
+    void render(const RenderData& data, RendererTasks&) override;
 
     static documentation::Documentation Documentation();
 
@@ -61,24 +59,18 @@ private:
     bool extractMandatoryInfoFromDictionary();
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
-    // Estimated end of sequence.
+
     double _sequenceEndTime;
-    bool _needsUpdate = false;
     std::vector<std::string> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
-    // Number of states in the sequence/ number of images.
-    size_t _nStates;
     properties::StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
-    // std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    bool _isLoadingTexture = false;
     bool _isLoadingLazily = false;
     bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANETIMEVARYINGIMAGE___H__
