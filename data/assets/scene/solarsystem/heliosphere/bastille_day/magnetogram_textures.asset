@@ -18,7 +18,6 @@ asset.onInitialize(function ()
 
   -- add all all elements in magnetograms as layers
   for i, imagename in ipairs(magnetograms) do
-
     openspace.globebrowsing.addLayer(
       'Sun',
       'ColorLayers',
@@ -31,13 +30,12 @@ asset.onInitialize(function ()
       }
     )
   end
-
 end)
 
 asset.onDeinitialize(function ()
-  --for i, imagename in ipairs(magnetograms) do
-  --  openspace.globebrowsing.removeLayer(
-  --    ?
-  --  )
-  --end
+  for i, imagename in ipairs(magnetograms) do
+    openspace.globebrowsing.deleteLayer(
+      'Sun', 'ColorLayers', 'magnetogram-' .. i
+    )
+  end
 end)

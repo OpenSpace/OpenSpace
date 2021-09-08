@@ -12,16 +12,19 @@ local legend = {
   Identifier = "Legendfluxnodes",
   Type = "ScreenSpaceImageLocal",
   TexturePath = TexturesPath .. "/CMR_transparent_white_text.png",
+  Scale = 0.15,
+  CartesianPosition = { 0.677970, 0.0, -1.049180 }
 }
 
-openspace.addScreenSpaceRenderable(legend)
--- These numbers are there to put the legend on the side of the screen.
-openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.CartesianPosition', { 0.677970, 0.0, -1.049180 });
-openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Rotation', { 0.000000, 0.000000, 0.56652 });
-openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Scale', 0.15);
-openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Enabled', false);
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(legend)
+  -- These numbers are there to put the legend on the side of the screen.
+  openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Rotation', { 0.000000, 0.000000, 0.56652 });
+end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { legend })
+asset.onDeinitialize(function ()
+  openspace.removeScreenSpaceRenderable(legend.Identifier)
+end)
 
 asset.meta = {
   Name = "Predictive Science Inc. Stream nodes Bastille Days",

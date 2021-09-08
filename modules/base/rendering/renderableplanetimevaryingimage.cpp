@@ -297,6 +297,7 @@ void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double curren
         _activeTriggerTimeIndex = static_cast<int>(_sourceFiles.size() - 1);
     }
 }
+
 void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     if (_sourceFiles.size() > 1) {
         const double lastTriggerTime = _startTimes[_sourceFiles.size() - 1];
@@ -305,11 +306,8 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
             (static_cast<double>(_sourceFiles.size() - 1.0));
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
-    else {
-        // If there's just one state it should never disappear!
-        _sequenceEndTime = std::numeric_limits<double>::max();
-    }
 }
+
 void RenderablePlaneTimeVaryingImage::loadTexture() {
     if (_activeTriggerTimeIndex != -1) {
         _texture = _textureFiles[_activeTriggerTimeIndex].get();

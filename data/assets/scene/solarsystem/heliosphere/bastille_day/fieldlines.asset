@@ -1,10 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
---local transferFunctions = asset.localResource("transferfunctions")
---local masVelocityColorTable = transferFunctions .. "/velocity-fieldlines.txt"
---local masDensityColorTable = transferFunctions .. "/density-fieldlines.txt"
-
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Fieldlines",
   Type = "HttpSynchronization",
