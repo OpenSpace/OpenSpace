@@ -21,7 +21,13 @@ local homeState = {
 -- An empty state that wil just be used to show a page in the GUI where the 
 -- user can fly to the planets in the solar system
 local solarSystemState = {
-  Identifier = "SolarSystem"
+  Identifier = "SolarSystem",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.startOrbiting() .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = util.stopOrbiting()
 }
 
 -- Missions
