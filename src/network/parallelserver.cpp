@@ -154,6 +154,10 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
             handleHostshipResignation(*peer);
             break;
         case ParallelConnection::MessageType::IndependentViewRequest:
+            handleViewRequest(*peer);
+            break;
+        case ParallelConnection::MessageType::IndependentViewResignation:
+            handleViewResignation(*peer);
             break;
         case ParallelConnection::MessageType::Disconnection:
             disconnect(*peer);
@@ -264,6 +268,14 @@ void ParallelServer::handleHostshipResignation(Peer& peer) {
     setToClient(peer);
 
     LINFO(fmt::format("Connection {} resigned as host", peer.id));
+}
+
+void ParallelServer::handleViewRequest(Peer& peer) {
+
+}
+
+void ParallelServer::handleViewResignation(Peer& peer) {
+
 }
 
 bool ParallelServer::isConnected(const Peer& peer) const {

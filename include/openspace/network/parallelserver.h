@@ -85,6 +85,8 @@ private:
     void handleData(const Peer& peer, std::vector<char> data);
     void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleHostshipResignation(Peer& peer);
+    void handleViewRequest(Peer& peer);
+    void handleViewResignation(Peer& peer);
 
     void handleNewPeers();
     void eventLoop();

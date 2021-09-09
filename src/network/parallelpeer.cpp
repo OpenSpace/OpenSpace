@@ -45,6 +45,8 @@ namespace {
     constexpr const size_t MaxLatencyDiffs = 64;
     constexpr const char* _loggerCat = "ParallelPeer";
 
+    bool _isConnected = false;
+
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
@@ -132,6 +134,7 @@ ParallelPeer::ParallelPeer()
     addProperty(_cameraKeyframeInterval);
 
     addProperty(_hasIndependentView);
+    _hasIndependentView.setReadOnly(true);
 
     _hasIndependentView.onChange([this]() {
         setViewStatus();
@@ -149,7 +152,11 @@ void ParallelPeer::connect() {
     disconnect();
 
     setStatus(ParallelConnection::Status::Connecting);
+
+    _isConnected = true;
     setViewStatus();
+    
+    _hasIndependentView.setReadOnly(false);
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
@@ -173,6 +180,8 @@ void ParallelPeer::disconnect() {
     }
     _shouldDisconnect = false;
     setStatus(ParallelConnection::Status::Disconnected);
+
+    _isConnected = false;
 }
 
 void ParallelPeer::sendAuthentication() {
@@ -525,7 +534,7 @@ void ParallelPeer::preSynchronization() {
 
     double now = global::windowDelegate->applicationTime();
 
-    if (isHost() || hasIndependentView()) {
+    if (isHost() || viewStatus() == ParallelConnection::ViewStatus::IndependentView) {
         // Allow view-independent peers to send camera information...
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -577,16 +586,25 @@ ParallelConnection::Status ParallelPeer::status() {
 }
 
 void ParallelPeer::setViewStatus() {
-    if (isHost() && viewStatus() != ParallelConnection::ViewStatus::Host) {
-        _viewStatus = ParallelConnection::ViewStatus::Host;
+    if (_isConnected) {
+        if (isHost() && viewStatus() != ParallelConnection::ViewStatus::Host) {
+            _viewStatus = ParallelConnection::ViewStatus::Host;
+        }
+        else if (hasIndependentView() && viewStatus() !=
+            ParallelConnection::ViewStatus::IndependentView) {
+            _viewStatus = ParallelConnection::ViewStatus::IndependentView;
+            LINFO(fmt::format("{} is now using host-independent viewpoint.", _name));
+        }
+        else if (!hasIndependentView() && viewStatus() !=
+            ParallelConnection::ViewStatus::HostView) {
+            _viewStatus = ParallelConnection::ViewStatus::HostView;
+            LINFO(fmt::format("{} is now using the host's viewpoint.", _name));
+        }
     }
-    else if (hasIndependentView() && viewStatus() != ParallelConnection::ViewStatus::IndependentView) {
-        _viewStatus = ParallelConnection::ViewStatus::IndependentView;
-        LINFO(fmt::format("{} is now using host-independent viewpoint.", _name));
-    }
-    else if (!hasIndependentView() && viewStatus() != ParallelConnection::ViewStatus::HostView) {
-        _viewStatus = ParallelConnection::ViewStatus::HostView;
-        LINFO(fmt::format("{} is now using the host's viewpoint.", _name));
+    else {
+        hasIndependentView() ?
+            LINFO(fmt::format("You will use host-independent viewpoint.")) : 
+            LINFO(fmt::format("You will use the host's viewpoint."));
     }
 }
 
