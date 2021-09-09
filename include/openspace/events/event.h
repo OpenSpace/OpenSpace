@@ -76,7 +76,7 @@ struct Event {
         SessionRecordingFinished,
         Custom
     };
-    Event(Type type_) : type(type_) {}
+    constexpr explicit Event(Type type_) : type(type_) {}
 
     const Type type;
     const Event* next = nullptr;
@@ -107,7 +107,7 @@ void logAllEvents(const Event* e);
 struct EventSceneGraphNodeAdded : public Event {
     static const Type Type = Event::Type::SceneGraphNodeAdded;
 
-    EventSceneGraphNodeAdded(const SceneGraphNode* node_);
+    explicit EventSceneGraphNodeAdded(const SceneGraphNode* node_);
     const tstring node;
 };
 
@@ -115,7 +115,7 @@ struct EventSceneGraphNodeAdded : public Event {
 struct EventSceneGraphNodeRemoved : public Event {
     static const Type Type = Event::Type::SceneGraphNodeRemoved;
     
-    EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
+    explicit EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
     const tstring node;
 };
 
@@ -129,7 +129,7 @@ struct EventParallelConnection : public Event {
         HostshipGained,
         HostshipLost
     };
-    EventParallelConnection(State state_);
+    explicit EventParallelConnection(State state_);
     State state;
 };
 
@@ -150,7 +150,7 @@ struct EventApplicationShutdown : public Event {
         Finished
     };
 
-    EventApplicationShutdown(State state_);
+    explicit EventApplicationShutdown(State state_);
     const State state;
 };
 
@@ -158,7 +158,7 @@ struct EventApplicationShutdown : public Event {
 struct EventScreenSpaceRenderableAdded : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
-    EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
+    explicit EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
     const tstring renderable;
 };
 
@@ -166,7 +166,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
 struct EventScreenSpaceRenderableRemoved : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
-    EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
+    explicit EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
     const tstring renderable;
 };
 
@@ -179,7 +179,8 @@ struct EventCameraTransition : public Event {
         ApproachSphere,
         ReachedSphere
     };
-    EventCameraTransition(const Camera* camera_, const SceneGraphNode* node_, Location before_, Location after_);
+    EventCameraTransition(const Camera* camera_, const SceneGraphNode* node_,
+        Location before_, Location after_);
 
     const Camera* camera = nullptr;
     const tstring node;
@@ -211,7 +212,7 @@ struct EventMissionEventReached : public Event {
 struct EventPlanetEclipsed : public Event {
     static const Type Type = Event::Type::PlanetEclipsed;
 
-    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser);
+    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser_);
     const tstring eclipsee;
     const tstring eclipser;
 };
@@ -237,7 +238,7 @@ struct EventFocusNodeChanged : public Event {
 struct EventLayerAdded : public Event {
     static const Type Type = Event::Type::LayerAdded;
 
-    EventLayerAdded(std::string_view layer);
+    explicit EventLayerAdded(std::string_view layer);
     const tstring layer;
 };
 
@@ -245,7 +246,7 @@ struct EventLayerAdded : public Event {
 struct EventLayerRemoved : public Event {
     static const Type Type = Event::Type::LayerRemoved;
 
-    EventLayerRemoved(std::string_view layer);
+    explicit EventLayerRemoved(std::string_view layer);
     const tstring layer;
 };
 
