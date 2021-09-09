@@ -16,8 +16,8 @@ local Example_Fixed_Height = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Longitude = -74.006,
       Latitude = 40.7128,
+      Longitude = -74.006,
       Altitude = 100000.0
     }
   },
@@ -38,8 +38,8 @@ local Example_Adaptive_Height = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Longitude = -74.006,
       Latitude = 40.7128,
+      Longitude = -74.006,
       UseHeightmap = true
     }
   },

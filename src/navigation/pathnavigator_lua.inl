@@ -67,51 +67,8 @@ int stopPath(lua_State* L) {
     return 0;
 }
 
-int handleOptionalGoToParameters(lua_State* L, const int startLocation,
-                                 const int nArguments,
-                                 ghoul::Dictionary& resultInstruction)
-{
-    const bool firstIsNumber = (lua_isnumber(L, startLocation) != 0);
-    const bool firstIsBool = (lua_isboolean(L, startLocation) != 0);
-
-    if (!(firstIsNumber || firstIsBool)) {
-        const char* msg = lua_pushfstring(
-            L,
-            "%s or %s expected, got %s",
-            lua_typename(L, LUA_TNUMBER),
-            lua_typename(L, LUA_TBOOLEAN),
-            luaL_typename(L, -1)
-        );
-        return ghoul::lua::luaError(
-            L, fmt::format("bad argument #{} ({})", startLocation, msg)
-        );
-    }
-
-    int location = startLocation;
-
-    if (firstIsBool) {
-        const bool useUpFromTarget = (lua_toboolean(L, location) == 1);
-        resultInstruction.setValue("UseTargetUpDirection", useUpFromTarget);
-
-        if (nArguments > startLocation) {
-            location++;
-        }
-    }
-
-    if (firstIsNumber || nArguments > startLocation) {
-        double duration = ghoul::lua::value<double>(L, location);
-        if (duration <= Epsilon) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
-        }
-        resultInstruction.setValue("Duration", duration);
-    }
-
-    return 0;
-}
-
 int goTo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::goTo");
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::goTo");
     auto [nodeIdentifier, useUpFromTargetOrDuration, duration] = ghoul::lua::values<
         std::string, std::optional<std::variant<bool, double>>, std::optional<double>
     >(L);
@@ -164,7 +121,7 @@ int goTo(lua_State* L) {
 }
 
 int goToHeight(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToHeight");
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToHeight");
     auto [nodeIdentifier, height, useUpFromTargetOrDuration, duration] =
         ghoul::lua::values<
             std::string, double, std::optional<std::variant<bool, double>>, 

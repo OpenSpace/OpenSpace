@@ -22,47 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/scene/rotation.h>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
-layout(location = 3) in vec3 in_tangent;
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+namespace openspace::globebrowsing {
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
-uniform mat4 meshTransform;
-uniform mat4 meshNormalTransform;
+class RenderableGlobe;
 
-void main() {
-  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+class GlobeRotation : public Rotation {
+public:
+    GlobeRotation(const ghoul::Dictionary& dictionary);
 
-  gl_Position = positionScreenSpace;
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
-    
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
-	// TBN matrix for normal mapping
-	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+    static documentation::Documentation Documentation();
 
-	// Re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
+private:
+    void findGlobe();
+    void setUpdateVariables();
+    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
 
-	// Retrieve perpendicular vector B with cross product of T and N
-	vec3 B = normalize(cross(N, T));
+    properties::StringProperty _globe;
+    properties::DoubleProperty _latitude;
+    properties::DoubleProperty _longitude;
+    properties::DoubleProperty _angle;
+    properties::BoolProperty _useHeightmap;
 
-	TBN = mat3(T, B, N);
-}
+    RenderableGlobe* _globeNode = nullptr;
+
+    mutable bool _matrixIsDirty = true;
+    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
+};
+
+} // namespace openspace::globebrowsing
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__

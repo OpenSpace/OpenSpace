@@ -94,11 +94,10 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
             "addCartesianAxes",
             &luascriptfunctions::addCartesianAxes,
             {},
-            "string, string [,number]",
+            "string, [number]",
             "Adds a set of Cartesian axes to the scene graph node identified by the "
-            "first string, to illustrate its local coordinate system. The second string "
-            "will be used to set the identifier of the axes. The third (optional) "
-            "argument is a scale value, in meters."
+            "first string, to illustrate its local coordinate system. The second "
+            "(optional) argument is a scale value, in meters."
         }
     };
 

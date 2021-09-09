@@ -22,47 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec2 vs_st;
+in vec3 vs_normalViewSpace;
+in vec4 vs_positionCameraSpace;
+in float vs_screenSpaceDepth;
+in mat3 TBN;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
-layout(location = 3) in vec3 in_tangent;
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+uniform bool performShading = true;
+uniform bool use_forced_color = false;
+uniform bool has_texture_diffuse;
+uniform bool has_texture_normal;
+uniform bool has_texture_specular;
+uniform bool has_color_specular;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
-uniform mat4 meshTransform;
-uniform mat4 meshNormalTransform;
+uniform bool opacityBlending = false;
 
-void main() {
-  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+uniform sampler2D texture_diffuse;
+uniform sampler2D texture_normal;
+uniform sampler2D texture_specular;
 
-  gl_Position = positionScreenSpace;
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
-    
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+uniform vec3 color_diffuse;
+uniform vec3 color_specular;
 
-	// TBN matrix for normal mapping
-	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+uniform int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
 
-	// Re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
+uniform float opacity = 1.0;
 
-	// Retrieve perpendicular vector B with cross product of T and N
-	vec3 B = normalize(cross(N, T));
+Fragment getFragment() {
+  Fragment frag;
 
-	TBN = mat3(T, B, N);
+  if (has_texture_normal) {
+    vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
+    normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
+    frag.color.rgb = normalize(TBN * normalAlbedo);
+  }
+  else {
+    frag.color.rgb = normalize(vs_normalViewSpace);
+  }
+  frag.color.a = 1.0;
+  frag.gPosition      = vs_positionCameraSpace;
+  frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+  frag.disableLDR2HDR = true;
+  return frag;
 }
