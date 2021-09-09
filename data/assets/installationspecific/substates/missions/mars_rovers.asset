@@ -24,103 +24,8 @@ local goToMarsOverview = [[
 ]]
 
 -----
--- Valles Marineris
------
-
--- TODO: Use a date where valles marineris is actually visible..
--- TODO: move these places to the webpage only.
-
-local vallesMarinerisTargetDistance = 7E6
-
-local vallesMarinerisTiltedNavState = [[{
-  Anchor = "Mars", ReferenceFrame= "Mars",
-  Position = {1153974.125, -3147836.75, -764025.4375},
-  Up = { 0.10838311165571213, -0.19677796959877014, 0.9744390845298767 },
-  Pitch = 1.1448750495910645, Yaw = -0.07529527693986893
-}]]
-
-local vallesMarinerisAboveNavState = [[{
-  Anchor = "Mars", ReferenceFrame = "Mars",
-  Position = { 1986306.875, -4939418.5, -880679.875 },
-  Up =  { 0.23815040290355682, -0.07685504853725433, 0.9681826829910278 },
-  Pitch = -1.0651531739958031e-12, Yaw = 3.5783407487111063e-12
-}]]
-
-local goToVMClose = [[
-  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  ]] .. util.flyToNavState(vallesMarinerisTiltedNavState) .. [[
-]]
-
-local goToVMOverview = [[
-  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  ]] .. util.flyToNavState(vallesMarinerisAboveNavState) .. [[
-]]
-
-local vallesMarinerisCloseState = {
-  Identifier = "VallesMarinerisClose",
-  Enter = [[
-    ]] .. util.setOrbitSpeedFactor(0.6) .. [[
-    ]] .. util.orbitOnArrival() .. [[
-    ]] .. util.enableRoll() .. [[
-  ]],
-  Exit = [[
-    ]] .. util.stopOrbiting() .. [[
-    ]] .. util.disableRoll() .. [[
-  ]]
-}
-
-local vallesMarinerisOverviewState = {
-  Identifier = "VallesMarinerisOverview",
-  Enter = [[
-    ]] .. util.enableRoll() .. [[
-    ]] .. util.stopOrbiting() .. [[
-  ]],
-  Exit = util.disableRoll()
-}
-
------
--- Olympus Mons
------
-local olympusMonsTargetDistance = 7E6
-local olympusMonsGeo = {
-  lat = 18.65, lon = 226.2, height = 1.5e6
-}
-
--- TODO: add this and a "orbit at constant latitude option?"
--- local olympusMonsNavState = [[{ 
---   "ReferenceFrame" = "Mars", 
---   "Pitch" = 0.822551, 
---   "Anchor" = "Mars", 
---   "Yaw" = -0.100134, 
---   "Position" = { -2998234.923265, -2272086.123151, 837612.478657 },
---   "Up" = { 0.612547, -0.634578, 0.471272 } 
--- }]];
-
-local goToOlympusMons = [[
-  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  openspace.time.setPause(true)
-  openspace.globebrowsing.flyToGeo(
-    "Mars", 
-    ]] .. tostring(olympusMonsGeo.lat) .. [[,
-    ]] .. tostring(olympusMonsGeo.lon) .. [[,
-    ]] .. tostring(olympusMonsGeo.height) .. [[
-  )
-]]
-
-local olympusMonsState = {
-  Identifier = "OlympusMons",
-  Enter = [[
-    ]] .. util.enableRoll() .. [[
-    ]] .. util.stopOrbiting() .. [[
-  ]],
-  Exit = util.disableRoll()
-}
-
------
 -- Curiosity
 -----
-local curiosityTargetDistance = 7E6
-
 local curiosityState = {
   Identifier = "Curiosity",
   Enter = [[
@@ -132,12 +37,132 @@ local curiosityState = {
   ]]
 }
 
+-----
+-- Perseverance
+-----
+local perseveranceState = {
+  Identifier = "Perseverance",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+-----
+-- MRO
+-----
+local mroState = {
+  Identifier = "MRO",
+  Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitOnArrival() .. [[
+  ]],
+  Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+  ]]
+}
+
+-----
+-- Valles Marineris
+-----
+
+-- TODO: Use a date where valles marineris is actually visible..
+-- TODO: move these places to the webpage only.
+
+-- local vallesMarinerisTargetDistance = 7E6
+
+-- local vallesMarinerisTiltedNavState = [[{
+--   Anchor = "Mars", ReferenceFrame= "Mars",
+--   Position = {1153974.125, -3147836.75, -764025.4375},
+--   Up = { 0.10838311165571213, -0.19677796959877014, 0.9744390845298767 },
+--   Pitch = 1.1448750495910645, Yaw = -0.07529527693986893
+-- }]]
+
+-- local vallesMarinerisAboveNavState = [[{
+--   Anchor = "Mars", ReferenceFrame = "Mars",
+--   Position = { 1986306.875, -4939418.5, -880679.875 },
+--   Up =  { 0.23815040290355682, -0.07685504853725433, 0.9681826829910278 },
+--   Pitch = -1.0651531739958031e-12, Yaw = 3.5783407487111063e-12
+-- }]]
+
+-- local goToVMClose = [[
+--   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+--   ]] .. util.flyToNavState(vallesMarinerisTiltedNavState) .. [[
+-- ]]
+
+-- local goToVMOverview = [[
+--   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+--   ]] .. util.flyToNavState(vallesMarinerisAboveNavState) .. [[
+-- ]]
+
+-- local vallesMarinerisCloseState = {
+--   Identifier = "VallesMarinerisClose",
+--   Enter = [[
+--     ]] .. util.setOrbitSpeedFactor(0.6) .. [[
+--     ]] .. util.orbitOnArrival() .. [[
+--     ]] .. util.enableRoll() .. [[
+--   ]],
+--   Exit = [[
+--     ]] .. util.stopOrbiting() .. [[
+--     ]] .. util.disableRoll() .. [[
+--   ]]
+-- }
+
+-- local vallesMarinerisOverviewState = {
+--   Identifier = "VallesMarinerisOverview",
+--   Enter = [[
+--     ]] .. util.enableRoll() .. [[
+--     ]] .. util.stopOrbiting() .. [[
+--   ]],
+--   Exit = util.disableRoll()
+-- }
+
+-----
+-- Olympus Mons
+-----
+-- local olympusMonsTargetDistance = 7E6
+-- local olympusMonsGeo = {
+--   lat = 18.65, lon = 226.2, height = 1.5e6
+-- }
+
+-- TODO: add this and a "orbit at constant latitude option?"
+-- local olympusMonsNavState = [[{ 
+--   "ReferenceFrame" = "Mars", 
+--   "Pitch" = 0.822551, 
+--   "Anchor" = "Mars", 
+--   "Yaw" = -0.100134, 
+--   "Position" = { -2998234.923265, -2272086.123151, 837612.478657 },
+--   "Up" = { 0.612547, -0.634578, 0.471272 } 
+-- }]];
+
+-- local goToOlympusMons = [[
+--   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+--   openspace.time.setPause(true)
+--   openspace.globebrowsing.flyToGeo(
+--     "Mars", 
+--     ]] .. tostring(olympusMonsGeo.lat) .. [[,
+--     ]] .. tostring(olympusMonsGeo.lon) .. [[,
+--     ]] .. tostring(olympusMonsGeo.height) .. [[
+--   )
+-- ]]
+
+-- local olympusMonsState = {
+--   Identifier = "OlympusMons",
+--   Enter = [[
+--     ]] .. util.enableRoll() .. [[
+--     ]] .. util.stopOrbiting() .. [[
+--   ]],
+--   Exit = util.disableRoll()
+-- }
+
 local states = {
   marsRoversState,
-  vallesMarinerisCloseState,
-  vallesMarinerisOverviewState,
-  olympusMonsState,
-  curiosityState
+  curiosityState,
+  perseveranceState,
+  mroState
 }
 
 ----------------------------------------------------------------
@@ -156,99 +181,75 @@ local transitions = {
     To = "Home",
     Action = flyHome.cameraPath
   },
-  -- Valles Marineris - overview
-  {
-    From = "MarsRovers",
-    To = "VallesMarinerisOverview",
-    Action = goToVMOverview
-  },
-  {
-    From = "VallesMarinerisOverview",
-    To = "MarsRovers",
-    Action = goToMarsOverview
-  },
-  {
-    From = "VallesMarinerisOverview",
-    To = "VallesMarinerisClose",
-    Action = goToVMClose
-  },
-  {
-    From = "VallesMarinerisClose",
-    To = "VallesMarinerisOverview",
-    Action = goToVMOverview
-  },
-  {
-    From = "VallesMarinerisOverview",
-    To = "OlympusMons",
-    Action = goToOlympusMons
-  },
-  {
-    From = "OlympusMons",
-    To = "VallesMarinerisOverview",
-    Action = goToVMOverview
-  },
-    -- Valles Marineris - close
-  {
-    From = "MarsRovers",
-    To = "VallesMarinerisClose",
-    Action = goToVMClose
-  },
-  {
-    From = "VallesMarinerisClose",
-    To = "MarsRovers",
-    Action = goToMarsOverview
-  },
-  {
-    From = "VallesMarinerisClose",
-    To = "OlympusMons",
-    Action = goToOlympusMons
-  },
-  {
-    From = "OlympusMons",
-    To = "VallesMarinerisClose",
-    Action = goToVMClose
-  },
-  -- Olympus Mons
-  {
-    From = "MarsRovers",
-    To = "OlympusMons",
-    Action = goToOlympusMons
-  },
-  {
-    From = "OlympusMons",
-    To = "MarsRovers",
-    Action = goToMarsOverview
-  },
   -- Curiosity
-  -- TODO: curiosity + transitions
   {
     From = "MarsRovers",
-    To = "Curiosity",
-    Action = [[]]
+    To = "Curiosity"
   },
   {
     From = "Curiosity",
+    To = "MarsRovers",
+    Action = goToMarsOverview
+  },
+  {
+    From = "Curiosity",
+    To = "Perseverance",
+  },
+  {
+    From = "Perseverance",
+    To = "Curiosity",
+  },
+  {
+    From = "Curiosity",
+    To = "MRO",
+  },
+  {
+    From = "MRO",
+    To = "Curiosity",
+  },
+  -- Perseverance
+  {
+    From = "MarsRovers",
+    To = "Perseverance",
+    Action = [[]]
+  },
+  {
+    From = "Perseverance",
+    To = "MarsRovers",
+    Action = goToMarsOverview
+  },
+  {
+    From = "Perseverance",
+    To = "MRO",
+  },
+  {
+    From = "MRO",
+    To = "Perseverance",
+  },
+  -- MRO
+  {
+    From = "MarsRovers",
+    To = "MRO",
+    Action = [[]]
+  },
+  {
+    From = "MRO",
     To = "MarsRovers",
     Action = goToMarsOverview
   },
   -- Back to SolarSystem from substates
   {
-    From = "VallesMarinerisOverview",
-    To = "Home",
-    Action = flyHome.cameraPath
-  },
-  {
-    From = "VallesMarinerisClose",
-    To = "Home",
-    Action = flyHome.cameraPath
-  },
-  {
-    From = "OlympusMons",
-    To = "Home",
-    Action = flyHome.cameraPath
-  },
-  {
     From = "Curiosity",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
+  {
+    From = "Perseverance",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
+  {
+    From = "MRO",
     To = "Home",
     Action = flyHome.cameraPath
   }
