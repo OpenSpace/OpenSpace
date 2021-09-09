@@ -597,13 +597,9 @@ void Profile::removeAsset(const std::string& path) {
     }
 
     const auto it = std::find(assets.cbegin(), assets.cend(), path);
-    if (it == assets.end()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Tried to remove non-existing asset '{}'", path
-        ));
+    if (it != assets.end()) {
+        assets.erase(it);
     }
-
-    assets.erase(it);
 }
 
 std::string Profile::serialize() const {

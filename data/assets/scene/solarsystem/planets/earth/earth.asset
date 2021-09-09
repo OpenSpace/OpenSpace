@@ -35,8 +35,6 @@ local Earth = {
       Color = { 1.0, 0.0, 0.0 }
     }
   },
-  OnEnter = "os.hide_my_trail",
-  OnExit = "os.show_my_trail",
   Tag = { "planet_solarSystem", "planet_terrestrial" },
   GUI = {
     Name = "Earth",

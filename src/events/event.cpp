@@ -97,7 +97,7 @@ void log(int i, const EventScreenSpaceRenderableRemoved& e) {
 }
 
 void log(int i, const EventCameraTransition& e) {
-    ghoul_assert(e.type == EventCameraApproachedSceneGraphNode::Type, "Wrong type");
+    ghoul_assert(e.type == EventCameraTransition::Type, "Wrong type");
     auto toString = [](EventCameraTransition::Location location) {
         switch (location) {
             case EventCameraTransition::Location::Outside:        return "Outside";

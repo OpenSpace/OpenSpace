@@ -49,11 +49,11 @@ void EventEngine::postFrameCleanup() {
 }
 
 void EventEngine::registerEventAction(events::Event::Type type,
-                                      std::string actionIdentifier,
+                                      std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
-    ai.action = std::move(actionIdentifier);
+    ai.action = std::move(identifier);
     ai.filter = std::move(filter);
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
@@ -65,11 +65,19 @@ void EventEngine::registerEventAction(events::Event::Type type,
 }
 
 void EventEngine::unregisterEventAction(events::Event::Type type,
-                                        const std::string& actionIdentifier)
+                                        const std::string& identifier,
+                                        std::optional<ghoul::Dictionary> filter)
 {
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
-        const auto jt = std::find(it->second.begin(), it->second.end(), actionIdentifier);
+        const auto jt = std::find_if(
+            it->second.begin(), it->second.end(),
+            [identifier, filter](const ActionInfo& ai) {
+                const bool a = ai.action == identifier;
+                const bool f = !filter.has_value() || *filter == ai.filter;
+                return a && f;
+            }
+        );
         if (jt != it->second.end()) {
             it->second.erase(jt);
         }
@@ -88,9 +96,9 @@ void EventEngine::triggerActions() const {
         if (it != _eventActions.end()) {
             ghoul::Dictionary params = toParameter(*e);
             for (const ActionInfo& ai : it->second) {
-                // @TODO Check against filter
-
-                global::actionManager->triggerAction(ai.action, params);
+                if (!ai.filter.has_value() || params.isSubset(*ai.filter)) {
+                    global::actionManager->triggerAction(ai.action, params);
+                }
             }
         }
 
@@ -110,6 +118,14 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         "parameter is encountered. If the optional third parameter is provided, it "
         "describes a filter that the event is being checked against and only if it "
         "passes the filter, the action is triggered"
+    });
+    res.functions.push_back({
+        "unregisterEventAction",
+        &luascriptfunctions::unregisterEventAction,
+        {},
+        "string, string [, table]",
+        "Unregisters a specific combination of event (first parameter), action (second "
+        "parameter), and potentially a filter (optional third argument)"
     });
     return res;
 }

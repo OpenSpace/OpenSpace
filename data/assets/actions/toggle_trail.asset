@@ -1,6 +1,48 @@
-local hide_my_trail = {
-  Identifier = "os.hide_my_trail",
-  Name = "Hide My Trail",
+local toggle_trail = {
+  Identifier = "os.toggle_trail",
+  Name = "Toggle Trail",
+  Command = [[
+    local node
+    if is_declared("args") then
+      node = args.Node
+    else
+      node = openspace.navigation.getNavigationState().Anchor
+    end
+
+    local trail
+    if openspace.hasSceneGraphNode(node .. "Trail") then
+      trail = node .. "Trail"
+    elseif openspace.hasSceneGraphNode(node .. "_trail") then
+      trail = node .. "_trail"
+    else
+      -- No trail found, so nothing more to do here
+      return
+    end
+
+    local visibility
+    if is_declared("args") then
+      if args.Before == "Outside" and args.After == "ApproachSphere" then
+        visibility = false
+      elseif args.Before == "ApproachSphere" and args.After == "Outside" then
+        visibility = true
+      else
+        return
+      end
+    else
+      visibility = not openspace.getPropertyValue("Scene." .. trail .. ".Renderable.Enabled")
+    end
+
+    openspace.setPropertyValueSingle("Scene." .. trail .. ".Renderable.Enabled", visibility)
+  ]],
+  Documentation = "Toggles the visibility of the associated trail of a scene graph node. This action takes optional arguments to 1) determine which trail to hide (as the 'Node') and 2) the transition direction (as 'After' and 'Before').",
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("toggle_trail", toggle_trail.Identifier)
+
+local hide_trail = {
+  Identifier = "os.hide_trail",
+  Name = "Hide Trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -16,14 +58,14 @@ local hide_my_trail = {
     end
   ]],
   Documentation = "Hides the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
-  GuiPath = "/",
+  GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("hide_my_trail", hide_my_trail.Identifier)
+asset.export("hide_trail", hide_trail.Identifier)
 
-local show_my_trail = {
-  Identifier = "os.show_my_trail",
-  Name = "Show My Trail",
+local show_trail = {
+  Identifier = "os.show_trail",
+  Name = "Show Trail",
   Command = [[
     local node
     if is_declared("args") then
@@ -39,17 +81,19 @@ local show_my_trail = {
     end
   ]],
   Documentation = "Shows the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
-  GuiPath = "/",
+  GuiPath = "/Trails",
   IsLocal = true
 }
-asset.export("show_my_trail", show_my_trail.Identifier)
+asset.export("show_trail", show_trail.Identifier)
 
 asset.onInitialize(function()
-  openspace.action.registerAction(hide_my_trail)
-  openspace.action.registerAction(show_my_trail)
+  openspace.action.registerAction(toggle_trail)
+  openspace.action.registerAction(show_trail)
+  openspace.action.registerAction(hide_trail)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(hide_my_trail.Identifier)
-  openspace.action.removeAction(show_my_trail.Identifier)
+  openspace.action.removeAction(toggle_trail.Identifier)
+  openspace.action.removeAction(show_trail.Identifier)
+  openspace.action.removeAction(hide_trail.Identifier)
 end)

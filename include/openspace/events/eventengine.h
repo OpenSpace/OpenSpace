@@ -76,17 +76,19 @@ public:
      *        checked and only if an event passes the filter, the corresponding action is
      *        triggered
      */
-    void registerEventAction(events::Event::Type type, std::string actionIdentifier,
+    void registerEventAction(events::Event::Type type, std::string identifier,
         std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
      * Removing registration for a type/action combination.
      * 
-     * /param type The type of the action that should be unregistered
+     * \param type The type of the action that should be unregistered
      * \param actionIdentifier The identifier of the action that should be unregistered
+     * \param filter The optional filter applied to the event-action combination
      */
     void unregisterEventAction(events::Event::Type type,
-        const std::string& actionIdentifier);
+        const std::string& identifier,
+        std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
      * Triggers all actions that are registered for events that are in the current event
