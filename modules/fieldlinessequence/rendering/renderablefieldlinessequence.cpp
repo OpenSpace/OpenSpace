@@ -1059,15 +1059,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         // Not in interval => set everything to false
         _activeTriggerTimeIndex   = -1;
         mustLoadNewStateFromDisk = false;
-        needUpdate              = false;
+        needUpdate = false;
     }
 
     if (mustLoadNewStateFromDisk) {
         if (!_isLoadingStateFromDisk && !_newStateIsReady) {
-            _isLoadingStateFromDisk    = true;
+            _isLoadingStateFromDisk = true;
             mustLoadNewStateFromDisk  = false;
             std::string filePath = _sourceFiles[_activeTriggerTimeIndex];
-            std::thread readBinaryThread([this, f = std::move(filePath)] {
+            std::thread readBinaryThread([this, f = std::move(filePath)]() {
                 readNewState(f);
             });
             readBinaryThread.detach();
@@ -1130,7 +1130,7 @@ void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
 }
 
 // Unbind buffers and arrays
-inline void unbindGL() {
+void unbindGL() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
