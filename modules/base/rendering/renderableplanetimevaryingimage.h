@@ -54,10 +54,10 @@ protected:
     virtual void bindTexture() override;
 
 private:
-    void loadTexture();
+    ghoul::opengl::Texture* loadTexture() const;
     void extractTriggerTimesFromFileNames();
     bool extractMandatoryInfoFromDictionary();
-    void updateActiveTriggerTimeIndex(double currenttime);
+    int updateActiveTriggerTimeIndex(double currenttime) const;
     void computeSequenceEndTime();
 
     // If there's just one state it should never disappear

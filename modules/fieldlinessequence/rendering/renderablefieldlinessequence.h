@@ -54,7 +54,23 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // ------------------------------------- ENUMS -------------------------------------//
+    void addStateToSequence(FieldlinesState& STATE);
+    void computeSequenceEndTime();
+    void definePropertyCallbackFunctions();
+    void extractTriggerTimesFromFileNames();
+    bool loadJsonStatesIntoRAM();
+    void loadOsflsStatesIntoRAM();
+    bool getStatesFromCdfFiles();
+    void setModelDependentConstants();
+    void setupProperties();
+    bool prepareForOsflsStreaming();
+
+    void readNewState(const std::string& filePath);
+    void updateActiveTriggerTimeIndex(double currentTime);
+    void updateVertexPositionBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexMaskingBuffer();
+
     // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
     enum class ColorMethod {
         Uniform = 0,
@@ -66,8 +82,6 @@ private:
         Osfls = 2
     };
 
-    // ------------------------------------ STRINGS ------------------------------------//
-    std::string _identifier;                               // Name of the Node! 
     // cdf, osfls or json
     SourceFileType _inputFileType;
     // Output folder path in case of file conversion
@@ -78,19 +92,14 @@ private:
     std::filesystem::path _seedPointDirectory;
     // optional except when using json input
     std::string _modelStr;
-    // ------------------------------------- FLAGS -------------------------------------//
+    fls::Model thismodel;
+
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.
     std::atomic_bool _isLoadingStateFromDisk = false;
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
     bool _loadingStatesDynamically  = false;
-    // Used for 'runtime-states': True if new 'runtime-state' must be loaded from disk.
-    // False => the previous frame's state should still be shown
-    bool _mustLoadNewStateFromDisk  = false;
-    // Used for 'in-RAM-states' : True if new 'in-RAM-state'  must be loaded.
-    // False => the previous frame's state should still be shown
-    bool _needsUpdate = false;
     // Used for 'runtime-states'. True when finished loading a new state from disk on
     // another thread.
     std::atomic_bool _newStateIsReady = false;
@@ -100,7 +109,6 @@ private:
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
 
-    // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time. Always the
     // same as _activeTriggerTimeIndex if(_loadingStatesDynamically==true), else
     // always = 0
@@ -115,7 +123,8 @@ private:
     // domain limits.
     float _scalingFactor = 1.f;
     // Estimated end of sequence.
-    double _sequenceEndTime;
+    // If there's just one state it should never disappear
+    double _sequenceEndTime = std::numeric_limits<double>::max();
     // OpenGL Vertex Array Object
     GLuint _vertexArrayObject = 0;
     // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
@@ -127,7 +136,6 @@ private:
     // OpenGL Vertex Buffer Object containing the vertex positions
     GLuint _vertexPositionBuffer = 0;
 
-    // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
     // Used for 'runtime-states' when switching out current state to a new state
     std::unique_ptr<FieldlinesState> _newState;
@@ -135,7 +143,6 @@ private:
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
     std::unique_ptr<TransferFunction> _transferFunction;
 
-    // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'extraQuantity'
     std::vector<std::string> _colorTablePaths;
     // Values represents min & max values represented in the color table
@@ -152,7 +159,6 @@ private:
     // Stores the FieldlineStates
     std::vector<FieldlinesState> _states;
 
-    // ---------------------------------- Properties ---------------------------------- //
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
     // Uniform/transfer function/topology?
@@ -170,7 +176,7 @@ private:
     // Whether or not to use additive blending
     properties::BoolProperty _colorABlendEnabled;
 
-// Whether or not to use Domain
+    // Whether or not to use Domain
     properties::BoolProperty _domainEnabled;
     // Group to hold the Domain properties
     properties::PropertyOwner _domainGroup;
@@ -183,7 +189,7 @@ private:
     // Domain Limits radially
     properties::Vec2Property _domainR;
 
-// Simulated particles' color
+    // Simulated particles' color
     properties::Vec4Property _flowColor;
     // Toggle flow [ON/OFF]
     properties::BoolProperty _flowEnabled;
@@ -209,34 +215,10 @@ private:
     // used to save property for later initialization
     int _maskingQuantityTemp = 0;
 
-    /// Line width for the line rendering part
+    // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
     // Button which executes a time jump to start of sequence
     properties::TriggerProperty _jumpToStartBtn;
-
-    // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
-    void addStateToSequence(FieldlinesState& STATE);
-    void computeSequenceEndTime();
-    void definePropertyCallbackFunctions();
-    //bool extractCdfInfoFromDictionary();
-    fls::Model extractJsonInfoFromDictionary();
-    std::vector<std::string> extractMagnitudeVarsFromStrings();
-    //bool extractMandatoryInfoFromDictionary(std::string sourceFolderPath);
-    std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles();
-    void extractTriggerTimesFromFileNames();
-    bool loadJsonStatesIntoRAM();
-    void loadOsflsStatesIntoRAM();
-    bool getStatesFromCdfFiles();
-    void setModelDependentConstants();
-    void setupProperties();
-    bool prepareForOsflsStreaming();
-
-    // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-    void readNewState(const std::string& filePath);
-    void updateActiveTriggerTimeIndex(double currentTime);
-    void updateVertexPositionBuffer();
-    void updateVertexColorBuffer();
-    void updateVertexMaskingBuffer();
 };
 
 } // namespace openspace

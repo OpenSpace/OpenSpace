@@ -41,8 +41,8 @@ Fragment getFragment() {
         frag.color = texture(texture1, vs_st);
     }
     else {
-        if (mirrorBackside){
-            frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+        if (mirrorBackside) {
+            frag.color = texture(texture1, vec2(1.0 - vs_st.s, vs_st.t));
         }
         else {
             frag.color = texture(texture1, vs_st);

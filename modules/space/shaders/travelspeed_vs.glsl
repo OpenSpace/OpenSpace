@@ -49,7 +49,7 @@ void main() {
     else if (gl_VertexID == 1) {
         finalColor = vec4(lineColor, opacity);
     }
-    else if (gl_VertexID == 2 ) {
+    else if (gl_VertexID == 2) {
         finalColor = vec4(lineColor, opacity);
     }
     // should never hit else

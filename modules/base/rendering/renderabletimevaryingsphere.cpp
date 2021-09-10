@@ -118,8 +118,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "Background",
         "Render as Background",
-        "Enables/Disables background rendering."
+        "If this value is set, the sphere is rendered in the background rendering bin, "
+        "causing it to be rendered before most other scene graph nodes"
     };
+
 
     struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
@@ -162,6 +164,8 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+double extractTriggerTimeFromFileName(const std::string& filePath);
 
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
@@ -226,9 +230,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     addProperty(_segments);
     _segments.onChange([this]() { _sphereIsDirty = true; });
 
-    addProperty(_textureSourcePath);
-    _textureSourcePath.onChange([this]() { loadTexture(); });
-
     addProperty(_mirrorTexture);
     addProperty(_useAdditiveBlending);
     addProperty(_fadeOutThreshold);
@@ -276,13 +277,12 @@ void RenderableTimeVaryingSphere::initializeGL() {
             );
         }
     );
+    _shader->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-    bool success = extractMandatoryInfoFromDictionary();
-    if (!success) {
-        return;
-    }
-
+    extractMandatoryInfoFromSourceFolder();
     computeSequenceEndTime();
     loadTexture();
 }
@@ -308,12 +308,9 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat3 modelRotation = glm::dmat3(data.modelTransform.rotation);
+    glm::dmat3 modelRotation = data.modelTransform.rotation;
 
-    // Activate shader
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _shader->activate();
-    _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
                              glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
@@ -335,7 +332,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
             if (logDistCamera > startLogFadeDistance &&
-                logDistCamera < stopLogFadeDistance) {
+                logDistCamera < stopLogFadeDistance)
+            {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                         (stopLogFadeDistance - startLogFadeDistance),
@@ -357,7 +355,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
             if (logDistCamera > startLogFadeDistance && 
-                logDistCamera < stopLogFadeDistance) {
+                logDistCamera < stopLogFadeDistance)
+            {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                         (stopLogFadeDistance - startLogFadeDistance),
@@ -377,7 +376,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
-    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture.value());
+    _shader->setUniform(_uniformCache._mirrorTexture, _mirrorTexture);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -408,7 +407,7 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDepthMask(true);
     }
 
-    _shader->setIgnoreUniformLocationError(IgnoreError::No);
+    _shader->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::No);
     _shader->deactivate();
 
     if (orientation == Orientation::Inside) {
@@ -418,61 +417,51 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glEnable(GL_CULL_FACE);
     }
     glDisable(GL_CULL_FACE);
-
 }
-bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
-{
+
+void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     fs::path sourceFolder = absPath(_textureSourcePath);
-    if (std::filesystem::is_directory(sourceFolder)) {
-        // Extract all file paths from the provided folder
-        _files.clear();
-        //_sourceFiles.clear();
-        namespace fs = std::filesystem;
-        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
-            if (e.is_regular_file()) {
-               
-                std::string filePath = e.path().string();
-                double time = extractTriggerTimeFromFileName(filePath);
-                std::unique_ptr<ghoul::opengl::Texture> t =
-                    ghoul::io::TextureReader::ref().loadTexture(filePath);
-
-                t->setInternalFormat(GL_COMPRESSED_RGBA);
-                t->uploadTexture();
-                t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                t->purgeFromRAM();
-
-                _files.push_back({ filePath, time, std::move(t) });
-            }
-        }
-
-        std::sort(
-            _files.begin(), _files.end(), 
-            [](const FileData& a, const FileData& b) {
-                return a.time < b.time;
-            }
+    if (!std::filesystem::is_directory(sourceFolder)) {
+        throw ghoul::RuntimeError(
+            "Source folder for timevaryingsphere is not a valid directory"
         );
-        // Ensure that there are available and valid source files left
-        if (_files.empty()) {
-            LERROR(fmt::format(
-                "{}: {} contains no {} files",
-                _identifier, _textureSourcePath, "extension"
-            ));
-            return false;
+    }
+    // Extract all file paths from the provided folder
+    _files.clear();
+    //_sourceFiles.clear();
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
+        if (e.is_regular_file()) {
+               
+            std::string filePath = e.path().string();
+            double time = extractTriggerTimeFromFileName(filePath);
+            std::unique_ptr<ghoul::opengl::Texture> t =
+                ghoul::io::TextureReader::ref().loadTexture(filePath);
+
+            t->setInternalFormat(GL_COMPRESSED_RGBA);
+            t->uploadTexture();
+            t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            t->purgeFromRAM();
+
+            _files.push_back({ filePath, time, std::move(t) });
         }
     }
-    else {
-        LERROR(fmt::format(
-            "{}: FieldlinesSequence {} is not a valid directory",
-            _identifier, _textureSourcePath
-        ));
-        return false;
-    }
 
-    LDEBUG("returning true in extractMandatoryInfoFromDictionary");
-    return true;
+    std::sort(
+        _files.begin(), _files.end(), 
+        [](const FileData& a, const FileData& b) {
+            return a.time < b.time;
+        }
+    );
+    // Ensure that there are available and valid source files left
+    if (_files.empty()) {
+        throw ghoul::RuntimeError(
+            "Source folder for timevaryingsphere contains no files"
+        );
+    }
 }
 
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
@@ -495,29 +484,24 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
             updateActiveTriggerTimeIndex(currentTime); 
-
-            // _mustLoadNewStateFromDisk = true;
-            _needsUpdate = true;
+            _sphereIsDirty = true;
 
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
-        _needsUpdate = false;
     }
-    if ((_needsUpdate || _sphereIsDirty) && !_isLoadingTexture) {
+    if (_sphereIsDirty) {
         _sphere = std::make_unique<Sphere>(_size, _segments);
         _sphere->initialize();
-        _isLoadingTexture = true;
         loadTexture();
         _sphereIsDirty = false;
     }
 }
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(
-                                                            const std::string& filePath) {
+double extractTriggerTimeFromFileName(const std::string& filePath) {
     // Extract the filename from the path (without extension)
     std::string timeString = std::filesystem::path(filePath).stem().string();
 
@@ -540,9 +524,8 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     );
     if (iter != _files.end()) {
         if (iter != _files.begin()) {
-            _activeTriggerTimeIndex = static_cast<int>(
-                std::distance(_files.begin(), iter)
-            ) - 1;
+            ptrdiff_t idx = std::distance(_files.begin(), iter);
+            _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {
             _activeTriggerTimeIndex = 0;
@@ -561,17 +544,11 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
             (static_cast<double>(_files.size()) - 1.0);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
-    else {
-        // If there's just one state it should never disappear!
-        _sequenceEndTime = std::numeric_limits<double>::max();
-    }
 }
 
 void RenderableTimeVaryingSphere::loadTexture() {
     if (_activeTriggerTimeIndex != -1) { 
         _texture = _files[_activeTriggerTimeIndex].texture.get();
-
-        _isLoadingTexture = false;
     }
 }
 } // namespace openspace

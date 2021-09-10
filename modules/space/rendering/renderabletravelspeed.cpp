@@ -34,15 +34,12 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-
 #include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "renderableTravelSpeed";
 
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "lineColor", "opacity"
-    };
+    constexpr const std::array<const char*, 2> UniformNames = {"lineColor", "opacity"};
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
@@ -130,7 +127,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(LineOpacityInfo, 1.0, 0.0, 1.0)
+    , _opacity(LineOpacityInfo, 1.f, 0.f, 1.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -174,8 +171,10 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 }
 
 void RenderableTravelSpeed::initialize() {
-    _initiationTime = -1;
     _targetNode = sceneGraphNode(_targetName);
+    if (_targetNode == nullptr) {
+        throw ghoul::RuntimeError("Could not find targetNode");
+    }
 }
 
 void RenderableTravelSpeed::initializeGL() {
@@ -209,8 +208,7 @@ void RenderableTravelSpeed::deinitializeGL() {
 
 double RenderableTravelSpeed::calculateLightTravelTime(glm::dvec3 startPosition,
     glm::dvec3 targetPosition) {
-    return glm::distance(targetPosition, startPosition) /
-        _travelSpeed;
+    return glm::distance(targetPosition, startPosition) / _travelSpeed;
 }
 
 void RenderableTravelSpeed::calculateDirectionVector() {
@@ -219,26 +217,24 @@ void RenderableTravelSpeed::calculateDirectionVector() {
 
 void RenderableTravelSpeed::calculateVerticesPositions() {
     // 3: start of light, 2: start of fade, 1: end of fade
-    _verticesPositions[2] = _travelSpeed * _timeSinceStart * _directionVector;
+    _vertexPositions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        _verticesPositions[1] = glm::vec3(0.0, 0.0, 0.0); // = source node
+        _vertexPositions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _verticesPositions[1] =
+        _vertexPositions.betweenLightAndFade =
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        _verticesPositions[0] = glm::vec3(0.0, 0.0, 0.0); // = source node
+        _vertexPositions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _verticesPositions[0] =
-            _travelSpeed * 
-            (_timeSinceStart - _indicatorLength - _fadeLength) *
-            _directionVector;
+        _vertexPositions.endOfFade = _travelSpeed * 
+            (_timeSinceStart - _indicatorLength - _fadeLength) * _directionVector;
     }
 }
 
@@ -249,12 +245,12 @@ void RenderableTravelSpeed::updateVertexData() {
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(_verticesPositions),
-        _verticesPositions,
+        sizeof(VertexPositions),
+        &_vertexPositions,
         GL_DYNAMIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glBindVertexArray(0);
 }
 
@@ -268,9 +264,8 @@ bool RenderableTravelSpeed::isReady() const{
 }
 
 void RenderableTravelSpeed::update(const UpdateData& data) {
-    if (_initiationTime == -1) {
+    if (_initiationTime == -1.0) {
         _initiationTime = data.time.j2000Seconds();
-        std::string_view temp = data.time.ISO8601();
         _arrivalTime = _initiationTime + _lightTravelTime;
     }
 
@@ -308,7 +303,7 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
         modelTransform;
@@ -323,11 +318,7 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
 #endif
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glDrawArrays(
-        GL_LINE_STRIP,
-        0,
-        3 
-    );
+    glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
 
     _shaderProgram->deactivate();

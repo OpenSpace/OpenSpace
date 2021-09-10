@@ -1,12 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
---local transferFunctions = asset.localResource("transferfunctions")
-local fluxnodeColorTable = asset.localResource("transferfunctions/flux-nodes.txt")
-local fluxnodeColorTableCMR = asset.localResource("transferfunctions/CMR.txt")
-local fluxnodeColorTableEarth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt")
-local fluxnodeColorTableFlow = asset.localResource("transferfunctions/flux-nodes-flow.txt")
-
 local fluxnodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
   Type = "HttpSynchronization",
@@ -39,18 +33,14 @@ local Fluxnodes = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxnodesBinaries,
     ColorTablePaths = {
-      --Standard = fluxnodeColorTable,
       Standard = asset.localResource("transferfunctions/flux-nodes.txt"),
-      --CMR = fluxnodeColorTableCMR,
       CMR = asset.localResource("transferfunctions/CMR.txt"),
-      --Earth = fluxnodeColorTableEarth,
       Earth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt"),
-      --Flow = fluxnodeColorTableFlow,
       Flow = asset.localResource("transferfunctions/flux-nodes-flow.txt")
     },
 
     LoadAtRuntime = true,
-    ScaleToMeters = 1.0,
+    --ScaleToMeters = 1.0,
     SecondsBefore = 24*60*60,
     SecondsAfter = 24*60*60,
     Enabled = true

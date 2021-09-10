@@ -52,9 +52,19 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void definePropertyCallbackFunctions();
+    void populateStartTimes();
+    void computeSequenceEndTime();
+    void setupProperties();
+    void updateActiveTriggerTimeIndex(double currentTime);
+
+    void loadNodeData(int energybinOption);
+    void updatePositionBuffer();
+    void updateVertexColorBuffer();
+    void updateVertexFilteringBuffer();
+
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
-    // ------------------------------------- ENUMS -------------------------------------//
     // Used to determine if lines should be colored UNIFORMLY or by Flux Value
     enum class ColorMethod {
         ByFluxValue = 0,
@@ -68,8 +78,8 @@ private:
         Flux = 0,
         RFlux = 1,
         R2Flux = 2,
-        log10RFlux = 3,
-        lnRFlux = 4
+        Log10RFlux = 3,
+        LnRFlux = 4
     };
     enum class NodeSkipMethod {
         Uniform = 0,
@@ -78,9 +88,9 @@ private:
         Streamnumber = 3
     };
     enum class EnhanceMethod {
-        Sizescaling = 0,
-        Colortables = 1,
-        Sizeandcolor = 2,
+        SizeScaling = 0,
+        ColorTables = 1,
+        SizeAndColor = 2,
         Illuminance = 3,
     };
 
@@ -93,14 +103,11 @@ private:
         _uniformCache;
     UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
         drawCircles, drawHollow, useGaussian, usingRadiusPerspective, 
-        perspectiveDistanceFactor, maxNodeSize, minNodeSize, usingPulse, 
+        perspectiveDistanceFactor, minMaxNodeSize, usingPulse, 
         usingGaussianPulse, pulsatingAlways) 
         _uniformCache2;
 
-    // ------------------------------------ STRINGS ------------------------------------//
     std::filesystem::path _binarySourceFolderPath;
-
-    // --------------------------------- NUMERICALS ----------------------------------- //
 
     // Active index of _startTimes
     int _activeTriggerTimeIndex = -1;
@@ -121,8 +128,6 @@ private:
     // OpenGL Vertex Buffer Object containing the index of nodes
     GLuint _vertexindexBuffer = 0;
 
-    // ----------------------------------- POINTERS ------------------------------------//
-    // The Lua-Modfile-Dictionary used during initialization
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
     // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
@@ -134,7 +139,7 @@ private:
     // Transfer function used to color line flow
     std::unique_ptr<TransferFunction> _transferFunctionFlow;
 
-    // ------------------------------------ VECTORS ----------------------------------- //
+    std::vector<std::string> _binarySourceFiles;
     // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions
@@ -150,11 +155,10 @@ private:
     // Stores the states radius
     std::vector<std::vector<float>> _statesRadius;
 
-    // ---------------------------------- Properties ---------------------------------- //   
     // Group to hold properties regarding distance to earth
     properties::PropertyOwner _earthdistGroup;
 
-    //Property to show different energybins
+    // Property to show different energybins
     properties::OptionProperty _goesEnergyBins;
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
@@ -175,17 +179,15 @@ private:
     // Group to hold the particle properties
     properties::PropertyOwner _streamGroup;
     // Scaling options
-    properties::OptionProperty _scalingmethod;
+    properties::OptionProperty _scalingMethod;
     // Group for how many nodes to render dependent on radius and flux
-    properties::PropertyOwner _nodesamountGroup;
+    properties::PropertyOwner _nodesAmountGroup;
     // Size of simulated node particles
     properties::FloatProperty _nodeSize;
     // Size of nodes for larger flux
     properties::FloatProperty _nodeSizeLargerFlux;
     // Threshold from earth to decide the distance for which the nodeSize gets larger
     properties::FloatProperty _distanceThreshold;
-    // Minimum size of nodes at a certin distance
-    //properties::FloatProperty _pMinNodeDistanceSize;
     // Maximum size of nodes at a certin distance
     properties::FloatProperty _maxNodeDistanceSize;
     // Threshold for where to interpolate between the max and min node distance
@@ -193,10 +195,10 @@ private:
     // Toggle selected streams [ON/OFF]
     properties::BoolProperty _interestingStreamsEnabled;
 
-    properties::FloatProperty _maxNodeSize;
-    properties::FloatProperty _minNodeSize;
-    /// Line width for the line rendering part
-    properties::FloatProperty _lineWidth;
+    //properties::FloatProperty _maxNodeSize;
+    //properties::FloatProperty _minNodeSize;
+    properties::Vec2Property _minMaxNodeSize;
+
     // Valid range along the Z-axis
     properties::Vec2Property _domainZ;
     // Threshold flux value
@@ -219,8 +221,6 @@ private:
     // The Radius threshold to decide the line between 
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _radiusNodeSkipThreshold;
-    //Misaligned index for fieldlines vs Fluxnodes
-    properties::IntProperty _misalignedIndex;
 
     // Flow Properties
     // Simulated particles' color
@@ -239,7 +239,6 @@ private:
     properties::IntProperty _flowSpeed;
     //Either use flowcolortable or FlowColor.
     properties::BoolProperty _useFlowColor;
-
     properties::PropertyOwner _cameraPerspectiveGroup;
     properties::BoolProperty _cameraPerspectiveEnabled;
     properties::BoolProperty _drawingCircles;
@@ -250,23 +249,5 @@ private:
     properties::BoolProperty _pulseEnabled;
     properties::BoolProperty _gaussianPulseEnabled;
     properties::BoolProperty _pulseAlways;
-    properties::FloatProperty _scaleFactor;
-
-    // initialization
-    std::vector<std::string> _binarySourceFiles;
-
-    // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
-    void definePropertyCallbackFunctions();
-    void populateStartTimes();
-    void computeSequenceEndTime();
-    void setModelDependentConstants();
-    void setupProperties();
-    void updateActiveTriggerTimeIndex(double currentTime);
-
-    void loadNodeData(int energybinOption);
-    // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-    void updatePositionBuffer();
-    void updateVertexColorBuffer();
-    void updateVertexFilteringBuffer();
 };
 } // namespace openspace

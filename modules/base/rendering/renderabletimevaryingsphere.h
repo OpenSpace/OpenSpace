@@ -44,12 +44,6 @@ class Sphere;
 struct RenderData;
 struct UpdateData;
 
-struct FileData {
-    std::string path;
-    double time;
-    std::unique_ptr<ghoul::opengl::Texture> texture;
-};
-
 namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingSphere : public Renderable {
@@ -67,19 +61,20 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    struct FileData {
+        std::string path;
+        double time;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+    };
     void loadTexture();
-    double extractTriggerTimeFromFileName(const std::string& filePath);
-    bool extractMandatoryInfoFromDictionary();
+    void extractMandatoryInfoFromSourceFolder();
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
 
-    // Estimated end of sequence.
-    double _sequenceEndTime;
-    bool _needsUpdate = false;
+    // If there's just one state it should never disappear!
+    double _sequenceEndTime = std::numeric_limits<double>::max();
     std::vector<FileData> _files;
     int _activeTriggerTimeIndex = 0;
-    // Number of states in the sequence
-    bool _isLoadingTexture = false;
 
     properties::StringProperty _textureSourcePath;
     properties::OptionProperty _orientation;
@@ -97,7 +92,6 @@ private:
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     ghoul::opengl::Texture* _texture = nullptr;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
     std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,

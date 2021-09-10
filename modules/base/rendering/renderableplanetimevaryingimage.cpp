@@ -34,7 +34,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <optional>
 
@@ -112,7 +111,7 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     }
 
     addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
+    _texturePath.onChange([this]() { _texture = loadTexture(); });
 
     if (p.renderType.has_value()) {
         switch (*p.renderType) {
@@ -178,7 +177,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
         _textureFiles[i]->purgeFromRAM();
     }
     if (!_isLoadingLazily) {
-        loadTexture();
+        _texture = loadTexture();
     }
 }
 
@@ -226,7 +225,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     ZoneScoped
     RenderablePlane::update(data);
         
-    if (!_enabled || _startTimes.size() == 0) {
+    if (!_enabled || _startTimes.empty()) {
         return;
     }
     bool needsUpdate = false;
@@ -241,7 +240,7 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _sourceFiles.size() && currentTime >= _startTimes[nextIdx]))
         {
-            updateActiveTriggerTimeIndex(currentTime);
+            _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
             needsUpdate = true;
 
         } // else we're still in same state as previous frame (no changes needed)
@@ -253,13 +252,16 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
     }
 
     if (needsUpdate || _textureIsDirty) {
-        loadTexture();
+        _texture = loadTexture();
         _textureIsDirty = false;
     }
 }
 
 void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTasks& t) {
-    if (data.time.j2000Seconds() < _sequenceEndTime) {
+    if (!_startTimes.empty() &&
+        data.time.j2000Seconds() < _sequenceEndTime && 
+        data.time.j2000Seconds() > _startTimes[0]) 
+    {
         glDisable(GL_CULL_FACE);
         RenderablePlane::render(data, t);
     }
@@ -282,20 +284,24 @@ void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
     }
 }
 
-void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) {
+int RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) 
+                                                                                     const
+{
+    int activeIndex = 0;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
             std::ptrdiff_t idx = std::distance(_startTimes.begin(), iter);
-            _activeTriggerTimeIndex = static_cast<int>(idx) - 1;
+            activeIndex = static_cast<int>(idx) - 1;
         }
         else {
-            _activeTriggerTimeIndex = 0;
+            activeIndex = 0;
         }
     }
     else {
-        _activeTriggerTimeIndex = static_cast<int>(_sourceFiles.size() - 1);
+        activeIndex = static_cast<int>(_sourceFiles.size() - 1);
     }
+    return activeIndex;
 }
 
 void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
@@ -308,9 +314,11 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     }
 }
 
-void RenderablePlaneTimeVaryingImage::loadTexture() {
+ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const{
+    ghoul::opengl::Texture* texture = nullptr;
     if (_activeTriggerTimeIndex != -1) {
-        _texture = _textureFiles[_activeTriggerTimeIndex].get();
+        texture = _textureFiles[_activeTriggerTimeIndex].get();
     }
+    return texture;
 }
 } // namespace openspace

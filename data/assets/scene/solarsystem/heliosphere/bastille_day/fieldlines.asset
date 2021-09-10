@@ -39,12 +39,10 @@ local fieldlines = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = fieldlinesDirectory,
     AlphaBlendlingEnabled = false,
-    InputFileType = "osfls",
+    InputFileType = "Osfls",
     ColorTablePaths = {
       asset.localResource("transferfunctions/density-fieldlines.txt"),
       asset.localResource("transferfunctions/velocity-fieldlines.txt")
-      --masDensityColorTable,
-      --masVelocityColorTable,
     },
     ColorTableMinMax = {
       { 0, 1000000 },

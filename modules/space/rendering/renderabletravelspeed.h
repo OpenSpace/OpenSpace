@@ -68,16 +68,18 @@ private:
     properties::FloatProperty _opacity;
     properties::Vec3Property _lineColor;
 
-
-    //0 at parent, 1 at end of fade, 2 between light and fade, 
-    //3 at head of light, 4 at target
-    glm::vec3 _verticesPositions[3]; 
+    struct VertexPositions {
+        glm::vec3 endOfFade;
+        glm::vec3 betweenLightAndFade;
+        glm::vec3 headOfLight;
+    };
+    VertexPositions _vertexPositions;
 
     glm::dvec3 _sourcePosition;
     glm::dvec3 _targetPosition;
     double _lightTravelTime;
     glm::dvec3 _directionVector;
-    double _initiationTime;
+    double _initiationTime = -1.0;
     double _arrivalTime;
     double _timeSinceStart = -1.0;
 
@@ -87,6 +89,7 @@ private:
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
 };
+
 } // namespace openspace
 
 #endif //__OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__
