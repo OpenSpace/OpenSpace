@@ -72,8 +72,8 @@ struct Event {
         FocusNodeChanged,
         LayerAdded,
         LayerRemoved,
-        SessionRecordingStarted,
-        SessionRecordingFinished,
+        SessionRecordingStartedPlayback,
+        SessionRecordingFinishedPlayback,
         Custom
     };
     constexpr explicit Event(Type type_) : type(type_) {}
@@ -251,17 +251,17 @@ struct EventLayerRemoved : public Event {
 };
 
 
-struct EventSessionRecordingStarted : public Event {
-    static const Type Type = Event::Type::SessionRecordingStarted;
+struct EventSessionRecordingStartedPlayback : public Event {
+    static const Type Type = Event::Type::SessionRecordingStartedPlayback;
 
-    EventSessionRecordingStarted();
+    EventSessionRecordingStartedPlayback();
 };
 
 
-struct EventSessionRecordingFinished : public Event {
-    static const Type Type = Event::Type::SessionRecordingFinished;
+struct EventSessionRecordingFinishedPlayback : public Event {
+    static const Type Type = Event::Type::SessionRecordingFinishedPlayback;
 
-    EventSessionRecordingFinished();
+    EventSessionRecordingFinishedPlayback();
 };
 
 

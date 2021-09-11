@@ -730,6 +730,24 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     _camera->setPositionVec3(pose.position);
     _camera->setRotation(composeCameraRotation(camRot));
 
+    // The rest of this function is concerned with managing transitions of the camera
+    // between different distances of interest relative to the focus node. For each
+    // transition two scenarios are handled;  SceneGraphNodes can have attached actions
+    // for each transition, which are automatically triggered. Additionally, an
+    // EventCameraTransition event is fired that contains information about the focus node
+    // and the transition state that caused the vent to fire.
+
+    // Diagram of events for a camera moving from right-to-left.
+    // Interaction sphere is 'O' in middle, and ')' are spherical boundaries. The approach
+    // factor, reach factor, and interaction sphere radius are all taken from the current
+    // focus node.
+    //
+    // |<------------------->|  Approach factor * Interaction sphere
+    //              |<------>|  Reach Factor * Interaction sphere
+    //   
+    // (            (        O        )            )
+    // ^            ^                 ^            ^
+    // OnExit       OnMoveAway        OnReach      OnApproach
     const double currDistance = glm::distance(anchorPos, pose.position);
     const double d = _anchorNode->interactionSphere();
     const double af = _anchorNode->approachFactor();

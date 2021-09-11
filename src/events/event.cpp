@@ -153,14 +153,14 @@ void log(int i, const EventLayerRemoved& e) {
     LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
 }
 
-void log(int i, const EventSessionRecordingStarted& e) {
-    ghoul_assert(e.type == EventSessionRecordingStarted::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SessionRecordingStarted", i));
+void log(int i, const EventSessionRecordingStartedPlayback& e) {
+    ghoul_assert(e.type == EventSessionRecordingStartedPlayback::Type, "Wrong type");
+    LINFO(fmt::format("[{}] SessionRecordingStartedPlayback", i));
 }
 
-void log(int i, const EventSessionRecordingFinished& e) {
-    ghoul_assert(e.type == EventSessionRecordingFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SessionRecordingFinished", i));
+void log(int i, const EventSessionRecordingFinishedPlayback& e) {
+    ghoul_assert(e.type == EventSessionRecordingFinishedPlayback::Type, "Wrong type");
+    LINFO(fmt::format("[{}] SessionRecordingFinishedPlayback", i));
 }
 
 void log(int i, const CustomEvent& e) {
@@ -186,8 +186,10 @@ std::string_view toString(Event::Type type) {
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
-        case Event::Type::SessionRecordingStarted: return "SessionRecordingStarted";
-        case Event::Type::SessionRecordingFinished: return "SessionRecordingFinished";
+        case Event::Type::SessionRecordingStartedPlayback:
+            return "SessionRecordingStartedPlayback";
+        case Event::Type::SessionRecordingFinishedPlayback:
+            return "SessionRecordingFinishedPlayback";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -240,11 +242,11 @@ Event::Type fromString(std::string_view str) {
     else if (str == "LayerRemoved") {
         return Event::Type::LayerRemoved;
     }
-    else if (str == "SessionRecordingStarted") {
-        return Event::Type::SessionRecordingStarted;
+    else if (str == "SessionRecordingStartedPlayback") {
+        return Event::Type::SessionRecordingStartedPlayback;
     }
-    else if (str == "SessionRecordingFinished") {
-        return Event::Type::SessionRecordingFinished;
+    else if (str == "SessionRecordingFinishedPlayback") {
+        return Event::Type::SessionRecordingFinishedPlayback;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -441,11 +443,11 @@ void logAllEvents(const Event* e) {
             case Event::Type::LayerRemoved:
                 log(i, *static_cast<const EventLayerRemoved*>(e));
                 break;
-            case Event::Type::SessionRecordingStarted:
-                log(i, *static_cast<const EventSessionRecordingStarted*>(e));
+            case Event::Type::SessionRecordingStartedPlayback:
+                log(i, *static_cast<const EventSessionRecordingStartedPlayback*>(e));
                 break;
-            case Event::Type::SessionRecordingFinished:
-                log(i, *static_cast<const EventSessionRecordingFinished*>(e));
+            case Event::Type::SessionRecordingFinishedPlayback:
+                log(i, *static_cast<const EventSessionRecordingFinishedPlayback*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -549,11 +551,11 @@ EventLayerRemoved::EventLayerRemoved(std::string_view layer)
     , layer(temporaryString(layer))
 {}
 
-EventSessionRecordingStarted::EventSessionRecordingStarted()
+EventSessionRecordingStartedPlayback::EventSessionRecordingStartedPlayback()
     : Event(Type)
 {}
 
-EventSessionRecordingFinished::EventSessionRecordingFinished()
+EventSessionRecordingFinishedPlayback::EventSessionRecordingFinishedPlayback()
     : Event(Type)
 {}
 

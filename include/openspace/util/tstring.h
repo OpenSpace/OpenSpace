@@ -27,10 +27,38 @@
 
 namespace openspace {
 
+/**
+ * This string is a temporary string that is generated using the temporary memory
+ * storage. This means that under no circumstances must an instance of a tstring be kept
+ * across frame boundaries as the temporary storage is reset at between frames. In
+ * exchange, the allocation of these objects is extreme fast and with barely any overhead
+ * associated with it. The memory accessed through a tstring object shall never be
+ * released manually.
+ */
 using tstring = std::string_view;
 
+/**
+ * Allocate and create a temporary string from the passed std::string.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
 tstring temporaryString(const std::string& str);
+
+/**
+ * Allocate and create a temporary string from the passed std::string_view.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
 tstring temporaryString(std::string_view str);
+
+/**
+ * Allocate and create a temporary string from the passed char array.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
 tstring temporaryString(const char str[]);
 
 } // namespace openspace

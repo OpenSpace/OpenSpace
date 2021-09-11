@@ -34,7 +34,9 @@ local toggle_trail = {
 
     openspace.setPropertyValueSingle("Scene." .. trail .. ".Renderable.Enabled", visibility)
   ]],
-  Documentation = "Toggles the visibility of the associated trail of a scene graph node. This action takes optional arguments to 1) determine which trail to hide (as the 'Node') and 2) the transition direction (as 'After' and 'Before').",
+  Documentation = [[Toggles the visibility of the associated trail of a scene graph node.
+    This action takes optional arguments to 1) determine which trail to hide (as the
+    'Node') and 2) the transition direction (as 'After' and 'Before').]],
   GuiPath = "/Trails",
   IsLocal = true
 }
@@ -57,7 +59,9 @@ local hide_trail = {
       openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", false)
     end
   ]],
-  Documentation = "Hides the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
+  Documentation = [[Hides the associated trail of a scene graph node. This action takes an
+    optional argument to determine whose trail to hide. If no argument is provided, the
+    current focus node is used instead]],
   GuiPath = "/Trails",
   IsLocal = true
 }
@@ -80,7 +84,9 @@ local show_trail = {
       openspace.setPropertyValue("Scene." .. node .. "_trail.Renderable.Enabled", true)
     end
   ]],
-  Documentation = "Shows the associated trail of a scene graph node. This action takes an optional argument to determine whose trail to hide. If no argument is provided, the current focus node is used instead",
+  Documentation = [[Shows the associated trail of a scene graph node. This action takes an
+    optional argument to determine whose trail to hide. If no argument is provided, the
+    current focus node is used instead]],
   GuiPath = "/Trails",
   IsLocal = true
 }
