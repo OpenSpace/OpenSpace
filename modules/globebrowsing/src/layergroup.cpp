@@ -148,7 +148,16 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
-    global::eventEngine->publishEvent<events::EventLayerAdded>(ptr->identifier());
+
+    properties::PropertyOwner* layerGroup = ptr->owner();
+    properties::PropertyOwner* layerManager = layerGroup->owner();
+    properties::PropertyOwner* globe = layerManager->owner();
+    properties::PropertyOwner* sceneGraphNode = globe->owner();
+
+    global::eventEngine->publishEvent<events::EventLayerAdded>(
+        sceneGraphNode->identifier(),
+        ptr->identifier()
+    );
     return ptr;
 }
 
@@ -164,7 +173,11 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
+            properties::PropertyOwner* layerManager = it->get()->owner();
+            properties::PropertyOwner* globe = layerManager->owner();
+            properties::PropertyOwner* sceneGraphNode = globe->owner();
             global::eventEngine->publishEvent<events::EventLayerRemoved>(
+                sceneGraphNode->identifier(),
                 it->get()->identifier()
             );
             update();

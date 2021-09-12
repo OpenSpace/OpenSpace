@@ -373,11 +373,19 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::LayerAdded:
             d.setValue(
+                "Globe",
+                std::string(static_cast<const EventLayerAdded&>(e).node)
+            );
+            d.setValue(
                 "Layer",
                 std::string(static_cast<const EventLayerAdded&>(e).layer)
             );
             break;
         case Event::Type::LayerRemoved:
+            d.setValue(
+                "Globe",
+                std::string(static_cast<const EventLayerRemoved&>(e).node)
+            );
             d.setValue(
                 "Layer",
                 std::string(static_cast<const EventLayerRemoved&>(e).layer)
@@ -541,14 +549,16 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view layer)
+EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layer_)
     : Event(Type)
-    , layer(temporaryString(layer))
+    , node(temporaryString(node_))
+    , layer(temporaryString(layer_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view layer)
+EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layer_)
     : Event(Type)
-    , layer(temporaryString(layer))
+    , node(temporaryString(node_))
+    , layer(temporaryString(layer_))
 {}
 
 EventSessionRecordingStartedPlayback::EventSessionRecordingStartedPlayback()

@@ -462,7 +462,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         (_playbackForceSimTimeAtStart ? 1 : 0)
     ));
 
-    global::eventEngine->publishEvent<events::EventSessionRecordingStarted>();
+    global::eventEngine->publishEvent<events::EventSessionRecordingStartedPlayback>();
     initializePlayback_triggerStart();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
@@ -588,7 +588,9 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
             _state = SessionState::Idle;
             _cleanupNeeded = true;
             LINFO("Playback session finished");
-            global::eventEngine->publishEvent<events::EventSessionRecordingFinished>();
+            global::eventEngine->publishEvent<
+                events::EventSessionRecordingFinishedPlayback
+            >();
         }
     }
 }
@@ -609,7 +611,9 @@ void SessionRecording::stopPlayback() {
         _state = SessionState::Idle;
         _cleanupNeeded = true;
         LINFO("Session playback stopped");
-        global::eventEngine->publishEvent<events::EventSessionRecordingFinished>();
+        global::eventEngine->publishEvent<
+            events::EventSessionRecordingFinishedPlayback
+        >();
     }
 }
 
