@@ -238,8 +238,10 @@ struct EventFocusNodeChanged : public Event {
 struct EventLayerAdded : public Event {
     static const Type Type = Event::Type::LayerAdded;
 
-    explicit EventLayerAdded(std::string_view node_, std::string_view layer_);
+    explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_, 
+        std::string_view layer_);
     const tstring node;
+    const tstring layerGroup;
     const tstring layer;
 };
 
@@ -247,8 +249,10 @@ struct EventLayerAdded : public Event {
 struct EventLayerRemoved : public Event {
     static const Type Type = Event::Type::LayerRemoved;
 
-    explicit EventLayerRemoved(std::string_view node_, std::string_view layer_);
+    explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_, 
+        std::string_view layer_);
     const tstring node;
+    const tstring layerGroup;
     const tstring layer;
 };
 

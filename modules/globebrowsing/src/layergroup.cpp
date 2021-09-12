@@ -156,6 +156,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 
     global::eventEngine->publishEvent<events::EventLayerAdded>(
         sceneGraphNode->identifier(),
+        layerGroup->identifier(),
         ptr->identifier()
     );
     return ptr;
@@ -173,11 +174,13 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
-            properties::PropertyOwner* layerManager = it->get()->owner();
+            properties::PropertyOwner* layerGroup = it->get()->owner();
+            properties::PropertyOwner* layerManager = layerGroup->owner();
             properties::PropertyOwner* globe = layerManager->owner();
             properties::PropertyOwner* sceneGraphNode = globe->owner();
             global::eventEngine->publishEvent<events::EventLayerRemoved>(
                 sceneGraphNode->identifier(),
+                layerGroup->identifier(),
                 it->get()->identifier()
             );
             update();

@@ -377,6 +377,10 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventLayerAdded&>(e).node)
             );
             d.setValue(
+                "Group",
+                std::string(static_cast<const EventLayerAdded&>(e).layerGroup)
+            );
+            d.setValue(
                 "Layer",
                 std::string(static_cast<const EventLayerAdded&>(e).layer)
             );
@@ -385,6 +389,10 @@ ghoul::Dictionary toParameter(const Event& e) {
             d.setValue(
                 "Globe",
                 std::string(static_cast<const EventLayerRemoved&>(e).node)
+            );
+            d.setValue(
+                "Group",
+                std::string(static_cast<const EventLayerRemoved&>(e).layerGroup)
             );
             d.setValue(
                 "Layer",
@@ -549,15 +557,19 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layer_)
+EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
+                                 std::string_view layer_)
     : Event(Type)
     , node(temporaryString(node_))
+    , layerGroup(temporaryString(layerGroup_))
     , layer(temporaryString(layer_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layer_)
+EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
+                                     std::string_view layer_)
     : Event(Type)
     , node(temporaryString(node_))
+    , layerGroup(temporaryString(layerGroup_))
     , layer(temporaryString(layer_))
 {}
 
