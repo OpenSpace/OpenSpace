@@ -88,7 +88,6 @@ void log(int i, const EventApplicationShutdown& e) {
 void log(int i, const EventScreenSpaceRenderableAdded& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
     LINFO(fmt::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
-
 }
 
 void log(int i, const EventScreenSpaceRenderableRemoved& e) {
@@ -153,14 +152,19 @@ void log(int i, const EventLayerRemoved& e) {
     LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
 }
 
-void log(int i, const EventSessionRecordingStartedPlayback& e) {
-    ghoul_assert(e.type == EventSessionRecordingStartedPlayback::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SessionRecordingStartedPlayback", i));
-}
+void log(int i, const EventSessionRecordingPlayback& e) {
+    ghoul_assert(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
 
-void log(int i, const EventSessionRecordingFinishedPlayback& e) {
-    ghoul_assert(e.type == EventSessionRecordingFinishedPlayback::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SessionRecordingFinishedPlayback", i));
+    std::string_view state = [](EventSessionRecordingPlayback::State s) {
+        switch (s) {
+            case EventSessionRecordingPlayback::State::Started:  return "Started";
+            case EventSessionRecordingPlayback::State::Paused:   return "Paused";
+            case EventSessionRecordingPlayback::State::Resumed:  return "Resumed";
+            case EventSessionRecordingPlayback::State::Finished: return "Finished";
+        }
+    }(e.state);
+
+    LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
 void log(int i, const CustomEvent& e) {
@@ -186,10 +190,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
-        case Event::Type::SessionRecordingStartedPlayback:
-            return "SessionRecordingStartedPlayback";
-        case Event::Type::SessionRecordingFinishedPlayback:
-            return "SessionRecordingFinishedPlayback";
+        case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -242,11 +243,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "LayerRemoved") {
         return Event::Type::LayerRemoved;
     }
-    else if (str == "SessionRecordingStartedPlayback") {
-        return Event::Type::SessionRecordingStartedPlayback;
-    }
-    else if (str == "SessionRecordingFinishedPlayback") {
-        return Event::Type::SessionRecordingFinishedPlayback;
+    else if (str == "SessionRecordingPlayback") {
+        return Event::Type::SessionRecordingPlayback;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -399,6 +397,22 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventLayerRemoved&>(e).layer)
             );
             break;
+        case Event::Type::SessionRecordingPlayback:
+            switch (static_cast<const EventSessionRecordingPlayback&>(e).state) {
+                case EventSessionRecordingPlayback::State::Started:
+                    d.setValue("State", "Started"s);
+                    break;
+                case EventSessionRecordingPlayback::State::Paused:
+                    d.setValue("State", "Paused"s);
+                    break;
+                case EventSessionRecordingPlayback::State::Resumed:
+                    d.setValue("State", "Resumed"s);
+                    break;
+                case EventSessionRecordingPlayback::State::Finished:
+                    d.setValue("State", "Finished"s);
+                    break;
+            }
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
@@ -459,11 +473,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::LayerRemoved:
                 log(i, *static_cast<const EventLayerRemoved*>(e));
                 break;
-            case Event::Type::SessionRecordingStartedPlayback:
-                log(i, *static_cast<const EventSessionRecordingStartedPlayback*>(e));
-                break;
-            case Event::Type::SessionRecordingFinishedPlayback:
-                log(i, *static_cast<const EventSessionRecordingFinishedPlayback*>(e));
+            case Event::Type::SessionRecordingPlayback:
+                log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -573,12 +584,9 @@ EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view la
     , layer(temporaryString(layer_))
 {}
 
-EventSessionRecordingStartedPlayback::EventSessionRecordingStartedPlayback()
+EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
     : Event(Type)
-{}
-
-EventSessionRecordingFinishedPlayback::EventSessionRecordingFinishedPlayback()
-    : Event(Type)
+    , state(state_)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, const void* payload_)
