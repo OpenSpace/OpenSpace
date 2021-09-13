@@ -4,12 +4,12 @@ asset.onInitialize(function()
   openspace.event.registerEventAction(
     "CameraTransition",
     action.show_trail,
-    { Before = "ApproachSphere", After = "Outside"}
+    { Transition = "Exiting" }
   );
   openspace.event.registerEventAction(
     "CameraTransition",
     action.hide_trail,
-    { Before = "Outside", After = "ApproachSphere" }
+    { Transition = "Approaching" }
   );
 end)
 
@@ -17,11 +17,11 @@ asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraTransition",
     action.show_trail,
-    { Before = "ApproachSphere", After = "Outside"}
+    { Transition = "Exiting" }
   );
   openspace.event.unregisterEventAction(
     "CameraTransition",
     action.hide_trail,
-    { Before = "Outside", After = "ApproachSphere" }
+    { Transition = "Approaching" }
   );
 end)

@@ -7,8 +7,7 @@ local generic_action = {
   Name = "Generic Example",
   Command = [[
     openspace.printInfo("Node: " .. args.Node)
-    openspace.printInfo("Before: " .. args.Before)
-    openspace.printInfo("After: " .. args.After)
+    openspace.printInfo("Transition: " .. args.Transition)
   ]],
   Documentation = "Prints the argument information for camera transitions to the log",
   GuiPath = "/Examples/Events",

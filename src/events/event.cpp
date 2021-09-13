@@ -97,20 +97,19 @@ void log(int i, const EventScreenSpaceRenderableRemoved& e) {
 
 void log(int i, const EventCameraTransition& e) {
     ghoul_assert(e.type == EventCameraTransition::Type, "Wrong type");
-    auto toString = [](EventCameraTransition::Location location) {
-        switch (location) {
-            case EventCameraTransition::Location::Outside:        return "Outside";
-            case EventCameraTransition::Location::ApproachSphere: return "ApproachSphere";
-            case EventCameraTransition::Location::ReachedSphere:  return "ReachedSphere";
+    std::string_view t = [](EventCameraTransition::Transition transition) {
+        switch (transition) {
+            case EventCameraTransition::Transition::Approaching: return "Approaching";
+            case EventCameraTransition::Transition::Reaching:    return "Reaching";
+            case EventCameraTransition::Transition::Receding:    return "Receding";
+            case EventCameraTransition::Transition::Exiting:     return "Exiting";
             default:                                  throw ghoul::MissingCaseException();
         }
-    };
-    std::string_view b = toString(e.before);
-    std::string_view a = toString(e.after);
+    }(e.transition);
 
     LINFO(fmt::format(
-        "[{}] CameraTransition: {}, {} ({} -> {})",
-        i, reinterpret_cast<const void*>(e.camera), e.node, b, a
+        "[{}] CameraTransition: {}, {} ({})",
+        i, reinterpret_cast<const void*>(e.camera), e.node, t
     ));
 }
 
@@ -321,27 +320,21 @@ ghoul::Dictionary toParameter(const Event& e) {
                 "Node",
                 std::string(static_cast<const EventCameraTransition&>(e).node)
             );
-            switch (static_cast<const EventCameraTransition&>(e).before) {
-                case EventCameraTransition::Location::Outside:
-                    d.setValue("Before", "Outside"s);
+            switch (static_cast<const EventCameraTransition&>(e).transition) {
+                case EventCameraTransition::Transition::Approaching:
+                    d.setValue("Transition", "Approaching"s);
                     break;
-                case EventCameraTransition::Location::ApproachSphere:
-                    d.setValue("Before", "ApproachSphere"s);
+                case EventCameraTransition::Transition::Reaching:
+                    d.setValue("Transition", "Reaching"s);
                     break;
-                case EventCameraTransition::Location::ReachedSphere:
-                    d.setValue("Before", "ReachedSphere"s);
+                case EventCameraTransition::Transition::Receding:
+                    d.setValue("Transition", "Receding"s);
                     break;
-            }
-            switch (static_cast<const EventCameraTransition&>(e).after) {
-                case EventCameraTransition::Location::Outside:
-                    d.setValue("After", "Outside"s);
+                case EventCameraTransition::Transition::Exiting:
+                    d.setValue("Transition", "Exiting"s);
                     break;
-                case EventCameraTransition::Location::ApproachSphere:
-                    d.setValue("After", "ApproachSphere"s);
-                    break;
-                case EventCameraTransition::Location::ReachedSphere:
-                    d.setValue("After", "ReachedSphere"s);
-                    break;
+                default:
+                    throw ghoul::MissingCaseException();
             }
             break;
         case Event::Type::PlanetEclipsed:
@@ -528,12 +521,11 @@ EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
 
 EventCameraTransition::EventCameraTransition(const Camera* camera_,
                                              const SceneGraphNode* node_,
-                                             Location before_, Location after_)
+                                             Transition transition_)
     : Event(Type)
     , camera(camera_)
     , node(temporaryString(node_->identifier()))
-    , before(before_)
-    , after(after_)
+    , transition(transition_)
 {}
 
 EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,

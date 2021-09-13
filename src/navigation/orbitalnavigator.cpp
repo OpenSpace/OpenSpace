@@ -762,8 +762,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             if (!_anchorNode->onExitAction().empty()) {
                 ghoul::Dictionary dict;
                 dict.setValue("Node", _anchorNode->identifier());
-                dict.setValue("Before", "Approach"s);
-                dict.setValue("After", "Outside"s);
+                dict.setValue("Transition", "Exiting"s);
                 for (const std::string& action : _anchorNode->onExitAction()) {
                     global::actionManager->triggerAction(action, dict);
                 }
@@ -772,8 +771,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             global::eventEngine->publishEvent<events::EventCameraTransition>(
                 _camera,
                 _anchorNode,
-                events::EventCameraTransition::Location::ApproachSphere,
-                events::EventCameraTransition::Location::Outside
+                events::EventCameraTransition::Transition::Exiting
             );
         }
         else if (currDistance < d * (rf - InteractionHystersis)) {
@@ -784,8 +782,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             if (!_anchorNode->onReachAction().empty()) {
                 ghoul::Dictionary dict;
                 dict.setValue("Node", _anchorNode->identifier());
-                dict.setValue("Before", "Approach"s);
-                dict.setValue("After", "ReachedSphere"s);
+                dict.setValue("Transition", "Reaching"s);
                 for (const std::string& action : _anchorNode->onReachAction()) {
                     global::actionManager->triggerAction(action, dict);
                 }
@@ -794,8 +791,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             global::eventEngine->publishEvent<events::EventCameraTransition>(
                 _camera,
                 _anchorNode,
-                events::EventCameraTransition::Location::ApproachSphere,
-                events::EventCameraTransition::Location::ReachedSphere
+                events::EventCameraTransition::Transition::Reaching
             );
         }
     }
@@ -804,12 +800,11 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _inAnchorReachSphere = false;
         _inAnchorApproachSphere = true;
 
-        if (!_anchorNode->onReachAction().empty()) {
+        if (!_anchorNode->onRecedeAction().empty()) {
             ghoul::Dictionary dict;
             dict.setValue("Node", _anchorNode->identifier());
-            dict.setValue("Before", "ReachedSphere"s);
-            dict.setValue("After", "ApproachSphere"s);
-            for (const std::string& action : _anchorNode->onReachAction()) {
+            dict.setValue("Transition", "Receding"s);
+            for (const std::string& action : _anchorNode->onRecedeAction()) {
                 global::actionManager->triggerAction(action, dict);
             }
         }
@@ -817,8 +812,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         global::eventEngine->publishEvent<events::EventCameraTransition>(
             _camera,
             _anchorNode,
-            events::EventCameraTransition::Location::ReachedSphere,
-            events::EventCameraTransition::Location::ApproachSphere
+            events::EventCameraTransition::Transition::Receding
         );
     }
     else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
@@ -830,8 +824,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         if (!_anchorNode->onApproachAction().empty()) {
             ghoul::Dictionary dict;
             dict.setValue("Node", _anchorNode->identifier());
-            dict.setValue("Before", "Outside"s);
-            dict.setValue("After", "ApproachSphere"s);
+            dict.setValue("Transition", "Approaching"s);
             for (const std::string& action : _anchorNode->onApproachAction()) {
                 global::actionManager->triggerAction(action, dict);
             }
@@ -840,8 +833,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         global::eventEngine->publishEvent<events::EventCameraTransition>(
             _camera,
             _anchorNode,
-            events::EventCameraTransition::Location::Outside,
-            events::EventCameraTransition::Location::ApproachSphere
+            events::EventCameraTransition::Transition::Approaching
         );
     }
 }

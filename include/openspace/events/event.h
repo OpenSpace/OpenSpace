@@ -222,32 +222,32 @@ Diagram of events for a camera moving from right-to-left. Interaction sphere is 
       
 (                       (           O          )                       )
 ^                       ^                      ^                       ^
-Before: ApproachSphere  Before: ReachedSphere  Before: ApproachSphere  Before: Outside
-After: Outside          After: ApproachSphere  After: ReachedSphere    After: ApproachSphere
+Exiting                 Receding               Reaching                Approaching
 ```
  *
  * \param Node The name of the node the camera is transitioning relative to. Currently is
  *        always the same as the camera's focus node
- * \param Before The name of the area the camera was in before the transition; is one of
- *        `Outside`, `ApproachSphere`, or `ReachedSphere` \
+ * \param Transition The transition type that the camera just finished; is one of 
+ *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
  * \param After The name of the area the camera is in after the transition; is one of
  *        `Outside`, `ApproachSphere`, or `ReachedSphere`
  */
 struct EventCameraTransition : public Event {
     static const Type Type = Event::Type::CameraTransition;
 
-    enum class Location {
-        Outside,
-        ApproachSphere,
-        ReachedSphere
+    enum class Transition {
+        Approaching,
+        Reaching,
+        Receding,
+        Exiting
     };
+
     EventCameraTransition(const Camera* camera_, const SceneGraphNode* node_,
-        Location before_, Location after_);
+        Transition transition_);
 
     const Camera* camera = nullptr;
     const tstring node;
-    const Location before;
-    const Location after;
+    const Transition transition;
 };
 
 
