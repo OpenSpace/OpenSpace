@@ -370,8 +370,8 @@ void TimeQuantizer::setResolution(const std::string& resolutionString) {
 }
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
-    //If monthly time resolution then restrict to 28 days so every month is consistent
-    unsigned int dayUpperLimit;
+    // If monthly time resolution then restrict to 28 days so every month is consistent
+    int dayUpperLimit;
     std::string helpfulDescription = "the selected month";
     if (_resolutionUnit == 'M') {
         dayUpperLimit = 28;
@@ -631,7 +631,6 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
     const double delta = endSeconds - startSeconds;
-
     ghoul_assert(
         static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
         "Quantization error"

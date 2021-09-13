@@ -22,36 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+namespace openspace::luascriptfunctions {
 
-#include <openspace/util/openspacemodule.h>
+/**
+ * \ingroup LuaScripts
+ * addDashboardItemToScreenSpace(string, table):
+ */
+int addDashboardItemToScreenSpace(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
+    auto [name, d] = ghoul::lua::values<std::string, ghoul::Dictionary>(L);
 
-namespace openspace {
+    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
+    if (!ssr) {
+        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
+    }
 
-class SyncModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Sync";
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
+    if (!dash) {
+        return ghoul::lua::luaError(
+            L,
+            "Provided name is a ScreenSpace item but not a dashboard"
+        );
+    }
 
-    SyncModule();
+    dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+    return 0;
+}
 
-    std::string synchronizationRoot() const;
+/**
+ * \ingroup LuaScripts
+ * removeDashboardItemsFromScreenSpace(string):
+ */
+int removeDashboardItemsFromScreenSpace(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
+    const std::string name = ghoul::lua::value<std::string>(L);
 
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
+    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
+    if (!ssr) {
+        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
+    }
 
-    std::vector<documentation::Documentation> documentations() const override;
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
+    if (!dash) {
+        return ghoul::lua::luaError(
+            L,
+            "Provided name is a ScreenSpace item but not a dashboard"
+        );
+    }
 
-    scripting::LuaLibrary luaLibrary() const override;
+    dash->dashboard().clearDashboardItems();
+    return 0;
+}
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-
-private:
-    std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+} // namespace openspace::luascriptfunctions

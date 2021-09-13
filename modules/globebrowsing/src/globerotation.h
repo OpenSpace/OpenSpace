@@ -22,36 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/scene/rotation.h>
 
-namespace openspace {
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-class SyncModule : public OpenSpaceModule {
+namespace openspace::globebrowsing {
+
+class RenderableGlobe;
+
+class GlobeRotation : public Rotation {
 public:
-    constexpr static const char* Name = "Sync";
+    GlobeRotation(const ghoul::Dictionary& dictionary);
 
-    SyncModule();
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
-    std::string synchronizationRoot() const;
-
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
-
-    std::vector<documentation::Documentation> documentations() const override;
-
-    scripting::LuaLibrary luaLibrary() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
+    void findGlobe();
+    void setUpdateVariables();
+    glm::vec3 computeSurfacePosition(double latitude, double longitude) const;
+
+    properties::StringProperty _globe;
+    properties::DoubleProperty _latitude;
+    properties::DoubleProperty _longitude;
+    properties::DoubleProperty _angle;
+    properties::BoolProperty _useHeightmap;
+
+    RenderableGlobe* _globeNode = nullptr;
+
+    mutable bool _matrixIsDirty = true;
+    mutable glm::dmat3 _matrix = glm::dmat3(0.0);
 };
 
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEROTATION___H__

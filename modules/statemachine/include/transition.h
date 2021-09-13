@@ -51,4 +51,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
+#endif // __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__

@@ -33,7 +33,7 @@ class QListWidget;
 class QLineEdit;
 class QPushButton;
 
-class DeltaTimesDialog : public QDialog {
+class DeltaTimesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

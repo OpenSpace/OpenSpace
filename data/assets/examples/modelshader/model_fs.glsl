@@ -22,36 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+#include "fragment.glsl"
 
-#include <openspace/util/openspacemodule.h>
+in vec2 vs_st;
+in vec3 vs_normalViewSpace;
+in vec4 vs_positionCameraSpace;
+in float vs_screenSpaceDepth;
+in mat3 TBN;
 
-namespace openspace {
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
 
-class SyncModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Sync";
+uniform bool performShading = true;
+uniform bool use_forced_color = false;
+uniform bool has_texture_diffuse;
+uniform bool has_texture_normal;
+uniform bool has_texture_specular;
+uniform bool has_color_specular;
 
-    SyncModule();
+uniform bool opacityBlending = false;
 
-    std::string synchronizationRoot() const;
+uniform sampler2D texture_diffuse;
+uniform sampler2D texture_normal;
+uniform sampler2D texture_specular;
 
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
+uniform vec3 color_diffuse;
+uniform vec3 color_specular;
 
-    std::vector<documentation::Documentation> documentations() const override;
+uniform int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
 
-    scripting::LuaLibrary luaLibrary() const override;
+uniform float opacity = 1.0;
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+Fragment getFragment() {
+  Fragment frag;
 
-private:
-    std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___SYNCMODULE___H__
+  if (has_texture_normal) {
+    vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
+    normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
+    frag.color.rgb = normalize(TBN * normalAlbedo);
+  }
+  else {
+    frag.color.rgb = normalize(vs_normalViewSpace);
+  }
+  frag.color.a = 1.0;
+  frag.gPosition      = vs_positionCameraSpace;
+  frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+  frag.disableLDR2HDR = true;
+  return frag;
+}

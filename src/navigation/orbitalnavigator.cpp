@@ -310,7 +310,8 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
     addProperty(apply);
     chosenBehavior.addOptions({
         { IdleBehavior::Behavior::Orbit, "Orbit" },
-        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" }
+        { IdleBehavior::Behavior::OrbitAtConstantLat, "OrbitAtConstantLatitude" },
+        { IdleBehavior::Behavior::OrbitAroundUp, "OrbitAroundUp" }
     });
     chosenBehavior = IdleBehavior::Behavior::Orbit;
     addProperty(chosenBehavior);
@@ -572,7 +573,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Calculate a position handle based on the camera position in world space
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
         // Use the interaction sphere to get an approximate distance to the node surface
-        double nodeRadius = static_cast<double>(_anchorNode->interactionSphere());
+        double nodeRadius = _anchorNode->interactionSphere();
         double distFromCameraToFocus =
             glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
@@ -1614,9 +1615,21 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         case IdleBehavior::Behavior::Orbit:
             orbitAnchor(deltaTime, position, globalRotation, speedScale);
             break;
-        case IdleBehavior::Behavior::OrbitAtConstantLat:
-            orbitAtConstantLatitude(deltaTime, position, globalRotation, speedScale);
+        case IdleBehavior::Behavior::OrbitAtConstantLat: {
+            // Assume that "north" coincides with the local z-direction
+            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own 
+            // north/up, so that we can query this information rather than assuming it. 
+            // The we could also combine this idle behavior with the next
+            const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+            orbitAroundAxis(north, deltaTime, position, globalRotation, speedScale);
             break;
+        }
+        case IdleBehavior::Behavior::OrbitAroundUp: {
+            // Assume that "up" coincides with the local y-direction
+            const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
+            orbitAroundAxis(up, deltaTime, position, globalRotation, speedScale);
+            break;
+        }
         default:
             throw ghoul::MissingCaseException();
     }
@@ -1645,24 +1658,19 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
     position += rotationDiffVec3;
 }
 
-void OrbitalNavigator::orbitAtConstantLatitude(double deltaTime, glm::dvec3& position,
-                                               glm::dquat& globalRotation,
-                                               double speedScale)
+void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime, 
+                                       glm::dvec3& position, glm::dquat& globalRotation,
+                                       double speedScale)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
+    const glm::dvec3 axisInWorldCoords = 
+        glm::dmat3(modelTransform) * glm::normalize(axis);
 
-    // Assume north coincides with the local z-direction
-    // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own north/up, so
-    // that we can query this information rather than assuming it
-    const glm::dvec3 northInWorldCoords =
-        glm::dmat3(modelTransform) * glm::dvec3(0.0, 0.0, 1.0);
-
-    // Compute rotation around the north axis to be applied
+    // Compute rotation to be applied around the axis
     double angle = deltaTime * speedScale;
-    const glm::dquat spinRotation =
-        glm::angleAxis(angle, glm::normalize(northInWorldCoords));
+    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldCoords);
 
     // Rotate the position vector from the center to camera and update position
     const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();

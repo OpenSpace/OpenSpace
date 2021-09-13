@@ -43,8 +43,8 @@ struct AABB3 {
 
 
 struct Geodetic2 {
-    double lat = 0.0;
-    double lon = 0.0;
+    double lat = 0.0; // in radians
+    double lon = 0.0; // in radians
 };
 
 

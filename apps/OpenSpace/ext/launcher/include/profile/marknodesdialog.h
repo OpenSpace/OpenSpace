@@ -32,7 +32,7 @@ class QListWidget;
 class QListWidgetItem;
 class QPushButton;
 
-class MarkNodesDialog : public QDialog {
+class MarkNodesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

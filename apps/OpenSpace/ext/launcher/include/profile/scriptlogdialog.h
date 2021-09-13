@@ -28,7 +28,7 @@
 #include <QDialog>
 #include <QListWidget>
 
-class ScriptlogDialog : public QDialog {
+class ScriptlogDialog final : public QDialog {
 Q_OBJECT
 public:
     /**

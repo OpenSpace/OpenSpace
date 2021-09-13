@@ -249,6 +249,14 @@ namespace {
 
         // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
         std::optional<bool> enableOpacityBlending;
+
+        // The path to the vertex shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> vertexShader;
+
+        // The path to the fragment shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> fragmentShader;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -335,7 +343,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     distanceUnit = DistanceUnit::Kilometer;
                     break;
 
-                // Weired units
+                // Weird units
                 case Parameters::ScaleUnit::Thou:
                     distanceUnit = DistanceUnit::Thou;
                     break;
@@ -472,6 +480,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
     _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
 
+    if (p.vertexShader.has_value()) {
+        _vertexShaderPath = p.vertexShader->string();
+    }
+    if (p.fragmentShader.has_value()) {
+        _fragmentShaderPath = p.fragmentShader->string();
+    }
+
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
@@ -560,15 +575,32 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/model_fs.glsl")
-            );
+        program,
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                _vertexShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
+                _vertexShaderPath;
+            std::filesystem::path fs =
+                _fragmentShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
+                _fragmentShaderPath;
+
+            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
         }
+    );
+    // We don't really know what kind of shader the user provides us with, so we can't
+    // make the assumption that we are going to use all uniforms
+    _program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
@@ -581,8 +613,15 @@ void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        program,
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
