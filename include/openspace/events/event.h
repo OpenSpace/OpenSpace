@@ -229,8 +229,6 @@ Exiting                 Receding               Reaching                Approachi
  *        always the same as the camera's focus node
  * \param Transition The transition type that the camera just finished; is one of 
  *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
- * \param After The name of the area the camera is in after the transition; is one of
- *        `Outside`, `ApproachSphere`, or `ReachedSphere`
  */
 struct EventCameraTransition : public Event {
     static const Type Type = Event::Type::CameraTransition;
