@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/statemachine/include/statemachine.h>
+#include <memory>
 #include <optional>
 
 namespace openspace {
@@ -52,6 +53,13 @@ public:
     void transitionTo(const std::string& newState);
     bool canGoToState(const std::string& state) const;
 
+    /**
+     * Save the state machine to a file given by the name and optional directory.
+     * If no directory is given, the TEMP folder is used
+     */
+    void saveToFile(const std::string& fileName,
+        std::string directory = "${TEMPORARY}/") const;
+
     scripting::LuaLibrary luaLibrary() const override;
 
     std::vector<documentation::Documentation> documentations() const override;
@@ -62,4 +70,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINEMODULE___H__
+#endif // __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINEMODULE___H__

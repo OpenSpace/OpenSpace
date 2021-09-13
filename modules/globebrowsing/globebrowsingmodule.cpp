@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
@@ -37,8 +38,9 @@
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -273,6 +275,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fTranslation, "Translation factory was not created");
     fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
 
+    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul_assert(fRotation, "Rotation factory was not created");
+    fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
+
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
@@ -396,6 +402,22 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "negative. The optional fourh argument is the altitude in meters. If no "
             "altitude is provided, the altitude will be kept as the current distance to "
             "the surface of the specified globe."
+        },
+        {
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            "flyToGeo", 
+            &globebrowsing::luascriptfunctions::flyToGeo,
+            {},
+            "[string], number, number, number [, bool, number]",
+            "Fly the camera to geographic coordinates of a globe, using the path "
+            "navigation system. The first (optional) argument is the identifier of a "
+            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
+            "current anchor will be used. The second and third argument is latitude and "
+            "longitude (degrees). The fourth argument is the altitude, in meters. The "
+            "last two optional arguments are: a bool specifying whether the up vector "
+            "at the target position should be set to the globe's North vector, and a "
+            "duration for the motion, in seconds. Either of the two can be left out."
         },
         {
             "getLocalPositionFromGeo",
@@ -599,7 +621,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
         Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
     );
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     state.anchor = globe.owner()->identifier();
     state.referenceFrame = globe.owner()->identifier();
     state.position = positionModelSpace;

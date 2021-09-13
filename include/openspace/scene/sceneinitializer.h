@@ -41,7 +41,7 @@ public:
     virtual bool isInitializing() const = 0;
 };
 
-class SingleThreadedSceneInitializer : public SceneInitializer {
+class SingleThreadedSceneInitializer final : public SceneInitializer {
 public:
     void initializeNode(SceneGraphNode* node) override;
     std::vector<SceneGraphNode*> takeInitializedNodes() override;
@@ -51,7 +51,7 @@ private:
     std::vector<SceneGraphNode*> _initializedNodes;
 };
 
-class MultiThreadedSceneInitializer : public SceneInitializer {
+class MultiThreadedSceneInitializer final : public SceneInitializer {
 public:
     MultiThreadedSceneInitializer(unsigned int nThreads);
 

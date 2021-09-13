@@ -22,66 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/shortcutmanager.h>
+#include <modules/imgui/include/guiactioncomponent.h>
 
+#include <modules/imgui/include/gui.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/lualibrary.h>
+#include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/glm.h>
-#include <sstream>
+#include <openspace/util/keys.h>
 
-#include "shortcutmanager_lua.inl"
+#include <modules/imgui/include/imgui_include.h>
 
-namespace openspace::interaction {
+namespace openspace::gui {
 
-void ShortcutManager::resetShortcuts() {
-    _shortcuts.clear();
-}
+GuiActionComponent::GuiActionComponent()
+    : GuiComponent("Shortcuts", "Shortcuts")
+{}
 
-void ShortcutManager::addShortcut(ShortcutInformation info) {
-    _shortcuts.push_back(std::move(info));
-}
+void GuiActionComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-const std::vector<ShortcutManager::ShortcutInformation>&
-ShortcutManager::shortcuts() const
-{
-    return _shortcuts;
-}
+    bool v = _isEnabled;
+    ImGui::Begin("Shortcuts", &v);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
-scripting::LuaLibrary ShortcutManager::luaLibrary() {
-    return {
-        "",
-        {
-            {
-                "clearShortcuts",
-                &luascriptfunctions::clearShortcuts,
-                {},
-                "",
-                "Clear all shortcuts in this scene"
-            },
-            {
-                "bindShortcut",
-                &luascriptfunctions::bindShortcut,
-                {},
-                "string, string [, string]",
-                "Binds a Lua script to a new shortcut that is executed both locally and "
-                "to be broadcast to clients if this is the host of a parallel session. "
-                "The first argument is a human-readable name for this shortcut, the "
-                "second argument is the Lua script that will be executed and the last "
-                "argument is a describtive text for the shortcut for tooltips, etc."
-            },
-            {
-                "bindShortcutLocal",
-                &luascriptfunctions::bindShortcutLocal,
-                {},
-                "string, string [, string]",
-                "Binds a Lua script to a new shortcut that is executed onlylocally. The "
-                "first argument is a human-readable name for this shortcut, the second "
-                "argument is the Lua script that will be executed and the last argument "
-                "is a describtive text for the shortcut for tooltips, etc."
-            }
+    using K = KeyWithModifier;
+    using V = std::string;
+    const std::multimap<K, V>& binds = global::keybindingManager->keyBindings();
+
+    std::set<std::string> boundActions;
+    CaptionText("Keybindings");
+    for (const std::pair<const K, V>& p : binds) {
+        boundActions.insert(p.second);
+        if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
+            global::actionManager->triggerAction(p.second, ghoul::Dictionary());
         }
-    };
+        ImGui::SameLine();
+
+        // Poor mans table layout
+        ImGui::SetCursorPosX(125.f);
+
+        const interaction::Action& a = global::actionManager->action(p.second);
+        ImGui::Text("%s", a.documentation.c_str());
+        if (!a.synchronization) {
+            ImGui::SameLine();
+            ImGui::Text("(%s)", "local");
+        }
+    }
+
+    CaptionText("Other Actions");
+    for (const interaction::Action& action : global::actionManager->actions()) {
+        // We only show all of the other actions that are not currently bound to keys here
+        if (boundActions.find(action.identifier) != boundActions.end()) {
+            continue;
+        }
+
+        if (ImGui::Button(action.identifier.c_str())) {
+            global::actionManager->triggerAction(action.command, ghoul::Dictionary());
+        }
+        ImGui::SameLine();
+
+        // Poor mans table layout
+        ImGui::SetCursorPosX(350.f);
+
+        ImGui::Text("%s", action.documentation.c_str());
+        if (!action.synchronization) {
+            ImGui::SameLine();
+            ImGui::Text("(%s)", "local");
+        }
+    }
 }
 
-} // namespace openspace::interaction
+} // namespace openspace::gui

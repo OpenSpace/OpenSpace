@@ -112,6 +112,7 @@ set(SOURCE_FILES
   rendering/renderabletrailorbit.cpp
   rendering/renderabletrailtrajectory.cpp
   rendering/screenspacedashboard.cpp
+  rendering/screenspacedashboard_lua.inl
   rendering/screenspaceframebuffer.cpp
   rendering/screenspaceimagelocal.cpp
   rendering/screenspaceimageonline.cpp

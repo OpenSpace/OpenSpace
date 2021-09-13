@@ -29,9 +29,9 @@
 
 namespace openspace::gui {
 
-class GuiShortcutsComponent : public GuiComponent {
+class GuiActionComponent : public GuiComponent {
 public:
-    GuiShortcutsComponent();
+    GuiActionComponent();
 
     void render() override;
 };

@@ -26,6 +26,7 @@
 
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
+#include <ghoul/fmt.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QEvent>
@@ -79,16 +80,15 @@ namespace {
     }
 } // namespace
 
-DeltaTimesDialog::DeltaTimesDialog(openspace::Profile& profile, QWidget *parent)
+DeltaTimesDialog::DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTimes)
     : QDialog(parent)
-    , _profile(profile)
+    , _deltaTimes(deltaTimes)
+    , _deltaTimesData(*_deltaTimes)
 {
     setWindowTitle("Simulation Time Increments");
     createWidgets();
 
-    _data = _profile.deltaTimes();
-
-    for (size_t d = 0; d < _data.size(); ++d) {
+    for (size_t d = 0; d < _deltaTimesData.size(); ++d) {
         std::string summary = createSummaryForDeltaTime(d, true);
         _listWidget->addItem(new QListWidgetItem(QString::fromStdString(summary)));
     }
@@ -203,7 +203,11 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
     }
 
     if (forListView) {
-        s += '\t' + std::to_string(_data.at(idx)) + '\t' + timeDescription(_data.at(idx));
+        s += fmt::format(
+            "\t{}\t{}",
+            std::to_string(_deltaTimesData.at(idx)),
+            timeDescription(_deltaTimesData.at(idx))
+        );
     }
     return s;
 }
@@ -212,16 +216,16 @@ void DeltaTimesDialog::listItemSelected() {
     QListWidgetItem *item = _listWidget->currentItem();
     int index = _listWidget->row(item);
 
-    if (index < (static_cast<int>(_data.size()) - 1)) {
+    if (index < (static_cast<int>(_deltaTimesData.size()) - 1)) {
         _listWidget->setCurrentRow(index);
     }
 
-    if (!_data.empty()) {
-        if (_data.at(index) == 0) {
+    if (!_deltaTimesData.empty()) {
+        if (_deltaTimesData.at(index) == 0) {
             _seconds->clear();
         }
         else {
-            _seconds->setText(QString::number(_data.at(index)));
+            _seconds->setText(QString::number(_deltaTimesData.at(index)));
         }
     }
     _editModeNewItem = true;
@@ -230,8 +234,8 @@ void DeltaTimesDialog::listItemSelected() {
 
 void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string color) {
     std::string labelS = "Set Simulation Time Increment for key";
-    if (index >= static_cast<int>(_data.size())) {
-        index = static_cast<int>(_data.size()) - 1;
+    if (index >= static_cast<int>(_deltaTimesData.size())) {
+        index = static_cast<int>(_deltaTimesData.size()) - 1;
     }
     if (editMode) {
         labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
@@ -261,7 +265,7 @@ bool DeltaTimesDialog::isLineEmpty(int index) {
     if (!_listWidget->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if (!_data.empty() && (_data.at(0) != 0)) {
+    if (!_deltaTimesData.empty() && (_deltaTimesData.at(0) != 0)) {
         isEmpty = false;
     }
     return isEmpty;
@@ -275,11 +279,11 @@ void DeltaTimesDialog::addDeltaTimeValue() {
         // Special case where list is "empty" but really has one line that is blank.
         // This is done because QListWidget does not seem to like having its sole
         // remaining item being removed.
-        _data.at(0) = 0;
+        _deltaTimesData.at(0) = 0;
         _listWidget->item(0)->setText(messageAddValue);
     }
-    else if (_data.size() < MaxNumberOfKeys) {
-        _data.push_back(0);
+    else if (_deltaTimesData.size() < MaxNumberOfKeys) {
+        _deltaTimesData.push_back(0);
         _listWidget->addItem(new QListWidgetItem(messageAddValue));
     }
     else {
@@ -294,8 +298,8 @@ void DeltaTimesDialog::saveDeltaTimeValue() {
     QListWidgetItem* item = _listWidget->currentItem();
     if (item != nullptr) {
         int index = _listWidget->row(item);
-        if (_data.size() > 0) {
-            _data.at(index) = _seconds->text().toDouble();
+        if (_deltaTimesData.size() > 0) {
+            _deltaTimesData.at(index) = _seconds->text().toDouble();
             std::string summary = createSummaryForDeltaTime(index, true);
             _listWidget->item(index)->setText(QString::fromStdString(summary));
             transitionEditMode(index, false);
@@ -307,7 +311,7 @@ void DeltaTimesDialog::saveDeltaTimeValue() {
 void DeltaTimesDialog::discardDeltaTimeValue() {
     listItemSelected();
     transitionEditMode(_listWidget->count() - 1, false);
-    if (_editModeNewItem && !_data.empty() && _data.back() == 0) {
+    if (_editModeNewItem && !_deltaTimesData.empty() && _deltaTimesData.back() == 0) {
         removeDeltaTimeValue();
     }
     _editModeNewItem = false;
@@ -316,13 +320,13 @@ void DeltaTimesDialog::discardDeltaTimeValue() {
 void DeltaTimesDialog::removeDeltaTimeValue() {
     if (_listWidget->count() > 0) {
         if (_listWidget->count() == 1) {
-            _data.at(0) = 0;
+            _deltaTimesData.at(0) = 0;
             _listWidget->item(0)->setText("");
         }
         else {
             delete _listWidget->takeItem(_listWidget->count() - 1);
-            if (!_data.empty()) {
-                _data.pop_back();
+            if (!_deltaTimesData.empty()) {
+                _deltaTimesData.pop_back();
             }
         }
     }
@@ -355,20 +359,20 @@ void DeltaTimesDialog::transitionEditMode(int index, bool state) {
 }
 
 void DeltaTimesDialog::parseSelections() {
-    if ((_data.size() == 1) && (_data.at(0) == 0)) {
-        _data.clear();
+    if ((_deltaTimesData.size() == 1) && (_deltaTimesData.at(0) == 0)) {
+        _deltaTimesData.clear();
     }
-    int finalNonzeroIndex = static_cast<int>(_data.size()) - 1;
+    int finalNonzeroIndex = static_cast<int>(_deltaTimesData.size()) - 1;
     for (; finalNonzeroIndex >= 0; --finalNonzeroIndex) {
-        if (_data.at(finalNonzeroIndex) != 0) {
+        if (_deltaTimesData.at(finalNonzeroIndex) != 0) {
             break;
         }
     }
     std::vector<double> tempDt;
     for (int i = 0; i < (finalNonzeroIndex + 1); ++i) {
-        tempDt.push_back(_data[i]);
+        tempDt.push_back(_deltaTimesData[i]);
     }
-    _profile.setDeltaTimes(tempDt);
+    *_deltaTimes = std::move(_deltaTimesData);
     accept();
 }
 

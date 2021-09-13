@@ -25,7 +25,6 @@
 #include "profile/cameradialog.h"
 
 #include "profile/line.h"
-#include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QFrame>
@@ -56,15 +55,16 @@ namespace {
     }
 } // namespace
 
-CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
+CameraDialog::CameraDialog(QWidget* parent,
+                           std::optional<openspace::Profile::CameraType>* camera)
     : QDialog(parent)
-    , _profile(profile)
+    , _camera(camera)
 {
     setWindowTitle("Set Camera Position");
     createWidgets();
 
-    if (_profile.camera().has_value()) {
-        openspace::Profile::CameraType type = *_profile.camera();
+    if (_camera->has_value()) {
+        const openspace::Profile::CameraType& type = **_camera;
         std::visit(overloaded {
             [this](const openspace::Profile::CameraNavState& nav) {
                 _tabWidget->setCurrentIndex(CameraTypeNav);
@@ -406,7 +406,7 @@ void CameraDialog::approved() {
         else {
             nav.pitch = std::nullopt;
         }
-        _profile.setCamera(nav);
+        *_camera = std::move(nav);
     }
     else if (_tabWidget->currentIndex() == CameraTypeGeo) {
         openspace::Profile::CameraGoToGeo geo;
@@ -416,7 +416,7 @@ void CameraDialog::approved() {
         if (!_geoState.altitude->text().isEmpty()) {
             geo.altitude = _geoState.altitude->text().toDouble();
         }
-        _profile.setCamera(geo);
+        *_camera = std::move(geo);
     }
 
     accept();

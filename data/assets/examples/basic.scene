@@ -1,5 +1,4 @@
 local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 local debugHelper = asset.require('util/debug_helper')
 

@@ -22,39 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SHORTCUTMANAGER___H__
-#define __OPENSPACE_CORE___SHORTCUTMANAGER___H__
+#include <openspace/util/collisionhelper.h>
 
-#include <ghoul/misc/boolean.h>
-#include <string>
-#include <vector>
+namespace openspace::collision {
 
-namespace openspace::scripting { struct LuaLibrary; }
+// Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 center,
+                            double r, glm::dvec3& intersectionPoint)
+{
+    double a, b, c;
+    const glm::dvec3 diffp = p2 - p1;
 
-namespace openspace::interaction {
+    a = diffp.x * diffp.x + diffp.y * diffp.y + diffp.z * diffp.z;
+    b = 2.0 * (diffp.x * (p1.x - center.x) + diffp.y * (p1.y - center.y) +
+        diffp.z * (p1.z - center.z));
+    c = center.x * center.x + center.y * center.y + center.z * center.z;
+    c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+    c -= 2.0 * (center.x * p1.x + center.y * p1.y + center.z * p1.z);
+    c -= r * r;
 
-class ShortcutManager {
-public:
-    BooleanType(IsSynchronized);
+    double intersectionTest = b * b - 4.0 * a * c;
 
-    struct ShortcutInformation {
-        std::string name;
-        std::string script;
-        IsSynchronized synchronization;
-        std::string documentation;
-        std::string guiPath;
-    };
+    // No intersection
+    if (std::abs(a) < 0 || intersectionTest < 0.0) {
+        return false;
+    }
+    // Intersection
+    else {
+        // Only care about the first intersection point if we have two
+        const double t = (-b - std::sqrt(intersectionTest)) / (2.0 * a);
 
-    void resetShortcuts();
-    void addShortcut(ShortcutInformation info);
-    const std::vector<ShortcutInformation>& shortcuts() const;
+        // Check if utside of line segment between p1 and p2
+        if (t <= 0 || t >= 1.0) {
+            return false;
+        }
 
-    static scripting::LuaLibrary luaLibrary();
+        intersectionPoint = p1 + t * diffp;
+        return true;
+    }
+}
 
-private:
-    std::vector<ShortcutInformation> _shortcuts;
-};
+bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
+    const glm::dvec3 v = c - p;
+    const double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+    const double squaredRadius = r * r;
 
-} // namespace openspace::interaction
+    return (squaredDistance <= squaredRadius);
+}
 
-#endif // __OPENSPACE_CORE___SHORTCUTMANAGER___H__
+}  // namespace openspace::collision

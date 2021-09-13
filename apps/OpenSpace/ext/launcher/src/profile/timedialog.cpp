@@ -37,20 +37,20 @@
 
 using namespace openspace;
 
-TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
+TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time)
     : QDialog(parent)
-    , _profile(profile)
+    , _time(time)
 {
     setWindowTitle("Time");
     createWidgets();
 
     QStringList types = { "Absolute", "Relative" };
     _typeCombo->addItems(types);
-    if (_profile.time().has_value()) {
-        _data = *_profile.time();
-        if (_data.type == Profile::Time::Type::Relative) {
-            if (_data.value == "") {
-                _data.value = "now";
+    if (_time->has_value()) {
+        _timeData = **_time;
+        if (_timeData.type == Profile::Time::Type::Relative) {
+            if (_timeData.value == "") {
+                _timeData.value = "now";
             }
             _relativeEdit->setSelection(0, _relativeEdit->text().length());
         }
@@ -59,11 +59,11 @@ TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
         }
     }
     else {
-        _data.type = Profile::Time::Type::Relative;
-        _data.value = "now";
+        _timeData.type = Profile::Time::Type::Relative;
+        _timeData.value = "now";
     }
-    _initializedAsAbsolute = (_data.type == Profile::Time::Type::Absolute);
-    enableAccordingToType(static_cast<int>(_data.type));
+    _initializedAsAbsolute = (_timeData.type == Profile::Time::Type::Absolute);
+    enableAccordingToType(static_cast<int>(_timeData.type));
 }
 
 void TimeDialog::createWidgets() {
@@ -117,15 +117,15 @@ void TimeDialog::enableAccordingToType(int idx) {
             _relativeEdit->setText("now");
         }
         else {
-            _relativeEdit->setText(QString::fromStdString(_data.value));
+            _relativeEdit->setText(QString::fromStdString(_timeData.value));
         }
         _relativeEdit->setFocus(Qt::OtherFocusReason);
     }
     else {
         _relativeEdit->setText("<font color='gray'>Relative Time:</font>");
-        size_t tIdx = _data.value.find_first_of('T', 0);
-        QString importDate = QString::fromStdString(_data.value.substr(0, tIdx));
-        QString importTime = QString::fromStdString(_data.value.substr(tIdx + 1));
+        size_t tIdx = _timeData.value.find_first_of('T', 0);
+        QString importDate = QString::fromStdString(_timeData.value.substr(0, tIdx));
+        QString importTime = QString::fromStdString(_timeData.value.substr(tIdx + 1));
         _absoluteEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
         _absoluteEdit->setTime(QTime::fromString(importTime));
         _relativeEdit->clear();
@@ -144,13 +144,13 @@ void TimeDialog::approved() {
     constexpr const int Relative = static_cast<int>(Profile::Time::Type::Relative);
     if (_typeCombo->currentIndex() == Relative) {
         if (_relativeEdit->text().isEmpty()) {
-            _profile.clearTime();
+            *_time = std::nullopt;
         }
         else {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
             t.value = _relativeEdit->text().toStdString();
-            _profile.setTime(t);
+            *_time = t;
         }
     }
     else {
@@ -161,7 +161,7 @@ void TimeDialog::approved() {
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()
         );
-        _profile.setTime(t);
+        *_time = t;
     }
     accept();
 }

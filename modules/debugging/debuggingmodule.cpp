@@ -27,9 +27,12 @@
 #include <modules/debugging/rendering/renderabledebugplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
+#include "debuggingmodule_lua.inl"
 
 namespace openspace {
 
@@ -48,5 +51,57 @@ std::vector<documentation::Documentation> DebuggingModule::documentations() cons
     };
 }
 
+scripting::LuaLibrary DebuggingModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "debugging";
+    res.functions = {
+        {
+            "renderCameraPath",
+            &luascriptfunctions::renderCameraPath,
+            {},
+            "[number, bool, number]",
+            "Render the current camera path from the path navigation system. The "
+            "first optional argument is the number of samples to take along the path "
+            "(defaults to 100). If a second optional argument is included and set to "
+            "true, a line indicating the camera view direction along the path will "
+            "also be rendered. This can be useful when debugging camera orientations. "
+            "Finally, the third optional argument can be used to set the length "
+            "(in meter) of the view direction lines"
+        },
+        {
+            "removeRenderedCameraPath",
+            &luascriptfunctions::removeRenderedCameraPath,
+            {},
+            "",
+            "Removes the rendered camera path, if there is one"
+        },
+        {
+            "renderPathControlPoints",
+            &luascriptfunctions::renderPathControlPoints,
+            {},
+            "[number]",
+            "Render the control points for the camera path spline as spheres. The "
+            "optional argument can be used to set the radius of the created spheres. "
+        },
+        {
+            "removePathControlPoints",
+            &luascriptfunctions::removePathControlPoints,
+            {},
+            "",
+            "Removes the rendered control points"
+        },
+        {
+            "addCartesianAxes",
+            &luascriptfunctions::addCartesianAxes,
+            {},
+            "string, [number]",
+            "Adds a set of Cartesian axes to the scene graph node identified by the "
+            "first string, to illustrate its local coordinate system. The second "
+            "(optional) argument is a scale value, in meters."
+        }
+    };
+
+    return res;
+}
 
 } // namespace openspace

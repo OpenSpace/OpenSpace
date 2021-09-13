@@ -33,6 +33,7 @@
 #include <openspace/interaction/mousecamerastates.h>
 #include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -46,6 +47,7 @@
 namespace openspace {
     class SceneGraphNode;
     class Camera;
+    struct CameraPose;
     struct SurfacePositionHandle;
 } // namespace
 
@@ -59,7 +61,15 @@ public:
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
+    void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
+
+    /*
+     * This function should be called on every camera interaction: for example when
+     * navigating using an input device, changing the focus node or starting a path or
+     * a session recording playback
+     */
+    void updateOnCameraInteraction();
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -104,11 +114,6 @@ private:
         glm::dquat globalRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     };
 
-    struct CameraPose {
-        glm::dvec3 position = glm::dvec3(0.0);
-        glm::dquat rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-    };
-
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
     struct Friction : public properties::PropertyOwner {
@@ -129,12 +134,12 @@ private:
 
     Friction _friction;
 
-    // Anchor: Node to follow and orbit.
+    // Anchor: Node to follow and orbit
     properties::StringProperty _anchor;
 
     // Aim: Node to look at (when camera direction is reset),
     // Empty string means same as anchor.
-    // If these are the same node we call it the `focus` node.
+    // If these are the same node we call it the `focus` node
     properties::StringProperty _aim;
 
     // Reset camera direction to the anchor node.
@@ -144,11 +149,17 @@ private:
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-    properties::FloatProperty _flightDestinationDistance;
-    properties::DoubleProperty _flightDestinationFactor;
-    properties::BoolProperty _applyLinearFlight;
 
-    properties::FloatProperty _velocitySensitivity;
+    struct LinearFlight : public properties::PropertyOwner {
+        LinearFlight();
+
+        properties::BoolProperty apply;
+        properties::FloatProperty destinationDistance;
+        properties::DoubleProperty destinationFactor;
+        properties::FloatProperty velocitySensitivity;
+    };
+    LinearFlight _linearFlight;
+
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
@@ -182,6 +193,25 @@ private:
     Interpolator<double> _retargetAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
+    Interpolator<double> _idleBehaviorDampenInterpolator;
+    bool _invertIdleBehaviorInterpolation = false;
+
+    struct IdleBehavior : public properties::PropertyOwner {
+        enum Behavior {
+            Orbit = 0,
+            OrbitAtConstantLat,
+            OrbitAroundUp
+        };
+
+        IdleBehavior();
+
+        properties::BoolProperty apply;
+        properties::OptionProperty chosenBehavior;
+        properties::FloatProperty speedScale;
+        properties::BoolProperty abortOnCameraInteraction;
+        properties::FloatProperty dampenInterpolationTime;
+    };
+    IdleBehavior _idleBehavior;
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -197,7 +227,7 @@ private:
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
-     * camera points towards the reference node's origin.
+     * camera points towards the reference position.
      * The local rotation defines the differential from the global to the current total
      * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
      */
@@ -318,7 +348,7 @@ private:
     /**
      * Interpolates between rotationDiff and a 0 rotation.
      */
-    glm::dquat interpolateRotationDifferential(double deltaTime, double interpolationTime,
+    glm::dquat interpolateRotationDifferential(double deltaTime,
         const glm::dvec3 cameraPosition, const glm::dquat& rotationDiff);
 
     /**
@@ -332,6 +362,45 @@ private:
      */
     SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
+
+    /**
+     * Apply the currently selected idle behavior to the position and rotations
+     */
+    void applyIdleBehavior(double deltaTime, glm::dvec3& position,
+        glm::dquat& localRotation, glm::dquat& globalRotation);
+
+    /**
+     * Orbit the current anchor node, in a right-bound orbit, by updating the position
+     * and global rotation of the camera. 
+     * 
+     * Used for IdleBehavior::Behavior::Orbit
+     * 
+     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param position The position of the camera. Will be changed by the function
+     * \param globalRotation The camera's global rotation. Will be changed by the function
+     * \param speedScale A speed scale that controls the speed of the motion
+     */
+    void orbitAnchor(double deltaTime, glm::dvec3& position,
+        glm::dquat& globalRotation, double speedScale);
+
+    /**
+     * Orbit the current anchor node, by adding a rotation around the given axis. For 
+     * example, when the axis is the north vector, the camera will stay on the current 
+     * latitude band. Note that this creates a rolling motion if the camera's forward 
+     * vector coincides with the axis, and should be used with care. 
+     * 
+     * Used for:
+     * IdleBehavior::Behavior::OrbitAtConstantLat ( axis = north = z-axis ) and
+     * IdleBehavior::Behavior::OrbitAroundUp ( axis = up = y-axis )
+     * 
+     * \param axis The axis to arbit around, given in model coordinates of the anchor
+     * \param deltaTime The time step to use for the motion. Controls the rotation angle
+     * \param position The position of the camera. Will be changed by the function
+     * \param globalRotation The camera's global rotation. Will be changed by the function
+     * \param speedScale A speed scale that controls the speed of the motion
+     */
+    void orbitAroundAxis(const glm::dvec3 axis, double deltaTime, glm::dvec3& position,
+        glm::dquat& globalRotation, double speedScale);
 };
 
 } // namespace openspace::interaction

@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <openspace/openspace.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
@@ -38,8 +39,8 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -60,7 +61,6 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
@@ -334,7 +334,7 @@ void OpenSpaceEngine::initialize() {
             // Then save the profile to a scene so that we can load it with the
             // existing infrastructure
             std::ofstream scene(outputAsset);
-            std::string sceneContent = global::profile->convertToScene();
+            std::string sceneContent = convertToScene(*global::profile);
             scene << sceneContent;
 
             // Set asset name to that of the profile because a new scene file will be
@@ -1103,9 +1103,9 @@ void OpenSpaceEngine::preSynchronization() {
 
     if (_hasScheduledAssetLoading) {
         LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
-        global::profile->setIgnoreUpdates(true);
+        global::profile->ignoreUpdates = true;
         loadSingleAsset(_scheduledAssetPathToLoad);
-        global::profile->setIgnoreUpdates(false);
+        global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();

@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
@@ -464,16 +465,19 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
-        global::keybindingManager->bindKeyLocal(
-            key,
-            mod,
-            fmt::format("openspace.time.interpolateDeltaTime({})", s),
-            fmt::format(
-                "Setting the simulation speed to {} seconds per realtime second", s
-            ),
-            fmt::format("Set Simulation Speed: {}", s),
-            DeltaTimeStepsKeybindsGuiPath
+
+        std::string identifier = fmt::format("core.time.delta_time.{}", s);
+        interaction::Action action;
+        action.identifier = identifier;
+        action.command = fmt::format("openspace.time.interpolateDeltaTime({})", s);
+        action.documentation = fmt::format(
+            "Setting the simulation speed to {} seconds per realtime second", s
         );
+        action.name = fmt::format("Set Simulation Speed: {}", s);
+        action.guiPath = DeltaTimeStepsKeybindsGuiPath;
+        action.synchronization = interaction::Action::IsSynchronized::No;
+        global::actionManager->registerAction(std::move(action));
+        global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
     };
 
@@ -486,7 +490,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         const Key key = Keys[i % nKeys];
         const double deltaTimeStep = steps[i];
 
-        KeyModifier modifier = KeyModifier::NoModifier;
+        KeyModifier modifier = KeyModifier::None;
         if (i > nKeys - 1) {
             modifier = KeyModifier::Shift;
         }
@@ -519,11 +523,11 @@ void TimeManager::clearDeltaTimesKeybindings() {
         if (bindings.size() > 1) {
             std::string names;
             for (auto& b : bindings) {
-                names += fmt::format("'{}' ", b.second.name);
+                names += fmt::format("'{}' ", b.second);
             }
             LWARNING(fmt::format(
                 "Updating keybindings for new delta time steps: More than one action "
-                "was bound to key '{}'. The following keybindings are removed: {}",
+                "was bound to key '{}'. The following actions are removed: {}",
                 ghoul::to_string(kb), names
             ));
         }

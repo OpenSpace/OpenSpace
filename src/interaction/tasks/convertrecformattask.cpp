@@ -105,21 +105,19 @@ void ConvertRecFormatTask::convert() {
         expectedFileExtension_out = SessionRecording::FileExtensionBinary;
     }
 
-    if (std::filesystem::path(_inFilePath).extension() != expectedFileExtension_in) {
+    if (_inFilePath.extension() != expectedFileExtension_in) {
         LWARNING(fmt::format(
             "Input filename doesn't have expected {} format file extension", currentFormat
         ));
     }
-    if (std::filesystem::path(_outFilePath).extension() == expectedFileExtension_in) {
+    if (_outFilePath.extension() == expectedFileExtension_in) {
         LERROR(fmt::format(
             "Output filename has {} file extension, but is conversion from {}",
             currentFormat, currentFormat
         ));
         return;
     }
-    else if (std::filesystem::path(_outFilePath).extension() !=
-             expectedFileExtension_out)
-    {
+    else if (_outFilePath.extension() != expectedFileExtension_out) {
         _outFilePath += expectedFileExtension_out;
     }
 

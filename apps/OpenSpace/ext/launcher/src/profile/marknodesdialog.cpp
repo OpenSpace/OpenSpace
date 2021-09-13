@@ -35,10 +35,10 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
+MarkNodesDialog::MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes)
     : QDialog(parent)
-    , _profile(profile)
-    , _data(_profile.markNodes())
+    , _markedNodes(markedNodes)
+    , _markedNodesData(*_markedNodes)
 {
     setWindowTitle("Mark Interesting Nodes");
     createWidgets();
@@ -55,9 +55,9 @@ void MarkNodesDialog::createWidgets() {
     _list->setMovement(QListView::Free);
     _list->setResizeMode(QListView::Adjust);
 
-    for (size_t i = 0; i < _data.size(); ++i) {
+    for (size_t i = 0; i < _markedNodesData.size(); ++i) {
         _markedNodesListItems.push_back(
-            new QListWidgetItem(QString::fromStdString(_data[i]))
+            new QListWidgetItem(QString::fromStdString(_markedNodesData[i]))
         );
         _list->addItem(_markedNodesListItems[i]);
     }
@@ -110,12 +110,17 @@ void MarkNodesDialog::listItemAdded() {
     }
 
     std::string itemToAdd = _newNode->text().toStdString();
-    const auto it = std::find(_data.cbegin(), _data.cend(), itemToAdd);
-    if (it != _data.end()) {
-        _list->setCurrentRow(static_cast<int>(std::distance(_data.cbegin(), it)));
+    const auto it = std::find(
+        _markedNodesData.cbegin(), _markedNodesData.cend(),
+        itemToAdd
+    );
+    if (it != _markedNodesData.end()) {
+        _list->setCurrentRow(
+            static_cast<int>(std::distance(_markedNodesData.cbegin(), it))
+        );
     }
     else {
-        _data.push_back(itemToAdd);
+        _markedNodesData.push_back(itemToAdd);
         _markedNodesListItems.push_back(new QListWidgetItem(_newNode->text()));
         _list->addItem(_markedNodesListItems.back());
 
@@ -136,12 +141,12 @@ void MarkNodesDialog::listItemRemove() {
     }
 
     _list->takeItem(index);
-    _data.erase(_data.begin() + index);
+    _markedNodesData.erase(_markedNodesData.begin() + index);
     _markedNodesListItems.erase(_markedNodesListItems.begin() + index);
 }
 
 void MarkNodesDialog::parseSelections() {
-    _profile.setMarkNodes(_data);
+    *_markedNodes = std::move(_markedNodesData);
     accept();
 }
 

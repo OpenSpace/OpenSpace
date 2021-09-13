@@ -22,58 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_CORE___ACTION___H__
+#define __OPENSPACE_CORE___ACTION___H__
 
-namespace {
+#include <ghoul/misc/boolean.h>
+#include <string>
 
-openspace::interaction::ShortcutManager::ShortcutInformation extractInfo(lua_State* L,
-                                                                         int nArguments,
-                                                                         bool isSync)
-{
-    openspace::interaction::ShortcutManager::ShortcutInformation i = {
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No),
-        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No),
-        openspace::interaction::ShortcutManager::IsSynchronized(isSync),
-        nArguments >= 3 ?
-            ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No) :
-            "",
-        nArguments == 4 ?
-            ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No) :
-            ""
-    };
-    lua_pop(L, nArguments);
-    return i;
-}
+namespace openspace::interaction {
 
-} // namespace
+struct Action {
+    BooleanType(IsSynchronized);
 
-namespace openspace::luascriptfunctions {
+    /// Unique identifier that identifies this action. There is no special naming scheme
+    /// that we enforce, we are trying to stick to the same . separated structure that
+    /// hopefully provides some protection against accidentally reusing identifiers
+    std::string identifier;
 
-int clearShortcuts(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearShortcuts");
-    global::shortcutManager->resetShortcuts();
-    return 0;
-}
+    /// The Lua script that gets executed whenever this action is triggered. Optional
+    /// parameters can be passed to actions which are accessible through an `args`
+    /// variable that contains all of the arguments passed into the action. This means
+    /// that the provided script must not use this variable name itself or the script will
+    /// not successfully execute
+    std::string command;
 
-int bindShortcut(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcut");
+    /// The human-readable name of this action. This name must not be unique, but it is
+    /// recommended that the combination of GuiPath + name should be unique to prevent
+    /// user confusion
+    std::string name;
 
-    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, true);
-    global::shortcutManager->addShortcut(std::move(info));
+    /// A user-facing description of what the action does when it gets triggered. If the
+    /// action uses optional arguments, they should be described in here, too
+    std::string documentation;
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
+    /// This variable defines a subdivision of where this action is placed in a user
+    /// interface. The individual path components are separated by '/' with a leading '/'
+    /// for the root path
+    std::string guiPath;
 
-int bindShortcutLocal(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcutLocal");
+    /// If this value is set to `Yes`, the execution of this action is synchronized to
+    /// other OpenSpace instances, for example other nodes in a cluster environment, or
+    /// to other OpenSpace instances using a parallel connection
+    IsSynchronized synchronization = IsSynchronized::Yes;
+};
 
-    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, false);
-    global::shortcutManager->addShortcut(std::move(info));
+} // namespace openspace::interaction
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions
+#endif // __OPENSPACE_CORE___ACTION___H__
