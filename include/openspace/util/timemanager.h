@@ -87,13 +87,6 @@ public:
      */
     void setFromProfile_time(const Profile& p);
 
-    /**
-     * Sets the delta times using the delta time array from a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_deltaTimes(const Profile& p);
-
     bool isPaused() const;
 
     std::vector<double> deltaTimeSteps() const;

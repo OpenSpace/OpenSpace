@@ -603,44 +603,6 @@ const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
 }
 
-void Scene::createInitialAssetToLoad(const Profile& p, const std::string& assetFilename)
-{
-    std::ofstream converted(assetFilename);
-    std::string output;
-    //Meta
-    if (p.meta.has_value()) {
-        output += "asset.meta = {\n";
-
-        if (p.meta->name.has_value()) {
-            output += fmt::format("  Name = [[{}]],\n", *p.meta->name);
-        }
-        if (p.meta->version.has_value()) {
-            output += fmt::format("  Version = [[{}]],\n", *p.meta->version);
-        }
-        if (p.meta->description.has_value()) {
-            output += fmt::format("  Description = [[{}]],\n", *p.meta->description);
-        }
-        if (p.meta->author.has_value()) {
-            output += fmt::format("  Author = [[{}]],\n", *p.meta->author);
-        }
-        if (p.meta->url.has_value()) {
-            output += fmt::format("  URL = [[{}]],\n", *p.meta->url);
-        }
-        if (p.meta->license.has_value()) {
-            output += fmt::format("  License = [[{}]]\n", *p.meta->license);
-        }
-
-        output += "}\n\n";
-    }
-
-    // Assets
-    for (const std::string& asset : p.assets) {
-        output += fmt::format("asset.require(\"{}\");\n", asset);
-    }
-
-    converted << output;
-}
-
 void Scene::setFromProfile_properties(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
@@ -680,21 +642,6 @@ void Scene::property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
             }
             ghoul::lua::push(L, stringRepresentation);
         }
-    }
-}
-
-void Scene::setFromProfile_markInterestingNodes(const Profile& p) {
-    std::string nodesToMark;
-    for (auto node : p.markNodes) {
-        nodesToMark += fmt::format("[[{}]],", node);
-    }
-    if (!nodesToMark.empty()) {
-        std::string markCmd = fmt::format("openspace.markInterestingNodes({{ {} }});",
-            nodesToMark);
-        global::scriptEngine->queueScript(
-            markCmd,
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
     }
 }
 

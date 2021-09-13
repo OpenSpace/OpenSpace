@@ -236,15 +236,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     /**
-     * Creates an initial asset file to load, which contains:
-     *   1. Meta information
-     *   2. Assets to include
-     *
-     * \param p The Profile to be read.
-     */
-    void createInitialAssetToLoad(const Profile& p, const std::string& assetFilename);
-
-    /**
      * Sets a property using the 'properties' contents of a profile. The function will
      * loop through each setProperty command. A property may be set to a bool, float,
      * or string value (which must be converted because a Profile stores all values
@@ -263,15 +254,6 @@ public:
      */
     void property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
         const std::string& value);
-
-    /**
-     * Reads list of nodes from profile to be marked as interesting nodes.
-     * If any nodes are listed, a script to mark these will be queued with the
-     * script engine.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_markInterestingNodes(const Profile& p);
 
 private:
     /**

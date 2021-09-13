@@ -879,8 +879,4 @@ void TimeManager::setFromProfile_time(const Profile& p) {
     }
 }
 
-void TimeManager::setFromProfile_deltaTimes(const Profile& p) {
-    global::timeManager->setDeltaTimeSteps(p.deltaTimes);
-}
-
 } // namespace openspace

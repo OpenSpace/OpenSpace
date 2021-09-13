@@ -133,14 +133,6 @@ public:
     void setNavigationStateNextFrame(NavigationState state);
 
     /**
-     * Sets the camera position using the time contents of a profile. The function will
-     * set an absolute position or a go-to-geolocation command using the globebrowsing
-     * module.
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_camera(const Profile& p);
-
-    /**
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */

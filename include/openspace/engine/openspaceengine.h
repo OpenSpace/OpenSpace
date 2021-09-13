@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
@@ -100,6 +101,61 @@ public:
     void writeSceneDocumentation();
     void writeStaticDocumentation();
     void createUserDirectoriesIfNecessary();
+
+    /**
+     * Sets the camera position using the time contents of a profile. The function will
+     * set an absolute position or a go-to-geolocation command using the globebrowsing
+     * module.
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_camera(const Profile& p);
+
+    /**
+     * Sets the delta times using the delta time array from a profile.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_deltaTimes(const Profile& p);
+
+    /**
+     * Reads a list of modules from a profile, and executes scripts based on whether or
+     * not the corresponding module is loaded.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_modules(const Profile& p);
+
+    /**
+     * Registers actions from the contents of a profile.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_actions(const Profile& p);
+
+    /**
+     * Registers keybindings from the contents of a profile.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_keybindings(const Profile& p);
+
+    /**
+     * Reads list of nodes from profile to be marked as interesting nodes.
+     * If any nodes are listed, a script to mark these will be queued with the
+     * script engine.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_markInterestingNodes(const Profile& p);
+
+    /**
+     * Reads list of "additional scripts" that are added to the profile to be run
+     * at the end of the initialization. Any openspace lua commands are allowed,
+     * and will be added to the script queue.
+     *
+     * \param p The Profile to be read.
+     */
+    void setFromProfile_additionalScripts(const Profile& p);
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the

@@ -24,7 +24,6 @@
 
 #include <openspace/interaction/actionmanager.h>
 
-#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
@@ -101,37 +100,6 @@ void ActionManager::triggerAction(const std::string& identifier,
             fmt::format("local args = {}\n{}", ghoul::formatLua(arguments), a.command),
             scripting::ScriptEngine::RemoteScripting(a.synchronization)
         );
-    }
-}
-
-void ActionManager::setFromProfile_actions(const Profile& p)
-{
-    for (Profile::Action a : p.actions) {
-        if (a.identifier.empty()) {
-            LERROR("Identifier must to provided to register action");
-        }
-        if (hasAction(a.identifier)) {
-            LERROR(fmt::format("Action for identifier '{}' already existed & registered",
-                a.identifier));
-        }
-        if (a.script.empty()) {
-            LERROR(fmt::format("Identifier '{}' doesn't provide a Lua command to execute",
-                a.identifier));
-        }
-        interaction::Action action;
-        action.identifier = a.identifier;
-        action.command = a.script;
-        if (!a.name.empty()) {
-            action.name = a.name;
-        }
-        if (!a.documentation.empty()) {
-            action.documentation = a.documentation;
-        }
-        if (!a.guiPath.empty()) {
-            action.guiPath = a.guiPath;
-        }
-        action.synchronization = interaction::Action::IsSynchronized(a.isLocal);
-        registerAction(std::move(action));
     }
 }
 

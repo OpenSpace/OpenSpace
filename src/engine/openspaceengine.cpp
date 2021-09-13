@@ -96,6 +96,10 @@
 #include "openspaceengine_lua.inl"
 
 namespace {
+    // Helper structs for the visitor pattern of the std::variant
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
     constexpr const char* _loggerCat = "OpenSpaceEngine";
 } // namespace
 
@@ -293,7 +297,7 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*global::scriptEngine);
 
-    // Convert profile to scene file (if was provided in configuration file)
+    // Process profile file (must be provided in configuration file)
     if (!global::configuration->profile.empty()) {
         std::string inputProfilePath = absPath("${PROFILES}").string();
         std::string outputScenePath = absPath("${TEMPORARY}").string();
@@ -331,10 +335,6 @@ void OpenSpaceEngine::initialize() {
                 std::istreambuf_iterator<char>()
             );
             *global::profile = Profile(content);
-
-            // Then save the profile to a scene so that we can load it with the
-            // existing infrastructure
-            //convertToSeparatedAssets(outputProfilePrefix, *global::profile);
 
             global::configuration->profileOutPrefixName = outputProfilePrefix;
             global::configuration->usingProfile = true;
@@ -701,9 +701,6 @@ void OpenSpaceEngine::loadAsset_init(const std::string assetName) {
         global::windowDelegate->setBarrier(true);
     };
 
-    if (assetName.empty()) {
-        return;
-    }
     if (_scene) {
         ZoneScopedN("Reset scene")
 
@@ -752,6 +749,9 @@ void OpenSpaceEngine::loadAsset_init(const std::string assetName) {
     }
 
     _assetManager->removeAll();
+    if (!assetName.empty()) {
+        _assetManager->add(assetName);
+    }
     for (auto a : global::profile->assets) {
         _assetManager->add(a);
     }
@@ -872,7 +872,7 @@ void OpenSpaceEngine::loadAsset_init(const std::string assetName) {
 void OpenSpaceEngine::loadAsset_postInit(const std::string assetName) {
     ZoneScoped
 
-    LTRACE("OpenSpaceEngine::loadAsset_init(begin)");
+    LTRACE("OpenSpaceEngine::loadAsset_postInit(begin)");
     _assetManager->add(assetName);
     _assetManager->update();
     LTRACE("OpenSpaceEngine::loadAsset_postInit(end)");
@@ -1117,24 +1117,17 @@ void OpenSpaceEngine::preSynchronization() {
         _scheduledAssetPathToLoad.clear();
     }
     else if (!_hasInitializedProfile) {
-        std::string outputScenePath = absPath("${TEMPORARY}/initAsset.asset").string();
         global::profile->ignoreUpdates = true;
-        global::renderEngine->scene()->createInitialAssetToLoad(*global::profile,
-            outputScenePath);
-        loadAsset_init(outputScenePath);
+        loadAsset_init("");
         global::renderEngine->scene()->setFromProfile_properties(*global::profile);
         global::timeManager->setFromProfile_time(*global::profile);
-        global::timeManager->setFromProfile_deltaTimes(*global::profile);
-        global::navigationHandler->setFromProfile_camera(*global::profile);
-        global::actionManager->setFromProfile_actions(*global::profile);
-        global::keybindingManager->setFromProfile_keybindings(*global::profile);
-        global::moduleEngine->setFromProfile_modules(*global::profile);
-        global::renderEngine->scene()->setFromProfile_markInterestingNodes(
-            *global::profile);
+        setFromProfile_deltaTimes(*global::profile);
+        setFromProfile_actions(*global::profile);
+        setFromProfile_keybindings(*global::profile);
+        setFromProfile_modules(*global::profile);
+        setFromProfile_markInterestingNodes(*global::profile);
         global::profile->ignoreUpdates = false;
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
-
-        _hasInitializedProfile = true;
     }
 
     if (_isFirstRenderingFirstFrame) {
@@ -1183,30 +1176,8 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (!_hasInitializedProfile) {
-        std::string output;
-        for (const std::string& a : global::profile->additionalScripts) {
-            global::scriptEngine->queueScript(
-                a,
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
-
-/*      std::string outputScenePath
-            = absPath("${TEMPORARY}/combinePostInit.asset").string();
-        std::ofstream combinedPostInitAsset(outputScenePath);
-        std::string profilePostInitAsset = "asset.onInitialize(function()\n";
-        profilePostInitAsset  += fmt::format(
-            "{}_{}{}",
-            global::configuration->profileOutPrefixName,
-            "_addedScripts",
-            global::profile->assetFileExtension
-        );
-        profilePostInitAsset += "end)\n";
-        combinedPostInitAsset << profilePostInitAsset;
-
-        loadAsset_postInit(outputScenePath);
-*/
-
+        setFromProfile_camera(*global::profile);
+        setFromProfile_additionalScripts(*global::profile);
         _hasInitializedProfile = true;
     }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
@@ -1610,6 +1581,144 @@ void OpenSpaceEngine::toggleShutdownMode() {
         // Else, we have to enable it
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
+    }
+}
+
+void OpenSpaceEngine::setFromProfile_camera(const Profile& p) {
+    std::visit(
+        overloaded{
+            [](const Profile::CameraNavState& navStateProfile) {
+                interaction::NavigationState nav;
+                nav.anchor = navStateProfile.anchor;
+                if (navStateProfile.aim.has_value()) {
+                    nav.aim = navStateProfile.aim.value();
+                }
+                if (nav.referenceFrame.empty()) {
+                    nav.referenceFrame = "Root";
+                }
+                nav.position = navStateProfile.position;
+                if (navStateProfile.up.has_value()) {
+                    nav.up = navStateProfile.up;
+                }
+                if (navStateProfile.yaw.has_value()) {
+                    nav.yaw = navStateProfile.yaw.value();
+                }
+                if (navStateProfile.pitch.has_value()) {
+                    nav.pitch = navStateProfile.pitch.value();
+                }
+                global::navigationHandler->setNavigationStateNextFrame(nav);
+            },
+            [](const Profile::CameraGoToGeo& geo) {
+                std::string geoScript = fmt::format("openspace.globebrowsing.goToGeo"
+                    "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
+                if (geo.altitude.has_value()) {
+                    geoScript += fmt::format(", {}", geo.altitude.value());
+                }
+                geoScript += ")";
+                global::scriptEngine->queueScript(
+                    geoScript,
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        },
+        p.camera.value()
+    );
+}
+
+void OpenSpaceEngine::setFromProfile_deltaTimes(const Profile& p) {
+    global::timeManager->setDeltaTimeSteps(p.deltaTimes);
+}
+
+void OpenSpaceEngine::setFromProfile_modules(const Profile& p)
+{
+    for (Profile::Module mod : p.modules) {
+        const std::vector<OpenSpaceModule*>& m = global::moduleEngine->modules();
+        const auto it = std::find_if(m.begin(), m.end(),
+            [&mod](const OpenSpaceModule* moduleSearch) {
+                return (moduleSearch->identifier().compare(mod.name) == 0);
+            });
+        if (it != m.end()) {
+            if (mod.loadedInstruction.has_value()) {
+                global::scriptEngine->queueScript(
+                    mod.loadedInstruction.value(),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+        else {
+            if (mod.notLoadedInstruction.has_value()) {
+                global::scriptEngine->queueScript(
+                    mod.notLoadedInstruction.value(),
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
+        }
+    }
+}
+
+void OpenSpaceEngine::setFromProfile_actions(const Profile& p)
+{
+    for (Profile::Action a : p.actions) {
+        if (a.identifier.empty()) {
+            LERROR("Identifier must to provided to register action");
+        }
+        if (global::actionManager->hasAction(a.identifier)) {
+            LERROR(fmt::format("Action for identifier '{}' already existed & registered",
+                a.identifier));
+        }
+        if (a.script.empty()) {
+            LERROR(fmt::format("Identifier '{}' doesn't provide a Lua command to execute",
+                a.identifier));
+        }
+        interaction::Action action;
+        action.identifier = a.identifier;
+        action.command = a.script;
+        if (!a.name.empty()) {
+            action.name = a.name;
+        }
+        if (!a.documentation.empty()) {
+            action.documentation = a.documentation;
+        }
+        if (!a.guiPath.empty()) {
+            action.guiPath = a.guiPath;
+        }
+        action.synchronization = interaction::Action::IsSynchronized(a.isLocal);
+        global::actionManager->registerAction(std::move(action));
+    }
+}
+
+void OpenSpaceEngine::setFromProfile_keybindings(const Profile& p)
+{
+    for (Profile::Keybinding k : p.keybindings) {
+        if (k.action.empty()) {
+            LERROR("Action must not be empty");
+        }
+        if (!global::actionManager->hasAction(k.action)) {
+            LERROR(fmt::format("Action '{}' does not exist", k.action));
+        }
+        if (k.key.key == openspace::Key::Unknown) {
+            LERROR(fmt::format("Could not find key '{}'",
+                std::to_string(static_cast<uint16_t>(k.key.key))));
+        }
+        global::keybindingManager->bindKey(k.key.key, k.key.modifier, k.action);
+    }
+}
+
+void OpenSpaceEngine::setFromProfile_markInterestingNodes(const Profile& p) {
+    for (std::string nodeName : p.markNodes) {
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
+        if (node) {
+            node->addTag("GUI.Interesting");
+        }
+    }
+}
+
+void OpenSpaceEngine::setFromProfile_additionalScripts(const Profile& p) {
+    for (const std::string& a : p.additionalScripts) {
+        global::scriptEngine->queueScript(
+            a,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 

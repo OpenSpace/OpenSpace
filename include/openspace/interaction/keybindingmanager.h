@@ -27,7 +27,6 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
-#include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 
 namespace openspace {
@@ -51,13 +50,6 @@ public:
 
     std::vector<std::pair<KeyWithModifier, std::string>> keyBinding(
         const KeyWithModifier& key) const;
-
-    /**
-     * Registers keybindings from the contents of a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_keybindings(const Profile& p);
 
     static scripting::LuaLibrary luaLibrary();
 

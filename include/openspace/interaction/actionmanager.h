@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
 #include <openspace/interaction/action.h>
-#include <openspace/scene/profile.h>
 #include <unordered_map>
 
 namespace ghoul { class Dictionary; }
@@ -44,12 +43,6 @@ public:
 
     void triggerAction(const std::string& identifier,
         const ghoul::Dictionary& arguments) const;
-    /**
-     * Registers actions from the contents of a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_actions(const Profile& p);
     static scripting::LuaLibrary luaLibrary();
 
 private:
