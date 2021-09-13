@@ -231,21 +231,21 @@ namespace {
         // smaller than the approachFactor or unexpected things might happen
         std::optional<double> reachFactor [[codegen::greaterequal(0.0)]];
 
-        // One or multiple actions that are executed whenever the camera is focussed on
+        // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it enters the interaction sphere of the node
         std::optional<std::variant<std::string, std::vector<std::string>>> onApproach;
 
-        // One or multiple actions that are executed whenever the camera is focussed on
+        // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it transitions from the approach distance to the
         // reach distance of the node
         std::optional<std::variant<std::string, std::vector<std::string>>> onReach;
 
-        // One or multiple actions that are executed whenever the camera is focussed on
+        // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it transitions from the reach distance to the
         // approach distance of the node
-        std::optional<std::variant<std::string, std::vector<std::string>>> onMoveAway;
+        std::optional<std::variant<std::string, std::vector<std::string>>> onRecede;
 
-        // One or multiple actions that are executed whenever the camera is focussed on
+        // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it exits the interaction sphere of the node
         std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
 
@@ -440,12 +440,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    if (p.onMoveAway.has_value()) {
-        if (std::holds_alternative<std::string>(*p.onMoveAway)) {
-            result->_onMoveAwayAction = { std::get<std::string>(*p.onMoveAway) };
+    if (p.onRecede.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onRecede)) {
+            result->_onRecedeAction = { std::get<std::string>(*p.onRecede) };
         }
         else {
-            result->_onMoveAwayAction = std::get<std::vector<std::string>>(*p.onMoveAway);
+            result->_onRecedeAction = std::get<std::vector<std::string>>(*p.onRecede);
         }
     }
 
@@ -1158,8 +1158,8 @@ const std::vector<std::string>& SceneGraphNode::onReachAction() const {
     return _onReachAction;
 }
 
-const std::vector<std::string>& SceneGraphNode::onMoveAwayAction() const {
-    return _onMoveAwayAction;
+const std::vector<std::string>& SceneGraphNode::onRecedeAction() const {
+    return _onRecedeAction;
 }
 
 const std::vector<std::string>& SceneGraphNode::onExitAction() const {

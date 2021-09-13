@@ -804,12 +804,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _inAnchorReachSphere = false;
         _inAnchorApproachSphere = true;
 
-        if (!_anchorNode->onMoveAwayAction().empty()) {
+        if (!_anchorNode->onReachAction().empty()) {
             ghoul::Dictionary dict;
             dict.setValue("Node", _anchorNode->identifier());
             dict.setValue("Before", "ReachedSphere"s);
             dict.setValue("After", "ApproachSphere"s);
-            for (const std::string& action : _anchorNode->onMoveAwayAction()) {
+            for (const std::string& action : _anchorNode->onReachAction()) {
                 global::actionManager->triggerAction(action, dict);
             }
         }

@@ -130,7 +130,7 @@ public:
 
     const std::vector<std::string>& onApproachAction() const;
     const std::vector<std::string>& onReachAction() const;
-    const std::vector<std::string>& onMoveAwayAction() const;
+    const std::vector<std::string>& onRecedeAction() const;
     const std::vector<std::string>& onExitAction() const;
 
     double boundingSphere() const;
@@ -165,7 +165,7 @@ private:
 
     std::vector<std::string> _onApproachAction;
     std::vector<std::string> _onReachAction;
-    std::vector<std::string> _onMoveAwayAction;
+    std::vector<std::string> _onRecedeAction;
     std::vector<std::string> _onExitAction;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it

@@ -67,7 +67,7 @@ void log(int i, const EventParallelConnection& e) {
     LINFO(fmt::format("[{}] ParallelConnection ({})", i, state));
 }
 
-void log(int i, const EventProfileLoadingFinished& e) {
+void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
     LINFO(fmt::format("[{}] ProfileLoadingFinished", i));
 }
@@ -122,7 +122,7 @@ void log(int i, const EventTimeOfInterestReached& e) {
     ));
 }
 
-void log(int i, const EventMissionEventReached& e) {
+void log(int i, [[ maybe_unused ]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
     LINFO(fmt::format("[{}] MissionEventReached", i));
 }
@@ -132,7 +132,7 @@ void log(int i, const EventPlanetEclipsed& e) {
     LINFO(fmt::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
-void log(int i, const EventInterpolationFinished& e) {
+void log(int i, [[ maybe_unused ]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
     LINFO(fmt::format("[{}] InterpolationFinished", i));
 }
@@ -161,6 +161,7 @@ void log(int i, const EventSessionRecordingPlayback& e) {
             case EventSessionRecordingPlayback::State::Paused:   return "Paused";
             case EventSessionRecordingPlayback::State::Resumed:  return "Resumed";
             case EventSessionRecordingPlayback::State::Finished: return "Finished";
+            default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
 

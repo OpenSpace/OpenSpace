@@ -115,7 +115,7 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
         {},
         "string, string [, table]",
         "Registers an action (second parameter) to be executed whenever an event (first "
-        "parameter is encountered. If the optional third parameter is provided, it "
+        "parameter) is encountered. If the optional third parameter is provided, it "
         "describes a filter that the event is being checked against and only if it "
         "passes the filter, the action is triggered"
     });
@@ -129,6 +129,5 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
     });
     return res;
 }
-
 
 } // namespace openspace

@@ -103,6 +103,13 @@ void logAllEvents(const Event* e);
 //  Events
 //
 
+/**
+ * This event is created whenever a new scene graph node is added to the system.  By the
+ * time this event is signalled, the scene graph node has already been created and added
+ * to the scene.
+ * 
+ * \param Node The identifier of the node that was added
+ */
 struct EventSceneGraphNodeAdded : public Event {
     static const Type Type = Event::Type::SceneGraphNodeAdded;
 
@@ -110,7 +117,12 @@ struct EventSceneGraphNodeAdded : public Event {
     const tstring node;
 };
 
-
+/**
+ * This event is created whenever a scene graph node was removed.  By the time this event
+ * is signalled, the scene graph node has already been removed.
+ *
+ * \param Node The identifier of that node that was removed
+ */
 struct EventSceneGraphNodeRemoved : public Event {
     static const Type Type = Event::Type::SceneGraphNodeRemoved;
     
@@ -118,7 +130,13 @@ struct EventSceneGraphNodeRemoved : public Event {
     const tstring node;
 };
 
-
+/**
+ * This event is created whenever something in the parallel connection subsystem changes.
+ * The new state is sent as an argument with this event.
+ *
+ * \param State The new state of the parallel connection system;  is one of `Established`,
+ *        `Lost`, `HostshipGained`, or `HostshipLost`
+ */
 struct EventParallelConnection : public Event {
     static const Type Type = Event::Type::ParallelConnection;
 
@@ -132,14 +150,24 @@ struct EventParallelConnection : public Event {
     State state;
 };
 
-
+/**
+ * This event is created when the loading of a profile is finished. This is emitted
+ * regardless of whether it is the initial profile, or any subsequent profile is loaded.
+ */
 struct EventProfileLoadingFinished : public Event {
     static const Type Type = Event::Type::ProfileLoadingFinished;
 
     EventProfileLoadingFinished();
 };
 
-
+/**
+ * This event is created whenever some information about the application shutdown sequence
+ * changes. This can either be that the seqeuence started, was aborted, or is finished,
+ * which means that OpenSpace is just about the shutdown.
+ * 
+ * \param State The next state of the application shutdown sequence;  is one of `Started`,
+ *        `Aborted`,  or `Finished`
+ */
 struct EventApplicationShutdown : public Event {
     static const Type Type = Event::Type::ApplicationShutdown;
 
@@ -153,7 +181,13 @@ struct EventApplicationShutdown : public Event {
     const State state;
 };
 
-
+/**
+ * This event is created when a new screenspace renderable has been created.  By the time
+ * this event is craeted, the screenspace renderable is already registered and available.
+ * 
+ * \param Renderable The identifier of the new screenspace renderable that was just added
+ *        to the system
+ */
 struct EventScreenSpaceRenderableAdded : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
@@ -161,7 +195,13 @@ struct EventScreenSpaceRenderableAdded : public Event {
     const tstring renderable;
 };
 
-
+/**
+ * This event is created when a screenspace renderable has been removed from the system.
+ * When this event is created, the screenspace renderable has already been removed and is
+ * no longer available
+ * 
+ * \param Renderable The identifier of the screenspace renderable that was removed
+ */
 struct EventScreenSpaceRenderableRemoved : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
@@ -169,7 +209,30 @@ struct EventScreenSpaceRenderableRemoved : public Event {
     const tstring renderable;
 };
 
+/**
+ * This event is created when the camera transitions between different interaction sphere
+ * distances. Right now, only movement relative to camera's focus node is considered.
+ * Each scene graph node has an interaction sphere radius that serves as the reference
+ * distance for all spheres.
+```
+Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in middle, and ')' are spherical boundaries. The approach factor, reach factor, and interaction sphere radius are all taken from the current focus node.
 
+|<------------------->|  Approach factor * Interaction sphere
+             |<------>|  Reach Factor * Interaction sphere
+      
+(                       (           O          )                       )
+^                       ^                      ^                       ^
+Before: ApproachSphere  Before: ReachedSphere  Before: ApproachSphere  Before: Outside
+After: Outside          After: ApproachSphere  After: ReachedSphere    After: ApproachSphere
+```
+ *
+ * \param Node The name of the node the camera is transitioning relative to. Currently is
+ *        always the same as the camera's focus node
+ * \param Before The name of the area the camera was in before the transition; is one of
+ *        `Outside`, `ApproachSphere`, or `ReachedSphere` \
+ * \param After The name of the area the camera is in after the transition; is one of
+ *        `Outside`, `ApproachSphere`, or `ReachedSphere`
+ */
 struct EventCameraTransition : public Event {
     static const Type Type = Event::Type::CameraTransition;
 
@@ -188,7 +251,10 @@ struct EventCameraTransition : public Event {
 };
 
 
-// Not used right now
+/**
+ * This event is created with a specific time of interest is reached. This event is
+ * currently unused.
+ */
 struct EventTimeOfInterestReached : public Event {
     static const Type Type = Event::Type::TimeOfInterestReached;
 
@@ -198,7 +264,10 @@ struct EventTimeOfInterestReached : public Event {
 };
 
 
-// Not used right now
+/**
+ * This event is created when the end of a mission phase is reached. This event is
+ * currently unused.
+ */
 struct EventMissionEventReached : public Event {
     static const Type Type = Event::Type::MissionEventReached;
 
@@ -206,8 +275,15 @@ struct EventMissionEventReached : public Event {
     EventMissionEventReached();
 };
 
-
-// Not used right now
+/**
+ * This event is created when a planet is eclipsed by a moon or a different planet. This
+ * event is currently unused.
+ *
+ * \param Eclipsee The identifier of the scene graph node that is eclipsed by another
+ *        object
+ * \param Eclipser The identifier of the scene graph node that is eclipsing the other
+ *        object
+ */
 struct EventPlanetEclipsed : public Event {
     static const Type Type = Event::Type::PlanetEclipsed;
 
@@ -216,7 +292,12 @@ struct EventPlanetEclipsed : public Event {
     const tstring eclipser;
 };
 
-
+/**
+ * This event is created when the interpolation of a property value is finished. If the
+ * interpolation time of a property change is 0s, this event is not fired
+ * 
+ * \param Property The URI of the property whose interpolation has finished
+ */
 struct EventInterpolationFinished : public Event {
     static const Type Type = Event::Type::InterpolationFinished;
 
@@ -224,7 +305,14 @@ struct EventInterpolationFinished : public Event {
     const tstring property;
 };
 
-
+/**
+ * This event is created when the camera changes focus nodes. Even if the camera position
+ * is interpolated, the node change happens instantaneously and the event is fired at the
+ * same time.
+ * 
+ * \param OldNode The identifier of the scene graph node which was the old focus node
+ * \param NewNode The identifier of the scene graph node that is the new focus node
+ */
 struct EventFocusNodeChanged : public Event {
     static const Type Type = Event::Type::FocusNodeChanged;
 
@@ -233,7 +321,13 @@ struct EventFocusNodeChanged : public Event {
     const tstring newNode;
 };
 
-
+/**
+ * This event is created when a layer is added to to a globe.
+ * 
+ * \param Globe The identifier of the globe to which the layer is added
+ * \param Group The identifier of the layer group to which the layer is added
+ * \param Layer The identifier of the layer that was added
+ */
 struct EventLayerAdded : public Event {
     static const Type Type = Event::Type::LayerAdded;
 
@@ -244,7 +338,13 @@ struct EventLayerAdded : public Event {
     const tstring layer;
 };
 
-
+/**
+ * This event is created when a layer is removed from a globe.
+ * 
+ * \param Globe The identifier of the globe from which the layer is removed
+ * \param Group The identifier of the layer group from which the layer is removed
+ * \param Layer The identifier of the layer that was removed
+ */
 struct EventLayerRemoved : public Event {
     static const Type Type = Event::Type::LayerRemoved;
 
@@ -255,7 +355,13 @@ struct EventLayerRemoved : public Event {
     const tstring layer;
 };
 
-
+/**
+ * This event is created when something regarding a session recording playback changes.
+ * The event contains information about the new state of the session recording subsystem.
+ * 
+ * \param State The new state of the session recording; one of `Started`, `Paused`,
+ *        `Resumed`, `Finished`
+ */
 struct EventSessionRecordingPlayback : public Event {
     static const Type Type = Event::Type::SessionRecordingPlayback;
 
@@ -270,7 +376,11 @@ struct EventSessionRecordingPlayback : public Event {
     const State state;
 };
 
-
+/**
+ * A custom event type that can be used in a pinch when no explicit event type is
+ * available. This should only be used in special circumstances and it should be
+ * transitioned to a specific event type, if it is deemed to be useful.
+ */
 struct CustomEvent : public Event {
     static const Type Type = Event::Type::Custom;
 
