@@ -48,5 +48,6 @@ asset.meta = {
   Description = "Magnetic fieldlines for the bastille day CME event",
   Author = "CCMC",
   URL = "",
-  License = ""
+  License = "",
+  Identifier = {"Earths_Magnetosphere"}
 }

@@ -82,5 +82,6 @@ asset.meta = {
   Description = "Flux nodes for the bastille day CME events",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = ""
+  License = "",
+  Identifier = {"MeridialCutplane", "EquatorialCutplane"}
 }

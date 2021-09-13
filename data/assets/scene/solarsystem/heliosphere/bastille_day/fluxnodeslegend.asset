@@ -32,5 +32,6 @@ asset.meta = {
   Description = "Stream nodes for the bastille day CME events",
   Author = "Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = ""
+  License = "",
+  Identifier = {"Legendfluxnodes"}
 }

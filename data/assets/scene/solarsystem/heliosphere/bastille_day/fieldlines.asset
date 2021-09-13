@@ -71,5 +71,6 @@ asset.meta = {
   Description = "Magnetic fieldlines for the bastille day CME event",
   Author = "CCMC, Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = ""
+  License = "",
+  Identifier = {"MAS_MHD_Fieldlines"}
 }

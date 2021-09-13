@@ -51,5 +51,6 @@ asset.meta = {
   Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = ""
+  License = "",
+  Identifier = {"MAS_MHD_density"}
 }

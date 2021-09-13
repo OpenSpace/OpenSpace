@@ -155,7 +155,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the field lines if the " 
+        "This value specifies the line width of the field lines if the "
         "selected rendering method includes lines."
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
@@ -172,7 +172,7 @@ namespace {
         };
         // Input file type. Should be cdf, json or osfls
         SourceFileType inputFileType;
-        
+
         // Should be path to folder containing the input files
         std::filesystem::path sourceFolder [[codegen::directory()]];
 
@@ -185,7 +185,7 @@ namespace {
 
         //sim mod
         //std::optional<openspace::fls::Model> model;
-        
+
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         
@@ -196,7 +196,7 @@ namespace {
         // Convert the models distance unit, ex. AU for Enlil, to meters.
         // Can be used during runtime to scale domain limits.
         std::optional<float> scaleToMeters;
-        
+
         // If False (default) => Load in initializing step and store in RAM
         std::optional<bool> loadAtRuntime;
 
@@ -211,7 +211,7 @@ namespace {
 
         // Values should be entered as {X, Y}, where X & Y are numbers
         std::optional<std::vector<glm::vec2>> colorTableRanges;
-        
+
         // Enables Flow
         std::optional<bool> flowEnabled;
 
@@ -223,17 +223,17 @@ namespace {
 
         // Values should be entered as {{X, Y},{X, Y}} where X & Y are numbers
         std::optional<std::vector<glm::vec2>> maskingRanges;
-        
+
         // Value should be path to folder where states are saved. Specifying this
-        // makes it use file type converter 
+        // makes it use file type converter
         // (JSON/CDF input => osfls output & oslfs input => JSON output)
         std::optional<std::string> outputFolder;
-        
+
         // Line width of line
         std::optional<float> lineWidth;
-        
-        // If data sets parameter start_time differ from start of run, 
-        // elapsed_time_in_seconds might be in relation to start of run. 
+
+        // If data sets parameter start_time differ from start of run,
+        // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
         std::optional<double> manualTimeOffset;
     };
@@ -306,7 +306,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // Extracts the general information (from the asset file) that 
+    // Extracts the general information (from the asset file) that
     // is mandatory for the class to function;
     std::string fileTypeString;
     switch (p.inputFileType) {
@@ -436,20 +436,20 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         LERROR(fmt::format(
             "The specified output path: '{}', does not exist", _outputFolderPath
         ));
-    }    
-    
+    }
+
     _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
 }
 
 void RenderableFieldlinesSequence::initialize() {
     // Set a default color table, just in case the (optional) user defined paths are
-    // corrupt or not provided!
+    // corrupt or not provided
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(
         absPath(_colorTablePaths[0]).string()
     );
 
-    // Extract source file type specific information from dictionary 
+    // Extract source file type specific information from dictionary
     // & get states from source
     switch (_inputFileType) {
         case SourceFileType::Cdf:
@@ -476,14 +476,14 @@ void RenderableFieldlinesSequence::initialize() {
             return;
     }
 
-    // No need to store source paths in memory if they are already in RAM!
+    // No need to store source paths in memory if they are already in RAM
     if (!_loadingStatesDynamically) {
         _sourceFiles.clear();
     }
 
-    // At this point there should be at least one state loaded into memory!
+    // At this point there should be at least one state loaded into memory
     if (_states.empty()) {
-        LERROR("Wasn't able to extract any valid states from provided source files!");
+        LERROR("Wasn't able to extract any valid states from provided source files");
         return;
     }
 
@@ -510,23 +510,16 @@ void RenderableFieldlinesSequence::initializeGL() {
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
-/**
- * Returns fls::Model::Invalid if it fails to extract mandatory information!
- */
+// Returns fls::Model::Invalid if it fails to extract mandatory information
 fls::Model stringToModel(std::string str) {
-    if (!str.empty()) {
-        std::transform(
-            str.begin(),
-            str.end(),
-            str.begin(),
-            [](char c) { return static_cast<char>(::tolower(c)); }
-        );
-        return fls::stringToModel(str);
-    }
-    else {
-        LERROR("Must specify model");
-        return fls::Model::Invalid;
-    }
+    std::transform(
+        str.begin(),
+        str.end(),
+        str.begin(),
+        [](char c) { return static_cast<char>(::tolower(c)); }
+    );
+    return fls::stringToModel(str);
+
 }
 
 bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM() {
@@ -535,7 +528,6 @@ bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM() {
     if (model == fls::Model::Invalid) {
         return false;
     }
-    // Load states into RAM!
     for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         const bool loadedSuccessfully = newState.loadStateFromJson(
@@ -557,7 +549,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     extractTriggerTimesFromFileNames();
     FieldlinesState newState;
     if (!newState.loadStateFromOsfls(_sourceFiles[0])) {
-        LERROR("The provided .osfls files seem to be corrupt!");
+        LERROR("The provided .osfls files seem to be corrupt");
         return false;
     }
     _states.push_back(newState);
@@ -567,7 +559,6 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 }
 
 void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
-    // Load states from .osfls files into RAM!
     for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         if (newState.loadStateFromOsfls(filePath)) {
@@ -630,7 +621,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 
         // Add option for each extra quantity. Assumes there are just as many names to
         // extra quantities as there are extra quantities. Also assume that all states in
-        // the given sequence have the same extra quantities! */
+        // the given sequence have the same extra quantities
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
         for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
@@ -777,14 +768,13 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
 bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
-    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles = 
+    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
         extractSeedPointsFromFiles(_seedPointDirectory);
     if (seedsPerFiles.empty()) {
         LERROR("No seed files found");
         return false;
     }
 
-    // Load states into RAM!
     for (const std::string& cdfPath : _sourceFiles) {
         FieldlinesState newState;
         bool isSuccessful = fls::convertCdfToFieldlinesState(
@@ -808,11 +798,11 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles() {
 }
 
 std::unordered_map<std::string, std::vector<glm::vec3>>
-    extractSeedPointsFromFiles(std::filesystem::path filePath) 
+    extractSeedPointsFromFiles(std::filesystem::path filePath)
 {
     std::vector<std::string> files;
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
-    
+
     if (!std::filesystem::is_directory(filePath)) {
         LERROR(fmt::format(
             "The specified seed point directory: '{}' does not exist", filePath
@@ -823,12 +813,12 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     namespace fs = std::filesystem;
     for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
         std::string seedFilePath = spFile.path().string();
-        if (!spFile.is_regular_file() || 
-            seedFilePath.substr(seedFilePath.find_last_of('.')+1) != "txt") 
+        if (!spFile.is_regular_file() ||
+            seedFilePath.substr(seedFilePath.find_last_of('.')+1) != "txt")
         {
             continue;
         }
-        
+
         std::ifstream seedFile(spFile);
         if (!seedFile.good()) {
             LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
@@ -860,14 +850,14 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
         std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
         std::string dateAndTime = date + time;
-            
+
         // add outVec as value and time stamp as int as key
         outMap[dateAndTime] = outVec;
     }
     return outMap;
 }
 
-std::vector<std::string> 
+std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
 {
     std::vector<std::string> extraMagVars;
@@ -921,7 +911,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
         _shaderProgram = nullptr;
     }
 
-    // Stall main thread until thread that's loading states is done!
+    // Stall main thread until thread that's loading states is done
     bool printedWarning = false;
     while (_isLoadingStateFromDisk) {
         if (!printedWarning) {
@@ -999,7 +989,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     glBindVertexArray(_vertexArrayObject);
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else      
+#else
     glLineWidth(1.f);
 #endif
 
@@ -1086,7 +1076,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             _shouldUpdateMaskingBuffer = true;
         }
 
-        // Everything is set and ready for rendering!
+        // Everything is set and ready for rendering
         needUpdate = false;
         _newStateIsReady = false;
     }
@@ -1120,7 +1110,7 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
     }
 }
 
-// Reading state from disk. Must be thread safe!
+// Reading state from disk. Must be thread safe
 void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
     _newState = std::make_unique<FieldlinesState>();
     if (_newState->loadStateFromOsfls(filePath)) {
