@@ -7,7 +7,7 @@ local image = asset.syncedResource({
   Name = "HUDF image",
   Type = "HttpSynchronization",
   Identifier = "hudf_image",
-  Version = 1
+  Version = 2
 })
 
 local DISTANCE = 9.2E15;
@@ -45,7 +45,7 @@ local HUDFImage = {
   RadiusAzimuthElevation = { 200.0, 0.5, 0.15 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "/Hubble_ultra_deep_field.jpg",
+  TexturePath = image .. "/Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf" },
 }
 
