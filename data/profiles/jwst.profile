@@ -47,14 +47,24 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/HUDFImage",
+    "scene/solarsystem/missions/jwst/timelaps",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {
-    "altitude": 17000000.0,
-    "anchor": "Earth",
-    "latitude": 3.5559,
-    "longitude": -53.0515,
-    "type": "goToGeo"
+    "aim": "",
+    "anchor": "JWSTLaunchModel",
+    "frame": "",
+    "position": {
+      "x": 17.363674,
+      "y": 11.520981,
+      "z": -10.344788
+    },
+    "type": "setNavigationState",
+    "up": {
+      "x": -0.276723,
+      "y": 0.838517,
+      "z": 0.469377
+    }
   },
   "delta_times": [
     1.0,
@@ -125,7 +135,7 @@
   ],
   "time": {
     "type": "absolute",
-    "value": "2021-10-31T00:00:00"
+    "value": "2018-10-01T14:05:53"
   },
   "version": {
     "major": 1,
