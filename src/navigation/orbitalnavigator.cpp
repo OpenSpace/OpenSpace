@@ -768,10 +768,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 }
             }
 
-            global::eventEngine->publishEvent<events::EventCameraTransition>(
+            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
                 _camera,
                 _anchorNode,
-                events::EventCameraTransition::Transition::Exiting
+                events::EventCameraFocusTransition::Transition::Exiting
             );
         }
         else if (currDistance < d * (rf - InteractionHystersis)) {
@@ -788,10 +788,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 }
             }
 
-            global::eventEngine->publishEvent<events::EventCameraTransition>(
+            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
                 _camera,
                 _anchorNode,
-                events::EventCameraTransition::Transition::Reaching
+                events::EventCameraFocusTransition::Transition::Reaching
             );
         }
     }
@@ -809,10 +809,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraTransition>(
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
             _camera,
             _anchorNode,
-            events::EventCameraTransition::Transition::Receding
+            events::EventCameraFocusTransition::Transition::Receding
         );
     }
     else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
@@ -830,10 +830,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraTransition>(
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
             _camera,
             _anchorNode,
-            events::EventCameraTransition::Transition::Approaching
+            events::EventCameraFocusTransition::Transition::Approaching
         );
     }
 }

@@ -95,14 +95,18 @@ void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
 }
 
-void log(int i, const EventCameraTransition& e) {
-    ghoul_assert(e.type == EventCameraTransition::Type, "Wrong type");
-    std::string_view t = [](EventCameraTransition::Transition transition) {
+void log(int i, const EventCameraFocusTransition& e) {
+    ghoul_assert(e.type == EventCameraFocusTransition::Type, "Wrong type");
+    std::string_view t = [](EventCameraFocusTransition::Transition transition) {
         switch (transition) {
-            case EventCameraTransition::Transition::Approaching: return "Approaching";
-            case EventCameraTransition::Transition::Reaching:    return "Reaching";
-            case EventCameraTransition::Transition::Receding:    return "Receding";
-            case EventCameraTransition::Transition::Exiting:     return "Exiting";
+            case EventCameraFocusTransition::Transition::Approaching:
+                return "Approaching";
+            case EventCameraFocusTransition::Transition::Reaching:
+                return "Reaching";
+            case EventCameraFocusTransition::Transition::Receding:
+                return "Receding";
+            case EventCameraFocusTransition::Transition::Exiting:
+                return "Exiting";
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.transition);
@@ -182,7 +186,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ScreenSpaceRenderableAdded: return "ScreenSpaceRenderableAdded";
         case Event::Type::ScreenSpaceRenderableRemoved:
             return "ScreenSpaceRenderableRemoved";
-        case Event::Type::CameraTransition: return "CameraTransition";
+        case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
@@ -219,8 +223,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "ScreenSpaceRenderableRemoved") {
         return Event::Type::ScreenSpaceRenderableRemoved;
     }
-    else if (str == "CameraTransition") {
-        return Event::Type::CameraTransition;
+    else if (str == "CameraFocusTransition") {
+        return Event::Type::CameraFocusTransition;
     }
     else if (str == "TimeOfInterestReached") {
         return Event::Type::TimeOfInterestReached;
@@ -315,22 +319,22 @@ ghoul::Dictionary toParameter(const Event& e) {
                 )
             );
             break;
-        case Event::Type::CameraTransition:
+        case Event::Type::CameraFocusTransition:
             d.setValue(
                 "Node",
-                std::string(static_cast<const EventCameraTransition&>(e).node)
+                std::string(static_cast<const EventCameraFocusTransition&>(e).node)
             );
-            switch (static_cast<const EventCameraTransition&>(e).transition) {
-                case EventCameraTransition::Transition::Approaching:
+            switch (static_cast<const EventCameraFocusTransition&>(e).transition) {
+                case EventCameraFocusTransition::Transition::Approaching:
                     d.setValue("Transition", "Approaching"s);
                     break;
-                case EventCameraTransition::Transition::Reaching:
+                case EventCameraFocusTransition::Transition::Reaching:
                     d.setValue("Transition", "Reaching"s);
                     break;
-                case EventCameraTransition::Transition::Receding:
+                case EventCameraFocusTransition::Transition::Receding:
                     d.setValue("Transition", "Receding"s);
                     break;
-                case EventCameraTransition::Transition::Exiting:
+                case EventCameraFocusTransition::Transition::Exiting:
                     d.setValue("Transition", "Exiting"s);
                     break;
                 default:
@@ -443,8 +447,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::ScreenSpaceRenderableRemoved:
                 log(i, *static_cast<const EventScreenSpaceRenderableRemoved*>(e));
                 break;
-            case Event::Type::CameraTransition:
-                log(i, *static_cast<const EventCameraTransition*>(e));
+            case Event::Type::CameraFocusTransition:
+                log(i, *static_cast<const EventCameraFocusTransition*>(e));
                 break;
             case Event::Type::TimeOfInterestReached:
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
@@ -519,9 +523,9 @@ EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
     , renderable(temporaryString(renderable_->identifier()))
 {}
 
-EventCameraTransition::EventCameraTransition(const Camera* camera_,
-                                             const SceneGraphNode* node_,
-                                             Transition transition_)
+EventCameraFocusTransition::EventCameraFocusTransition(const Camera* camera_,
+                                                       const SceneGraphNode* node_,
+                                                       Transition transition_)
     : Event(Type)
     , camera(camera_)
     , node(temporaryString(node_->identifier()))

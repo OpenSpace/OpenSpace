@@ -21,9 +21,9 @@ local toggle_trail = {
 
     local visibility
     if is_declared("args") then
-      if args.Before == "Outside" and args.After == "ApproachSphere" then
+      if args.Transition == "Approaching" then
         visibility = false
-      elseif args.Before == "ApproachSphere" and args.After == "Outside" then
+      elseif args.Transition == "Exiting" then
         visibility = true
       else
         return

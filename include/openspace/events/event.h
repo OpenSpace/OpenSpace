@@ -64,7 +64,7 @@ struct Event {
         ApplicationShutdown,
         ScreenSpaceRenderableAdded,
         ScreenSpaceRenderableRemoved,
-        CameraTransition,
+        CameraFocusTransition,
         TimeOfInterestReached,
         MissionEventReached,
         PlanetEclipsed,
@@ -230,8 +230,8 @@ Exiting                 Receding               Reaching                Approachi
  * \param Transition The transition type that the camera just finished; is one of 
  *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
  */
-struct EventCameraTransition : public Event {
-    static const Type Type = Event::Type::CameraTransition;
+struct EventCameraFocusTransition : public Event {
+    static const Type Type = Event::Type::CameraFocusTransition;
 
     enum class Transition {
         Approaching,
@@ -240,7 +240,7 @@ struct EventCameraTransition : public Event {
         Exiting
     };
 
-    EventCameraTransition(const Camera* camera_, const SceneGraphNode* node_,
+    EventCameraFocusTransition(const Camera* camera_, const SceneGraphNode* node_,
         Transition transition_);
 
     const Camera* camera = nullptr;
