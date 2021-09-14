@@ -40,7 +40,7 @@ namespace {
         // executed instead
         std::string time;
 
-        // The Lua script that will be executed when the specified time is passed 
+        // The Lua script that will be executed when the specified time is passed
         // independent of its direction. This script will be executed before the
         // specific scripts if both versions are specified
         std::optional<std::string> script;
