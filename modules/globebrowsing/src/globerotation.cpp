@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/globerotation.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
@@ -34,6 +34,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/quaternion.hpp>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
@@ -47,7 +48,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
@@ -55,27 +56,25 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
+        "globe. The default value is 0.0."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AltitudeInfo = {
-        "Altitude",
-        "Altitude",
-        "The altitude in meters. "
-        "If the 'UseHeightmap' property is 'true', this is an offset from the actual "
-        "surface of the globe. If not, this is an offset from the reference ellipsoid."
-        "The default value is 0.0"
+    constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
+        "Angle",
+        "Angle",
+        "A rotation angle that can be used to rotate the object around its own y-axis, "
+        "which will be pointing out of the globe's surface."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
         "Use Heightmap",
-        "If this value is 'true', the altitude specified in 'Altitude' will be treated "
-        "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'."
+        "If set to true, the heightmap will be used when computing the surface normal. "
+        "This means that the object will be rotated to lay flat on the surface at the "
+        "given coordinate and follow the shape of the landscape."
     };
 
-    struct [[codegen::Dictionary(GlobeTranslation)]] Parameters {
+    struct [[codegen::Dictionary(GlobeRotation)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
         std::string globe
             [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
@@ -86,26 +85,26 @@ namespace {
         // [[codegen::verbatim(LongitudeInfo.description)]]
         std::optional<double> longitude;
 
-        // [[codegen::verbatim(AltitudeInfo.description)]]
-        std::optional<double> altitude;
+        // [[codegen::verbatim(AngleInfo.description)]]
+        std::optional<double> angle;
 
         // [[codegen::verbatim(UseHeightmapInfo.description)]]
         std::optional<bool> useHeightmap;
     };
-#include "globetranslation_codegen.cpp"
+#include "globerotation_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
-documentation::Documentation GlobeTranslation::Documentation() {
-    return codegen::doc<Parameters>("space_translation_globetranslation");
+documentation::Documentation GlobeRotation::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_rotation_globerotation");
 }
 
-GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
+GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
-    , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
+    , _angle(AngleInfo, 0.0, 0.0, 360.0)
     , _useHeightmap(UseHeightmapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -120,88 +119,120 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _longitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_longitude);
 
-    _altitude = p.altitude.value_or(_altitude);
-    _altitude.setExponent(8.f);
-    _altitude.onChange([this]() { setUpdateVariables(); });
-    addProperty(_altitude);
-
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
     _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
+
+    _angle = p.angle.value_or(_angle);
+    _angle.onChange([this]() { setUpdateVariables(); });
+    addProperty(_angle);
 }
 
-void GlobeTranslation::fillAttachedNode() {
+void GlobeRotation::findGlobe() {
     SceneGraphNode* n = sceneGraphNode(_globe);
     if (n->renderable() && dynamic_cast<RenderableGlobe*>(n->renderable())) {
-        _attachedNode = dynamic_cast<RenderableGlobe*>(n->renderable());
+        _globeNode = dynamic_cast<RenderableGlobe*>(n->renderable());
     }
     else {
         LERRORC(
-            "GlobeTranslation",
+            "GlobeRotation",
             "Could not set attached node as it does not have a RenderableGlobe"
         );
-        if (_attachedNode) {
+        if (_globeNode) {
             // Reset the globe name to it's previous name
-            _globe = _attachedNode->identifier();
+            _globe = _globeNode->identifier();
         }
     }
 }
 
-void GlobeTranslation::setUpdateVariables() {
-    _positionIsDirty = true;
+void GlobeRotation::setUpdateVariables() {
+    _matrixIsDirty = true;
     requireUpdate();
 }
 
-glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
-    if (!_attachedNode) {
-        // @TODO(abock): The const cast should be removed on a redesign of the translation
-        //               to make the position function not constant. Const casting this
-        //               away is fine as the factories that create the translations don't
+glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitude) const
+{
+    ghoul_assert(_globeNode, "Globe cannot be nullptr");
+
+    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
+    glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+        *_globeNode,
+        latitude,
+        longitude,
+        0.0
+    );
+
+    SurfacePositionHandle h =
+        _globeNode->calculateSurfacePositionHandle(groundPos);
+
+    // Compute position including heightmap
+    return mod->cartesianCoordinatesFromGeo(
+        *_globeNode,
+        latitude,
+        longitude,
+        h.heightToSurface
+    );
+}
+
+glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
+    if (!_globeNode) {
+        // @TODO(abock): The const cast should be removed on a redesign of the rotation
+        //               to make the matrix function not constant. Const casting this
+        //               away is fine as the factories that create the rotations don't
         //               create them as constant objects
-        const_cast<GlobeTranslation*>(this)->fillAttachedNode();
-        _positionIsDirty = true;
+        const_cast<GlobeRotation*>(this)->findGlobe();
+        _matrixIsDirty = true;
     }
 
     if (_useHeightmap) {
         // If we use the heightmap, we have to compute the height every frame
-        _positionIsDirty = true;
+        _matrixIsDirty = true;
     }
 
-    if (!_positionIsDirty) {
-        return _position;
+    if (!_matrixIsDirty) {
+        return _matrix;
     }
 
-    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-
+    // Compute vector that points out of globe surface
+    glm::dvec3 yAxis = glm::dvec3(0.0);
     if (_useHeightmap) {
-        glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            _latitude,
-            _longitude,
-            0.0
-        );
+        const double angleDiff = 0.00001; // corresponds to a meter-ish
+        const glm::vec3 posCenter = computeSurfacePosition(_latitude, _longitude);
+        const glm::vec3 pos1 = computeSurfacePosition(_latitude, _longitude + angleDiff);
+        const glm::vec3 pos2 = computeSurfacePosition(_latitude + angleDiff, _longitude);
 
-        SurfacePositionHandle h =
-            _attachedNode->calculateSurfacePositionHandle(groundPos);
-
-        _position = mod->cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            _latitude,
-            _longitude,
-            h.heightToSurface + _altitude
-        );
-        return _position;
+        const glm::vec3 v1 = pos1 - posCenter;
+        const glm::vec3 v2 = pos2 - posCenter;
+        yAxis = glm::dvec3(glm::cross(v1, v2));
     }
     else {
-        _position = mod->cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            _latitude,
-            _longitude,
-            _altitude
+        float latitudeRad = glm::radians(static_cast<float>(_latitude));
+        float longitudeRad = glm::radians(static_cast<float>(_longitude));
+        yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
+            { latitudeRad, longitudeRad }
         );
-        _positionIsDirty = false;
-        return _position;
     }
+    yAxis = glm::normalize(yAxis);
+
+    constexpr const glm::dvec3 n = glm::dvec3(0.0, 0.0, 1.0);
+    glm::dvec3 zAxis = glm::dvec3(
+        zAxis.x = yAxis.y * n.z - yAxis.z * n.y,
+        zAxis.y = yAxis.z * n.x - yAxis.x * n.z,
+        zAxis.z = yAxis.x * n.y - yAxis.y * n.x
+    );
+    zAxis = glm::normalize(zAxis);
+
+    const glm::dvec3 xAxis = glm::normalize(glm::cross(yAxis, zAxis));
+    const glm::dmat3 mat = {
+        xAxis.x, xAxis.y, xAxis.z,
+        yAxis.x, yAxis.y, yAxis.z,
+        zAxis.x, zAxis.y, zAxis.z
+    };
+
+    const glm::dquat q = glm::angleAxis(glm::radians(_angle.value()), yAxis);
+    _matrix = glm::toMat3(q) * mat;
+    _matrixIsDirty = false;
+    return _matrix;
 }
 
 } // namespace openspace::globebrowsing
