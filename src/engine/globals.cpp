@@ -381,6 +381,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
+    rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);

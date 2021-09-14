@@ -33,6 +33,14 @@
 #include "scriptscheduler_lua.inl"
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "EnabledInfo",
+        "Enabled",
+        "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
+        "will be executed. If enabled, scheduled scripts will be executed at their given "
+        "time as normal."
+    };
+
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
         // The time at which, when the in game time passes it, the two scripts will
         // be executed. If the traversal is forwards (towards + infinity), the
@@ -63,6 +71,13 @@ documentation::Documentation ScriptScheduler::Documentation() {
     // returns the documentation for the ScheduledScript, not for the ScriptScheduler
     // itself. This should be cleaned up a bit
     return codegen::doc<Parameters>("core_scheduledscript");
+}
+
+ScriptScheduler::ScriptScheduler()
+    : properties::PropertyOwner({ "ScriptScheduler" })
+    , _enabled(EnabledInfo, true)
+{
+    addProperty(_enabled);
 }
 
 ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
@@ -132,7 +147,7 @@ void ScriptScheduler::clearSchedule() {
 std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt>
 ScriptScheduler::progressTo(double newTime)
 {
-    if (newTime == _currentTime) {
+    if (!_enabled || newTime == _currentTime) {
         return { _forwardScripts.end(), _forwardScripts.end() };
     }
 
