@@ -254,7 +254,7 @@ Event::Type fromString(std::string_view str) {
         return Event::Type::Custom;
     }
 
-    throw ghoul::MissingCaseException();
+    throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
 }
 
 ghoul::Dictionary toParameter(const Event& e) {

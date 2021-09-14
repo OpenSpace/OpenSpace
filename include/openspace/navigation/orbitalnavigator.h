@@ -136,9 +136,6 @@ private:
 
     // Anchor: Node to follow and orbit
     properties::StringProperty _anchor;
-    inline static const double InteractionHystersis = 0.0125;
-    bool _inAnchorApproachSphere = false;
-    bool _inAnchorReachSphere = false;
 
     // Aim: Node to look at (when camera direction is reset),
     // Empty string means same as anchor.

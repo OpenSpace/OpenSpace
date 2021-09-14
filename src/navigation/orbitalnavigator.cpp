@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
-#include <openspace/interaction/actionmanager.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -729,113 +728,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // Update the camera state
     _camera->setPositionVec3(pose.position);
     _camera->setRotation(composeCameraRotation(camRot));
-
-    // The rest of this function is concerned with managing transitions of the camera
-    // between different distances of interest relative to the focus node. For each
-    // transition two scenarios are handled;  SceneGraphNodes can have attached actions
-    // for each transition, which are automatically triggered. Additionally, an
-    // EventCameraTransition event is fired that contains information about the focus node
-    // and the transition state that caused the vent to fire.
-
-    // Diagram of events for a camera moving from right-to-left.
-    // Interaction sphere is 'O' in middle, and ')' are spherical boundaries. The approach
-    // factor, reach factor, and interaction sphere radius are all taken from the current
-    // focus node.
-    //
-    // |<------------------->|  Approach factor * Interaction sphere
-    //              |<------>|  Reach Factor * Interaction sphere
-    //   
-    // (            (        O        )            )
-    // ^            ^                 ^            ^
-    // OnExit       OnMoveAway        OnReach      OnApproach
-    const double currDistance = glm::distance(anchorPos, pose.position);
-    const double d = _anchorNode->interactionSphere();
-    const double af = _anchorNode->approachFactor();
-    const double rf = _anchorNode->reachFactor();
-
-    using namespace std::string_literals;
-    if (_inAnchorApproachSphere) {
-        if (currDistance > d * (af + InteractionHystersis)) {
-            // We left the approach sphere outwards
-            _inAnchorApproachSphere = false;
-
-            if (!_anchorNode->onExitAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", _anchorNode->identifier());
-                dict.setValue("Transition", "Exiting"s);
-                for (const std::string& action : _anchorNode->onExitAction()) {
-                    global::actionManager->triggerAction(action, dict);
-                }
-            }
-
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                _anchorNode,
-                events::EventCameraFocusTransition::Transition::Exiting
-            );
-        }
-        else if (currDistance < d * (rf - InteractionHystersis)) {
-            // We transitioned from the approach sphere into the reach sphere
-            _inAnchorApproachSphere = false;
-            _inAnchorReachSphere = true;
-
-            if (!_anchorNode->onReachAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", _anchorNode->identifier());
-                dict.setValue("Transition", "Reaching"s);
-                for (const std::string& action : _anchorNode->onReachAction()) {
-                    global::actionManager->triggerAction(action, dict);
-                }
-            }
-
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                _anchorNode,
-                events::EventCameraFocusTransition::Transition::Reaching
-            );
-        }
-    }
-    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHystersis)) {
-        // We transitioned from the reach sphere to the approach sphere
-        _inAnchorReachSphere = false;
-        _inAnchorApproachSphere = true;
-
-        if (!_anchorNode->onRecedeAction().empty()) {
-            ghoul::Dictionary dict;
-            dict.setValue("Node", _anchorNode->identifier());
-            dict.setValue("Transition", "Receding"s);
-            for (const std::string& action : _anchorNode->onRecedeAction()) {
-                global::actionManager->triggerAction(action, dict);
-            }
-        }
-
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-            _camera,
-            _anchorNode,
-            events::EventCameraFocusTransition::Transition::Receding
-        );
-    }
-    else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
-             currDistance < d * (af - InteractionHystersis))
-    {
-        // We moved into the approach sphere
-        _inAnchorApproachSphere = true;
-
-        if (!_anchorNode->onApproachAction().empty()) {
-            ghoul::Dictionary dict;
-            dict.setValue("Node", _anchorNode->identifier());
-            dict.setValue("Transition", "Approaching"s);
-            for (const std::string& action : _anchorNode->onApproachAction()) {
-                global::actionManager->triggerAction(action, dict);
-            }
-        }
-
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-            _camera,
-            _anchorNode,
-            events::EventCameraFocusTransition::Transition::Approaching
-        );
-    }
 }
 
 void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {

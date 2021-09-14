@@ -139,12 +139,17 @@ public:
 
 private:
     void applyNavigationState(const NavigationState& ns);
+    void updateCameraTransitions();
 
     bool _playbackModeEnabled = false;
 
     InputState _inputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
+
+    inline static const double InteractionHystersis = 0.0125;
+    bool _inAnchorApproachSphere = false;
+    bool _inAnchorReachSphere = false;
 
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;
