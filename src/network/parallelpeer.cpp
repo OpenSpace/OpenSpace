@@ -135,7 +135,6 @@ ParallelPeer::ParallelPeer()
 
     addProperty(_hasIndependentView);
     _hasIndependentView.setReadOnly(true);
-
     _hasIndependentView.onChange([this]() {
         setViewStatus();
     });
@@ -593,18 +592,27 @@ void ParallelPeer::setViewStatus() {
         else if (hasIndependentView() && viewStatus() !=
             ParallelConnection::ViewStatus::IndependentView) {
             _viewStatus = ParallelConnection::ViewStatus::IndependentView;
-            LINFO(fmt::format("{} is now using host-independent viewpoint.", _name));
+            LINFO(fmt::format("You are now using host-independent viewpoint."));
+
+            std::vector<char> buffer;
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::IndependentViewRequest, buffer));
         }
         else if (!hasIndependentView() && viewStatus() !=
             ParallelConnection::ViewStatus::HostView) {
             _viewStatus = ParallelConnection::ViewStatus::HostView;
-            LINFO(fmt::format("{} is now using the host's viewpoint.", _name));
+            LINFO(fmt::format("You are now using the host's viewpoint."));
+
+            std::vector<char> buffer;
+            // eventuellt modifiera buffer (ex. om lösenord krävs/spara kameraposition)
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::IndependentViewResignation, buffer));
         }
     }
     else {
         hasIndependentView() ?
-            LINFO(fmt::format("You will use host-independent viewpoint.")) : 
-            LINFO(fmt::format("You will use the host's viewpoint."));
+            LINFO(fmt::format("You will use host-independent viewpoint upon connecting."))
+            : LINFO(fmt::format("You will use the host's viewpoint."));
     }
 }
 

@@ -271,11 +271,11 @@ void ParallelServer::handleHostshipResignation(Peer& peer) {
 }
 
 void ParallelServer::handleViewRequest(Peer& peer) {
-
+    LINFO(fmt::format("{} is now using host-independent viewpoint.", peer.id));
 }
 
 void ParallelServer::handleViewResignation(Peer& peer) {
-
+    LINFO(fmt::format("{} is now using the host's viewpoint.", peer.id));
 }
 
 bool ParallelServer::isConnected(const Peer& peer) const {
