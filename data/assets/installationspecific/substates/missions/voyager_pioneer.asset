@@ -6,37 +6,6 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 ----------------------------------------------------------------
 local identifiers = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
 
-local fadeInTrails = [[
-  openspace.setPropertyValueSingle("Scene.Voyager1.Renderable.Opacity", 1.0, 3.0);
-]]
-
-local fadeInTrails = function()
-  local str = ""
-  for key,identifier in ipairs(identifiers) do
-    str = str .. [[
-      openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Enabled", true
-      );
-      openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Opacity", 1.0, 3.0
-      );
-    ]]
-  end
-  return str
-end
-
-local fadeOutTrails = function()
-  local str = ""
-  for key,identifier in ipairs(identifiers) do
-    str = str .. [[
-      openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Opacity", 0.0, 3.0
-      );
-    ]]
-  end
-  return str
-end
-
 -- OBS! Should match the time in the profile, or at least in the SolarSystem state
 local today = "2021-08-27T12:58:03.505"
 
@@ -122,7 +91,7 @@ local onLeavingMainStateAction = [[
   ]] .. flyHome.linearFlight .. [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[
-  ]] .. fadeOutTrails() .. [[
+  ]] .. util.fadeOutTrails(identifiers) .. [[
 ]]
 
 local transitions = {
@@ -136,7 +105,7 @@ local transitions = {
       ]] .. util.orbitConstantLatitudeOnArrival() .. [[
       ]] .. util.enableRoll() .. [[
       ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
-      ]] .. fadeInTrails() .. [[
+      ]] .. util.fadeInTrails(identifiers) .. [[
     ]]
   },
   {

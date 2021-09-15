@@ -172,6 +172,33 @@ local interpolateProperty = function(uri, value, duration)
   ]]
 end
 
+local fadeInTrails = function(identifiers)
+  local str = ""
+  for key, identifier in ipairs(identifiers) do
+    str = str .. [[
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Enabled", true
+      );
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Opacity", 1.0, 3.0
+      );
+    ]]
+  end
+  return str
+end
+
+local fadeOutTrails = function(identifiers)
+  local str = ""
+  for key,identifier in ipairs(identifiers) do
+    str = str .. [[
+      openspace.setPropertyValueSingle(
+        "Scene.]] .. identifier .. [[.Renderable.Opacity", 0.0, 3.0
+      );
+    ]]
+  end
+  return str
+end
+
 -- Append table B to table A
 local appendTable = function(A, B)
   for key, val in pairs(B) do
@@ -194,4 +221,6 @@ asset.export("setCurveType", setCurveType)
 asset.export("setTime", setTime)
 asset.export("interpolateTime", interpolateTime)
 asset.export("interpolateProperty", interpolateProperty)
+asset.export("fadeInTrails", fadeInTrails)
+asset.export("fadeOutTrails", fadeOutTrails)
 asset.export("appendTable", appendTable)
