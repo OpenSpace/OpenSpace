@@ -37,7 +37,7 @@
     "scene/solarsystem/dwarf_planets/pluto/pluto",
     "scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11",
     "scene/solarsystem/planets/earth/satellites/misc/iss",
-    "installationspecific/substates/missions/cassini/trail"
+    "installationspecific/substates/missions/cassini/trail",
     "scene/solarsystem/planets/jupiter/major_moons",
     "scene/solarsystem/planets/jupiter/minor_moons",
     "scene/solarsystem/planets/neptune/inner_moons",
