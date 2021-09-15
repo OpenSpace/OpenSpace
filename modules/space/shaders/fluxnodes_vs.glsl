@@ -57,13 +57,13 @@ const int sizeAndColor = 2;
 const int illuminance = 3;
 
 const float AUtoMeter = 149597871000.0;
-varying out vec4    vs_color;
-varying out float   vs_depth;
-varying out vec2    vs_st;
-varying out float   camera_IsCloseEnough;
-varying out float   vs_closeToEarth;
-varying out double  vs_time;
-varying out vec3    vs_camerapos;
+out vec4    vs_color;
+out float   vs_depth;
+out vec2    vs_st;
+out float   camera_IsCloseEnough;
+out float   vs_closeToEarth;
+out double  vs_time;
+out vec3    vs_camerapos;
 
 // General Uniforms that's always needed
 uniform mat4      modelViewProjection;
@@ -306,7 +306,7 @@ void main() {
     }
 
     if (usingCameraPerspective) {
-        float rtemp = min(rValue, 1,0);
+        float rtemp = min(rValue, 1.0);
     
         float maxDistance = 100000000000.0 * perspectiveDistanceFactor;
         float distanceVec = distance(cameraPos, in_position.xyz);

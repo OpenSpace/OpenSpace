@@ -976,7 +976,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("particleSpeed", _flowSpeed);
     _shaderProgram->setUniform(
         "time",
-        global::windowDelegate->deltaTime() * (_flowReversed ? -1 : 1)
+        global::windowDelegate->applicationTime() * (_flowReversed ? -1 : 1)
     );
 
     bool additiveBlending = false;

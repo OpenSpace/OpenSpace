@@ -9,12 +9,6 @@ local magnetogramDirectory = asset.require('./magnetogram').TexturesPath;
 asset.onInitialize(function ()
   -- lists of paths
   local magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
-  local textures = openspace.walkDirectoryFiles(textureDirectory);
-
-  -- put elements from textures into magnetograms
-  for _, v in ipairs(textures) do
-    table.insert(magnetograms, v)
-  end
 
   -- add all all elements in magnetograms as layers
   for i, imagename in ipairs(magnetograms) do
