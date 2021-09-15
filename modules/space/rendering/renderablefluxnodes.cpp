@@ -54,17 +54,16 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 2;
     
     //streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, 
-    constexpr const std::array<const char*, 26> UniformNames = {
+    constexpr const std::array<const char*, 21> UniformNames = {
         "streamColor", "nodeSize", "nodeSizeLargerFlux", "thresholdFlux", "colorMode",
         "filterLower", "filterUpper", "scalingMode", "colorTableRange", "domainLimZ",
         "nodeSkip", "nodeSkipDefault", "nodeSkipEarth", "nodeSkipMethod", 
         "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold", "fluxColorAlpha", 
         "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", 
-        "enhanceMethod", "flowColor", "usingParticles", 
-        "particleSize", "particleSpacing", "particleSpeed"
+        "enhanceMethod"
     };
-    constexpr const std::array<const char*, 13> UniformNames2 = {
-        "time", "flowColoring", "maxNodeDistanceSize", "usingCameraPerspective",
+    constexpr const std::array<const char*, 12> UniformNames2 = {
+        "time", "maxNodeDistanceSize", "usingCameraPerspective",
         "drawCircles", "drawHollow", "useGaussian", "usingRadiusPerspective",
         "perspectiveDistanceFactor", "minMaxNodeSize", "usingPulse",
         "usingGaussianPulse", "pulsatingAlways"
@@ -319,7 +318,6 @@ namespace {
 
         struct TransferFunctions {
             std::string standard;
-            std::string flow;
             std::string earth;
             std::string cmr [[codegen::key("CMR")]];
         };
@@ -370,19 +368,19 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _earthdistGroup({ "Earthfocus" })
     , _distanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1.0f)
-    , _flowColor(
-        FlowColorInfo,
-        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _flowEnabled(FlowEnabledInfo, false)
+    //, _flowColor(
+    //    FlowColorInfo,
+    //    glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
+    //    glm::vec4(0.f),
+    //    glm::vec4(1.f)
+    //)
+    //, _flowEnabled(FlowEnabledInfo, false)
     , _interestingStreamsEnabled(InterestingStreamsInfo, false)
     , _flowGroup({ "Flow" })
-    , _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    , _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    , _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    , _useFlowColor(UseFlowColorInfo, false)
+    //, _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
+    //, _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
+    //, _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
+    //, _useFlowColor(UseFlowColorInfo, false)
     , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _nodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
     , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
@@ -402,7 +400,6 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     _transferFunction = std::make_unique<TransferFunction>(p.colorTablePaths.standard);
     _transferFunctionCMR = std::make_unique<TransferFunction>(p.colorTablePaths.cmr);
     _transferFunctionEarth = std::make_unique<TransferFunction>(p.colorTablePaths.earth);
-    _transferFunctionFlow = std::make_unique<TransferFunction>(p.colorTablePaths.flow);
     
     _colorTablePath = p.colorTablePaths.standard;
 
@@ -593,7 +590,6 @@ void RenderableFluxNodes::setupProperties() {
     addPropertySubOwner(_nodesAmountGroup);
     addPropertySubOwner(_earthdistGroup);
     addPropertySubOwner(_cameraPerspectiveGroup);
-    _earthdistGroup.addPropertySubOwner(_flowGroup);
 
     _colorGroup.addProperty(_colorMode);
     _colorGroup.addProperty(_scalingMethod);
@@ -623,12 +619,12 @@ void RenderableFluxNodes::setupProperties() {
     _earthdistGroup.addProperty(_enhancemethod);
     _earthdistGroup.addProperty(_interestingStreamsEnabled);
 
-    _flowGroup.addProperty(_flowEnabled);
-    _flowGroup.addProperty(_flowColor);
-    _flowGroup.addProperty(_flowParticleSize);
-    _flowGroup.addProperty(_flowParticleSpacing);
-    _flowGroup.addProperty(_flowSpeed);
-    _flowGroup.addProperty(_useFlowColor);
+    //_flowGroup.addProperty(_flowEnabled);
+    //_flowGroup.addProperty(_flowColor);
+    //_flowGroup.addProperty(_flowParticleSize);
+    //_flowGroup.addProperty(_flowParticleSpacing);
+    //_flowGroup.addProperty(_flowSpeed);
+    //_flowGroup.addProperty(_useFlowColor);
 
     _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
     _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
@@ -831,16 +827,10 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
     _shaderProgram->setUniform(_uniformCache.distanceThreshold, _distanceThreshold);
     _shaderProgram->setUniform(_uniformCache.enhanceMethod, _enhancemethod);
-    _shaderProgram->setUniform(_uniformCache.flowColor, _flowColor);
-    _shaderProgram->setUniform(_uniformCache.usingParticles, _flowEnabled);
-    _shaderProgram->setUniform(_uniformCache.particleSize, _flowParticleSize);
-    _shaderProgram->setUniform(_uniformCache.particleSpacing, _flowParticleSpacing);
-    _shaderProgram->setUniform(_uniformCache.particleSpeed, _flowSpeed);
     _shaderProgram->setUniform(
         _uniformCache2.time,
         global::windowDelegate->applicationTime()
     );
-    _shaderProgram->setUniform(_uniformCache2.flowColoring, _useFlowColor);
     _shaderProgram->setUniform(
         _uniformCache2.maxNodeDistanceSize, 
         _maxNodeDistanceSize
@@ -875,7 +865,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit textureUnit;
     ghoul::opengl::TextureUnit textureUnitCMR;
     ghoul::opengl::TextureUnit textureUnitEarth;
-    ghoul::opengl::TextureUnit textureUnitFlow;
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
         textureUnit.activate();
         _transferFunction->bind(); // Calls update internally
@@ -888,10 +877,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         textureUnitEarth.activate();
         _transferFunctionEarth->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTableEarth", textureUnitEarth);
-
-        textureUnitFlow.activate();
-        _transferFunctionFlow->bind(); // Calls update internally
-        _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
     }
 
     glBindVertexArray(_vertexArrayObject);

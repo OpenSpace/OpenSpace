@@ -29,11 +29,11 @@
 // Should be provided in meters VaPosition
 layout(location = 0) in vec3 in_position;
 
-// The extra value used to color lines. Location must correspond to VaColor in 
+// The extra value used to color lines. Location must correspond to VaColor in
 // renderablefluxnodes.h
 layout(location = 1) in float fluxValue;
 
-// The extra value used to mask out parts of lines. Location must correspond to 
+// The extra value used to mask out parts of lines. Location must correspond to
 // VaFiltering in renderablefluxnodes.h
 layout(location = 2) in float rValue;
 
@@ -73,16 +73,8 @@ uniform int       colorMode;
 uniform sampler1D colorTable;
 uniform sampler1D colorTableCMR;
 uniform sampler1D colorTableEarth;
-uniform sampler1D colorTableFlow;
+//uniform sampler1D colorTableFlow;
 uniform vec2      colorTableRange;
-
-// Uniforms needed for Particle Flow
-uniform vec4      flowColor;
-uniform int       particleSize;
-uniform int       particleSpeed;
-uniform int       particleSpacing;
-uniform bool      usingParticles;
-uniform bool      flowColoring;
 
 // Masking Uniforms
 uniform bool      usingMasking;
@@ -138,7 +130,7 @@ vec4 getTransferFunctionColor(sampler1D inColorTable) {
        scaleValue = rValue * fluxValue;
     }
     else if (scalingMode == log10RFlux) {
-        //conversion from logbase e to log10 since glsl does not support log10. 
+        //conversion from logbase e to log10 since glsl does not support log10.
         float logtoTen = log(rValue) / log(10.0);
         scaleValue = logtoTen * fluxValue;
     }
@@ -181,11 +173,6 @@ bool checkIfSkipVertex() {
     return false;
 }
 
-bool isParticle() {
-    int modulusResult = int(double(particleSpeed) * time + gl_VertexID) % particleSpacing;
-    return modulusResult > 0 && modulusResult <= particleSize;
-}
-
 //function for showing nodes different depending on distance to earth
 void decideHowToShowCloseToEarth() {
     // SizeScaling
@@ -203,7 +190,7 @@ void decideHowToShowCloseToEarth() {
         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
         vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
 
-        float tempR2 = rValue + 0.4; 
+        float tempR2 = rValue + 0.4;
         if (tempR2 > 1.5) {
             tempR2 = 1.5;
         }
@@ -211,14 +198,14 @@ void decideHowToShowCloseToEarth() {
     }
 }
 
-void checkdistanceMethod() { 
+void checkdistanceMethod() {
     //Enhance by distance to Earth
     float maxdist = 10000000000.0 * perspectiveDistanceFactor;
     float distancevec = distance(earthPos, in_position.xyz);
 
     vs_closeToEarth = 0.0;
 
-    if (distancevec < AUtoMeter * distanceThreshold && usingPulse) { 
+    if (distancevec < AUtoMeter * distanceThreshold && usingPulse) {
         vs_closeToEarth = 1.0;
         gl_PointSize = gl_PointSize * 5;
         vec4 fluxColor = getTransferFunctionColor(colorTable);
@@ -246,7 +233,7 @@ void checkdistanceMethod() {
         }
 
         if (fluxValue < thresholdFlux) {
-            vs_color.a = fluxColorAlpha;  
+            vs_color.a = fluxColorAlpha;
         }
     }
 }
@@ -255,11 +242,11 @@ void main() {
     // Default gl_PointSize if it is not set anywhere else.
     gl_PointSize = 2;
 
-    // Checking if we should render the vertex dependent on the vertexindex, 
+    // Checking if we should render the vertex dependent on the vertexindex,
     // by using modulus.
-    if (checkIfSkipVertex() || 
+    if (checkIfSkipVertex() ||
         distance(earthPos, in_position) < (distanceThreshold * AUtoMeter) &&
-        rValue/AUtoMeter > filterLower && 
+        rValue/AUtoMeter > filterLower &&
         rValue/AUtoMeter < filterUpper &&
         in_position.z > (domainLimZ.x * AUtoMeter) &&
         in_position.z < (domainLimZ.y * AUtoMeter))
@@ -268,7 +255,7 @@ void main() {
         if (colorMode == 0) {
             vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
             if (fluxValue > thresholdFlux) {
-                vs_color = vec4(fluxColor.xyz, fluxColor.a);  
+                vs_color = vec4(fluxColor.xyz, fluxColor.a);
                 gl_PointSize = nodeSizeLargerFlux;
             }
             else {
@@ -286,28 +273,9 @@ void main() {
         vs_color = vec4(0.0);
     }
 
-    if (usingParticles && isParticle() && rValue > 0.0) {
-        int modulusResult = int(double(particleSpeed) * time + gl_VertexID) 
-            % particleSpacing;
-
-        if (modulusResult >= particleSize - 30) {
-            if (flowColoring) {
-                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                vs_color = vec4(fluxColor3.xyz, flowColor.a * 0.8);
-            }
-            else {
-                vs_color = vec4(0.9, 0.9, 0.9, 0.5);
-            }
-        }
-        else {
-            vec4 fluxColorFlow = getTransferFunctionColor(colorTableFlow);
-            vs_color = vec4(fluxColorFlow.xyz, 1.0);
-        }
-    }
-
     if (usingCameraPerspective) {
         float rtemp = min(rValue, 1.0);
-    
+
         float maxDistance = 100000000000.0 * perspectiveDistanceFactor;
         float distanceVec = distance(cameraPos, in_position.xyz);
 
@@ -327,22 +295,22 @@ void main() {
             else {
                 factorS = pow(distScale, 9.0) * 500.0;
             }
-            gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
+            gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
         }
 
         if (gl_PointSize > minMaxNodeSize.y) {
             gl_PointSize = minMaxNodeSize.y;
         }
-        
+
         if (gl_PointSize < minMaxNodeSize.x) {
             gl_PointSize = minMaxNodeSize.x;
-        }           
+        }
     }
 
     vs_time = time;
     vec4 position_in_meters = vec4(in_position, 1.0);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
-    
+
     gl_Position = vec4(positionClipSpace.xy, 0.0, positionClipSpace.w);
     vs_depth = gl_Position.w;
 }

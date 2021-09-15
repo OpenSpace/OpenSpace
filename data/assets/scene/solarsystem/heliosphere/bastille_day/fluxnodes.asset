@@ -35,8 +35,7 @@ local Fluxnodes = {
     ColorTablePaths = {
       Standard = asset.localResource("transferfunctions/flux-nodes.txt"),
       CMR = asset.localResource("transferfunctions/CMR.txt"),
-      Earth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt"),
-      Flow = asset.localResource("transferfunctions/flux-nodes-flow.txt")
+      Earth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt")
     },
 
     LoadAtRuntime = true,

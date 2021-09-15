@@ -98,10 +98,9 @@ private:
         filterLower, filterUpper, scalingMode, colorTableRange, domainLimZ, nodeSkip,
         nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
         nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
-        distanceThreshold, enhanceMethod, flowColor, usingParticles,
-        particleSize, particleSpacing, particleSpeed)
+        distanceThreshold, enhanceMethod)
         _uniformCache;
-    UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
+    UniformCache(time, maxNodeDistanceSize, usingCameraPerspective,
         drawCircles, drawHollow, useGaussian, usingRadiusPerspective, 
         perspectiveDistanceFactor, minMaxNodeSize, usingPulse, 
         usingGaussianPulse, pulsatingAlways) 
@@ -224,21 +223,21 @@ private:
 
     // Flow Properties
     // Simulated particles' color
-    properties::Vec4Property _flowColor;
+    //properties::Vec4Property _flowColor;
     // Toggle flow [ON/OFF]
-    properties::BoolProperty _flowEnabled;
+    //properties::BoolProperty _flowEnabled;
     // Group to hold the flow/particle properties
     properties::PropertyOwner _flowGroup;
     // Size of simulated flow particles
-    properties::IntProperty _flowParticleSize;
+    //properties::IntProperty _flowParticleSize;
     // Size of simulated flow particles
-    properties::IntProperty _flowParticleSpacing;
+    //properties::IntProperty _flowParticleSpacing;
     // Toggle flow direction [FORWARDS/BACKWARDS]
     //properties::BoolProperty _pFlowReversed;
     // Speed of simulated flow
-    properties::IntProperty _flowSpeed;
+    //properties::IntProperty _flowSpeed;
     //Either use flowcolortable or FlowColor.
-    properties::BoolProperty _useFlowColor;
+    //properties::BoolProperty _useFlowColor;
     properties::PropertyOwner _cameraPerspectiveGroup;
     properties::BoolProperty _cameraPerspectiveEnabled;
     properties::BoolProperty _drawingCircles;
