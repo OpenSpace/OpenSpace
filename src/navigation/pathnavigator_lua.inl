@@ -26,6 +26,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
@@ -124,7 +125,7 @@ int goToHeight(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToHeight");
     auto [nodeIdentifier, height, useUpFromTargetOrDuration, duration] =
         ghoul::lua::values<
-            std::string, double, std::optional<std::variant<bool, double>>, 
+            std::string, double, std::optional<std::variant<bool, double>>,
             std::optional<double>
         >(L);
 
@@ -167,6 +168,46 @@ int goToHeight(lua_State* L) {
         global::navigationHandler->pathNavigator().startPath();
     }
 
+    return 0;
+}
+
+int goToNavigationState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::goToNavigationState");
+    auto [navigationState, duration] =
+        ghoul::lua::values<ghoul::Dictionary, std::optional<double>>(L);
+
+    try {
+        openspace::documentation::testSpecificationAndThrow(
+            interaction::NavigationState::Documentation(),
+            navigationState,
+            "NavigationState"
+        );
+    }
+    catch (documentation::SpecificationError& e) {
+        LERRORC("goToNavigationState", ghoul::to_string(e.result));
+        return ghoul::lua::luaError(
+            L, fmt::format("Unable to create a path: {}", e.what())
+        );
+    }
+
+    using namespace std::string_literals;
+    ghoul::Dictionary instruction;
+    instruction.setValue("TargetType", "NavigationState"s);
+    instruction.setValue("NavigationState", navigationState);
+
+    if (duration.has_value()) {
+        double d = *duration;
+        if (d <= Epsilon) {
+            return ghoul::lua::luaError(L, "Duration must be larger than zero");
+        }
+        instruction.setValue("Duration", d);
+    }
+
+    global::navigationHandler->pathNavigator().createPath(instruction);
+
+    if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
+        global::navigationHandler->pathNavigator().startPath();
+    }
     return 0;
 }
 

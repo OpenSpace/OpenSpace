@@ -435,6 +435,16 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "camera is set based on the target node. Either of the optional "
                 "parameters can be left out."
             },
+             {
+                "goToNavigationState",
+                &luascriptfunctions::goToNavigationState,
+                {},
+                "table, [double]",
+                "Create a path to the navigation state described by the input table. "
+                "The optional double specifies the target duration of the motion. Note "
+                "that roll must be included for the target up direction to be taken "
+                "into account."
+            },
             {
                 "createPath",
                 &luascriptfunctions::createPath,
