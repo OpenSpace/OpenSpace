@@ -170,8 +170,8 @@ int goToHeight(lua_State* L) {
     return 0;
 }
 
-int generatePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePath");
+int createPath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createPath");
     ghoul::Dictionary dictionary = ghoul::lua::value<ghoul::Dictionary>(L);
 
     global::navigationHandler->pathNavigator().createPath(dictionary);

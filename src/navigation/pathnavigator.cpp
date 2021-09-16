@@ -436,11 +436,11 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "parameters can be left out."
             },
             {
-                "generatePath",
-                &luascriptfunctions::generatePath,
+                "createPath",
+                &luascriptfunctions::createPath,
                 {},
                 "table",
-                "Generate the path as described by the lua table input argument"
+                "Create the path as described by the lua table input argument"
             },
         }
     };
