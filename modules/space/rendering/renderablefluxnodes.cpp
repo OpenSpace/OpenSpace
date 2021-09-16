@@ -50,23 +50,17 @@
 namespace {
     // log category
     constexpr const char* _loggerCat = "RenderableFluxNodes";
-
-    constexpr int8_t CurrentCacheVersion = 2;
     
     //streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, 
-    constexpr const std::array<const char*, 21> UniformNames = {
-        "streamColor", "nodeSize", "nodeSizeLargerFlux", "thresholdFlux", "colorMode",
-        "filterLower", "filterUpper", "scalingMode", "colorTableRange", "domainLimZ",
-        "nodeSkip", "nodeSkipDefault", "nodeSkipEarth", "nodeSkipMethod", 
-        "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold", "fluxColorAlpha", 
-        "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", 
-        "enhanceMethod"
-    };
-    constexpr const std::array<const char*, 12> UniformNames2 = {
-        "time", "maxNodeDistanceSize", "usingCameraPerspective",
-        "drawCircles", "drawHollow", "useGaussian", "usingRadiusPerspective",
+    constexpr const std::array<const char*, 29> UniformNames = {
+        "streamColor", "nodeSize", "proximityNodesSize", 
+        "thresholdFlux", "colorMode", "filterLower", "filterUpper", "scalingMode",
+        "colorTableRange", "domainLimZ", "nodeSkip", "nodeSkipDefault", "nodeSkipEarth",
+        "nodeSkipMethod", "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold",
+        "fluxColorAlpha", "earthPos", "distanceThreshold", "time", "maxNodeDistanceSize", 
+        "usingCameraPerspective", "drawCircles", "drawHollow", "useGaussian",
         "perspectiveDistanceFactor", "minMaxNodeSize", "usingPulse",
-        "usingGaussianPulse", "pulsatingAlways"
+        "usingGaussianPulse"
     };
 
     constexpr openspace::properties::Property::PropertyInfo GoesEnergyBinsInfo = {
@@ -157,12 +151,6 @@ namespace {
         "Flux Color Alpha",
         "The value of alpha for the flux color mode."
     };
-    constexpr openspace::properties::Property::PropertyInfo 
-                                                         FluxColorAlphaIlluminanceInfo = {
-        "FluxColorAlphaIlluminance",
-        "Flux Color Alpha for illuminance",
-        "The value of alpha for the flux color mode."
-    };
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
         "Skipping Nodes By Flux",
@@ -174,11 +162,6 @@ namespace {
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
     };
-    constexpr openspace::properties::Property::PropertyInfo EnhanceMethodInfo = {
-        "EnhanceMethod",
-        "Enhance Method",
-        "Deciding what method to use for nodes close to earth"
-    };
     constexpr openspace::properties::Property::PropertyInfo DistanceplanetInfo = {
         "Distanceplanet",
         "Distance Planet",
@@ -187,58 +170,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
-        "Enhance the size of nodes dependent on distance to planet."
+        "Changes threshold distance for highlighting nodes close to earth."
+    };
+    constexpr openspace::properties::Property::PropertyInfo ProximityNodesSizeInfo = {
+        "ProximityNodesSize",
+        "Earths Proximity Nodes Size",
+        "Changes size of nodes only close to earth."
     };
     constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
         "MisalignedIndex",
         "Index to shift sequence number",
         "The misalignment number for sequence for fluxnodes vs Fieldlines"
     };
-    constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
-        "Flowcolor",
-        "Color of Flow",
-        "Color of Flow."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
-        "FlowEnabled",
-        "Flow Direction",
-        "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow."
-    };
-    constexpr openspace::properties::Property::PropertyInfo InterestingStreamsInfo = {
-        "InterestingStreamsEnabled",
-        "Interesting Streams Enabled",
-        "Toggles the rendering of selected streams."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
-        "ParticleSize",
-        "Particle Size",
-        "Size of the particles."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
-        "ParticleSpacing",
-        "Particle Spacing",
-        "Spacing inbetween particles."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
-        "Speed",
-        "Speed",
-        "Speed of the flow."
-    };
-    constexpr openspace::properties::Property::PropertyInfo UseFlowColorInfo = {
-        "Coloring",
-        "Color either by Flowcolor or Flow colortable",
-        "If set to true the flow will be colored by Flowcolor."
-    };
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max Node Distance Size",
         "The maximum size of the nodes at a certin distance."
-    };
-    constexpr openspace::properties::Property::PropertyInfo NodeDistanceThresholdInfo = {
-        "NodeDistanceThreshold",
-        "Node Distance Threshold",
-        "Threshold for where to interpolate between the max and min node distance."
     };
     constexpr openspace::properties::Property::PropertyInfo 
                                                           CameraPerspectiveEnabledInfo = {
@@ -264,13 +211,6 @@ namespace {
 
     };
     constexpr openspace::properties::Property::PropertyInfo 
-                                                          RadiusPerspectiveEnabledInfo = {
-        "RadiusPerspectiveEnabled",
-        "Include radius with cameraperspective",
-        "If false, then nodes closer to the sun will not be larger "
-        "regardless of distance to camera."
-    };
-    constexpr openspace::properties::Property::PropertyInfo 
                                                          PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
         "Perspective Distance factor",
@@ -281,11 +221,6 @@ namespace {
         "MinMaxNodeSize",
         "Min & Max node size",
         "The minimum and maximum node size."
-    };
-    constexpr openspace::properties::Property::PropertyInfo AlwaysPulseInfo = {
-        "AlwaysPulsate",
-        "Pulsate regardless of camera position",
-        "Always have nodes close to earth pulsate regardless of position."
     };
     constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
@@ -315,14 +250,8 @@ namespace {
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
         // path to source folder with the 3 binary files in it
         std::filesystem::path sourceFolder [[codegen::directory()]];
-
-        struct TransferFunctions {
-            std::string standard;
-            std::string earth;
-            std::string cmr [[codegen::key("CMR")]];
-        };
         // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        TransferFunctions colorTablePaths;
+        std::string colorTablePaths;
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
         std::optional<int> energyBin;
     };
@@ -339,12 +268,10 @@ documentation::Documentation RenderableFluxNodes::Documentation() {
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _goesEnergyBins(GoesEnergyBinsInfo, properties::OptionProperty::DisplayType::Radio)
-    , _colorGroup({ "Color" })
+    , _styleGroup({ "Style" })
     , _colorMode(ColorModeInfo, properties::OptionProperty::DisplayType::Radio)
     , _scalingMethod(ScalingmethodInfo, properties::OptionProperty::DisplayType::Radio)
     , _nodeskipMethod(NodeskipMethodInfo, properties::OptionProperty::DisplayType::Radio)
-    , _enhancemethod(EnhanceMethodInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _colorTablePath(ColorTablePathInfo)
     , _streamColor(
         StreamColorInfo,
         glm::vec4(0.96f, 0.88f, 0.8f, 1.f),
@@ -353,11 +280,10 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _streamGroup({ "Streams" })
     , _nodesAmountGroup({ "NodeGroup" })
     , _nodeSize(NodeSizeInfo, 2.f, 1.f, 10.f)
-    , _nodeSizeLargerFlux(NodeSizeLargerFluxInfo, 2.f, 1.f, 10.f)
+    , _colorTablePath(ColorTablePathInfo)
     , _colorTableRange(colorTableRangeInfo, { -2.f, 4.f }, { -8.f, -8.f }, { 8.f, 8.f })
     , _domainZ(DomainZInfo, { -2.5f, 2.5f }, { -2.5f, -2.5f }, { 2.5f, 2.5f})
-    , _fluxColorAlpha(FluxColorAlphaInfo, 0.f, 0.f, 1.f)
-    , _fluxColorAlphaIlluminance(FluxColorAlphaIlluminanceInfo, 1.f, 0.f, 1.f)
+    , _fluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
     , _thresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
     , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
@@ -367,42 +293,24 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
     , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _earthdistGroup({ "Earthfocus" })
-    , _distanceThreshold(DistanceThresholdInfo, 0.0f, 0.0f, 1.0f)
-    //, _flowColor(
-    //    FlowColorInfo,
-    //    glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
-    //    glm::vec4(0.f),
-    //    glm::vec4(1.f)
-    //)
-    //, _flowEnabled(FlowEnabledInfo, false)
-    , _interestingStreamsEnabled(InterestingStreamsInfo, false)
-    , _flowGroup({ "Flow" })
-    //, _flowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
-    //, _flowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
-    //, _flowSpeed(FlowSpeedInfo, 20, 0, 1000)
-    //, _useFlowColor(UseFlowColorInfo, false)
+    , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
+    , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
     , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
-    , _nodeDistanceThreshold(NodeDistanceThresholdInfo, 0.f, 0.f, 40.f)
     , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
     , _drawingCircles(DrawingCirclesInfo, false)
     , _cameraPerspectiveGroup({" CameraPerspective"})
     , _drawingHollow(DrawingHollowInfo, false)
     , _gaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
-    , _radiusPerspectiveEnabled(RadiusPerspectiveEnabledInfo, true)
     , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
     , _minMaxNodeSize(MinMaxNodeSizeInfo, {2.f, 30.f}, {1.f, 1.f}, {10.f, 200.f})
     , _pulseEnabled(pulseEnabledInfo, false)
     , _gaussianPulseEnabled(gaussianPulseEnabledInfo, false)
-    , _pulseAlways(AlwaysPulseInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _transferFunction = std::make_unique<TransferFunction>(p.colorTablePaths.standard);
-    _transferFunctionCMR = std::make_unique<TransferFunction>(p.colorTablePaths.cmr);
-    _transferFunctionEarth = std::make_unique<TransferFunction>(p.colorTablePaths.earth);
+    _colorTablePath = p.colorTablePaths;
+    _transferFunction = std::make_unique<TransferFunction>(_colorTablePath);
     
-    _colorTablePath = p.colorTablePaths.standard;
-
     _binarySourceFolderPath = p.sourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
         // Extract all file paths from the provided folder
@@ -443,16 +351,6 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
     _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
     _nodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
-    _nodeskipMethod.addOption(
-        static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber"
-    );
-
-    _enhancemethod.addOption(static_cast<int>(EnhanceMethod::SizeScaling), "SizeScaling");
-    _enhancemethod.addOption(static_cast<int>(EnhanceMethod::ColorTables), "ColorTables");
-    _enhancemethod.addOption(
-        static_cast<int>(EnhanceMethod::SizeAndColor), "Sizescaling and colortables"
-    );
-    _enhancemethod.addOption(static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
 
     if (p.energyBin.has_value()) {
         _goesEnergyBins.setValue(p.energyBin.value());
@@ -479,12 +377,9 @@ void RenderableFluxNodes::initializeGL() {
 
     _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
     _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
-    _uniformCache.nodeSizeLargerFlux = 
-        _shaderProgram->uniformLocation("nodeSizeLargerFlux");
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, UniformNames2); 
       
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -498,13 +393,11 @@ void RenderableFluxNodes::initializeGL() {
 
 void RenderableFluxNodes::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
-
-    _colorTablePath.onChange([this] {
-        _transferFunction->setPath(_colorTablePath);
-    });
-
     _goesEnergyBins.onChange([this] {
         loadNodeData(_goesEnergyBins.option().value);
+    });
+    _colorTablePath.onChange([this]() {
+        _transferFunction->setPath(_colorTablePath);
     });
 }
 
@@ -585,58 +478,45 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
 void RenderableFluxNodes::setupProperties() {
     addProperty(_goesEnergyBins);
         
-    addPropertySubOwner(_colorGroup);
+    addPropertySubOwner(_styleGroup);
     addPropertySubOwner(_streamGroup);
     addPropertySubOwner(_nodesAmountGroup);
     addPropertySubOwner(_earthdistGroup);
     addPropertySubOwner(_cameraPerspectiveGroup);
 
-    _colorGroup.addProperty(_colorMode);
-    _colorGroup.addProperty(_scalingMethod);
-    _colorGroup.addProperty(_colorTableRange);
-    _colorGroup.addProperty(_colorTablePath);
-    _colorGroup.addProperty(_streamColor);
-    _colorGroup.addProperty(_fluxColorAlpha);
-    _colorGroup.addProperty(_fluxColorAlphaIlluminance);
+    _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
+    _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
+    _minMaxNodeSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _cameraPerspectiveGroup.addProperty(_minMaxNodeSize);
 
-    _streamGroup.addProperty(_thresholdFlux);
-    _streamGroup.addProperty(_filteringLower);
-    _streamGroup.addProperty(_filteringUpper);
-    _streamGroup.addProperty(_domainZ);
+    _earthdistGroup.addProperty(_distanceThreshold);
+    _earthdistGroup.addProperty(_proximityNodesSize);
+    _earthdistGroup.addProperty(_pulseEnabled);
+    _earthdistGroup.addProperty(_gaussianPulseEnabled);
 
     _nodesAmountGroup.addProperty(_nodeskipMethod);
     _nodesAmountGroup.addProperty(_amountofNodes);
     _nodesAmountGroup.addProperty(_defaultNodeSkip);
     _nodesAmountGroup.addProperty(_earthNodeSkip);
     _nodesAmountGroup.addProperty(_nodeSize);
-    _nodesAmountGroup.addProperty(_nodeSizeLargerFlux);
     _nodesAmountGroup.addProperty(_fluxNodeskipThreshold);
     _nodesAmountGroup.addProperty(_radiusNodeSkipThreshold);
     _nodesAmountGroup.addProperty(_maxNodeDistanceSize);
-    _nodesAmountGroup.addProperty(_nodeDistanceThreshold);
 
-    _earthdistGroup.addProperty(_distanceThreshold);
-    _earthdistGroup.addProperty(_enhancemethod);
-    _earthdistGroup.addProperty(_interestingStreamsEnabled);
+    _streamGroup.addProperty(_thresholdFlux);
+    _streamGroup.addProperty(_filteringLower);
+    _streamGroup.addProperty(_filteringUpper);
+    _streamGroup.addProperty(_domainZ);
 
-    //_flowGroup.addProperty(_flowEnabled);
-    //_flowGroup.addProperty(_flowColor);
-    //_flowGroup.addProperty(_flowParticleSize);
-    //_flowGroup.addProperty(_flowParticleSpacing);
-    //_flowGroup.addProperty(_flowSpeed);
-    //_flowGroup.addProperty(_useFlowColor);
-
-    _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
-    _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
-    _cameraPerspectiveGroup.addProperty(_drawingCircles);
-    _cameraPerspectiveGroup.addProperty(_drawingHollow);
-    _cameraPerspectiveGroup.addProperty(_gaussianAlphaFilter);
-    _cameraPerspectiveGroup.addProperty(_radiusPerspectiveEnabled);
-    _minMaxNodeSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    _cameraPerspectiveGroup.addProperty(_minMaxNodeSize);
-    _cameraPerspectiveGroup.addProperty(_pulseEnabled);
-    _cameraPerspectiveGroup.addProperty(_gaussianPulseEnabled);
-    _cameraPerspectiveGroup.addProperty(_pulseAlways);
+    _styleGroup.addProperty(_drawingCircles);
+    _styleGroup.addProperty(_drawingHollow);
+    _styleGroup.addProperty(_gaussianAlphaFilter);
+    _styleGroup.addProperty(_colorMode);
+    _styleGroup.addProperty(_scalingMethod);
+    _styleGroup.addProperty(_colorTableRange);
+    _styleGroup.addProperty(_colorTablePath);
+    _styleGroup.addProperty(_streamColor);
+    _styleGroup.addProperty(_fluxColorAlpha);
 
     definePropertyCallbackFunctions();
 }
@@ -796,10 +676,6 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     
     _shaderProgram->setUniform(_uniformCache.streamColor, _streamColor);
     _shaderProgram->setUniform(_uniformCache.nodeSize, _nodeSize);
-    _shaderProgram->setUniform(
-        _uniformCache.nodeSizeLargerFlux, 
-        _nodeSizeLargerFlux
-    );
     _shaderProgram->setUniform(_uniformCache.thresholdFlux, _thresholdFlux);
     _shaderProgram->setUniform(_uniformCache.colorMode, _colorMode);
     _shaderProgram->setUniform(_uniformCache.filterLower, _filteringLower);
@@ -812,7 +688,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform(_uniformCache.nodeSkipEarth, _earthNodeSkip);
     _shaderProgram->setUniform(_uniformCache.nodeSkipMethod, _nodeskipMethod);
     _shaderProgram->setUniform(
-        _uniformCache.nodeSkipFluxThreshold, 
+        _uniformCache.nodeSkipFluxThreshold,
         _fluxNodeskipThreshold
     );
     _shaderProgram->setUniform(
@@ -820,63 +696,46 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _radiusNodeSkipThreshold
     );
     _shaderProgram->setUniform(_uniformCache.fluxColorAlpha, _fluxColorAlpha);
-    _shaderProgram->setUniform(
-        _uniformCache.fluxColorAlphaIlluminance, 
-        _fluxColorAlphaIlluminance
-    );
+
     _shaderProgram->setUniform(_uniformCache.earthPos, earthPos);
     _shaderProgram->setUniform(_uniformCache.distanceThreshold, _distanceThreshold);
-    _shaderProgram->setUniform(_uniformCache.enhanceMethod, _enhancemethod);
+    _shaderProgram->setUniform(_uniformCache.proximityNodesSize, _proximityNodesSize);
     _shaderProgram->setUniform(
-        _uniformCache2.time,
+        _uniformCache.time,
         global::windowDelegate->applicationTime()
     );
     _shaderProgram->setUniform(
-        _uniformCache2.maxNodeDistanceSize, 
+        _uniformCache.maxNodeDistanceSize, 
         _maxNodeDistanceSize
     );
     _shaderProgram->setUniform(
-        _uniformCache2.usingCameraPerspective, 
+        _uniformCache.usingCameraPerspective, 
         _cameraPerspectiveEnabled
     );
-    _shaderProgram->setUniform(_uniformCache2.drawCircles, _drawingCircles);
-    _shaderProgram->setUniform(_uniformCache2.drawHollow, _drawingHollow);
-    _shaderProgram->setUniform(_uniformCache2.useGaussian, _gaussianAlphaFilter);
+    _shaderProgram->setUniform(_uniformCache.drawCircles, _drawingCircles);
+    _shaderProgram->setUniform(_uniformCache.drawHollow, _drawingHollow);
+    _shaderProgram->setUniform(_uniformCache.useGaussian, _gaussianAlphaFilter);
+
     _shaderProgram->setUniform(
-        _uniformCache2.usingRadiusPerspective, 
-        _radiusPerspectiveEnabled
-    );
-    _shaderProgram->setUniform(
-        _uniformCache2.perspectiveDistanceFactor, 
+        _uniformCache.perspectiveDistanceFactor, 
         _perspectiveDistanceFactor
     );
-    _shaderProgram->setUniform(_uniformCache2.minMaxNodeSize, _minMaxNodeSize);
-    _shaderProgram->setUniform(_uniformCache2.usingPulse, _pulseEnabled);
+    _shaderProgram->setUniform(_uniformCache.minMaxNodeSize, _minMaxNodeSize);
+    _shaderProgram->setUniform(_uniformCache.usingPulse, _pulseEnabled);
     _shaderProgram->setUniform(
-        _uniformCache2.usingGaussianPulse, 
+        _uniformCache.usingGaussianPulse, 
         _gaussianPulseEnabled
     );
-    _shaderProgram->setUniform(_uniformCache2.pulsatingAlways, _pulseAlways);
         
     glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
     
     _shaderProgram->setUniform("cameraPos", cameraPos);
     
-    ghoul::opengl::TextureUnit textureUnit;
-    ghoul::opengl::TextureUnit textureUnitCMR;
-    ghoul::opengl::TextureUnit textureUnitEarth;
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+        ghoul::opengl::TextureUnit textureUnit;
         textureUnit.activate();
         _transferFunction->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTable", textureUnit);
-
-        textureUnitCMR.activate();
-        _transferFunctionCMR->bind(); // Calls update internally
-        _shaderProgram->setUniform("colorTableCMR", textureUnitCMR);
-
-        textureUnitEarth.activate();
-        _transferFunctionEarth->bind(); // Calls update internally
-        _shaderProgram->setUniform("colorTableEarth", textureUnitEarth);
     }
 
     glBindVertexArray(_vertexArrayObject);
@@ -953,11 +812,6 @@ void RenderableFluxNodes::update(const UpdateData& data) {
             *_shaderProgram, 
             _uniformCache, 
             UniformNames
-        );
-        ghoul::opengl::updateUniformLocations(
-            *_shaderProgram,
-            _uniformCache2,
-            UniformNames2
         );
     }
 }

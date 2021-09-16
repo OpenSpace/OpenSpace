@@ -32,12 +32,7 @@ local Fluxnodes = {
   Renderable = {
     Type = "RenderableFluxNodes",
     SourceFolder = fluxnodesBinaries,
-    ColorTablePaths = {
-      Standard = asset.localResource("transferfunctions/flux-nodes.txt"),
-      CMR = asset.localResource("transferfunctions/CMR.txt"),
-      Earth = asset.localResource("transferfunctions/flux-nodes-grey-scale.txt")
-    },
-
+    ColorTablePaths = asset.localResource("transferfunctions/CMR.txt"),
     LoadAtRuntime = true,
     --ScaleToMeters = 1.0,
     SecondsBefore = 24*60*60,

@@ -94,17 +94,14 @@ private:
         Illuminance = 3,
     };
 
-    UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, colorMode,
-        filterLower, filterUpper, scalingMode, colorTableRange, domainLimZ, nodeSkip,
-        nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
-        nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
-        distanceThreshold, enhanceMethod)
+    UniformCache(streamColor, nodeSize, proximityNodesSize, 
+        thresholdFlux, colorMode, filterLower, filterUpper, scalingMode, colorTableRange,
+        domainLimZ, nodeSkip, nodeSkipDefault, nodeSkipEarth, nodeSkipMethod,
+        nodeSkipFluxThreshold, nodeSkipRadiusThreshold, fluxColorAlpha,
+        earthPos, distanceThreshold, time, maxNodeDistanceSize, usingCameraPerspective,
+        drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize, 
+        usingPulse, usingGaussianPulse)
         _uniformCache;
-    UniformCache(time, maxNodeDistanceSize, usingCameraPerspective,
-        drawCircles, drawHollow, useGaussian, usingRadiusPerspective, 
-        perspectiveDistanceFactor, minMaxNodeSize, usingPulse, 
-        usingGaussianPulse, pulsatingAlways) 
-        _uniformCache2;
 
     std::filesystem::path _binarySourceFolderPath;
 
@@ -129,14 +126,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
-    // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
+    // Transfer function used to color lines when _colorMethod is set to by_flux_value
     std::unique_ptr<TransferFunction> _transferFunction;
-    // Transfer function used to color with the CMR map
-    std::unique_ptr<TransferFunction> _transferFunctionCMR;
-    // Transfer function used to color line near Earth
-    std::unique_ptr<TransferFunction> _transferFunctionEarth;
-    // Transfer function used to color line flow
-    std::unique_ptr<TransferFunction> _transferFunctionFlow;
 
     std::vector<std::string> _binarySourceFiles;
     // Contains the _triggerTimes for all streams in the sequence
@@ -160,21 +151,17 @@ private:
     // Property to show different energybins
     properties::OptionProperty _goesEnergyBins;
     // Group to hold the color properties
-    properties::PropertyOwner _colorGroup;
+    properties::PropertyOwner _styleGroup;
     // Uniform/transfer function
     properties::OptionProperty _colorMode;
     // Uniform stream Color
     properties::Vec4Property _streamColor;
-    // Choose different distant to earth enhanchement method. 
-    properties::OptionProperty _enhancemethod;
-    // Color table/transfer function for "By Flux value" coloring
+    // Path to transferfunction
     properties::StringProperty _colorTablePath;
     // Valid range for the color table
     properties::Vec2Property _colorTableRange;
     // The value of alpha for the flux color mode
     properties::FloatProperty _fluxColorAlpha;
-    // The value of alpha for the flux illuminance color mode
-    properties::FloatProperty _fluxColorAlphaIlluminance;
     // Group to hold the particle properties
     properties::PropertyOwner _streamGroup;
     // Scaling options
@@ -183,19 +170,13 @@ private:
     properties::PropertyOwner _nodesAmountGroup;
     // Size of simulated node particles
     properties::FloatProperty _nodeSize;
-    // Size of nodes for larger flux
-    properties::FloatProperty _nodeSizeLargerFlux;
     // Threshold from earth to decide the distance for which the nodeSize gets larger
     properties::FloatProperty _distanceThreshold;
+    // Change size of nodes close to earth
+    properties::FloatProperty _proximityNodesSize;
     // Maximum size of nodes at a certin distance
     properties::FloatProperty _maxNodeDistanceSize;
-    // Threshold for where to interpolate between the max and min node distance
-    properties::FloatProperty _nodeDistanceThreshold;
-    // Toggle selected streams [ON/OFF]
-    properties::BoolProperty _interestingStreamsEnabled;
 
-    //properties::FloatProperty _maxNodeSize;
-    //properties::FloatProperty _minNodeSize;
     properties::Vec2Property _minMaxNodeSize;
 
     // Valid range along the Z-axis
@@ -221,32 +202,13 @@ private:
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _radiusNodeSkipThreshold;
 
-    // Flow Properties
-    // Simulated particles' color
-    //properties::Vec4Property _flowColor;
-    // Toggle flow [ON/OFF]
-    //properties::BoolProperty _flowEnabled;
-    // Group to hold the flow/particle properties
-    properties::PropertyOwner _flowGroup;
-    // Size of simulated flow particles
-    //properties::IntProperty _flowParticleSize;
-    // Size of simulated flow particles
-    //properties::IntProperty _flowParticleSpacing;
-    // Toggle flow direction [FORWARDS/BACKWARDS]
-    //properties::BoolProperty _pFlowReversed;
-    // Speed of simulated flow
-    //properties::IntProperty _flowSpeed;
-    //Either use flowcolortable or FlowColor.
-    //properties::BoolProperty _useFlowColor;
     properties::PropertyOwner _cameraPerspectiveGroup;
     properties::BoolProperty _cameraPerspectiveEnabled;
     properties::BoolProperty _drawingCircles;
     properties::BoolProperty _drawingHollow;
     properties::BoolProperty _gaussianAlphaFilter;
-    properties::BoolProperty _radiusPerspectiveEnabled;
     properties::FloatProperty _perspectiveDistanceFactor;
     properties::BoolProperty _pulseEnabled;
     properties::BoolProperty _gaussianPulseEnabled;
-    properties::BoolProperty _pulseAlways;
 };
 } // namespace openspace

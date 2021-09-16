@@ -26,18 +26,16 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 // Inputs
-// Should be provided in meters VaPosition
+// Should be provided in meters
 layout(location = 0) in vec3 in_position;
 
-// The extra value used to color lines. Location must correspond to VaColor in
-// renderablefluxnodes.h
+// The extra value used to color lines
 layout(location = 1) in float fluxValue;
 
-// The extra value used to mask out parts of lines. Location must correspond to
-// VaFiltering in renderablefluxnodes.h
+// The extra value used to mask out parts of lines
 layout(location = 2) in float rValue;
 
-// These should correspond to the enum 'ColorMode' in renderablefluxnodes.cpp
+// These should correspond to the enum 'ColorMode'
 const int colorByFluxValue = 0;
 const int uniformColor = 1;
 
@@ -51,19 +49,11 @@ const int R2Flux = 2;
 const int log10RFlux = 3;
 const int lnRFlux = 4;
 
-const int sizeScaling = 0;
-const int colorTables = 1;
-const int sizeAndColor = 2;
-const int illuminance = 3;
-
 const float AUtoMeter = 149597871000.0;
 out vec4    vs_color;
 out float   vs_depth;
 out vec2    vs_st;
-out float   camera_IsCloseEnough;
 out float   vs_closeToEarth;
-out double  vs_time;
-out vec3    vs_camerapos;
 
 // General Uniforms that's always needed
 uniform mat4      modelViewProjection;
@@ -71,24 +61,12 @@ uniform mat4      modelViewProjection;
 // Uniforms needed to color by quantity
 uniform int       colorMode;
 uniform sampler1D colorTable;
-uniform sampler1D colorTableCMR;
-uniform sampler1D colorTableEarth;
-//uniform sampler1D colorTableFlow;
 uniform vec2      colorTableRange;
 
-// Masking Uniforms
-uniform bool      usingMasking;
-uniform vec2      maskingRange;
-
-// Domain Uniforms
-uniform vec2      domainLimX;
-uniform vec2      domainLimY;
 uniform vec2      domainLimZ;
-uniform vec2      domainLimR;
 
 // Fluxnodes specific uniforms
 uniform float   nodeSize;
-uniform float   nodeSizeLargerFlux;
 uniform vec4    streamColor;
 uniform float   thresholdFlux;
 uniform float   filterLower;
@@ -101,23 +79,20 @@ uniform int     nodeSkipEarth;
 uniform float   nodeSkipFluxThreshold;
 uniform float   nodeSkipRadiusThreshold;
 uniform float   fluxColorAlpha;
-uniform float   fluxColorAlphaIlluminance;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
-uniform int     enhanceMethod;
+uniform float   proximityNodesSize;
 uniform double  time;
 
 // Speicific uniforms for cameraperspective
 uniform float maxNodeDistanceSize;
-uniform float nodeDistanceThreshold;
 
 uniform vec3    cameraPos;
 //uniform vec2 screenSize;
 uniform bool    usingCameraPerspective;
-uniform bool    usingRadiusPerspective;
 uniform float   perspectiveDistanceFactor;
 
-uniform vec2   minMaxNodeSize;
+uniform vec2    minMaxNodeSize;
 uniform bool    usingPulse;
 
 vec4 getTransferFunctionColor(sampler1D inColorTable) {
@@ -140,9 +115,9 @@ vec4 getTransferFunctionColor(sampler1D inColorTable) {
     else if (scalingMode == R2Flux) {
         scaleValue = rValue * rValue * fluxValue;
     }
-
     float lookUpVal = (scaleValue - colorTableRange.x) /
         (colorTableRange.y - colorTableRange.x);
+
     return texture(inColorTable, lookUpVal);
 }
 
@@ -173,67 +148,33 @@ bool checkIfSkipVertex() {
     return false;
 }
 
-//function for showing nodes different depending on distance to earth
-void decideHowToShowCloseToEarth() {
-    // SizeScaling
-    if (enhanceMethod == sizeScaling || enhanceMethod == illuminance) {
-       vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
-        vs_color = vec4(fluxColor.xyz, fluxColor.a);
-    }
-    // ColorTables
-    if (enhanceMethod == colorTables) {
-        vec4 fluxColor = getTransferFunctionColor(colorTable);
-        vs_color = vec4(fluxColor.xyz, fluxColor.a);
-    }
-    // SizeColor
-    if (enhanceMethod == sizeAndColor) {
-        vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-        vs_color = vec4(fluxColor3.xyz, fluxColor3.a);
-
-        float tempR2 = rValue + 0.4;
-        if (tempR2 > 1.5) {
-            tempR2 = 1.5;
-        }
-        gl_PointSize = tempR2 * tempR2 * tempR2 * gl_PointSize * 5;
-    }
-}
-
-void checkdistanceMethod() {
-    //Enhance by distance to Earth
+void whatToDoIfCloseToEarth() {
     float maxdist = 10000000000.0 * perspectiveDistanceFactor;
     float distancevec = distance(earthPos, in_position.xyz);
-
     vs_closeToEarth = 0.0;
 
-    if (distancevec < AUtoMeter * distanceThreshold && usingPulse) {
+    if (distancevec < AUtoMeter * distanceThreshold) {
+        if (usingPulse) {
+            int speed = 2;
+            int modulusResult = int(speed * time) % 2;
+            if (fluxValue > thresholdFlux){
+                if (modulusResult == 1) {
+                    vs_color.a = 0.01;
+                }
+                else {
+                    vs_color.a = 1.0;
+                }
+            }
+            else {
+                vs_color.a = 0.0;
+            }
+        }
         vs_closeToEarth = 1.0;
-        gl_PointSize = gl_PointSize * 5;
-        vec4 fluxColor = getTransferFunctionColor(colorTable);
-        vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-    }
-    if (enhanceMethod == colorTables || enhanceMethod == sizeAndColor) {
-        vec4 fluxColor = getTransferFunctionColor(colorTableEarth);
-        vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-    }
-    if (enhanceMethod == illuminance) {
-        vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
-        vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-    }
-    if (distance(earthPos, in_position) < AUtoMeter * distanceThreshold) {
         if (mod(gl_VertexID, nodeSkipEarth) == 0) {
-            decideHowToShowCloseToEarth();
+            gl_PointSize = proximityNodesSize;
         }
         else {
             vs_color = vec4(0.0);
-        }
-    }
-    else {
-        if (enhanceMethod == illuminance) {
-            vs_color.a = fluxColorAlphaIlluminance;
-        }
-
-        if (fluxValue < thresholdFlux) {
-            vs_color.a = fluxColorAlpha;
         }
     }
 }
@@ -244,30 +185,28 @@ void main() {
 
     // Checking if we should render the vertex dependent on the vertexindex,
     // by using modulus.
-    if (checkIfSkipVertex() ||
-        distance(earthPos, in_position) < (distanceThreshold * AUtoMeter) &&
-        rValue/AUtoMeter > filterLower &&
-        rValue/AUtoMeter < filterUpper &&
+    if ((checkIfSkipVertex() ||
+        distance(earthPos, in_position) < (distanceThreshold * AUtoMeter)) &&
+        filterLower < rValue / AUtoMeter &&
+        filterUpper > rValue / AUtoMeter &&
         in_position.z > (domainLimZ.x * AUtoMeter) &&
         in_position.z < (domainLimZ.y * AUtoMeter))
     {
-        // We should color it by flux
-        if (colorMode == 0) {
-            vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
+        vs_color =  getTransferFunctionColor(colorTable);
+        if (colorMode == colorByFluxValue) {
             if (fluxValue > thresholdFlux) {
-                vs_color = vec4(fluxColor.xyz, fluxColor.a);
-                gl_PointSize = nodeSizeLargerFlux;
-            }
-            else {
-                vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+                vs_color =  getTransferFunctionColor(colorTable);
+                vs_color.a = fluxColorAlpha;
                 gl_PointSize = nodeSize;
             }
+            else {
+                vs_color.a = 0.0;
+            }
         }
-        else {
-            //Uniform coloring
+        else if (colorMode == uniformColor){
             vs_color = streamColor;
         }
-        checkdistanceMethod();
+        whatToDoIfCloseToEarth();
     }
     else {
         vs_color = vec4(0.0);
@@ -280,22 +219,14 @@ void main() {
         float distanceVec = distance(cameraPos, in_position.xyz);
 
         if (distanceVec < maxDistance) {
-            camera_IsCloseEnough = 0.0;
-        }
-        else {
-            camera_IsCloseEnough = 1.0;
-        }
-
-        if (distanceVec < maxDistance) {
             float distScale = 1.0 - smoothstep(0.0, maxDistance, distanceVec);
-            float factorS = 1.0;
-            if (usingRadiusPerspective) {
-                factorS = pow(distScale, 9.0) * 500.0 * pow(rtemp, 2.0);
+            float factorS = pow(distScale, 9.0) * 500.0;
+            if (distance(earthPos, in_position.xyz) < (distanceThreshold * AUtoMeter)) {
+                gl_PointSize =  proximityNodesSize;
             }
             else {
-                factorS = pow(distScale, 9.0) * 500.0;
+                gl_PointSize = factorS * maxNodeDistanceSize;
             }
-            gl_PointSize = factorS * maxNodeDistanceSize * 0.8;
         }
 
         if (gl_PointSize > minMaxNodeSize.y) {
@@ -307,7 +238,6 @@ void main() {
         }
     }
 
-    vs_time = time;
     vec4 position_in_meters = vec4(in_position, 1.0);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
 
