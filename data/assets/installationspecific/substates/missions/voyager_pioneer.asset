@@ -1,13 +1,11 @@
 local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
+local today = asset.require('./../../default_time').time
 
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local identifiers = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
-
--- OBS! Should match the time in the profile, or at least in the SolarSystem state
-local today = "2021-08-27T12:58:03.505"
 
 local voyagerPioneerNavigationState = [[{
   Anchor = "Sun",
