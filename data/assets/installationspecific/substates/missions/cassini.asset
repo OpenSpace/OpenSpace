@@ -18,10 +18,19 @@ local equinoxDistance = 1500000000
 local solsticeDistance = 650000000
 local grandFinaleDistance = 400000000
 
+local cassiniNavigationState = [[{
+  Anchor = "Saturn",
+  Pitch = -0.000071,
+  Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 },
+  ReferenceFrame = "Root",
+  Up = { -0.739154, 0.443940, 0.506525 },
+  Yaw = 0.003681
+}]]
+
 local scripts = [[
   -- Primary start
   openspace.scriptScheduler.loadScheduledScript(
-    "2004-06-16T08:14:58.000", -- 1 min pre delay
+    "2004-06-16T08:14:58.000", -- 1 sec pre delay
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(orbitInsertionDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -47,6 +56,15 @@ local scripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(primaryDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-11-10T00:00:00.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
   -- Equinox start
@@ -138,18 +156,18 @@ local states = { cassiniState, huygensState }
 ----------------------------------------------------------------
 -- The action we want to happen when moving from any of the substates back
 -- to the SolarSystem state
-local onLeavingMainStateAction = [[
-  ]] .. flyHome.cameraPath .. [[
+local goToHome = [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[
+  ]] .. flyHome.cameraPath .. [[
 ]]
 
 local goToCassiniOverview = [[
-  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
   ]] .. util.setOrbitSpeedFactor(0.4) .. [[
   ]] .. util.orbitConstantLatitudeOnArrival() .. [[
   ]] .. util.enableRoll() .. [[
-  openspace.pathnavigation.goTo('Saturn', true)
+  ]] .. util.flyToNavState(cassiniNavigationState) .. [[
 ]]
 
 local transitions = {
@@ -162,7 +180,7 @@ local transitions = {
   {
     From = "Cassini",
     To = "Home",
-    Action = onLeavingMainStateAction
+    Action = goToHome
   },
   -- Cassini - Huygens
   {
@@ -179,7 +197,7 @@ local transitions = {
   {
     From = "Huygens",
     To = "Home",
-    Action = onLeavingMainStateAction
+    Action = goToHome
   }
 }
 

@@ -226,7 +226,7 @@ int time_interpolateTogglePause(lua_State* L) {
  */
 int time_pauseToggleViaKeyboard(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_pauseToggleViaKeyboard");
-    
+
     if (global::sessionRecording->isPlayingBack()) {
         bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
         global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
