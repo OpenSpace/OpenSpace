@@ -634,14 +634,18 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
 void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
                                             const std::string& value)
 {
-    if (!luascriptfunctions::convertStringToLuaAndPush_bool(L, value)) {
-        if (!luascriptfunctions::convertStringToLuaAndPush_float(L, value)) {
-            std::string stringRepresentation = value;
-            if (value.compare("nil") != 0) {
-                stringRepresentation = "[[" + stringRepresentation + "]]";
-            }
-            ghoul::lua::push(L, stringRepresentation);
+    if (luascriptfunctions::isBoolValue(value)) {
+        ghoul::lua::push(L, (value == "true") ? true : false);
+    }
+    else if (luascriptfunctions::isFloatValue(value)) {
+        ghoul::lua::push(L, std::stof(value));
+    }
+    else {
+        std::string stringRepresentation = value;
+        if (value.compare("nil") != 0) {
+            stringRepresentation = "[[" + stringRepresentation + "]]";
         }
+        ghoul::lua::push(L, stringRepresentation);
     }
 }
 

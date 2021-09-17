@@ -901,34 +901,21 @@ int worldRotation(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
- * convertStringToLuaAndPush_bool(lua_State*, string):
- * Used to convert a string value from a text file (e.g. profile) to a lua bool type.
- * If string value is a bool, the value gets pushed to the lua_State, and returns true.
- * If string value is not a bool, the lua_State is unchanged and returns false.
+ * isBoolValue(const std::string& s):
+ * Used to check if a string is a lua bool type. Returns false if not a valid bool string.
  */
-bool convertStringToLuaAndPush_bool(lua_State* L, std::string s) {
-    if (s.compare("true") == 0) {
-        ghoul::lua::push(L, true);
-        return true;
-    }
-    else if (s.compare("false") == 0) {
-        ghoul::lua::push(L, false);
-        return true;
-    }
-    return false;
+bool isBoolValue(const std::string& s) {
+    return (s == "true" || s == "false");
 }
 
 /**
  * \ingroup LuaScripts
- * convertStringToLuaAndPush_float(lua_State*, string):
- * Used to convert a string value from a text file (e.g. profile) to a lua float type.
- * If string value is a float, the value gets pushed to the lua_State, and returns true.
- * If string value is not a float, the lua_State is unchanged and returns false.
+ * isFloatValue(const std::string& s):
+ * Used to check if a string is a lua float value. Returns false if not a valid float.
  */
-bool convertStringToLuaAndPush_float(lua_State* L, std::string s) {
+bool isFloatValue(const std::string& s) {
     try {
         float converted = std::stof(s);
-        ghoul::lua::push(L, converted);
         return true;
     }
     catch (...) {
