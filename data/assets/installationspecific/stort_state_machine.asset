@@ -1,5 +1,6 @@
 local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
+local today = asset.require('./default_time').time
 
 ---------------------------------------------------------------- 
 -- STATES

@@ -128,7 +128,7 @@ end
 local flyToNavState = function(state)
   return [[ 
     openspace.time.setPause(true)
-    openspace.pathnavigation.generatePath({
+    openspace.pathnavigation.createPath({
       TargetType = "NavigationState", NavigationState = ]] .. state .. [[
     })
   ]]
