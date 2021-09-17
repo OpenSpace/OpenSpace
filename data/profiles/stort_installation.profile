@@ -28,6 +28,7 @@
   "assets": [
     "base",
     "installationspecific/stort_state_machine",
+    "installationspecific/others/olympus_mons_node",
     "scene/solarsystem/dwarf_planets/pluto/charon/charon",
     "scene/solarsystem/dwarf_planets/pluto/charon/charon_trail",
     "scene/solarsystem/dwarf_planets/pluto/minor/hydra",

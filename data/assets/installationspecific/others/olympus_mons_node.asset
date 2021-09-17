@@ -1,0 +1,39 @@
+local assetHelper = asset.require('util/asset_helper')
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+
+local lat = 18.65
+local long = 226.2
+
+local olympusMonsPosition = {
+  Identifier = "OlympusMonsPosition",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+        Type = "GlobeTranslation",
+        Globe = mars.Mars.Identifier,
+        Latitude =  lat,
+        Longitude =  long
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Latitude =  lat,
+      Longitude =  long
+    },
+  },
+  GUI = {
+    Name = "Olympus Mons",
+    Path = "/Mars/"
+  }
+}
+
+asset.meta = {
+    Name = "Olympus Mons Position",
+    Version = "1.0",
+    Description = "A node on the surface of Mars, in the position of Olympus Mons",
+    Author = "",
+    URL = "",
+    License = ""
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { olympusMonsPosition })
