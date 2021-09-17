@@ -4,6 +4,7 @@ local solarTargetDistance = 1079252848800 -- 1 lighthour
 local solarsystemflightDuration = 9 -- seconds
 
 local cameraPath = [[
+  openspace.time.setPause(true)
   ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.pathnavigation.goToHeight(

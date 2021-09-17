@@ -4,7 +4,7 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local identifiers = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
+local trails = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
 
 -- OBS! Should match the time in the profile, or at least in the SolarSystem state
 local today = "2021-08-27T12:58:03.505"
@@ -91,7 +91,7 @@ local onLeavingMainStateAction = [[
   ]] .. flyHome.linearFlight .. [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[
-  ]] .. util.fadeOutTrails(identifiers) .. [[
+  ]] .. util.fadeOutTrails(trails) .. [[
 ]]
 
 local transitions = {
@@ -105,7 +105,7 @@ local transitions = {
       ]] .. util.orbitConstantLatitudeOnArrival() .. [[
       ]] .. util.enableRoll() .. [[
       ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
-      ]] .. util.fadeInTrails(identifiers) .. [[
+      ]] .. util.fadeInTrails(trails) .. [[
     ]]
   },
   {

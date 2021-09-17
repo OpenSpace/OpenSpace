@@ -2,16 +2,121 @@ local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
 
 ----------------------------------------------------------------
+-- SCRIPTS
+----------------------------------------------------------------
+local cassiniStart = "2004-06-16T08:14:57.000" -- Primary mission start
+local missionEquinoxStart = "2008-08-09T00:00:00.000"
+local missionSolsticeStart = "2010-11-24T00:00:00.000"
+local grandFinaleStart = "2017-04-26T00:00:00.000"
+local cassiniEnd = "2017-09-15T10:34:05.000"
+local huygensDetach = "2004-11-21 08:44:53.000"
+local huygensEnd = "2005-01-15 11:06:00.000"
+
+local orbitInsertionDistance = 9000000000
+local primaryDistance = 2500000000
+local equinoxDistance = 1500000000
+local solsticeDistance = 650000000
+local grandFinaleDistance = 400000000
+
+local scripts = [[
+  -- Primary start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-06-16T08:14:58.000", -- 1 min pre delay
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(orbitInsertionDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-06-26T08:14:57.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Zoom in after orbital insertion
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-11-01T00:00:00.000", -- 5 months after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(primaryDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+  )
+
+  -- Equinox start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2008-08-09T00:00:00.000",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(equinoxDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(864000)" .. -- 10 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Solstice start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2010-11-24T00:00:00.000",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(solsticeDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(1314871)" .. -- 15 days per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Grand Finale start
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-04-16T00:00:00.000", -- 10 day pre delay
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(grandFinaleDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(172800)" .. -- 2 Days  per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-15T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.time.setTime('2004-06-16T08:14:57.000')" -- Loop
+  )
+]]
+
+----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
+local trails = { "primaryMission", "equinoxMission", "solsticeMission", "grandFinale" }
+local huygensTrail = { "huygensTrail" }
+
 local cassiniState = {
   Identifier = "Cassini",
   Enter = [[
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-    ]] .. util.orbitOnArrival() .. [[
+    openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
+    openspace.setPropertyValue('{moonTrail_saturn}.Renderable.Opacity', 0.0, 3.0)
+    openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 0.0, 3.0)
+    ]] .. util.fadeInTrails(trails) .. [[
+    ]] .. scripts .. [[
   ]],
   Exit = [[
-    ]] .. util.stopOrbiting() .. [[
+    openspace.scriptScheduler.clear()
+    ]] .. util.fadeOutTrails(trails) .. [[
+    openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_saturn}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
   ]]
 }
 
@@ -31,9 +136,19 @@ local states = { cassiniState, huygensState }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
-local goToSaturnOverview = [[
+-- The action we want to happen when moving from any of the substates back
+-- to the SolarSystem state
+local onLeavingMainStateAction = [[
+  ]] .. flyHome.cameraPath .. [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. util.stopOrbiting() .. [[
+]]
+
+local goToCassiniOverview = [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.time.setPause(true)
+  ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+  ]] .. util.orbitConstantLatitudeOnArrival() .. [[
+  ]] .. util.enableRoll() .. [[
   openspace.pathnavigation.goTo('Saturn', true)
 ]]
 
@@ -42,12 +157,12 @@ local transitions = {
   {
     From = "Home",
     To = "Cassini",
-    Action = goToSaturnOverview
+    Action = goToCassiniOverview
   },
   {
     From = "Cassini",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = onLeavingMainStateAction
   },
   -- Cassini - Huygens
   {
@@ -58,13 +173,13 @@ local transitions = {
   {
     From = "Huygens",
     To = "Cassini",
-    Action = goToSaturnOverview
+    Action = goToCassiniOverview
   },
   -- Back to SolarSystem from substates
   {
     From = "Huygens",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = onLeavingMainStateAction
   }
 }
 

@@ -37,7 +37,7 @@ local orbitInsertion = "2004 JUN 30 06:32:25.000" -- 2004 JUN 16 08:14:57.000
 local beginSaturnOrbit = "2004 JUN 16 08:14:57.000"
 local missionEquinoxStart = "2008 AUG 09 00:00:00.000" -- get better times
 local missionSolsticeStart = "2010 NOV 24 00:00:00.000" -- get better times
-local startGrandFinale = "2017 APR 26 8:13:23.642" -- i made up the time (date is right tho)
+local startGrandFinale = "2017 APR 26 00:00:00.000" -- i made up the time (date is right tho)
 local endCassini = "2017 SEP 15 10:34:05.000" -- should be 00s
 
 local huygensDetach = "2004 NOV 21 08:44:53.000"
@@ -254,7 +254,8 @@ local primaryMission = {
     StartTime = beginSaturnOrbit,
     EndTime = missionEquinoxStart,
     SampleInterval = 400,
-    Enabled = false
+    Enabled = true,
+    Opacity = 0.0
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -286,7 +287,8 @@ local equinoxMission = {
     StartTime = missionEquinoxStart,
     EndTime = missionSolsticeStart,
     SampleInterval = 400,
-    Enabled = false
+    Enabled = true,
+    Opacity = 0.0
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -318,7 +320,8 @@ local solsticeMission = {
     StartTime = missionSolsticeStart,
     EndTime = startGrandFinale,
     SampleInterval = 400,
-    Enabled = false
+    Enabled = true,
+    Opacity = 0.0
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -350,7 +353,8 @@ local grandFinale = {
     StartTime = startGrandFinale,
     EndTime = endCassini,
     SampleInterval = 400,
-    Enabled = false
+    Enabled = true,
+    Opacity = 0.0
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -382,7 +386,8 @@ local huygensTrail = {
     StartTime = huygensDetach,
     EndTime = endHuygens,
     SampleInterval = 400,
-    Enabled = false
+    Enabled = true,
+    Opacity = 0.0
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
