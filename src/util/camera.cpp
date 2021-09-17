@@ -42,10 +42,11 @@ Camera::Camera(const Camera& o)
 {}
 
 void Camera::setPositionVec3(glm::dvec3 pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _position = std::move(pos);
-
-    _cachedCombinedViewMatrix.isDirty = true;
+    if (!glm::any(glm::isnan(pos))) {
+        std::lock_guard _lock(_mutex);
+        _position = std::move(pos);
+        _cachedCombinedViewMatrix.isDirty = true;
+    }
 }
 
 void Camera::setRotation(glm::dquat rotation) {
