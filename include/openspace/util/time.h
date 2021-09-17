@@ -146,14 +146,14 @@ public:
      * \param setTime a string containing time adjustment as described in documentation
      * for luascriptfunctions::time_advancedTime
      */
-    void setFromProfile_timeRelative(const std::string& setTime);
+    void setTimeRelativeFromProfile(const std::string& setTime);
 
     /**
      * Sets an absolute time from profile.
      * \param setTime a string containing time to set, which must be a valid
      * ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS
      */
-    void setFromProfile_timeAbsolute(const std::string& setTime);
+    void setTimeAbsoluteFromProfile(const std::string& setTime);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the

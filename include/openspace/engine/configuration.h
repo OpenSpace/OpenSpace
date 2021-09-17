@@ -45,7 +45,6 @@ struct Configuration {
 
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset;
-    std::string profileOutPrefixName;
     std::string profile;
     std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
@@ -132,7 +131,6 @@ struct Configuration {
     HTTPProxy httpProxy;
 
     // Values not read from the openspace.cfg file
-    bool usingProfile = false;
     std::string sgctConfigNameInitialized;
 
     static documentation::Documentation Documentation;

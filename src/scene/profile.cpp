@@ -738,8 +738,4 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-std::vector<std::string>& additionalScripts(Profile& p) {
-    return p.additionalScripts;
-}
-
 }  // namespace openspace

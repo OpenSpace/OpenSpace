@@ -868,14 +868,20 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     return _previousApplicationTime;
 }
 
-void TimeManager::setFromProfile_time(const Profile& p) {
+void TimeManager::setTimeFromProfile(const Profile& p) {
     Time t;
 
-    if (p.time->type == Profile::Time::Type::Relative) {
-        t.setFromProfile_timeRelative(p.time->value);
-    }
-    else if (p.time->type == Profile::Time::Type::Absolute) {
-        t.setFromProfile_timeAbsolute(p.time->value);
+    switch (p.time.value().type) {
+    case Profile::Time::Type::Relative:
+        t.setTimeRelativeFromProfile(p.time.value().value);
+        break;
+
+    case Profile::Time::Type::Absolute:
+        t.setTimeAbsoluteFromProfile(p.time.value().value);
+        break;
+
+    default:
+        throw ghoul::MissingCaseException();
     }
 }
 

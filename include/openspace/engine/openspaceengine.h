@@ -103,77 +103,19 @@ public:
     void createUserDirectoriesIfNecessary();
 
     /**
-     * Sets the camera position using the time contents of a profile. The function will
-     * set an absolute position or a go-to-geolocation command using the globebrowsing
-     * module.
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_camera(const Profile& p);
-
-    /**
-     * Sets the delta times using the delta time array from a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_deltaTimes(const Profile& p);
-
-    /**
-     * Reads a list of modules from a profile, and executes scripts based on whether or
-     * not the corresponding module is loaded.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_modules(const Profile& p);
-
-    /**
-     * Registers actions from the contents of a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_actions(const Profile& p);
-
-    /**
-     * Registers keybindings from the contents of a profile.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_keybindings(const Profile& p);
-
-    /**
-     * Reads list of nodes from profile to be marked as interesting nodes.
-     * If any nodes are listed, a script to mark these will be queued with the
-     * script engine.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_markInterestingNodes(const Profile& p);
-
-    /**
-     * Reads list of "additional scripts" that are added to the profile to be run
-     * at the end of the initialization. Any openspace lua commands are allowed,
-     * and will be added to the script queue.
-     *
-     * \param p The Profile to be read.
-     */
-    void setFromProfile_additionalScripts(const Profile& p);
-
-    /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
      */
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void loadAsset_init(const std::string assetName);
-    void loadAsset_postInit(const std::string assetName);
+    void loadAsset(const std::string& assetName);
     void loadFonts();
 
     void runGlobalCustomizationScripts();
     void configureLogging();
     std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
-    void loadInitAssetSection(std::string& initAssetOutput,
-        std::string profileSectionName);
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -183,7 +125,6 @@ private:
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
-    bool _hasInitializedProfile = false;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
 
@@ -196,8 +137,56 @@ private:
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
-    bool _isFirstRenderingFirstFrame = true;
+    bool _isRenderingFirstFrame = true;
 };
+
+/**
+ * Sets the camera position using the time contents of a profile. The function will
+ * set an absolute position or a go-to-geolocation command using the globebrowsing
+ * module.
+ * \param p The Profile to be read.
+ */
+void setCameraFromProfile(const Profile& p);
+
+/**
+ * Reads a list of modules from a profile, and executes scripts based on whether or
+ * not the corresponding module is loaded.
+ *
+ * \param p The Profile to be read.
+ */
+void setModulesFromProfile(const Profile& p);
+
+/**
+ * Registers actions from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setActionsFromProfile(const Profile& p);
+
+/**
+ * Registers keybindings from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setKeybindingsFromProfile(const Profile& p);
+
+/**
+ * Reads list of nodes from profile to be marked as interesting nodes.
+ * If any nodes are listed, a script to mark these will be queued with the
+ * script engine.
+ *
+ * \param p The Profile to be read.
+ */
+void setMarkInterestingNodesFromProfile(const Profile& p);
+
+/**
+ * Reads list of "additional scripts" that are added to the profile to be run
+ * at the end of the initialization. Any openspace lua commands are allowed,
+ * and will be added to the script queue.
+ *
+ * \param p The Profile to be read.
+ */
+void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 

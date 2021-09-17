@@ -163,19 +163,7 @@ public:
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();
-
-    std::string file_subName_assets = "";
-    std::string assetFileExtension = ".asset";
 };
-
-/**
- * Function to retrieve the individual additional script lines included in the profile
- *
- * \param p The profile that should be processed
- *
- * \return vector of strings containing the individual script lines
- */
-std::vector<std::string>& additionalScripts(Profile& p);
 
 } // namespace openspace
 

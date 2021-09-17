@@ -243,17 +243,7 @@ public:
      *
      * \param p The Profile to be read.
      */
-    void setFromProfile_properties(const Profile& p);
-
-    /**
-     * Accepts string version of a property value from a profile, converts it to the
-     * appropriate type, and then pushes the value onto the lua state.
-     *
-     * \param L the lua state to push value to
-     * \param value string representation of the value with which to set property
-     */
-    void property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-        const std::string& value);
+    void setPropertiesFromProfile(const Profile& p);
 
 private:
     /**
@@ -288,6 +278,16 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 };
+
+/**
+ * Accepts string version of a property value from a profile, converts it to the
+ * appropriate type, and then pushes the value onto the lua state.
+ *
+ * \param L the lua state to push value to
+ * \param value string representation of the value with which to set property
+ */
+void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+    const std::string& value);
 
 } // namespace openspace
 

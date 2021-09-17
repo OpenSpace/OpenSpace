@@ -485,7 +485,7 @@ std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
 }
 
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
-                             ghoul::EasingFunction easingFunction)
+                                     ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
@@ -603,7 +603,7 @@ const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
 }
 
-void Scene::setFromProfile_properties(const Profile& p) {
+void Scene::setPropertiesFromProfile(const Profile& p) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     for (const Profile::Property& prop : p.properties) {
@@ -616,7 +616,7 @@ void Scene::setFromProfile_properties(const Profile& p) {
         ghoul::lua::push(L, uriOrRegex);
         ghoul::lua::push(L, 0.0);
         // Later functions expect the value to be at the last position on the stack
-        property_pushValueFromProfileToLuaState(L, prop.value);
+        propertyPushValueFromProfileToLuaState(L, prop.value);
 
         applyRegularExpression(
             L,
@@ -631,8 +631,8 @@ void Scene::setFromProfile_properties(const Profile& p) {
     }
 }
 
-void Scene::property_pushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-    const std::string& value)
+void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+                                            const std::string& value)
 {
     if (!luascriptfunctions::convertStringToLuaAndPush_bool(L, value)) {
         if (!luascriptfunctions::convertStringToLuaAndPush_float(L, value)) {

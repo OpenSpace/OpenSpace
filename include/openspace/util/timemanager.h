@@ -85,7 +85,7 @@ public:
      *
      * \param p The Profile to be read.
      */
-    void setFromProfile_time(const Profile& p);
+    void setTimeFromProfile(const Profile& p);
 
     bool isPaused() const;
 

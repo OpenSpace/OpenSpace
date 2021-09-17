@@ -122,7 +122,7 @@ void Time::ISO8601(char* buffer) const {
     SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
-void Time::setFromProfile_timeRelative(const std::string& setTime) {
+void Time::setTimeRelativeFromProfile(const std::string& setTime) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     luascriptfunctions::time_currentWallTime(L);
@@ -131,7 +131,7 @@ void Time::setFromProfile_timeRelative(const std::string& setTime) {
     luascriptfunctions::time_setTime(L);
 }
 
-void Time::setFromProfile_timeAbsolute(const std::string& setTime) {
+void Time::setTimeAbsoluteFromProfile(const std::string& setTime) {
     ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
 
     ghoul::lua::push(L, setTime);
