@@ -75,7 +75,7 @@ std::string SceneLicenseWriter::generateJson() const {
         json << fmt::format(replStr, "description", escapedJson(global::profile->meta->description.value()));
         json << fmt::format(replStr, "author", escapedJson(global::profile->meta->author.value()));
         json << fmt::format(replStr, "url", escapedJson(global::profile->meta->url.value()));
-        json << fmt::format(replStr, "license", escapedJson(global::profile->meta->license.value()));
+        json << fmt::format(replStr2, "license", escapedJson(global::profile->meta->license.value()));
         json << "}";
 
         if (++metaCount != metaTotal) {
