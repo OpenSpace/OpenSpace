@@ -25,10 +25,18 @@
 #include "filesystemaccess.h"
 
 FileSystemAccess::FileSystemAccess(std::string fileExtension,
-                                   std::vector<std::string> approvedPaths,
                                    bool hideFileExtensions, bool useCheckboxes)
     : _fileExtension(std::move(fileExtension))
+    , _hideFileExtensions(hideFileExtensions)
+    , _useCheckboxes(useCheckboxes)
+{}
+
+FileSystemAccess::FileSystemAccess(std::string fileExtension,
+    std::vector<std::string> approvedPaths,
+    bool hideFileExtensions, bool useCheckboxes)
+    : _fileExtension(std::move(fileExtension))
     , _approvedPaths(std::move(approvedPaths))
+    , _useOnlyApprovedPaths(true)
     , _hideFileExtensions(hideFileExtensions)
     , _useCheckboxes(useCheckboxes)
 {}
@@ -78,16 +86,19 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
 }
 
 bool FileSystemAccess::isApprovedPath(std::string path) {
-    bool approvedMatch = false;
     path.erase(0, path.find_first_not_of(" "));
 
-    for (const std::string& p : _approvedPaths) {
-        if (path.substr(0, p.length()).compare(p) == 0) {
-            approvedMatch = true;
-            break;
-        }
+    if (!_useOnlyApprovedPaths) {
+        return true;
     }
-    return approvedMatch;
+    else {
+        for (const std::string& p : _approvedPaths) {
+            if (path.substr(0, p.length()).compare(p) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,

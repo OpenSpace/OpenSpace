@@ -34,6 +34,22 @@ public:
      *
      * \param fileExtension string that defines the filter used to find files. Only
      *                      files with this extension will be recognized (e.g. '.xml')
+     * \param hideFileExtensions if true then file extensions will be removed from the
+     *                           listed files in the output
+     * \param useCheckboxes if true then the text output format will contain a '0' as
+     *                      the first character in the line (this first character is
+     *                      used to represent checked ('1'), uncheck ('0') or doesn't
+     *                      exist in filesystem ('x') states.
+     */
+    FileSystemAccess(std::string fileExtension, bool hideFileExtensions,
+        bool useCheckboxes);
+
+    /**
+     * Constructor for filesystemAccess class which will find files that are only in the
+     * provided approved paths
+     *
+     * \param fileExtension string that defines the filter used to find files. Only
+     *                      files with this extension will be recognized (e.g. '.xml')
      * \param approvedPaths vector or strings containing directory names to be included
      *                      in the search. These are directories at the base level of
      *                      the starting point of the search. Any sub-directories within
@@ -67,6 +83,7 @@ private:
     QFileSystemModel _filesystemModel;
     QDir::Filters _fileFilterOptions = QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot;
     std::string _fileExtension;
+    bool _useOnlyApprovedPaths = false;
     std::vector<std::string> _approvedPaths;
     bool _hideFileExtensions = true;
     bool _useCheckboxes = false;
