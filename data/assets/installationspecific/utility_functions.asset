@@ -126,8 +126,7 @@ local disableRoll = function()
 end
 
 local flyToNavState = function(state)
-  return [[ 
-    openspace.time.setPause(true)
+  return [[
     openspace.pathnavigation.createPath({
       TargetType = "NavigationState", NavigationState = ]] .. state .. [[
     })

@@ -9,8 +9,6 @@ local missionEquinoxStart = "2008-08-09T00:00:00.000"
 local missionSolsticeStart = "2010-11-24T00:00:00.000"
 local grandFinaleStart = "2017-04-26T00:00:00.000"
 local cassiniEnd = "2017-09-15T10:34:05.000"
-local huygensDetach = "2004-11-21 08:44:53.000"
-local huygensEnd = "2005-01-15 11:06:00.000"
 
 local orbitInsertionDistance = 9000000000
 local primaryDistance = 2500000000
@@ -27,7 +25,7 @@ local cassiniNavigationState = [[{
   Yaw = 0.003681
 }]]
 
-local scripts = [[
+local cassiniScripts = [[
   -- Primary start
   openspace.scriptScheduler.loadScheduledScript(
     "2004-06-16T08:14:58.000", -- 1 sec pre delay
@@ -114,6 +112,68 @@ local scripts = [[
   )
 ]]
 
+local huygensDetach = "2004-11-21 08:44:53.000"
+local huygensEnd = "2005-01-14 09:05:55.000"
+
+local approachDistance = 1000000000
+local landingDistance = 45000000
+
+local huygensNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.003934, Position = { 1343293062.949463, 3847226689.074280, -1700869686.287659 }, ReferenceFrame = 'Root', Up = { -0.697954, 0.479043, 0.532333 }, Yaw = 0.003055 }]]
+
+local huygensScripts = [[
+  -- Detach
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-11-21 08:44:54.000", -- 1 sec pre delay
+    "openspace.time.interpolateDeltaTime(172800)" -- 2 days per second
+  )
+
+  -- Slow
+  openspace.scriptScheduler.loadScheduledScript(
+    "2004-12-21 08:44:53.000",
+    "openspace.time.interpolateDeltaTime(86400)" .. -- 1 day per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Approach
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-13 00:00:00.000",
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(approachDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 06:41:40.000", -- 30 min pre delay
+    "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(landingDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 09:05:55.000",
+    "openspace.time.setDeltaTime(1)" ..
+    "openspace.time.setTime('2004-11-21 08:44:50.000')" -- Loop
+  )
+]]
+
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
@@ -123,13 +183,16 @@ local huygensTrail = { "huygensTrail" }
 local cassiniState = {
   Identifier = "Cassini",
   Enter = [[
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitConstantLatitudeOnArrival() .. [[
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
     openspace.setPropertyValue('{moonTrail_saturn}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 0.0, 3.0)
     ]] .. util.fadeInTrails(trails) .. [[
-    ]] .. scripts .. [[
+    ]] .. cassiniScripts .. [[
   ]],
   Exit = [[
+    ]] .. util.stopOrbiting() .. [[
     openspace.scriptScheduler.clear()
     ]] .. util.fadeOutTrails(trails) .. [[
     openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 1.0, 3.0)
@@ -141,11 +204,12 @@ local cassiniState = {
 local huygensState = {
   Identifier = "Huygens",
   Enter = [[
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-    ]] .. util.orbitOnArrival() .. [[
+    ]] .. util.fadeInTrails(huygensTrail) .. [[
+    ]] .. huygensScripts .. [[
   ]],
   Exit = [[
-    ]] .. util.stopOrbiting() .. [[
+    openspace.scriptScheduler.clear()
+    ]] .. util.fadeOutTrails(huygensTrail) .. [[
   ]]
 }
 
@@ -158,16 +222,19 @@ local states = { cassiniState, huygensState }
 -- to the SolarSystem state
 local goToHome = [[
   ]] .. util.disableRoll() .. [[
-  ]] .. util.stopOrbiting() .. [[
   ]] .. flyHome.cameraPath .. [[
 ]]
 
 local goToCassiniOverview = [[
   ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
-  ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-  ]] .. util.orbitConstantLatitudeOnArrival() .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(cassiniNavigationState) .. [[
+]]
+
+local goToHuygensOverview = [[
+  ]] .. util.setCurveType("AvoidCollisionWithLookAt") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(huygensNavigationState) .. [[
 ]]
 
 local transitions = {
@@ -186,7 +253,7 @@ local transitions = {
   {
     From = "Cassini",
     To = "Huygens",
-    Action = [[]]
+    Action = goToHuygensOverview
   },
   {
     From = "Huygens",
