@@ -45,32 +45,12 @@ public:
         bool useCheckboxes);
 
     /**
-     * Constructor for filesystemAccess class which will find files that are only in the
-     * provided approved paths
-     *
-     * \param fileExtension string that defines the filter used to find files. Only
-     *                      files with this extension will be recognized (e.g. '.xml')
-     * \param approvedPaths vector or strings containing directory names to be included
-     *                      in the search. These are directories at the base level of
-     *                      the starting point of the search. Any sub-directories within
-     *                      these directories will be included.
-     * \param hideFileExtensions if true then file extensions will be removed from the
-     *                           listed files in the output
-     * \param useCheckboxes if true then the text output format will contain a '0' as
-     *                      the first character in the line (this first character is
-     *                      used to represent checked ('1'), uncheck ('0') or doesn't
-     *                      exist in filesystem ('x') states.
-     */
-    FileSystemAccess(std::string fileExtension,
-        std::vector<std::string> approvedPaths, bool hideFileExtensions,
-        bool useCheckboxes);
-
-    /**
      * Function that uses the #QtFileSystemModel class to search the given directory
      *
      * \param dir The directory from which to start the search from
      */
-    std::string useQtFileSystemModelToTraverseDir(std::string dir, bool usersAssets = false);
+    std::string useQtFileSystemModelToTraverseDir(std::string dir,
+        bool usersAssets = false);
 
 private:
     void parseChildDirElements(QFileInfo item, std::string space, int level,
@@ -78,12 +58,10 @@ private:
         bool userAssets);
     void parseChildFile(std::string res, bool& hasDirHeaderBeenAdded,
         std::vector<std::string>& dirNames, std::vector<std::string>& output);
-    bool isApprovedPath(std::string path);
 
     QFileSystemModel _filesystemModel;
     QDir::Filters _fileFilterOptions = QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot;
     std::string _fileExtension;
-    bool _useOnlyApprovedPaths = false;
     std::vector<std::string> _approvedPaths;
     bool _hideFileExtensions = true;
     bool _useCheckboxes = false;
