@@ -16,14 +16,7 @@ local equinoxDistance = 1500000000
 local solsticeDistance = 650000000
 local grandFinaleDistance = 400000000
 
-local cassiniNavigationState = [[{
-  Anchor = "Saturn",
-  Pitch = -0.000071,
-  Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 },
-  ReferenceFrame = "Root",
-  Up = { -0.739154, 0.443940, 0.506525 },
-  Yaw = 0.003681
-}]]
+local cassiniNavigationState = [[{ Anchor = 'Saturn', Pitch = -0.000071, Position = { 3641029278.891357, 7812048554.762817, -1533586357.197266 }, ReferenceFrame = 'Root', Up = { -0.739154, 0.443940, 0.506525 }, Yaw = 0.003681 }]]
 
 local cassiniScripts = [[
   -- Primary start
@@ -108,7 +101,8 @@ local cassiniScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-15T10:34:05.000",
     "openspace.time.interpolateDeltaTime(1)" ..
-    "openspace.time.setTime('2004-06-16T08:14:57.000')" -- Loop
+    "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)"
   )
 ]]
 
@@ -170,7 +164,8 @@ local huygensScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 09:05:55.000",
     "openspace.time.setDeltaTime(1)" ..
-    "openspace.time.setTime('2004-11-21 08:44:50.000')" -- Loop
+    "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
   )
 ]]
 
