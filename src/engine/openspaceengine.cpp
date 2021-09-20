@@ -1140,6 +1140,8 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
+        global::renderEngine->updateScene();
+
         if (_scene) {
             Camera* camera = _scene->camera();
             if (camera) {
