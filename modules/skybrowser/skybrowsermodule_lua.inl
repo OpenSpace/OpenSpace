@@ -44,29 +44,29 @@ namespace openspace::skybrowser::luascriptfunctions {
         if (module->browserIdExists(module->selectedBrowserId())) {
             selectedBrowser = module->getSkyBrowsers()[module->selectedBrowserId()];
         }
-        ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        ImageData& image = module->getWWTDataHandler()->getLoadedImages()[i];
 
         if (selectedBrowser) {
             // Load image into browser
-            LINFO("Loading image " + resultImage.name);
-            selectedBrowser->addSelectedImage(resultImage, i);
+            LINFO("Loading image " + image.name);
+            selectedBrowser->addSelectedImage(image, i);
 
             ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
             // If the image has coordinates, move the target
-            if (resultImage.hasCelestCoords && selectedTarget) {
+            if (image.hasCelestCoords && selectedTarget) {
                 // Animate the target to the image coord position
                 selectedTarget->unlock();
-                selectedTarget->startAnimation(resultImage.celestCoords, resultImage.fov);
+                selectedTarget->startAnimation(image.celestCoords, image.fov);
                 // Check if image coordinate is within current FOV
-                glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
+                glm::dvec3 coordsScreen = J2000SphericalToScreenSpace(image.celestCoords);
                 glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
                 float r = windowRatio.x / windowRatio.y;
-                bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && 
-                    abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
-                bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
+                bool coordIsWithinView = (abs(coordsScreen.x) < r && 
+                    abs(coordsScreen.y) < 1.f && coordsScreen.z < 0);
+                bool coordIsBehindCamera = coordsScreen.z > 0;
                 // If the coordinate is not in view, rotate camera
                 if (!coordIsWithinView || coordIsBehindCamera) {
-                    module->startRotation(resultImage.celestCoords);
+                    module->startRotation(image.celestCoords);
                 } 
             }
         }
@@ -76,7 +76,7 @@ namespace openspace::skybrowser::luascriptfunctions {
                 RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
                     node->renderable());
                 if (browser3d) {
-                    browser3d->displayImage(resultImage, i);
+                    browser3d->displayImage(image, i);
                 }
                 else {
                     LINFO("No browser selected!");
@@ -92,16 +92,17 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::moveCircleToHoverImage");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        const ImageData& image = module->getWWTDataHandler()->getLoadedImages()[i];
 
         // Only move and show circle if the image has coordinates
-        if (resultImage.hasCelestCoords && module->cameraInSolarSystem()) {
+        if (image.hasCelestCoords && module->cameraInSolarSystem()) {
             // Make circle visible
-            ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
+            ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(
+                global::renderEngine->screenSpaceRenderable("HoverCircle"));
             hoverCircle->property("Enabled")->set(true);
             // Calculate coords for the circle and translate
-            glm::vec3 imageCoordsScreenSpace = skybrowser::J2000SphericalToScreenSpace(resultImage.celestCoords);
-            hoverCircle->property("CartesianPosition")->set(imageCoordsScreenSpace);
+            glm::vec3 coordsScreen = skybrowser::J2000SphericalToScreenSpace(image.celestCoords);
+            hoverCircle->property("CartesianPosition")->set(coordsScreen);
         }
         
         return 0;
@@ -109,7 +110,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 
     int disableHoverCircle(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableHoverCircle");
-        ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
+        ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(
+            global::renderEngine->screenSpaceRenderable("HoverCircle"));
         if (hoverCircle->isEnabled()) {
             hoverCircle->property("Enabled")->set(false);
         }
@@ -234,7 +236,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         }
         else if (dynamic_cast<ScreenSpaceSkyTarget*>(found)) {
             ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(found);
-            target->setConnectedBrowser();
+            target->initializeWithBrowser();
         }
         return 0;
     }
@@ -529,10 +531,10 @@ namespace openspace::skybrowser::luascriptfunctions {
     int setOpacityOfImageLayer(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setOpacityOfImageLayer");
         const std::string browserId = ghoul::lua::value<std::string>(L, 1);
-        const int i = ghoul::lua::value<int>(L, 2);
+        const std::string i = std::to_string(ghoul::lua::value<int>(L, 2));
         double opacity = ghoul::lua::value<double>(L, 3);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ghoul::Dictionary message = wwtmessage::setLayerOpacity(std::to_string(i), opacity);
+        ghoul::Dictionary message = wwtmessage::setLayerOpacity(i, opacity);
 
         if (module->browserIdExists(browserId)) {    
             module->getSkyBrowsers()[browserId]->sendMessageToWWT(message);
@@ -623,18 +625,18 @@ namespace openspace::skybrowser::luascriptfunctions {
         const std::string browserId = ghoul::lua::value<std::string>(L, 2);
         // Get browser
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        ImageData& image = module->getWWTDataHandler()->getLoadedImages()[i];
         
 
         if (module->browserIdExists(browserId)) {
             ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[browserId];
             // Remove image
-            browser->removeSelectedImage(resultImage, i);
+            browser->removeSelectedImage(image, i);
         }
         else if (module->get3dBrowser() != nullptr) {
             RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
                 module->get3dBrowser()->renderable());
-            browser3d->removeSelectedImage(resultImage, i);
+            browser3d->removeSelectedImage(image, i);
         }
         return 0;
     }
