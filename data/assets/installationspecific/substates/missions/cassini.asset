@@ -178,7 +178,6 @@ local huygensScripts = [[
 -- STATES
 ----------------------------------------------------------------
 local trails = { "primaryMission", "equinoxMission", "solsticeMission", "grandFinale" }
-local huygensTrail = { "huygensTrail" }
 
 local cassiniState = {
   Identifier = "Cassini",
@@ -204,12 +203,17 @@ local cassiniState = {
 local huygensState = {
   Identifier = "Huygens",
   Enter = [[
-    ]] .. util.fadeInTrails(huygensTrail) .. [[
+    openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 0.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_saturn}.Renderable.Opacity', 0.0, 3.0)
+    ]] .. util.fadeInTrails({ "TitanTrail", "Titan" }) .. [[
+    ]] .. util.fadeInTrails({ "huygensTrail" }) .. [[
     ]] .. huygensScripts .. [[
   ]],
   Exit = [[
     openspace.scriptScheduler.clear()
-    ]] .. util.fadeOutTrails(huygensTrail) .. [[
+    ]] .. util.fadeOutTrails({ "huygensTrail" }) .. [[
+    openspace.setPropertyValue('{moon_saturn}.Renderable.Opacity', 1.0, 3.0)
+    openspace.setPropertyValue('{moonTrail_saturn}.Renderable.Opacity', 1.0, 3.0)
   ]]
 }
 
