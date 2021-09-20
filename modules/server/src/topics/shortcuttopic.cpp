@@ -78,7 +78,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
                     { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
-            { "action", action.name },
+            { "action", action.identifier },
         };
         json.push_back(shortcutJson);
     }
