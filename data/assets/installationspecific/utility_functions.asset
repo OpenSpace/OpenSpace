@@ -6,7 +6,7 @@
 local orbitOnArrival = function()
   return [[
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+      'NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior',
       0 -- Orbit
     )
     openspace.setPropertyValueSingle(
@@ -34,11 +34,11 @@ end
 local startOrbiting = function()
   return [[
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+      'NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior',
       0 -- Orbit
     )
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
+      'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',
       true
     )
   ]]
@@ -47,11 +47,11 @@ end
 local stopOrbiting = function()
   return [[
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior",
+      'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',
       false
     )
     openspace.setPropertyValueSingle(
-      "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
+      'NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish',
       false
     )
   ]]
@@ -60,7 +60,7 @@ end
 local setOrbitSpeedFactor = function(value)
   return [[
     openspace.setPropertyValueSingle(
-      "NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor",
+      'NavigationHandler.OrbitalNavigator.IdleBehavior.SpeedFactor',
       ]] .. tostring(value) .. [[
     )    
   ]]
@@ -115,20 +115,20 @@ end
 
 local enableRoll = function()
   return [[
-    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", true)
+    openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.IncludeRoll', true)
   ]]
 end
 
 local disableRoll = function()
   return [[
-    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false)
+    openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.IncludeRoll', false)
   ]]
 end
 
 local flyToNavState = function(state)
   return [[
     openspace.pathnavigation.createPath({
-      TargetType = "NavigationState", NavigationState = ]] .. state .. [[
+      TargetType = 'NavigationState', NavigationState = ]] .. state .. [[
     })
   ]]
 end
@@ -144,7 +144,7 @@ local setCurveType = function(type)
   end
 
   return [[
-    openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.DefaultPathType", 
+    openspace.setPropertyValueSingle('NavigationHandler.PathNavigator.DefaultPathType', 
     ]] .. tostring(typeAsInt) .. [[)
   ]]
 end
@@ -176,10 +176,10 @@ local fadeInTrails = function(identifiers)
   for key, identifier in ipairs(identifiers) do
     str = str .. [[
       openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Enabled", true
+        'Scene.]] .. identifier .. [[.Renderable.Enabled', true
       );
       openspace.setPropertyValueSingle(
-        "Scene.]] .. identifier .. [[.Renderable.Opacity", 1.0, 3.0
+        'Scene.]] .. identifier .. [[.Renderable.Opacity', 1.0, 3.0
       );
     ]]
   end

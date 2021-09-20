@@ -1,6 +1,6 @@
 local util = asset.require('./utility_functions')
 local flyHome = asset.require('./fly_home_alternatives')
-local today = asset.require('./default_time').time
+local defaultTime = asset.require('./default_time').time
 
 ---------------------------------------------------------------- 
 -- STATES
@@ -57,11 +57,22 @@ util.appendTable(states, substateExoplanets.states)
 ---------------------------------------------------------------- 
 -- TRANSITIONS
 ----------------------------------------------------------------
+
+-- Ugly workaround: we set the time here since setting the correct time at start-up and also
+-- pausing causes weirdnesss and leads to some things (such as the ISS rotation) to not update 
+-- correctly. (Note that the flyhome path also pauses the time)
+local startupScript = string.gsub([[
+    openspace.time.setTime(']] .. defaultTime .. [[')
+    ]] .. flyHome.cameraPath .. [[
+  ]],
+  "\n", ""
+)
+
 local transitions = {
   {
     From = "Start",
-    To = "Home",
-    Action = flyHome.cameraPath
+    To = "Home", 
+    Action = [[openspace.scriptScheduler.loadScheduledScript(']] .. defaultTime .. [[', "]] .. startupScript .. [[")]]
   },
   -- SolarSystem <-> Home
   {
@@ -89,9 +100,6 @@ util.appendTable(transitions, substateCBR.transitions)
 util.appendTable(transitions, substateExoplanets.transitions)
 
 asset.onInitialize(function()
-    -- OBS: the following line should be set in the profile
-    openspace.time.setPause(true) -- However, this does not work
-
     openspace.statemachine.createStateMachine(states, transitions, "Start")
     openspace.statemachine.goToState("Home")
 end)
