@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 asset.require("spice/base")
 
-local GSMKernel = asset.localResource("./kernels/GSM.ti")
+local GSMKernel = asset.localResource("../kernels/GSM.ti")
 
 local GSMReferenceFrame = {
   Identifier = "GSMReferenceFrame",

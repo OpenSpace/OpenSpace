@@ -1,5 +1,6 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
+local propertyHelper = asset.require('../../../util/property_helper')
 local transforms = asset.require("./transforms")
 
 local textureSourcePath = asset.syncedResource({
@@ -9,8 +10,8 @@ local textureSourcePath = asset.syncedResource({
   Version = 1
 })
 
-local EUV_Layer = {
-  Identifier = "EUV_Layer",
+local EUVLayer = {
+  Identifier = "EUV-Layer",
   Parent = transforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
@@ -22,12 +23,27 @@ local EUV_Layer = {
     Segments = 132
   },
   GUI = {
-    Name = "EUV_Layer",
+    Name = "EUV Layer",
     Path = "/Solar System/Sun"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EUV_Layer })
+local toggle_EUV_layer ={
+  Identifier = "EUV_layer.toggle_EUV",
+  Name = "Toggle EUV Layer",
+  Command = propertyHelper.invert("Scene.EUV-Layer.Renderable.Enabled"),
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_EUV_layer)
+end)
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(toggle_EUV_layer.Identifier)
+end)
+assetHelper.registerSceneGraphNodesAndExport(asset, { EUVLayer })
 
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
@@ -35,6 +51,6 @@ asset.meta = {
   Description = "EUV simulation, texture sequence",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "",
-  Identifier = {"EUV_Layer"}
+  License = "CC-BY",
+  Identifier = {"EUV-Layer"}
 }

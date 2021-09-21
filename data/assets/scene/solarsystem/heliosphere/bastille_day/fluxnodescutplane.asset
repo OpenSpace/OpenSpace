@@ -1,4 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
+local propertyHelper = asset.require('../../../../util/property_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 
 local TexturesPathEquitorial = asset.syncedResource({
@@ -74,6 +75,31 @@ local MeridialCutplane = {
   }
 }
 
+local toggle_equatorial = {
+  Identifier = "fluxnodescutplane.toggle_equatorial",
+  Name = "Toggle equatorial cutplane",
+  Command = propertyHelper.invert("Scene.EquatorialCutplane.Renderable.Enabled"),
+  Documentation = "Toggle equatorial cutplane of CME",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+local toggle_meridial = {
+  Identifier = "fluxnodescutplane.toggle_meridial",
+  Name = "Toggle meridial cutplane",
+  Command = propertyHelper.invert("Scene.MeridialCutplane.Renderable.Enabled"),
+  Documentation = "Toggle meridial cutplane of CME",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_equatorial)
+  openspace.action.registerAction(toggle_meridial)
+end)
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(toggle_equatorial.Identifier)
+  openspace.action.removeAction(toggle_meridial.Identifier)
+end)
 assetHelper.registerSceneGraphNodesAndExport(asset, { EquatorialCutplane, MeridialCutplane})
 
 asset.meta = {
@@ -82,6 +108,6 @@ asset.meta = {
   Description = "Flux nodes for the bastille day CME events",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "",
+  License = "CC-BY",
   Identifier = {"MeridialCutplane", "EquatorialCutplane"}
 }

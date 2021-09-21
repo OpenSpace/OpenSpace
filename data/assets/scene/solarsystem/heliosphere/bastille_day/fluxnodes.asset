@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
+local propertyHelper = asset.require('../../../../util/property_helper')
 
 local fluxnodesBinaries = asset.syncedResource({
   Name = "Bastille day Flux nodes binaries",
@@ -9,8 +10,8 @@ local fluxnodesBinaries = asset.syncedResource({
 })
 
 -- Fluxnodes from binaries
-local Fluxnodes = {
-  Identifier = "MAS_MHD_FluxNodes",
+local fluxnodes = {
+  Identifier = "MAS-MHD-FluxNodes",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Rotation = {
@@ -45,7 +46,22 @@ local Fluxnodes = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Fluxnodes })
+local toggle_fluxnodes = {
+  Identifier = "fluxnodes.toggle_fluxnodes",
+  Name = "Toggle flux nodes",
+  Command = propertyHelper.invert("Scene.MAS-MHD-FluxNodes.Renderable.Enabled"),
+  Documentation = "Toggle flux node rendering of CME",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_fluxnodes)
+end)
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(toggle_fluxnodes.Identifier)
+end)
+assetHelper.registerSceneGraphNodesAndExport(asset, { fluxnodes })
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
@@ -53,6 +69,6 @@ asset.meta = {
   Description = "Flux nodes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "",
-  Identifier = {"MAS_MHD_FluxNodes"}
+  License = "CC-BY",
+  Identifier = {"MAS-MHD-FluxNodes"}
 }

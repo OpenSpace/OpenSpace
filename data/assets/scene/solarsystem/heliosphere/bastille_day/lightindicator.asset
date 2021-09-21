@@ -3,7 +3,7 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local travelSpeedIndicator = {
-  Identifier = "travelSpeedIndicator",
+  Identifier = "TravelSpeedIndicator",
   --SunIAU adds an extra rotation. Using barycenter, then offsetting to SunIAU
   Parent =  sunTransforms.SolarSystemBarycenter.Identifier,
   Transform = {
@@ -34,6 +34,6 @@ asset.meta = {
   Description = "Speed of light from sun to earth",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
-  License = "",
-  Identifier = {"travelSpeedIndicator"}
+  License = "MIT",
+  Identifier = {"TravelSpeedIndicator"}
 }

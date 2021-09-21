@@ -9,21 +9,44 @@ local TexturesPath = asset.syncedResource({
 })
 
 local legend = {
-  Identifier = "Legendfluxnodes",
+  Identifier = "LegendFluxnodes",
   Type = "ScreenSpaceImageLocal",
   TexturePath = TexturesPath .. "/CMR_transparent_white_text.png",
   Scale = 0.15,
   CartesianPosition = { 0.677970, 0.0, -1.049180 }
 }
 
+local show_legend = {
+  Identifier = "fluxnodelegend.show_legend",
+  Name = "Show the legend image",
+  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxnodes.Opacity', 0.0);" ..
+  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxnodes.Enabled', true);" ..
+  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxnodes.Opacity', 1.0, 4);",
+  Documentation = "Show the legend image",
+  GuiPath = "/Bastille-Day",
+  IsLocal =  false
+}
+local hide_legend = {
+  Identifier = "fluxnodelegend.hide_legend",
+  Name = "Hides the legend image",
+  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxnodes.Opacity', 0.0, 2);",
+  Documentation =  "Hides the legend image",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(legend)
   -- These numbers are there to put the legend on the side of the screen.
-  openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Rotation', { 0.000000, 0.000000, 0.56652 });
+  openspace.setPropertyValueSingle('ScreenSpace.LegendFluxnodes.Rotation', { 0.0, 0.0, 0.56652 });
+  openspace.action.registerAction(show_legend)
+  openspace.action.registerAction(hide_legend)
 end)
 
 asset.onDeinitialize(function ()
   openspace.removeScreenSpaceRenderable(legend.Identifier)
+  openspace.action.removeAction(show_legend.Identifier)
+  openspace.action.removeAction(hide_legend.Identifier)
 end)
 
 asset.meta = {
@@ -32,6 +55,6 @@ asset.meta = {
   Description = "Stream nodes for the bastille day CME events",
   Author = "Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "",
-  Identifier = {"Legendfluxnodes"}
+  License = "MIT",
+  Identifier = {"LegendFluxnodes"}
 }

@@ -1,4 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
+local propertyHelper = asset.require('../../../../util/property_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local densityDirectory = asset.syncedResource({
@@ -11,7 +12,7 @@ local densityDirectory = asset.syncedResource({
 local sunRadius = 6.957E8
 
 local densityVolume = {
-  Identifier = "MAS_MHD_density",
+  Identifier = "MAS-MHD-Density",
   Parent = sunTransforms.SunIAU.Identifier,
   Transform = {
     Scale = {
@@ -43,6 +44,21 @@ local densityVolume = {
   }
 }
 
+local toggle_volume = {
+  Identifier = "density_volume.toggle_volume",
+  Name = "Toggle volume",
+  Command = propertyHelper.invert("Scene.MAS-MHD-Density.Renderable.Enabled"),
+  Documentation = "Toggle volume rendering of CME",
+  GuiPath = "/Bastille-Day",
+  IsLocal = false
+}
+
+asset.onInitialize(function ()
+  openspace.action.registerAction(toggle_volume)
+end)
+asset.onDeinitialize(function ()
+  openspace.action.removeAction(toggle_volume.Identifier)
+end)
 assetHelper.registerSceneGraphNodesAndExport(asset, { densityVolume })
 
 asset.meta = {
@@ -51,6 +67,6 @@ asset.meta = {
   Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "",
-  Identifier = {"MAS_MHD_density"}
+  License = "CC-BY",
+  Identifier = {"MAS-MHD-density"}
 }

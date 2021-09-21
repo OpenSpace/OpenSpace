@@ -1,8 +1,52 @@
 {
+  "actions": [
+    {
+      "documentation": "Restart button to start of CME",
+      "gui_path": "/Bastille-Day",
+      "identifier": "profile.keybind.1",
+      "is_local": false,
+      "name": "Reset button. Start of CME, no loop",
+      "script": "openspace.time.setTime('2000-JUL-14 10:03:00.00');openspace.scriptScheduler.clear();"
+    },
+    {
+      "documentation": "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
+      "gui_path": "/Bastille-Day",
+      "identifier": "profile.keybind.2",
+      "is_local": false,
+      "name": "Loop 10:03 - 10:16, at 2 min/ second",
+      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(120);openspace.time.setTime('2000-JUL-14 10:03:00.00');EndtimeShortLoop = \"2000 JUL 14 10:16:00\";StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);"
+    },
+    {
+      "documentation": "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
+      "gui_path": "/Bastille-Day",
+      "identifier": "profile.keybind.3",
+      "is_local": false,
+      "name": "Loop 10:03 - 11:00, at 4 min/ second",
+      "script": "StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 10:03:00.00');openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:00:00', StarttimescriptSlowLoop);"
+    },
+    {
+      "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
+      "gui_path": "/Bastille-Day",
+      "identifier": "profile.keybind.4",
+      "is_local": false,
+      "name": "Loop 10:03 - 12.00, at 15 min/ second",
+      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
+    },
+    {
+      "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
+      "gui_path": "/Bastille-Day",
+      "identifier": "profile.keybind.5",
+      "is_local": false,
+      "name": "Loop 09:30 - 11:50, at 4 min/ second",
+      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:50:00', StarttimescriptLongLoop);"
+    }
+  ],
+  "additional_scripts": [
+    "rawset(_G, \"textureIndex\", -1)"
+  ],
   "assets": [
     "base",
     "dashboard/default_dashboard",
-    "scene/solarsystem/heliosphere/bastille_day/bastille_day_sun_textures",
     "scene/solarsystem/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/heliosphere/bastille_day/fieldlines",
     "scene/solarsystem/heliosphere/bastille_day/fluxnodes",
@@ -11,9 +55,8 @@
     "scene/solarsystem/heliosphere/bastille_day/lightindicator",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/heliosphere/bastille_day/magnetogram_textures",
-    "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/magnetosphere",
-    "scene/solarsystem/planets/earth/satellites/misc/iss",
+    "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
+    "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/sun/EUV_layer",
     "scene/solarsystem/sun/sun_textures"
@@ -49,196 +92,60 @@
   ],
   "keybindings": [
     {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.keybind.1",
+      "key": "R"
     },
     {
-      "documentation": "Show the legend image",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F2",
-      "name": "Show the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 0.000000);openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 1.000000, 4);openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Enabled', true);"
+      "action": "profile.keybind.2",
+      "key": "CTRL+1"
     },
     {
-      "documentation": "Hides the legend image",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F3",
-      "name": "Hides the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 0.000000, 2);"
+      "action": "profile.keybind.3",
+      "key": "CTRL+2"
     },
     {
-      "documentation": "Start to focus on Earth",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F4",
-      "name": "Change to Earth focus",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 155022826061.149994);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.navigation.loadNavigationState('Earth');"
+      "action": "profile.keybind.4",
+      "key": "CTRL+3"
     },
     {
-      "documentation": "Toggle volume rendering of CME",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F6",
-      "name": "Toggle volume",
-      "script": "propertyHelper.invert('Scene.MAS_MHD_density.Renderable.Enabled');"
+      "action": "profile.keybind.5",
+      "key": "CTRL+4"
     },
     {
-      "documentation": "Loop time 10:03 - 11:00",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F7",
-      "name": "Loop Nodedata time 10:03 - 11:00",
-      "script": "EndtimeSlowLoop = '2000 JUL 14 11:00:00';StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript(EndtimeSlowLoop, StarttimescriptSlowLoop);"
+      "action": "density_volume.toggle_volume",
+      "key": "D"
     },
     {
-      "documentation": "Loop time 08:34- 19:00",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F8",
-      "name": "Loop Nodedata time 08:34- 19:00",
-      "script": "Endtime1 = '2000 JUL 14 19:00:00';Starttimescript = \"openspace.time.setTime('2000 JUL 14 08:38:27')\";openspace.scriptScheduler.loadScheduledScript(Endtime1, Starttimescript);"
+      "action": "fluxnodelegend.show_legend",
+      "key": "N"
     },
     {
-      "documentation": "Clear scriptScheduler",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F9",
-      "name": "Clear loop scripts",
-      "script": "openspace.scriptScheduler.clear();"
+      "action": "fluxnodelegend.hide_legend",
+      "key": "M"
     },
     {
-      "documentation": "Restart button to start of CME",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "F10",
-      "name": "Restart button to start of CME",
-      "script": "openspace.time.setTime('2000-JUL-14 10:03:00.00');"
+      "action": "magnetogram_texture.switch_color_layer",
+      "key": "I"
     },
     {
-      "documentation": "Display next sun texture in list of textures",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "I",
-      "name": "Next sun texture",
-      "script": "textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');if (textureIndex == nil) then textureIndex = 2;end;textureIndex = textureIndex + 1;if (textureIndex >= #textureList) then textureIndex = 0;end;if (textureIndex == 0) then openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false);openspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled\", true);else openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false);str = \"Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-\" .. textureIndex .. \".Enabled\";openspace.setPropertyValueSingle(str, true);end;"
+      "action": "EUV_layer.toggle_EUV",
+      "key": "E"
     },
     {
-      "documentation": "Transition Magnetosphere",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+A",
-      "name": "Transition Magnetosphere",
-      "script": "propertyHelper.invert('Scene.Earths_Magnetosphere.Renderable.Enabled');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.lineWidth', 1.500000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.00000});openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.50000}, 8);"
+      "action": "fluxnodes.toggle_fluxnodes",
+      "key": "O"
     },
     {
-      "documentation": "transition when zooming out nodes+cutplane, nmbr 12",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+B",
-      "name": "Transition zooming out nodes + cutplane",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 5, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', -1);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000, 10);"
+      "action": "fieldlines.toggle_fieldlines",
+      "key": "U"
     },
     {
-      "documentation": "New loop: Restarts time at 10:03 and stops at 10:40, sets delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+D",
-      "name": "Loop 10:03 - 10:40, delta time 4 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 10:03:00.00');starttimeEarth = '2000 JUL 14 10:40:00';StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript(starttimeEarth, StarttimescriptSlowLoop);"
+      "action": "fluxnodescutplane.toggle_equatorial",
+      "key": "P"
     },
     {
-      "documentation": "Turn off sun glare, turn on field lines, increase field lines line width, change layer on the Sun to magnetogram 3",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+E",
-      "name": "Third transition Emilie",
-      "script": "openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 4.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'focusPoint');openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Color.uniform', {0.300000,0.570000,0.750000,0.500000}, 6);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', true);"
-    },
-    {
-      "documentation": "Enable nodes with some filters",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+H",
-      "name": "Last transition Emilie",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSize', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 0.190000);"
-    },
-    {
-      "documentation": "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+M",
-      "name": "Loop 10:03 - 10:16, delta time 2 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(120);openspace.time.setTime('2000-JUL-14 10:03:00.00');EndtimeShortLoop = \"2000 JUL 14 10:16:00\";StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript(EndtimeShortLoop, StarttimescriptSlowLoop);"
-    },
-    {
-      "documentation": "transition from cutplane to nodes",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+N",
-      "name": "Transition cutplane to nodes",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.NodesMAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 1, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkipEarth', 11.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.maxNodeSize', 40.0000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', -1.00000);openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.amountOfNodes', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.renderingcircles', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.CameraPerspective.cameraPerspectiveEnabled', true);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkip', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000, 10);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.minNodeSize', 3.00000);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 0.000000, 7);"
-    },
-    {
-      "documentation": "Appearance change for trails",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+Q",
-      "name": "Appearance change for trails",
-      "script": "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Color', {0.700000,0.700000,0.700000});openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.LineWidth', 10.000000)openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Fade', 2.270000);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.Fade', 2.710000);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.Fade', 1.830000);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.Fade', 3.440000);openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.LineWidth', 10.00000);openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Fade', 5.420000);"
-    },
-    {
-      "documentation": "Resets the visualisation of fluxnodes",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+R",
-      "name": "Reset Fluxnodes Vis back",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.colorMode', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkip', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSize', 2.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', 0.800000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterLower', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 5.000000);"
-    },
-    {
-      "documentation": "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+S",
-      "name": "Loop 10:03 - 11:00, delta time 4 min/ second",
-      "script": "StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 10:03:00.00');openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:00:00', StarttimescriptSlowLoop);"
-    },
-    {
-      "documentation": "transition from nodes to cutplane",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+T",
-      "name": "Transition nodeviz to cutplane",
-      "script": "openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 6);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 1.000000, 10);"
-    },
-    {
-      "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+V",
-      "name": "Starts from 10:03, delta time 15 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
-    },
-    {
-      "documentation": "Turn on sun glare, reset field line line width, change layer on the Sun to Orange",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+W",
-      "name": "First transition Emilie",
-      "script": "openspace.time.setDeltaTime(0);openspace.time.setTime('2000-JUL-14 08:42:00.00');openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.travelSpeedIndicator.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);"
-    },
-    {
-      "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/CCMC/Nodes",
-      "is_local": false,
-      "key": "SHIFT+Y",
-      "name": "Loop 09:30 - 11:50, delta time 4 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:50:00', StarttimescriptLongLoop);"
+      "action": "fluxnodescutplane.toggle_meridial",
+      "key": "LEFTBRACKET"
     }
   ],
   "mark_nodes": [
@@ -300,6 +207,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

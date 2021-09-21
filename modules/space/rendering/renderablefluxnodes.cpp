@@ -91,11 +91,6 @@ namespace {
        "Size of nodes",
        "Change the size of the nodes"
     };
-    constexpr openspace::properties::Property::PropertyInfo NodeSizeLargerFluxInfo = {
-       "NodeSizeLargerFlux",
-       "Size of nodes for larger flux",
-       "Change the size of the nodes when flux is larger than flux threshold value"
-    };
     constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",
        "Threshold flux value",
@@ -195,7 +190,7 @@ namespace {
         "distance from camera."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
-        "Renderingcircles",
+        "RenderingCircles",
         "Render as circles",
         "Using fragment shader to draw nodes as circles instead of squares."
     };
@@ -297,8 +292,8 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
     , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
     , _cameraPerspectiveEnabled(CameraPerspectiveEnabledInfo, false)
-    , _drawingCircles(DrawingCirclesInfo, false)
-    , _cameraPerspectiveGroup({" CameraPerspective"})
+    , _drawingCircles(DrawingCirclesInfo, true)
+    , _cameraPerspectiveGroup({ "CameraPerspective" })
     , _drawingHollow(DrawingHollowInfo, false)
     , _gaussianAlphaFilter(GaussiandAlphaFilterInfo, false)
     , _perspectiveDistanceFactor(PerspectiveDistanceFactorInfo, 2.67f, 1.f, 20.f)
