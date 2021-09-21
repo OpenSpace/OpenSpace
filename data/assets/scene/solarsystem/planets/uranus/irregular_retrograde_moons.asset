@@ -13,7 +13,9 @@ local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_uranus",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_uranus_minor",
+  "moonTrail_uranus_minor_irregular"
 }
 
 local irregularMoons = {

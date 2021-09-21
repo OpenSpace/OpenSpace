@@ -15,7 +15,9 @@ local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_neptune",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_neptune_minor",
+  "moonTrail_neptune_minor_irregular"
 }
 
 local irregularRetrogradeMoons = {

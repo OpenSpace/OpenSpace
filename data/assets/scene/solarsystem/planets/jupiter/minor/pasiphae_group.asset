@@ -13,7 +13,8 @@ local trailTags = {
   "moonTrail_solarSystem",
   "moonTrail_giants",
   "moonTrail_jupiter",
-  "moonTrail_minor"
+  "moonTrail_minor",
+  "moonTrail_jupiter_minor"
 }
 local pasiphaeGroup = {
   {
