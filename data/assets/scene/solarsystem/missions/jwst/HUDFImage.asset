@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local jwstTransforms = asset.require('scene/solarsystem/missions/jwst/jwst')
+local jwstTransforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local image = asset.syncedResource({
@@ -29,9 +29,12 @@ local HUDFPosition = {
     }
   },
   GUI = {
-    Name = "Hubble Ultra Deep field",
-    Path = "/Solar System/Missions/JWST",
-    Hidden = true
+    Name = "Hubble Ultra Deep field Position",
+    Path = "/Solar System/Missions/JWST/HUDF",
+    Hidden = true,
+    Description = [[
+      Galactic cartesian position for the Hubble Ultra Deep field
+    ]],
   }
 }
 
@@ -63,7 +66,10 @@ local HUDFJWSTLine = {
   Tag = { "mission_jwst_hudf" },
   GUI = {
     Name = "JWST to HUDF Line",
-    Path = "/Solar System/Missions/JWST",
+    Path = "/Solar System/Missions/JWST/HUDF",
+    Description = [[
+      Line from the James Webb Space Telescope to the Hubble Ultra Deep field
+    ]],
   }
 }
 

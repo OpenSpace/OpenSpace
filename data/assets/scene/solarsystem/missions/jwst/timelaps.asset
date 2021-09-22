@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 asset.onInitialize(function()
   -- JWST timelaps timeline
   -- Mission start
@@ -236,7 +234,18 @@ asset.onInitialize(function()
 
 end)
 
-
 asset.onDeinitialize(function ()
   openspace.scriptScheduler.clear()
 end)
+
+asset.meta = {
+  Name = "James Webb Space Telescope Timelapse",
+  Version = "1.0",
+  Description = [[
+    Scripts that are scheduled to alter the speed of the simulation time so the deployment
+    of the James Webb Space Telescope looks smoother.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

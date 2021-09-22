@@ -46,13 +46,14 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/jwst/jwst",
+    "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/HUDFImage",
     "scene/solarsystem/missions/jwst/timelaps",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {
     "aim": "",
-    "anchor": "JWSTLaunchModel",
+    "anchor": "JWSTModel",
     "frame": "",
     "position": {
       "x": 17.363674,

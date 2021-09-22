@@ -1,0 +1,67 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local horizons = asset.require('./horizons').horizons
+asset.require('spice/base')
+
+local JWSTPosition = {
+  Identifier = "JWSTPosition",
+  Parent = transforms.L2.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "/horizons_jwst.dat",
+    },
+  },
+  GUI = {
+    Name = "JWST Position",
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      James Webb Space Telescope Position relative to L2 based on horizons data from the
+      2018 launch.
+    ]],
+    Hidden = true,
+  }
+}
+
+local JWSTRotation = {
+  Identifier = "JWSTRotation",
+  Parent = JWSTPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTRotation",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = true,
+      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  GUI = {
+    Name = "JWST Rotation",
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      James Webb Space Telescope Rotation so the sunshield always faces the Sun.
+    ]],
+    Hidden = true,
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  JWSTPosition,
+  JWSTRotation
+})
+
+asset.meta = {
+  Name = "James Webb Space Telescope Transforms",
+  Version = "1.0",
+  Description = [[
+    JWST transforms: JWST position relative to L2 using horizons data from the planned
+    launch of 2018. JWST rotation, a fixed rotation so sunshield always points toward
+    the Sun.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JWSTPosition", "JWSTRotation"}
+}

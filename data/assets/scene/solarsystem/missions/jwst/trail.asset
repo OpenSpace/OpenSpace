@@ -1,0 +1,99 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local horizons = asset.require('./horizons').horizons
+local kernels = asset.require('./kernels').kernels
+asset.require("spice/base")
+
+local JWSTTrail = {
+  Identifier = "JWSTTrail",
+  Parent = transforms.L2.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 13:18:00",
+    End = "2021 OCT 01"
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "/horizons_jwst.dat",
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "2018 OCT 01 13:18:00",
+    EndTime = "2021 OCT 01",
+    SampleInterval = 600
+  },
+  GUI = {
+    Name = "JWST Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Trail relative to L2 based on horizons data from the
+      2018 launch.
+    ]],
+  }
+}
+
+local JWSTSunTrail = {
+  Identifier = "JWSTSunTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JWST",
+      Observer = "SSB",
+      Kernels = kernels .. "/jwst_horizons_20200101_20240101_v01.bsp"
+    },
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 365.242,
+    Resolution = 1000
+  },
+  GUI = {
+    Name = "JWST Sun Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Trail relative to the Sun based on horizons data from the
+      2018 launch.
+    ]],
+  }
+}
+
+local JWSTOrbitTrail = {
+  Identifier = "JWSTOrbitTrail",
+  Parent = transforms.L2.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "/horizons_jwst.dat",
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    Period = 91.3105,
+    Resolution = 100
+  },
+  GUI = {
+    Name = "JWST Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  JWSTTrail,
+  JWSTSunTrail,
+  JWSTOrbitTrail
+})
+
+asset.meta = {
+  Name = "James Webb Space Telescope Trails",
+  Version = "1.0",
+  Description = [[
+    Trail of James Webb Space Telescope in respect to L2, the Sun and as an orbit trail
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JWSTTrail", "JWSTSunTrail", "JWSTOrbitTrail"}
+}
