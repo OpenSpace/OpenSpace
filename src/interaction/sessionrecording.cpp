@@ -1777,7 +1777,6 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
-    bool paused = global::timeManager->isPaused();
     bool playbackPaused = (_state == SessionState::PlaybackPaused);
     if (playbackPaused) {
         _playbackPauseOffset
