@@ -36,6 +36,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/scene/profile.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 #include <optional>

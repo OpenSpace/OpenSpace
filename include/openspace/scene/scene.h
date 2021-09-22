@@ -27,7 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
@@ -233,6 +235,16 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
+    /**
+     * Sets a property using the 'properties' contents of a profile. The function will
+     * loop through each setProperty command. A property may be set to a bool, float,
+     * or string value (which must be converted because a Profile stores all values
+     * as strings)
+     *
+     * \param p The Profile to be read.
+     */
+    void setPropertiesFromProfile(const Profile& p);
+
 private:
     /**
      * Update dependencies.
@@ -266,6 +278,16 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 };
+
+/**
+ * Accepts string version of a property value from a profile, converts it to the
+ * appropriate type, and then pushes the value onto the lua state.
+ *
+ * \param L the lua state to push value to
+ * \param value string representation of the value with which to set property
+ */
+void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+    const std::string& value);
 
 } // namespace openspace
 

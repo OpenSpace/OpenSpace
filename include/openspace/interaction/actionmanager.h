@@ -43,7 +43,6 @@ public:
 
     void triggerAction(const std::string& identifier,
         const ghoul::Dictionary& arguments) const;
-
     static scripting::LuaLibrary luaLibrary();
 
 private:

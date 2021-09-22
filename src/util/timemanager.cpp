@@ -868,4 +868,21 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
     return _previousApplicationTime;
 }
 
+void TimeManager::setTimeFromProfile(const Profile& p) {
+    Time t;
+
+    switch (p.time.value().type) {
+    case Profile::Time::Type::Relative:
+        t.setTimeRelativeFromProfile(p.time.value().value);
+        break;
+
+    case Profile::Time::Type::Absolute:
+        t.setTimeAbsoluteFromProfile(p.time.value().value);
+        break;
+
+    default:
+        throw ghoul::MissingCaseException();
+    }
+}
+
 } // namespace openspace

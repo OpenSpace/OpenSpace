@@ -29,9 +29,11 @@
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,6 +45,10 @@
 #include <fstream>
 
 namespace {
+    // Helper structs for the visitor pattern of the std::variant
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
     constexpr const char* _loggerCat = "NavigationHandler";
 
     const double Epsilon = 1E-7;
