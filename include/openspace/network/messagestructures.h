@@ -196,7 +196,9 @@ struct CameraKeyframe {
             << std::fixed << std::setprecision(7) << _rotation.y << ' '
             << std::fixed << std::setprecision(7) << _rotation.z << ' '
             << std::fixed << std::setprecision(7) << _rotation.w << ' ';
-        out << std::scientific << _scale << ' ';
+        out << std::fixed
+            << std::setprecision(std::numeric_limits<double>::max_digits10)
+            << _scale << ' ';
         if (_followNodeRotation) {
             out << "F ";
         }
