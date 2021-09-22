@@ -61,9 +61,11 @@ util.appendTable(states, substateExoplanets.states)
 -- Ugly workaround: we set the time here since setting the correct time at start-up and also
 -- pausing causes weirdnesss and leads to some things (such as the ISS rotation) to not update 
 -- correctly. (Note that the flyhome path also pauses the time)
+-- Clear scheduler after this has happened, to avoid it happening again by accident.
 local startupScript = string.gsub([[
-    openspace.time.setTime(']] .. defaultTime .. [[')
-    ]] .. flyHome.cameraPath .. [[
+    openspace.time.setTime(']] .. defaultTime .. [[');
+    ]] .. flyHome.cameraPath .. [[;
+    openspace.scriptScheduler.clear(); 
   ]],
   "\n", ""
 )
@@ -72,7 +74,7 @@ local transitions = {
   {
     From = "Start",
     To = "Home", 
-    Action = [[openspace.scriptScheduler.loadScheduledScript(']] .. defaultTime .. [[', "]] .. startupScript .. [[")]]
+    Action = [[openspace.scriptScheduler.loadScheduledScript(']] .. defaultTime .. [[', "]] .. startupScript .. [[");]]
   },
   -- SolarSystem <-> Home
   {
