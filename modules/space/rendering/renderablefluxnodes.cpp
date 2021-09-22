@@ -48,10 +48,8 @@
 #include <thread>
 
 namespace {
-    // log category
     constexpr const char* _loggerCat = "RenderableFluxNodes";
     
-    //streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, 
     constexpr const std::array<const char*, 29> UniformNames = {
         "streamColor", "nodeSize", "proximityNodesSize", 
         "thresholdFlux", "colorMode", "filterLower", "filterUpper", "scalingMode",
@@ -67,8 +65,8 @@ namespace {
         "GoesEnergy",
         "GOES Energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
-        "Environmental Satellites Emin01 is values > 10 Mev, "
-        "Default is Emin03 where values > 100 Mev."
+        "Environmental Satellites. Emin01 is values > 10 MeV, "
+        "Default is Emin03 where values > 100 MeV."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
         "ColorMode",
@@ -89,7 +87,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
-       "Change the size of the nodes"
+       "Change the size of the rendered points of the nodes"
     };
     constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",

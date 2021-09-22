@@ -148,8 +148,7 @@ bool checkIfSkipVertex() {
     return false;
 }
 
-void whatToDoIfCloseToEarth() {
-    float maxdist = 10000000000.0 * perspectiveDistanceFactor;
+void setEarthProximitySettings() {
     float distancevec = distance(earthPos, in_position.xyz);
     vs_closeToEarth = 0.0;
 
@@ -206,7 +205,7 @@ void main() {
         else if (colorMode == uniformColor){
             vs_color = streamColor;
         }
-        whatToDoIfCloseToEarth();
+        setEarthProximitySettings();
     }
     else {
         vs_color = vec4(0.0);

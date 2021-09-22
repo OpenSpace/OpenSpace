@@ -119,7 +119,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
         "RUpperBound",
         "Radius upper bound",
-        "Limit the volumes radiues."
+        "Limit the volume's radius"
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {

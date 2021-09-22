@@ -114,11 +114,11 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     }
     else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
         seqStartStr =
-                kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
+            kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
     }
     else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
         seqStartStr =
-                kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+            kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
     }
     else {
         LWARNING(

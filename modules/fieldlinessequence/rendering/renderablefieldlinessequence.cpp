@@ -36,6 +36,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <filesystem>
@@ -59,7 +60,7 @@ namespace {
         "Quantity used to color lines if the 'By Quantity' color method is selected."
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
-        "ColorQuantityMin",
+        "ColorQuantityMinMax",
         "ColorTable Min Value",
         "Value to map to the lowest and highest end of the color table."
     };
@@ -155,8 +156,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the field lines if the "
-        "selected rendering method includes lines."
+        "This value specifies the line width of the fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
@@ -173,7 +173,7 @@ namespace {
         // Input file type. Should be cdf, json or osfls
         SourceFileType inputFileType;
 
-        // Should be path to folder containing the input files
+        // Path to folder containing the input files
         std::filesystem::path sourceFolder [[codegen::directory()]];
 
         // Path to a .txt file containing seed points. Mandatory if CDF as input.
@@ -183,24 +183,22 @@ namespace {
         // Currently supports: batsrus, enlil & pfss
         std::optional<std::string> simulationModel;
 
-        //sim mod
-        //std::optional<openspace::fls::Model> model;
-
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
 
-        // 1.f is default, assuming meters as input.
         // Convert the models distance unit, ex. AU for Enlil, to meters.
         // Can be used during runtime to scale domain limits.
+        // 1.f is default, assuming meters as input.
         std::optional<float> scaleToMeters;
 
-        // If False (default) => Load in initializing step and store in RAM
+        // Set to true if you are streaming data during runtime
         std::optional<bool> loadAtRuntime;
 
-        // Values should be paths to .txt files
+        // A list of paths to transferfunction .txt files containing color tables
+        // used for colorizing the fieldlines according to different parameters
         std::optional<std::vector<std::string>> colorTablePaths;
 
         // [[codegen::verbatim(ColorMethodInfo.description)]]
@@ -209,10 +207,12 @@ namespace {
         // [[codegen::verbatim(ColorQuantityInfo.description)]]
         std::optional<int> colorQuantity;
 
-        // Values should be entered as {X, Y}, where X & Y are numbers
+        // List of ranges for which their corresponding parameters values will be 
+        // colorized by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> colorTableRanges;
 
-        // Enables Flow
+        // Enables flow, showing the direction, but not accurate speed, that particles 
+        // would be traveling
         std::optional<bool> flowEnabled;
 
         // [[codegen::verbatim(MaskingEnabledInfo.description)]]
@@ -221,7 +221,8 @@ namespace {
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
 
-        // Values should be entered as {{X, Y},{X, Y}} where X & Y are numbers
+        // List of ranges for which their corresponding parameters values will be 
+        // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
         // Value should be path to folder where states are saved. Specifying this
@@ -229,7 +230,7 @@ namespace {
         // (JSON/CDF input => osfls output & oslfs input => JSON output)
         std::optional<std::string> outputFolder;
 
-        // Line width of line
+        // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
         // If data sets parameter start_time differ from start of run,
@@ -385,7 +386,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _modelStr = p.simulationModel.value_or(_modelStr);
-    //thismodel = p.model.value_or(thismodel);
     _seedPointDirectory = p.seedPointDirectory.value_or(_seedPointDirectory);
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
@@ -519,12 +519,10 @@ fls::Model stringToModel(std::string str) {
         [](char c) { return static_cast<char>(::tolower(c)); }
     );
     return fls::stringToModel(str);
-
 }
 
 bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM() {
     fls::Model model = stringToModel(_modelStr);
-    //fls::Model model = thismodel;
     if (model == fls::Model::Invalid) {
         return false;
     }
@@ -597,12 +595,14 @@ void RenderableFieldlinesSequence::setupProperties() {
     }
 
     // Add Properties to the groups
+    _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
     _domainGroup.addProperty(_domainX);
     _domainGroup.addProperty(_domainY);
     _domainGroup.addProperty(_domainZ);
     _domainGroup.addProperty(_domainR);
     _flowGroup.addProperty(_flowReversed);
+    _flowColor.setViewOption(properties::Property::ViewOptions::Color);
     _flowGroup.addProperty(_flowColor);
     _flowGroup.addProperty(_flowParticleSize);
     _flowGroup.addProperty(_flowParticleSpacing);
@@ -814,7 +814,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
         std::string seedFilePath = spFile.path().string();
         if (!spFile.is_regular_file() ||
-            seedFilePath.substr(seedFilePath.find_last_of('.')+1) != "txt")
+            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
         {
             continue;
         }
@@ -1004,8 +1004,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->deactivate();
 
     if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
+        // Restores OpenGL Rendering State
+        global::renderEngine->openglStateCache().resetBlendState();
+        global::renderEngine->openglStateCache().resetDepthState();
     }
 }
 

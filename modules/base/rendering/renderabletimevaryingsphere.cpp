@@ -182,8 +182,8 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, true)
     , _backgroundRendering(BackgroundInfo, false)
-    , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
-    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
+    , _fadeInThreshold(FadeInThresholdInfo, -1.f, -1.f, 1.f)
+    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, -1.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -220,7 +220,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     addProperty(_orientation);
 
-    _size.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _size.setExponent(20.f);
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;
@@ -431,23 +431,22 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     }
     // Extract all file paths from the provided folder
     _files.clear();
-    //_sourceFiles.clear();
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
-        if (e.is_regular_file()) {
-               
-            std::string filePath = e.path().string();
-            double time = extractTriggerTimeFromFileName(filePath);
-            std::unique_ptr<ghoul::opengl::Texture> t =
-                ghoul::io::TextureReader::ref().loadTexture(filePath);
-
-            t->setInternalFormat(GL_COMPRESSED_RGBA);
-            t->uploadTexture();
-            t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            t->purgeFromRAM();
-
-            _files.push_back({ filePath, time, std::move(t) });
+        if (!e.is_regular_file()) {
+            continue;
         }
+        std::string filePath = e.path().string();
+        double time = extractTriggerTimeFromFileName(filePath);
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(filePath);
+
+        t->setInternalFormat(GL_COMPRESSED_RGBA);
+        t->uploadTexture();
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        t->purgeFromRAM();
+
+        _files.push_back({ filePath, time, std::move(t) });
     }
 
     std::sort(
@@ -485,7 +484,6 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime); 
             _sphereIsDirty = true;
-
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
@@ -499,8 +497,9 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         _sphereIsDirty = false;
     }
 }
-    // Extract J2000 time from file names
-    // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
+
+// Extract J2000 time from file names
+// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
 double extractTriggerTimeFromFileName(const std::string& filePath) {
     // Extract the filename from the path (without extension)
     std::string timeString = std::filesystem::path(filePath).stem().string();
