@@ -36,14 +36,6 @@
 namespace openspace::luascriptfunctions {
 
 int saveSettingsToProfile(lua_State* L) {
-    if (!global::configuration->usingProfile) {
-        return ghoul::lua::luaError(
-            L,
-            "Program was not started with a profile, so cannot use this "
-            "save-current-settings feature"
-        );
-    }
-
     ghoul::lua::checkArgumentsAndThrow(L, { 0, 2 }, "lua::saveSettingsToProfile");
     auto [saveFilePath, overwrite] =
         ghoul::lua::values<std::optional<std::string>, std::optional<bool>>(L);
