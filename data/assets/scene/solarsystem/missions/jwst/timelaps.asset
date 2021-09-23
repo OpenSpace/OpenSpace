@@ -2,7 +2,7 @@ asset.onInitialize(function()
   -- JWST timelaps timeline
   -- Mission start
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:05:52",
+    "2018 OCT 01 14:07:02", -- 1 min delay
     "openspace.time.interpolateDeltaTime(120)",
     "openspace.time.interpolateDeltaTime(-1)"
   )
