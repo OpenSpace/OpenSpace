@@ -22,7 +22,7 @@ local JWSTTrail = {
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2018 OCT 01 13:18:00",
     EndTime = "2021 OCT 01",
-    SampleInterval = 600
+    SampleInterval = 3600
   },
   GUI = {
     Name = "JWST Trail",
@@ -60,40 +60,19 @@ local JWSTSunTrail = {
   }
 }
 
-local JWSTOrbitTrail = {
-  Identifier = "JWSTOrbitTrail",
-  Parent = transforms.L2.Identifier,
-  Renderable = {
-    Enabled = false,
-    Type = "RenderableTrailOrbit",
-    Translation = {
-      Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst.dat",
-    },
-    Color = { 0.9, 0.9, 0.0 },
-    Period = 91.3105,
-    Resolution = 100
-  },
-  GUI = {
-    Name = "JWST Orbit Trail",
-    Path = "/Solar System/Missions/JWST/Trails"
-  }
-}
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTTrail,
-  JWSTSunTrail,
-  JWSTOrbitTrail
+  JWSTSunTrail
 })
 
 asset.meta = {
   Name = "James Webb Space Telescope Trails",
   Version = "1.0",
   Description = [[
-    Trail of James Webb Space Telescope in respect to L2, the Sun and as an orbit trail
+    Trail of James Webb Space Telescope in respect to L2 and the Sun
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"JWSTTrail", "JWSTSunTrail", "JWSTOrbitTrail"}
+  Identifiers = {"JWSTTrail", "JWSTSunTrail"}
 }

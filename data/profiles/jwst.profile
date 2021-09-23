@@ -47,7 +47,7 @@
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
-    "scene/solarsystem/missions/jwst/HUDFImage",
+    "scene/solarsystem/missions/jwst/hudf",
     "scene/solarsystem/missions/jwst/timelaps",
     "scene/digitaluniverse/hdf"
   ],

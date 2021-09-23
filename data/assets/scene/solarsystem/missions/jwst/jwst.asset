@@ -115,3 +115,15 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTModel,
   JWSTFov
 })
+
+asset.meta = {
+  Name = "James Webb Space Telescope",
+  Version = "1.0",
+  Description = [[
+    James Webb Space Telescope animated model, safe viewing band and field of view.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JWSTBand", "JWSTModel", "JWSTFov"}
+}

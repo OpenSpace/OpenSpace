@@ -16,11 +16,11 @@ local JWSTPosition = {
   GUI = {
     Name = "JWST Position",
     Path = "/Solar System/Missions/JWST",
+    Hidden = true,
     Description = [[
       James Webb Space Telescope Position relative to L2 based on horizons data from the
       2018 launch.
     ]],
-    Hidden = true,
   }
 }
 
@@ -40,10 +40,10 @@ local JWSTRotation = {
   GUI = {
     Name = "JWST Rotation",
     Path = "/Solar System/Missions/JWST",
+    Hidden = true,
     Description = [[
       James Webb Space Telescope Rotation so the sunshield always faces the Sun.
     ]],
-    Hidden = true,
   }
 }
 
