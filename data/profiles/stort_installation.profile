@@ -39,6 +39,8 @@
     "scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11",
     "scene/solarsystem/planets/earth/satellites/misc/iss",
     "installationspecific/substates/missions/cassini/trail",
+    "installationspecific/substates/mars_moons/deimos",
+    "installationspecific/substates/mars_moons/phobos",
     "scene/solarsystem/planets/jupiter/major_moons",
     "scene/solarsystem/planets/jupiter/minor_moons",
     "scene/solarsystem/planets/neptune/inner_moons",
@@ -113,6 +115,16 @@
     "version": "1.0"
   },
   "properties": [
+    {
+      "name": "Scene.Phobos.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Deimos.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
     {
       "name": "NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationFactor",
       "type": "setPropertyValueSingle",

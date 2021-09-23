@@ -1,0 +1,63 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('scene/solarsystem/planets/mars/mar097').Kernels
+
+local model = asset.syncedResource({
+  Name = "Phobos Model",
+  Type = "HttpSynchronization",
+  Identifier = "phobos_model",
+  Version = 1
+})
+
+local PhobosModel = {
+  Identifier = "PhobosModel",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_PHOBOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "/Phobos_1_1000.glb",
+    ModelScale = 2000,
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      }
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Phobos (Model)",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[One of two moons of Mars.]]
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { PhobosModel })
+
+asset.meta = {
+  Name = "Phobos Model",
+  Version = "1.0",
+  Description = [[ RenderableModel for Phobos.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Phobos"}
+}
