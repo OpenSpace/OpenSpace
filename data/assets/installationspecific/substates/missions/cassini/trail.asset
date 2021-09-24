@@ -250,7 +250,7 @@ local primaryMission = {
       Observer = "SATURN",
       Kernels = kernels.ephemerisKernels
     },
-    Color = { 0.34, 0.06, 0.85 },
+    Color = { 0.76, 0.26, 0.85 },
     StartTime = beginSaturnOrbit,
     EndTime = missionEquinoxStart,
     SampleInterval = 400,
@@ -283,7 +283,7 @@ local equinoxMission = {
       Observer = "SATURN",
       Kernels = kernels.ephemerisKernels
     },
-    Color = { 0.54, 0.06, 0.85 },
+    Color = { 0.76, 0.26, 0.85 },
     StartTime = missionEquinoxStart,
     EndTime = missionSolsticeStart,
     SampleInterval = 400,
@@ -316,7 +316,7 @@ local solsticeMission = {
       Observer = "SATURN",
       Kernels = kernels.ephemerisKernels
     },
-    Color = { 0.74, 0.06, 0.85 },
+    Color = { 0.76, 0.26, 0.85 },
     StartTime = missionSolsticeStart,
     EndTime = startGrandFinale,
     SampleInterval = 400,
@@ -382,7 +382,7 @@ local huygensTrail = {
       Observer = "SATURN",
       Kernels = kernels.ephemerisKernels
     },
-    Color = { 0.09, 0.00, 0.99 },
+    Color = { 0.1, 0.34, 0.85 },
     StartTime = huygensDetach,
     EndTime = endHuygens,
     SampleInterval = 400,
