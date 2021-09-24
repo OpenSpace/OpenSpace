@@ -26,11 +26,16 @@
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
 
 #include "actionmanager_lua.inl"
+
+namespace {
+    constexpr const char* _loggerCat = "ActionManager";
+} // namespace
 
 namespace openspace::interaction {
 
