@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
 
@@ -29,7 +30,8 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Primära uppdraget. För varje sekund passerar 10 dagar')"
   )
 
   -- Focus on Saturn again
@@ -68,7 +70,8 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Dagjämningsuppodraget. För varje sekund passerar 10 dagar')"
   )
 
   -- Solstice start
@@ -81,7 +84,8 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Solståndsuppdraget. För varje sekund passerar 15 dagar')"
   )
 
   -- Grand Finale start
@@ -94,7 +98,8 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Den stora finalen. För varje sekund passerar 2 dagar')"
   )
 
   -- End
@@ -102,7 +107,8 @@ local cassiniScripts = [[
     "2017-09-15T10:34:05.000",
     "openspace.time.interpolateDeltaTime(1)" ..
     "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
-    "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)"
+    "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', '')"
   )
 ]]
 
@@ -118,7 +124,8 @@ local huygensScripts = [[
   -- Detach
   openspace.scriptScheduler.loadScheduledScript(
     "2004-11-21 08:44:54.000", -- 1 sec pre delay
-    "openspace.time.interpolateDeltaTime(172800)" -- 2 days per second
+    "openspace.time.interpolateDeltaTime(172800)" .. -- 2 days per second
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Huygens är på väg mot Titan. För varje sekund passerar 2 dagar')"
   )
 
   -- Slow
@@ -128,7 +135,8 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Huygens är på väg mot Titan. För varje sekund passerar 1 dagar')"
   )
 
   -- Approach
@@ -144,7 +152,8 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Huygens närmar sig Titan. För varje sekund passerar 1 timme')"
   )
 
   -- Landing
@@ -157,7 +166,8 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Huygens landar snart på Titan. För varje sekund passerar 10 minuter')"
   )
 
   -- End
@@ -165,7 +175,8 @@ local huygensScripts = [[
     "2005-01-14 09:05:55.000",
     "openspace.time.setDeltaTime(1)" ..
     "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
-    "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
+    "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)" ..
+    "openspace.setPropertyValueSingle('Dashboard.CassiniStateText.Text', 'Huygens har landat på Titan!')"
   )
 ]]
 
@@ -270,3 +281,13 @@ local transitions = {
 
 asset.export("states", states)
 asset.export("transitions", transitions)
+
+assetHelper.registerDashboardItems(asset, {
+  {
+    Type = "DashboardItemText",
+    Identifier = "CassiniStateText",
+    GuiName = "Cassini State Dashboard Text",
+    FontName = "Light",
+    Text = ""
+  }
+})
