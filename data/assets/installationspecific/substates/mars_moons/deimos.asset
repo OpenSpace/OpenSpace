@@ -31,7 +31,7 @@ local DeimosModel = {
     Type = "RenderableModel",
     GeometryFile = model .. "/Deimos_1_1000.glb",
     ModelScale = 2000,
-    AmbientIntensity = 0.05,
+    AmbientIntensity = 0.02,
     SpecularIntensity = 0.0,
     LightSources = {
       {
