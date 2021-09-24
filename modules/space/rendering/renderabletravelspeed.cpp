@@ -134,6 +134,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     setRenderBin(RenderBin::Overlay);
 
     _lineColor = p.color.value_or(_lineColor);
+    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     _opacity = p.opacity.value_or(_opacity);

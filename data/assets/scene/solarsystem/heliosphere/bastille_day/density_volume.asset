@@ -1,5 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
-local propertyHelper = asset.require('../../../../util/property_helper')
+local propertyHelper = asset.require('util/property_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local densityDirectory = asset.syncedResource({

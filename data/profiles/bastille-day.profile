@@ -55,7 +55,7 @@
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
     "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/sun/EUV_layer",
+    "scene/solarsystem/sun/euv_layer",
     "scene/solarsystem/sun/sun_textures"
   ],
   "camera": {
@@ -125,7 +125,7 @@
       "key": "I"
     },
     {
-      "action": "EUV_layer.toggle_EUV",
+      "action": "euv_layer.toggle_EUV",
       "key": "E"
     },
     {

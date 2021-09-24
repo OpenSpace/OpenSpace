@@ -1,6 +1,6 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local propertyHelper = asset.require('../../../util/property_helper')
+local propertyHelper = asset.require('util/property_helper')
 local transforms = asset.require("./transforms")
 
 local textureSourcePath = asset.syncedResource({
@@ -18,7 +18,6 @@ local EUVLayer = {
     Size = 6.96E8, -- Slightly bigger than the sun renderable,
     Enabled = true,
     TextureSource = textureSourcePath,
-    --BlendMode = "Additive",
     Opacity = 1,
     Segments = 132
   },
@@ -29,7 +28,7 @@ local EUVLayer = {
 }
 
 local toggle_EUV_layer ={
-  Identifier = "EUV_layer.toggle_EUV",
+  Identifier = "euv_layer.toggle_EUV",
   Name = "Toggle EUV Layer",
   Command = propertyHelper.invert("Scene.EUV-Layer.Renderable.Enabled"),
   Documentation = "Toggle EUV layer of sun",

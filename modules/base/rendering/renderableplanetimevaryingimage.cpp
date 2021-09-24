@@ -41,22 +41,22 @@ namespace {
     constexpr const char* KeyLazyLoading = "LazyLoading";
     constexpr const char* _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
-        "Texture Directory",
+        "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
         "is used as a texture that is applied to this plane."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
-       "RenderType",
+       "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
        "Opaque, Transparent, or Overlay rendering step."
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
-        // [[codegen::verbatim(TextureInfo.description)]]
+        // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
 
         enum class RenderType {
@@ -95,23 +95,22 @@ documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
                                                       const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
-    , _texturePath(TextureInfo)
+    , _sourceFolder(SourceFolderInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     
     addProperty(_blendMode);
     
-    _texturePath = p.sourceFolder;
-    std::filesystem::path textureDirectory = absPath(_texturePath);
-    if (!std::filesystem::is_directory(textureDirectory)) {
+    _sourceFolder = p.sourceFolder;
+    if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(fmt::format(
             "Time varying image, {} is not a valid directory",
-            _texturePath
+            _sourceFolder
         ));
     }
 
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() { _texture = loadTexture(); });
+    addProperty(_sourceFolder);
+    _sourceFolder.onChange([this]() { _texture = loadTexture(); });
 
     if (p.renderType.has_value()) {
         switch (*p.renderType) {
@@ -166,7 +165,7 @@ void RenderablePlaneTimeVaryingImage::initialize() {
 void RenderablePlaneTimeVaryingImage::initializeGL() {
     RenderablePlane::initializeGL();
 
-    _textureFiles.resize(_sourceFiles.size());  
+    _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
             absPath(_sourceFiles[i]).string()
@@ -185,7 +184,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    fs::path sourceFolder = absPath(_texturePath);
+    fs::path sourceFolder = absPath(_sourceFolder);
     // Extract all file paths from the provided folder
     _sourceFiles.clear();
     namespace fs = std::filesystem;
@@ -199,7 +198,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     if (_sourceFiles.empty()) {
         LERROR(fmt::format(
             "{}: Plane sequence filepath {} was empty",
-            _identifier, _texturePath
+            _identifier, _sourceFolder
         ));
         return false;
     }
@@ -208,7 +207,6 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
 }
 
 void RenderablePlaneTimeVaryingImage::deinitializeGL() {
-
     BaseModule::TextureManager.release(_texture);
 
     _textureFiles.clear();
@@ -242,7 +240,6 @@ void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         {
             _activeTriggerTimeIndex = updateActiveTriggerTimeIndex(currentTime);
             needsUpdate = true;
-
         } // else we're still in same state as previous frame (no changes needed)
     }
     else {
@@ -284,8 +281,8 @@ void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
     }
 }
 
-int RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) 
-                                                                                     const
+int RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(
+                                                                 double currentTime) const
 {
     int activeIndex = 0;
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
@@ -314,7 +311,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
     }
 }
 
-ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const{
+ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
     ghoul::opengl::Texture* texture = nullptr;
     if (_activeTriggerTimeIndex != -1) {
         texture = _textureFiles[_activeTriggerTimeIndex].get();

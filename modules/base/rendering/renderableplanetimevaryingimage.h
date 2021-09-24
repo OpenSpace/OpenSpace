@@ -65,7 +65,7 @@ private:
     std::vector<std::string> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
-    properties::StringProperty _texturePath;
+    properties::StringProperty _sourceFolder;
     ghoul::opengl::Texture* _texture = nullptr;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     bool _isLoadingLazily = false;
