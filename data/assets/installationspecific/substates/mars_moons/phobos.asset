@@ -31,6 +31,8 @@ local PhobosModel = {
     Type = "RenderableModel",
     GeometryFile = model .. "/Phobos_1_1000.glb",
     ModelScale = 2000,
+    AmbientIntensity = 0.05,
+    SpecularIntensity = 0.0,
     LightSources = {
       {
         Type = "SceneGraphLightSource",
