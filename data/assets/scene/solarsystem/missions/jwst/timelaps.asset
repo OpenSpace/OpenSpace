@@ -2,234 +2,249 @@ asset.onInitialize(function()
   -- JWST timelaps timeline
   -- Mission start
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:07:02", -- 1 min delay
-    "openspace.time.interpolateDeltaTime(120)",
+    "2018 OCT 01 14:06:03",
+    "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 0.7)" ..
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)",
+    "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 1.0)" ..
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)"
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 OCT 01 14:07:03", -- 1 min delay
+    "openspace.time.interpolateDeltaTime(120)"
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 OCT 01 14:10:03", -- 4 min pre delay
+    "",
     "openspace.time.interpolateDeltaTime(-1)"
   )
 
   -- array deploy, forwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:35:12", -- 1min pre delay so time to interpolate
+    "2018 OCT 01 14:35:23", -- 1 min pre delay so time to interpolate
     "openspace.time.interpolateDeltaTime(1)"
   )
   -- array deploy, backwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:36:12",
+    "2018 OCT 01 14:36:23",
     "",
     "openspace.time.interpolateDeltaTime(-120)"
   )
 
   -- array complete, forwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:36:34",
+    "2018 OCT 01 14:36:45",
     "openspace.time.interpolateDeltaTime(7200)"
   )
   -- array complete, backwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:37:44", -- 1min 10sec pre delay so time to interpolate
+    "2018 OCT 01 14:37:55", -- 1 min 10 sec pre delay so time to interpolate
     "",
     "openspace.time.interpolateDeltaTime(-1)"
   )
   -- array complete, backwards prepare
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 15:46:34", -- 1h 10min delay for interpolation
+    "2018 OCT 01 15:46:45", -- 1h 10 min delay for interpolation
     "",
     "openspace.time.interpolateDeltaTime(-120)"
   )
 
   -- antenna deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 02 08:05:52",
+    "2018 OCT 02 08:06:03",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- antenna complete, forwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 02 13:44:52",
+    "2018 OCT 02 13:45:03",
     "openspace.time.interpolateDeltaTime(18000)"
   )
   -- antenna complete, backwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 02 14:44:52", -- 1h pre delay so time to interpolate
+    "2018 OCT 02 14:45:03", -- 1h pre delay so time to interpolate
     "",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- fw palette deploy, forwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 04 06:26:27", -- 2h pre delay so time to interpolate
+    "2018 OCT 04 06:26:38", -- 2h pre delay so time to interpolate
     "openspace.time.interpolateDeltaTime(3600)"
   )
   -- fw palette deploy, backwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 04 08:26:27",
+    "2018 OCT 04 08:26:38",
     "",
     "openspace.time.interpolateDeltaTime(-18000)"
   )
 
   -- fw palette complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 04 20:05:52",
+    "2018 OCT 04 20:06:03",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-3600)"
   )
 
   -- r palette deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 04 22:56:52",
+    "2018 OCT 04 22:57:03",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- r palette complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 05 02:05:52",
+    "2018 OCT 05 02:06:03",
     "openspace.time.interpolateDeltaTime(120)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- base rise deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 05 02:27:52",
+    "2018 OCT 05 02:28:03",
     "openspace.time.interpolateDeltaTime(7200)",
     "openspace.time.interpolateDeltaTime(-120)"
   )
 
   -- base rise complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 06 07:40:52",
+    "2018 OCT 06 07:41:03",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- aft flap deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 06 11:05:52",
+    "2018 OCT 06 11:06:03",
     "openspace.time.interpolateDeltaTime(600)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- aft flap complete, forwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 06 15:42:52",
+    "2018 OCT 06 15:43:03",
     "openspace.time.interpolateDeltaTime(3600)"
   )
   -- aft flap complete, backwards
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 06 16:12:52", -- 30min pre delay so time to interpolate
+    "2018 OCT 06 16:13:03", -- 30 min pre delay so time to interpolate
     "",
     "openspace.time.interpolateDeltaTime(-600)"
   )
 
   -- mid booms extend
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 01:35:35",
+    "2018 OCT 07 01:35:46",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-3600)"
   )
 
   -- first boom stop
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 02:22:08",
+    "2018 OCT 07 02:22:19",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- right boom complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 07:47:57",
+    "2018 OCT 07 07:48:08",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- left booms complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 12:11:52",
+    "2018 OCT 07 12:12:03",
     "openspace.time.interpolateDeltaTime(30)",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- tension sun shield membranes
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 12:15:06",
+    "2018 OCT 07 12:15:17",
     "openspace.time.interpolateDeltaTime(60)",
     "openspace.time.interpolateDeltaTime(-30)"
   )
 
   -- membrane tension complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 07 12:25:52",
+    "2018 OCT 07 12:26:03",
     "openspace.time.interpolateDeltaTime(7200)",
     "openspace.time.interpolateDeltaTime(-60)"
   )
 
   -- membranes separate
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 08 02:42:41",
+    "2018 OCT 08 02:42:52",
     "openspace.time.interpolateDeltaTime(3600)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- secondary mirror deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 08 14:05:52",
+    "2018 OCT 08 14:06:03",
     "openspace.time.interpolateDeltaTime(18000)",
     "openspace.time.interpolateDeltaTime(-3600)"
   )
 
   -- secondary mirror complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 13 00:38:52",
+    "2018 OCT 13 00:39:03",
     "openspace.time.interpolateDeltaTime(1200)",
     "openspace.time.interpolateDeltaTime(-18000)"
   )
 
   -- aft radiator deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 13 02:26:40",
+    "2018 OCT 13 02:26:51",
     "openspace.time.interpolateDeltaTime(1800)",
     "openspace.time.interpolateDeltaTime(-1200)"
   )
 
   -- aft radiator complete, forward
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 13 06:10:52",
+    "2018 OCT 13 06:11:03",
     "openspace.time.interpolateDeltaTime(7200)"
   )
    -- aft radiator complete, backward
    openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 13 07:10:52", -- 1h pre delay so time to interpolate
+    "2018 OCT 13 07:11:03", -- 1h pre delay so time to interpolate
     "",
     "openspace.time.interpolateDeltaTime(-1800)"
   )
 
   -- rt cord fold wings deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 13 23:35:52",
+    "2018 OCT 13 23:36:03",
     "openspace.time.interpolateDeltaTime(7200)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- rt cord fold wings complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 15 02:46:40",
+    "2018 OCT 15 02:46:51",
     "openspace.time.interpolateDeltaTime(7200)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- lft cord fold wings deploy
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 15 13:05:52",
+    "2018 OCT 15 13:06:03",
     "openspace.time.interpolateDeltaTime(7200)",
     "openspace.time.interpolateDeltaTime(-7200)"
   )
 
   -- lft cord fold wings complete
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 16 09:05:52",
-    "openspace.time.interpolateDeltaTime(1)",
-    "openspace.time.interpolateDeltaTime(-7200)"
+    "2018 OCT 16 09:06:03",
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 1.0)" ..
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)",
+    "openspace.time.interpolateDeltaTime(-7200)" ..
+    "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 0.7)" ..
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)"
   )
 
 end)

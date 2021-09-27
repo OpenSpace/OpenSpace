@@ -45,6 +45,7 @@
     "base",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/lagrange_points/lagrange_points",
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/hudf",
@@ -138,7 +139,7 @@
   ],
   "time": {
     "type": "absolute",
-    "value": "2018-10-01T14:06:02"
+    "value": "2018-10-01T14:06:03"
   },
   "version": {
     "major": 1,
