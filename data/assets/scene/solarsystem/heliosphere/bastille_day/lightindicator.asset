@@ -21,17 +21,18 @@ local travelSpeedIndicator = {
     FadeLength = 10
   },
    GUI = {
-    Path = "/Solar System/Heliosphere",
-    Name = "Speed indicator"
+    Path = "/Solar System/Heliosphere/Bastille Day",
+    Name = "Speed indicator",
+    Description = "Speed of light indicator from sun to earth"
   }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { travelSpeedIndicator })
 
 asset.meta = {
-  Name = "Lighttravel sun to earth",
+  Name = "Light travel from sun to earth",
   Version = "1.0",
-  Description = "Speed of light from sun to earth",
+  Description = [[Speed of light indicator from sun to earth]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
   License = "MIT",

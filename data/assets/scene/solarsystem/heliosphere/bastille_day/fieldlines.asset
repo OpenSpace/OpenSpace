@@ -47,7 +47,8 @@ local fieldlines = {
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day",
-    Name = "MAS Fieldlines"
+    Name = "MAS Fieldlines",
+    Description = "Magnetic fieldlines for the bastille day CME event"
   }
 }
 
@@ -71,7 +72,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",
   Version = "1.0",
-  Description = "Magnetic fieldlines for the bastille day CME event",
+  Description = [[Magnetic fieldlines for the bastille day CME event]],
   Author = "CCMC, Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",

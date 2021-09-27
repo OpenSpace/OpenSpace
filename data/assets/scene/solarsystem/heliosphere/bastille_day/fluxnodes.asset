@@ -29,7 +29,8 @@ local fluxNodes = {
   },
   GUI = {
     Path = "/Solar System/Heliosphere/Bastille Day",
-    Name = "Flux Nodes"
+    Name = "Flux Nodes",
+    Description = "Flux nodes for the bastille day CME event"
   }
 }
 
@@ -53,7 +54,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { fluxNodes })
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
   Version = "1.0",
-  Description = "Flux nodes for the bastille day CME event",
+  Description = [[Flux nodes for the bastille day CME event]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",
