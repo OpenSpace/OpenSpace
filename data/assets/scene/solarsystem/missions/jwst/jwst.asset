@@ -110,20 +110,42 @@ local JWSTFov = {
   }
 }
 
+local JWSTLabel = {
+  Identifier = "JWSTLabel",
+  Parent = transforms.JWSTPosition.Identifier,
+  Renderable = {
+    Enabled = true,
+    Type = "RenderableLabels",
+    Text = "JWST",
+    FontSize = 20,
+    Size = 6.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  GUI = {
+    Name = "JWST Label",
+    Path = "/Solar System/Missions/JWST",
+    Description = "Main label for the James Webb Space Telescope"
+  }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTBand,
   JWSTModel,
-  JWSTFov
+  JWSTFov,
+  JWSTLabel
 })
 
 asset.meta = {
   Name = "James Webb Space Telescope",
   Version = "1.0",
   Description = [[
-    James Webb Space Telescope animated model, safe viewing band and field of view.
+    James Webb Space Telescope animated model, safe viewing band, field of view and label.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"JWSTBand", "JWSTModel", "JWSTFov"}
+  Identifiers = {"JWSTBand", "JWSTModel", "JWSTFov", "JWSTLabel"}
 }

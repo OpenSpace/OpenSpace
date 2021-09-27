@@ -8,6 +8,7 @@ local L2Small = {
   Identifier = "L2Small",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
+    Enabled = false,
     Type = "RenderablePlaneImageLocal",
     RenderableType = "Opaque",
     Billboard = false,
