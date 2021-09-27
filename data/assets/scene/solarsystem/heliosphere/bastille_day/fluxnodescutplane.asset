@@ -18,7 +18,7 @@ local TexturesPathMeridial = asset.syncedResource({
 })
 
 local EquatorialCutplane = {
-  Identifier = "EquatorialCutplane",
+  Identifier = "EquatorialCutplane-bastille-day",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
@@ -34,12 +34,12 @@ local EquatorialCutplane = {
   },
   GUI = {
     Name = "Cutplane Equitorial",
-    Path = "/Solar System/Heliosphere"
+    Path = "/Solar System/Heliosphere/Bastille Day"
   }
 }
 
 local MeridialCutplane = {
-  Identifier = "MeridialCutplane",
+  Identifier = "MeridialCutplane-bastille-day",
   Parent = transforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Rotation = {
@@ -58,14 +58,14 @@ local MeridialCutplane = {
   },
   GUI = {
     Name = "Cutplane Meridial",
-    Path = "/Solar System/Heliosphere"
+    Path = "/Solar System/Heliosphere/Bastille Day"
   }
 }
 
 local toggle_equatorial = {
   Identifier = "fluxnodescutplane.toggle_equatorial",
   Name = "Toggle equatorial cutplane",
-  Command = propertyHelper.invert("Scene.EquatorialCutplane.Renderable.Enabled"),
+  Command = propertyHelper.invert("Scene.EquatorialCutplane-bastille-day.Renderable.Enabled"),
   Documentation = "Toggle equatorial cutplane of CME",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -73,7 +73,7 @@ local toggle_equatorial = {
 local toggle_meridial = {
   Identifier = "fluxnodescutplane.toggle_meridial",
   Name = "Toggle meridial cutplane",
-  Command = propertyHelper.invert("Scene.MeridialCutplane.Renderable.Enabled"),
+  Command = propertyHelper.invert("Scene.MeridialCutplane-bastille-day.Renderable.Enabled"),
   Documentation = "Toggle meridial cutplane of CME",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -96,5 +96,5 @@ asset.meta = {
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",
-  Identifier = {"MeridialCutplane", "EquatorialCutplane"}
+  Identifier = {"MeridialCutplane-bastille-day", "EquatorialCutplane-bastille-day"}
 }

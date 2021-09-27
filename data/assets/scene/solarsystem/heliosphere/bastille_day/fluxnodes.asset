@@ -12,7 +12,7 @@ local fluxNodesBinaries = asset.syncedResource({
 
 -- FluxNodes from binaries
 local fluxNodes = {
-  Identifier = "MAS-MHD-FluxNodes",
+  Identifier = "MAS-MHD-FluxNodes-bastille-day",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
@@ -28,7 +28,7 @@ local fluxNodes = {
     Enabled = true
   },
   GUI = {
-    Path = "/Solar System/Heliosphere",
+    Path = "/Solar System/Heliosphere/Bastille Day",
     Name = "Flux Nodes"
   }
 }
@@ -36,7 +36,7 @@ local fluxNodes = {
 local toggle_fluxnodes = {
   Identifier = "fluxnodes.toggle_fluxnodes",
   Name = "Toggle flux nodes",
-  Command = propertyHelper.invert("Scene.MAS-MHD-FluxNodes.Renderable.Enabled"),
+  Command = propertyHelper.invert("Scene.MAS-MHD-FluxNodes-bastille-day.Renderable.Enabled"),
   Documentation = "Toggle flux node rendering of CME",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -57,5 +57,5 @@ asset.meta = {
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",
-  Identifier = {"MAS-MHD-FluxNodes"}
+  Identifier = {"MAS-MHD-FluxNodes-bastille-day"}
 }

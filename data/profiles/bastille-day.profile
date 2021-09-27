@@ -29,7 +29,7 @@
       "gui_path": "/Bastille-Day",
       "identifier": "bastille-day.fast_loop",
       "is_local": false,
-      "name": "Loop 10:03 - 12.00, at 15 min/ second",
+      "name": "Loop 10:03 - 11.48, at 15 min/ second",
       "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
     },
     {
@@ -37,7 +37,7 @@
       "gui_path": "/Bastille-Day",
       "identifier": "bastille-day.long_loop",
       "is_local": false,
-      "name": "Loop 09:30 - 11:50, at 4 min/ second",
+      "name": "Loop 09:30 - 13:00, at 4 min/ second",
       "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:50:00', StarttimescriptLongLoop);"
     }
   ],

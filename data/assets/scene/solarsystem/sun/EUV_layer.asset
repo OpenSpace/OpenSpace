@@ -11,7 +11,7 @@ local textureSourcePath = asset.syncedResource({
 })
 
 local EUVLayer = {
-  Identifier = "EUV-Layer",
+  Identifier = "EUV-Layer-bastille-day",
   Parent = transforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
@@ -30,7 +30,7 @@ local EUVLayer = {
 local toggle_EUV_layer ={
   Identifier = "euv_layer.toggle_EUV",
   Name = "Toggle EUV Layer",
-  Command = propertyHelper.invert("Scene.EUV-Layer.Renderable.Enabled"),
+  Command = propertyHelper.invert("Scene.EUV-Layer-bastille-day.Renderable.Enabled"),
   Documentation = "Toggle EUV layer of sun",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -51,5 +51,5 @@ asset.meta = {
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",
-  Identifier = {"EUV-Layer"}
+  Identifier = {"EUV-Layer-bastille-day"}
 }

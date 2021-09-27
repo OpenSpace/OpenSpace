@@ -10,18 +10,18 @@ local switch_color_layer = {
   Name = "Next sun texture",
   Command = [[
     local textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');
-    if (textureIndex == -1) then
-      textureIndex = 2;
+    if (magnetogramsTextureIndex == -1) then
+      magnetogramsTextureIndex = 2;
     end;
-    textureIndex = textureIndex + 1;
-    if (textureIndex >= #textureList) then
-      textureIndex = 0;
+    magnetogramsTextureIndex = magnetogramsTextureIndex + 1;
+    if (magnetogramsTextureIndex >= #textureList) then
+      magnetogramsTextureIndex = 0;
     end
     openspace.setPropertyValue("Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled", false);
-    if (textureIndex == 0) then
+    if (magnetogramsTextureIndex == 0) then
       openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled", true);
     else
-      str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. textureIndex .. ".Enabled";
+      str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled";
       openspace.setPropertyValueSingle(str, true);
     end;
   ]],
@@ -31,7 +31,7 @@ local switch_color_layer = {
 }
 
 asset.onInitialize(function ()
-  rawset(_G, "textureIndex", -1)
+  rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.addLayer(
       'Sun',

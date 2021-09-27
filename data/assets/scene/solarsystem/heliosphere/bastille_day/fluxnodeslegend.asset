@@ -9,7 +9,7 @@ local TexturesPath = asset.syncedResource({
 })
 
 local legend = {
-  Identifier = "LegendFluxNodes",
+  Identifier = "LegendFluxNodes-bastille-day",
   Type = "ScreenSpaceImageLocal",
   TexturePath = TexturesPath .. "/CMR_transparent_white_text.png",
   Scale = 0.15,
@@ -19,9 +19,9 @@ local legend = {
 local show_legend = {
   Identifier = "fluxnodelegend.show_legend",
   Name = "Show the legend image",
-  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes.Opacity', 0.0);" ..
-  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes.Enabled', true);" ..
-  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes.Opacity', 1.0, 4);",
+  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes-bastille-day.Opacity', 0.0);" ..
+  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes-bastille-day.Enabled', true);" ..
+  "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes-bastille-day.Opacity', 1.0, 4);",
   Documentation = "Show the legend image",
   GuiPath = "/Bastille-Day",
   IsLocal =  false
@@ -29,7 +29,7 @@ local show_legend = {
 local hide_legend = {
   Identifier = "fluxnodelegend.hide_legend",
   Name = "Hides the legend image",
-  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes.Opacity', 0.0, 2);",
+  Command = "openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes-bastille-day.Opacity', 0.0, 2);",
   Documentation =  "Hides the legend image",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -38,7 +38,7 @@ local hide_legend = {
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(legend)
   -- These numbers are there to put the legend on the side of the screen.
-  openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes.Rotation', { 0.0, 0.0, 0.56652 });
+  openspace.setPropertyValueSingle('ScreenSpace.LegendFluxNodes-bastille-day.Rotation', { 0.0, 0.0, 0.56652 });
   openspace.action.registerAction(show_legend)
   openspace.action.registerAction(hide_legend)
 end)
@@ -56,5 +56,5 @@ asset.meta = {
   Author = "Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "MIT",
-  Identifier = {"LegendFluxNodes"}
+  Identifier = {"LegendFluxNodes-bastille-day"}
 }

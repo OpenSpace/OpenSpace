@@ -14,7 +14,7 @@ local sunRadius = 6.957E8
 
 -- Fieldlies from binaries
 local fieldlines = {
-  Identifier = "MAS-MHD-Fieldlines",
+  Identifier = "MAS-MHD-Fieldlines-bastille-day",
   Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
   Transform = {
     Scale = {
@@ -46,7 +46,7 @@ local fieldlines = {
     }
   },
   GUI = {
-    Path = "/Solar System/Heliosphere",
+    Path = "/Solar System/Heliosphere/Bastille Day",
     Name = "MAS Fieldlines"
   }
 }
@@ -54,7 +54,7 @@ local fieldlines = {
 local toggle_fieldlines = {
   Identifier = "fieldlines.toggle_fieldlines",
   Name = "Toggle Fieldlines",
-  Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines.Renderable.Enabled"),
+  Command = propertyHelper.invert("Scene.MAS-MHD-Fieldlines-bastille-day.Renderable.Enabled"),
   Documentation = "Toggle fieldline rendering of CME",
   GuiPath = "/Bastille-Day",
   IsLocal = false
@@ -75,5 +75,5 @@ asset.meta = {
   Author = "CCMC, Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
   License = "CC-BY",
-  Identifier = {"MAS-MHD-Fieldlines"}
+  Identifier = {"MAS-MHD-Fieldlines-bastille-day"}
 }
