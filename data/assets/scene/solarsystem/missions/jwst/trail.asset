@@ -10,7 +10,7 @@ local JWSTTrail = {
   Parent = transforms.L2.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 13:18:00",
+    Start = "2018 OCT 01 14:06:03",
     End = "2021 OCT 01"
   },
   Renderable = {

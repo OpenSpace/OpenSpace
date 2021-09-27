@@ -39,6 +39,22 @@
       "is_local": false,
       "name": "Toggle JWST field of view and view band",
       "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Set the time to the 2018 launch time of JWST",
+      "gui_path": "/JWST",
+      "identifier": "profile.set.2018_launch",
+      "is_local": false,
+      "name": "Set to 2018 launch time",
+      "script": "openspace.time.setTime('2018-10-01T14:06:03')"
+    },
+    {
+      "documentation": "Set the time to the 2021 launch time of JWST",
+      "gui_path": "/JWST",
+      "identifier": "profile.set.2021_launch",
+      "is_local": false,
+      "name": "Set to 2021 launch time",
+      "script": "openspace.time.setTime('2021-12-18T14:06:03')"
     }
   ],
   "assets": [
@@ -112,6 +128,14 @@
     {
       "action": "profile.toggle.jwst_fov",
       "key": "V"
+    },
+    {
+      "action": "profile.set.2018_launch",
+      "key": "J"
+    },
+    {
+      "action": "profile.set.2021_launch",
+      "key": "K"
     }
   ],
   "mark_nodes": [
