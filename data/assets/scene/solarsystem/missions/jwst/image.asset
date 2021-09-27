@@ -2,7 +2,7 @@ local image = asset.syncedResource({
   Name = "HUDF image",
   Type = "HttpSynchronization",
   Identifier = "hudf_image",
-  Version = 2
+  Version = 3
 })
 
 asset.export('image', image)
@@ -14,9 +14,9 @@ asset.meta = {
   Author = "NASA, ESA, and S. Beckwith (STScI) and the HUDF Team",
   URL = "https://esahubble.org/images/heic0611b/",
   License = [[
-    https://creativecommons.org/licenses/by/4.0/<br>
     Original image by NASA, ESA, and S. Beckwith (STScI) and the HUDF Team,
-    white frame added by OpenSpace Team.
+    white frame and red arrow added by OpenSpace Team.<br>
+    https://creativecommons.org/licenses/by/4.0/
   ]],
   Identifiers = {"HUDFImage"}
 }
