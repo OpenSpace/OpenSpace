@@ -311,6 +311,14 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     _keybindingWidgets.key->addItems(keyList);
     _keybindingWidgets.key->setCurrentIndex(-1);
     _keybindingWidgets.key->setEnabled(false);
+    connect(
+        _keybindingWidgets.key, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [this](int newIndex) {
+            _keybindingWidgets.saveButtons->button(QDialogButtonBox::Save)->setEnabled(
+                newIndex > 0
+            );
+        }
+    );
     layout->addWidget(_keybindingWidgets.key, 11, 2);
 
     layout->addWidget(new QLabel("Action chooser"), 12, 1);
@@ -632,7 +640,9 @@ void ActionDialog::keybindingSelected() {
         std::string key = ghoul::to_string(keybinding->key.key);
         _keybindingWidgets.key->setCurrentText(QString::fromStdString(key));
         _keybindingWidgets.key->setEnabled(true);
-        _keybindingWidgets.action->setCurrentText(QString::fromStdString(keybinding->action));
+        _keybindingWidgets.action->setCurrentText(
+            QString::fromStdString(keybinding->action)
+        );
         _keybindingWidgets.action->setEnabled(true);
         _keybindingWidgets.actionText->setText(
             QString::fromStdString(keybinding->action)
@@ -640,7 +650,13 @@ void ActionDialog::keybindingSelected() {
         _keybindingWidgets.actionText->setEnabled(true);
         _keybindingWidgets.addButton->setEnabled(false);
         _keybindingWidgets.removeButton->setEnabled(true);
+
         _keybindingWidgets.saveButtons->setEnabled(true);
+        // Only enable the save buttons if a key is selected, otherwise we would get an
+        // exception as the None key cannot be bound
+        _keybindingWidgets.saveButtons->button(QDialogButtonBox::Save)->setEnabled(
+            _keybindingWidgets.key->currentIndex() > 0
+        );
     }
     else {
         // No keybinding selected
@@ -656,7 +672,7 @@ void ActionDialog::keybindingActionSelected(int) {
 
 void ActionDialog::keybindingSaved() {
     Profile::Keybinding* keybinding = selectedKeybinding();
-    ghoul_assert(keybinding, "There must be a selected action at this point");
+    ghoul_assert(keybinding, "There must be a selected keybinding at this point");
 
     KeyModifier km = KeyModifier::None;
     if (_keybindingWidgets.shiftModifier->isChecked()) {
