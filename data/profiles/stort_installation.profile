@@ -25,6 +25,11 @@
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     }
   ],
+  "additional_scripts": [
+    "openspace.setPropertyValue(\"{moonTrail_minor}.Renderable.Appearance.Color\", {0.3, 0.5, 0.5});",
+    "openspace.setPropertyValue(\"Scene.Voyager*.Renderable.Appearance.Color\", {0.424000, 1.000000, 0.404000});",
+    "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});"
+  ],
   "assets": [
     "base",
     "installationspecific/stort_state_machine",
@@ -182,31 +187,6 @@
       "name": "{moonTrail_minor}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
-    },
-    {
-      "name": "{moonTrail_minor}.Renderable.Appearance.Color",
-      "type": "setPropertyValue",
-      "value": "{0.3, 0.5, 0.5}"
-    },
-    {
-      "name": "Scene.Voyager1.Renderable.Appearance.Color",
-      "type": "setPropertyValueSingle",
-      "value": "{0.424000, 1.000000, 0.404000}"
-    },
-    {
-      "name": "Scene.Voyager2.Renderable.Appearance.Color",
-      "type": "setPropertyValueSingle",
-      "value": "{0.424000, 1.000000, 0.404000}"
-    },
-    {
-      "name": "Scene.Pioneer10.Renderable.Appearance.Color",
-      "type": "setPropertyValueSingle",
-      "value": "{0.910000, 0.478000, 0.976000}"
-    },
-    {
-      "name": "Scene.Pioneer11.Renderable.Appearance.Color",
-      "type": "setPropertyValueSingle",
-      "value": "{0.910000, 0.478000, 0.976000}"
     },
     {
       "name": "Scene.Planck.Renderable.Opacity",
