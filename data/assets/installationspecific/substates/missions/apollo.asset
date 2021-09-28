@@ -2,6 +2,135 @@ local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
 
 ----------------------------------------------------------------
+-- SCRIPTS
+----------------------------------------------------------------
+local launchOverviewDistance = 20000000
+local EarthOverviewDistance = 50000000
+local Apollo8OverviewDistance = 400000000
+local MoonOverviewDistance = 80000000
+
+local Apollo8NavigationState = [[{ Up = { -0.639234, 0.734826, 0.226741 }, ReferenceFrame = 'Root', Position = { 1481965.290802, 635156.777273, 2119562.935007 }, Yaw = 0.005130, Pitch = -0.002823, Anchor = 'Apollo8' }]]
+
+local Apollo8Scripts = [[
+  -- Launch
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:51:52", -- 1 sec delay
+    "openspace.time.interpolateDeltaTime(60)"
+  )
+
+  -- Zoom out a little
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:54:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(launchOverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+  )
+
+  -- Focus on Apollo 8 again
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:55:51", -- 1 min after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Speed up a little
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T12:56:51",
+    "openspace.time.interpolateDeltaTime(60)"
+  )
+
+  -- Retarget to Earth and zoom out
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T13:06:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(EarthOverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(1800)" .. -- 30 min per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Orbiting Earth
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-21T17:51:51",
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(Apollo8OverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
+  )
+
+  -- Leaving Earth
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-22T08:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- At Moon
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-24T01:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(MoonOverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Leaving Moon
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-25T09:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(Apollo8OverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Coming home
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T10:51:51",
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T12:51:51",
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(EarthOverviewDistance) .. [[)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
+    "openspace.time.interpolateDeltaTime(1800)" .. -- 30 min per second
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:36:59",
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.time.setTime('1968-12-21T12:51:51')" .. -- Loop
+    "openspace.navigation.setNavigationState(]] .. tostring(Apollo8NavigationState) .. [[)"
+  )
+]]
+
+----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
 local insignias = {
@@ -12,15 +141,6 @@ local insignias = {
   "Apollo16Insignia",
   "Apollo17Insignia"
 }
-
-local moonTargetDistance = 1.5E7
-
-local flyToMoon = [[
-  ]] .. util.disableLinearFlight() .. [[
-  ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.time.setPause(true)
-  openspace.pathnavigation.goTo('Moon', true)
-]]
 
 local apolloMainState = {
   Identifier = "Apollo",
@@ -35,11 +155,50 @@ local apolloMainState = {
   ]]
 }
 
-local states = { apolloMainState }
+local apollo8State = {
+  Identifier = "Apollo8",
+  Enter = [[
+    ]] .. util.fadeInNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
+    ]] .. util.fadeOutNodes({ "Apollo8LaunchTrail", "ISS_trail", "ISSModel" }) .. [[
+    ]] .. Apollo8Scripts .. [[
+  ]],
+  Exit = [[
+    openspace.scriptScheduler.clear()
+    ]] .. util.fadeOutNodes({ "Apollo8EarthBarycenterTrail" }) .. [[
+    ]] .. util.fadeInNodes({ "Apollo8LaunchTrail", "ISS_trail", "ISSModel" }) .. [[
+  ]]
+}
+
+local apollo11State = {
+  Identifier = "Apollo11",
+  Enter = [[
+  ]],
+  Exit = [[
+  ]]
+}
+
+local states = { apolloMainState, apollo8State, apollo11State }
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+local flyToMoon = [[
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.time.setPause(true)
+  openspace.pathnavigation.goTo('Moon', true)
+]]
+
+local flyToApollo8 = [[
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("AvoidCollision") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(Apollo8NavigationState) .. [[
+]]
+
+local flyToApollo11 = [[
+]]
+
 local transitions = {
   -- Transition to/from this state
   {
@@ -52,7 +211,50 @@ local transitions = {
     To = "Home",
     Action = flyHome.cameraPath
   },
+  -- Overview - Apollo 8
+  {
+    From = "Apollo",
+    To = "Apollo8",
+    Action = flyToApollo8
+  },
+  {
+    From = "Apollo8",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  -- Overview - Apollo 11
+  {
+    From = "Apollo",
+    To = "Apollo11",
+    Action = flyToApollo11
+  },
+  {
+    From = "Apollo11",
+    To = "Apollo",
+    Action = flyToMoon
+  },
+  -- Apollo 8 - Apollo 11
+  {
+    From = "Apollo8",
+    To = "Apollo11",
+    Action = flyToApollo11
+  },
+  {
+    From = "Apollo11",
+    To = "Apollo8",
+    Action = flyToApollo8
+  },
   -- Back to SolarSystem from substates
+  {
+    From = "Apollo8",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
+  {
+    From = "Apollo11",
+    To = "Home",
+    Action = flyHome.cameraPath
+  },
 }
 
 asset.export("states", states)
