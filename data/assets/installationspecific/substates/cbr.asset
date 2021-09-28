@@ -7,7 +7,8 @@ local flyHome = asset.require('./../fly_home_alternatives')
 local maxOpacity = 0.3
 local opacityUri = "Scene.Planck.Renderable.Opacity"
 
-local cbrDistance = 1079252848800 -- 1 light year
+-- OBS! To nicely handle fading, all code for the substates of this 
+-- state is on the webpage
 
 local cbrState = {
     Identifier = "CBR",
@@ -23,23 +24,7 @@ local cbrState = {
     ]]
 }
 
-local edgeOfUniverseDistance = 10.2E26
-
--- TODO: gotta do the fading on the webpage
-local edgeOfUniverseState = {
-    Identifier = "EdgeOfUniverse",
-    Enter = [[
-        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-        ]] .. util.startOrbiting() .. [[
-        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 6) .. [[
-    ]],
-    Exit = [[
-        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
-        ]] .. util.stopOrbiting() .. [[
-    ]]
-}
-
-local states = { cbrState, edgeOfUniverseState }
+local states = { cbrState }
 
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
@@ -52,23 +37,6 @@ local transitions = {
   },
   {
     From = "CBR",
-    To = "Home"
-    -- No action. Should already be at the desired distance
-  },
-  -- CBR
-  {
-    From = "CBR",
-    To = "EdgeOfUniverse",
-    Action = util.applyLinearFlight(edgeOfUniverseDistance, 2)
-  },
-  {
-    From = "EdgeOfUniverse",
-    To = "CBR",
-    Action = util.applyLinearFlight(cbrDistance, 2)
-  },
-  -- Back from substates
-  {
-    From = "EdgeOfUniverse",
     To = "Home",
     Action = flyHome.linearFlight
   }
