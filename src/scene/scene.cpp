@@ -35,6 +35,7 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
@@ -606,6 +607,52 @@ void Scene::addInterestingTime(InterestingTime time) {
 
 const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
+}
+
+void Scene::setPropertiesFromProfile(const Profile& p) {
+    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+
+    for (const Profile::Property& prop : p.properties) {
+        std::string uriOrRegex = prop.name;
+        std::string groupName;
+        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+            // Remove group name from start of regex and replace with '*'
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        }
+        ghoul::lua::push(L, uriOrRegex);
+        ghoul::lua::push(L, 0.0);
+        // Later functions expect the value to be at the last position on the stack
+        propertyPushValueFromProfileToLuaState(L, prop.value);
+
+        applyRegularExpression(
+            L,
+            uriOrRegex,
+            allProperties(),
+            0.0,
+            groupName,
+            ghoul::EasingFunction::Linear
+        );
+        //Clear lua state stack
+        lua_settop(L, 0);
+    }
+}
+
+void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+                                            const std::string& value)
+{
+    if (luascriptfunctions::isBoolValue(value)) {
+        ghoul::lua::push(L, (value == "true") ? true : false);
+    }
+    else if (luascriptfunctions::isFloatValue(value)) {
+        ghoul::lua::push(L, std::stof(value));
+    }
+    else {
+        std::string stringRepresentation = value;
+        if (value.compare("nil") != 0) {
+            stringRepresentation = "[[" + stringRepresentation + "]]";
+        }
+        ghoul::lua::push(L, stringRepresentation);
+    }
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {

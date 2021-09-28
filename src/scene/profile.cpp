@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
+#include <openspace/scene/scene.h>
 
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
@@ -465,7 +466,7 @@ struct Keybinding {
     std::string documentation;
     std::string name;
     std::string guiPath;
-    bool isLocal;
+    bool isLocal = true;
     std::string script;
 };
 
@@ -731,193 +732,6 @@ scripting::LuaLibrary Profile::luaLibrary() {
             }
         }
     };
-}
-
-std::string convertToScene(const Profile& p) {
-    ZoneScoped
-
-    std::string output;
-
-    if (p.meta.has_value()) {
-        output += "asset.meta = {\n";
-
-        if (p.meta->name.has_value()) {
-            output += fmt::format("  Name = [[{}]],\n", *p.meta->name);
-        }
-        if (p.meta->version.has_value()) {
-            output += fmt::format("  Version = [[{}]],\n", *p.meta->version);
-        }
-        if (p.meta->description.has_value()) {
-            output += fmt::format("  Description = [[{}]],\n", *p.meta->description);
-        }
-        if (p.meta->author.has_value()) {
-            output += fmt::format("  Author = [[{}]],\n", *p.meta->author);
-        }
-        if (p.meta->url.has_value()) {
-            output += fmt::format("  URL = [[{}]],\n", *p.meta->url);
-        }
-        if (p.meta->license.has_value()) {
-            output += fmt::format("  License = [[{}]]\n", *p.meta->license);
-        }
-
-        output += "}\n\n";
-    }
-
-    // Modules
-    for (const Profile::Module& m : p.modules) {
-        output += fmt::format(
-            "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
-            m.name, *m.loadedInstruction, *m.notLoadedInstruction
-        );
-    }
-
-    // Assets
-    for (const std::string& asset : p.assets) {
-        output += fmt::format("asset.require(\"{}\");\n", asset);
-    }
-
-    output += "\n\nasset.onInitialize(function()\n";
-    // Actions
-    output += "  -- Actions\n";
-    for (const Profile::Action& action : p.actions) {
-        const std::string name = action.name.empty() ? action.identifier : action.name;
-        output += fmt::format(
-            "  openspace.action.registerAction({{"
-            "Identifier=[[{}]], Command=[[{}]], Name=[[{}]], Documentation=[[{}]], "
-            "GuiPath=[[{}]], IsLocal={}"
-            "}})\n",
-            action.identifier, action.script, name, action.documentation, action.guiPath,
-            action.isLocal ? "true" : "false"
-        );
-    }
-
-    // Keybindings
-    output += "\n  -- Keybindings\n";
-        for (size_t i = 0; i < p.keybindings.size(); ++i) {
-        const Profile::Keybinding& k = p.keybindings[i];
-        const std::string key = keyToString(k.key);
-        output += fmt::format("  openspace.bindKey([[{}]], [[{}]])\n", key, k.action);
-    }
-
-    // Time
-    output += "\n  -- Time\n";
-    switch (p.time->type) {
-        case Profile::Time::Type::Absolute:
-            output += fmt::format("  openspace.time.setTime(\"{}\")\n", p.time->value);
-            break;
-        case Profile::Time::Type::Relative:
-            output += "  local now = openspace.time.currentWallTime();\n";
-            output += fmt::format(
-                "  local prev = openspace.time.advancedTime(now, \"{}\");\n", p.time->value
-            );
-            output += "  openspace.time.setTime(prev);\n";
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
-
-    // Delta Times
-    {
-        output += "\n  -- Delta Times\n";
-        std::string times;
-        for (double d : p.deltaTimes) {
-            times += fmt::format("{}, ", d);
-        }
-        output += fmt::format("  openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
-    }
-
-    // Mark Nodes
-    {
-        output += "\n  -- Mark Nodes\n";
-        std::string nodes;
-        for (const std::string& n : p.markNodes) {
-            nodes += fmt::format("[[{}]],", n);
-        }
-        output += fmt::format("  openspace.markInterestingNodes({{ {} }});\n", nodes);
-    }
-
-    // Properties
-    output += "\n  -- Properties\n";
-    for (const Profile::Property& prop : p.properties) {
-        switch (prop.setType) {
-            case Profile::Property::SetType::SetPropertyValue:
-                output += fmt::format(
-                    "  openspace.setPropertyValue(\"{}\", {});\n", prop.name, prop.value
-                );
-                break;
-            case Profile::Property::SetType::SetPropertyValueSingle:
-                output += fmt::format(
-                    "  openspace.setPropertyValueSingle(\"{}\", {});\n",
-                    prop.name, prop.value
-                );
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }
-
-    // Camera
-    output += "\n  -- Camera\n";
-    if (p.camera.has_value()) {
-        output += std::visit(
-            overloaded {
-                [](const Profile::CameraNavState& c) {
-                    std::string result;
-                    result += "  openspace.navigation.setNavigationState({";
-                    result += fmt::format("Anchor = [[{}]], ", c.anchor);
-                    if (c.aim.has_value()) {
-                        result += fmt::format("Aim = [[{}]], ", *c.aim);
-                    }
-                    if (!c.referenceFrame.empty()) {
-                        result += fmt::format(
-                            "ReferenceFrame = [[{}]], ", c.referenceFrame
-                        );
-                    }
-                    result += fmt::format(
-                        "Position = {{ {}, {}, {} }}, ",
-                        c.position.x, c.position.y, c.position.z
-                    );
-                    if (c.up.has_value()) {
-                        result += fmt::format(
-                            "Up = {{ {}, {}, {} }}, ", c.up->x, c.up->y, c.up->z
-                        );
-                    }
-                    if (c.yaw.has_value()) {
-                        result += fmt::format("Yaw = {}, ", *c.yaw);
-                    }
-                    if (c.pitch.has_value()) {
-                        result += fmt::format("Pitch = {} ", *c.pitch);
-                    }
-                    result += "})\n";
-                    return result;
-                },
-                [](const Profile::CameraGoToGeo& c) {
-                    if (c.altitude.has_value()) {
-                        return fmt::format(
-                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
-                            c.anchor, c.latitude, c.longitude, *c.altitude
-                        );
-                    }
-                    else {
-                        return fmt::format(
-                            "  openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
-                            c.anchor, c.latitude, c.longitude
-                        );
-                    }
-                }
-            },
-            *p.camera
-        );
-    }
-
-    output += "\n  -- Additional Scripts begin\n";
-    for (const std::string& a : p.additionalScripts) {
-        output += fmt::format("  {}\n", a);
-    }
-    output += "  -- Additional Scripts end\n";
-    output += "end)\n";
-
-    return output;
 }
 
 }  // namespace openspace

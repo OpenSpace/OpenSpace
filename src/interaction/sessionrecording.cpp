@@ -356,15 +356,15 @@ bool SessionRecording::startPlayback(std::string& filename,
                                      bool loop)
 {
     std::string absFilename;
-    // Run through conversion in case file is older. Does nothing if the file format
-    // is up-to-date
-    filename = convertFile(filename);
     if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
     }
     else {
         absFilename = absPath("${RECORDINGS}/" + filename).string();
     }
+    // Run through conversion in case file is older. Does nothing if the file format
+    // is up-to-date
+    absFilename = convertFile(absFilename);
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
@@ -1793,7 +1793,6 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
-    bool paused = global::timeManager->isPaused();
     bool playbackPaused = (_state == SessionState::PlaybackPaused);
     if (playbackPaused) {
         _playbackPauseOffset
@@ -2218,7 +2217,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
                                                 std::ifstream& inputFstream,
                                                 std::stringstream& stream)
 {
-    std::filesystem::path conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    std::filesystem::path conversionInFilename = absPath(filename);
     if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
             "Cannot find the specified playback file {} to convert", conversionInFilename

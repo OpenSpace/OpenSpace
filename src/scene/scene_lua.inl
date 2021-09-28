@@ -28,8 +28,11 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/scene/profile.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace {
 
@@ -896,6 +899,30 @@ int worldRotation(lua_State* L) {
     glm::dmat3 rot = node->worldRotationMatrix();
     ghoul::lua::push(L, std::move(rot));
     return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * isBoolValue(const std::string& s):
+ * Used to check if a string is a lua bool type. Returns false if not a valid bool string.
+ */
+bool isBoolValue(const std::string& s) {
+    return (s == "true" || s == "false");
+}
+
+/**
+ * \ingroup LuaScripts
+ * isFloatValue(const std::string& s):
+ * Used to check if a string is a lua float value. Returns false if not a valid float.
+ */
+bool isFloatValue(const std::string& s) {
+    try {
+        float converted = std::stof(s);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
 }
 
 }  // namespace openspace::luascriptfunctions

@@ -33,6 +33,10 @@
 
 #include "actionmanager_lua.inl"
 
+namespace {
+    constexpr const char* _loggerCat = "ActionManager";
+} // namespace
+
 namespace openspace::interaction {
 
 bool ActionManager::hasAction(const std::string& identifier) const {

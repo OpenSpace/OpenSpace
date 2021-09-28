@@ -29,9 +29,37 @@ asset.onInitialize(function ()
   end)
 
   helper.setCurrentSlide(deck, 1)
-  openspace.bindKey("KP_6", "nextSlide()", "Next slide", "Next slide", "/Slides")
-  openspace.bindKey("KP_4", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
-  openspace.bindKey("KP_0", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.prevslide",
+    Name = "Previous slide",
+    Command = "previousSlide()",
+    Documentation = "Previous slide",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_4", "slide_deck.prevslide");
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.nextslide",
+    Name = "Next slide",
+    Command = "nextSlide()",
+    Documentation = "Next slide",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_6", "slide_deck.nextslide")
+
+  openspace.action.registerAction({
+    Identifier = "slide_deck.toggleslides",
+    Name = "Toggle slides",
+    Command = "toggleSlides()",
+    Documentation = "Toggle slides",
+    GuiPath = "/Slides",
+    IsLocal = false
+  })
+  openspace.bindKey("KP_0", "slide_deck.toggleslides")
+
 end)
 
 

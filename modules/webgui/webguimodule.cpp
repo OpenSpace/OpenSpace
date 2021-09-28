@@ -166,7 +166,12 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
     _port = p.port.value_or(_port);
-    _address = p.address.value_or(_address);
+    if (p.address.has_value()) {
+        _address = p.address.value();
+    }
+    else {
+        _address = "192.168.1.8"; //global::windowDelegate
+    }
     _webSocketInterface = p.webSocketInterface.value_or(_webSocketInterface);
 
     auto startOrStop = [this]() {

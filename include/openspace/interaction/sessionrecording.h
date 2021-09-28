@@ -832,16 +832,16 @@ public:
     ~SessionRecording_legacy_0085() {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
-    std::string fileFormatVersion() {
+    std::string fileFormatVersion() override {
         return std::string(FileHeaderVersion);
     }
-    std::string targetFileFormatVersion() {
+    std::string targetFileFormatVersion() override {
         return std::string(TargetConvertVersion);
     }
-    std::string getLegacyConversionResult(std::string filename, int depth);
+    std::string getLegacyConversionResult(std::string filename, int depth) override;
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
-        void read(std::istream* in) {
+        void read(std::istream* in) override {
             size_t strLen;
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
@@ -860,7 +860,7 @@ public:
 
 protected:
     bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer) override;
 };
 
 } // namespace openspace

@@ -291,7 +291,12 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
         global::navigationHandler->pathNavigator().relevantNodes();
 
     for (SceneGraphNode* n : relevantNodes) {
-        if (n->identifier() == node->identifier()) {
+        bool isSame = (n->identifier() == node->identifier());
+        // If the nodes are in the very same position, they are probably representing
+        // the same object
+        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < Epsilon;
+
+        if (isSame) {
             continue;
         }
 

@@ -588,11 +588,11 @@ void RenderableModel::initializeGL() {
             std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
-                _vertexShaderPath;
+                std::filesystem::path(_vertexShaderPath);
             std::filesystem::path fs =
                 _fragmentShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
-                _fragmentShaderPath;
+                std::filesystem::path(_fragmentShaderPath);
 
             return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
         }
