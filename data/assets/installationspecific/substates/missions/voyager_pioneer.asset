@@ -89,7 +89,7 @@ local onLeavingMainStateAction = [[
   ]] .. flyHome.linearFlight .. [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[
-  ]] .. util.fadeOutTrails(trails) .. [[
+  ]] .. util.fadeOutNodes(trails) .. [[
 ]]
 
 local transitions = {
@@ -103,7 +103,7 @@ local transitions = {
       ]] .. util.orbitConstantLatitudeOnArrival() .. [[
       ]] .. util.enableRoll() .. [[
       ]] .. util.flyToNavState(voyagerPioneerNavigationState) .. [[
-      ]] .. util.fadeInTrails(trails) .. [[
+      ]] .. util.fadeInNodes(trails) .. [[
     ]]
   },
   {

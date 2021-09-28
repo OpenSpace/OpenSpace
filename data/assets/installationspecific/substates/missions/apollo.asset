@@ -4,6 +4,15 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
+local insignias = {
+  "Apollo11Insignia",
+  "Apollo12Insignia",
+  "Apollo14Insignia",
+  "Apollo15Insignia",
+  "Apollo16Insignia",
+  "Apollo17Insignia"
+}
+
 local moonTargetDistance = 1.5E7
 
 local flyToMoon = [[
@@ -18,9 +27,11 @@ local apolloMainState = {
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
+    ]] .. util.fadeInNodes(insignias) .. [[
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
+    ]] .. util.fadeOutNodes(insignias) .. [[
   ]]
 }
 

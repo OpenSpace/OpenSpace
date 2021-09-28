@@ -53,7 +53,10 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons"
+    "scene/solarsystem/planets/uranus/minor_moons",
+    "scene/solarsystem/missions/apollo/8/apollo8",
+    "scene/solarsystem/missions/apollo/insignias_map",
+    "scene/solarsystem/missions/apollo/11/apollo11"
   ],
   "camera": {
     "altitude": 17000000.0,

@@ -193,13 +193,13 @@ local cassiniState = {
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', false)
-    ]] .. util.fadeInTrails(trails) .. [[
+    ]] .. util.fadeInNodes(trails) .. [[
     ]] .. cassiniScripts .. [[
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.scriptScheduler.clear()
-    ]] .. util.fadeOutTrails(trails) .. [[
+    ]] .. util.fadeOutNodes(trails) .. [[
       openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 1.0, 3.0)
@@ -212,13 +212,13 @@ local huygensState = {
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.Titan.Renderable.Opacity', 1.0, 3.0)
-    ]] .. util.fadeInTrails({ "TitanTrail", "Titan" }) .. [[
-    ]] .. util.fadeInTrails({ "huygensTrail" }) .. [[
+    ]] .. util.fadeInNodes({ "TitanTrail", "Titan" }) .. [[
+    ]] .. util.fadeInNodes({ "huygensTrail" }) .. [[
     ]] .. huygensScripts .. [[
   ]],
   Exit = [[
     openspace.scriptScheduler.clear()
-    ]] .. util.fadeOutTrails({ "huygensTrail" }) .. [[
+    ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 1.0, 3.0)
   ]]
