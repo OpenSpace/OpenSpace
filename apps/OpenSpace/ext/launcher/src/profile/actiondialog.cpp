@@ -306,6 +306,17 @@ void ActionDialog::createKeyboardWidgets(QGridLayout* layout) {
     _keybindingWidgets.key = new QComboBox;
     QStringList keyList;
     for (const KeyInfo& ki : KeyInfos) {
+        // We don't want to use the Shift, Alt, and Ctrl keys directly since we already
+        // have them as modifier keys
+        if (ki.key == Key::LeftShift   || ki.key == Key::RightShift   ||
+            ki.key == Key::LeftAlt     || ki.key == Key::RightAlt     ||
+            ki.key == Key::LeftControl || ki.key == Key::RightControl ||
+            ki.key == Key::LeftSuper   || ki.key == Key::RightSuper   ||
+            ki.key == Key::Menu        || ki.key == Key::NumLock      ||
+            ki.key == Key::World1      || ki.key == Key::World2)
+        {
+            continue;
+        }
         keyList += QString::fromStdString(std::string(ki.name));
     }
     _keybindingWidgets.key->addItems(keyList);
