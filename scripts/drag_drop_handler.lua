@@ -42,5 +42,5 @@ elseif extension == ".asset" then
   return [[openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
     openspace.asset.add("]] .. filename .. [[");]] .. ReloadUIScript
 elseif extension == ".osrec" or extension == ".osrectxt" then
-  return [[openspace.sessionRecording.startPlayback("]] .. basename .. [[")]]
+  return [[openspace.sessionRecording.startPlayback("]] .. filename .. [[")]]
 end

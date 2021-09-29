@@ -35,6 +35,10 @@
 
 #include "keybindingmanager_lua.inl"
 
+namespace {
+    constexpr const char* _loggerCat = "KeyBindingManager";
+} // namespace
+
 namespace openspace::interaction {
 
 KeybindingManager::KeybindingManager()

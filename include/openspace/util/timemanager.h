@@ -25,8 +25,11 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <ghoul/lua/luastate.h>
+#include <ghoul/lua/lua_helper.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include "openspace/scene/profile.h"
 #include <openspace/util/keys.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/util/time.h>
@@ -75,6 +78,15 @@ public:
      * Returns the current delta time, as affected by pause
      */
     double deltaTime() const;
+
+    /**
+     * Sets the simulation time using the time contents of a profile. The function will
+     * set either a relative or absolute time.
+     *
+     * \param p The Profile to be read.
+     */
+    void setTimeFromProfile(const Profile& p);
+
     bool isPaused() const;
 
     std::vector<double> deltaTimeSteps() const;
