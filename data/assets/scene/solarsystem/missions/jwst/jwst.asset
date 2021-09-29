@@ -14,6 +14,11 @@ local band = asset.syncedResource({
 local JWSTBand = {
   Identifier = "JWSTBand",
   Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -84,6 +89,11 @@ local JWSTModel = {
 local JWSTFov = {
   Identifier = "JWSTFov",
   Parent = JWSTModel.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Renderable = {
     Enabled = false,
     Type = "RenderablePrism",
@@ -113,6 +123,11 @@ local JWSTFov = {
 local JWSTLabel = {
   Identifier = "JWSTLabel",
   Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Renderable = {
     Enabled = true,
     Type = "RenderableLabels",

@@ -52,6 +52,11 @@ local HUDFImage = {
 
 local HUDFJWSTLine = {
   Identifier = "HUDFJWSTLine",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Enabled = false,
