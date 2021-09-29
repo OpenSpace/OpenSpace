@@ -46,7 +46,7 @@
       "identifier": "profile.set.2018_launch",
       "is_local": false,
       "name": "Set to 2018 launch time",
-      "script": "openspace.time.setTime('2018-10-01T14:06:03')"
+      "script": "openspace.time.setTime('2018-10-01T14:06:03'); openspace.time.setDeltaTime(1)"
     },
     {
       "documentation": "Set the time to the 2021 launch time of JWST",
@@ -54,7 +54,7 @@
       "identifier": "profile.set.2021_launch",
       "is_local": false,
       "name": "Set to 2021 launch time",
-      "script": "openspace.time.setTime('2021-12-18T14:06:03')"
+      "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
     }
   ],
   "assets": [
