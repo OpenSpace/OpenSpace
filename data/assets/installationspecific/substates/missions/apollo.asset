@@ -54,16 +54,16 @@ local Apollo8Scripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
-  -- Orbiting Earth
+  -- Leaving Earth
   openspace.scriptScheduler.loadScheduledScript(
-    "1968-12-21T17:51:51",
+    "1968-12-21T17:20:51",
     "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hours per second
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(Apollo8OverviewDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)"
   )
 
-  -- Leaving Earth
+  -- Half way to moon
   openspace.scriptScheduler.loadScheduledScript(
     "1968-12-22T08:51:51",
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
@@ -121,10 +121,21 @@ local Apollo8Scripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
+  -- Slow down for landing
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:10:51",
+    "openspace.time.interpolateDeltaTime(600)" -- 10 min per second
+  )
+
+  -- Take a moment to understand they landed
+  openspace.scriptScheduler.loadScheduledScript(
+    "1968-12-27T15:36:39",
+    "openspace.time.interpolateDeltaTime(1)"
+  )
+
   -- End
   openspace.scriptScheduler.loadScheduledScript(
-    "1968-12-27T15:36:59",
-    "openspace.time.interpolateDeltaTime(1)" ..
+    "1968-12-27T15:42:09", -- 5 minute 10 seconds delay
     "openspace.time.setTime('1968-12-21T12:51:51')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(Apollo8NavigationState) .. [[)"
   )
