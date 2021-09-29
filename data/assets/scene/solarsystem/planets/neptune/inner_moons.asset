@@ -10,7 +10,7 @@ local kernel088 = kernels.nep088
 
 local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner", "moon_minor" }
 local trailColor = { 0.2, 0.5, 0.75 }
 local trailTags = { 
   "moonTrail_solarSystem",
