@@ -225,10 +225,10 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
 }
 
 void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
-    if (peer.id != _hostPeerId) {
+    if (peer.id != _hostPeerId && peer.viewStatus != ParallelConnection::ViewStatus::IndependentView) {
         LINFO(fmt::format(
             "Ignoring connection {} trying to send data without being host"
-            " or using host-view", peer.id
+            " or using independent view", peer.id
         ));
     }
     sendMessageToClients(ParallelConnection::MessageType::Data, data);
@@ -273,10 +273,14 @@ void ParallelServer::handleHostshipResignation(Peer& peer) {
 }
 
 void ParallelServer::handleViewRequest(Peer& peer) {
+    setViewStatus(peer, ParallelConnection::ViewStatus::IndependentView);
+
     LINFO(fmt::format("{} is now using host-independent viewpoint.", peer.id));
 }
 
 void ParallelServer::handleViewResignation(Peer& peer) {
+    setViewStatus(peer, ParallelConnection::ViewStatus::HostView);
+
     LINFO(fmt::format("{} is now using the host's viewpoint.", peer.id));
 }
 
@@ -386,12 +390,12 @@ void ParallelServer::setToClient(Peer& peer) {
             std::lock_guard lock(_hostInfoMutex);
             _hostPeerId = 0;
             _hostName.clear();
-            peer.viewStatus = ParallelConnection::ViewStatus::HostView;
         }
 
         // If host becomes client, make all clients hostless.
         for (std::pair<const size_t, std::shared_ptr<Peer>>& it : _peers) {
             it.second->status = ParallelConnection::Status::ClientWithoutHost;
+            it.second->viewStatus = ParallelConnection::ViewStatus::IndependentView;
             sendConnectionStatus(*it.second);
         }
     }
@@ -399,6 +403,9 @@ void ParallelServer::setToClient(Peer& peer) {
         peer.status = (_hostPeerId > 0) ?
             ParallelConnection::Status::ClientWithHost :
             ParallelConnection::Status::ClientWithoutHost;
+        peer.viewStatus = (_hostPeerId > 0) ?
+            ParallelConnection::ViewStatus::Host :
+            ParallelConnection::ViewStatus::HostView;
         sendConnectionStatus(peer);
     }
 }
@@ -438,6 +445,10 @@ void ParallelServer::sendConnectionStatus(Peer& peer) {
     );
 
     sendMessage(peer, ParallelConnection::MessageType::ConnectionStatus, data);
+}
+
+void ParallelServer::setViewStatus(Peer& peer, ParallelConnection::ViewStatus viewStatus) {
+    peer.viewStatus = viewStatus;
 }
 
 size_t ParallelServer::nConnections() const {

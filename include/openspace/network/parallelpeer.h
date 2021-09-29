@@ -94,7 +94,7 @@ private:
     void sendTimeTimeline();
 
     void setStatus(ParallelConnection::Status status);
-    void setViewStatus();
+    void setViewStatus(ParallelConnection::ViewStatus status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 

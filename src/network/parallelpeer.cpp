@@ -102,7 +102,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IndependentViewInfo = {
         "IndependentView",
         "Independent View",
-        "Enables host-independent camera viewpoint. Has no effect for the host."
+        "Enables host-independent camera viewpoint. Requires a connection."
     };
 } // namespace
 
@@ -134,9 +134,15 @@ ParallelPeer::ParallelPeer()
     addProperty(_cameraKeyframeInterval);
 
     addProperty(_hasIndependentView);
+
     _hasIndependentView.setReadOnly(true);
     _hasIndependentView.onChange([this]() {
-        setViewStatus();
+        if (_hasIndependentView) {
+            setViewStatus(ParallelConnection::ViewStatus::IndependentView);
+        }
+        else {
+            setViewStatus(ParallelConnection::ViewStatus::HostView);
+        }
     });
 }
 
@@ -153,8 +159,15 @@ void ParallelPeer::connect() {
     setStatus(ParallelConnection::Status::Connecting);
 
     _isConnected = true;
-    setViewStatus();
-    
+
+    // Default ViewStatus is HostView
+    if (!isHost()) {
+        setViewStatus(ParallelConnection::ViewStatus::HostView);
+    }
+    else {
+        setViewStatus(ParallelConnection::ViewStatus::Host);
+    }
+
     _hasIndependentView.setReadOnly(false);
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
@@ -181,6 +194,8 @@ void ParallelPeer::disconnect() {
     setStatus(ParallelConnection::Status::Disconnected);
 
     _isConnected = false;
+
+    _hasIndependentView.setReadOnly(true);
 }
 
 void ParallelPeer::sendAuthentication() {
@@ -584,9 +599,27 @@ ParallelConnection::Status ParallelPeer::status() {
     return _status;
 }
 
-void ParallelPeer::setViewStatus() {
-    if (_isConnected) {
-        if (isHost() && viewStatus() != ParallelConnection::ViewStatus::Host) {
+void ParallelPeer::setViewStatus(ParallelConnection::ViewStatus status) {
+    if (!_isConnected) {
+        _hasIndependentView.setValue(false);
+        LINFO(fmt::format("ERROR: This action requires a connection."));
+    }
+    else {
+        if (isHost()) {
+            _hasIndependentView.setValue(false);
+            _viewStatus = ParallelConnection::ViewStatus::Host;
+
+            if (status != ParallelConnection::ViewStatus::Host) {
+                LINFO(fmt::format("ERROR: {} is redundant as host.", status));
+            }
+        }
+        else {
+            _viewStatus = status;
+        }
+    }
+
+    /*if (_isConnected) {
+        if (isHost()) {
             _viewStatus = ParallelConnection::ViewStatus::Host;
         }
         else if (hasIndependentView() && viewStatus() !=
@@ -605,15 +638,15 @@ void ParallelPeer::setViewStatus() {
 
             std::vector<char> buffer;
             // possibly modify buffer (ex. require password or save camera position)
+
             _connection.sendMessage(ParallelConnection::Message(
                 ParallelConnection::MessageType::IndependentViewResignation, buffer));
         }
     }
-    else {
-        hasIndependentView() ?
-            LINFO(fmt::format("You will use host-independent viewpoint upon connecting.")
-            ) : LINFO(fmt::format("You will use the host's viewpoint upon connecting."));
-    }
+    else if (_hasIndependentView) {
+        LINFO(fmt::format("ERROR: This action requires a connection."));
+        _hasIndependentView.setValue(false);
+    }*/
 }
 
 ParallelConnection::ViewStatus ParallelPeer::viewStatus() {

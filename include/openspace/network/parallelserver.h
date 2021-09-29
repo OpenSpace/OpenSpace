@@ -80,6 +80,7 @@ private:
     void setToClient(Peer& peer);
     void setNConnections(size_t nConnections);
     void sendConnectionStatus(Peer& peer);
+    void setViewStatus(Peer& peer, ParallelConnection::ViewStatus viewStatus);
 
     void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleData(const Peer& peer, std::vector<char> data);
