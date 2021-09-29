@@ -66,6 +66,7 @@ local setOrbitSpeedFactor = function(value)
   ]]
 end
 
+-- Change or retarget anchor
 local changeAnchor = function(name, interpolationTime) 
   return [[
     openspace.setPropertyValueSingle(

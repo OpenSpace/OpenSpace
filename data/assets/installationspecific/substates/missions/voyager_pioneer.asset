@@ -84,8 +84,9 @@ local states = {
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 -- The action we want to happen when moving from any of the substates back
--- to the SolarSystem state
+-- to the Home state
 local onLeavingMainStateAction = [[
+  ]] .. util.setTime(today) .. [[
   ]] .. flyHome.linearFlight .. [[
   ]] .. util.disableRoll() .. [[
   ]] .. util.stopOrbiting() .. [[

@@ -14,7 +14,10 @@ local cameraPath = [[
   )
 ]]
 
-local linearFlight = util.applyLinearFlight(solarTargetDistance, 1.2)
+local linearFlight = [[
+  ]] .. util.changeAnchor('Sun', 1.0) .. [[
+  ]] .. util.applyLinearFlight(solarTargetDistance, 1.2) .. [[
+]]
 
 asset.export("cameraPath", cameraPath)
 asset.export("linearFlight", linearFlight)
