@@ -923,4 +923,23 @@ bool isFloatValue(const std::string& s) {
     }
 }
 
+/**
+ * \ingroup LuaScripts
+ * isNilValue(const std::string& s):
+ * Used to check if a string is a lua 'nil' value. Returns false if not.
+ */
+bool isNilValue(const std::string& s) {
+    return (s == "nil");
+}
+
+/**
+ * \ingroup LuaScripts
+ * isTableValue(const std::string& s):
+ * Used to check if a string contains a lua table rather than an individual value.
+ * Returns false if not.
+ */
+bool isTableValue(const std::string& s) {
+    return ((s.front() == '{') && (s.back() == '}'));
+}
+
 }  // namespace openspace::luascriptfunctions

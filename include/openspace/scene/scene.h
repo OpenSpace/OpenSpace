@@ -33,6 +33,7 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
+#include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -45,6 +46,14 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
+
+enum class PropertyValueType {
+    Boolean = 0,
+    Float,
+    String,
+    Table,
+    Nil
+};
 
 class SceneInitializer;
 
@@ -288,6 +297,40 @@ private:
  */
 void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
     const std::string& value);
+
+/**
+ * Accepts string version of a property value from a profile, and processes it
+ * according to the data type of the value
+ *
+ * \param L the lua state to (eventually) push to
+ * \param value string representation of the value with which to set property
+ * \param pushFn the std::function provided for pushing the result, which may be
+ *               a lambda that pushes to the lua state, or a lambda that pushes
+ *               to a vector (the vector will eventually be pushed to a lua table)
+ */
+void propertyProcessValue(ghoul::lua::LuaState& L, std::string& value,
+    std::function<void(auto v)>pushFn);
+
+/**
+ * Accepts string version of a property value from a profile, and returns the
+ * supported data types that can be pushed to a lua state. Currently, the full
+ * range of possible lua values is not supported.
+ *
+ * \param value string representation of the value with which to set property
+ */
+PropertyValueType getPropertyValueType(std::string& value);
+
+/**
+ * Accepts string version of a property value from a profile, and adds it to a vector
+ * which will later be used to push as a lua table containing values of type T
+ *
+ * \param L the lua state to (eventually) push to
+ * \param value string representation of the value with which to set property
+ * \param table the std::vector container which has elements of type T for a lua table
+ */
+template <typename T>
+void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
+    std::vector<T>& table);
 
 } // namespace openspace
 

@@ -631,21 +631,128 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     }
 }
 
+template<typename T>
 void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-                                            const std::string& value)
+                                            std::string& value)
 {
+    propertyProcessValue(
+        L,
+        value,
+        [&](T resultValue) {
+            ghoul::lua::push(L, resultValue);
+        }
+    );
+}
+
+template<typename T>
+void propertyProcessValue(ghoul::lua::LuaState& L, std::string& value,
+                          std::function<void(T val)>pushFn)
+{
+    PropertyValueType pType = getPropertyValueType(value);
+    switch (pType) {
+    case PropertyValueType::Boolean:
+        (value == "true") ? pushFn(true) : pushFn(false);
+        break;
+
+    case PropertyValueType::Float:
+        pushFn(L, std::stof(value));
+        break;
+
+    case PropertyValueType::Nil:
+        ghoul::lua::nil_t n;
+        pushFn(n);
+        break;
+
+    case PropertyValueType::Table:
+        std::string nextValue = value;
+        size_t commaPos = value.find(',', commaPos);
+        if (commaPos != std::string::npos) {
+            nextValue = value.substr(1, commaPos);
+        }
+        PropertyValueType enclosedType = getPropertyValueType(nextValue);
+        switch (enclosedType) {
+        case PropertyValueType::Boolean:
+            std::vector<bool> valsB;
+            processPropertyValueTableEntries(L, value, valsB);
+            pushFn(valsB);
+            break;
+
+        case PropertyValueType::Float:
+            std::vector<float> valsF;
+            processPropertyValueTableEntries(L, value, valsF);
+            pushFn(valsF);
+            break;
+
+        case PropertyValueType::Nil:
+            std::vector<ghoul::lua::nil_t> valsN;
+            processPropertyValueTableEntries(L, value, valsN);
+            pushFn(valsN);
+            break;
+
+        case PropertyValueType::String:
+            std::vector<std::string> valsS;
+            processPropertyValueTableEntries(L, value, valsS);
+            pushFn(valsS);
+            break;
+
+        case PropertyValueType::Table:
+        default:
+            LERROR("Table-within-a-table values are not supported for profile property");
+            break;
+        }
+        break;
+
+    default:
+        value.insert(0, "[[");
+        value.append("]]");
+        pushFn(value);
+        break;
+    }
+}
+
+template <typename T>
+void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
+                                                                    std::vector<T>& table)
+{
+    size_t commaPos = 0;
+    size_t prevPos = 0;
+    std::string nextValue;
+    while (commaPos != std::string::npos) {
+        commaPos = value.find(',', commaPos);
+        if (commaPos != std::string::npos) {
+            nextValue = value.substr(prevPos, commaPos);
+            prevPos = commaPos + 1;
+        }
+        else {
+            nextValue = value.substr(prevPos);
+        }
+        propertyProcessValue(L, nextValue, [&](T val){table.push_back(val);});
+    }
+}
+
+PropertyValueType getPropertyValueType(std::string& value) {
+    //First trim spaces from front and back of string
+    while (value.front() == ' ') {
+        value.erase(0, 1);
+    }
+    while (value.back() == ' ') {
+        value.pop_back();
+    }
+
     if (luascriptfunctions::isBoolValue(value)) {
-        ghoul::lua::push(L, (value == "true") ? true : false);
+        return PropertyValueType::Boolean;
     }
     else if (luascriptfunctions::isFloatValue(value)) {
-        ghoul::lua::push(L, std::stof(value));
+        return PropertyValueType::Float;
+    }
+    else if (luascriptfunctions::isNilValue(value)) {
+        return PropertyValueType::Nil;
+    }
+    else if (luascriptfunctions::isTableValue(value)) {
+        return PropertyValueType::Table;
     }
     else {
-        std::string stringRepresentation = value;
-        if (value.compare("nil") != 0) {
-            stringRepresentation = "[[" + stringRepresentation + "]]";
-        }
-        ghoul::lua::push(L, stringRepresentation);
+        return PropertyValueType::String;
     }
 }
 
