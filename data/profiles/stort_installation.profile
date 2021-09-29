@@ -189,6 +189,11 @@
       "value": "false"
     },
     {
+      "name": "{moon_minor}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
       "name": "Scene.Planck.Renderable.Opacity",
       "type": "setPropertyValueSingle",
       "value": "0.0"
