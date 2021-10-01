@@ -1,4 +1,4 @@
-asset.onInitialize(function()
+local timelaps = [[
   -- JWST timelaps timeline
   -- Mission start
   openspace.scriptScheduler.loadScheduledScript(
@@ -9,7 +9,7 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)"
   )
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:07:03", -- 1 min delay
+    "2018 OCT 01 14:06:04", -- 1 sec delay
     "openspace.time.interpolateDeltaTime(120)"
   )
   openspace.scriptScheduler.loadScheduledScript(
@@ -208,8 +208,8 @@ asset.onInitialize(function()
     "2018 OCT 13 06:11:03",
     "openspace.time.interpolateDeltaTime(7200)"
   )
-   -- aft radiator complete, backward
-   openspace.scriptScheduler.loadScheduledScript(
+  -- aft radiator complete, backward
+  openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 13 07:11:03", -- 1h pre delay so time to interpolate
     "",
     "openspace.time.interpolateDeltaTime(-1800)"
@@ -244,9 +244,52 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)",
     "openspace.time.interpolateDeltaTime(-7200)" ..
     "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 0.7)" ..
-    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)"
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)" ..
   )
+]]
 
+local playForwards = {
+  Identifier = "jwst.play.forwards",
+  Name = "Play JWST forward",
+  Command = [[
+    openspace.scriptScheduler.clear();
+    openspace.time.setDeltaTime(1);
+    openspace.time.setTime('2018 OCT 01 14:06:03');
+    ]] .. tostring(timelaps) .. [[
+    openspace.scriptScheduler.loadScheduledScript(
+      "2018 OCT 16 09:06:04",
+      "openspace.scriptScheduler.clear()"
+    )
+  ]],
+  Documentation = "Jump to the JWST launch time and play the timelaps of deployment forward",
+  GuiPath = "/JWST",
+  IsLocal = false,
+
+  Key = "m"
+}
+
+local clearPlay = {
+  Identifier = "jwst.play.clear",
+  Name = "Clear JWST timelaps",
+  Command = [[
+    openspace.scriptScheduler.clear();
+    local deltaTime = openspace.time.deltaTime();
+    if deltaTime > 0 then
+      openspace.time.setDeltaTime(1);
+    else
+      openspace.time.setDeltaTime(-1);
+    end
+  ]],
+  Documentation = "Set delta time back to realtime and clear the JWST deployment timelapse",
+  GuiPath = "/JWST",
+  IsLocal = false,
+
+  Key = "."
+}
+
+asset.onInitialize(function()
+  openspace.action.registerAction(playForwards)
+  openspace.action.registerAction(clearPlay)
 end)
 
 asset.onDeinitialize(function ()
