@@ -55,6 +55,14 @@
       "is_local": false,
       "name": "Set to 2021 Sun trail",
       "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
+    },
+    {
+      "documentation": "Toggle all planet and moon trails, except the Moon",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggel.trails_not_moon",
+      "is_local": false,
+      "name": "Toggle trails (except Moon)",
+      "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
     }
   ],
   "additional_scripts": [
