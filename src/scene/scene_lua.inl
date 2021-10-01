@@ -915,8 +915,14 @@ bool isBoolValue(const std::string& s) {
  */
 bool isFloatValue(const std::string& s) {
     try {
-        float converted = std::stof(s);
-        return true;
+        float converted = std::numeric_limits<float>::min();
+        converted = std::stof(s);
+        if (converted != std::numeric_limits<float>::min()) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     catch (...) {
         return false;

@@ -54,6 +54,7 @@ enum class PropertyValueType {
     Table,
     Nil
 };
+typedef std::variant<bool, float, std::string, ghoul::lua::nil_t> ProfilePropertyLua;
 
 class SceneInitializer;
 
@@ -256,6 +257,60 @@ public:
 
 private:
     /**
+     * Accepts string version of a property value from a profile, converts it to the
+     * appropriate type, and then pushes the value onto the lua state.
+     *
+     * \param L the lua state to push value to
+     * \param value string representation of the value with which to set property
+     */
+    void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+        std::string& value);
+
+    /**
+     * Accepts string version of a property value from a profile, and processes it
+     * according to the data type of the value
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     * \param didPushToLua Bool reference that represents the lua push state at the end
+     *        of this function call. This will be set to true if the value (e.g. table)
+     *        has already been pushed to the lua stack
+     * \return The ProfilePropertyLua variant type translated from string representation
+     */
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+        std::string& value, bool& didPushToLua);
+
+    /**
+     * Accepts string version of a property value from a profile, and returns the
+     * supported data types that can be pushed to a lua state. Currently, the full
+     * range of possible lua values is not supported.
+     *
+     * \param value string representation of the value with which to set property
+     */
+    PropertyValueType getPropertyValueType(std::string& value);
+
+    /**
+     * Accepts string version of a property value from a profile, and adds it to a vector
+     * which will later be used to push as a lua table containing values of type T
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     * \param table the std::vector container which has elements of type T for a lua table
+     */
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
+        std::vector<T>& table);
+
+    /**
+     * Handles a lua table entry, creating a vector of the correct variable type based
+     * on the profile string, and pushes this vector to the lua stack.
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     */
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, std::string& value);
+
+    /**
      * Update dependencies.
      */
     void updateNodeRegistry();
@@ -269,7 +324,7 @@ private:
     bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
-
+    std::string _profilePropertyName;
     std::vector<InterestingTime> _interestingTimes;
 
     std::mutex _programUpdateLock;
@@ -288,49 +343,7 @@ private:
     ghoul::MemoryPool<4096> _memoryPool;
 };
 
-/**
- * Accepts string version of a property value from a profile, converts it to the
- * appropriate type, and then pushes the value onto the lua state.
- *
- * \param L the lua state to push value to
- * \param value string representation of the value with which to set property
- */
-void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-    const std::string& value);
-
-/**
- * Accepts string version of a property value from a profile, and processes it
- * according to the data type of the value
- *
- * \param L the lua state to (eventually) push to
- * \param value string representation of the value with which to set property
- * \param pushFn the std::function provided for pushing the result, which may be
- *               a lambda that pushes to the lua state, or a lambda that pushes
- *               to a vector (the vector will eventually be pushed to a lua table)
- */
-void propertyProcessValue(ghoul::lua::LuaState& L, std::string& value,
-    std::function<void(auto v)>pushFn);
-
-/**
- * Accepts string version of a property value from a profile, and returns the
- * supported data types that can be pushed to a lua state. Currently, the full
- * range of possible lua values is not supported.
- *
- * \param value string representation of the value with which to set property
- */
-PropertyValueType getPropertyValueType(std::string& value);
-
-/**
- * Accepts string version of a property value from a profile, and adds it to a vector
- * which will later be used to push as a lua table containing values of type T
- *
- * \param L the lua state to (eventually) push to
- * \param value string representation of the value with which to set property
- * \param table the std::vector container which has elements of type T for a lua table
- */
-template <typename T>
-void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
-    std::vector<T>& table);
+void trimSurroundingCharacters(std::string& valueString, const char c);
 
 } // namespace openspace
 

@@ -73,6 +73,9 @@ namespace {
         }
     }
 #endif // TRACY_ENABLE
+
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
@@ -613,10 +616,14 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             // Remove group name from start of regex and replace with '*'
             uriOrRegex = removeGroupNameFromUri(uriOrRegex);
         }
+        _profilePropertyName = uriOrRegex;
         ghoul::lua::push(L, uriOrRegex);
         ghoul::lua::push(L, 0.0);
+
+        std::string workingValue = prop.value;
+        trimSurroundingCharacters(workingValue, ' ');
         // Later functions expect the value to be at the last position on the stack
-        propertyPushValueFromProfileToLuaState(L, prop.value);
+        propertyPushValueFromProfileToLuaState(L, workingValue);
 
         applyRegularExpression(
             L,
@@ -631,114 +638,145 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     }
 }
 
-template<typename T>
-void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-                                            std::string& value)
+void Scene::propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
+                                                                       std::string& value)
 {
-    propertyProcessValue(
-        L,
-        value,
-        [&](T resultValue) {
-            ghoul::lua::push(L, resultValue);
-        }
-    );
+    bool alreadyPushedToLua = false;
+    ProfilePropertyLua elem = propertyProcessValue(L, value, alreadyPushedToLua);
+    if (!alreadyPushedToLua) {
+        std::visit(overloaded{
+            [&L](const bool& value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const float& value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const std::string& value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const ghoul::lua::nil_t& nilValue) {
+                ghoul::lua::push(L, nilValue);
+            }
+            }, elem);
+    }
 }
 
-template<typename T>
-void propertyProcessValue(ghoul::lua::LuaState& L, std::string& value,
-                          std::function<void(T val)>pushFn)
+ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,std::string& value,
+                                                                       bool& didPushToLua)
 {
+    ProfilePropertyLua result;
     PropertyValueType pType = getPropertyValueType(value);
     switch (pType) {
     case PropertyValueType::Boolean:
-        (value == "true") ? pushFn(true) : pushFn(false);
+        result = (value == "true") ? true : false;
         break;
 
     case PropertyValueType::Float:
-        pushFn(L, std::stof(value));
+        result = std::stof(value);
         break;
 
     case PropertyValueType::Nil:
         ghoul::lua::nil_t n;
-        pushFn(n);
+        result = n;
         break;
 
     case PropertyValueType::Table:
-        std::string nextValue = value;
-        size_t commaPos = value.find(',', commaPos);
-        if (commaPos != std::string::npos) {
-            nextValue = value.substr(1, commaPos);
-        }
-        PropertyValueType enclosedType = getPropertyValueType(nextValue);
-        switch (enclosedType) {
-        case PropertyValueType::Boolean:
-            std::vector<bool> valsB;
-            processPropertyValueTableEntries(L, value, valsB);
-            pushFn(valsB);
-            break;
+        trimSurroundingCharacters(value, '{');
+        trimSurroundingCharacters(value, '}');
+        handlePropertyLuaTableEntry(L, value);
+        didPushToLua = true;
+        break;
 
-        case PropertyValueType::Float:
+    case PropertyValueType::String:
+    default:
+        std::string newValue = value;
+        newValue.insert(0, "[[");
+        newValue.append("]]");
+        result = newValue;
+        break;
+    }
+    return result;
+}
+
+void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, std::string& value) {
+    std::string firstValue;
+    size_t commaPos = 0;
+    commaPos = value.find(',', commaPos);
+    if (commaPos != std::string::npos) {
+        firstValue = value.substr(0, commaPos);
+    }
+    else {
+        firstValue = value;
+    }
+
+    PropertyValueType enclosedType = getPropertyValueType(firstValue);
+    switch (enclosedType) {
+    case PropertyValueType::Boolean:
+        LERROR(fmt::format(
+            "A lua table of bool values is not supported. (processing property {})",
+            _profilePropertyName)
+        );
+        break;
+
+    case PropertyValueType::Float:
+        {
             std::vector<float> valsF;
             processPropertyValueTableEntries(L, value, valsF);
-            pushFn(valsF);
-            break;
-
-        case PropertyValueType::Nil:
-            std::vector<ghoul::lua::nil_t> valsN;
-            processPropertyValueTableEntries(L, value, valsN);
-            pushFn(valsN);
-            break;
-
-        case PropertyValueType::String:
-            std::vector<std::string> valsS;
-            processPropertyValueTableEntries(L, value, valsS);
-            pushFn(valsS);
-            break;
-
-        case PropertyValueType::Table:
-        default:
-            LERROR("Table-within-a-table values are not supported for profile property");
-            break;
+            ghoul::lua::push(L, valsF);
         }
         break;
 
+    case PropertyValueType::String:
+        {
+            std::vector<std::string> valsS;
+            processPropertyValueTableEntries(L, value, valsS);
+            ghoul::lua::push(L, valsS);
+        }
+        break;
+
+    case PropertyValueType::Table:
     default:
-        value.insert(0, "[[");
-        value.append("]]");
-        pushFn(value);
+        LERROR(fmt::format(
+            "Table-within-a-table values are not supported for profile a "
+            "property (processing property {})", _profilePropertyName)
+        );
         break;
     }
 }
 
 template <typename T>
-void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
+void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
                                                                     std::vector<T>& table)
 {
     size_t commaPos = 0;
     size_t prevPos = 0;
     std::string nextValue;
     while (commaPos != std::string::npos) {
-        commaPos = value.find(',', commaPos);
+        commaPos = value.find(',', prevPos);
         if (commaPos != std::string::npos) {
-            nextValue = value.substr(prevPos, commaPos);
+            nextValue = value.substr(prevPos, commaPos - prevPos);
             prevPos = commaPos + 1;
         }
         else {
             nextValue = value.substr(prevPos);
         }
-        propertyProcessValue(L, nextValue, [&](T val){table.push_back(val);});
+        trimSurroundingCharacters(nextValue, ' ');
+        bool alreadyPushedToLua = false;
+        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue,
+            alreadyPushedToLua);
+        try {
+            table.push_back(std::get<T>(tableElement));
+        }
+        catch (std::bad_variant_access& e) {
+            LERROR(fmt::format(
+                "Error attempting to parse profile property setting for "
+                "{} using value = {}", _profilePropertyName, value)
+            );
+        }
     }
 }
 
-PropertyValueType getPropertyValueType(std::string& value) {
-    //First trim spaces from front and back of string
-    while (value.front() == ' ') {
-        value.erase(0, 1);
-    }
-    while (value.back() == ' ') {
-        value.pop_back();
-    }
-
+PropertyValueType Scene::getPropertyValueType(std::string& value) {
     if (luascriptfunctions::isBoolValue(value)) {
         return PropertyValueType::Boolean;
     }
@@ -753,6 +791,15 @@ PropertyValueType getPropertyValueType(std::string& value) {
     }
     else {
         return PropertyValueType::String;
+    }
+}
+
+void trimSurroundingCharacters(std::string& valueString, const char c) {
+    while (valueString.front() == c) {
+        valueString.erase(0, 1);
+    }
+    while (valueString.back() == c) {
+        valueString.pop_back();
     }
 }
 
