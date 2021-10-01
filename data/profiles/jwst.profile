@@ -57,6 +57,9 @@
       "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
     }
   ],
+  "additional_scripts": [
+    "openspace.setPropertyValue(\"Scene.MoonTrail.Renderable.Appearance.Color\", {0.7, 0.5, 0.5});"
+  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",
@@ -159,6 +162,11 @@
       "name": "{earth_satellites}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.MoonTrail.Renderable.Appearance.Fade",
+      "type": "setPropertyValueSingle",
+      "value": "3.0"
     }
   ],
   "time": {
