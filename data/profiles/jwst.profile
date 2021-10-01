@@ -29,7 +29,7 @@
       "gui_path": "/JWST",
       "identifier": "profile.toggle.l2",
       "is_local": false,
-      "name": "Toggle L2",
+      "name": "Toggle L2 line and small L2 label",
       "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
@@ -49,11 +49,11 @@
       "script": "openspace.time.setTime('2018-10-01T14:06:03'); openspace.time.setDeltaTime(1)"
     },
     {
-      "documentation": "Set the time to the 2021 launch time of JWST",
+      "documentation": "Set the time to 2021 where the JWST Sun trail has valid data (2020-2024)",
       "gui_path": "/JWST",
-      "identifier": "profile.set.2021_launch",
+      "identifier": "profile.set.2021_sun",
       "is_local": false,
-      "name": "Set to 2021 launch time",
+      "name": "Set to 2021 Sun trail",
       "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
     }
   ],
@@ -137,7 +137,7 @@
       "key": "J"
     },
     {
-      "action": "profile.set.2021_launch",
+      "action": "profile.set.2021_sun",
       "key": "K"
     }
   ],

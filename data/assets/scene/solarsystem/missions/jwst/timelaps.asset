@@ -244,7 +244,7 @@ local timelaps = [[
     "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)",
     "openspace.time.interpolateDeltaTime(-7200)" ..
     "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 0.7)" ..
-    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)"
   )
 ]]
 
