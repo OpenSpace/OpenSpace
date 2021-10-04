@@ -1,0 +1,88 @@
+local assetHelper = asset.require("util/asset_helper")
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+
+local globeIdentifier = mars.Mars.Identifier
+
+ -- Coordinate offset to match hirise image in Jezero crater
+local offset = { -0.0024, 0.0 }
+
+-- Some useful lat, long positions
+local landingPosition = { 18.444634598608634, 77.45088440206018 }
+local handlePosition = { 18.43532532679642, 77.4481201276649 }
+
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Mars-Perseverance-Handle",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2],
+      Altitude = 10.0,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2]
+    }
+  },
+  GUI = {
+    Name = "Mars Perseverance Handle",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local Path = {
+  Identifier = "Mars-Perseverance-Rover-Path",
+  Parent = globeIdentifier,
+  Renderable = {
+    Type = "RenderableGeoJsonObject",
+    Globe = globeIdentifier,
+    File = asset.localResource("./roverpath_perseverance.geojson"),
+    HeightOffset = 10.0,
+    CoordinateOffset = offset,
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "Mars Perseverance Rover Path",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local LandingPosition = {
+  Identifier = "Mars-Perseverance-Landing-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = landingPosition[1] + offset[1],
+      Longitude = landingPosition[2] + offset[2],
+      Altitude = 10,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = landingPosition[1] + offset[1],
+      Longitude = landingPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 10.0,
+    Origin = "Center",
+    Billboard = true,
+    Texture = asset.localResource('./Mars_2020_JPL_second_insignia.svg.png')
+  },
+  GUI = {
+    Name = "Mars Perseverance Rover Landing Position",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Handle, Path, LandingPosition })

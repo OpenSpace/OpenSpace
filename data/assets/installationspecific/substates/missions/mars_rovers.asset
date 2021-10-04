@@ -1,10 +1,18 @@
 local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
+local defaultTime = asset.require('./../../default_time.asset').time
+
+local enterStateSettings = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0)
+]]
+
+local leaveStateSettings = [[
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 1.0)
+]]
 
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local marsTargetDistance = 7E6
 
 local marsRoversState = {
   Identifier = "MarsRovers",
@@ -40,8 +48,33 @@ local curiosityState = {
 -----
 -- Perseverance
 -----
+
+-- Go to Perseverance path overview:
+-- openspace.globebrowsing.goToGeo("Mars", 18.433832, 77.450000, -800);
+
+-- Tilted navigation state
+-- openspace.pathnavigation.goToNavigationState({ 
+--   Position = { 145.012710, -727.768585, -662.409943 },
+--   ReferenceFrame = "Root", 
+--   Pitch = -0.030899, 
+--   Yaw = -0.028713, 
+--   Anchor = "Mars-Perseverance-Handle", 
+--   Up = { 0.572586, 0.611321, -0.546290 } 
+-- })
+
+-- TODO: fade in renderables?
 local perseveranceState = {
   Identifier = "Perseverance",
+  Enter = [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.globebrowsing.flyToGeo("Mars", 18.433832, 77.45000, -800);
+  ]],
+  Exit = [[
+  ]]
+}
+
+local perseveranceTiltedState = {
+  Identifier = "Perseverance_Tilted",
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
@@ -76,12 +109,27 @@ local states = {
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 
+local enterTransition = [[ 
+  openspace.time.setTime('2021-08-26T15:21:00.505')
+  ]] .. enterStateSettings .. [[
+  ]] .. goToMarsOverview .. [[
+]]
+
+local leaveTransition = [[
+  openspace.time.setTime(']] .. defaultTime .. [[')
+  ]] .. leaveStateSettings .. [[
+  ]] .. flyHome.cameraPath .. [[
+]]
+
 local transitions = {
   -- Transition to/from this state
   {
     From = "Home",
     To = "MarsRovers",
-    Action = goToMarsOverview
+    Action =  [[ 
+      openspace.time.setTime('2021-08-26T15:21:00.505')
+      ]] .. goToMarsOverview .. [[
+    ]]
   },
   {
     From = "MarsRovers",
@@ -148,17 +196,17 @@ local transitions = {
   {
     From = "Curiosity",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveTransition
   },
   {
     From = "Perseverance",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveTransition
   },
   {
     From = "MRO",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveTransition
   }
 }
 

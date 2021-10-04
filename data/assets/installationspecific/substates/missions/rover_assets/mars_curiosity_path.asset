@@ -1,0 +1,26 @@
+local assetHelper = asset.require("util/asset_helper")
+local mars = asset.require('scene/solarsystem/planets/mars/mars')
+
+local globeIdentifier = mars.Mars.Identifier
+
+ -- Coordinate offset to match hirise image in Jezero crater
+local offset = { -0.0024, 0.0 }
+
+local Path = {
+  Identifier = "Mars-Curiosity-Rover-Path",
+  Parent = globeIdentifier,
+  Renderable = {
+    Type = "RenderableGeoJsonObject",
+    Globe = globeIdentifier,
+    File = asset.localResource("./roverpath_Curiosity.geojson"),
+    HeightOffset = 10.0,
+    CoordinateOffset = offset,
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "Mars Curiosity Rover Path",
+    Path = "/Missions/Curiosity"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Path })

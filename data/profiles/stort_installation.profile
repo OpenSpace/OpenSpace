@@ -32,8 +32,13 @@
   ],
   "assets": [
     "base",
-    "installationspecific/stort_state_machine",
+    "installationspecific/others/mars_moons/deimos",
+    "installationspecific/others/mars_moons/phobos",
     "installationspecific/others/olympus_mons_node",
+    "installationspecific/stort_state_machine",
+    "installationspecific/substates/missions/cassini/trail",
+    "installationspecific/substates/missions/rover_assets/mars_curiosity_path",
+    "installationspecific/substates/missions/rover_assets/mars_perseverance_path",
     "scene/solarsystem/dwarf_planets/pluto/charon/charon",
     "scene/solarsystem/dwarf_planets/pluto/charon/charon_trail",
     "scene/solarsystem/dwarf_planets/pluto/minor/hydra",
@@ -41,11 +46,11 @@
     "scene/solarsystem/dwarf_planets/pluto/minor/nix",
     "scene/solarsystem/dwarf_planets/pluto/minor/styx",
     "scene/solarsystem/dwarf_planets/pluto/pluto",
+    "scene/solarsystem/missions/apollo/11/apollo11",
+    "scene/solarsystem/missions/apollo/8/apollo8",
+    "scene/solarsystem/missions/apollo/insignias_map",
     "scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11",
     "scene/solarsystem/planets/earth/satellites/misc/iss",
-    "installationspecific/substates/missions/cassini/trail",
-    "installationspecific/substates/mars_moons/deimos",
-    "installationspecific/substates/mars_moons/phobos",
     "scene/solarsystem/planets/jupiter/major_moons",
     "scene/solarsystem/planets/jupiter/minor_moons",
     "scene/solarsystem/planets/neptune/inner_moons",
@@ -58,10 +63,7 @@
     "scene/solarsystem/planets/saturn/major_moons",
     "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/planets/uranus/major_moons",
-    "scene/solarsystem/planets/uranus/minor_moons",
-    "scene/solarsystem/missions/apollo/8/apollo8",
-    "scene/solarsystem/missions/apollo/insignias_map",
-    "scene/solarsystem/missions/apollo/11/apollo11"
+    "scene/solarsystem/planets/uranus/minor_moons"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -207,6 +209,26 @@
       "name": "Scene.Exoplanets.Renderable.Opacity",
       "type": "setPropertyValueSingle",
       "value": "0.0"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Settings.Opacity",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
     }
   ],
   "time": {
