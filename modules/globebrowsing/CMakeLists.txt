@@ -51,6 +51,7 @@ set(HEADER_FILES
   src/prioritizingconcurrentjobmanager.inl
   src/rawtile.h
   src/rawtiledatareader.h
+  src/renderablegeojsonobject.h
   src/renderableglobe.h
   src/ringscomponent.h
   src/shadowcomponent.h
@@ -81,6 +82,7 @@ set(SOURCE_FILES
   src/layerrendersettings.cpp
   src/memoryawaretilecache.cpp
   src/rawtiledatareader.cpp
+  src/renderablegeojsonobject.cpp
   src/renderableglobe.cpp
   src/ringscomponent.cpp
   src/shadowcomponent.cpp
@@ -97,6 +99,8 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/geojson_fs.glsl
+  shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl

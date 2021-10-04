@@ -35,6 +35,7 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/renderablegeojsonobject.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -270,6 +271,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
+    fRenderable->registerClass<globebrowsing::RenderableGeoJsonObject>(
+        "RenderableGeoJsonObject"
+    );
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Translation factory was not created");
@@ -406,7 +410,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
             // paths work really well close to surfaces
-            "flyToGeo", 
+            "flyToGeo",
             &globebrowsing::luascriptfunctions::flyToGeo,
             {},
             "[string], number, number, number [, bool, number]",
@@ -482,6 +486,7 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::RenderableGeoJsonObject::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
