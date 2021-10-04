@@ -109,14 +109,13 @@ local states = {
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
 
+-- Note: time is set on the webpage
 local enterTransition = [[ 
-  openspace.time.setTime('2021-08-26T15:21:00.505')
   ]] .. enterStateSettings .. [[
   ]] .. goToMarsOverview .. [[
 ]]
 
 local leaveTransition = [[
-  openspace.time.setTime(']] .. defaultTime .. [[')
   ]] .. leaveStateSettings .. [[
   ]] .. flyHome.cameraPath .. [[
 ]]
@@ -126,15 +125,12 @@ local transitions = {
   {
     From = "Home",
     To = "MarsRovers",
-    Action =  [[ 
-      openspace.time.setTime('2021-08-26T15:21:00.505')
-      ]] .. goToMarsOverview .. [[
-    ]]
+    Action = enterTransition
   },
   {
     From = "MarsRovers",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveTransition
   },
   -- Curiosity
   {

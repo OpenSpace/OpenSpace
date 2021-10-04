@@ -1,7 +1,15 @@
 local assetHelper = asset.require("util/asset_helper")
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local globeIdentifier = mars.Mars.Identifier
+
+local models = asset.syncedResource({
+  Name = "Perseverance Models",
+  Type = "HttpSynchronization",
+  Identifier = "perseverance_models",
+  Version = 2
+})
 
  -- Coordinate offset to match hirise image in Jezero crater
 local offset = { -0.0024, 0.0 }
@@ -9,6 +17,7 @@ local offset = { -0.0024, 0.0 }
 -- Some useful lat, long positions
 local landingPosition = { 18.444634598608634, 77.45088440206018 }
 local handlePosition = { 18.43532532679642, 77.4481201276649 }
+local finalPosition = { 18.43379229870882,  77.4421387910843 } -- position as of 2021-10-04
 
 -- A "handle" that can be used for navigation and such
 local Handle = {
@@ -85,4 +94,46 @@ local LandingPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Handle, Path, LandingPosition })
+-- Perseverance Model --
+local PerseveranceModel = {
+  Identifier = "PerseveranceModel",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + offset[1],
+      Longitude = finalPosition[2] + offset[2],
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + offset[1],
+      Longitude = finalPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "/Perseverance.obj",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Type = "CameraLightSource",
+        Identifier = "Camera",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Name = "Perseverance Model",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Handle, Path, LandingPosition, PerseveranceModel })
