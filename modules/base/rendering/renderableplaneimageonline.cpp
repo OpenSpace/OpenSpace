@@ -95,7 +95,9 @@ void RenderablePlaneImageOnline::bindTexture() {
     }
 }
 
-void RenderablePlaneImageOnline::update(const UpdateData&) {
+void RenderablePlaneImageOnline::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+
     if (!_textureIsDirty) {
         return;
     }
