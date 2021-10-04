@@ -147,6 +147,14 @@
     {
       "action": "profile.set.2021_sun",
       "key": "K"
+    },
+    {
+      "action": "jwst.play.forwards",
+      "key": "M"
+    },
+    {
+      "action": "jwst.play.clear",
+      "key": "B"
     }
   ],
   "mark_nodes": [

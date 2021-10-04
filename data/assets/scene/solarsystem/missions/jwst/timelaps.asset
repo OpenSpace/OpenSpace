@@ -263,9 +263,7 @@ local playForwards = {
   ]],
   Documentation = "Jump to the JWST launch time and play the timelaps of deployment forward",
   GuiPath = "/JWST",
-  IsLocal = false,
-
-  Key = "m"
+  IsLocal = false
 }
 
 local clearPlay = {
@@ -282,9 +280,7 @@ local clearPlay = {
   ]],
   Documentation = "Set delta time back to realtime and clear the JWST deployment timelapse",
   GuiPath = "/JWST",
-  IsLocal = false,
-
-  Key = "."
+  IsLocal = false
 }
 
 asset.onInitialize(function()
