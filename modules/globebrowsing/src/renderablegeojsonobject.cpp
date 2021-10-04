@@ -266,6 +266,13 @@ void RenderableGeoJsonObject::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
+    // @TODO: this shouldn't be needed, but currently it is. At least for assets
+    // that are included during runtime
+    if (!_dataIsInitialized) {
+        //LERROR("Wasn't ready for render");
+        return;
+    }
+
     const glm::dmat4 globeModelTransform = _globeNode->modelTransform();
     const glm::dmat4 modelViewTransform =
         data.camera.combinedViewMatrix() * globeModelTransform;
@@ -382,6 +389,7 @@ void RenderableGeoJsonObject::update(const UpdateData&) {
     glBindVertexArray(0);
 
     _dataIsDirty = false;
+    _dataIsInitialized = true;
 }
 
 void RenderableGeoJsonObject::readFile() {

@@ -100,6 +100,7 @@ private:
     RenderableGlobe* _globeNode = nullptr;
 
     bool _dataIsDirty = true;
+    bool _dataIsInitialized = false;
 };
 
 } // namespace openspace::globebrowsing
