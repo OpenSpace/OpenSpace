@@ -263,8 +263,7 @@ private:
      * \param L the lua state to push value to
      * \param value string representation of the value with which to set property
      */
-    void propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-        std::string& value);
+    void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and processes it
@@ -277,8 +276,7 @@ private:
      *        has already been pushed to the lua stack
      * \return The ProfilePropertyLua variant type translated from string representation
      */
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
-        std::string& value, bool& didPushToLua);
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L, std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and returns the
@@ -326,6 +324,7 @@ private:
     std::unique_ptr<SceneInitializer> _initializer;
     std::string _profilePropertyName;
     std::vector<InterestingTime> _interestingTimes;
+    bool _valueIsTable = false;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

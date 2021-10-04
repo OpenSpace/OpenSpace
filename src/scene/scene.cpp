@@ -623,7 +623,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
         std::string workingValue = prop.value;
         trimSurroundingCharacters(workingValue, ' ');
         // Later functions expect the value to be at the last position on the stack
-        propertyPushValueFromProfileToLuaState(L, workingValue);
+        propertyPushProfileValueToLua(L, workingValue);
 
         applyRegularExpression(
             L,
@@ -638,12 +638,11 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     }
 }
 
-void Scene::propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
-                                                                       std::string& value)
+void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L, std::string& value)
 {
-    bool alreadyPushedToLua = false;
-    ProfilePropertyLua elem = propertyProcessValue(L, value, alreadyPushedToLua);
-    if (!alreadyPushedToLua) {
+    _valueIsTable = false;
+    ProfilePropertyLua elem = propertyProcessValue(L, value);
+    if (!_valueIsTable) {
         std::visit(overloaded{
             [&L](const bool& value) {
                 ghoul::lua::push(L, value);
@@ -657,15 +656,15 @@ void Scene::propertyPushValueFromProfileToLuaState(ghoul::lua::LuaState& L,
             [&L](const ghoul::lua::nil_t& nilValue) {
                 ghoul::lua::push(L, nilValue);
             }
-            }, elem);
+        }, elem);
     }
 }
 
-ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,std::string& value,
-                                                                       bool& didPushToLua)
+ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,std::string& value)
 {
     ProfilePropertyLua result;
     PropertyValueType pType = getPropertyValueType(value);
+
     switch (pType) {
     case PropertyValueType::Boolean:
         result = (value == "true") ? true : false;
@@ -684,15 +683,15 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,std::stri
         trimSurroundingCharacters(value, '{');
         trimSurroundingCharacters(value, '}');
         handlePropertyLuaTableEntry(L, value);
-        didPushToLua = true;
+        _valueIsTable = true;
         break;
 
     case PropertyValueType::String:
     default:
-        std::string newValue = value;
-        newValue.insert(0, "[[");
-        newValue.append("]]");
-        result = newValue;
+        trimSurroundingCharacters(value, '\"');
+        trimSurroundingCharacters(value, '[');
+        trimSurroundingCharacters(value, ']');
+        result = value;
         break;
     }
     return result;
@@ -761,9 +760,7 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::strin
             nextValue = value.substr(prevPos);
         }
         trimSurroundingCharacters(nextValue, ' ');
-        bool alreadyPushedToLua = false;
-        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue,
-            alreadyPushedToLua);
+        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue);
         try {
             table.push_back(std::get<T>(tableElement));
         }
