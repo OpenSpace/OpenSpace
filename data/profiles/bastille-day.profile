@@ -2,7 +2,7 @@
   "actions": [
     {
       "documentation": "Reset button to start of CME",
-      "gui_path": "/Bastille-Day",
+      "gui_path": "/Bastille-Day 2000",
       "identifier": "bastille-day.reset_loops",
       "is_local": false,
       "name": "Reset button. Start of CME, no loop",
@@ -10,7 +10,7 @@
     },
     {
       "documentation": "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
-      "gui_path": "/Bastille-Day",
+      "gui_path": "/Bastille-Day 2000",
       "identifier": "bastille-day.short_loop",
       "is_local": false,
       "name": "Loop 10:03 - 10:16, at 2 min/ second",
@@ -18,7 +18,7 @@
     },
     {
       "documentation": "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/Bastille-Day",
+      "gui_path": "/Bastille-Day 2000",
       "identifier": "bastille-day.standard_loop",
       "is_local": false,
       "name": "Loop 10:03 - 11:00, at 4 min/ second",
@@ -26,19 +26,19 @@
     },
     {
       "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
-      "gui_path": "/Bastille-Day",
+      "gui_path": "/Bastille-Day 2000",
       "identifier": "bastille-day.fast_loop",
       "is_local": false,
       "name": "Loop 10:03 - 11.48, at 15 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptSlowLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 12:00:00', StarttimescriptSlowLoop);"
+      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(900);openspace.time.setTime('2000-JUL-14 10:03:00.00');StarttimescriptFastLoop = \"openspace.time.setTime('2000 JUL 14 10:03:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:48:00', StarttimescriptFastLoop);"
     },
     {
       "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
-      "gui_path": "/Bastille-Day",
+      "gui_path": "/Bastille-Day 2000",
       "identifier": "bastille-day.long_loop",
       "is_local": false,
       "name": "Loop 09:30 - 13:00, at 4 min/ second",
-      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 11:50:00', StarttimescriptLongLoop);"
+      "script": "openspace.scriptScheduler.clear();openspace.time.setDeltaTime(240);openspace.time.setTime('2000-JUL-14 09:30:00.00');StarttimescriptLongLoop = \"openspace.time.setTime('2000 JUL 14 09:30:00')\";openspace.scriptScheduler.loadScheduledScript('2000 JUL 14 13:00:00', StarttimescriptLongLoop);"
     }
   ],
   "assets": [

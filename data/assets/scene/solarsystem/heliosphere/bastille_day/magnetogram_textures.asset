@@ -26,7 +26,7 @@ local switch_color_layer = {
     end;
   ]],
   Documentation = "Display next sun texture in list of textures",
-  GuiPath = "/Bastille-Day",
+  GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 

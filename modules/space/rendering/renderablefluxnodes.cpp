@@ -36,7 +36,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
-// Test debugging tools more then logmanager
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/opengl/programobject.h>
@@ -132,7 +131,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
         "ColorTableRange",
         "Color Table Range",
-        "Valid range for the color table. [Min, Max]"
+        "Valid range for the color table as the exponent, with base 10, of flux values. "
+        "[Min, Max]"
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "ZLimit",
@@ -226,27 +226,15 @@ namespace {
         "Toggles the pulse with alpha by gaussian for nodes close to Earth."
     };
 
-    float stringToFloat(const std::string input, const float backupValue = 0.f) {
-        float tmp;
-        try {
-            tmp = std::stof(input);
-        }
-        catch (const std::invalid_argument& ia) {
-            LWARNING(fmt::format(
-                "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
-            ));
-            return backupValue;
-        }
-        return tmp;
-    }
-
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
         // path to source folder with the 3 binary files in it
         std::filesystem::path sourceFolder [[codegen::directory()]];
         // [[codegen::verbatim(ColorTablePathInfo.description)]]
-        std::string colorTablePaths;
+        std::string colorTablePath;
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
         std::optional<int> energyBin;
+        // [[codegen::verbatim(colorTableRangeInfo.description)]]
+        std::optional<glm::vec2> colorTableRange;
     };
 #include "renderablefluxnodes_codegen.cpp"
 
@@ -301,8 +289,9 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _colorTablePath = p.colorTablePaths;
+    _colorTablePath = p.colorTablePath;
     _transferFunction = std::make_unique<TransferFunction>(_colorTablePath);
+    _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
     
     _binarySourceFolderPath = p.sourceFolder;
     if (std::filesystem::is_directory(_binarySourceFolderPath)) {
@@ -506,6 +495,7 @@ void RenderableFluxNodes::setupProperties() {
     _styleGroup.addProperty(_gaussianAlphaFilter);
     _styleGroup.addProperty(_colorMode);
     _styleGroup.addProperty(_scalingMethod);
+    _colorTableRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _styleGroup.addProperty(_colorTableRange);
     _styleGroup.addProperty(_colorTablePath);
     _styleGroup.addProperty(_streamColor);
