@@ -111,6 +111,11 @@ public:
     double currentTime() const;
 
     /**
+     * Updates the current time to the given j2000 time value
+     */
+    void setCurrentTime(double time);
+
+    /**
      * \returns a vector of all scripts that has been loaded
      */
     std::vector<ScheduledScript> allScripts() const;

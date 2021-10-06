@@ -266,6 +266,24 @@ local playForwards = {
   IsLocal = false
 }
 
+local playBackwards = {
+  Identifier = "jwst.play.backwards",
+  Name = "Play JWST in reverse",
+  Command = [[
+    openspace.scriptScheduler.clear();
+    openspace.time.setDeltaTime(-1);
+    openspace.time.setTime('2018 OCT 16 09:06:04');
+    ]] .. tostring(timelaps) .. [[
+    openspace.scriptScheduler.loadScheduledScript(
+      "2018 OCT 01 14:06:02",
+      "openspace.scriptScheduler.clear()"
+    )
+  ]],
+  Documentation = "Jump to the end of JWST deployment time and play the timelaps of deployment in reverse",
+  GuiPath = "/JWST",
+  IsLocal = false
+}
+
 local clearPlay = {
   Identifier = "jwst.play.clear",
   Name = "Clear JWST timelaps",
@@ -285,6 +303,7 @@ local clearPlay = {
 
 asset.onInitialize(function()
   openspace.action.registerAction(playForwards)
+  openspace.action.registerAction(playBackwards)
   openspace.action.registerAction(clearPlay)
 end)
 

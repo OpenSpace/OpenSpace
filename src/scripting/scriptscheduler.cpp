@@ -213,6 +213,10 @@ double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
 
+void ScriptScheduler::setCurrentTime(double time) {
+    _currentTime = time;
+}
+
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
     for (size_t i = 0; i < _timings.size(); ++i) {
