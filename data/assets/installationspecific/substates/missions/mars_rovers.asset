@@ -3,11 +3,19 @@ local flyHome = asset.require('./../../fly_home_alternatives')
 local defaultTime = asset.require('./../../default_time.asset').time
 
 local enterStateSettings = [[
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0); 
+  -- Ugly fix to make sure they update their height
+  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Landing-Position.Translation.UseHeightmap", false);
+  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Landing-Position.Translation.UseHeightmap", true);
+  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Handle.Translation.UseHeightmap", false);
+  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Handle.Translation.UseHeightmap", true);
 ]]
 
 local leaveStateSettings = [[
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 1.0)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 1.0);
+  -- Disable these, as they might be performance expensive
+  openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false);
+  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
 ]]
 
 ----------------------------------------------------------------
@@ -37,11 +45,13 @@ local goToMarsOverview = [[
 local curiosityState = {
   Identifier = "Curiosity",
   Enter = [[
+    openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", true);
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false);
   ]]
 }
 
@@ -67,14 +77,16 @@ local perseveranceState = {
   Identifier = "Perseverance",
   Enter = [[
     ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", true);
     openspace.globebrowsing.flyToGeo("Mars", 18.433832, 77.45000, -800);
   ]],
   Exit = [[
+    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
   ]]
 }
 
-local perseveranceTiltedState = {
-  Identifier = "Perseverance_Tilted",
+local perseveranceModelState = {
+  Identifier = "PerseveranceModel",
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[

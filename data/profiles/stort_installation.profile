@@ -229,6 +229,16 @@
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
