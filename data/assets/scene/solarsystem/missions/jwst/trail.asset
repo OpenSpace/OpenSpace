@@ -28,7 +28,7 @@ local JWSTTrailLaunch = {
       HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
-    StartTime = "2018 OCT 01 14:06:03",
+    StartTime = "2018 OCT 01 14:06:00",
     EndTime = "2018 NOV 01",
     SampleInterval = 60
   },
@@ -49,7 +49,7 @@ local JWSTTrailOrbit = {
   Parent = transforms.L2.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 NOV 01 00:00:03",
+    Start = "2018 NOV 01 00:00:00",
     End = "2024 OCT 01"
   },
   Renderable = {

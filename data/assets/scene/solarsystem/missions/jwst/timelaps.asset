@@ -305,6 +305,12 @@ asset.onInitialize(function()
   openspace.action.registerAction(playForwards)
   openspace.action.registerAction(playBackwards)
   openspace.action.registerAction(clearPlay)
+
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 NOV 01 00:00:00",
+    "openspace.setParent('JWSTPosition', 'L2')",
+    "openspace.setParent('JWSTPosition', 'EarthCenter')"
+  )
 end)
 
 asset.onDeinitialize(function ()

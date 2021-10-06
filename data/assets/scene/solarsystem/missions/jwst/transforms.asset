@@ -1,16 +1,26 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local horizons = asset.require('./horizons').horizons
 asset.require('spice/base')
 
 local JWSTPosition = {
   Identifier = "JWSTPosition",
-  Parent = transforms.L2.Identifier,
+  Parent = earthTransforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
-      Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "/horizons_jwst.dat",
+      Type = "TimelineTranslation",
+      ShouldInterpolate = false,
+      Keyframes = {
+        ['2018 OCT 01 14:06:03'] = {
+          Type = "HorizonsTranslation",
+          HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
+        },
+        ['2018 NOV 01 00:00:00'] = {
+          Type = "HorizonsTranslation",
+          HorizonsTextFile = horizons .. "/horizons_jwst_orbit.dat",
+        }
+      }
     },
   },
   GUI = {
@@ -18,7 +28,7 @@ local JWSTPosition = {
     Path = "/Solar System/Missions/JWST",
     Hidden = true,
     Description = [[
-      James Webb Space Telescope Position relative to L2 based on horizons data from the
+      James Webb Space Telescope Position relative to Earth based on horizons data from the
       2018 launch.
     ]],
   }
@@ -56,7 +66,7 @@ asset.meta = {
   Name = "James Webb Space Telescope Transforms",
   Version = "1.0",
   Description = [[
-    JWST transforms: JWST position relative to L2 using horizons data from the planned
+    JWST transforms: JWST position relative to Earth using horizons data from the planned
     launch of 2018. JWST rotation, a fixed rotation so sunshield always points toward
     the Sun.
   ]],
