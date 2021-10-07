@@ -191,6 +191,11 @@
       "name": "Scene.MoonTrail.Renderable.Appearance.Fade",
       "type": "setPropertyValueSingle",
       "value": "3.0"
+    },
+    {
+      "name": "Scene.JWSTTrailLaunch.Renderable.Appearance.EnableFade",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
