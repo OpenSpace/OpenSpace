@@ -163,6 +163,10 @@
     {
       "action": "profile.toggle.trails_not_moon",
       "key": "G"
+    },
+    {
+      "action": "jwst.toggle.direction",
+      "key": "Y"
     }
   ],
   "mark_nodes": [
