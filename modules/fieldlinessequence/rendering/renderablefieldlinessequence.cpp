@@ -848,7 +848,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
         size_t dateAndTimeSeperator = name.find_last_of('_');
         std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
-        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
         std::string dateAndTime = date + time;
 
         // add outVec as value and time stamp as int as key

@@ -90,7 +90,7 @@ namespace openspace::fls {
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
                                  const std::unordered_map<std::string, 
-                                 std::vector<glm::vec3>>& seedMap,
+                                    std::vector<glm::vec3>>& seedMap,
                                  double manualTimeOffset,
                                  const std::string& tracingVar,
                                  std::vector<std::string>& extraVars,

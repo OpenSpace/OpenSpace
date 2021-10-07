@@ -92,7 +92,6 @@ private:
     std::filesystem::path _seedPointDirectory;
     // optional except when using json input
     std::string _modelStr;
-    fls::Model thismodel;
 
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.

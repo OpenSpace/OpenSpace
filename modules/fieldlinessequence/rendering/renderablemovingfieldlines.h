@@ -22,49 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__
 
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#include <openspace/rendering/renderable.h>
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+
+
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+namespace documentation { struct Documentation; }
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath(
-        "${TEMPORARY}/default_transfer_function.txt"
-    ).string();
+class RenderableMovingFieldlines : public Renderable {
+public:
+    RenderableMovingFieldlines(const ghoul::Dictionary& dictionary);
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendertask) override;
+    void update(const UpdateData& data) override;
+    static documentation::Documentation Documentation();
+
+private:
+    bool getStatesFromCdfFiles();
+
+    double _manualTimeOffset = 0.0;
+    std::filesystem::path _sourceFolder;
+    std::filesystem::path _seedFilePath;
+    std::vector<glm::vec3> _seedPoints;
+    // Extra variables such as rho, p or t
+    std::vector<std::string> _extraVars;
+    // which tracing vaiable to trace. 'b' for fieldline is default
+    std::string _tracingVariable = "b";
+};
+
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableMovingFieldlines>("RenderableMovingFieldlines");
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__
