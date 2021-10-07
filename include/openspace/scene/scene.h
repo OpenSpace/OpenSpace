@@ -343,8 +343,6 @@ private:
     ghoul::MemoryPool<4096> _memoryPool;
 };
 
-void trimSurroundingCharacters(std::string& valueString, const char c);
-
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCENE___H__

@@ -39,6 +39,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <string>
 #include <stack>
@@ -621,7 +622,7 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
         ghoul::lua::push(L, 0.0);
 
         std::string workingValue = prop.value;
-        trimSurroundingCharacters(workingValue, ' ');
+        ghoul::trimSurroundingCharacters(workingValue, ' ');
         // Later functions expect the value to be at the last position on the stack
         propertyPushProfileValueToLua(L, workingValue);
 
@@ -678,16 +679,16 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
             result = ghoul::lua::nil_t();
             break;
         case PropertyValueType::Table:
-            trimSurroundingCharacters(const_cast<std::string&>(value), '{');
-            trimSurroundingCharacters(const_cast<std::string&>(value), '}');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '{');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '}');
             handlePropertyLuaTableEntry(L, value);
             _valueIsTable = true;
             break;
         case PropertyValueType::String:
         default:
-            trimSurroundingCharacters(const_cast<std::string&>(value), '\"');
-            trimSurroundingCharacters(const_cast<std::string&>(value), '[');
-            trimSurroundingCharacters(const_cast<std::string&>(value), ']');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '\"');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '[');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), ']');
             result = value;
             break;
     }
@@ -752,7 +753,7 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         else {
             nextValue = value.substr(prevPos);
         }
-        trimSurroundingCharacters(nextValue, ' ');
+        ghoul::trimSurroundingCharacters(nextValue, ' ');
         ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue);
         try {
             table.push_back(std::get<T>(tableElement));
@@ -781,15 +782,6 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
     }
     else {
         return PropertyValueType::String;
-    }
-}
-
-void trimSurroundingCharacters(std::string& valueString, const char c) {
-    while (valueString.front() == c) {
-        valueString.erase(0, 1);
-    }
-    while (valueString.back() == c) {
-        valueString.pop_back();
     }
 }
 
