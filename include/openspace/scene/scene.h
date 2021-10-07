@@ -54,7 +54,7 @@ enum class PropertyValueType {
     Table,
     Nil
 };
-typedef std::variant<bool, float, std::string, ghoul::lua::nil_t> ProfilePropertyLua;
+using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
 
 class SceneInitializer;
 
@@ -263,7 +263,7 @@ private:
      * \param L the lua state to push value to
      * \param value string representation of the value with which to set property
      */
-    void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, std::string& value);
+    void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and processes it
@@ -276,7 +276,8 @@ private:
      *        has already been pushed to the lua stack
      * \return The ProfilePropertyLua variant type translated from string representation
      */
-    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L, std::string& value);
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+        const std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and returns the
@@ -285,7 +286,7 @@ private:
      *
      * \param value string representation of the value with which to set property
      */
-    PropertyValueType getPropertyValueType(std::string& value);
+    PropertyValueType propertyValueType(const std::string& value);
 
     /**
      * Accepts string version of a property value from a profile, and adds it to a vector
@@ -296,8 +297,8 @@ private:
      * \param table the std::vector container which has elements of type T for a lua table
      */
     template <typename T>
-    void processPropertyValueTableEntries(ghoul::lua::LuaState& L, std::string& value,
-        std::vector<T>& table);
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+        const std::string& value, std::vector<T>& table);
 
     /**
      * Handles a lua table entry, creating a vector of the correct variable type based
@@ -306,7 +307,7 @@ private:
      * \param L the lua state to (eventually) push to
      * \param value string representation of the value with which to set property
      */
-    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, std::string& value);
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value);
 
     /**
      * Update dependencies.
