@@ -63,6 +63,14 @@
       "is_local": false,
       "name": "Toggle trails (except Moon)",
       "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
+    },
+    {
+      "documentation": "Toggle JWST launch and orbit trails",
+      "gui_path": "/JWST",
+      "identifier": "profile.toggle.jwst_trails",
+      "is_local": false,
+      "name": "Toggle JWST trails",
+      "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
   "additional_scripts": [
@@ -167,6 +175,10 @@
     {
       "action": "jwst.toggle.direction",
       "key": "Y"
+    },
+    {
+      "action": "profile.toggle.jwst_trails",
+      "key": "T"
     }
   ],
   "mark_nodes": [
