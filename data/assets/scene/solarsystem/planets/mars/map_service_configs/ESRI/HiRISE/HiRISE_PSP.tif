@@ -13,4 +13,10 @@
   <BlockSizeY>512</BlockSizeY>
   <MaxConnections>5</MaxConnections>
   <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
+  <Cache>
+    <Path>./gdalwmscache</Path>
+    <MaxSize>1073741824</MaxSize>
+    <CleanTimeout>86400</CleanTimeout>
+    <Unique>True</Unique>
+  </Cache>
 </GDAL_WMS>
