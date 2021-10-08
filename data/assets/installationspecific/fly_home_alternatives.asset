@@ -15,7 +15,7 @@ local cameraPath = [[
 ]]
 
 local linearFlight = [[
-  ]] .. util.changeAnchor('Sun', 1.0) .. [[
+  ]] .. util.changeAnchor('Sun', 2.0) .. [[
   ]] .. util.applyLinearFlight(solarTargetDistance, 1.2) .. [[
 ]]
 

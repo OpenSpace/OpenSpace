@@ -4,22 +4,15 @@ local flyHome = asset.require('./../fly_home_alternatives')
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local maxOpacity = 0.3
-local opacityUri = "Scene.Planck.Renderable.Opacity"
-
--- OBS! To nicely handle fading, all code for the substates of this 
--- state is on the webpage
 
 local cbrState = {
     Identifier = "CBR",
     Enter = [[
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.startOrbiting() .. [[
-        openspace.setPropertyValueSingle("Scene.Planck.Renderable.DisableFadeInOut", true)
-        ]] .. util.interpolateProperty(opacityUri, maxOpacity, 2) .. [[
+        ]] .. util.orbitOnArrival() .. [[
     ]],
     Exit = [[
-        ]] .. util.interpolateProperty(opacityUri, 0.0, 2) .. [[
         ]] .. util.stopOrbiting() .. [[
     ]]
 }
@@ -29,11 +22,25 @@ local states = { cbrState }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+
+local earthDistance = 20000000
+
+local flyToEarth = [[
+  openspace.time.setPause(true);
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.goToHeight(
+    "Earth", 
+    ]] .. tostring(earthDistance) .. [[
+  );
+]]
+
 local transitions = {
   -- Transition to/from this state
   {
     From = "Home",
-    To = "CBR"
+    To = "CBR",
+    Action = flyToEarth
   },
   {
     From = "CBR",
