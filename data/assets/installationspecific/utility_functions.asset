@@ -30,6 +30,20 @@ local orbitConstantLatitudeOnArrival = function()
   ]]
 end
 
+-- Use to orbit around up vectore after a camera path
+local orbitAroundUpOnArrival = function()
+  return [[
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.OrbitalNavigator.IdleBehavior.IdleBehavior",
+      2 -- OrbitAroundUp
+    )
+    openspace.setPropertyValueSingle(
+      "NavigationHandler.PathNavigator.ApplyIdleBehaviorOnFinish",
+      true
+    )
+  ]]
+end
+
 -- Use to immediately trigger an orbiting idle behavior
 local startOrbiting = function()
   return [[
@@ -211,6 +225,7 @@ end
 
 asset.export("orbitOnArrival", orbitOnArrival)
 asset.export("orbitConstantLatitudeOnArrival", orbitConstantLatitudeOnArrival)
+asset.export("orbitAroundUpOnArrival", orbitAroundUpOnArrival)
 asset.export("startOrbiting", startOrbiting)
 asset.export("stopOrbiting", stopOrbiting)
 asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)

@@ -4,11 +4,6 @@ local defaultTime = asset.require('./../../default_time.asset').time
 
 local enterStateSettings = [[
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0); 
-  -- Ugly fix to make sure they update their height
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Landing-Position.Translation.UseHeightmap", false);
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Landing-Position.Translation.UseHeightmap", true);
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Handle.Translation.UseHeightmap", false);
-  openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Handle.Translation.UseHeightmap", true);
 ]]
 
 local leaveStateSettings = [[
@@ -42,16 +37,30 @@ local goToMarsOverview = [[
 -----
 -- Curiosity
 -----
+
+-- openspace.globebrowsing.flyToGeo("Mars", -4.664599, 137.421634, 12057);
+
+local galeCrater_TiltedNavState = [[{
+  ReferenceFrame = 'Root',
+  Pitch = -0.022993,
+  Anchor = 'Mars-Curiosity-Handle',
+  Yaw = 0.005086,
+  Position = { 1925.412973, 141800.094666, -67911.340698 },
+  Up = { -0.363898, -0.398303, -0.841981 }
+}]]
+
 local curiosityState = {
   Identifier = "Curiosity",
   Enter = [[
     openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", true);
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-    ]] .. util.orbitOnArrival() .. [[
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 10.0);
+    ]] .. util.setOrbitSpeedFactor(0.8) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false);
+    ]] .. util.disableRoll() .. [[
   ]]
 }
 
@@ -60,61 +69,51 @@ local curiosityState = {
 -----
 
 -- Go to Perseverance path overview:
--- openspace.globebrowsing.goToGeo("Mars", 18.433832, 77.450000, -800);
+-- openspace.globebrowsing.flyToGeo("Mars", 18.433832, 77.450000, -800);
 
--- Tilted navigation state
--- openspace.pathnavigation.goToNavigationState({ 
---   Position = { 145.012710, -727.768585, -662.409943 },
---   ReferenceFrame = "Root", 
---   Pitch = -0.030899, 
---   Yaw = -0.028713, 
---   Anchor = "Mars-Perseverance-Handle", 
---   Up = { 0.572586, 0.611321, -0.546290 } 
--- })
+-- Perseverance tilted state 
+local perseverance_TiltedNavState_Path = [[{ 
+  Up = { 0.444587, 0.644127, -0.622450 }, 
+  ReferenceFrame = 'Root', 
+  Anchor = 'Mars-Perseverance-Handle', 
+  Yaw = -0.005563, 
+  Position = { 530.380697, -754.288422, -401.730408 }, 
+  Pitch = -0.000264 
+}]]
 
--- TODO: fade in renderables?
+local perseverance_TiltedNavState_Rover = [[{ 
+  Up = {0.406661, 0.895815, -0.179284 }, 
+  Yaw = -0.012316, 
+  Position = { -8.458007, 4.433480, 2.967551 }, 
+  Pitch = 0.118225, 
+  Anchor = 'PerseveranceModel', 
+  ReferenceFrame = 'PerseveranceModel' 
+}]]
+
+-- TODO: Just keep one state per rover and add a scripscheudler that flies to see it from above and 
+-- that looks at the rover
+
 local perseveranceState = {
   Identifier = "Perseverance",
   Enter = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", true);
-    openspace.globebrowsing.flyToGeo("Mars", 18.433832, 77.45000, -800);
+    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.ForceUpdateData", nil); 
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0); 
+    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
-  ]]
-}
-
-local perseveranceModelState = {
-  Identifier = "PerseveranceModel",
-  Enter = [[
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-    ]] .. util.orbitOnArrival() .. [[
-  ]],
-  Exit = [[
     ]] .. util.stopOrbiting() .. [[
-  ]]
-}
-
------
--- MRO
------
-local mroState = {
-  Identifier = "MRO",
-  Enter = [[
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
-    ]] .. util.orbitOnArrival() .. [[
-  ]],
-  Exit = [[
-    ]] .. util.stopOrbiting() .. [[
+    ]] .. util.disableRoll() .. [[
   ]]
 }
 
 local states = {
   marsRoversState,
   curiosityState,
-  perseveranceState,
-  mroState
+  perseveranceState
 }
 
 ----------------------------------------------------------------
@@ -132,6 +131,44 @@ local leaveTransition = [[
   ]] .. flyHome.cameraPath .. [[
 ]]
 
+local toPerseveranceTransition = [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.goToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
+]]
+
+local toCuriosityTransition = [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  openspace.pathnavigation.goToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
+]]
+
+local betweenGaleAndJezero_NavState = [[{ 
+  Up = { -0.887533, -0.263131, -0.378216 }, 
+  ReferenceFrame = 'Mars',
+  Anchor = 'Mars',
+  Position = { -2949968.384396, 5345824.976367, 3203314.816664 }, 
+  Pitch = 0.007257, 
+  Yaw = -0.000050 
+}]]
+
+-- TODO: OBS! The application time mode does not actually work right now...
+-- So this will only trigger the last transition anyways :( 
+-- local galeToJezeroTransition = [[
+--   openspace.scriptScheduler.clear();
+--   openspace.scriptScheduler.setModeApplicationTime();
+--   local now = openspace.time.currentApplicationTime();
+
+--   openspace.scriptScheduler.loadScheduledScript(
+--     tostring(now), -- 0 seconds after this script was triggered
+--     "openspace.pathnavigation.goToNavigationState( ]] .. util.removeLineBreaks(betweenGaleAndJezero_NavState) .. [[);"
+--   );
+--   openspace.scriptScheduler.loadScheduledScript(
+--     tostring(now + 10), -- 10 seconds after this script was triggered
+--     "]] .. util.removeLineBreaks(toPerseveranceTransition) .. [[;"
+--   );
+-- ]]
+
 local transitions = {
   -- Transition to/from this state
   {
@@ -147,7 +184,8 @@ local transitions = {
   -- Curiosity
   {
     From = "MarsRovers",
-    To = "Curiosity"
+    To = "Curiosity",
+    Action = toCuriosityTransition
   },
   {
     From = "Curiosity",
@@ -157,46 +195,21 @@ local transitions = {
   {
     From = "Curiosity",
     To = "Perseverance",
+    Action = toPerseveranceTransition -- TODO: update with custom (to avoid crashing into Mars)
   },
   {
     From = "Perseverance",
     To = "Curiosity",
-  },
-  {
-    From = "Curiosity",
-    To = "MRO",
-  },
-  {
-    From = "MRO",
-    To = "Curiosity",
+    Action = toCuriosityTransition -- TODO: update with custom (to avoid crashing into Mars)
   },
   -- Perseverance
   {
     From = "MarsRovers",
     To = "Perseverance",
-    Action = [[]]
+    Action = toPerseveranceTransition
   },
   {
     From = "Perseverance",
-    To = "MarsRovers",
-    Action = goToMarsOverview
-  },
-  {
-    From = "Perseverance",
-    To = "MRO",
-  },
-  {
-    From = "MRO",
-    To = "Perseverance",
-  },
-  -- MRO
-  {
-    From = "MarsRovers",
-    To = "MRO",
-    Action = [[]]
-  },
-  {
-    From = "MRO",
     To = "MarsRovers",
     Action = goToMarsOverview
   },
@@ -208,11 +221,6 @@ local transitions = {
   },
   {
     From = "Perseverance",
-    To = "Home",
-    Action = leaveTransition
-  },
-  {
-    From = "MRO",
     To = "Home",
     Action = leaveTransition
   }

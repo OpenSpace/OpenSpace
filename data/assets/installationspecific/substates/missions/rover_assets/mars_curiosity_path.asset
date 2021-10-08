@@ -5,6 +5,7 @@ local globeIdentifier = mars.Mars.Identifier
 
  -- Coordinate offset to match hirise image in Jezero crater
 local offset = { -0.0024, 0.0 }
+local handlePosition = { -5.397273407690904, 137.86468505859378 }
 
 local Path = {
   Identifier = "Mars-Curiosity-Rover-Path",
@@ -15,7 +16,8 @@ local Path = {
     File = asset.localResource("./roverpath_Curiosity.geojson"),
     HeightOffset = 10.0,
     CoordinateOffset = offset,
-    LineWidth = 2.0
+    LineWidth = 2.0,
+    UseHeightmap = true
   },
   GUI = {
     Name = "Mars Curiosity Rover Path",
@@ -23,4 +25,30 @@ local Path = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Path })
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Mars-Curiosity-Handle",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2],
+      Altitude = 10.0,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = handlePosition[1] + offset[1],
+      Longitude = handlePosition[2] + offset[2]
+    }
+  },
+  GUI = {
+    Name = "Mars Curiosity Handle",
+    Path = "/Missions/Curiosity"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Path, Handle })

@@ -29,8 +29,8 @@ local Handle = {
       Globe = globeIdentifier,
       Latitude = handlePosition[1] + offset[1],
       Longitude = handlePosition[2] + offset[2],
-      Altitude = 10.0,
-      UseHeightmap = true
+      Altitude = -2570.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
     },
     Rotation = {
       Type = "GlobeRotation",
@@ -54,7 +54,8 @@ local Path = {
     File = asset.localResource("./roverpath_perseverance.geojson"),
     HeightOffset = 10.0,
     CoordinateOffset = offset,
-    LineWidth = 2.0
+    LineWidth = 2.0,
+    UseHeightmap = true
   },
   GUI = {
     Name = "Mars Perseverance Rover Path",
@@ -104,7 +105,8 @@ local PerseveranceModel = {
       Globe = globeIdentifier,
       Latitude = finalPosition[1] + offset[1],
       Longitude = finalPosition[2] + offset[2],
-      UseHeightmap = true
+      Altitude = -2575.0, -- put on surface. Need a static position for camera paths
+      UseHeightmap = false
     },
     Rotation = {
       Type = "GlobeRotation",
