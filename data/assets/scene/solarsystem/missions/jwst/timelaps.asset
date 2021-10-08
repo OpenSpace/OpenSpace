@@ -9,7 +9,7 @@ local timelaps = [[
   )
   -- Mission start
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:06:03",
+    "2018 OCT 01 14:06:04",
     "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 0.7)" ..
     "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false)",
     "openspace.time.interpolateDeltaTime(-1)" ..
@@ -18,7 +18,7 @@ local timelaps = [[
     "openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)"
   )
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 01 14:06:04", -- 1 sec delay
+    "2018 OCT 01 14:06:05", -- 2 sec delay
     "openspace.time.interpolateDeltaTime(120)" ..
     "openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', 'Time speed: 2 minutes/second')",
     "openspace.time.interpolateDeltaTime(-1)" ..
@@ -316,7 +316,7 @@ local timelaps = [[
   )
 
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 OCT 16 09:06:04",
+    "2018 OCT 16 09:06:05",
     "openspace.scriptScheduler.clear()"
   )
 ]]
