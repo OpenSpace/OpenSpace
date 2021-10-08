@@ -5,7 +5,7 @@ local timelaps = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 01 14:06:02",
     "",
-    "openspace.scriptScheduler.clear()"
+    "openspace.scriptScheduler.clear(0)"
   )
   -- Mission start
   openspace.scriptScheduler.loadScheduledScript(
@@ -317,7 +317,7 @@ local timelaps = [[
 
   openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 16 09:06:05",
-    "openspace.scriptScheduler.clear()"
+    "openspace.scriptScheduler.clear(0)"
   )
 ]]
 
@@ -325,7 +325,7 @@ local playForwards = {
   Identifier = "jwst.play.forwards",
   Name = "Play JWST from start",
   Command = [[
-    openspace.scriptScheduler.clear();
+    openspace.scriptScheduler.clear(0);
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(1);
     openspace.time.setTime('2018 OCT 01 14:06:03');
@@ -340,7 +340,7 @@ local playBackwards = {
   Identifier = "jwst.play.backwards",
   Name = "Play JWST from end",
   Command = [[
-    openspace.scriptScheduler.clear();
+    openspace.scriptScheduler.clear(0);
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(-1);
     openspace.time.setTime('2018 OCT 16 09:06:04');
@@ -355,7 +355,7 @@ local clearPlay = {
   Identifier = "jwst.play.clear",
   Name = "Clear JWST timelaps",
   Command = [[
-    openspace.scriptScheduler.clear();
+    openspace.scriptScheduler.clear(0);
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     local deltaTime = openspace.time.deltaTime();
     if deltaTime > 0 then
@@ -371,7 +371,7 @@ local clearPlay = {
 
 local togglePlayDirection = {
   Identifier = "jwst.toggle.direction",
-  Name = "Toggle forwards/backwards",
+  Name = "Toggle forwards/ backwards",
   Command = [[
     -- Flip deltatime
     local deltaTime = openspace.time.deltaTime();
@@ -405,7 +405,9 @@ asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
     "2018 NOV 01 00:00:00",
     "openspace.setParent('JWSTPosition', 'L2')",
-    "openspace.setParent('JWSTPosition', 'EarthCenter')"
+    "openspace.setParent('JWSTPosition', 'EarthCenter')",
+    "",
+    1
   )
 end)
 

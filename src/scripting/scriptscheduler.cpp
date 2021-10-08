@@ -100,36 +100,23 @@ void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts)
         }
     );
 
-    // Move the scheduled scripts into their SOA alignment
-    // For the forward scripts, this is the forwards direction
-    // For the backward scripts, we insert them in the opposite order so that we can still
-    // return forward iterators to them in the progressTo method
     for (ScheduledScript& script : scheduledScripts) {
-        _timings.push_back(script.time);
-
-        std::string forward =
-            script.universalScript.empty() ?
-            std::move(script.forwardScript) :
-            std::move(script.universalScript) + ';' + std::move(script.forwardScript);
-        _forwardScripts.push_back(forward);
-
-        std::string backward =
-            script.universalScript.empty() ?
-            std::move(script.backwardScript) :
-            std::move(script.universalScript) + ';' + std::move(script.backwardScript);
-        _backwardScripts.insert(_backwardScripts.begin(), backward);
+        _scripts.push_back(script);
     }
+
+    // Re-sort so it is always in sorted order in regards to time
+    std::stable_sort(
+        _scripts.begin(),
+        _scripts.end(),
+        [](const ScheduledScript& lhs, const ScheduledScript& rhs) {
+            return lhs.time < rhs.time;
+        }
+    );
 
     // Ensure _currentIndex and _currentTime is accurate after new scripts was added
     const double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
-
-    ghoul_assert(
-        (_timings.size() == _forwardScripts.size()) &&
-        (_timings.size() == _backwardScripts.size()),
-        "The SOA data structure has been mistreated and has different number of values"
-    );
 }
 
 void ScriptScheduler::rewind() {
@@ -137,18 +124,35 @@ void ScriptScheduler::rewind() {
     _currentTime = -std::numeric_limits<double>::max();
 }
 
-void ScriptScheduler::clearSchedule() {
-    rewind();
-    _timings.clear();
-    _forwardScripts.clear();
-    _backwardScripts.clear();
+void ScriptScheduler::clearSchedule(std::optional<int> group) {
+    if (group.has_value()) {
+        for (auto it = _scripts.begin(); it < _scripts.end(); ) {
+            if ((*it).group == group.value()) {
+                it = _scripts.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        // Ensure _currentIndex and _currentTime is accurate after scripts was removed
+        const double lastTime = _currentTime;
+        rewind();
+        progressTo(lastTime);
+    }
+    else {
+        rewind();
+        _scripts.clear();
+    }
 }
 
-std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt>
-ScriptScheduler::progressTo(double newTime)
+std::vector<std::string> ScriptScheduler::progressTo(double newTime)
 {
+    std::vector<std::string> result;
     if (!_enabled || newTime == _currentTime) {
-        return { _forwardScripts.end(), _forwardScripts.end() };
+        // Update the new time
+        _currentTime = newTime;
+        return result;
     }
 
     if (newTime > _currentTime) {
@@ -156,44 +160,62 @@ ScriptScheduler::progressTo(double newTime)
         // vector that is still smaller than the newTime
         size_t prevIndex = _currentIndex;
         const auto it = std::upper_bound(
-            _timings.begin() + prevIndex, // We only need to start at the previous time
-            _timings.end(),
-            newTime
+            _scripts.begin() + prevIndex, // We only need to start at the previous time
+            _scripts.end(),
+            newTime,
+            [](const double& value, const ScheduledScript& item) {
+                return value < item.time;
+            }
          );
 
         // How many values did we pass over?
-        const ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
+        const ptrdiff_t n = std::distance(_scripts.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
 
         // Update the new time
         _currentTime = newTime;
 
-        return {
-            _forwardScripts.begin() + prevIndex,
-            _forwardScripts.begin() + _currentIndex
-        };
+        // Construct result
+        for (auto iter = _scripts.begin() + prevIndex; iter < (_scripts.begin() + _currentIndex); ++iter) {
+            std::string script = (*iter).universalScript.empty() ?
+                (*iter).forwardScript :
+                (*iter).universalScript + "; " + (*iter).forwardScript;
+            result.push_back(script);
+        }
+
+        return result;
     }
     else {
         // Moving backward in time; the need to find the lowest entry that is still bigger
         // than the newTime
         const size_t prevIndex = _currentIndex;
         const auto it = std::lower_bound(
-            _timings.begin(),
-            _timings.begin() + prevIndex, // We can stop at the previous time
-            newTime
+            _scripts.begin(),
+            _scripts.begin() + prevIndex, // We can stop at the previous time
+            newTime,
+            [](const ScheduledScript& item, const double& value) {
+                return item.time < value;
+            }
         );
 
         // How many values did we pass over?
-        const ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
+        const ptrdiff_t n = std::distance(it, _scripts.begin() + prevIndex);
         _currentIndex = static_cast<int>(prevIndex - n);
 
         // Update the new time
         _currentTime = newTime;
 
-        return {
-            _backwardScripts.begin() + (_timings.size() - prevIndex),
-            _backwardScripts.begin() + (_timings.size() - _currentIndex)
-        };
+        // Construct result
+        auto start = _scripts.begin() + _scripts.size() - _currentIndex;   // High in vector
+        auto end = _scripts.begin() + _scripts.size() - prevIndex;         // Low in vector
+        for (auto iter = start; iter > end; --iter) {
+            std::string script = (*iter).universalScript.empty() ?
+                (*iter).backwardScript :
+                (*iter).universalScript + "; " + (*iter).backwardScript;
+            result.push_back(script);
+        }
+
+        return result;
     }
 }
 
@@ -214,18 +236,26 @@ double ScriptScheduler::currentTime() const {
 }
 
 void ScriptScheduler::setCurrentTime(double time) {
-    _currentTime = time;
+    // Ensure _currentIndex and _currentTime is accurate after time jump
+    std::vector<std::string> scheduledScripts = progressTo(time);
+
+    // Queue all scripts for the time jump
+    for (const std::string& script : scheduledScripts) {
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
 }
 
-std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
+std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts(
+                                                           std::optional<int> group) const
+{
     std::vector<ScheduledScript> result;
-    for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;
-        script.time = _timings[i];
-        script.forwardScript = _forwardScripts[i];
-        script.backwardScript = _backwardScripts[i];
-
-        result.push_back(std::move(script));
+    for (const ScheduledScript& script : _scripts) {
+        if (!group.has_value() || script.group == group.value()) {
+            result.push_back(script);
+        }
     }
     return result;
 }

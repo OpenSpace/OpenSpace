@@ -1129,13 +1129,12 @@ void OpenSpaceEngine::preSynchronization() {
 
         global::timeManager->preSynchronization(dt);
 
-        using Iter = std::vector<std::string>::const_iterator;
-        std::pair<Iter, Iter> scheduledScripts = global::scriptScheduler->progressTo(
+        std::vector<std::string> scheduledScripts = global::scriptScheduler->progressTo(
             global::timeManager->time().j2000Seconds()
         );
-        for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
+        for (const std::string& script : scheduledScripts) {
             global::scriptEngine->queueScript(
-                *it,
+                script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
