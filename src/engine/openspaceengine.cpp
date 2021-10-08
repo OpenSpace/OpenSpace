@@ -1553,6 +1553,9 @@ void OpenSpaceEngine::toggleShutdownMode() {
 }
 
 void setCameraFromProfile(const Profile& p) {
+    if (!p.camera.has_value()) {
+        throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
+    }
     std::visit(
         overloaded{
             [](const Profile::CameraNavState& navStateProfile) {
