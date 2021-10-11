@@ -50,7 +50,7 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
         _timeData = **_time;
         if (_timeData.type == Profile::Time::Type::Relative) {
             if (_timeData.value == "") {
-                _timeData.value = "now";
+                _timeData.value = "0d";
             }
             _relativeEdit->setSelection(0, _relativeEdit->text().length());
         }
@@ -60,7 +60,7 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
     }
     else {
         _timeData.type = Profile::Time::Type::Relative;
-        _timeData.value = "now";
+        _timeData.value = "0d";
     }
     _initializedAsAbsolute = (_timeData.type == Profile::Time::Type::Absolute);
     enableAccordingToType(static_cast<int>(_timeData.type));
@@ -114,7 +114,7 @@ void TimeDialog::enableAccordingToType(int idx) {
     if (comboIdx == Profile::Time::Type::Relative) {
         _relativeEdit->setText("<font color='black'>Relative Time:</font>");
         if (_initializedAsAbsolute) {
-            _relativeEdit->setText("now");
+            _relativeEdit->setText("0d");
         }
         else {
             _relativeEdit->setText(QString::fromStdString(_timeData.value));
