@@ -316,6 +316,14 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"
             },
             {
+                "currentApplicationTime",
+                &luascriptfunctions::time_currentApplicationTime,
+                {},
+                "",
+                "Returns the current application time as the number of seconds "
+                "since the OpenSpace application started"
+            },
+            {
                 "advancedTime",
                 &luascriptfunctions::time_advancedTime,
                 {},

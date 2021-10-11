@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/scene/scene.h>
@@ -401,6 +402,18 @@ int time_currentWallTime(lua_State* L) {
         utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
     );
     ghoul::lua::push(L, time);
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * currentTime():
+ * Returns the current application time as the number of seconds since the OpenSpace
+ * application started
+ */
+int time_currentApplicationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_currentApplicationTime");
+    ghoul::lua::push(L, global::windowDelegate->applicationTime());
     return 1;
 }
 
