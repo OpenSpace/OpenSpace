@@ -28,8 +28,10 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -93,9 +95,14 @@ private:
     properties::StringProperty _geoJsonFile;
     properties::FloatProperty _heightOffset;
     properties::Vec2Property _latLongOffset;
+    properties::BoolProperty _useHeightmap;
     properties::Vec3Property _color;
     properties::FloatProperty _pointSize;
     properties::FloatProperty _lineWidth;
+
+    // Temporary property to get around height map update issues
+    properties::TriggerProperty _forceUpdateData;
+    bool _shouldForceUpdateData = false;
 
     RenderableGlobe* _globeNode = nullptr;
 
