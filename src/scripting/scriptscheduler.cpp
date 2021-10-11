@@ -206,9 +206,9 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime)
         _currentTime = newTime;
 
         // Construct result
-        auto start = _scripts.begin() + _scripts.size() - _currentIndex;   // High in vector
-        auto end = _scripts.begin() + _scripts.size() - prevIndex;         // Low in vector
-        for (auto iter = start; iter > end; --iter) {
+        auto start = _scripts.begin() + prevIndex - 1;
+        auto end = it;
+        for (auto iter = start; iter != _scripts.end() && iter >= end; --iter) {
             std::string script = (*iter).universalScript.empty() ?
                 (*iter).backwardScript :
                 (*iter).universalScript + "; " + (*iter).backwardScript;

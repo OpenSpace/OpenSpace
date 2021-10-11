@@ -357,6 +357,8 @@ local clearPlay = {
   Command = [[
     openspace.scriptScheduler.clear(0);
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
+    openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma', 1.0)
+    openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', true)
     local deltaTime = openspace.time.deltaTime();
     if deltaTime > 0 then
       openspace.time.setDeltaTime(1);
