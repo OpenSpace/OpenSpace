@@ -28,6 +28,7 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -77,13 +78,14 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
 //       documentation version.
 void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());
+    engine.addLibrary(EventEngine::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(OpenSpaceEngine::luaLibrary());
     engine.addLibrary(ParallelPeer::luaLibrary());
+    engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());
-    engine.addLibrary(Profile::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::ActionManager::luaLibrary());

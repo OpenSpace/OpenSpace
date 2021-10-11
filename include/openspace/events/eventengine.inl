@@ -22,22 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
-
-#include <ghoul/misc/memorypool.h>
+#include <type_traits>
 
 namespace openspace {
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+template <typename T, typename... Args>
+void EventEngine::publishEvent(Args&&... args) {
+    static_assert(
+        std::is_base_of<events::Event, T>::value,
+        "T must be a subclass of Event"
+    );
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false, true> TemporaryMemory;
-};
+    T* e = _memory.alloc<T>(args...);
+    if (!_firstEvent) {
+        _firstEvent = e;
+        _lastEvent = e;
+    }
+    else {
+        _lastEvent->next = e;
+        _lastEvent = e;
+    }
+
+#ifdef _DEBUG
+    nEvents++;
+#endif // _DEBUG
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__

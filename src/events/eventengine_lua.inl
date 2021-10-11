@@ -22,22 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+namespace openspace::luascriptfunctions {
 
-#include <ghoul/misc/memorypool.h>
+int registerEventAction(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::registerEventAction");
+    auto [event, action, filter] =
+        ghoul::lua::values<std::string, std::string, std::optional<ghoul::Dictionary>>(L);
 
-namespace openspace {
+    events::Event::Type type = events::fromString(event);
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+    global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
+    return 0;
+}
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false, true> TemporaryMemory;
-};
+int unregisterEventAction(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::unregisterEventAction");
+    auto [event, action, filter] =
+        ghoul::lua::values<std::string, std::string, std::optional<ghoul::Dictionary>>(L);
 
-} // namespace openspace
+    events::Event::Type type = events::fromString(event);
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+    global::eventEngine->unregisterEventAction(type, action, filter);
+    return 0;
+}
+
+} // namespace openspace::luascriptfunctions

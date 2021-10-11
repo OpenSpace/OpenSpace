@@ -25,6 +25,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/lua/luastate.h>

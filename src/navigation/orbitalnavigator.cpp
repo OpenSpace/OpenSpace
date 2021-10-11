@@ -27,6 +27,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
 #include <glm/gtx/rotate_vector.hpp>
@@ -353,7 +356,12 @@ OrbitalNavigator::OrbitalNavigator()
         }
         SceneGraphNode* node = sceneGraphNode(_anchor.value());
         if (node) {
+            const SceneGraphNode* previousAnchor = _anchorNode;
             setAnchorNode(node);
+            global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
+                previousAnchor,
+                node
+            );
         }
         else {
             LERROR(fmt::format(
@@ -804,8 +812,14 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
 void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode,
                                     bool resetVelocitiesOnChange)
 {
+    const SceneGraphNode* previousAnchor = _anchorNode;
     setAnchorNode(focusNode, resetVelocitiesOnChange);
     setAimNode(nullptr);
+
+    global::eventEngine->publishEvent<events::EventFocusNodeChanged>(
+        previousAnchor,
+        focusNode
+    );
 }
 
 void OrbitalNavigator::setFocusNode(const std::string& focusNode, bool) {
@@ -953,8 +967,8 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
 
     const double distanceToCamera =
         glm::distance(cameraPosition, _anchorNode->worldPosition());
-
-    return distanceToCamera < maximumDistanceForRotation;
+    bool shouldFollow = distanceToCamera < maximumDistanceForRotation;
+    return shouldFollow;
 }
 
 bool OrbitalNavigator::followingAnchorRotation() const {

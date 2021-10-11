@@ -22,22 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#include <openspace/util/tstring.h>
 
-#include <ghoul/misc/memorypool.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/memorymanager.h>
 
 namespace openspace {
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+tstring temporaryString(const std::string& str) {
+    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(str.size(), 8);
+    std::strcpy(reinterpret_cast<char*>(ptr), str.data());
+    return tstring(reinterpret_cast<char*>(ptr), str.size());
+}
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false, true> TemporaryMemory;
-};
+tstring temporaryString(std::string_view str) {
+    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(str.size(), 8);
+    std::strcpy(reinterpret_cast<char*>(ptr), str.data());
+    return tstring(reinterpret_cast<char*>(ptr), str.size());
+}
+
+tstring temporaryString(const char str[]) {
+    size_t size = strlen(str);
+    void* ptr = global::memoryManager->TemporaryMemory.do_allocate(size, 8);
+    std::strcpy(reinterpret_cast<char*>(ptr), str);
+    return tstring(reinterpret_cast<char*>(ptr), size);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__

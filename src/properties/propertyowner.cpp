@@ -24,6 +24,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/json_helper.h>
