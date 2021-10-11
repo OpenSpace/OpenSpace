@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Globe",
-        "The globe on which this feature should be rendered."
+        "The identifier of the globe on which this feature should be rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
@@ -71,6 +71,14 @@ namespace {
         "renderings."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+        "UseHeightmap",
+        "Use Heightmap",
+        "If this value is 'true', the height offset property ('HeightOffset') will be "
+        "treated as an offset from the heightmap. Otherwise, it will be an offset from "
+        "the globe's reference ellipsoid. The default value is 'false'."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -85,13 +93,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "LineWidth",
+        "Line Width",
         "The width of any rendered lines."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ForceUpdateDataInfo = {
+        "ForceUpdateData",
+        "Force Update Data",
+        "Triggering this leads to a recomputation of the geometry positions. Can "
+        "be used to for example update the poisition when the height map has loaded."
     };
 
     struct [[codegen::Dictionary(RenderableGeoJsonObject)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe;
+        std::string globe
+            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
@@ -101,6 +117,9 @@ namespace {
 
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
+
+        // [[codegen::verbatim(UseHeightmapInfo.description)]]
+        std::optional<bool> useHeightmap;
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -172,16 +191,18 @@ RenderableGeoJsonObject::RenderableGeoJsonObject(const ghoul::Dictionary& dictio
     : Renderable(dictionary)
     , _globe(GlobeInfo)
     , _geoJsonFile(FileInfo)
-    , _heightOffset(HeightOffsetInfo, 0.f, -10000.f, 10000.f)
+    , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
     , _latLongOffset(
         CoordinateOffsetInfo,
         glm::vec2(0.f),
         glm::vec2(-90.0),
         glm::vec2(90.f)
     )
+    , _useHeightmap(UseHeightmapInfo, false)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _pointSize(PointSizeInfo, 1.f, 0.f, 100.f)
     , _lineWidth(LineWidthInfo, 1.f, 0.f, 100.f)
+    , _forceUpdateData(ForceUpdateDataInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -204,6 +225,10 @@ RenderableGeoJsonObject::RenderableGeoJsonObject(const ghoul::Dictionary& dictio
     _latLongOffset.onChange([this]() { _dataIsDirty = true; });
     addProperty(_latLongOffset);
 
+    _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
+    _useHeightmap.onChange([this]() { _dataIsDirty = true; });
+    addProperty(_useHeightmap);
+
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
@@ -213,6 +238,9 @@ RenderableGeoJsonObject::RenderableGeoJsonObject(const ghoul::Dictionary& dictio
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _forceUpdateData.onChange([this]() { _shouldForceUpdateData = true; });
+    addProperty(_forceUpdateData);
 
     // Render after atmosphere
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
@@ -333,11 +361,15 @@ void RenderableGeoJsonObject::renderGeometry(const RenderData&,
 }
 
 void RenderableGeoJsonObject::update(const UpdateData&) {
-    // TODO: figure out why height is computed wrong the first frame,
-    // then bring this back so that we don't update every frame..
-    //if (!_dataIsDirty) {
-    //    return;
-    //}
+    // @TODO (2021-10-21, emmbr): Figure out a neat solution to listen to changes 
+    // in the height map, so that we don't have to use the force update property 
+    // (or the worse alternative: recompute every frame, like the GlobeTranslation and 
+    // GlobeRotation do)
+    if (!_dataIsDirty && !_shouldForceUpdateData) {
+        return;
+    }
+
+    _shouldForceUpdateData = false;
 
     if (!_globeNode) {
         // Find the globe and try to update next frame instead
@@ -460,14 +492,17 @@ void RenderableGeoJsonObject::initializeGeometry() {
 }
 
 glm::vec3 RenderableGeoJsonObject::calculateModelCoordinate(const Geodetic2& geodetic) {
-    glm::dvec3 posModelSpaceTemp =
+    glm::dvec3 posModelSpaceZeroHeight =
         _globeNode->ellipsoid().cartesianSurfacePosition(geodetic);
 
-    const SurfacePositionHandle posHandle =
-        _globeNode->calculateSurfacePositionHandle(posModelSpaceTemp);
+    double heightToSurface = static_cast<double>(_heightOffset);
 
-    double heightToSurface =
-        posHandle.heightToSurface + static_cast<double>(_heightOffset);
+    if (_useHeightmap) {
+        const SurfacePositionHandle posHandle =
+            _globeNode->calculateSurfacePositionHandle(posModelSpaceZeroHeight);
+
+        heightToSurface += posHandle.heightToSurface;
+    }
 
     Geodetic3 geo3 = Geodetic3{ geodetic, heightToSurface };
     const glm::dvec3 posModelSpace = _globeNode->ellipsoid().cartesianPosition(geo3);
