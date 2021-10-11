@@ -105,7 +105,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
-    , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
+    , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -121,7 +121,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_longitude);
 
     _altitude = p.altitude.value_or(_altitude);
-    _altitude.setExponent(8.f);
+    // @TODO (emmbr) uncomment when ranges with negative values are supported
+    //_altitude.setExponent(8.f); 
     _altitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_altitude);
 
