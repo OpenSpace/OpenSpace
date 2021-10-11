@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 
--- JWST timelaps timeline
-local timelaps = [[
+-- JWST timelapse timeline
+local timelapse = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2018 OCT 01 14:06:02",
     "",
@@ -329,9 +329,9 @@ local playForwards = {
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(1);
     openspace.time.setTime('2018 OCT 01 14:06:03');
-    ]] .. tostring(timelaps) .. [[
+    ]] .. tostring(timelapse) .. [[
   ]],
-  Documentation = "Jump to the JWST launch time and play the timelaps of deployment forward",
+  Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
   GuiPath = "/JWST",
   IsLocal = false
 }
@@ -344,16 +344,16 @@ local playBackwards = {
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(-1);
     openspace.time.setTime('2018 OCT 16 09:06:04');
-    ]] .. tostring(timelaps) .. [[
+    ]] .. tostring(timelapse) .. [[
   ]],
-  Documentation = "Jump to the end of JWST deployment time and play the timelaps of deployment in reverse",
+  Documentation = "Jump to the end of JWST deployment time and play the timelapse of deployment in reverse",
   GuiPath = "/JWST",
   IsLocal = false
 }
 
 local clearPlay = {
   Identifier = "jwst.play.clear",
-  Name = "Clear JWST timelaps",
+  Name = "Clear JWST timelapse",
   Command = [[
     openspace.scriptScheduler.clear(0);
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
@@ -415,6 +415,11 @@ end)
 
 asset.onDeinitialize(function ()
   openspace.scriptScheduler.clear()
+
+  openspace.action.removeAction(playForwards.Identifier)
+  openspace.action.removeAction(playBackwards.Identifier)
+  openspace.action.removeAction(clearPlay.Identifier)
+  openspace.action.removeAction(togglePlayDirection.Identifier)
 end)
 
 assetHelper.registerDashboardItems(asset, {

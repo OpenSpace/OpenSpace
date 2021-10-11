@@ -8,7 +8,7 @@ asset.require("spice/base")
 
 -- (malej 2021-10-04) In general, there is no trajectery data of JWST for the scheduled
 -- launch in December 2021, no horizons and no SPICE. Instead data from the 2018 launch
--- is used, old data from an old launch time that never happende because of delays.
+-- is used, old data from an old launch time that never happened because of delays.
 -- If we can get our hands on the 2021 launch data, the jwst assets will be updated.
 
 -- Trail of JWST relative the Earth for the first month after launch
@@ -36,7 +36,7 @@ local JWSTTrailLaunch = {
     Name = "JWST Launch Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Laucnh Trail relative to Earth based on horizons data from the
+      James Webb Space Telescope Launch Trail relative to Earth based on Horizons data from the
       2018 launch.
     ]],
   }
@@ -66,7 +66,7 @@ local JWSTTrailOrbit = {
     Name = "JWST Orbit Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Orbit Trail relative to L2 based on horizons data from the
+      James Webb Space Telescope Orbit Trail relative to L2 based on Horizons data from the
       2018 launch.
     ]],
   }
@@ -97,7 +97,7 @@ local JWSTSunTrail = {
     Name = "JWST Sun Trail",
     Path = "/Solar System/Missions/JWST/Trails",
     Description = [[
-      James Webb Space Telescope Trail relative to the Sun based on horizons data from the
+      James Webb Space Telescope Trail relative to the Sun based on Horizons data from the
       2018 launch.
     ]],
   }

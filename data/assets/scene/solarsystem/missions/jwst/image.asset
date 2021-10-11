@@ -1,5 +1,5 @@
 local image = asset.syncedResource({
-  Name = "HUDF image",
+  Name = "HUDF Image",
   Type = "HttpSynchronization",
   Identifier = "hudf_image",
   Version = 3
@@ -17,6 +17,5 @@ asset.meta = {
     Original image by NASA, ESA, and S. Beckwith (STScI) and the HUDF Team,
     white frame and red arrow added by OpenSpace Team.<br>
     https://creativecommons.org/licenses/by/4.0/
-  ]],
-  Identifiers = {"HUDFImage"}
+  ]]
 }

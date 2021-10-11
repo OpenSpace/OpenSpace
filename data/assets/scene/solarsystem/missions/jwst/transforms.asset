@@ -28,7 +28,7 @@ local JWSTPosition = {
     Path = "/Solar System/Missions/JWST",
     Hidden = true,
     Description = [[
-      James Webb Space Telescope Position relative to Earth based on horizons data from the
+      James Webb Space Telescope Position relative to Earth based on Horizons data from the
       2018 launch.
     ]],
   }

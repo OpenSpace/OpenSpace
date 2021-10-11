@@ -81,6 +81,9 @@ public:
 
     /**
      * Removes all scripts for the schedule.
+     *
+     * \param An int that specifies which group to clear.
+     *        If none given then all scripts is cleared from the schedule.
      */
     void clearSchedule(std::optional<int> group);
 
@@ -128,8 +131,13 @@ public:
     void setCurrentTime(double time);
 
     /**
-     * \returns a vector of all scripts that has been loaded
-     */
+    * Function that returns all scripts currently loaded in the script scheduler
+    *
+    * \param group An int specifying which group to return, if empty all scripts
+    *              will be returned
+    *
+    * \returns a vector of all scripts that has been loaded
+    */
     std::vector<ScheduledScript> allScripts(std::optional<int> group) const;
 
     /**

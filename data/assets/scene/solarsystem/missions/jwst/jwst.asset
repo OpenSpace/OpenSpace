@@ -44,7 +44,7 @@ local JWSTBand = {
     Name = "JWST Safe Viewing Band",
     Path = "/Solar System/Missions/JWST",
     Description = [[
-      The Safe viewing band for the James Webb Space Telescope at its current position
+      The safe viewing band for the James Webb Space Telescope at its current position
     ]],
   }
 }

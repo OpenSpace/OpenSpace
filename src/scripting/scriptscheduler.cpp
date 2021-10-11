@@ -68,6 +68,9 @@ namespace {
         // The Lua script that is executed when OpenSpace passes the time in a
         // backward direction
         std::optional<std::string> backwardScript;
+
+        // The group that this script belongs to, default group is 0
+        std::optional<int> group;
     };
 #include "scriptscheduler_codegen.cpp"
 } // namespace
@@ -97,6 +100,7 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict)
     forwardScript = p.forwardScript.value_or(forwardScript);
     backwardScript = p.backwardScript.value_or(backwardScript);
     universalScript = p.script.value_or(universalScript);
+    group = p.group.value_or(group);
 }
 
 void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts) {

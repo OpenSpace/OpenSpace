@@ -84,7 +84,7 @@
     "scene/solarsystem/missions/jwst/jwst",
     "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/hudf",
-    "scene/solarsystem/missions/jwst/timelaps",
+    "scene/solarsystem/missions/jwst/timelapse",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {
@@ -210,6 +210,61 @@
     },
     {
       "name": "Scene.JWSTTrailLaunch.Renderable.Appearance.EnableFade",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L1.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L1Label.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2Label.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L4.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L4Label.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L5.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L5Label.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2Small.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2SmallLabel.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.L2SunLine.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
     }
