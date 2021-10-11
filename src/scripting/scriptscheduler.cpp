@@ -41,6 +41,14 @@ namespace {
         "time as normal."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
+        "ShouldRunAllTimeJumpInfo",
+        "Should Run All Time Jump",
+        "If 'true': In a time jump, all scheduled scripts between the old time and the "
+        "new time is executed. If 'false': In a time jump, no scripts scheduled between "
+        "the new time and the old time is executed."
+    };
+
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
         // The time at which, when the in game time passes it, the two scripts will
         // be executed. If the traversal is forwards (towards + infinity), the
@@ -76,8 +84,10 @@ documentation::Documentation ScriptScheduler::Documentation() {
 ScriptScheduler::ScriptScheduler()
     : properties::PropertyOwner({ "ScriptScheduler" })
     , _enabled(EnabledInfo, true)
+    , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo, true)
 {
     addProperty(_enabled);
+    addProperty(_shouldRunAllTimeJump);
 }
 
 ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) {
@@ -239,12 +249,14 @@ void ScriptScheduler::setCurrentTime(double time) {
     // Ensure _currentIndex and _currentTime is accurate after time jump
     std::vector<std::string> scheduledScripts = progressTo(time);
 
-    // Queue all scripts for the time jump
-    for (const std::string& script : scheduledScripts) {
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+    if (_shouldRunAllTimeJump) {
+        // Queue all scripts for the time jump
+        for (const std::string& script : scheduledScripts) {
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
     }
 }
 

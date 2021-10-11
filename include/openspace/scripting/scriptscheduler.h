@@ -160,6 +160,7 @@ public:
 
 private:
     properties::BoolProperty _enabled;
+    properties::BoolProperty _shouldRunAllTimeJump;
     std::vector<ScheduledScript> _scripts;
 
     int _currentIndex = 0;
