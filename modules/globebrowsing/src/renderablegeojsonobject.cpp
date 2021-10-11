@@ -190,7 +190,7 @@ RenderableGeoJsonObject::RenderableGeoJsonObject(const ghoul::Dictionary& dictio
     : Renderable(dictionary)
     , _globe(GlobeInfo)
     , _geoJsonFile(FileInfo)
-    , _heightOffset(HeightOffsetInfo, 0.f, -10000.f, 10000.f)
+    , _heightOffset(HeightOffsetInfo, 0.f, -1e12f, 1e12f)
     , _latLongOffset(
         CoordinateOffsetInfo,
         glm::vec2(0.f),
