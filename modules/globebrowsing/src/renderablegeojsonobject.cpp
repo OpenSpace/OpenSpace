@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Globe",
-        "The globe on which this feature should be rendered."
+        "The identifier of the globe on which this feature should be rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
@@ -106,7 +106,8 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableGeoJsonObject)]] Parameters {
         // [[codegen::verbatim(GlobeInfo.description)]]
-        std::string globe;
+        std::string globe
+            [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
