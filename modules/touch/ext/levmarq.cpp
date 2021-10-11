@@ -67,7 +67,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
         void (*grad)(double *, double *, int, void *, LMstat*),
         void *fdata, LMstat *lmstat) {
 
-    int x, i, j, it, nit, ill;
+    int x, j, it, nit, ill;
     bool verbose;
     std::string data;
     double lambda, up, down, mult, weight, err, newerr, derr, target_derr;
@@ -86,7 +86,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
     
     defer {
         // deallocate the arrays
-        for (i = 0; i < npar; i++) {
+        for (int i = 0; i < npar; i++) {
             delete[] h[i];
             delete[] ch[i];
         }
@@ -109,7 +109,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 
     if (verbose) {
         std::ostringstream qs, gs, ds, ps, oss;
-        for (i = 0; i < npar; ++i) {
+        for (int i = 0; i < npar; ++i) {
             qs << "q" << i;
             gs << "g" << i;
             ds << "d" << i;
@@ -119,7 +119,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 ds << ",";
             }
         }
-        for (i = 0; i < ny; ++i) {
+        for (int i = 0; i < ny; ++i) {
             for (j = 0; j < 2; ++j) {
                 std::string s = (j == 0) ? "x" : "y";
                 ps << "p" << i << s;
@@ -153,7 +153,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
         }
 
         // calculate the approximation to the Hessian and the "derivative" d
-        for (i = 0; i < npar; i++) {
+        for (int i = 0; i < npar; i++) {
             d[i] = 0;
             for (j = 0; j <= i; j++) {
                 h[i][j] = 0;
@@ -164,7 +164,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 weight = 1 / dysq[x]; // for weighted least-squares
             }
             grad(g, par, x, fdata, lmstat);
-            for (i = 0; i < npar; i++) {
+            for (int i = 0; i < npar; i++) {
                 d[i] += (0.0 - func(par, x, fdata, lmstat)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
                 for (j = 0; j <= i; j++) {
                     h[i][j] += g[i] * g[j] * weight;
@@ -175,13 +175,13 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
         mult = 1 + lambda;
         ill = 1; // ill-conditioned?
         while (ill && (it < nit)) {
-            for (i = 0; i < npar; i++) {
+            for (int i = 0; i < npar; i++) {
                 h[i][i] = h[i][i] * mult;
             }
             ill = cholesky_decomp(npar, ch, h);
             if (!ill) {
                 solve_axb_cholesky(npar, ch, delta, d);
-                for (i = 0; i < npar; i++) {
+                for (int i = 0; i < npar; i++) {
                     newpar[i] = par[i] + delta[i];
                 }
                 lmstat->pos.clear();
@@ -197,7 +197,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 printf("\n");*/
 
                 std::ostringstream gString, qString, dString, pString, os;
-                for (i = 0; i < npar; ++i) {
+                for (int i = 0; i < npar; ++i) {
                     gString << g[i];
                     qString << par[i];
                     dString << d[i];
@@ -207,7 +207,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                         dString << ",";
                     }
                 }
-                for (i = 0; i < ny; ++i) {
+                for (int i = 0; i < ny; ++i) {
                     pString << lmstat->pos.at(i).x << "," << lmstat->pos.at(i).y;
                     if (i + 1 < ny) {
                         pString << ",";
@@ -222,7 +222,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 it++;
             }
         }
-        for (i = 0; i < npar; i++) {
+        for (int i = 0; i < npar; i++) {
             par[i] = newpar[i];
         }
         err = newerr;
