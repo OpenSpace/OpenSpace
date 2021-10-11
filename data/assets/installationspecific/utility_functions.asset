@@ -204,6 +204,11 @@ local appendTable = function(A, B)
   end
 end
 
+local removeLineBreaks = function(stringValue)
+  -- replace newline with empty string
+  return string.gsub(stringValue, "\n", "")
+end
+
 asset.export("orbitOnArrival", orbitOnArrival)
 asset.export("orbitConstantLatitudeOnArrival", orbitConstantLatitudeOnArrival)
 asset.export("startOrbiting", startOrbiting)
@@ -222,3 +227,4 @@ asset.export("interpolateProperty", interpolateProperty)
 asset.export("fadeInNodes", fadeInNodes)
 asset.export("fadeOutNodes", fadeOutNodes)
 asset.export("appendTable", appendTable)
+asset.export("removeLineBreaks", removeLineBreaks)
