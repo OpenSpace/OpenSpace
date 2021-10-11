@@ -758,7 +758,7 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
         try {
             table.push_back(std::get<T>(tableElement));
         }
-        catch (std::bad_variant_access& e) {
+        catch (std::bad_variant_access&) {
             LERROR(fmt::format(
                 "Error attempting to parse profile property setting for "
                 "{} using value = {}", _profilePropertyName, value
