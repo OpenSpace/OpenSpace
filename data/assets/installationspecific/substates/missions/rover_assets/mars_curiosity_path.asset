@@ -6,6 +6,7 @@ local globeIdentifier = mars.Mars.Identifier
  -- Coordinate offset to match hirise image in Jezero crater
 local offset = { -0.0024, 0.0 }
 local handlePosition = { -5.397273407690904, 137.86468505859378 }
+local roverPosition = { -4.744157, 137.396317 } -- as of october 2021
 
 local Path = {
   Identifier = "Mars-Curiosity-Rover-Path",
@@ -14,13 +15,13 @@ local Path = {
     Type = "RenderableGeoJsonObject",
     Globe = globeIdentifier,
     File = asset.localResource("./roverpath_Curiosity.geojson"),
-    HeightOffset = 10.0,
+    HeightOffset = 50.0,
     CoordinateOffset = offset,
     LineWidth = 2.0,
     UseHeightmap = true
   },
   GUI = {
-    Name = "Mars Curiosity Rover Path",
+    Name = "Curiosity Rover Path",
     Path = "/Missions/Curiosity"
   }
 }
@@ -46,9 +47,40 @@ local Handle = {
     }
   },
   GUI = {
-    Name = "Mars Curiosity Handle",
+    Name = "Curiosity Overview Handle",
     Path = "/Missions/Curiosity"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Path, Handle })
+local RoverPosition = {
+  Identifier = "Mars-Curiosity-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = roverPosition[1] + offset[1],
+      Longitude = roverPosition[2] + offset[2],
+      Altitude = 50,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = roverPosition[1] + offset[1],
+      Longitude = roverPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 3500.0,
+    Billboard = true,
+    Texture = asset.localResource('./images/rover_icon.png')
+  },
+  GUI = {
+    Name = "Curiosity Position",
+    Path = "/Missions/Curiosity"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Path, Handle, RoverPosition })

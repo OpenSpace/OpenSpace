@@ -18,6 +18,7 @@ local offset = { -0.0024, 0.0 }
 local landingPosition = { 18.444634598608634, 77.45088440206018 }
 local handlePosition = { 18.43532532679642, 77.4481201276649 }
 local finalPosition = { 18.43379229870882,  77.4421387910843 } -- position as of 2021-10-04
+local ingenuityPosition = { 18.43286833,  77.43914669 } -- position as of 2021-10-04
 
 -- A "handle" that can be used for navigation and such
 local Handle = {
@@ -40,7 +41,7 @@ local Handle = {
     }
   },
   GUI = {
-    Name = "Mars Perseverance Handle",
+    Name = "Perseverance Handle",
     Path = "/Missions/Mars2020"
   }
 }
@@ -58,7 +59,7 @@ local Path = {
     UseHeightmap = true
   },
   GUI = {
-    Name = "Mars Perseverance Rover Path",
+    Name = "Perseverance Rover Path",
     Path = "/Missions/Mars2020"
   }
 }
@@ -85,12 +86,73 @@ local LandingPosition = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 10.0,
-    Origin = "Center",
     Billboard = true,
-    Texture = asset.localResource('./Mars_2020_JPL_second_insignia.svg.png')
+    Texture = asset.localResource('./images/M20_JPL_second_insignia.svg.png')
   },
   GUI = {
-    Name = "Mars Perseverance Rover Landing Position",
+    Name = "Perseverance Rover Landing Position",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local RoverPosition = {
+  Identifier = "Mars-Perseverance-Rover-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + offset[1],
+      Longitude = finalPosition[2] + offset[2],
+      Altitude = 10,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = finalPosition[1] + offset[1],
+      Longitude = finalPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 50.0,
+    Billboard = true,
+    Texture = asset.localResource('./images/rover_icon.png')
+  },
+  GUI = {
+    Name = "Perseverance Rover Position",
+    Path = "/Missions/Mars2020"
+  }
+}
+
+local IngenuityPosition = {
+  Identifier = "Mars-Ingenuity-Position",
+  Parent = globeIdentifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + offset[1],
+      Longitude = ingenuityPosition[2] + offset[2],
+      Altitude = 10,
+      UseHeightmap = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = globeIdentifier,
+      Latitude = ingenuityPosition[1] + offset[1],
+      Longitude = ingenuityPosition[2] + offset[2]
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 50.0,
+    Billboard = true,
+    Texture = asset.localResource('./images/helicoper_icon.png')
+  },
+  GUI = {
+    Name = "Ingenuity Position",
     Path = "/Missions/Mars2020"
   }
 }
@@ -138,4 +200,11 @@ local PerseveranceModel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Handle, Path, LandingPosition, PerseveranceModel })
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+  Handle,
+  Path,
+  LandingPosition,
+  PerseveranceModel,
+  RoverPosition,
+  IngenuityPosition
+})

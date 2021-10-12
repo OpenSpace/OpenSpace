@@ -40,13 +40,13 @@ local goToMarsOverview = [[
 
 -- openspace.globebrowsing.flyToGeo("Mars", -4.664599, 137.421634, 12057);
 
-local galeCrater_TiltedNavState = [[{
-  ReferenceFrame = 'Root',
-  Pitch = -0.022993,
+local galeCrater_TiltedNavState = [[{ 
   Anchor = 'Mars-Curiosity-Handle',
-  Yaw = 0.005086,
-  Position = { 1925.412973, 141800.094666, -67911.340698 },
-  Up = { -0.363898, -0.398303, -0.841981 }
+  ReferenceFrame = 'Root',
+  Up = { -0.388564, -0.373363, -0.842388 },
+  Yaw = -0.024106,
+  Pitch = -0.162116,
+  Position = { 7470.144476, 112056.853134, -53111.525452 }
 }]]
 
 local curiosityState = {
