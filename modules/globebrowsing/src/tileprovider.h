@@ -37,7 +37,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
-#include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/programobject.h>
 struct CPLXMLNode;
 
 namespace ghoul::fontrendering {
