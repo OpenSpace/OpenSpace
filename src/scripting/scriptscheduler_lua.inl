@@ -99,7 +99,7 @@ int setModeSimulationTime(lua_State* L) {
 
 int clear(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::clear");
-    auto [group] = ghoul::lua::values<std::optional<int>>(L);
+    std::optional<int> group = ghoul::lua::value<std::optional<int>>(L);
 
     global::scriptScheduler->clearSchedule(group);
     return 0;

@@ -329,7 +329,7 @@ local playForwards = {
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(1);
     openspace.time.setTime('2018 OCT 01 14:06:03');
-    ]] .. tostring(timelapse) .. [[
+    ]] .. timelapse .. [[
   ]],
   Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
   GuiPath = "/JWST",
@@ -344,7 +344,7 @@ local playBackwards = {
     openspace.setPropertyValueSingle('Dashboard.JWSTStateText.Text', '');
     openspace.time.setDeltaTime(-1);
     openspace.time.setTime('2018 OCT 16 09:06:04');
-    ]] .. tostring(timelapse) .. [[
+    ]] .. timelapse .. [[
   ]],
   Documentation = "Jump to the end of JWST deployment time and play the timelapse of deployment in reverse",
   GuiPath = "/JWST",

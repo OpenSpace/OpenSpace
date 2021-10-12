@@ -141,7 +141,7 @@ void ScriptScheduler::rewind() {
 void ScriptScheduler::clearSchedule(std::optional<int> group) {
     if (group.has_value()) {
         for (auto it = _scripts.begin(); it < _scripts.end(); ) {
-            if ((*it).group == group.value()) {
+            if (it->group == *group) {
                 it = _scripts.erase(it);
             }
             else {
@@ -160,8 +160,7 @@ void ScriptScheduler::clearSchedule(std::optional<int> group) {
     }
 }
 
-std::vector<std::string> ScriptScheduler::progressTo(double newTime)
-{
+std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     std::vector<std::string> result;
     if (!_enabled || newTime == _currentTime) {
         // Update the new time
@@ -177,7 +176,7 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime)
             _scripts.begin() + prevIndex, // We only need to start at the previous time
             _scripts.end(),
             newTime,
-            [](const double& value, const ScheduledScript& item) {
+            [](const double value, const ScheduledScript& item) {
                 return value < item.time;
             }
          );
@@ -190,10 +189,13 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime)
         _currentTime = newTime;
 
         // Construct result
-        for (auto iter = _scripts.begin() + prevIndex; iter < (_scripts.begin() + _currentIndex); ++iter) {
-            std::string script = (*iter).universalScript.empty() ?
-                (*iter).forwardScript :
-                (*iter).universalScript + "; " + (*iter).forwardScript;
+        for (auto iter = _scripts.begin() + prevIndex;
+            iter < (_scripts.begin() + _currentIndex);
+            ++iter)
+        {
+            std::string script = iter->universalScript.empty() ?
+                iter->forwardScript :
+                iter->universalScript + "; " + iter->forwardScript;
             result.push_back(script);
         }
 
@@ -207,7 +209,7 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime)
             _scripts.begin(),
             _scripts.begin() + prevIndex, // We can stop at the previous time
             newTime,
-            [](const ScheduledScript& item, const double& value) {
+            [](const ScheduledScript& item, const double value) {
                 return item.time < value;
             }
         );
@@ -223,9 +225,9 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime)
         auto start = _scripts.begin() + prevIndex - 1;
         auto end = it;
         for (auto iter = start; iter != _scripts.end() && iter >= end; --iter) {
-            std::string script = (*iter).universalScript.empty() ?
-                (*iter).backwardScript :
-                (*iter).universalScript + "; " + (*iter).backwardScript;
+            std::string script = iter->universalScript.empty() ?
+                iter->backwardScript :
+                iter->universalScript + "; " + iter->backwardScript;
             result.push_back(script);
         }
 
@@ -269,7 +271,7 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts(
 {
     std::vector<ScheduledScript> result;
     for (const ScheduledScript& script : _scripts) {
-        if (!group.has_value() || script.group == group.value()) {
+        if (!group.has_value() || script.group == *group) {
             result.push_back(script);
         }
     }

@@ -27,8 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 
 #include <functional>
@@ -85,7 +85,7 @@ public:
      * \param An int that specifies which group to clear.
      *        If none given then all scripts is cleared from the schedule.
      */
-    void clearSchedule(std::optional<int> group);
+    void clearSchedule(std::optional<int> group = std::nullopt);
 
     /**
     * Progresses the script schedulers time and returns all scripts that has been
@@ -138,7 +138,7 @@ public:
     *
     * \returns a vector of all scripts that has been loaded
     */
-    std::vector<ScheduledScript> allScripts(std::optional<int> group) const;
+    std::vector<ScheduledScript> allScripts(std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.
