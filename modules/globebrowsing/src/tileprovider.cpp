@@ -1192,8 +1192,6 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
         if (tileExists) {//If the tile already exists
             ourTile = tileCache->get(key);//get the tile from the tilecache
             writeTexture = ourTile.texture;//Use the texture from the tileCache
-            //ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK }; /without these two lines there is a glitch at the first interpolation
-            //tileCache->put(key, initData.hashKey, ourTile);  
         }
         else { //first time
             writeTexture = tileCache->texture(initData);//create a texture with the initialization data 
@@ -1247,8 +1245,6 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
         //Render to the texture
         glBindVertexArray(vaoQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
-        //glFlush();
-        //glBindVertexArray(0);
         // Deactivate shader program (when rendering is completed(
         shaderProgram->deactivate();
         glUseProgram(id);
@@ -1261,10 +1257,8 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
         global::renderEngine->openglStateCache().resetDepthState();
         global::renderEngine->openglStateCache().resetPolygonAndClippingState();
         global::renderEngine->openglStateCache().resetViewportState();
-        //}
 
         return ourTile;
-        //return Tile{ writeTexture, std::nullopt, Tile::Status::OK };
     }
     return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
 }

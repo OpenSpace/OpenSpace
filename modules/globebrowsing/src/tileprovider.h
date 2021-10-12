@@ -119,8 +119,6 @@ struct InterpolateTileProvider : public TileProvider {
     GLuint vaoQuad = 0;
     GLuint vboQuad = 0;
     GLuint fbo = 0;
-    //float debugfactor = 1.0;
-    //long long debughkey = 31;
     int renderEverySpecificIteration = 2;
     std::unordered_map<long long, int> renderIterations;
     std::string colormap;
