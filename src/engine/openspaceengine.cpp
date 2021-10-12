@@ -36,6 +36,8 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -53,6 +55,7 @@
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/timeframe.h>
@@ -101,13 +104,22 @@ namespace {
     template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
+
+    openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+        "PrintEvents",
+        "Print Events",
+        "If this is enabled, all events that are propagated through the system are "
+        "printed to the log."
+    };
 } // namespace
 
 namespace openspace {
 
 class Scene;
 
-OpenSpaceEngine::OpenSpaceEngine() {
+OpenSpaceEngine::OpenSpaceEngine()
+    : _printEvents(PrintEventsInfo, false)
+{
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -185,6 +197,8 @@ void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
+
+    _printEvents = global::configuration->isPrintingEvents;
 
     const std::string versionCheckUrl = global::configuration->versionCheckUrl;
     if (!versionCheckUrl.empty()) {
@@ -895,13 +909,16 @@ void OpenSpaceEngine::deinitialize() {
     TransformationManager::deinitialize();
     SpiceManager::deinitialize();
 
+    if (_printEvents) {
+        events::Event* e = global::eventEngine->firstEvent();
+        events::logAllEvents(e);
+    }
+
     ghoul::fontrendering::FontRenderer::deinitialize();
 
     ghoul::logging::LogManager::deinitialize();
 
     LTRACE("deinitialize(end)");
-
-
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }
 
@@ -1101,6 +1118,7 @@ void OpenSpaceEngine::preSynchronization() {
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
+        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>();
     }
     else if (_isRenderingFirstFrame) {
         global::profile->ignoreUpdates = true;
@@ -1186,6 +1204,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
+            global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+                events::EventApplicationShutdown::State::Finished
+            );
             global::windowDelegate->terminate();
             return;
         }
@@ -1311,6 +1332,23 @@ void OpenSpaceEngine::postDraw() {
         _isRenderingFirstFrame = false;
     }
 
+    //
+    // Handle events
+    //
+    const events::Event* e = global::eventEngine->firstEvent();
+    if (_printEvents) {
+        events::logAllEvents(e);
+    }
+    global::eventEngine->triggerActions();
+    while (e) {
+        // @TODO (abock, 2021-08-25) Need to send all events to a topic to be sent out to
+        // others
+
+        e = e->next;
+    }
+
+
+    global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
 
     LTRACE("OpenSpaceEngine::postDraw(end)");
@@ -1544,11 +1582,17 @@ void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
         _shutdown.inShutdown = false;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Aborted
+        );
     }
     else {
         // Else, we have to enable it
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
+        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
+            events::EventApplicationShutdown::State::Started
+        );
     }
 }
 

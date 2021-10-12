@@ -43,6 +43,9 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/event.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/eventengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
@@ -176,6 +179,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
   ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/tstring.cpp
   ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
   ${OPENSPACE_BASE_DIR}/src/util/task.cpp
   ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
@@ -223,6 +227,9 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/action.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/actionmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
@@ -381,6 +388,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/touch.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/tstring.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/universalhelpers.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h

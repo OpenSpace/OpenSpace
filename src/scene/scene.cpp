@@ -125,6 +125,7 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -144,6 +145,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -585,6 +587,10 @@ void Scene::updateInterpolations() {
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
+
+        if (i.isExpired) {
+            global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
+        }
     }
 
     _propertyInterpolationInfos.erase(

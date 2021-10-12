@@ -22,22 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
-
-#include <ghoul/misc/memorypool.h>
+#include <string>
+#include <string_view>
 
 namespace openspace {
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+/**
+ * This string is a temporary string that is generated using the temporary memory
+ * storage. This means that under no circumstances must an instance of a tstring be kept
+ * across frame boundaries as the temporary storage is reset at between frames. In
+ * exchange, the allocation of these objects is extreme fast and with barely any overhead
+ * associated with it. The memory accessed through a tstring object shall never be
+ * released manually.
+ */
+using tstring = std::string_view;
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false, true> TemporaryMemory;
-};
+/**
+ * Allocate and create a temporary string from the passed std::string.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
+tstring temporaryString(const std::string& str);
+
+/**
+ * Allocate and create a temporary string from the passed std::string_view.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
+tstring temporaryString(std::string_view str);
+
+/**
+ * Allocate and create a temporary string from the passed char array.
+ * 
+ * \param str The string to be copied into a newly allocated tstring
+ * \return The copy of the str as a temporary string
+ */
+tstring temporaryString(const char str[]);
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
