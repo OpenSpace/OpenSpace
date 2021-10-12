@@ -92,16 +92,17 @@ private:
 
     void sendCameraKeyframe();
     void sendTimeTimeline();
+    void reloadUI();
 
     void setStatus(ParallelConnection::Status status);
     void setViewStatus(ParallelConnection::ViewStatus status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
+    bool hasIndependentView();
+
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
-
-    bool hasIndependentView();
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;

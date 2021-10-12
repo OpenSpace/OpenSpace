@@ -154,10 +154,10 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
         case ParallelConnection::MessageType::HostshipResignation:
             handleHostshipResignation(*peer);
             break;
-        case ParallelConnection::MessageType::IndependentViewRequest:
+        case ParallelConnection::MessageType::ViewRequest:
             handleViewRequest(*peer);
             break;
-        case ParallelConnection::MessageType::IndependentViewResignation:
+        case ParallelConnection::MessageType::ViewResignation:
             handleViewResignation(*peer);
             break;
         case ParallelConnection::MessageType::Disconnection:
@@ -230,6 +230,8 @@ void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
             "Ignoring connection {} trying to send data without being host"
             " or using independent view", peer.id
         ));
+
+        return;
     }
     sendMessageToClients(ParallelConnection::MessageType::Data, data);
 }
@@ -275,13 +277,13 @@ void ParallelServer::handleHostshipResignation(Peer& peer) {
 void ParallelServer::handleViewRequest(Peer& peer) {
     setViewStatus(peer, ParallelConnection::ViewStatus::IndependentView);
 
-    LINFO(fmt::format("{} is now using host-independent viewpoint.", peer.id));
+    LINFO(fmt::format("{} is now using host-independent viewpoint", peer.id));
 }
 
 void ParallelServer::handleViewResignation(Peer& peer) {
     setViewStatus(peer, ParallelConnection::ViewStatus::HostView);
 
-    LINFO(fmt::format("{} is now using the host's viewpoint.", peer.id));
+    LINFO(fmt::format("{} is now using the host's viewpoint", peer.id));
 }
 
 bool ParallelServer::isConnected(const Peer& peer) const {
@@ -309,8 +311,8 @@ void ParallelServer::sendMessageToClients(ParallelConnection::MessageType messag
                                           const std::vector<char>& message)
 {
     for (std::pair<const size_t, std::shared_ptr<Peer>>& it : _peers) {
-        if (it.second->status == ParallelConnection::Status::ClientWithHost
-            || it.second->viewStatus == ParallelConnection::ViewStatus::HostView) {
+        if (it.second->status == ParallelConnection::Status::ClientWithHost ||
+            it.second->viewStatus == ParallelConnection::ViewStatus::IndependentView) {
             it.second->parallelConnection.sendMessage({ messageType, message });
         }
     }

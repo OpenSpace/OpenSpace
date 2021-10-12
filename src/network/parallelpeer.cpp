@@ -134,14 +134,19 @@ ParallelPeer::ParallelPeer()
     addProperty(_cameraKeyframeInterval);
 
     addProperty(_hasIndependentView);
-
     _hasIndependentView.setReadOnly(true);
     _hasIndependentView.onChange([this]() {
-        if (_hasIndependentView) {
-            setViewStatus(ParallelConnection::ViewStatus::IndependentView);
+        if (isHost() && _hasIndependentView) {
+            _hasIndependentView = false;
+            LERROR("This option is redundant as host.");
         }
-        else {
-            setViewStatus(ParallelConnection::ViewStatus::HostView);
+        else if (!isHost()) {
+            if (_hasIndependentView) {
+                setViewStatus(ParallelConnection::ViewStatus::IndependentView);
+            }
+            else {
+                setViewStatus(ParallelConnection::ViewStatus::HostView);
+            }
         }
     });
 }
@@ -163,12 +168,12 @@ void ParallelPeer::connect() {
     // Default ViewStatus is HostView
     if (!isHost()) {
         setViewStatus(ParallelConnection::ViewStatus::HostView);
+        _hasIndependentView.setReadOnly(false);
+        reloadUI();
     }
     else {
         setViewStatus(ParallelConnection::ViewStatus::Host);
     }
-
-    _hasIndependentView.setReadOnly(false);
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
@@ -196,6 +201,7 @@ void ParallelPeer::disconnect() {
     _isConnected = false;
 
     _hasIndependentView.setReadOnly(true);
+    reloadUI();
 }
 
 void ParallelPeer::sendAuthentication() {
@@ -252,6 +258,12 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
         case ParallelConnection::MessageType::NConnections:
             nConnectionsMessageReceived(message.content);
             break;
+        case ParallelConnection::MessageType::ViewRequest:
+            viewRequestMessageReceived(message.content);
+            break;
+        case ParallelConnection::MessageType::ViewResignation:
+            viewResignationMessageReceived(message.content);
+            break;
         default:
             //unknown message type
             break;
@@ -296,8 +308,7 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
@@ -396,8 +407,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
- {
+void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
     if (message.size() < 2 * sizeof(uint32_t)) {
         LERROR("Malformed connection status message.");
         return;
@@ -444,8 +454,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     global::timeManager->clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
     if (message.size() < sizeof(uint32_t)) {
         LERROR("Malformed host info message.");
         return;
@@ -600,53 +609,13 @@ ParallelConnection::Status ParallelPeer::status() {
 }
 
 void ParallelPeer::setViewStatus(ParallelConnection::ViewStatus status) {
-    if (!_isConnected) {
-        _hasIndependentView.setValue(false);
-        LINFO(fmt::format("ERROR: This action requires a connection."));
+    if (!_isConnected && _hasIndependentView) {
+        _hasIndependentView = false;
+        LERROR("This action requires a connection.");
     }
-    else {
-        if (isHost()) {
-            _hasIndependentView.setValue(false);
-            _viewStatus = ParallelConnection::ViewStatus::Host;
-
-            if (status != ParallelConnection::ViewStatus::Host) {
-                LINFO(fmt::format("ERROR: {} is redundant as host.", status));
-            }
-        }
-        else {
-            _viewStatus = status;
-        }
+    else if (_isConnected) {
+        _viewStatus = status;
     }
-
-    /*if (_isConnected) {
-        if (isHost()) {
-            _viewStatus = ParallelConnection::ViewStatus::Host;
-        }
-        else if (hasIndependentView() && viewStatus() !=
-            ParallelConnection::ViewStatus::IndependentView) {
-            _viewStatus = ParallelConnection::ViewStatus::IndependentView;
-            LINFO(fmt::format("You are now using host-independent viewpoint."));
-
-            std::vector<char> buffer;
-            _connection.sendMessage(ParallelConnection::Message(
-                ParallelConnection::MessageType::IndependentViewRequest, buffer));
-        }
-        else if (!hasIndependentView() && viewStatus() !=
-            ParallelConnection::ViewStatus::HostView) {
-            _viewStatus = ParallelConnection::ViewStatus::HostView;
-            LINFO(fmt::format("You are now using the host's viewpoint."));
-
-            std::vector<char> buffer;
-            // possibly modify buffer (ex. require password or save camera position)
-
-            _connection.sendMessage(ParallelConnection::Message(
-                ParallelConnection::MessageType::IndependentViewResignation, buffer));
-        }
-    }
-    else if (_hasIndependentView) {
-        LINFO(fmt::format("ERROR: This action requires a connection."));
-        _hasIndependentView.setValue(false);
-    }*/
 }
 
 ParallelConnection::ViewStatus ParallelPeer::viewStatus() {
@@ -773,6 +742,16 @@ void ParallelPeer::sendTimeTimeline() {
         timestamp,
         buffer
     ));
+}
+
+void ParallelPeer::reloadUI() {
+    std::string script = "if openspace.hasProperty('Modules.CefWebGui.Reload')"
+        " then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end";
+
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::No
+        );
 }
 
 ghoul::Event<>& ParallelPeer::connectionEvent() {
