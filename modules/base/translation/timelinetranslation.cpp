@@ -94,23 +94,22 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
     const double prevTime = prev->timestamp;
     const double nextTime = next->timestamp;
 
-    glm::dvec3 pos = glm::dvec3(0.0);
     if (_shouldInterpolate) {
         double t = 0.0;
         if (nextTime - prevTime > 0.0) {
             t = (now - prevTime) / (nextTime - prevTime);
         }
-        pos = t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
+        return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
     }
     else {
         if (prevTime <= now && now < nextTime) {
-            pos = prev->data->position(data);
+            return prev->data->position(data);
         }
         else if (nextTime <= now) {
-            pos = next->data->position(data);
+            return next->data->position(data);
         }
     }
-    return pos;
+    return glm::dvec3(0.0);
 }
 
 } // namespace openspace
