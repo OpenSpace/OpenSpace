@@ -28,7 +28,8 @@
   "additional_scripts": [
     "openspace.setPropertyValue(\"{moonTrail_minor}.Renderable.Appearance.Color\", {0.3, 0.5, 0.5});",
     "openspace.setPropertyValue(\"Scene.Voyager*.Renderable.Appearance.Color\", {0.424000, 1.000000, 0.404000});",
-    "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});"
+    "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});",
+    "openspace.setPropertyValueSingle(\"Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity\", 0.7);"
   ],
   "assets": [
     "base",

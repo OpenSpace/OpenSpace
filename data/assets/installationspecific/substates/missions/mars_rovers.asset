@@ -11,6 +11,7 @@ local leaveStateSettings = [[
   -- Disable these, as they might be performance expensive
   openspace.setPropertyValueSingle("Scene.Mars-Curiosity-Rover-Path.Renderable.Enabled", false);
   openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", false);
+  openspace.setPropertyValueSingle("NavigationHandler.PathNavigator.IncludeRoll", false);
 ]]
 
 ----------------------------------------------------------------
@@ -98,9 +99,10 @@ local perseveranceState = {
   Enter = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Opacity", 1.0, 2.0);
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.ForceUpdateData", nil); 
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0); 
-    ]] .. util.setOrbitSpeedFactor(0.4) .. [[
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0);
+    ]] .. util.setOrbitSpeedFactor(0.6) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
