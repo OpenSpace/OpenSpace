@@ -23,25 +23,41 @@
  ****************************************************************************************/
 
 #include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
+
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
+
 #include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableMovingFieldlines";
 
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    "LineWidth",
+    "Line Width",
+    "This value specifies the line width of the fieldlines"
+    };
+
     struct [[codegen::Dictionary(RenderableMovingFieldlines)]] Parameters {
         // Path to folder containing the input .cdf files
         std::filesystem::path sourceFolder [[codegen::directory()]];
         // Path to file with seed points
-        std::filesystem::path seedPintFile;
+        std::filesystem::path seedPointFile;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
+        // TODO should not be any need for manual time offset because 
+        // we only want one state
         std::optional<double> manualTimeOffset;
     };
 #include "renderablemovingfieldlines_codegen.cpp"
@@ -58,6 +74,7 @@ documentation::Documentation RenderableMovingFieldlines::Documentation() {
 RenderableMovingFieldlines::RenderableMovingFieldlines(
                                                       const ghoul::Dictionary& dictionary) 
     :Renderable(dictionary)
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -84,7 +101,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     }
     std::sort(sourceFiles.begin(), sourceFiles.end());
 
-    _seedFilePath = p.seedPintFile;
+    _seedFilePath = p.seedPointFile;
     if (!std::filesystem::is_regular_file(_seedFilePath) || 
         _seedFilePath.extension() != ".txt") 
     {
@@ -114,6 +131,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     _extraVars = p.extraVariables.value_or(_extraVars);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
 
 
 }
@@ -124,68 +142,58 @@ void RenderableMovingFieldlines::initialize() {
 }
 
 void RenderableMovingFieldlines::initializeGL() {
+    _shaderProgram = global::renderEngine->buildRenderProgram(
+        "MovingFieldlines",
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
+        absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
+    );
 
+    glGenVertexArrays(1, &_vertexArrayObject);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
+
+    // Needed for additive blending
+    setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 bool RenderableMovingFieldlines::getStatesFromCdfFiles() {
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
-    std::unordered_map<std::string, std::vector<glm::vec3>> placeholder;
-    placeholder["1"] = _seedPoints;
+    
+    // TODO remove placeholder, fix map vs vector
+    std::unordered_map<std::string, std::vector<glm::vec3>> seedpointsPlaceholder;
+    seedpointsPlaceholder["20000101080000"] = _seedPoints;
+    
     namespace fs = std::filesystem;
-    for (const fs::directory_entry entry : fs::directory_iterator(_sourceFolder)) {
-        const std::string& cdfPath = entry.path().string();
-        FieldlinesState newState;
+    for (const std::filesystem::path entry : _sourceFiles) {
+        const std::string& cdfPath = entry.string();
         bool isSuccessful = fls::convertCdfToFieldlinesState(
-            newState,
+            _fieldlineState,
             cdfPath,
-            placeholder,
+            seedpointsPlaceholder,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
             extraMagVars
         );
     }
+
     return true;
 }
 
-//std::vector<std::string>
-//    extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars)
-//{
-//    std::vector<std::string> extraMagVars;
-//    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
-//        const std::string& str = extrVars[i];
-//        // Check if string is in the format specified for magnitude variables
-//        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
-//            std::istringstream ss(str.substr(2, str.size() - 4));
-//            std::string magVar;
-//            size_t counter = 0;
-//            while (std::getline(ss, magVar, ',')) {
-//                magVar.erase(
-//                    std::remove_if(
-//                        magVar.begin(),
-//                        magVar.end(),
-//                        ::isspace
-//                    ),
-//                    magVar.end()
-//                );
-//                extraMagVars.push_back(magVar);
-//                counter++;
-//                if (counter == 3) {
-//                    break;
-//                }
-//            }
-//            if (counter != 3 && counter > 0) {
-//                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
-//            }
-//            extrVars.erase(extrVars.begin() + i);
-//            i--;
-//        }
-//    }
-//    return extraMagVars;
-//}
-
 void RenderableMovingFieldlines::deinitializeGL() {
+    glDeleteVertexArrays(1, &_vertexArrayObject);
+    _vertexArrayObject = 0;
 
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexColorBuffer);
+    _vertexColorBuffer = 0;
+    
+    if (_shaderProgram) {
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
+        _shaderProgram = nullptr;
+    }
 }
 
 bool RenderableMovingFieldlines::isReady() const {
@@ -193,11 +201,32 @@ bool RenderableMovingFieldlines::isReady() const {
 }
 
 void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) {
+    glBindVertexArray(_vertexArrayObject);
+#ifndef __APPLE__
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
 
+    glMultiDrawArrays(
+        GL_LINE_STRIP,
+        _fieldlineState.lineStart().data(),
+        _fieldlineState.lineCount().data(),
+        static_cast<GLsizei>(_fieldlineState.lineStart().size())
+    );
+
+    glBindVertexArray(0);
+    _shaderProgram->deactivate();
+
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableMovingFieldlines::update(const UpdateData& data) {
-
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+    }
 }
 
 } // namespace openspace

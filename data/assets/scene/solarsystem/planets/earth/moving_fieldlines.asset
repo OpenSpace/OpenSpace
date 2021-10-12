@@ -1,8 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
 
-local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
-local seedPointFile = 'C:/Users/elono/Documents/OpenSpace/data/Chris/seedpoints/lines.txt'
+--local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
+local fieldlinesDirectory =  'D:/data/2000_01_01_event/cdf'
+--local seedPointFile = 'C:/Users/elono/Documents/OpenSpace/data/Chris/seedpoints/lines.txt'
+local seedPointFile = 'D:/data/2000_01_01_event/cdf/GM_CDF/footpoints.txt'
 
 local movingLines = {
     Identifier = "MovingFieldlines",
@@ -10,16 +12,16 @@ local movingLines = {
     Renderable = {
         Type = "RenderableMovingFieldlines",
         SourceFolder = fieldlinesDirectory,
-        seedPointFile = seedPointFile,
+        SeedPointFile = seedPointFile,
     },
     GUI = {
-        Path = "/SolarSystem/Planets/Earth",
+        Path = "/Solar System/Planets/Earth",
         Name = "moving fieldlines",
         Description = "moving"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
+assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
 
 asset.meta = {
     Name = "M",

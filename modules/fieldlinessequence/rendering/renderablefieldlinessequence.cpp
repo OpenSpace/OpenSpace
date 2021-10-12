@@ -994,7 +994,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 #endif
 
     glMultiDrawArrays(
-        GL_LINE_STRIP, //_drawingOutputType,
+        GL_LINE_STRIP,
         _states[_activeStateIndex].lineStart().data(),
         _states[_activeStateIndex].lineCount().data(),
         static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
@@ -1048,7 +1048,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
     else {
         // Not in interval => set everything to false
-        _activeTriggerTimeIndex   = -1;
+        _activeTriggerTimeIndex = -1;
         mustLoadNewStateFromDisk = false;
         needUpdate = false;
     }

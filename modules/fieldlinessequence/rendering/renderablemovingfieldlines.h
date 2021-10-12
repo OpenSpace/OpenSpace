@@ -52,8 +52,26 @@ public:
 private:
     bool getStatesFromCdfFiles();
 
+    struct Mover {
+
+    };
+
+    // Line width for the line rendering part
+    properties::FloatProperty _lineWidth;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+    // OpenGL Vertex Array Object
+    GLuint _vertexArrayObject = 0;
+    // OpenGL Vertex Buffer Object containing the vertex positions
+    GLuint _vertexPositionBuffer = 0;
+    // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
+    // the lines
+    GLuint _vertexColorBuffer = 0;
+
+    FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
     std::filesystem::path _sourceFolder;
+    std::vector<std::filesystem::path> _sourceFiles;
     std::filesystem::path _seedFilePath;
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
