@@ -154,11 +154,6 @@ void GlobeTranslation::setUpdateVariables() {
 }
 
 void GlobeTranslation::update(const UpdateData& data) {
-    if (!_attachedNode) {
-        fillAttachedNode();
-        setUpdateVariables();
-    }
-
     if (_useHeightmap) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -168,7 +163,16 @@ void GlobeTranslation::update(const UpdateData& data) {
 }
 
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
-    if (!_positionIsDirty || !_attachedNode) {
+    if (!_attachedNode) {
+        // @TODO(abock): The const cast should be removed on a redesign of the translation
+        //               to make the position function not constant. Const casting this
+        //               away is fine as the factories that create the translations don't
+        //               create them as constant objects
+        const_cast<GlobeTranslation*>(this)->fillAttachedNode();
+        _positionIsDirty = true;
+    }
+    
+    if (!_positionIsDirty) {
         return _position;
     }
 

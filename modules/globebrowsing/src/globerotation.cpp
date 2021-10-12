@@ -175,11 +175,6 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
 }
 
 void GlobeRotation::update(const UpdateData& data) {
-    if (!_globeNode) {
-        findGlobe();
-        setUpdateVariables();
-    }
-
     if (_useHeightmap) {
         // If we use the heightmap, we have to compute the height every frame
         setUpdateVariables();
@@ -189,7 +184,16 @@ void GlobeRotation::update(const UpdateData& data) {
 }
 
 glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
-    if (!_matrixIsDirty || !_globeNode) {
+    if (!_globeNode) {
+        // @TODO(abock): The const cast should be removed on a redesign of the rotation
+        //               to make the matrix function not constant. Const casting this
+        //               away is fine as the factories that create the rotations don't
+        //               create them as constant objects
+        const_cast<GlobeRotation*>(this)->findGlobe();
+        _matrixIsDirty = true;
+    }
+
+    if (!_matrixIsDirty) {
         return _matrix;
     }
 
