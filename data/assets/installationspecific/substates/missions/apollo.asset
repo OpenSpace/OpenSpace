@@ -141,6 +141,8 @@ local apollo8Scripts = [[
   )
 ]]
 
+local apollo11LandingState = [[{ Up = { -0.775178, 0.600074, 0.197509 }, Yaw = 0.005949, Position = { -30.476334, -14.669479, -75.043663 }, ReferenceFrame = 'Root', Pitch = 0.003976, Anchor = 'Apollo11-landing-Handle' }]]
+
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
@@ -183,8 +185,19 @@ local apollo8State = {
 local apollo11State = {
   Identifier = "Apollo11",
   Enter = [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11);
+    ]] .. util.fadeInNodes({ "Apollo11MoonTrail", "Apollo11LemTrail" }) .. [[
+    ]] .. util.setOrbitSpeedFactor(0.8) .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
+    ]] .. util.stopOrbiting() .. [[
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 15.0);
+    ]] .. util.fadeOutNodes({ "Apollo11MoonTrail", "Apollo11LemTrail" }) .. [[
   ]]
 }
 
@@ -208,6 +221,10 @@ local flyToApollo8 = [[
 ]]
 
 local flyToApollo11 = [[
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("AvoidCollision") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(apollo11LandingState) .. [[
 ]]
 
 local transitions = {

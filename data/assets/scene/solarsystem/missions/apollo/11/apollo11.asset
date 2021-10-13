@@ -15,6 +15,33 @@ asset.require('spice/base')
 --landing - 1969-07-20T20:17:40
 local apolloSpiceId = "-911"
 local apolloLemSpiceId = "-911500"
+local landingPosition = { 0.673950, 23.473093 }
+
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Apollo11-landing-Handle",
+  Parent = moon_transforms.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_transforms.Moon.Identifier,
+      Latitude = landingPosition[1],
+      Longitude = landingPosition[2],
+      Altitude = -1925,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon_transforms.Moon.Identifier,
+      Latitude = landingPosition[1],
+      Longitude = landingPosition[2]
+    }
+  },
+  GUI = {
+    Name = "Apollo 11 landing site Handle",
+    Path = "/Solar System/Missions/Apollo/11"
+  }
+}
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
@@ -69,7 +96,7 @@ local Apollo11MoonTrail = {
   Identifier = "Apollo11MoonTrail",
   Parent = moon_transforms.Moon.Identifier,
   Renderable = {
-    Type = "RenderableTrailTrajectory",
+    Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
       Target = apolloSpiceId,
@@ -78,10 +105,8 @@ local Apollo11MoonTrail = {
       Kernels = kernels
     },
     Color = { 0.180000,0.510000,0.750000 },
-    StartTime = "1969 JUL 19 19:38:29.183",
-    EndTime = "1969 JUL 22 04:55:35.183",
-    SampleInterval = 60,
-    EnableFade = false,
+    Resolution = 120,
+    Period = 0.08,
     Enabled = false
   },
   GUI = {
@@ -216,6 +241,7 @@ local exportList = {
   Apollo11LemLandedModel,
   Apollo11MoonTrail,
   Apollo11LemTrail,
+  Handle
 }
 
 asset_helper.registerSceneGraphNodesAndExport(asset, exportList)

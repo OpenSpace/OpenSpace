@@ -47,6 +47,7 @@
     "scene/solarsystem/dwarf_planets/pluto/minor/nix",
     "scene/solarsystem/dwarf_planets/pluto/minor/styx",
     "scene/solarsystem/dwarf_planets/pluto/pluto",
+    "scene/solarsystem/missions/apollo/apollo_globebrowsing",
     "scene/solarsystem/missions/apollo/11/apollo11",
     "scene/solarsystem/missions/apollo/8/apollo8",
     "scene/solarsystem/missions/apollo/insignias_map",
@@ -205,6 +206,11 @@
       "name": "Scene.Exoplanets.Renderable.Opacity",
       "type": "setPropertyValueSingle",
       "value": "0.0"
+    },
+    {
+      "name": "Scene.Apollo8LaunchTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     },
     {
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity",
