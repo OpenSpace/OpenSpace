@@ -212,16 +212,6 @@
       "value": "0.0"
     },
     {
-      "name": "Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Settings.Opacity",
-      "type": "setPropertyValueSingle",
-      "value": "0.0"
-    },
-    {
-      "name": "Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "true"
-    },
-    {
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"

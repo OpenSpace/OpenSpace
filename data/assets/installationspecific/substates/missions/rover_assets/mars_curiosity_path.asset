@@ -15,7 +15,7 @@ local Path = {
     Type = "RenderableGeoJsonObject",
     Globe = globeIdentifier,
     File = asset.localResource("./roverpath_Curiosity.geojson"),
-    HeightOffset = 50.0,
+    HeightOffset = 100.0,
     CoordinateOffset = offset,
     LineWidth = 2.0,
     UseHeightmap = true
@@ -61,7 +61,7 @@ local RoverPosition = {
       Globe = globeIdentifier,
       Latitude = roverPosition[1] + offset[1],
       Longitude = roverPosition[2] + offset[2],
-      Altitude = 50,
+      Altitude = 100.0,
       UseHeightmap = true
     },
     Rotation = {
