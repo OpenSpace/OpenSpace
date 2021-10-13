@@ -3,7 +3,7 @@ local sun = asset.require('scene/solarsystem/sun/sun')
 
 -- synced directories
 local magnetogramDirectory = asset.require('./magnetogram').TexturesPath;
-local magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
+local magnetograms;
 
 local switch_color_layer = {
   Identifier = "magnetogram_texture.switch_color_layer",
@@ -24,13 +24,14 @@ local switch_color_layer = {
       str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled";
       openspace.setPropertyValueSingle(str, true);
     end;
-  ]],
+    ]],
   Documentation = "Display next sun texture in list of textures",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
 asset.onInitialize(function ()
+  magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);
   rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.addLayer(
