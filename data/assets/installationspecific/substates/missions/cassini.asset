@@ -98,14 +98,29 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
-  -- End
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-04-26T00:00:00.000", -- 10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
+  -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-15T10:34:05.000",
-    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.time.interpolateDeltaTime(1)"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-16T10:34:20.000", -- 1 day delay 15 sec
     "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)"
   )
 ]]
+
 
 local huygensDetach = "2004-11-21 08:44:53.000"
 local huygensEnd = "2005-01-14 09:05:55.000"
@@ -161,10 +176,15 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
-  -- End
+  -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 09:05:55.000",
-    "openspace.time.setDeltaTime(1)" ..
+    "openspace.time.interpolateDeltaTime(1)"
+  )
+
+  -- End
+  openspace.scriptScheduler.loadScheduledScript(
+    "2005-01-14 09:06:05.000", -- 10 sec delay
     "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
   )
