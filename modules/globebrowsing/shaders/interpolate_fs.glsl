@@ -30,27 +30,23 @@ uniform sampler2D colormapTexture;
 uniform float blendFactor;
 
 in vec2 texCoord;
-//out vec4 fragColor;
 
 Fragment getFragment() {
-	vec4 mixedTexture;
-    vec4 texel0 = texture2D(prevTexture, texCoord);
-    vec4 texel1 = texture2D(nextTexture, texCoord);
+  vec4 texel0 = texture2D(prevTexture, texCoord);
+  vec4 texel1 = texture2D(nextTexture, texCoord);
 
+	vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
-    Fragment frag;  
-	mixedTexture = mix(texel0, texel1, blendFactor);
-
-	vec2 position = vec2(mixedTexture.r , 0.5);
-
-	if(mixedTexture.r>0.999){
-		vec2 position = vec2(mixedTexture.r-0.01 , 0.5);
+  Fragment frag;  
+	if (mixedTexture.r > 0.999) {
+		vec2 position = vec2(mixedTexture.r - 0.01, 0.5);
 		frag.color = texture2D(colormapTexture, position);
 	}
-	else{
+	else {
+  	vec2 position = vec2(mixedTexture.r , 0.5);
 		frag.color = texture2D(colormapTexture, position);
 	}
 	
-	frag.color.a=mixedTexture.a;
-    return frag;
+	frag.color.a = mixedTexture.a;
+  return frag;
 }

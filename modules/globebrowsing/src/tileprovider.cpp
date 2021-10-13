@@ -34,8 +34,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -44,10 +45,11 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <fstream>
 #include "cpl_minixml.h"
-#include <ghoul/opengl/textureunit.h>
+
 namespace ghoul {
     template <>
     constexpr openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
@@ -292,9 +294,12 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
 //
 
 // Buffer needs at least 22 characters space
-int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char* buffer)
-{
+std::string_view timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
     ZoneScoped
+
+    char* buffer = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(22)
+    );
 
     std::memset(buffer, 0, 22);
     const double time = t.j2000Seconds();
@@ -305,32 +310,32 @@ int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char
             constexpr const char Format[] = "YYYY-MM-DD";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
             constexpr const char Format[] = "YYYYMMDD_HRMNSC";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
             constexpr const char Format[] = "YYYYMMDD_HRMN";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
         {
             constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SCZ";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
             constexpr const char Format[] = "YYYY-MM-DDTHR_MN_SCZ";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         default:
             throw ghoul::MissingCaseException();
@@ -387,108 +392,8 @@ TileProvider* getTileProvider(TemporalTileProvider& t, std::string_view timekey)
 
 TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
     ZoneScoped
-    Time tCopy(time);
-    Time simulationTime(time);
-    Time nextTile;
-    Time nextNextTile;
-    Time prevTile;
-    Time secondToLast;
-    Time secondToFirst;
-    if (t.interpolation) {
-        InterpolateTileProvider* currentInterpolateTileProvider = t.interpolateTileProvider; //if the asset file says that the tiles should interpolate an InterpolateTileProvider is initialized
-        if (t.timeQuantizer.quantize(tCopy, true)) {
-            char Buffer[22];
-            char Buffer1[22];
-            char Buffer2[22];
-            char Buffer3[22];
-            const int Size = timeStringify(t.timeFormat, tCopy, Buffer);
-            try {
-                currentInterpolateTileProvider->timeT1 = tCopy.j2000Seconds();
 
-                currentInterpolateTileProvider->t1 = getTileProvider(t, std::string_view(Buffer, Size));
-            }
-            catch (const ghoul::RuntimeError e) {
-                LERRORC("TemporalTileProvider", e.message);
-                return nullptr;
-            }
-            if (t.myResolution == "1h") {//if the images are for each hour
-                nextTile.setTime(tCopy.j2000Seconds() + 60 * 60 ); //the second tile to interpolate between
-                nextNextTile.setTime(tCopy.j2000Seconds() + 120 * 60);//the tile after the second tile
-                prevTile.setTime(tCopy.j2000Seconds() - 60 * 60 + 1);//the tile before the first tile
-                secondToLast.setTime(t.endTimeJ2000 - 60 * 60);//to make sure that an image outside the dataset is not searched for both ends of the dataset are calculated
-                secondToFirst.setTime(t.startTimeJ2000 + 60 * 60);
-            }
-            if (t.myResolution == "1M") {//if the images are for each month
-                nextTile.setTime(tCopy.j2000Seconds() + 32 * 60 * 60 * 24);//the second tile to interpolate between
-                nextNextTile.setTime(tCopy.j2000Seconds() + 64 * 60 * 60 * 24);//the tile after the second tile
-                prevTile.setTime(tCopy.j2000Seconds() - 2 * 60 * 60 * 24);//the tile before the first tile
-                secondToLast.setTime(t.endTimeJ2000 - 2 * 60 * 60 * 24);//to make sure that an image outside the dataset is not searched for both ends of the dataset are calculated
-                secondToFirst.setTime(t.startTimeJ2000 + 32 * 60 * 60 * 24);
-
-                // since months vary in length the time strings are set to the first of each month
-                std::string timeString{ nextTile.ISO8601() };
-                timeString[8] = '0';
-                timeString[9] = '1';
-                nextTile.setTime(timeString);
-
-                std::string timeString1{ nextNextTile.ISO8601() };
-                timeString1[8] = '0';
-                timeString1[9] = '1';
-                nextNextTile.setTime(timeString1);
-
-                std::string timeString2{ prevTile.ISO8601() };
-                timeString2[8] = '0';
-                timeString2[9] = '1';
-                prevTile.setTime(timeString2);
-
-                std::string timeString3{ secondToLast.ISO8601() };
-                timeString3[8] = '0';
-                timeString3[9] = '1';
-                secondToLast.setTime(timeString3);
-
-                std::string timeString4{ secondToFirst.ISO8601() };
-                timeString4[8] = '0';
-                timeString4[9] = '1';
-                secondToFirst.setTime(timeString4);
-            }
-            const int Size2 = timeStringify(t.timeFormat, nextTile, Buffer1);
-            const int Size3 = timeStringify(t.timeFormat, nextNextTile, Buffer2);
-            const int Size4 = timeStringify(t.timeFormat, prevTile, Buffer3);
-            try {//the necessary tile providers are loaded if they exist within the dataset's timespan 
-                if (secondToLast.j2000Seconds() > simulationTime.j2000Seconds() && secondToFirst.j2000Seconds() < simulationTime.j2000Seconds()) {
-                    currentInterpolateTileProvider->t2 = getTileProvider(t, std::string_view(Buffer1, Size2));
-                    currentInterpolateTileProvider->future = getTileProvider(t, std::string_view(Buffer2, Size3));
-                    currentInterpolateTileProvider->before = getTileProvider(t, std::string_view(Buffer3, Size4));
-                }
-                else if (secondToLast.j2000Seconds() < simulationTime.j2000Seconds() && t.endTimeJ2000 > simulationTime.j2000Seconds()) {
-                    currentInterpolateTileProvider->t2 = getTileProvider(t, std::string_view(Buffer1, Size2));
-                    currentInterpolateTileProvider->future = getTileProvider(t, std::string_view(Buffer, Size));
-                    currentInterpolateTileProvider->before = getTileProvider(t, std::string_view(Buffer3, Size4));
-                }
-                else if (secondToFirst.j2000Seconds() > simulationTime.j2000Seconds() && t.startTimeJ2000 < simulationTime.j2000Seconds()) {
-                    currentInterpolateTileProvider->t2 = getTileProvider(t, std::string_view(Buffer1, Size2));
-                    currentInterpolateTileProvider->future = getTileProvider(t, std::string_view(Buffer2, Size3));
-                    currentInterpolateTileProvider->before = getTileProvider(t, std::string_view(Buffer, Size));
-                }
-                else {
-                    currentInterpolateTileProvider->t2 = getTileProvider(t, std::string_view(Buffer, Size));
-                    currentInterpolateTileProvider->future = getTileProvider(t, std::string_view(Buffer, Size));
-                    currentInterpolateTileProvider->before = getTileProvider(t, std::string_view(Buffer, Size));
-                }
-                currentInterpolateTileProvider->timeT2 = nextTile.j2000Seconds();
-                currentInterpolateTileProvider->factor = (simulationTime.j2000Seconds() - tCopy.j2000Seconds()) / (nextTile.j2000Seconds() - tCopy.j2000Seconds());
-                if (currentInterpolateTileProvider->factor > 1)
-                    currentInterpolateTileProvider->factor = 1;
-                return  currentInterpolateTileProvider;
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERRORC("TemporalTileProvider", e.message);
-                return nullptr;
-            }
-            return  currentInterpolateTileProvider;
-        }
-    }
-    else {
+    if (!t.interpolation) {
         if (t.useFixedTime && !t.fixedTime.value().empty()) {
             try {
                 return getTileProvider(t, t.fixedTime.value());
@@ -501,10 +406,9 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
         else {
             Time tCopy(time);
             if (t.timeQuantizer.quantize(tCopy, true)) {
-                char Buffer[22];
-                const int size = timeStringify(t.timeFormat, tCopy, Buffer);
+                std::string_view timeStr = timeStringify(t.timeFormat, tCopy);
                 try {
-                    return getTileProvider(t, std::string_view(Buffer, size));
+                    return getTileProvider(t, timeStr);
                 }
                 catch (const ghoul::RuntimeError& e) {
                     LERRORC("TemporalTileProvider", e.message);
@@ -513,7 +417,113 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
             }
         }
     }
-    return nullptr;
+
+    Time tCopy(time);
+    if (!t.timeQuantizer.quantize(tCopy, true)) {
+        return nullptr;
+    }
+
+    Time simulationTime(time);
+    Time nextTile;
+    Time nextNextTile;
+    Time prevTile;
+    Time secondToLast;
+    Time secondToFirst;
+
+    std::string_view tCopyStr = timeStringify(t.timeFormat, tCopy);
+    try {
+        t.interpolateTileProvider->t1 = getTileProvider(t, tCopyStr);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("TemporalTileProvider", e.message);
+        return nullptr;
+    }
+    // if the images are for each hour
+    if (t.myResolution == "1h") {
+        // the second tile to interpolate between
+        nextTile.setTime(tCopy.j2000Seconds() + 60 * 60);
+        // the tile after the second tile
+        nextNextTile.setTime(tCopy.j2000Seconds() + 120 * 60);
+        // the tile before the first tile
+        prevTile.setTime(tCopy.j2000Seconds() - 60 * 60 + 1);
+        // to make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
+        secondToLast.setTime(t.endTimeJ2000 - 60 * 60);
+        secondToFirst.setTime(t.startTimeJ2000 + 60 * 60);
+    }
+    // if the images are for each month
+    if (t.myResolution == "1M") {
+        // the second tile to interpolate between
+        nextTile.setTime(tCopy.j2000Seconds() + 32 * 60 * 60 * 24);
+        // the tile after the second tile
+        nextNextTile.setTime(tCopy.j2000Seconds() + 64 * 60 * 60 * 24);
+        // the tile before the first tile
+        prevTile.setTime(tCopy.j2000Seconds() - 2 * 60 * 60 * 24);
+        // to make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
+        secondToLast.setTime(t.endTimeJ2000 - 2 * 60 * 60 * 24);
+        secondToFirst.setTime(t.startTimeJ2000 + 32 * 60 * 60 * 24);
+
+        // since months vary in length the time strings are set to the first of each month
+        auto setToFirstOfMonth = [](Time& time) {
+            std::string timeString = std::string(time.ISO8601());
+            timeString[8] = '0';
+            timeString[9] = '1';
+            time.setTime(timeString);
+        };
+
+        setToFirstOfMonth(nextTile);
+        setToFirstOfMonth(nextNextTile);
+        setToFirstOfMonth(prevTile);
+        setToFirstOfMonth(secondToLast);
+        setToFirstOfMonth(secondToFirst);
+    }
+
+    std::string_view nextTileStr = timeStringify(t.timeFormat, nextTile);
+    std::string_view nextNextTileStr = timeStringify(t.timeFormat, nextNextTile);
+    std::string_view prevTileStr = timeStringify(t.timeFormat, prevTile);
+    try {
+        // the necessary tile providers are loaded if they exist within the
+        // dataset's timespan 
+        if (secondToLast.j2000Seconds() > simulationTime.j2000Seconds() &&
+            secondToFirst.j2000Seconds() < simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, nextNextTileStr);
+            t.interpolateTileProvider->before = getTileProvider(t, prevTileStr);
+        }
+        else if (secondToLast.j2000Seconds() < simulationTime.j2000Seconds() &&
+                 t.endTimeJ2000 > simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->before = getTileProvider(t, prevTileStr);
+        }
+        else if (secondToFirst.j2000Seconds() > simulationTime.j2000Seconds() &&
+                 t.startTimeJ2000 < simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, nextNextTileStr);
+            t.interpolateTileProvider->before = getTileProvider(t, tCopyStr);
+        }
+        else {
+            t.interpolateTileProvider->t2 = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->future = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->before = getTileProvider(t, tCopyStr);
+        }
+        t.interpolateTileProvider->factor =
+            (simulationTime.j2000Seconds() - tCopy.j2000Seconds()) /
+            (nextTile.j2000Seconds() - tCopy.j2000Seconds());
+
+        if (t.interpolateTileProvider->factor > 1) {
+            t.interpolateTileProvider->factor = 1;
+        }
+        return t.interpolateTileProvider.get();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("TemporalTileProvider", e.message);
+        return nullptr;
+    }
 }
 
 void ensureUpdated(TemporalTileProvider& t) {
@@ -525,10 +535,10 @@ void ensureUpdated(TemporalTileProvider& t) {
 }
 
 std::string xmlValue(TemporalTileProvider& t, CPLXMLNode* node, const std::string& key,
-                        const std::string& defaultVal)
+                     const std::string& defaultVal, bool isOptional = false)
 {
     CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
-    if (!n) {
+    if (!n && !isOptional) {
         throw ghoul::RuntimeError(
             fmt::format("Unable to parse file {}. {} missing", t.filePath.value(), key)
         );
@@ -552,23 +562,18 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
         temporal::TimeFormat,
         "YYYY-MM-DDThh:mm:ssZ"
     );
-    std::string timeInterpolation;
-    if (xml.find("<OpenSpaceTimeInterpolation>linear</OpenSpaceTimeInterpolation>") != std::string::npos) {
-        timeInterpolation = xmlValue(t, node, temporal::TimeInterpolation, "none");
-        //timeInterpolation = "linear";
-    }
-    else {
-        timeInterpolation = "none";
-    }
+    std::string timeInterpolation = xmlValue(
+        t,
+        node,
+        temporal::TimeInterpolation,
+        "none",
+        true
+    );
+    t.colormap = xmlValue(t, node, temporal::TransferFunction, "none", true);
 
-    if (xml.find("<OpenSpaceTransferFunction>") != std::string::npos) {
-        t.colormap = xmlValue(t, node, temporal::TransferFunction, "none");
-        //timeInterpolation = "linear";
-    }
-    Time start;
-    start.setTime(std::move(timeStart));
-    Time end(Time::now());
-    Time endOfInterval(std::move(timeEnd));
+    Time start = Time(timeStart);
+    Time end = Time::now();
+    Time endOfInterval = Time(timeEnd);
     t.startTimeJ2000 = start.j2000Seconds();
     t.endTimeJ2000 = endOfInterval.j2000Seconds();
     if (timeEnd == "Yesterday") {
@@ -593,10 +598,8 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
         ));
     }
     t.timeFormat = ghoul::from_string<TemporalTileProvider::TimeFormatType>(timeIdFormat);
-    if (timeInterpolation == "linear")
-    {
-        t.interpolation = true;
-    }
+    t.interpolation = (timeInterpolation == "linear");
+
     CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
     if (gdalNode) {
         std::string gdalDescription = CPLSerializeXMLTree(gdalNode);
@@ -614,10 +617,10 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
 }
 
-bool readFilePath(TemporalTileProvider& t) {
+void readFilePath(TemporalTileProvider& t) {
     ZoneScoped
 
-    std::ifstream in(t.filePath.value().c_str());
+    std::ifstream in(t.filePath.value());
     std::string xml;
     if (in.is_open()) {
         // read file
@@ -638,7 +641,6 @@ bool readFilePath(TemporalTileProvider& t) {
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);
-    return true;
 }
 
 } // namespace
@@ -996,20 +998,20 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     }
     addProperty(fixedTime);
 
-    successfulInitialization = readFilePath(*this);
+    readFilePath(*this);
+    successfulInitialization = true;
 
     if (!successfulInitialization) {
         LERRORC("TemporalTileProvider", "Unable to read file " + filePath.value());
     }
     if (interpolation) {
-        interpolateTileProvider = new InterpolateTileProvider(dictionary);
+        interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         interpolateTileProvider->colormap = colormap;
         initialize(*interpolateTileProvider);
         ghoul::Dictionary dict;
-        std::string keyForDictionary = "FilePath";
-        dict.setValue(keyForDictionary, colormap);
-        //openspace::imgui::GUI mittgui;
-        interpolateTileProvider->singleImageProvider = new SingleImageProvider(dict);
+        dict.setValue("FilePath", colormap);
+        interpolateTileProvider->singleImageProvider =
+            std::make_unique<SingleImageProvider>(dict);
     }
 }
 
@@ -1123,15 +1125,13 @@ bool deinitialize(TileProvider& tp) {
 //
 // InterpolateTileProvider
 //
-InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&)
-{
+InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&) {
     ZoneScoped
-        type = Type::InterpolateTileProvider;
+    
+    type = Type::InterpolateTileProvider;
     glGenFramebuffers(1, &fbo);
-    // Generate VAO and VBO for Quad.
     glGenVertexArrays(1, &vaoQuad);
     glGenBuffers(1, &vboQuad);
-    // Bind VBO and VAO for Quad rendering.
     glBindVertexArray(vaoQuad);
     glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
     tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
@@ -1146,11 +1146,18 @@ InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&)
          1.f,  1.f, 1.f, 1.f
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    //vertex coordinates at location 0
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, nullptr);
+    // vertex coordinates at location 0
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     // texture coords at location 1
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(sizeof(GLfloat) * 2));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(GLfloat),
+        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
+    );
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -1160,107 +1167,129 @@ InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&)
         absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_fs.glsl")
     );
 }
+
 InterpolateTileProvider::~InterpolateTileProvider() {
     glDeleteFramebuffers(1, &fbo);
     glDeleteBuffers(1, &vboQuad);
     glDeleteVertexArrays(1, &vaoQuad);
 }
+
 Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
     ZoneScoped
-        TracyGpuZone("tile");
-    Tile prev = tile(*t1, tileIndex);//prev and next are the two tiles to interpolate between
+    TracyGpuZone("tile");
+    
+    // prev and next are the two tiles to interpolate between
+    Tile prev = tile(*t1, tileIndex);
     Tile next = tile(*t2, tileIndex);
-    Tile prevprev = tile(*before, tileIndex);//the tile before and the tile after the interpolation interval are loaded so the interpolation goes smoother
+    // the tile before and the tile after the interpolation interval are loaded so the
+    // interpolation goes smoother
+    Tile prevprev = tile(*before, tileIndex);
     Tile nextnext = tile(*future, tileIndex);
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
     
-    if (prev.texture && next.texture) {//if there is a previous texture and a next texture to interpolate between, do the interpolation
-        Tile ourTile;//Initializing the tile that will contian the interpolated texture
-        ghoul::opengl::Texture* writeTexture;//The texture that will contain the interpolated image
-        ghoul::opengl::Texture* colormapTexture = singleImageProvider->tile.texture;//The texture that will give the color for the interpolated texture
-        cache::ProviderTileHasher hashKey;
-        long long hkey = hashKey(key);
-        TileTextureInitData initData(//The data for initializing the texture
-            prev.texture->dimensions().x,
-            prev.texture->dimensions().y,
-            prev.texture->dataType(),
-            prev.texture->format(),
-            TileTextureInitData::PadTiles::No,
-            TileTextureInitData::ShouldAllocateDataOnCPU::No
-        );
-        bool tileExists = tileCache->exist(key);//Check if a tile exists for the given key in the tileCache
-        if (tileExists) {//If the tile already exists
-            ourTile = tileCache->get(key);//get the tile from the tilecache
-            writeTexture = ourTile.texture;//Use the texture from the tileCache
-        }
-        else { //first time
-            writeTexture = tileCache->texture(initData);//create a texture with the initialization data 
-            ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };//create a tile with the texture
-            tileCache->put(key, initData.hashKey, ourTile);//add it to the tilecache
-        }
-
-         // Saves current state
-        GLint currentFBO;
-        GLint viewport[4];
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
-        global::renderEngine->openglStateCache().viewport(viewport);
-        // Bind render texture to FBO.
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            *writeTexture, //*ourTile.texture,
-            0
-        );
-        glDisable(GL_BLEND);
-        GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, textureBuffers);
-        // Check that our framebuffer is ok.
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            std::cout << "error" << std::endl;
-        }
-        //Setup our own viewport settings
-        GLsizei w = static_cast<GLsizei>(writeTexture->width());  // ourTile.texture->width());
-        GLsizei h = static_cast<GLsizei>(writeTexture->height()); // ourTile.texture->height());
-        glViewport(0, 0, w, h);
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        GLint id;
-        glGetIntegerv(GL_CURRENT_PROGRAM, &id);
-        //Activate shader and bind uniforms
-        shaderProgram->activate();
-        ghoul::opengl::TextureUnit colormapUnit;
-        colormapUnit.activate();
-        colormapTexture->bind();
-        ghoul::opengl::TextureUnit prevUnit;
-        prevUnit.activate();
-        prev.texture->bind();
-        ghoul::opengl::TextureUnit nextUnit;
-        nextUnit.activate();
-        next.texture->bind();
-        shaderProgram->setUniform("blendFactor", factor);
-        shaderProgram->setUniform("colormapTexture", colormapUnit);
-        shaderProgram->setUniform("prevTexture", prevUnit);
-        shaderProgram->setUniform("nextTexture", nextUnit);
-        //Render to the texture
-        glBindVertexArray(vaoQuad);
-        glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
-        // Deactivate shader program (when rendering is completed(
-        shaderProgram->deactivate();
-        glUseProgram(id);
-        // Restores system state
-        glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        // Restores OpenGL Rendering State
-        global::renderEngine->openglStateCache().resetColorState();
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
-        global::renderEngine->openglStateCache().resetPolygonAndClippingState();
-        global::renderEngine->openglStateCache().resetViewportState();
-
-        return ourTile;
+    if (!prev.texture || !next.texture) {
+        return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
     }
-    return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+
+    // There is a previous and next texture to interpolate between so do the interpolation
+
+    // The texture that will give the color for the interpolated texture
+    ghoul::opengl::Texture* colormapTexture = singleImageProvider->tile.texture;
+    long long hkey = cache::ProviderTileHasher()(key);
+    // The data for initializing the texture
+    TileTextureInitData initData(
+        prev.texture->dimensions().x,
+        prev.texture->dimensions().y,
+        prev.texture->dataType(),
+        prev.texture->format(),
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::No
+    );
+
+    // Check if a tile exists for the given key in the tileCache
+    // Initializing the tile that will contian the interpolated texture
+    Tile ourTile;
+    // The texture that will contain the interpolated image
+    ghoul::opengl::Texture* writeTexture;
+    if (tileCache->exist(key)) {
+        // Get the tile from the tilecache
+        ourTile = tileCache->get(key);
+        // Use the texture from the tileCache
+        writeTexture = ourTile.texture;
+    }
+    else {
+        // Create a texture with the initialization data 
+        writeTexture = tileCache->texture(initData);
+        // Create a tile with the texture
+        ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
+        // Add it to the tilecache
+        tileCache->put(key, initData.hashKey, ourTile);
+    }
+
+    // Saves current state
+    GLint currentFBO;
+    GLint viewport[4];
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
+    global::renderEngine->openglStateCache().viewport(viewport);
+    // Bind render texture to FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        *writeTexture,
+        0
+    );
+    glDisable(GL_BLEND);
+    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, textureBuffers);
+    // Check that our framebuffer is ok
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LERRORC("TileProvider", "Incomplete framebuffer");
+    }
+    // Setup our own viewport settings
+    GLsizei w = static_cast<GLsizei>(writeTexture->width());
+    GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    glViewport(0, 0, w, h);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    GLint id;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+    // Activate shader and bind uniforms
+    shaderProgram->activate();
+    shaderProgram->setUniform("blendFactor", factor);
+    
+    ghoul::opengl::TextureUnit colormapUnit;
+    colormapUnit.activate();
+    colormapTexture->bind();
+    shaderProgram->setUniform("colormapTexture", colormapUnit);
+
+    ghoul::opengl::TextureUnit prevUnit;
+    prevUnit.activate();
+    prev.texture->bind();
+    shaderProgram->setUniform("prevTexture", prevUnit);
+
+    ghoul::opengl::TextureUnit nextUnit;
+    nextUnit.activate();
+    next.texture->bind();
+    shaderProgram->setUniform("nextTexture", nextUnit);
+
+    // Render to the texture
+    glBindVertexArray(vaoQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
+    // Deactivate shader program (when rendering is completed)
+    shaderProgram->deactivate();
+    glUseProgram(id);
+    // Restores system state
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetColorState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
+    global::renderEngine->openglStateCache().resetViewportState();
+
+    return ourTile;
 }
 
 

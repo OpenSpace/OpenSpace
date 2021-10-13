@@ -108,23 +108,20 @@ struct SingleImageProvider : public TileProvider {
 struct InterpolateTileProvider : public TileProvider {
     InterpolateTileProvider(const ghoul::Dictionary&);
     virtual ~InterpolateTileProvider();
+
     Tile calculateTile(const TileIndex&);
-    TileProvider* before;
-    TileProvider* t1;
-    TileProvider* t2;
-    TileProvider* future;
-    double timeT1;
-    double timeT2;
-    float factor;
+    TileProvider* before = nullptr;
+    TileProvider* t1 = nullptr;
+    TileProvider* t2 = nullptr;
+    TileProvider* future = nullptr;
+    float factor = 1.f;
     GLuint vaoQuad = 0;
     GLuint vboQuad = 0;
     GLuint fbo = 0;
-    int renderEverySpecificIteration = 2;
-    std::unordered_map<long long, int> renderIterations;
     std::string colormap;
     std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
-    SingleImageProvider* singleImageProvider;
-    cache::MemoryAwareTileCache* tileCache;
+    std::unique_ptr<SingleImageProvider> singleImageProvider;
+    cache::MemoryAwareTileCache* tileCache = nullptr;
 };
 
 struct TextTileProvider : public TileProvider {
@@ -215,7 +212,7 @@ struct TemporalTileProvider : public TileProvider {
 
     std::string myResolution;
     bool successfulInitialization = false;
-    InterpolateTileProvider* interpolateTileProvider;
+    std::unique_ptr<InterpolateTileProvider> interpolateTileProvider;
 };
 
 
