@@ -45,6 +45,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/fieldlinessequence_vs.glsl
   shaders/fieldlinessequence_fs.glsl
+  shaders/movingfieldlines_vs.glsl
+  shaders/movingfieldlines_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

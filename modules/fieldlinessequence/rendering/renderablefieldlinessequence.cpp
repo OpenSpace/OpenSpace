@@ -953,10 +953,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         textureUnit.activate();
         _transferFunction->bind(); // Calls update internally
         _shaderProgram->setUniform("colorTable", textureUnit);
-        _shaderProgram->setUniform(
-            "colorTableRange",
-            _colorTableRanges[_colorQuantity]
-        );
+        _shaderProgram->setUniform("colorTableRange", _colorTableRanges[_colorQuantity]);
     }
 
     if (_maskingEnabled) {

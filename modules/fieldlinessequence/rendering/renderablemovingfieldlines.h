@@ -29,6 +29,12 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <openspace/rendering/transferfunction.h>
+
 
 
 
@@ -50,16 +56,46 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    bool getStatesFromCdfFiles();
+    bool getStateFromCdfFiles();
+    void updateVertexPositionBuffer();
+    void updateVertexColorBuffer();
 
     struct Mover {
 
     };
 
+    enum class ColorMethod {
+        Uniform = 0,
+        ByQuantity = 1
+    };
+
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
+    
+    // Group to hold the color properties
+    properties::PropertyOwner _colorGroup;
+    // Uniform or transfer function
+    properties::OptionProperty _colorMethod;
+    // Uniform Field Line Color
+    properties::Vec4Property _colorUniform;
+    // Values represents min & max values represented in the color table
+    std::vector<glm::vec2> _colorTableRanges;
+    // Index of the extra quantity to color lines by
+    properties::OptionProperty _colorQuantity;
+    // Used to save property for later initialization
+    int _colorQuantityTemp = 0;
+    // Color table/transfer function min and max range
+    properties::Vec2Property _colorQuantityMinMax;
+    // Paths to color tables. One for each 'extraQuantity'
+    std::vector<std::string> _colorTablePaths;
+    // Color table/transfer function for "By Quantity" coloring
+    properties::StringProperty _colorTablePath;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+    // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
+    std::unique_ptr<TransferFunction> _transferFunction;
+    // True when new state is loaded or user change which quantity to color the lines by
+    bool _shouldUpdateColorBuffer = false;
     // OpenGL Vertex Array Object
     GLuint _vertexArrayObject = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
