@@ -357,7 +357,9 @@ constexpr double convertUnit(DistanceUnit fromUnit, DistanceUnit toUnit) {
     return convertMeters(toMeter(fromUnit), toUnit);
 }
 
-constexpr double convertDistance(double distance, DistanceUnit fromUnit, DistanceUnit toUnit) {
+constexpr double convertDistance(double distance, DistanceUnit fromUnit,
+                                 DistanceUnit toUnit)
+{
     return distance * convertUnit(fromUnit, toUnit);
 }
 

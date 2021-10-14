@@ -27,6 +27,8 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -215,7 +217,7 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             nConnectionsMessageReceived(message.content);
             break;
         default:
-            //unknown message type
+            // unknown message type
             break;
     }
 }
@@ -259,8 +261,7 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
@@ -290,8 +291,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            global::navigationHandler->keyframeNavigator().addKeyframe(convertedTimestamp,
-                                                                      pose);
+            global::navigationHandler->keyframeNavigator().addKeyframe(
+                convertedTimestamp,
+                pose
+            );
             break;
         }
         case datamessagestructures::Type::TimelineData: {
@@ -359,10 +362,9 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
- {
+void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
     if (message.size() < 2 * sizeof(uint32_t)) {
-        LERROR("Malformed connection status message.");
+        LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
@@ -376,7 +378,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     pointer += sizeof(uint32_t);
 
     if (hostNameSize > message.size() - pointer) {
-        LERROR("Malformed connection status message.");
+        LERROR("Malformed connection status message");
         return;
     }
 
@@ -387,7 +389,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     pointer += hostNameSize;
 
     if (status > ParallelConnection::Status::Host) {
-        LERROR("Invalid status.");
+        LERROR("Invalid status");
         return;
     }
 
@@ -410,7 +412,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
 void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
 {
     if (message.size() < sizeof(uint32_t)) {
-        LERROR("Malformed host info message.");
+        LERROR("Malformed host info message");
         return;
     }
     const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(&message[0]));
@@ -532,9 +534,54 @@ void ParallelPeer::preSynchronization() {
 
 void ParallelPeer::setStatus(ParallelConnection::Status status) {
     if (_status != status) {
+        ParallelConnection::Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
+
+
+        EventEngine* ee = global::eventEngine;
+        const bool isConnected =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost ||
+            status == ParallelConnection::Status::Host;
+        const bool wasConnected =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost ||
+            prevStatus == ParallelConnection::Status::Host;
+        const bool isDisconnected = status == ParallelConnection::Status::Disconnected;
+        const bool wasDisconnected =
+            prevStatus == ParallelConnection::Status::Disconnected;
+        const bool isHost = status == ParallelConnection::Status::Host;
+        const bool wasHost = prevStatus == ParallelConnection::Status::Host;
+        const bool isClient =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost;
+        const bool wasClient =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost;
+
+
+        if (isDisconnected && wasConnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Lost
+            );
+        }
+        if (isConnected && wasDisconnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Established
+            );
+        }
+        if (isHost && (wasClient || wasDisconnected)) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipGained
+            );
+        }
+        if ((isClient || isDisconnected) && wasHost) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipLost
+            );
+        }
     }
     if (isHost()) {
         global::timeManager->addTimeJumpCallback([this]() {

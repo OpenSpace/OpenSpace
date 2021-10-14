@@ -109,8 +109,8 @@ namespace {
             InstrumentTimes [[codegen::key("instrument-times")]],
             ImageAndInstrumentTimes [[codegen::key("image-and-instrument-times")]]
         };
-        // This value determines which type of sequencer is used for generating image 
-        // schedules. The 'playbook' is using a custom format designed by the New Horizons 
+        // This value determines which type of sequencer is used for generating image
+        // schedules. The 'playbook' is using a custom format designed by the New Horizons
         // team, the 'image-sequence' uses lbl files from a directory, and the 'hybrid'
         // uses both methods
         std::optional<Type> sequenceType;
@@ -128,7 +128,7 @@ namespace {
         // SPICE integer
         std::string target [[codegen::annotation("A SPICE name of the observed object")]];
 
-        // The aberration correction that is supposed to be used for the projection. The 
+        // The aberration correction that is supposed to be used for the projection. The
         // values for the correction correspond to the SPICE definition as described in
         // ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html
         std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S",
@@ -137,18 +137,18 @@ namespace {
         // The list of potential targets that are involved with the image projection
         std::optional<std::vector<std::string>> potentialTargets;
 
-        // Determines whether the object requires a self-shadowing algorithm. This is 
-        // necessary if the object is concave and might cast a shadow on itself during 
+        // Determines whether the object requires a self-shadowing algorithm. This is
+        // necessary if the object is concave and might cast a shadow on itself during
         // presentation. The default value is 'false'
         std::optional<bool> textureMap;
 
-        // Determines whether the object requires a self-shadowing algorithm. This is 
-        // necessary if the object is concave and might cast a shadow on itself during 
+        // Determines whether the object requires a self-shadowing algorithm. This is
+        // necessary if the object is concave and might cast a shadow on itself during
         // presentation. The default value is 'false'
         std::optional<bool> shadowMap;
 
-        // Sets the desired aspect ratio of the projected texture. This might be necessary 
-        // as planets usually have 2x1 aspect ratios, whereas this does not hold for 
+        // Sets the desired aspect ratio of the projected texture. This might be necessary
+        // as planets usually have 2x1 aspect ratios, whereas this does not hold for
         // non-planet objects (comets, asteroids, etc). The default value is '1.0'
         std::optional<float> aspectRatio;
 

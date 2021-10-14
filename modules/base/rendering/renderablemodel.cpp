@@ -649,8 +649,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
             glm::scale(
                 glm::dmat4(_modelTransform.value()),
@@ -770,8 +770,9 @@ void RenderableModel::update(const UpdateData& data) {
         // be converted to the animation time range, so the animation knows which
         // keyframes it should interpolate between for each frame. The conversion is
         // done in different ways depending on the animation mode.
-        // Explanation: s indicates start time, / indicates animation is played once forwards,
-        // \ indicates animation is played once backwards, time moves to the right.
+        // Explanation: s indicates start time, / indicates animation is played once
+        // forwards, \ indicates animation is played once backwards, time moves to the
+        // right.
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time

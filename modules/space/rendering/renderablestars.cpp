@@ -529,35 +529,35 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _dataMapping.bvColor = p.dataMapping.bv.value_or("");
     _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.bvColor);
-    
+
     _dataMapping.luminance = p.dataMapping.luminance.value_or("");
     _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.luminance);
-    
+
     _dataMapping.absoluteMagnitude = p.dataMapping.absoluteMagnitude.value_or("");
     _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.absoluteMagnitude);
-    
+
     _dataMapping.apparentMagnitude = p.dataMapping.apparentMagnitude.value_or("");
     _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.apparentMagnitude);
-    
+
     _dataMapping.vx = p.dataMapping.vx.value_or("");
     _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.vx);
-    
+
     _dataMapping.vy = p.dataMapping.vy.value_or("");
     _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.vy);
-    
+
     _dataMapping.vz = p.dataMapping.vz.value_or("");
     _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.vz);
-    
+
     _dataMapping.speed = p.dataMapping.speed.value_or("");
     _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
     _dataMappingContainer.addProperty(_dataMapping.speed);
-    
+
     addPropertySubOwner(_dataMappingContainer);
 
     _speckFile = p.speckFile.string();

@@ -462,7 +462,7 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
             o.offender = key;
             o.reason = TestResult::Offense::Reason::MissingKey;
             res.offenses.push_back(o);
-            return res;            
+            return res;
         }
     }
 }
@@ -498,7 +498,7 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                     o.offender = key;
                     o.reason = TestResult::Offense::Reason::WrongType;
                     res.offenses.push_back(o);
-                    return res;  
+                    return res;
                 }
             }
             else {
@@ -508,7 +508,7 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 res.offenses.push_back(o);
-                return res;  
+                return res;
             }
         }
         else {
@@ -565,7 +565,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 res.offenses.push_back(o);
-                return res;                
+                return res;
             }
         }
         else {
@@ -575,7 +575,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
             o.offender = key;
             o.reason = TestResult::Offense::Reason::MissingKey;
             res.offenses.push_back(o);
-            return res;                
+            return res;
         }
     }
 }

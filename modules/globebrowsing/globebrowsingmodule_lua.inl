@@ -301,9 +301,8 @@ int flyToGeo(lua_State* L) {
         altitude
     );
 
-    using namespace std::string_literals;
     ghoul::Dictionary instruction;
-    instruction.setValue("TargetType", "Node"s);
+    instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
 

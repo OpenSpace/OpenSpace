@@ -30,6 +30,8 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
@@ -258,7 +260,7 @@ namespace {
         "Enabled Font Color",
         "The font color used for enabled options."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
@@ -397,7 +399,7 @@ RenderEngine::RenderEngine()
 
     _enabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     addProperty(_enabledFontColor);
-    
+
     _disabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     addProperty(_disabledFontColor);
 }
@@ -1105,8 +1107,11 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     s->initialize();
     s->initializeGL();
 
-    global::screenSpaceRootPropertyOwner->addPropertySubOwner(s.get());
+    ScreenSpaceRenderable* ssr = s.get();
+    global::screenSpaceRootPropertyOwner->addPropertySubOwner(ssr);
     global::screenSpaceRenderables->push_back(std::move(s));
+
+    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableAdded>(ssr);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
@@ -1119,9 +1124,10 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     if (it != global::screenSpaceRenderables->end()) {
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
-
         global::screenSpaceRenderables->erase(it);
     }
+
+    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {
@@ -1131,8 +1137,7 @@ void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {
     }
 }
 
-ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
-                                                            const std::string& identifier)
+ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(const std::string& identifier)
 {
     const auto it = std::find_if(
         global::screenSpaceRenderables->begin(),
