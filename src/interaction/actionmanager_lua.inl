@@ -200,7 +200,7 @@ int actions(lua_State* L) {
             action.synchronization == interaction::Action::IsSynchronized::Yes
         );
         lua_settable(L, -3);
-        
+
         lua_settable(L, -3);
     }
 

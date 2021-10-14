@@ -80,8 +80,8 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
 }
 
 NavigationState::NavigationState(std::string anchor_, std::string aim_,
-                                 std::string referenceFrame_, glm::dvec3 position_, 
-                                 std::optional<glm::dvec3> up_, 
+                                 std::string referenceFrame_, glm::dvec3 position_,
+                                 std::optional<glm::dvec3> up_,
                                  double yaw_, double pitch_)
     : anchor(std::move(anchor_))
     , aim(std::move(aim_))

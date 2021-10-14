@@ -151,7 +151,7 @@ int renderCameraPath(lua_State* L) {
     };
 
     auto addDirectionLine = [addPoint, addLineBetweenPoints]
-                            (const std::string& pointId, const CameraPose& p, 
+                            (const std::string& pointId, const CameraPose& p,
                              double lineLength)
     {
         const glm::dvec3 dir = glm::normalize(p.rotation * glm::dvec3(0.0, 0.0, -1.0));
@@ -291,7 +291,7 @@ int removePathControlPoints(lua_State* L) {
 int addCartesianAxes(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::addCartesianAxes");
 
-    auto [nodeIdentifier, scale] = 
+    auto [nodeIdentifier, scale] =
         ghoul::lua::values<std::string, std::optional<double>>(L);
 
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeIdentifier);

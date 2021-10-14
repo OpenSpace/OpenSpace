@@ -122,7 +122,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
 
     _altitude = p.altitude.value_or(_altitude);
     // @TODO (emmbr) uncomment when ranges with negative values are supported
-    //_altitude.setExponent(8.f); 
+    //_altitude.setExponent(8.f);
     _altitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_altitude);
 
@@ -171,7 +171,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         const_cast<GlobeTranslation*>(this)->fillAttachedNode();
         _positionIsDirty = true;
     }
-    
+
     if (!_positionIsDirty) {
         return _position;
     }

@@ -1979,9 +1979,13 @@ bool SessionRecording::processCameraKeyframe(double now) {
     }
 
     // getPrevTimestamp();
-    double prevTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrPrev].t3stamps);
+    double prevTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrPrev].t3stamps
+    );
     // getNextTimestamp();
-    double nextTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrNext].t3stamps);
+    double nextTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrNext].t3stamps
+    );
 
     double t;
     if ((nextTime - prevTime) < 1e-7) {

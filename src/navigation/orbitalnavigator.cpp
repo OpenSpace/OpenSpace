@@ -463,7 +463,9 @@ OrbitalNavigator::OrbitalNavigator()
     addPropertySubOwner(_linearFlight);
     addPropertySubOwner(_idleBehavior);
 
-    _idleBehaviorDampenInterpolator.setTransferFunction(ghoul::quadraticEaseInOut<double>);
+    _idleBehaviorDampenInterpolator.setTransferFunction(
+        ghoul::quadraticEaseInOut<double>
+    );
     _idleBehavior.dampenInterpolationTime.onChange([&]() {
         _idleBehaviorDampenInterpolator.setInterpolationTime(
             _idleBehavior.dampenInterpolationTime
@@ -1631,8 +1633,8 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
             break;
         case IdleBehavior::Behavior::OrbitAtConstantLat: {
             // Assume that "north" coincides with the local z-direction
-            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own 
-            // north/up, so that we can query this information rather than assuming it. 
+            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
+            // north/up, so that we can query this information rather than assuming it.
             // The we could also combine this idle behavior with the next
             const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
             orbitAroundAxis(north, deltaTime, position, globalRotation, speedScale);
@@ -1672,14 +1674,14 @@ void OrbitalNavigator::orbitAnchor(double deltaTime, glm::dvec3& position,
     position += rotationDiffVec3;
 }
 
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime, 
+void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double deltaTime,
                                        glm::dvec3& position, glm::dquat& globalRotation,
                                        double speedScale)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set!");
 
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldCoords = 
+    const glm::dvec3 axisInWorldCoords =
         glm::dmat3(modelTransform) * glm::normalize(axis);
 
     // Compute rotation to be applied around the axis

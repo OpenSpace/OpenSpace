@@ -280,7 +280,7 @@ ghoul::Dictionary toParameter(const Event& e) {
                 case EventParallelConnection::State::Lost:
                     d.setValue("State", "Lost"s);
                     break;
-                case EventParallelConnection::State::HostshipGained:                        
+                case EventParallelConnection::State::HostshipGained:
                     d.setValue("State", "HostshipGained"s);
                     break;
                 case EventParallelConnection::State::HostshipLost:

@@ -86,9 +86,8 @@ int goTo(lua_State* L) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
 
-    using namespace std::string_literals;
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", "Node"s);
+    insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     if (useUpFromTargetOrDuration.has_value()) {
         if (std::holds_alternative<bool>(*useUpFromTargetOrDuration)) {
@@ -134,9 +133,8 @@ int goToHeight(lua_State* L) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
 
-    using namespace std::string_literals;
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", "Node"s);
+    insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
     if (useUpFromTargetOrDuration.has_value()) {
@@ -190,9 +188,8 @@ int goToNavigationState(lua_State* L) {
         );
     }
 
-    using namespace std::string_literals;
     ghoul::Dictionary instruction;
-    instruction.setValue("TargetType", "NavigationState"s);
+    instruction.setValue("TargetType", std::string("NavigationState"));
     instruction.setValue("NavigationState", navigationState);
 
     if (duration.has_value()) {

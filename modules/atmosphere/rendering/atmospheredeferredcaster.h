@@ -114,9 +114,9 @@ private:
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
-        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix, 
+        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix,
         modelTransformMatrix, projectionToModelTransform, viewToWorldMatrix,
-        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture, 
+        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;

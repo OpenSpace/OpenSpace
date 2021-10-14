@@ -41,7 +41,7 @@ public:
      * no event exists. To navigate the full list of events, you can access the returned
      * Event's next function. If the end of the list is reached, the next pointer will be
      * a nullptr
-     * 
+     *
      * \return The first event stored in the EventEngine or nullptr if no event exists
      */
     events::Event* firstEvent() const;
@@ -51,7 +51,7 @@ public:
      * constructor. An example of usage is
      * <code>engine.publishEvent<MyEvent>("a", 2.0);</code> which would call the
      * constructor of \c MyEvent with a <code>const char*</code> and \c double parameter.
-     * 
+     *
      * \param args The arguments that are passed to the constructor of T
      * \tparam T The subclass of Event that is to be published
      */
@@ -81,7 +81,7 @@ public:
 
     /**
      * Removing registration for a type/action combination.
-     * 
+     *
      * \param type The type of the action that should be unregistered
      * \param actionIdentifier The identifier of the action that should be unregistered
      * \param filter The optional filter applied to the event-action combination
@@ -97,7 +97,7 @@ public:
     void triggerActions() const;
 
     static scripting::LuaLibrary luaLibrary();
-    
+
 private:
     /// The storage space in which Events are stored
     ghoul::MemoryPool<4096> _memory;

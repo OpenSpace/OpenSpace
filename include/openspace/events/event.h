@@ -52,7 +52,7 @@ struct Event {
     //     to see all events.
     //  4. Add a new case into the logAllEvents function that handles the new enum entry
     //  5. If the new event type has any parameters it takes in its constructor, go into
-    //     the `toParameter` function and add a case label for the new enum type and 
+    //     the `toParameter` function and add a case label for the new enum type and
     //     return a dictionary with these parameters. This dictionary is passed to actions
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
@@ -107,7 +107,7 @@ void logAllEvents(const Event* e);
  * This event is created whenever a new scene graph node is added to the system.  By the
  * time this event is signalled, the scene graph node has already been created and added
  * to the scene.
- * 
+ *
  * \param Node The identifier of the node that was added
  */
 struct EventSceneGraphNodeAdded : public Event {
@@ -125,7 +125,7 @@ struct EventSceneGraphNodeAdded : public Event {
  */
 struct EventSceneGraphNodeRemoved : public Event {
     static const Type Type = Event::Type::SceneGraphNodeRemoved;
-    
+
     explicit EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
     const tstring node;
 };
@@ -164,7 +164,7 @@ struct EventProfileLoadingFinished : public Event {
  * This event is created whenever some information about the application shutdown sequence
  * changes. This can either be that the seqeuence started, was aborted, or is finished,
  * which means that OpenSpace is just about the shutdown.
- * 
+ *
  * \param State The next state of the application shutdown sequence;  is one of `Started`,
  *        `Aborted`,  or `Finished`
  */
@@ -184,7 +184,7 @@ struct EventApplicationShutdown : public Event {
 /**
  * This event is created when a new screenspace renderable has been created.  By the time
  * this event is craeted, the screenspace renderable is already registered and available.
- * 
+ *
  * \param Renderable The identifier of the new screenspace renderable that was just added
  *        to the system
  */
@@ -199,7 +199,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
  * This event is created when a screenspace renderable has been removed from the system.
  * When this event is created, the screenspace renderable has already been removed and is
  * no longer available
- * 
+ *
  * \param Renderable The identifier of the screenspace renderable that was removed
  */
 struct EventScreenSpaceRenderableRemoved : public Event {
@@ -215,11 +215,13 @@ struct EventScreenSpaceRenderableRemoved : public Event {
  * Each scene graph node has an interaction sphere radius that serves as the reference
  * distance for all spheres.
 ```
-Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in middle, and ')' are spherical boundaries. The approach factor, reach factor, and interaction sphere radius are all taken from the current focus node.
+Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
+middle, and ')' are spherical boundaries. The approach factor, reach factor, and
+interaction sphere radius are all taken from the current focus node.
 
 |<------------------->|  Approach factor * Interaction sphere
              |<------>|  Reach Factor * Interaction sphere
-      
+
 (                       (           O          )                       )
 ^                       ^                      ^                       ^
 Exiting                 Receding               Reaching                Approaching
@@ -227,7 +229,7 @@ Exiting                 Receding               Reaching                Approachi
  *
  * \param Node The name of the node the camera is transitioning relative to. Currently is
  *        always the same as the camera's focus node
- * \param Transition The transition type that the camera just finished; is one of 
+ * \param Transition The transition type that the camera just finished; is one of
  *        `Approaching`, `Reaching`, `Receding`, or `Exiting`
  */
 struct EventCameraFocusTransition : public Event {
@@ -293,7 +295,7 @@ struct EventPlanetEclipsed : public Event {
 /**
  * This event is created when the interpolation of a property value is finished. If the
  * interpolation time of a property change is 0s, this event is not fired
- * 
+ *
  * \param Property The URI of the property whose interpolation has finished
  */
 struct EventInterpolationFinished : public Event {
@@ -307,7 +309,7 @@ struct EventInterpolationFinished : public Event {
  * This event is created when the camera changes focus nodes. Even if the camera position
  * is interpolated, the node change happens instantaneously and the event is fired at the
  * same time.
- * 
+ *
  * \param OldNode The identifier of the scene graph node which was the old focus node
  * \param NewNode The identifier of the scene graph node that is the new focus node
  */
@@ -321,7 +323,7 @@ struct EventFocusNodeChanged : public Event {
 
 /**
  * This event is created when a layer is added to to a globe.
- * 
+ *
  * \param Globe The identifier of the globe to which the layer is added
  * \param Group The identifier of the layer group to which the layer is added
  * \param Layer The identifier of the layer that was added
@@ -329,7 +331,7 @@ struct EventFocusNodeChanged : public Event {
 struct EventLayerAdded : public Event {
     static const Type Type = Event::Type::LayerAdded;
 
-    explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_, 
+    explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
         std::string_view layer_);
     const tstring node;
     const tstring layerGroup;
@@ -338,7 +340,7 @@ struct EventLayerAdded : public Event {
 
 /**
  * This event is created when a layer is removed from a globe.
- * 
+ *
  * \param Globe The identifier of the globe from which the layer is removed
  * \param Group The identifier of the layer group from which the layer is removed
  * \param Layer The identifier of the layer that was removed
@@ -346,7 +348,7 @@ struct EventLayerAdded : public Event {
 struct EventLayerRemoved : public Event {
     static const Type Type = Event::Type::LayerRemoved;
 
-    explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_, 
+    explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
         std::string_view layer_);
     const tstring node;
     const tstring layerGroup;
@@ -356,7 +358,7 @@ struct EventLayerRemoved : public Event {
 /**
  * This event is created when something regarding a session recording playback changes.
  * The event contains information about the new state of the session recording subsystem.
- * 
+ *
  * \param State The new state of the session recording; one of `Started`, `Paused`,
  *        `Resumed`, `Finished`
  */
