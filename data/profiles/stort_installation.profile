@@ -37,7 +37,7 @@
     "installationspecific/others/mars_moons/phobos",
     "installationspecific/others/olympus_mons_node",
     "installationspecific/stort_state_machine",
-    "installationspecific/substates/missions/cassini/screenspace_renderables",
+    "installationspecific/screenspace_renderables",
     "installationspecific/substates/missions/cassini/trail",
     "installationspecific/substates/missions/rover_assets/mars_curiosity_path",
     "installationspecific/substates/missions/rover_assets/mars_perseverance_path",
