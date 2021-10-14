@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/scene/scene.h>
@@ -226,7 +227,7 @@ int time_interpolateTogglePause(lua_State* L) {
  */
 int time_pauseToggleViaKeyboard(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_pauseToggleViaKeyboard");
-    
+
     if (global::sessionRecording->isPlayingBack()) {
         bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
         global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
@@ -404,6 +405,18 @@ int time_currentWallTime(lua_State* L) {
     return 1;
 }
 
+/**
+ * \ingroup LuaScripts
+ * currentTime():
+ * Returns the current application time as the number of seconds since the OpenSpace
+ * application started
+ */
+int time_currentApplicationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_currentApplicationTime");
+    ghoul::lua::push(L, global::windowDelegate->applicationTime());
+    return 1;
+}
+
 int time_advancedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::time_advanceTime");
     auto [base, change] =
@@ -447,24 +460,29 @@ int time_advancedTime(lua_State* L) {
             }
         );
 
-        double value = std::stod(std::string(modifier.begin(), it));
+        try {
+            double value = std::stod(std::string(modifier.begin(), it));
+            std::string uName = std::string(it, modifier.end());
 
-        std::string unitName = std::string(it, modifier.end());
+            TimeUnit unit = TimeUnit::Second;
+            if (uName == "s") { unit = TimeUnit::Second; }
+            else if (uName == "m") { unit = TimeUnit::Minute; }
+            else if (uName == "h") { unit = TimeUnit::Hour; }
+            else if (uName == "d") { unit = TimeUnit::Day; }
+            else if (uName == "M") { unit = TimeUnit::Month; }
+            else if (uName == "y") { unit = TimeUnit::Year; }
+            else {
+                return ghoul::lua::luaError(L, fmt::format("Unknown unit '{}'", uName));
+            }
 
-        TimeUnit unit = TimeUnit::Second;
-        if (unitName == "s")      { unit = TimeUnit::Second; }
-        else if (unitName == "m") { unit = TimeUnit::Minute; }
-        else if (unitName == "h") { unit = TimeUnit::Hour; }
-        else if (unitName == "d") { unit = TimeUnit::Day; }
-        else if (unitName == "M") { unit = TimeUnit::Month; }
-        else if (unitName == "y") { unit = TimeUnit::Year; }
-        else {
-            return ghoul::lua::luaError(L, fmt::format("Unknown unit '{}'", unitName));
+            dt = convertTime(value, unit, TimeUnit::Second);
+            if (isNegative) {
+                dt *= -1.0;
+            }
         }
-
-        dt = convertTime(value, unit, TimeUnit::Second);
-        if (isNegative) {
-            dt *= -1.0;
+        catch (...) {
+            return ghoul::lua::luaError(L, fmt::format("Error parsing relative time "
+                "offset '{}'", modifier));
         }
     }
 

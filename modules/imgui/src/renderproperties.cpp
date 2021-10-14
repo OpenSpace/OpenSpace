@@ -270,7 +270,10 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 void renderListProperty(const std::string& name, const std::string& fullIdentifier,
                         const std::string& stringValue, IsRegularProperty isRegular)
 {
-    ghoul_assert(stringValue.size() > 2, "an empty list should have the string value '[]'");
+    ghoul_assert(
+        stringValue.size() > 2,
+        "an empty list should have the string value '[]'"
+    );
 
     // Remove brackets from the string value
     std::string value = stringValue.substr(1, stringValue.size() - 2);

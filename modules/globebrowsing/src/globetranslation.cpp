@@ -105,7 +105,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
-    , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
+    , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -121,7 +121,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_longitude);
 
     _altitude = p.altitude.value_or(_altitude);
-    _altitude.setExponent(8.f);
+    // @TODO (emmbr) uncomment when ranges with negative values are supported
+    //_altitude.setExponent(8.f);
     _altitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_altitude);
 
@@ -152,6 +153,15 @@ void GlobeTranslation::setUpdateVariables() {
     requireUpdate();
 }
 
+void GlobeTranslation::update(const UpdateData& data) {
+    if (_useHeightmap) {
+        // If we use the heightmap, we have to compute the height every frame
+        setUpdateVariables();
+    }
+
+    Translation::update(data);
+}
+
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     if (!_attachedNode) {
         // @TODO(abock): The const cast should be removed on a redesign of the translation
@@ -159,11 +169,6 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         //               away is fine as the factories that create the translations don't
         //               create them as constant objects
         const_cast<GlobeTranslation*>(this)->fillAttachedNode();
-        _positionIsDirty = true;
-    }
-
-    if (_useHeightmap) {
-        // If we use the heightmap, we have to compute the height every frame
         _positionIsDirty = true;
     }
 

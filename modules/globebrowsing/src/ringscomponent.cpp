@@ -64,7 +64,8 @@ namespace {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
-        "ringTextureTransparency", "shadowMatrix", "shadowMapTexture", "zFightingPercentage"
+        "ringTextureTransparency", "shadowMatrix", "shadowMapTexture",
+        "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 3> GeomUniformNames = {
@@ -413,7 +414,10 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 modelViewProjectionTransform
             );
             _shader->setUniform(_uniformCacheAdvancedRings.textureOffset, _offset);
-            _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.colorFilterValue,
+                _colorFilter
+            );
             _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
 
@@ -496,7 +500,10 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
             ghoul::opengl::TextureUnit shadowMapUnit;
             shadowMapUnit.activate();
             glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
-            _shader->setUniform(_uniformCacheAdvancedRings.shadowMapTexture, shadowMapUnit);
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.shadowMapTexture,
+                shadowMapUnit
+            );
 
             glEnable(GL_DEPTH_TEST);
             glEnablei(GL_BLEND, 0);

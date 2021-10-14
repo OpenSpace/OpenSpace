@@ -28,6 +28,13 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scene.h>
+
 #include <ghoul/opengl/programobject.h>
 #include <numeric>
 #include <optional>

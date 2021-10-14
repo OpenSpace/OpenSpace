@@ -31,8 +31,8 @@
 #include <optional>
 #include <vector>
 
-namespace openspace { 
-    struct CameraPose; 
+namespace openspace {
+    struct CameraPose;
 } // namespace openspace
 
 namespace openspace::interaction {
@@ -44,10 +44,10 @@ public:
         Linear,
         ZoomOutOverview,
         AvoidCollisionWithLookAt // @TODO (2021-08-13, emmbr) This type right now leads
-                                 // to rapid rotations, but is useful in specific 
-                                 // scenarios, e.g. close to surfaces. Later we want to 
+                                 // to rapid rotations, but is useful in specific
+                                 // scenarios, e.g. close to surfaces. Later we want to
                                  // remove it, and create a curve type that looks nicely
-                                 // at the targets when moving, avoids collisions and 
+                                 // at the targets when moving, avoids collisions and
                                  // doesn't introduce sudden large changes in rotation
     };
 
@@ -63,21 +63,21 @@ public:
     double pathLength() const;
 
     /**
-     * Return a vector of positions corresponding to the control points of the path's 
+     * Return a vector of positions corresponding to the control points of the path's
      * spline curve
      */
     std::vector<glm::dvec3> controlPoints() const;
 
     /**
      * Take a step along the current path, corresponding to the delta time step \p dt, and
-     * return the resulting camera pose. The \p speedScale is a factor that will be 
+     * return the resulting camera pose. The \p speedScale is a factor that will be
      * multiplied with the traversal speed
      */
     CameraPose traversePath(double dt, float speedScale = 1.f);
 
     /**
-     * Return the identifer of the node that is the current appropriate anchor node, of 
-     * the start and end waypoint's reference node. Dtermined based on how far along the 
+     * Return the identifer of the node that is the current appropriate anchor node, of
+     * the start and end waypoint's reference node. Dtermined based on how far along the
      * path we have traveled
      */
     std::string currentAnchor() const;
@@ -94,7 +94,7 @@ public:
 
 private:
     /**
-     * Interpolate between the paths start and end rotation using the approach that 
+     * Interpolate between the paths start and end rotation using the approach that
      * corresponds to the path's curve type. The interpolation parameter \p t is the
      * same as for the position interpolation, i.e. the relative traveled in distance
      * along the path, in [0, 1]
@@ -107,14 +107,14 @@ private:
     glm::dquat easedSlerpRotation(double t) const;
 
     /**
-     * Compute the interpolated rotation quaternion using an approach that first 
-     * interpolates to look at the start node, and then the end node, before 
+     * Compute the interpolated rotation quaternion using an approach that first
+     * interpolates to look at the start node, and then the end node, before
      * interpolating to the end rotation
      */
     glm::dquat lookAtTargetsRotation(double t) const;
 
     /**
-     * Evaluate the current traversal speed along the path, based on the currently 
+     * Evaluate the current traversal speed along the path, based on the currently
      * traveled distance. The final speed will be scaled to match the desired duration
      * for the path (which might have been specified by the user)
      */
@@ -134,9 +134,9 @@ private:
 };
 
 
-// Create a path of the given type based on an instruction given as a dictionary. 
-// See top of cpp file for documentation on keys and values for the dictionary. 
-// Returns the created path. 
+// Create a path of the given type based on an instruction given as a dictionary.
+// See top of cpp file for documentation on keys and values for the dictionary.
+// Returns the created path.
 Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type);
 
 } // namespace openspace::interaction

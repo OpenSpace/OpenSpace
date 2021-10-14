@@ -171,7 +171,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         return;
     }
     ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
-    
+
     const Parameters p = codegen::bake<Parameters>(d);
 
     addProperty(_enabled);

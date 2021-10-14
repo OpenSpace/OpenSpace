@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
-#define __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIACTIONCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIACTIONCOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
 
@@ -38,4 +38,4 @@ public:
 
 } // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIACTIONCOMPONENT___H__

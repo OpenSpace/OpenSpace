@@ -173,9 +173,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData); // NOLINT
             if (timeout_secs) {
                 curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs); // NOLINT
             }
@@ -204,7 +205,11 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 future->isFinished = true;
             }
             else {
-                future->errorMessage = curl_easy_strerror(res);
+                long rescode;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
+                future->errorMessage = fmt::format(
+                    "{}. HTTP code: {}", curl_easy_strerror(res), rescode
+                );
             }
 
             if (finishedCb) {

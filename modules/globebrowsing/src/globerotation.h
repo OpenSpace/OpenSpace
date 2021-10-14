@@ -39,6 +39,7 @@ class GlobeRotation : public Rotation {
 public:
     GlobeRotation(const ghoul::Dictionary& dictionary);
 
+    void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();

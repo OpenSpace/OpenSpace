@@ -26,6 +26,9 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
@@ -125,17 +128,18 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
 
     if (!layerDict.hasValue<std::string>("Identifier")) {
-        LERROR("'Identifier' must be specified for layer.");
+        LERROR("'Identifier' must be specified for layer");
         return nullptr;
     }
-    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
-    layer->onChange(_onChangeCallback);
-    if (hasPropertySubOwner(layer->identifier())) {
-        LINFO("Layer with identifier " + layer->identifier() + " already exists.");
+    std::string identifier = layerDict.value<std::string>("Identifier");
+    if (hasPropertySubOwner(identifier)) {
+        LINFO("Layer with identifier '" + identifier + "' already exists");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
 
+    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
+    layer->onChange(_onChangeCallback);
     Layer* ptr = layer.get();
     _layers.push_back(std::move(layer));
     update();
@@ -144,6 +148,17 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+
+    properties::PropertyOwner* layerGroup = ptr->owner();
+    properties::PropertyOwner* layerManager = layerGroup->owner();
+    properties::PropertyOwner* globe = layerManager->owner();
+    properties::PropertyOwner* sceneGraphNode = globe->owner();
+
+    global::eventEngine->publishEvent<events::EventLayerAdded>(
+        sceneGraphNode->identifier(),
+        layerGroup->identifier(),
+        ptr->identifier()
+    );
     return ptr;
 }
 
@@ -159,6 +174,15 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
+            properties::PropertyOwner* layerGroup = it->get()->owner();
+            properties::PropertyOwner* layerManager = layerGroup->owner();
+            properties::PropertyOwner* globe = layerManager->owner();
+            properties::PropertyOwner* sceneGraphNode = globe->owner();
+            global::eventEngine->publishEvent<events::EventLayerRemoved>(
+                sceneGraphNode->identifier(),
+                layerGroup->identifier(),
+                it->get()->identifier()
+            );
             update();
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);

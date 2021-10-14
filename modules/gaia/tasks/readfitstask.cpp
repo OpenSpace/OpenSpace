@@ -193,7 +193,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             }
         }
     }
-    
+
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
