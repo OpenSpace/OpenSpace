@@ -29,7 +29,12 @@
     "openspace.setPropertyValue(\"{moonTrail_minor}.Renderable.Appearance.Color\", {0.3, 0.5, 0.5});",
     "openspace.setPropertyValue(\"Scene.Voyager*.Renderable.Appearance.Color\", {0.424000, 1.000000, 0.404000});",
     "openspace.setPropertyValue(\"Scene.Pioneer*.Renderable.Appearance.Color\", {0.910000, 0.478000, 0.976000});",
-    "openspace.setPropertyValueSingle(\"Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity\", 0.7);"
+    "openspace.setPropertyValueSingle(\"Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity\", 0.7);",
+    "openspace.setPropertyValueSingle('Dashboard.IsEnabled', false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowLog\", false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowVersion\", false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowCamera\", false)",
+    "openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', false);"
   ],
   "assets": [
     "base",
