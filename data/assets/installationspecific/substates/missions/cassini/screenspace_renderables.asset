@@ -1,0 +1,36 @@
+local textImagefolder = asset.localResource("./../../../screenspacetexts")
+
+local MissionPart = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "Cassini-Mission-Part-Description",
+  Enabled = false,
+  Name = "Cassini Mission Part Description",
+  FaceCamera = false,
+  Scale = 0.4,
+  CartesianPosition = { 0.0, -0.54, -2.0 },
+  TexturePath = textImagefolder .. "/text-cassini-dagjamningsuppdraget.png", -- just a random default text
+  Tag = { "stort_cassini_onscreen_text" },
+}
+
+local SimulationSpeed = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "Cassini-Time-Speed-Description",
+  Enabled = false,
+  Name = "Cassini Time Speed Description",
+  FaceCamera = false,
+  Scale = 0.3,
+  MultiplyColor = { 0.8, 0.8, 0.8 },
+  CartesianPosition = { 0.0, -0.7, -2.0 },
+  TexturePath = textImagefolder .. "/text-speed_10dayspersecond.png", -- just a random default text
+  Tag = { "stort_cassini_onscreen_text" },
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(MissionPart)
+  openspace.addScreenSpaceRenderable(SimulationSpeed)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(MissionPart.Identifier)
+  openspace.removeScreenSpaceRenderable(SimulationSpeed.Identifier)
+end)
