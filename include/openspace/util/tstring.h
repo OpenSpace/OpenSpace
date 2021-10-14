@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___TSTRING___H__
+#define __OPENSPACE_CORE___TSTRING___H__
+
 #include <string>
 #include <string_view>
 
@@ -39,7 +42,7 @@ using tstring = std::string_view;
 
 /**
  * Allocate and create a temporary string from the passed std::string.
- * 
+ *
  * \param str The string to be copied into a newly allocated tstring
  * \return The copy of the str as a temporary string
  */
@@ -47,7 +50,7 @@ tstring temporaryString(const std::string& str);
 
 /**
  * Allocate and create a temporary string from the passed std::string_view.
- * 
+ *
  * \param str The string to be copied into a newly allocated tstring
  * \return The copy of the str as a temporary string
  */
@@ -55,10 +58,12 @@ tstring temporaryString(std::string_view str);
 
 /**
  * Allocate and create a temporary string from the passed char array.
- * 
+ *
  * \param str The string to be copied into a newly allocated tstring
  * \return The copy of the str as a temporary string
  */
 tstring temporaryString(const char str[]);
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___TSTRING___H__

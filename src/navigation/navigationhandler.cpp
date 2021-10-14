@@ -215,7 +215,7 @@ void NavigationHandler::applyNavigationState(const NavigationState& ns) {
 
 void NavigationHandler::updateCameraTransitions() {
     // This function is concerned with managing transitions of the camera between
-    // different distances of interest relative to the focus node. For each transition two 
+    // different distances of interest relative to the focus node. For each transition two
     // scenarios are handled;  SceneGraphNodes can have attached actions for each
     // transition, which are automatically triggered. Additionally, an
     // EventCameraTransition event is fired that contains information about the focus node
@@ -228,7 +228,7 @@ void NavigationHandler::updateCameraTransitions() {
     //
     // |<------------------->|  Approach factor * Interaction sphere
     //              |<------>|  Reach Factor * Interaction sphere
-    //   
+    //
     // (            (        O        )            )
     // ^            ^                 ^            ^
     // OnExit       OnMoveAway        OnReach      OnApproach

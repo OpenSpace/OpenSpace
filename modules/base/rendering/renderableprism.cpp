@@ -329,7 +329,12 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     glLineWidth(_lineWidth);
     glBindVertexArray(_vaoId);
 
-    glDrawElements(GL_LINE_LOOP, static_cast<GLsizei>(_indexArray.size()), GL_UNSIGNED_BYTE, nullptr);
+    glDrawElements(
+        GL_LINE_LOOP,
+        static_cast<GLsizei>(_indexArray.size()),
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
 
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();

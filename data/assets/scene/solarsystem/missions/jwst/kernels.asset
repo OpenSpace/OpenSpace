@@ -1,0 +1,8 @@
+local kernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 1
+})
+
+asset.export('kernels', kernels)

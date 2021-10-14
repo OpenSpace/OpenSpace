@@ -498,7 +498,7 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
                                              float averageGroundReflectance,
                                              float groundRadianceEmission,
                                              float rayleighHeightScale, bool enableOzone,
-                                             float ozoneHeightScale, float mieHeightScale, 
+                                             float ozoneHeightScale, float mieHeightScale,
                                              float miePhaseConstant, float sunRadiance,
                                              glm::vec3 rayScatteringCoefficients,
                                              glm::vec3 ozoneExtinctionCoefficients,
@@ -529,7 +529,7 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
 
 void AtmosphereDeferredcaster::calculateTransmittance() {
     ZoneScoped
-        
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -566,7 +566,7 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
 
 GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     ZoneScoped
-        
+
     GLuint deltaE = createTexture(_deltaETableSize, "DeltaE");
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaE, 0);
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
@@ -595,7 +595,7 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
 
 std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     ZoneScoped
-        
+
     GLuint deltaSRayleigh = createTexture(_textureSize, "DeltaS Rayleigh", 3);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaSRayleigh, 0);
     GLuint deltaSMie = createTexture(_textureSize, "DeltaS Mie", 3);
@@ -649,7 +649,7 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
 
 void AtmosphereDeferredcaster::calculateIrradiance() {
     ZoneScoped
-        
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -678,7 +678,7 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
                                                      GLuint deltaSMie)
 {
     ZoneScoped
-        
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -726,7 +726,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
                                                GLuint deltaSRayleigh, GLuint deltaSMie)
 {
     ZoneScoped
-        
+
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaJ, 0);
     glViewport(0, 0, _textureSize.x, _textureSize.y);
     program.activate();
@@ -745,7 +745,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     deltaSRayleighUnit.activate();
     glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
     program.setUniform("deltaSRTexture", deltaSRayleighUnit);
-    
+
     ghoul::opengl::TextureUnit deltaSMieUnit;
     deltaSMieUnit.activate();
     glBindTexture(GL_TEXTURE_3D, deltaSMie);
@@ -784,7 +784,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
                                                GLuint deltaSMie)
 {
     ZoneScoped
-        
+
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaE, 0);
     glViewport(0, 0, _deltaETableSize.x, _deltaETableSize.y);
     program.activate();
@@ -823,7 +823,7 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
                                                GLuint deltaSRayleigh, GLuint deltaJ)
 {
     ZoneScoped
-        
+
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaSRayleigh, 0);
     glViewport(0, 0, _textureSize.x, _textureSize.y);
     program.activate();
@@ -863,7 +863,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
                                                    GLuint deltaE)
 {
     ZoneScoped
-        
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -895,7 +895,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
 
 {
     ZoneScoped
-        
+
     glFramebufferTexture(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,

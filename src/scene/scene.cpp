@@ -911,14 +911,24 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 &luascriptfunctions::worldPosition,
                 {},
                 "string",
-                "Returns the world position of the scene graph node with the given string as identifier"
+                "Returns the world position of the scene graph node with the given "
+                "string as identifier"
             },
             {
                 "worldRotation",
                 & luascriptfunctions::worldRotation,
                 {},
                 "string",
-                "Returns the world rotation matrix of the scene graph node with the given string as identifier"
+                "Returns the world rotation matrix of the scene graph node with the "
+                "given string as identifier"
+            },
+            {
+                "setParent",
+                &luascriptfunctions::setParent,
+                {},
+                "string, string",
+                "The scene graph node identified by the first string is reparented to be "
+                "a child of the scene graph node identified by the second string."
             }
         }
     };

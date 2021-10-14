@@ -53,7 +53,7 @@ Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::stri
 }
 
 Waypoint::Waypoint(const NavigationState& ns) {
-    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); 
+    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor);
 
     if (!anchorNode) {
         LERROR(fmt::format("Could not find node '{}' to target", ns.anchor));
@@ -92,7 +92,7 @@ double Waypoint::validBoundingSphere() const {
 double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
     double bs = static_cast<double>(node->boundingSphere());
 
-    const double minValidBoundingSphere = 
+    const double minValidBoundingSphere =
         global::navigationHandler->pathNavigator().minValidBoundingSphere();
 
     if (bs < minValidBoundingSphere) {

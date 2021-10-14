@@ -72,7 +72,8 @@ namespace {
         "triggered once the path has reached its target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo =
+    {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
@@ -203,8 +204,10 @@ void PathNavigator::updateCamera(double deltaTime) {
 
         if (_applyIdleBehaviorOnFinish) {
             constexpr const char* ApplyIdleBehaviorScript =
-                "local f = 'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior';"
-                "openspace.setPropertyValueSingle(f, true);";
+                "openspace.setPropertyValueSingle("
+                    "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
+                    "true"
+                ");";
 
             global::scriptEngine->queueScript(
                 ApplyIdleBehaviorScript,

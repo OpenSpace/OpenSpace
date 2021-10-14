@@ -28,13 +28,24 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
+#include <optional>
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
+        "ShouldInterpolate",
+        "Should Interpolate",
+        "If this value is set to 'true', an interpolation is applied between the given keyframes. "
+        "If this value is set to 'false', the interpolation is not applied."
+    };
+
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_translation")]];
+
+        // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
+        std::optional<bool> shouldInterpolate;
     };
 #include "timelinetranslation_codegen.cpp"
 } // namespace
@@ -45,7 +56,9 @@ documentation::Documentation TimelineTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_keyframe");
 }
 
-TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
+TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
+    : _shouldInterpolate(ShouldInterpolateInfo, true)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
@@ -57,6 +70,9 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
             _timeline.addKeyframe(t, std::move(translation));
         }
     }
+
+    _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);
+    addProperty(_shouldInterpolate);
 }
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
@@ -78,11 +94,22 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
     const double prevTime = prev->timestamp;
     const double nextTime = next->timestamp;
 
-    double t = 0.0;
-    if (nextTime - prevTime > 0.0) {
-        t = (now - prevTime) / (nextTime - prevTime);
+    if (_shouldInterpolate) {
+        double t = 0.0;
+        if (nextTime - prevTime > 0.0) {
+            t = (now - prevTime) / (nextTime - prevTime);
+        }
+        return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
     }
-    return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
+    else {
+        if (prevTime <= now && now < nextTime) {
+            return prev->data->position(data);
+        }
+        else if (nextTime <= now) {
+            return next->data->position(data);
+        }
+    }
+    return glm::dvec3(0.0);
 }
 
 } // namespace openspace

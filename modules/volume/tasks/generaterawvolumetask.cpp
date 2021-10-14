@@ -93,7 +93,7 @@ std::string GenerateRawVolumeTask::description() {
         "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
         "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into {} and "
         "dictionary with metadata to {}",
-        _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua, 
+        _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
         _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
         _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
         _rawVolumeOutputPath, _dictionaryOutputPath

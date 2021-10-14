@@ -1,0 +1,8 @@
+local horizons = asset.syncedResource({
+  Name = "JWST Horizons",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_horizons",
+  Version = 2
+})
+
+asset.export('horizons', horizons)

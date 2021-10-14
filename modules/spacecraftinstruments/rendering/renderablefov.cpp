@@ -254,7 +254,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     _alwaysDrawFov = p.alwaysDrawFov.value_or(_alwaysDrawFov);
     addProperty(_alwaysDrawFov);
-    
+
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
 
     addProperty(_colors.defaultStart);

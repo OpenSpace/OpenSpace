@@ -59,7 +59,8 @@ namespace {
         // The desired duration traversing the specified path segment should take
         std::optional<float> duration;
 
-        // (Node): The target node of the camera path. Not optional for 'Node' instructions
+        // (Node): The target node of the camera path. Not optional for 'Node'
+        // instructions
         std::optional<std::string> target;
 
         // (Node): An optional position in relation to the target node, in model
@@ -271,9 +272,11 @@ double Path::speedAlongPath(double traveledDistance) const {
         speed *= remainingDistance / closeUpDistance + 0.01;
     }
 
-    // TODO: also dampen speed based on curvature, or make sure the curve has a rounder shape
+    // TODO: also dampen speed based on curvature, or make sure the curve has a rounder
+    //       shape
 
-    // TODO: check for when path is shorter than the starUpDistance or closeUpDistance variables
+    // TODO: check for when path is shorter than the starUpDistance or closeUpDistance
+    //       variables
 
     return _speedFactorFromDuration * speed;
 }
@@ -384,7 +387,9 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     if (info.position.has_value()) {
         // The position in instruction is given in the targetNode's local coordinates.
         // Convert to world coordinates
-        targetPos = glm::dvec3(targetNode->modelTransform() * glm::dvec4(*info.position, 1.0));
+        targetPos = glm::dvec3(
+            targetNode->modelTransform() * glm::dvec4(*info.position, 1.0)
+        );
     }
     else {
         const double radius = Waypoint::findValidBoundingSphere(targetNode);

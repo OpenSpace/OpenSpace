@@ -868,7 +868,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         useFixedTime = dictionary.value<bool>(temporal::UseFixedTimeInfo.identifier);
     }
     addProperty(useFixedTime);
-    
+
     if (dictionary.hasValue<std::string>(temporal::FixedTimeInfo.identifier)) {
         fixedTime = dictionary.value<std::string>(temporal::FixedTimeInfo.identifier);
     }

@@ -260,7 +260,7 @@ namespace {
         "Enabled Font Color",
         "The font color used for enabled options."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
@@ -399,7 +399,7 @@ RenderEngine::RenderEngine()
 
     _enabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     addProperty(_enabledFontColor);
-    
+
     _disabledFontColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
     addProperty(_disabledFontColor);
 }

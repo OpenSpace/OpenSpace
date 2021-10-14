@@ -1,0 +1,122 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local horizons = asset.require('./horizons').horizons
+local kernels = asset.require('./kernels').kernels
+asset.require("spice/base")
+
+-- (malej 2021-10-04) In general, there is no trajectery data of JWST for the scheduled
+-- launch in December 2021, no horizons and no SPICE. Instead data from the 2018 launch
+-- is used, old data from an old launch time that never happened because of delays.
+-- If we can get our hands on the 2021 launch data, the jwst assets will be updated.
+
+-- Trail of JWST relative the Earth for the first month after launch
+-- Makes histroy of trail to stay at Earth, that a trail relative to L2 won't
+local JWSTTrailLaunch = {
+  Identifier = "JWSTTrailLaunch",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2018 NOV 01"
+  },
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "2018 OCT 01 14:06:00",
+    EndTime = "2018 NOV 01",
+    SampleInterval = 60
+  },
+  GUI = {
+    Name = "JWST Launch Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Launch Trail relative to Earth based on Horizons data from the
+      2018 launch.
+    ]],
+  }
+}
+
+-- Trail of JWST relative to L2 after first month to reach L2
+-- Gives a better trail history of the orbit around L2 than if it was relative to Earth
+local JWSTTrailOrbit = {
+  Identifier = "JWSTTrailOrbit",
+  Parent = transforms.L2.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 NOV 01 00:00:00",
+    End = "2024 OCT 01"
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = horizons .. "/horizons_jwst_orbit.dat",
+    },
+    Color = { 0.9, 0.9, 0.0 },
+    Period = 182.621099, -- About 6 months
+    Resolution = 4383 -- About a sample rate of once per hour
+  },
+  GUI = {
+    Name = "JWST Orbit Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Orbit Trail relative to L2 based on Horizons data from the
+      2018 launch.
+    ]],
+  }
+}
+
+-- JPL Horizons doesn't have data of JWST relative to the Sun,
+-- instead a SPICE kernel with data from 2020 to 2024 is used.
+-- However, this SPICE kernel is (somehow) based on the horizons
+-- data of the 2018 launch anyway. Which mean that this kernel doesn't
+-- have any data of the launch, just the orbit.
+local JWSTSunTrail = {
+  Identifier = "JWSTSunTrail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JWST",
+      Observer = "SSB",
+      Kernels = kernels .. "/jwst_horizons_20200101_20240101_v01.bsp"
+    },
+    Color = { 0.0, 0.9, 0.9 },
+    Period = 365.242,
+    Resolution = 1000
+  },
+  GUI = {
+    Name = "JWST Sun Trail",
+    Path = "/Solar System/Missions/JWST/Trails",
+    Description = [[
+      James Webb Space Telescope Trail relative to the Sun based on Horizons data from the
+      2018 launch.
+    ]],
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+  JWSTTrailLaunch,
+  JWSTTrailOrbit,
+  JWSTSunTrail
+})
+
+asset.meta = {
+  Name = "James Webb Space Telescope Trails",
+  Version = "1.0",
+  Description = [[
+    Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JWSTTrailLaunch", "JWSTTrailOrbit", "JWSTSunTrail"}
+}
