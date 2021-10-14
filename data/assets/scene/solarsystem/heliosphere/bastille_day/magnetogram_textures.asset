@@ -24,7 +24,7 @@ local switch_color_layer = {
       str = "Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-" .. magnetogramsTextureIndex .. ".Enabled";
       openspace.setPropertyValueSingle(str, true);
     end;
-    ]],
+  ]],
   Documentation = "Display next sun texture in list of textures",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
