@@ -1,6 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
+local textImagefolder = asset.localResource("s./../../../screenspacetexts")
+textImagefolder = textImagefolder:gsub('\\', '/')
 
 ----------------------------------------------------------------
 -- SCRIPTS
@@ -23,6 +25,10 @@ local cassiniScripts = [[
   -- Primary start
   openspace.scriptScheduler.loadScheduledScript(
     "2004-06-16T08:14:58.000", -- 1 sec pre delay
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.TexturePath', ']] .. textImagefolder .. '/text-cassini-primarauppdraget.png' .. [[')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.Enabled', true)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-speed_10dayspersecond.png' .. [[')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Time-Speed-Description.Enabled', true)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(orbitInsertionDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -62,6 +68,7 @@ local cassiniScripts = [[
   -- Equinox start
   openspace.scriptScheduler.loadScheduledScript(
     "2008-08-09T00:00:00.000",
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.TexturePath', ']] .. textImagefolder .. '/text-cassini-dagjamningsuppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(equinoxDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -75,6 +82,7 @@ local cassiniScripts = [[
   -- Solstice start
   openspace.scriptScheduler.loadScheduledScript(
     "2010-11-24T00:00:00.000",
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.TexturePath', ']] .. textImagefolder .. '/text-cassini-solstandsuppdraget.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(solsticeDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -88,6 +96,7 @@ local cassiniScripts = [[
   -- Grand Finale start
   openspace.scriptScheduler.loadScheduledScript(
     "2017-04-16T00:00:00.000", -- 10 day pre delay
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.TexturePath', ']] .. textImagefolder .. '/text-cassini-storafinalen.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(grandFinaleDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -116,6 +125,8 @@ local cassiniScripts = [[
   -- End
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-16T10:34:20.000", -- 1 day delay 15 sec
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.Enabled', false)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Cassini-Time-Speed-Description.Enabled', false)" ..
     "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(cassiniNavigationState) .. [[)"
   )
@@ -209,6 +220,8 @@ local cassiniState = {
   Exit = [[
     ]] .. util.stopOrbiting() .. [[
     openspace.scriptScheduler.clear()
+    openspace.setPropertyValueSingle('ScreenSpace.Cassini-Mission-Part-Description.Enabled', false)
+    openspace.setPropertyValueSingle('ScreenSpace.Cassini-Time-Speed-Description.Enabled', false)
     ]] .. util.fadeOutNodes(trails) .. [[
       openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
