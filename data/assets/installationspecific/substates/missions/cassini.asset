@@ -93,6 +93,15 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
+  -- Focus on Saturn again
+  openspace.scriptScheduler.loadScheduledScript(
+    "2010-12-04T00:00:00.000", -- ~10 days after
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
+    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+  )
+
   -- Grand Finale start
   openspace.scriptScheduler.loadScheduledScript(
     "2017-04-16T00:00:00.000", -- 10 day pre delay
