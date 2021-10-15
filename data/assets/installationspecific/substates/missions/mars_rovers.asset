@@ -2,9 +2,7 @@ local util = asset.require('./../../utility_functions')
 local flyHome = asset.require('./../../fly_home_alternatives')
 local defaultTime = asset.require('./../../default_time.asset').time
 
-local enterStateSettings = [[
-  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0); 
-]]
+local enterStateSettings = [[]]
 
 local leaveStateSettings = [[
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 0.0, 1.0);
@@ -100,8 +98,8 @@ local perseveranceState = {
     ]] .. util.stopOrbiting() .. [[
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled", true);
     openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.Opacity", 1.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.ForceUpdateData", nil); 
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars-Perseverance-Rover-Path.Renderable.ForceUpdateData", nil);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.HiRISE-PSP.Settings.Opacity", 1.0, 5.0);
     ]] .. util.setOrbitSpeedFactor(0.6) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
