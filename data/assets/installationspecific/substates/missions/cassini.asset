@@ -83,6 +83,7 @@ local cassiniScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2010-11-24T00:00:00.000",
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-solstandsuppdraget.png' .. [[')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-15days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(solsticeDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -106,6 +107,7 @@ local cassiniScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2017-04-16T00:00:00.000", -- 10 day pre delay
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.TexturePath', ']] .. textImagefolder .. '/text-cassini-storafinalen.png' .. [[')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(grandFinaleDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -128,19 +130,22 @@ local cassiniScripts = [[
   -- Slow down to see the last dive
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-12T10:34:05.000",
-    "openspace.time.interpolateDeltaTime(10800)" -- 3 hour per second
+    "openspace.time.interpolateDeltaTime(10800)" .. -- 3 hour per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-3hours.png' .. [[')"
   )
 
   -- Slow down even more
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-14T10:34:05.000",
-    "openspace.time.interpolateDeltaTime(3600)" -- 1 hour per second
+    "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-1hour.png' .. [[')"
   )
 
   -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-15T10:34:05.000",
-    "openspace.time.interpolateDeltaTime(1)"
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)"
   )
 
   -- End
@@ -166,13 +171,16 @@ local huygensScripts = [[
   -- Detach
   openspace.scriptScheduler.loadScheduledScript(
     "2004-11-21 08:44:54.000", -- 1 sec pre delay
-    "openspace.time.interpolateDeltaTime(172800)" -- 2 days per second
+    "openspace.time.interpolateDeltaTime(172800)" .. -- 2 days per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-2days.png' .. [[')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', true)"
   )
 
   -- Slow
   openspace.scriptScheduler.loadScheduledScript(
     "2004-12-21 08:44:53.000",
     "openspace.time.interpolateDeltaTime(86400)" .. -- 1 day per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-1day.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Saturn')" ..
@@ -183,6 +191,7 @@ local huygensScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-13 00:00:00.000",
     "openspace.time.interpolateDeltaTime(3600)" .. -- 1 hour per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-1hour.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
@@ -199,6 +208,7 @@ local huygensScripts = [[
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 06:41:40.000", -- 30 min pre delay
     "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.TexturePath', ']] .. textImagefolder .. '/text-simspeed-10min.png' .. [[')" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.FlightDestinationDistance', ]] .. tostring(landingDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.VelocityZoomControl', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.LinearFlight.ApplyLinearFlight', true)" ..
@@ -211,7 +221,8 @@ local huygensScripts = [[
   -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2005-01-14 09:05:55.000",
-    "openspace.time.interpolateDeltaTime(1)"
+    "openspace.time.interpolateDeltaTime(1)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)"
   )
 
   -- End
@@ -244,7 +255,7 @@ local cassiniState = {
     openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)
     openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
     ]] .. util.fadeOutNodes(trails) .. [[
-      openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
+    openspace.setPropertyValueSingle('Scene.TitanAtmosphere.Renderable.Enabled', true)
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
     openspace.setPropertyValue('{moonTrail_saturn_major}.Renderable.Opacity', 1.0, 3.0)
   ]]
@@ -261,6 +272,7 @@ local huygensState = {
     ]] .. huygensScripts .. [[
   ]],
   Exit = [[
+    openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)
     openspace.scriptScheduler.clear()
     ]] .. util.fadeOutNodes({ "huygensTrail" }) .. [[
     openspace.setPropertyValue('{moon_saturn_major}.Renderable.Opacity', 1.0, 3.0)
