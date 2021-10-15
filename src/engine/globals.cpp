@@ -134,7 +134,7 @@ void create() {
     ghoul_assert(eventEngine, "No eventEngine");
     currentPos += sizeof(EventEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
-    downloadManager = new EventEngine;
+    eventEngine = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
