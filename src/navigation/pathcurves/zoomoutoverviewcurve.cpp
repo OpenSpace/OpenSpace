@@ -26,6 +26,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -69,6 +71,9 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3 n1 = startTangentDir;
         const glm::dvec3 n2 = endTangentDir;
 
+        const glm::dvec3 startPosToEndPos = end.position() - start.position();
+        const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
+
         // Decide the step direction for the "overview point" based on the directions
         // at the start and end of the path, to try to get a nice curve shape
         glm::dvec3 goodStepDirection;
@@ -80,9 +85,33 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
             goodStepDirection = glm::normalize(n1 + n2);
         }
 
+        // OBS! This is a hack to avoid colliding with a close node. Should be done nicely in a
+        // rewrite of the path types. This has explicitly been added just to allow 
+        // collision free paths between two nodes on a planet surface but might work weird in 
+        // other cases
+        const PathNavigator& pn = global::navigationHandler->pathNavigator();
+        const SceneGraphNode* closeNode1 = pn.findNodeNearTarget(start.node());
+        const SceneGraphNode* closeNode2 = pn.findNodeNearTarget(end.node());
+        bool hasCloseNode = closeNode1 || closeNode2;
+        if (hasCloseNode) {
+            // Step outwards from the  node
+            const SceneGraphNode* node;
+            if (closeNode1 && closeNode2) {
+                // pick the biggest one
+                node = (closeNode1->boundingSphere() > closeNode2->boundingSphere()) ?
+                    closeNode1 : closeNode2;
+            }
+            else {
+                // pick the one that isn't a nullptr
+                node = (closeNode1) ? closeNode1 : closeNode2;
+            }
+            // Let the outwards direction impact the step direction
+            goodStepDirection += glm::normalize(halfWayPos - node->worldPosition());
+            goodStepDirection = glm::normalize(goodStepDirection);
+        }
+
         // Find a direction that is orthogonal to the line between the start and end
         // position
-        const glm::dvec3 startPosToEndPos = end.position() - start.position();
         const glm::dvec3 outwardStepVector =
             0.5 * glm::length(startPosToEndPos) * goodStepDirection;
 
@@ -91,8 +120,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3 stepDirection = glm::normalize(orthogonalComponent);
 
         // Step half-way along the line between the position and then orthogonally
-        const glm::dvec3 extraKnot = start.position() + 0.5 * startPosToEndPos
-            + 1.5 * glm::length(startPosToEndPos) * stepDirection;
+        const double stepDistance = 1.5 * glm::length(startPosToEndPos);
+        const glm::dvec3 extraKnot = halfWayPos + stepDistance * stepDirection;
 
         _points.push_back(extraKnot);
     }
