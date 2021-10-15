@@ -238,7 +238,19 @@ local flyToApollo8 = [[
   ]] .. util.flyToNavState(apollo8NavigationState) .. [[
 ]]
 
+local jumpToApollo8 = [[
+  ]] .. util.disableLinearFlight() .. [[
+  openspace.navigation.setNavigationState(]] .. tostring(apollo8NavigationState) .. [[)
+]]
+
 local flyToApollo11 = [[
+  ]] .. util.disableLinearFlight() .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
+  ]] .. util.enableRoll() .. [[
+  ]] .. util.flyToNavState(apollo11LandingState) .. [[
+]]
+
+local jumpToApollo11 = [[
   ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
@@ -283,12 +295,12 @@ local transitions = {
   {
     From = "Apollo8",
     To = "Apollo11",
-    Action = flyToApollo11
+    Action = jumpToApollo11
   },
   {
     From = "Apollo11",
     To = "Apollo8",
-    Action = flyToApollo8
+    Action = jumpToApollo8
   },
   -- Back to SolarSystem from substates
   {
