@@ -74,6 +74,8 @@ public:
     double minValidBoundingSphere() const;
     const std::vector<SceneGraphNode*>& relevantNodes();
 
+    SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) const;
+
     /**
     * \return The Lua library that contains all Lua functions available to affect the
     * path navigation
