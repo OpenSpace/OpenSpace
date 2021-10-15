@@ -125,6 +125,18 @@ local cassiniScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
   )
 
+  -- Slow down to see the last dive
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-12T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(10800)" -- 3 hour per second
+  )
+
+  -- Slow down even more
+  openspace.scriptScheduler.loadScheduledScript(
+    "2017-09-14T10:34:05.000",
+    "openspace.time.interpolateDeltaTime(3600)" -- 1 hour per second
+  )
+
   -- Take a moment
   openspace.scriptScheduler.loadScheduledScript(
     "2017-09-15T10:34:05.000",
@@ -133,7 +145,7 @@ local cassiniScripts = [[
 
   -- End
   openspace.scriptScheduler.loadScheduledScript(
-    "2017-09-16T10:34:20.000", -- 1 day delay 15 sec
+    "2017-09-15T11:05:10.000", -- 31 minutes and 5 seconds delay
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-OnScreen-Title.Enabled', false)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.Installation-Time-Speed-Description.Enabled', false)" ..
     "openspace.time.setTime('2004-06-16T08:14:57.000')" .. -- Loop
@@ -204,7 +216,7 @@ local huygensScripts = [[
 
   -- End
   openspace.scriptScheduler.loadScheduledScript(
-    "2005-01-14 09:06:05.000", -- 10 sec delay
+    "2005-01-14 09:11:15.000", -- 6 minutes and 20 secods delay
     "openspace.time.setTime('2004-11-21 08:44:50.000')" .. -- Loop
     "openspace.navigation.setNavigationState(]] .. tostring(huygensNavigationState) .. [[)"
   )
