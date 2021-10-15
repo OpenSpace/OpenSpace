@@ -228,14 +228,14 @@ local flyToMoon = [[
 
 local flyToApollo8 = [[
   ]] .. util.disableLinearFlight() .. [[
-  ]] .. util.setCurveType("AvoidCollision") .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(apollo8NavigationState) .. [[
 ]]
 
 local flyToApollo11 = [[
   ]] .. util.disableLinearFlight() .. [[
-  ]] .. util.setCurveType("AvoidCollision") .. [[
+  ]] .. util.setCurveType("ZoomOutOverview") .. [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.flyToNavState(apollo11LandingState) .. [[
 ]]
