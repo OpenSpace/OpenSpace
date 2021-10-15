@@ -58,6 +58,14 @@ namespace {
         "transformations."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
+        "MirrorBackside",
+        "Mirror backside of image plane",
+        "If this value is set to false, the image plane will not be mirrored when "
+        "looking from the backside. This is usually desirable when the image shows "
+        "data at a specific location, but not if it is displaying text for example."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
@@ -80,6 +88,9 @@ namespace {
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         // [[codegen::verbatim(BillboardInfo.description)]]
         std::optional<bool> billboard;
+
+        // [[codegen::verbatim(MirrorBacksideInfo.description)]]
+        std::optional<bool> mirrorBackside;
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
@@ -107,6 +118,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _billboard(BillboardInfo, false)
+    , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
@@ -117,6 +129,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     _size = p.size;
     _billboard = p.billboard.value_or(_billboard);
+    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
@@ -210,6 +223,8 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->activate();
     _shader->setUniform("opacity", _opacity);
+
+    _shader->setUniform("mirrorBackside", _mirrorBackside);
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(

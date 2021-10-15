@@ -89,6 +89,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
         global::timeManager->time().j2000Seconds(),
         _timeFormat.value().c_str()
     );
+
     try {
         RenderFont(*_font, penPosition, fmt::format(_formatString.value().c_str(), time));
     }

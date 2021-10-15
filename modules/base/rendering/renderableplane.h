@@ -75,6 +75,7 @@ private:
     void createPlane();
 
     properties::BoolProperty _billboard;
+    properties::BoolProperty _mirrorBackside;
     properties::FloatProperty _size;
     properties::Vec3Property _multiplyColor;
 
