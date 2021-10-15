@@ -219,6 +219,11 @@ local states = { apolloMainState, apollo8State, apollo11State }
 ----------------------------------------------------------------
 -- TRANSITIONS within this substate
 ----------------------------------------------------------------
+local leaveState = [[
+  ]] .. util.disableRoll() .. [[
+  ]] .. flyHome.cameraPath .. [[
+]]
+
 local flyToMoon = [[
   ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
@@ -250,7 +255,7 @@ local transitions = {
   {
     From = "Apollo",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveState
   },
   -- Overview - Apollo 8
   {
@@ -289,12 +294,12 @@ local transitions = {
   {
     From = "Apollo8",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveState
   },
   {
     From = "Apollo11",
     To = "Home",
-    Action = flyHome.cameraPath
+    Action = leaveState
   },
 }
 
