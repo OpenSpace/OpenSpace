@@ -485,6 +485,15 @@ bool FixedRotation::initialize() {
     return res;
 }
 
+void FixedRotation::update(const UpdateData& data) {
+    // OBS!
+    // Temporary workaround to avoid problems with fixed rotation when
+    // simulation tie is paused. Should be thought through more carefully,
+    // but for the installation, just update every frame
+    requireUpdate();
+    Rotation::update(data);
+}
+
 glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     if (!_enabled) {
         return glm::dmat3();
