@@ -2,7 +2,28 @@ asset.require('spice/base')
 
 local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spiceName,
     radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels)
-  return
+  return {
+    Identifier = identifier,
+    Parent = parent,
+    Transform = {
+      Translation = {
+        Type = "SpiceTranslation",
+        Target = spiceName,
+        Observer = parentSpiceName,
+        Kernels = kernels
+      }
+    },
+    Renderable = {
+      Type = "RenderableGlobe",
+      Radii = radii,
+      SegmentsPerPatch = 64,
+      Layers = {},
+      Tag = tags
+    },
+    GUI = {
+      Path = guiPath
+    }
+  },
   {
     Identifier = identifier .. "Trail",
     Parent = parent,

@@ -24,13 +24,11 @@ local homeState = {
 local solarSystemState = {
   Identifier = "SolarSystem",
   Enter = [[
-    openspace.setPropertyValue('{moon_minor}.Renderable.Enabled', true);
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.startOrbiting() .. [[
     ]] .. util.orbitOnArrival() .. [[
   ]],
   Exit = [[
-    openspace.setPropertyValue('{moon_minor}.Renderable.Enabled', false);
     openspace.setPropertyValue('{moonTrail_minor}.Renderable.Enabled', false);
     ]] .. util.stopOrbiting() .. [[
   ]]
