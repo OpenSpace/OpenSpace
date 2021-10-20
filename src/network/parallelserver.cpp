@@ -233,6 +233,7 @@ void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
 
         return;
     }
+
     sendMessageToClients(ParallelConnection::MessageType::Data, data);
 }
 

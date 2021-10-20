@@ -166,14 +166,14 @@ void ParallelPeer::connect() {
     _isConnected = true;
 
     // Default ViewStatus is HostView
-    if (!isHost()) {
+    /*if (!isHost()) {
         setViewStatus(ParallelConnection::ViewStatus::HostView);
         _hasIndependentView.setReadOnly(false);
         reloadUI();
     }
     else {
         setViewStatus(ParallelConnection::ViewStatus::Host);
-    }
+    }*/
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
@@ -186,6 +186,12 @@ void ParallelPeer::connect() {
     sendAuthentication();
 
     _receiveThread = std::make_unique<std::thread>([this]() { handleCommunication(); });
+
+
+    if (isHost()) // is not true
+    {
+        LINFO(fmt::format("isHost at end of connect"));
+    }
 }
 
 void ParallelPeer::disconnect() {
@@ -257,12 +263,6 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             break;
         case ParallelConnection::MessageType::NConnections:
             nConnectionsMessageReceived(message.content);
-            break;
-        case ParallelConnection::MessageType::ViewRequest:
-            viewRequestMessageReceived(message.content);
-            break;
-        case ParallelConnection::MessageType::ViewResignation:
-            viewResignationMessageReceived(message.content);
             break;
         default:
             //unknown message type
@@ -557,7 +557,7 @@ void ParallelPeer::preSynchronization() {
 
     double now = global::windowDelegate->applicationTime();
 
-    if (isHost() || viewStatus() == ParallelConnection::ViewStatus::IndependentView) {
+    if (isHost()) { // || viewStatus() == ParallelConnection::ViewStatus::IndependentView
         // Allow view-independent peers to send camera information...
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -609,12 +609,33 @@ ParallelConnection::Status ParallelPeer::status() {
 }
 
 void ParallelPeer::setViewStatus(ParallelConnection::ViewStatus status) {
-    if (!_isConnected && _hasIndependentView) {
+    if (!_isConnected) {
         _hasIndependentView = false;
         LERROR("This action requires a connection.");
+
+        return;
     }
-    else if (_isConnected) {
-        _viewStatus = status;
+    
+    _viewStatus = status;
+
+    if (!isHost()) {
+
+        LINFO(fmt::format("not isHost in setViewStatus"));
+
+        std::vector<char> buffer;
+        
+        if (_viewStatus == ParallelConnection::ViewStatus::IndependentView) {
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::ViewRequest,
+                buffer
+            ));
+        }
+        else if (_viewStatus == ParallelConnection::ViewStatus::HostView) {
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::ViewResignation,
+                buffer
+            ));
+        }
     }
 }
 

@@ -89,6 +89,7 @@ private:
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
+    void viewMessageReceived(const std::vector<char>& message);
 
     void sendCameraKeyframe();
     void sendTimeTimeline();
