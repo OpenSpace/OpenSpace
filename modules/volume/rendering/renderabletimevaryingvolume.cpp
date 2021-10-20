@@ -50,94 +50,104 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 
-    const char* KeyStepSize = "StepSize";
-    const char* KeyGridType = "GridType";
-
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
-        "stepSize",
+        "StepSize",
         "Step Size",
-        "" // @TODO Missing documentation
+        "Specifies how often to sample on the raycaster. Lower step -> higher resolution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
-        "gridType",
+        "GridType",
         "Grid Type",
-        "", // @TODO Missing documentation
+        "Spherical or Cartesian grid.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
-        "secondsBefore",
+        "SecondsBefore",
         "Seconds before",
-        "" // @TODO Missing documentation
+        "Specifies the number of seconds to show the first timestep before its "
+        "actual time. The default value is 0."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
-        "secondsAfter",
+        "SecondsAfter",
         "Seconds after",
-        "" // @TODO Missing documentation
+        "Specifies the number of seconds to show the the last timestep after its "
+        "actual time."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
-        "sourceDirectory",
+        "SourceDirectory",
         "Source Directory",
-        "" // @TODO Missing documentation
+        "Specifies the path to load timesteps from."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
-        "transferFunctionPath",
+        "TransferFunctionPath",
         "Transfer Function Path",
-        ""
+        "Specifies the transfer function file path."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
-        "triggerTimeJump",
+        "TriggerTimeJump",
         "Jump",
-        "" // @TODO Missing documentation
+        "Sets the time to be the first time of the volume sequence."
     };
 
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
-        "jumpToTimestep",
+        "JumpToTimestep",
         "Jump to timestep",
-        "" // @TODO Missing documentation
+        "Lets you scrub through the sequence's time steps."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
-        "currentTimestep",
-        "Current timestep",
-        "" // @TODO Missing documentation
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "The volumes general opacity."
     };
 
     constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
-        "rNormalization",
+        "RNormalization",
         "Radius normalization",
         "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
-        "rUpperBound",
+        "RUpperBound",
         "Radius upper bound",
-        "" // @TODO Missing documentation
+        "Limit the volume's radius"
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
-        // Specifies the path to load timesteps from
+        // [[codegen::verbatim(SourceDirectoryInfo.description)]]
         std::string sourceDirectory;
 
-        // Specifies the transfer function file path
+        // [[codegen::verbatim(TransferFunctionInfo.description)]]
         std::string transferFunction;
 
-        // Specifies the number of seconds to show the the first timestep before its
-        // actual time. The default value is 0
+        // [[codegen::verbatim(SecondsBeforeInfo.description)]]
         std::optional<float> secondsBefore;
 
-        // Specifies the number of seconds to show the the last timestep after its 
-        // actual time
+        // [[codegen::verbatim(SecondsAfterInfo.description)]]
         float secondsAfter;
 
+        // Specifies if you want to invert the volume data at it z-axis.
+        std::optional<bool> invertDataAtZ;
+
+        // [[codegen::verbatim(OpacityInfo.description)]]
+        std::optional<float> opacity;
+
+        // [[codegen::verbatim(StepSizeInfo.description)]]
+        std::optional<double> stepSize;
+
+        // [[codegen::verbatim(GridTypeInfo.description)]]
+        std::optional<std::string> gridType;
+
+        // @TODO Missing documentation
         std::optional<ghoul::Dictionary> clipPlanes;
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
@@ -154,6 +164,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _opacity(OpacityInfo, 10.f, 0.f, VolumeMaxOpacity)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -162,7 +173,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
-    , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
+    , _invertDataAtZ(false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -172,6 +183,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
     );
+    
+    _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
@@ -179,8 +192,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasValue<double>(KeyStepSize)) {
-        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
+    _stepSize = p.stepSize.value_or(_stepSize);
+    
+    if (p.opacity.has_value()) {
+        _opacity = *p.opacity * VolumeMaxOpacity;
     }
 
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
@@ -191,10 +206,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
-        VolumeGridType gridType = volume::parseGridType(
-           dictionary.value<std::string>(KeyGridType)
-        );
+    if (p.gridType.has_value()) {
+        VolumeGridType gridType = volume::parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
@@ -225,7 +238,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read();
+        t.rawVolume = reader.read(_invertDataAtZ);
 
         float min = t.metadata.minValue;
         float diff = t.metadata.maxValue - t.metadata.minValue;
@@ -238,7 +251,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             t.histogram->add(data[i]);
         }
-
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -276,14 +288,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
     });
 
-    _triggerTimeJump.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
+    _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
-    _jumpToTimestep.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
+    _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
     const int lastTimestep = !_volumeTimesteps.empty() ?
         static_cast<int>(_volumeTimesteps.size() - 1) :
         0;
-    _currentTimestep.setMaxValue(lastTimestep);
     _jumpToTimestep.setMaxValue(lastTimestep);
 
     addProperty(_stepSize);
@@ -293,7 +304,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
-    addProperty(_currentTimestep);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
     addProperty(_gridType);
@@ -317,7 +327,12 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     try {
         ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
         metadata = RawVolumeMetadata::createFromDictionary(dictionary);
-    } catch (...) {
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return;
+    }
+    catch (...) {
         return;
     }
 
@@ -404,7 +419,6 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
 
     if (_raycaster) {
         Timestep* t = currentTimestep();
-        _currentTimestep = timestepIndex(t);
 
         // Set scale and translation matrices:
         // The original data cube is a unit cube centered in 0
@@ -437,7 +451,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity * VolumeMaxOpacity);
+        _raycaster->setOpacity(_opacity);
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

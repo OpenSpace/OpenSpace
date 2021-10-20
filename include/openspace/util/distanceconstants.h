@@ -33,6 +33,7 @@ namespace openspace::distanceconstants {
     constexpr double LightMonth = LightYear / 12;
     constexpr double LightDay = LightYear / 365;
     constexpr double LightHour = LightDay / 24;
+    constexpr double LightSecond = 299792458.0;
     constexpr double AstronomicalUnit = 1.495978707E11;
     constexpr double Parsec = 3.0856776E16;
 

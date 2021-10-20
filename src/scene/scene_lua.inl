@@ -25,6 +25,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/lua/luastate.h>
@@ -616,7 +618,7 @@ int addSceneGraphNode(lua_State* L) {
             d.value<std::string>("Identifier") :
             "Scene";
         LERRORC(cat, ghoul::to_string(e.result));
-        
+
         return ghoul::lua::luaError(
             L,
             fmt::format("Error loading scene graph node: {}", e.what())
@@ -904,7 +906,7 @@ int worldRotation(lua_State* L) {
  * isBoolValue(const std::string& s):
  * Used to check if a string is a lua bool type. Returns false if not a valid bool string.
  */
-bool isBoolValue(const std::string& s) {
+bool isBoolValue(std::string_view s) {
     return (s == "true" || s == "false");
 }
 
@@ -915,12 +917,32 @@ bool isBoolValue(const std::string& s) {
  */
 bool isFloatValue(const std::string& s) {
     try {
-        float converted = std::stof(s);
-        return true;
+        float converted = std::numeric_limits<float>::min();
+        converted = std::stof(s);
+        return (converted != std::numeric_limits<float>::min());
     }
     catch (...) {
         return false;
     }
+}
+
+/**
+ * \ingroup LuaScripts
+ * isNilValue(const std::string& s):
+ * Used to check if a string is a lua 'nil' value. Returns false if not.
+ */
+bool isNilValue(std::string_view s) {
+    return (s == "nil");
+}
+
+/**
+ * \ingroup LuaScripts
+ * isTableValue(const std::string& s):
+ * Used to check if a string contains a lua table rather than an individual value.
+ * Returns false if not.
+ */
+bool isTableValue(std::string_view s) {
+    return ((s.front() == '{') && (s.back() == '}'));
 }
 
 }  // namespace openspace::luascriptfunctions

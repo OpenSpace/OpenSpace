@@ -194,7 +194,8 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             &luascriptfunctions::printCurrentStateInfo,
             {},
             "",
-            "Prints information about the current state and possible transitions to the log."
+            "Prints information about the current state and possible transitions to the "
+            "log."
         },
         {
             "saveToDotFile",

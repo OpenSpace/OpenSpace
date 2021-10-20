@@ -70,12 +70,30 @@ std::string SceneLicenseWriter::generateJson() const {
         constexpr const char* replStr = R"("{}": "{}", )";
         constexpr const char* replStr2 = R"("{}": "{}")";
         json << "{";
-        json << fmt::format(replStr, "name", escapedJson(global::profile->meta->name.value()));
-        json << fmt::format(replStr, "version", escapedJson(global::profile->meta->version.value()));
-        json << fmt::format(replStr, "description", escapedJson(global::profile->meta->description.value()));
-        json << fmt::format(replStr, "author", escapedJson(global::profile->meta->author.value()));
-        json << fmt::format(replStr, "url", escapedJson(global::profile->meta->url.value()));
-        json << fmt::format(replStr2, "license", escapedJson(global::profile->meta->license.value()));
+        json << fmt::format(
+            replStr,
+            "name", escapedJson(global::profile->meta->name.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "version", escapedJson(global::profile->meta->version.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "description", escapedJson(global::profile->meta->description.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "author", escapedJson(global::profile->meta->author.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "url", escapedJson(global::profile->meta->url.value_or(""))
+        );
+        json << fmt::format(
+            replStr2,
+            "license", escapedJson(global::profile->meta->license.value_or(""))
+        );
         json << "}";
 
         if (++metaCount != metaTotal) {

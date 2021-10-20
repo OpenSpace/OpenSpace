@@ -80,7 +80,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
             goodStepDirection = glm::normalize(n1 + n2);
         }
 
-        // Find a direction that is orthogonal to the line between the start and end position
+        // Find a direction that is orthogonal to the line between the start and end
+        // position
         const glm::dvec3 startPosToEndPos = end.position() - start.position();
         const glm::dvec3 outwardStepVector =
             0.5 * glm::length(startPosToEndPos) * goodStepDirection;

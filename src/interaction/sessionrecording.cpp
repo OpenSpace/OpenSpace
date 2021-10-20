@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/tasks/convertrecfileversiontask.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/keyframenavigator.h>
@@ -461,6 +462,9 @@ bool SessionRecording::startPlayback(std::string& filename,
         (_playbackForceSimTimeAtStart ? 1 : 0)
     ));
 
+    global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+        events::EventSessionRecordingPlayback::State::Started
+    );
     initializePlayback_triggerStart();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
@@ -527,12 +531,18 @@ void SessionRecording::setPlaybackPause(bool pause) {
             global::timeManager->setPause(true);
         }
         _state = SessionState::PlaybackPaused;
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Paused
+        );
     }
     else if (!pause && _state == SessionState::PlaybackPaused) {
         if (!_playbackPausedWithinDeltaTimePause) {
             global::timeManager->setPause(false);
         }
         _state = SessionState::Playback;
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Resumed
+        );
     }
 }
 
@@ -575,7 +585,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 
     if (!_playbackActive_camera && !_playbackActive_time && !_playbackActive_script) {
         if (_playbackLoopMode) {
-            //Loop back to the beginning to replay
+            // Loop back to the beginning to replay
             _saveRenderingDuringPlayback = false;
             initializePlayback_time(global::windowDelegate->applicationTime());
             initializePlayback_modeFlags();
@@ -586,6 +596,9 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
             _state = SessionState::Idle;
             _cleanupNeeded = true;
             LINFO("Playback session finished");
+            global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+                events::EventSessionRecordingPlayback::State::Finished
+            );
         }
     }
 }
@@ -606,6 +619,9 @@ void SessionRecording::stopPlayback() {
         _state = SessionState::Idle;
         _cleanupNeeded = true;
         LINFO("Session playback stopped");
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Finished
+        );
     }
 }
 
@@ -1963,9 +1979,13 @@ bool SessionRecording::processCameraKeyframe(double now) {
     }
 
     // getPrevTimestamp();
-    double prevTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrPrev].t3stamps);
+    double prevTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrPrev].t3stamps
+    );
     // getNextTimestamp();
-    double nextTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrNext].t3stamps);
+    double nextTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrNext].t3stamps
+    );
 
     double t;
     if ((nextTime - prevTime) < 1e-7) {

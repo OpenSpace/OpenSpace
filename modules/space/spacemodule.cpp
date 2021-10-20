@@ -25,11 +25,13 @@
 #include <modules/space/spacemodule.h>
 
 #include <modules/space/rendering/renderableconstellationbounds.h>
+#include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderablesmallbody.h>
 #include <modules/space/rendering/renderablestars.h>
+#include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/rendering/simplespheregeometry.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
@@ -82,11 +84,13 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
     );
+    fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
     fRenderable->registerClass<RenderableSmallBody>("RenderableSmallBody");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
+    fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -121,11 +125,13 @@ void SpaceModule::internalDeinitializeGL() {
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         RenderableConstellationBounds::Documentation(),
+        RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
         RenderableSatellites::Documentation(),
         RenderableSmallBody::Documentation(),
         RenderableStars::Documentation(),
+        RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
         KeplerTranslation::Documentation(),

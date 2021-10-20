@@ -258,7 +258,7 @@ namespace {
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // Defines either a single or multiple tags that apply to this
-        // ScreenSpaceRenderable, thus making it possible to address multiple, separate 
+        // ScreenSpaceRenderable, thus making it possible to address multiple, separate
         // Renderables with a single property change
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
     };

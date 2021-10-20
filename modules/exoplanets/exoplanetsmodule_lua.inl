@@ -557,7 +557,7 @@ void createExoplanetSystem(const std::string& starName) {
 
 int addExoplanetSystem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addExoplanetSystem");
-    std::variant<std::string, ghoul::Dictionary> v = 
+    std::variant<std::string, ghoul::Dictionary> v =
         ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
 
     if (std::holds_alternative<std::string>(v)) {

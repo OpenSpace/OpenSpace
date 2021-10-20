@@ -24,14 +24,15 @@
 
 #include <openspace/engine/globals.h>
 
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -71,12 +72,13 @@ namespace {
     // in some random global randoms
 #ifdef WIN32
     constexpr const int TotalSize =
+        sizeof(MemoryManager) +
+        sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
         sizeof(LuaConsole) +
-        sizeof(MemoryManager) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
         sizeof(OpenSpaceEngine) +
@@ -120,6 +122,22 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    memoryManager = new (currentPos) MemoryManager;
+    ghoul_assert(memoryManager, "No memoryManager");
+    currentPos += sizeof(MemoryManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    memoryManager = new MemoryManager;
+#endif // WIN32
+
+#ifdef WIN32
+    eventEngine = new (currentPos) EventEngine;
+    ghoul_assert(eventEngine, "No eventEngine");
+    currentPos += sizeof(EventEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    eventEngine = new EventEngine;
+#endif // WIN32
+
+#ifdef WIN32
     fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
     ghoul_assert(fontManager, "No fontManager");
     currentPos += sizeof(ghoul::fontrendering::FontManager);
@@ -157,14 +175,6 @@ void create() {
     currentPos += sizeof(LuaConsole);
 #else // ^^^ WIN32 / !WIN32 vvv
     luaConsole = new LuaConsole;
-#endif // WIN32
-
-#ifdef WIN32
-    memoryManager = new (currentPos) MemoryManager;
-    ghoul_assert(memoryManager, "No memoryManager");
-    currentPos += sizeof(MemoryManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    memoryManager = new MemoryManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -573,13 +583,6 @@ void destroy() {
     delete missionManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'MemoryManager'");
-#ifdef WIN32
-    memoryManager->~MemoryManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete memoryManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'LuaConsole'");
 #ifdef WIN32
     luaConsole->~LuaConsole();
@@ -613,6 +616,20 @@ void destroy() {
     fontManager->~FontManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete fontManager;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'EventEngine'");
+#ifdef WIN32
+    eventEngine->~EventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'MemoryManager'");
+#ifdef WIN32
+    memoryManager->~MemoryManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete memoryManager;
 #endif // WIN32
 
     callback::destroy();

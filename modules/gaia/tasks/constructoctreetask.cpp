@@ -462,7 +462,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             }
         }
     }
-    
+
     std::vector<float> filterValues;
     auto writeThreads = std::vector<std::thread>(8);
 

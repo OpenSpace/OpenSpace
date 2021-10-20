@@ -1377,20 +1377,22 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
                 &luascriptfunctions::rotationMatrix,
                 {},
                 "{string, string, string}",
-                "Returns the rotationMatrix for a given body in a frame of reference at a specific"
-                "time. The first agument is the target body, the second is the frame of reference,"
-                " the third is the time. Example: openspace.spice.rotationMatrix('"
-                "INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')."
+                "Returns the rotationMatrix for a given body in a frame of reference at "
+                "a specific time. The first agument is the target body, the second is "
+                "the frame of reference, the third is the time. Example: "
+                "openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS',"
+                "'2018 NOV 26 19:45:34')."
             },
             {
                 "position",
                 &luascriptfunctions::position,
                 {},
                 "{string, string, string, string}",
-                "Returns the position for a target by an observer in a frame of reference at a specific"
-                "time. The first agument is the target body, the second is the observer body, the third"
-                "is the frame of reference, and the fourth is the time. Example: openspace.spice."
-                "position('INSIGHT','MARS','GALACTIC', '2018 NOV 26 19:45:34')."
+                "Returns the position for a target by an observer in a frame of "
+                "reference at a specific time. The first agument is the target body, the "
+                "second is the observer body, the third is the frame of reference, and "
+                "the fourth is the time. Example: openspace.spice.position('INSIGHT',"
+                "'MARS','GALACTIC', '2018 NOV 26 19:45:34')."
             },
             {
                 "getSpiceBodies",
