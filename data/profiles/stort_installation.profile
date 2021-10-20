@@ -237,6 +237,21 @@
       "name": "Scene.Mars-Perseverance-Rover-Path.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.Apollo11MoonTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Apollo11LemDescentModel.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Apollo11.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {

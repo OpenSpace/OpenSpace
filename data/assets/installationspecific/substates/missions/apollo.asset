@@ -201,7 +201,7 @@ local apollo11State = {
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 20.11);
-    ]] .. util.fadeInNodes({ "Apollo11MoonTrail", "Apollo11LemTrail" }) .. [[
+    ]] .. util.fadeInNodes({ "Apollo11LemTrail" }) .. [[
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
@@ -210,7 +210,7 @@ local apollo11State = {
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.TargetLodScaleFactor', 15.0);
-    ]] .. util.fadeOutNodes({ "Apollo11MoonTrail", "Apollo11LemTrail" }) .. [[
+    ]] .. util.fadeOutNodes({ "Apollo11LemTrail" }) .. [[
   ]]
 }
 
