@@ -76,7 +76,7 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
+    void setTransferFunction(std::shared_ptr<openspace::TransferFunction> transferFunction);
 
     void setStepSize(float stepSize);
     float opacity() const;
@@ -94,7 +94,7 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform = glm::mat4(1.f);

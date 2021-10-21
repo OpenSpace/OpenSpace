@@ -28,12 +28,14 @@ set(HEADER_FILES
   speckloader.h
   rendering/planetgeometry.h
   rendering/renderableconstellationbounds.h
+  rendering/renderablefluxnodes.h
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
   rendering/renderablesatellites.h
   rendering/renderablesmallbody.h
   rendering/renderablestars.h
+  rendering/renderabletravelspeed.h
   rendering/simplespheregeometry.h
   translation/keplertranslation.h
   translation/spicetranslation.h
@@ -48,12 +50,14 @@ set(SOURCE_FILES
   speckloader.cpp
   rendering/planetgeometry.cpp
   rendering/renderableconstellationbounds.cpp
+  rendering/renderablefluxnodes.cpp
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
   rendering/renderablesatellites.cpp
   rendering/renderablesmallbody.cpp
   rendering/renderablestars.cpp
+  rendering/renderabletravelspeed.cpp
   rendering/simplespheregeometry.cpp
   translation/keplertranslation.cpp
   translation/spicetranslation.cpp
@@ -68,6 +72,8 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/debrisViz_fs.glsl
   shaders/debrisViz_vs.glsl
+  shaders/fluxnodes_fs.glsl
+  shaders/fluxnodes_vs.glsl
   shaders/habitablezone_vs.glsl
   shaders/habitablezone_fs.glsl
   shaders/rings_vs.glsl
@@ -75,6 +81,8 @@ set(SHADER_FILES
   shaders/star_fs.glsl
   shaders/star_ge.glsl
   shaders/star_vs.glsl
+  shaders/travelspeed_fs.glsl
+  shaders/travelspeed_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
