@@ -69,6 +69,11 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
     }
 }
 
+void StateMachineModule::deinitializeStateMachine() {
+    _machine.reset();
+    _machine = nullptr;
+}
+
 bool StateMachineModule::hasStateMachine() const {
     return _machine != nullptr;
 }
@@ -147,6 +152,13 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "and Transition documentation for details. The optional thrid argument is "
             "the identifier of the desired initial state. If left out, the first state "
             "in the list will be used."
+        },
+        {
+            "destroyStateMachine",
+            &luascriptfunctions::destroyStateMachine,
+            {},
+            "",
+            "Destroys the current state machine and deletes all the memory."
         },
         {
             "goToState",
