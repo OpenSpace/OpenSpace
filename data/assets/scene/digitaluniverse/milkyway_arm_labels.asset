@@ -35,7 +35,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
 
 asset.meta = {
   Name = "Milky Way Arms Labels",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Image with arm labels for the Milky Way galaxy]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
@@ -58,6 +58,5 @@ asset.meta = {
     WARRANTY of any kind. We provide the Atlas as is and take no responsibility for
     any damage resulting from the use of this Atlas. The entire risk as to the quality
     and performance of this product is with the user. <br><br> For more information,
-    please visit http://www.haydenplanetarium.org/universe]],
-  Identifiers = {"MilkyWayGalaxyArmLabelsImage"}
+    please visit http://www.haydenplanetarium.org/universe]]
 }

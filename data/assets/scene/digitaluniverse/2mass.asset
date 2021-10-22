@@ -54,11 +54,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "2MASS Galaxies",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Digital Universe asset for the Two Micron All-Sky Survey (2MASS) 
       survey]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"2MASS"}
+  License = "AMNH Digital Universe"
 }

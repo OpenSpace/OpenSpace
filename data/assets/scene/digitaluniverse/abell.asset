@@ -65,10 +65,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "Abell Galaxy Clusters",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for The Abell catalog]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Abell"}
+  License = "AMNH Digital Universe"
 }

@@ -46,10 +46,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
-  Identifiers = {"HubbleDeepField"},
   URL = "http://www.haydenplanetarium.org/universe",
   License = [[
     Copyright (c) American Museum of Natural History. All rights reserved.<br><br>
