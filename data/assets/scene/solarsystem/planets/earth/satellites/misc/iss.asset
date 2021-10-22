@@ -18,7 +18,7 @@ local models = asset.syncedResource({
 
 local initializeAndAddNodes = function()
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
-  local period = satelliteHelper.getPeriodFromElement(lineElement)
+  local period = 0.0645675984
   local path = tle .. "/" .. filename
 
   local iss = {
@@ -27,12 +27,16 @@ local initializeAndAddNodes = function()
     InteractionSphere = 30,
     Transform = {
       Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1
-      },
+        Type = "KeplerTranslation",
+        Eccentricity = 0.000419,
+        SemiMajorAxis = 6798.414219,
+        Inclination = 51.6428,
+        AscendingNode = 157,
+        ArgumentOfPeriapsis = 132.4567,
+        MeanAnomaly = 288.2541,
+        Epoch = '2021 OCT 22T05:03:31.470',
+        Period = 5578.640506
+    },
       Rotation = {
         Type = "SpiceRotation",
         SourceFrame = "GALACTIC",
@@ -84,12 +88,15 @@ local initializeAndAddNodes = function()
     Renderable = {
       Type = "RenderableTrailOrbit",
       Translation = {
-        Type = "TLETranslation",
-        Body = identifier,
-        Observer = transforms.EarthInertial.Identifier,
-        File = path,
-        LineNumber = 1,
-        RenderBinMode = "PostDeferredTransparent"
+        Type = "KeplerTranslation",
+        Eccentricity = 0.000419,
+        SemiMajorAxis = 6798.414219,
+        Inclination = 51.6428,
+        AscendingNode = 157,
+        ArgumentOfPeriapsis = 132.4567,
+        MeanAnomaly = 288.2541,
+        Epoch = '2021 OCT 22T05:03:31.470',
+        Period = 5578.640506
       },
       Color = { 0.9, 0.6715, 0.0 },
       Fade = 1.5,
