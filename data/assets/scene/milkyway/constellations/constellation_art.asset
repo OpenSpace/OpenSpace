@@ -65,7 +65,8 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
         Tag = { "ConstellationArtImage", group },
         GUI = {
           Name = name .. ' Image',
-          Path = '/Milky Way/' .. guiPath
+          Path = '/Milky Way/' .. guiPath,
+          Description = name .. ' Constellation Image'
         }
       }
       table.insert(genConstellations, aconstellation);
@@ -133,6 +134,7 @@ local hide_zodiac_art = {
 asset.export("HideZodiacArt", hide_zodiac_art)
 
 local nodes = {}
+local assetRef = asset
 
 asset.onInitialize(function ()
   local constellationsCSV = images .. "/constellation_data.csv"
@@ -140,6 +142,7 @@ asset.onInitialize(function ()
   nodes = createConstellations('ConstellationArt', 'Constellation Art', constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
+    assetRef.registerIdentifierWithMeta(n.Identifier)
   end
 
   openspace.action.registerAction(show_art)

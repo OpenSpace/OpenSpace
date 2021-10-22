@@ -94,4 +94,14 @@ int exportAsset(lua_State* L) {
     return asset->loader()->exportAssetLua(asset);
 }
 
+int registerIdentifierWithMeta(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerIdentifierWithMeta");
+
+    std::string identifier = luaL_checkstring(L, 1);
+    asset->addIdentifier(identifier);
+    lua_settop(L, 0);
+    return 0;
+}
+
 } // namespace openspace::assetloader

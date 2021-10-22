@@ -45,6 +45,7 @@ namespace {
     constexpr const char* RequireFunctionName = "require";
     constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
+    constexpr const char* RegisterIdentifierWithMetaFunctionName = "registerIdentifierWithMeta";
 
     constexpr const char* SyncedResourceFunctionName = "syncedResource";
     constexpr const char* LocalResourceFunctionName = "localResource";
@@ -147,6 +148,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     // |  |- request
     // |  |- exists
     // |  |- export
+    // |  |- registerIdentifierWithMeta
     // |  |- onInitialize
     // |  |- onDeinitialize
     // |  |- directory
@@ -206,6 +208,12 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     lua_pushlightuserdata(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exportAsset, 1);
     lua_setfield(*_luaState, assetTableIndex, ExportFunctionName);
+
+    // Register identifer with meta function
+    // registerIdentifierWithMeta(string identifier)
+    lua_pushlightuserdata(*_luaState, asset);
+    lua_pushcclosure(*_luaState, &assetloader::registerIdentifierWithMeta, 1);
+    lua_setfield(*_luaState, assetTableIndex, RegisterIdentifierWithMetaFunctionName);
 
     // Register onInitialize function
     // void onInitialize(function<void()> initializationFunction)

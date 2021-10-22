@@ -85,6 +85,12 @@ public:
         ResourceSynchronization::State state);
 
     /**
+    * Register a SceneGraphNodeIdentifier with the asset
+    * (used to associate Nodes with asset meta)
+    */
+    void addIdentifier(std::string identifier);
+
+    /**
      * Load this asset and return true if successful,
      * i.e. if this and all required assets loaded without errors.
      */

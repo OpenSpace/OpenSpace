@@ -459,6 +459,13 @@ float Asset::requestedSynchronizationProgress() {
     return syncProgress(assets);
 }
 
+void Asset::addIdentifier(std::string identifier) {
+    if (_metaInformation.has_value()) {
+        _metaInformation->identifiers.push_back(identifier);
+    }
+    return;
+}
+
 bool Asset::load() {
     if (isLoaded()) {
         return true;
