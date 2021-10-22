@@ -14,9 +14,13 @@ local homeState = {
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.startOrbiting() .. [[
-    ]] .. util.orbitOnArrival() .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
+    ]] .. util.enableRoll() .. [[
   ]],
-  Exit = util.stopOrbiting()
+  Exit = [[
+      ]] .. util.stopOrbiting() .. [[
+      ]] .. util.disableRoll() .. [[
+    ]]
 }
 
 -- An empty state that wil just be used to show a page in the GUI where the 
@@ -26,7 +30,7 @@ local solarSystemState = {
   Enter = [[
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.startOrbiting() .. [[
-    ]] .. util.orbitOnArrival() .. [[
+    ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     openspace.setPropertyValue('{moonTrail_minor}.Renderable.Enabled', false);
@@ -85,7 +89,7 @@ local transitions = {
     To = "Home",
     Action = [[
       local anchor = openspace.getPropertyValue("NavigationHandler.OrbitalNavigator.Anchor")
-      if (anchor ~= 'Sun' ) then ]]
+      if (anchor ~= 'Sun-Handle' ) then ]]
         .. flyHome.cameraPath .. 
       [[end
     ]]

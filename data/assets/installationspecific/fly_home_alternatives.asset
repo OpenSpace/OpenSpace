@@ -3,19 +3,32 @@ local util = asset.require('./utility_functions')
 local solarTargetDistance = 1079252848800 -- 1 lighthour
 local solarsystemflightDuration = 9 -- seconds
 
+local homeNavState = [[{
+  Up = {
+    -0.110511,
+    0.991965,
+    0.061579
+  },
+  ReferenceFrame = 'Root',
+  Anchor = 'Sun-Handle',
+  Pitch = -0.000608,
+  Yaw = 0.000012,
+  Position = {
+    167386109976.042145,
+    -47502587545.293373,
+    1065606578626.349121
+  }
+}]]
+
 local cameraPath = [[
   openspace.time.setPause(true)
   ]] .. util.disableLinearFlight() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.goToHeight(
-    'Sun', 
-    ]] .. solarTargetDistance .. [[,
-    ]] .. solarsystemflightDuration .. [[
-  )
+  ]] .. util.flyToNavState(homeNavState) .. [[
 ]]
 
 local linearFlight = [[
-  ]] .. util.changeAnchor('Sun', 2.0) .. [[
+  ]] .. util.changeAnchor('Sun-Handle', 2.0) .. [[
   ]] .. util.applyLinearFlight(solarTargetDistance, 1.2) .. [[
 ]]
 

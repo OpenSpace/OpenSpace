@@ -20,6 +20,32 @@ local Sun = {
   }
 }
 
+-- A "handle" that can be used for navigation and such
+local Handle = {
+  Identifier = "Sun-Handle",
+  Parent = Sun.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = Sun.Identifier,
+      Latitude = 90.0,
+      Longitude = 0.0,
+      Altitude = 1000,
+      UseHeightmap = false
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = Sun.Identifier,
+      Latitude = 90.0,
+      Longitude = 0.0
+    }
+  },
+  GUI = {
+    Name = "Sun Handle",
+    Path = "/Solar System/Sun"
+  }
+}
+
 local SunLabel = {
   Identifier = "SunLabel",
   Parent = Sun.Identifier,
@@ -45,7 +71,7 @@ local SunLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel, Handle })
 
 
 asset.meta = {
