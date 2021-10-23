@@ -163,7 +163,7 @@ end)
 
 asset.meta = {
   Name = "Constellation Images",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Artistic images depicting the constellations",
   Author = "James Hedberg",
   URL = "http://jameshedberg.com",

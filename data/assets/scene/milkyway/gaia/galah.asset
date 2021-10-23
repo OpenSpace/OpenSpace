@@ -12,7 +12,7 @@ local speck = asset.syncedResource({
 
 
 local gaia_abundance_galah = {
-  Identifier = "Gaia Abundance Galah",
+  Identifier = "GaiaAbundanceGalah",
   Renderable = {
     Type = "RenderableStars",
     Enabled = false,
@@ -40,8 +40,20 @@ local gaia_abundance_galah = {
     }
   },
   GUI = {
-    Path = "/Milky Way/Gaia"
+    Path = "/Milky Way/Gaia",
+    Name = "Gaia Abundance Galah",
+    Description = "Data set of stars color coded by metalocity."
   }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_galah })
+
+
+asset.meta = {
+  Name = "Gaia Abundance Galah",
+  Version = "1.0",
+  Description = [[This asset contains a RenderableStars dataset with metalocity data.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}

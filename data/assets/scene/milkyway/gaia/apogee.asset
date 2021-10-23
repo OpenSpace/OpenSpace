@@ -12,7 +12,7 @@ local speck = asset.syncedResource({
 })
 
 local gaia_abundance_apogee = {
-  Identifier = "Gaia Abundance Apogee",
+  Identifier = "GaiaAbundanceApogee",
   Renderable = {
     Type = "RenderableStars",
     Enabled = false,
@@ -40,8 +40,20 @@ local gaia_abundance_apogee = {
     }
   },
   GUI = {
-    Path = "/Milky Way/Gaia"
+    Path = "/Milky Way/Gaia",
+    Name = "Gaia Abundance Apogee",
+    Description = "Data set of stars color coded by metalocity."
   }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_apogee })
+
+
+asset.meta = {
+  Name = "Gaia Abundance Apogee",
+  Version = "1.0",
+  Description = [[This asset contains a RenderableStars dataset with metalocity data.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}
