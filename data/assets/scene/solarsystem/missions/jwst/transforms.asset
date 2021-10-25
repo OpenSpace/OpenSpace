@@ -57,6 +57,17 @@ local JWSTRotation = {
   }
 }
 
+-- Reparent the JWSTPosition node when the data changes at 01 Nov 2018
+asset.onInitialize(function()
+  openspace.scriptScheduler.loadScheduledScript(
+    "2018 NOV 01 00:00:00",
+    "openspace.setParent('JWSTPosition', 'L2')",
+    "openspace.setParent('JWSTPosition', 'EarthCenter')",
+    "",
+    1 -- Not default group, never clear this script
+  )
+end)
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTPosition,
   JWSTRotation
