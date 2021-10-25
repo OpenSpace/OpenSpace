@@ -30,26 +30,27 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo BrowserDimensionInfo =
     {
         "BrowserDimensions",
-        "Browser Dimensions Info",
-        "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
+        "Browser Dimensions",
+        "The pixel dimensions of the sky browser."
     };
-    constexpr const openspace::properties::Property::PropertyInfo ZoomInfo =
+    constexpr const openspace::properties::Property::PropertyInfo VerticalFovInfo =
     {
-        "Zoom",
-        "Zoom Info",
-        "tjobidabidobidabidopp plupp"
+        "VerticalFieldOfView",
+        "Vertical Field Of View",
+        "The vertical field of view in degrees."
     };
-    constexpr const openspace::properties::Property::PropertyInfo TargetIDInfo =
+    constexpr const openspace::properties::Property::PropertyInfo TargetIdInfo =
     {
-        "TargetID",
-        "Target Info",
-        "tjobidabidobidabidopp plupp"
+        "TargetId",
+        "Target Id",
+        "The identifier of the target. It is used to synchronize the sky browser and the" 
+        "sky target."
     };
     constexpr const openspace::properties::Property::PropertyInfo BorderColorInfo =
     {
         "BorderColor",
-        "Border color Info",
-        "tjobidabidobidabidopp plupp"
+        "Border Color",
+        "The color of the border of the sky browser as well as the sky target."
     };
 
 
@@ -58,14 +59,14 @@ namespace {
         // [[codegen::verbatim(BrowserDimensionInfo.description)]]
         std::optional<glm::vec2> browserDimensions;
 
-        // [[codegen::verbatim(ZoomInfo.description)]]
-        std::optional<float> zoom;
+        // [[codegen::verbatim(VerticalFovInfo.description)]]
+        std::optional<float> verticalFov;
 
-        // [[codegen::verbatim(TargetIDInfo.description)]]
-        std::optional<std::string> targetID;
+        // [[codegen::verbatim(TargetIdInfo.description)]]
+        std::optional<std::string> targetId;
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
-        std::optional<glm::ivec3> borderColor;
+        std::optional<glm::vec3> borderColor;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -76,47 +77,44 @@ namespace openspace {
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0), glm::ivec2(300))
-        , _vfieldOfView(ZoomInfo, 10.f, 0.1f, 70.f)
-        , _borderColor(BorderColorInfo, glm::ivec3(rand() % 256, rand() % 256, rand() % 256))
-        , _skyTargetID(TargetIDInfo)
-        , _camIsSyncedWWT(false)
-        , _skyTarget(nullptr)
+        , _verticalFov(VerticalFovInfo, 10.f, 0.1f, 70.f)
+        , _borderColor(BorderColorInfo, glm::vec3(rand() % 256, rand() % 256, rand() % 256))
+        , _skyTargetId(TargetIdInfo)
     {
-        // Ensure the color of the border is bright enough.
-        // Make sure the RGB color at least is 50% brightness
-        // By making each channel 50% bright in general
-        // 222 = sqrt(3*(0.5*256)^2)
-        while (glm::length(_borderColor.value()) < 222) {
-            _borderColor = glm::ivec3(rand() % 256, rand() % 256, rand() % 256);
-        }
+        // Make the color property display a color picker in the GUI
+        _borderColor.setViewOption("Color", true);
 
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
-        _browserDimensions.onChange([&]() { 
-            if(_skyTarget) {
-                glm::vec2 dim = getBrowserPixelDimensions();
+        _verticalFov = p.verticalFov.value_or(_verticalFov);
+        _borderColor = p.borderColor.value_or(_borderColor);
+        _skyTargetId = p.targetId.value_or(_skyTargetId);
+
+        addProperty(_browserDimensions);
+        addProperty(_verticalFov);
+        addProperty(_borderColor);
+        addProperty(_skyTargetId);
+
+        _browserDimensions.onChange([&]() {
+            if (_skyTarget) {
+                glm::vec2 dim = browserPixelDimensions();
                 _skyTarget->setDimensions(dim);
             }
             });
-        addProperty(_browserDimensions);
-
-        _vfieldOfView = p.zoom.value_or(_vfieldOfView);
-        addProperty(_vfieldOfView);
-
-        _skyTargetID = p.targetID.value_or(_skyTargetID);
-        addProperty(_skyTargetID);
-
-        _skyTargetID.onChange([&]() {
-            setConnectedTarget();
-            });
-        
-        _vfieldOfView.onChange([&]() {
+        _verticalFov.onChange([&]() {
             if (_skyTarget) {
-                _skyTarget->setVerticalFOV(_vfieldOfView);
+                _skyTarget->setScale(_verticalFov);
             }
             });
-        
+        _borderColor.onChange([&]() {
+            setWebpageBorderColor(_borderColor.value());
+            });
+        _skyTargetId.onChange([&]() {
+            connectToSkyTarget();
+            });
+
+        // Set a unique identifier
         std::string identifier;
         if (dictionary.hasValue<std::string>(KeyIdentifier)) {
             identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -127,7 +125,8 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-        _cartesianPosition.setValue(glm::dvec3(_cartesianPosition.value().x, _cartesianPosition.value().y, skybrowser::SCREENSPACE_Z));
+        glm::vec2 screenPosition = _cartesianPosition.value();
+        _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));
 
         // Always make sure that the target and browser are visible together
         _enabled.onChange([&]() {
@@ -135,13 +134,21 @@ namespace openspace {
                 _skyTarget->property("Enabled")->set(_enabled.value());
             }
         });
+
+        // Ensure the color of the border is bright enough.
+        // Make sure the RGB color at least is 50% brightness
+        // By making each channel 50% bright in general
+        // 222 = sqrt(3*(0.5*256)^2)
+        while (glm::length(_borderColor.value()) < 222) {
+            _borderColor = glm::vec3(rand() % 256, rand() % 256, rand() % 256);
+        }
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
         // Set flag to false so the thread can exit
-        _camIsSyncedWWT = false;
-        if (_threadWWTMessages.joinable()) {
-            _threadWWTMessages.join();
+        _syncViewWithWwt = false;
+        if (_threadWwtMessages.joinable()) {
+            _threadWwtMessages.join();
             LINFO("Joined thread");
         }
     }
@@ -150,38 +157,39 @@ namespace openspace {
         return ScreenSpaceBrowser::initializeGL();
     }
 
-    void ScreenSpaceSkyBrowser::setIdInBrowser() {
+    void ScreenSpaceSkyBrowser::sendIdToBrowser() {
         // Send ID to it's browser
         executeJavascript("setId('" + identifier() + "')");
     }
 
     void ScreenSpaceSkyBrowser::initializeBrowser() {
         // If the camera is already synced, the browser is already initialized
-        if (!_camIsSyncedWWT) {
-            _camIsSyncedWWT = true;
+        if (!_syncViewWithWwt) {
+            _syncViewWithWwt = true;
             // Set border color
-            setBorderColor(_borderColor.value());
+            setWebpageBorderColor(_borderColor.value());
             // Connect to target if they haven't been connected
             if (!_skyTarget) {
-                setConnectedTarget();
+                connectToSkyTarget();
             }
             // Track target
-            WWTfollowCamera();
+            syncWwtView();
         }
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         // Set flag to false so the thread can exit
-        _camIsSyncedWWT = false;
-        if (_threadWWTMessages.joinable()) {
-            _threadWWTMessages.join();
+        _syncViewWithWwt = false;
+        if (_threadWwtMessages.joinable()) {
+            _threadWwtMessages.join();
             LINFO("Joined thread");
         }
         return ScreenSpaceBrowser::deinitializeGL();
     }   
 
-    bool ScreenSpaceSkyBrowser::setConnectedTarget() {
-        _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(_skyTargetID.value()));
+    bool ScreenSpaceSkyBrowser::connectToSkyTarget() {
+        _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(
+            global::renderEngine->screenSpaceRenderable(_skyTargetId.value()));
         return _skyTarget;
     }
 
@@ -189,72 +197,81 @@ namespace openspace {
         return _skyTarget;
     }
 
-    bool ScreenSpaceSkyBrowser::hasLoadedCollections() {
-        return _hasLoadedCollections;
+    bool ScreenSpaceSkyBrowser::hasLoadedImages() const {
+        return _hasLoadedImages;
     }
 
-    void ScreenSpaceSkyBrowser::setHasLoadedCollections(bool isLoaded) {
-        _hasLoadedCollections = isLoaded;
+    void ScreenSpaceSkyBrowser::setHasLoadedImages(bool isLoaded) {
+        _hasLoadedImages = isLoaded;
     }
 
-    float ScreenSpaceSkyBrowser::fieldOfView() const {
-        return _vfieldOfView;
+    void ScreenSpaceSkyBrowser::setVerticalFov(float vfov) {
+        _verticalFov = vfov;
     }
 
-    void ScreenSpaceSkyBrowser::setVerticalFieldOfView(float fov) {
-        _vfieldOfView = fov;
-    }
-
-    void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
+    void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
         // Cap how often the zoom is allowed to update
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        if (now - _lastUpdateTime > TimeUpdateInterval) {
+        std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
+
+        if (timeSinceLastUpdate > _timeUpdateInterval) {
             // Make scroll more sensitive the smaller the FOV
-            float x = _vfieldOfView;
+            float x = _verticalFov;
             float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
             float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
-            _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
+            _verticalFov = std::clamp(_verticalFov + zoom, 0.001f, 70.0f);
             _lastUpdateTime = std::chrono::system_clock::now();
         }
     }
 
-    void ScreenSpaceSkyBrowser::executeJavascript(std::string script) const {
-        //LINFOC(_loggerCat, "Executing javascript " + script);
-        if (_browserInstance && _browserInstance->getBrowser() && _browserInstance->getBrowser()->GetMainFrame()) {
+    void ScreenSpaceSkyBrowser::executeJavascript(std::string script) {
+        // Make sure that the browser has a main frame
+        bool browserExists = _browserInstance && _browserInstance->getBrowser();
+        bool frameIsLoaded = browserExists && 
+            _browserInstance->getBrowser()->GetMainFrame();
+
+        if (frameIsLoaded) {
             CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
             frame->ExecuteJavaScript(script, frame->GetURL(), 0);
         }      
     }
 
-    glm::ivec3 ScreenSpaceSkyBrowser::getColor() {
+    glm::ivec3 ScreenSpaceSkyBrowser::borderColor() const {
         return _borderColor.value();
     }
 
-    void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 col)  {
-        std::string stringColor = std::to_string(col.x) + "," + std::to_string(col.y) + "," + std::to_string(col.z);
-        std::string script = "document.body.style.backgroundColor = 'rgb(" + stringColor + ")';";
+    float ScreenSpaceSkyBrowser::verticalFov() const {
+        return _verticalFov.value();
+    }
+
+    void ScreenSpaceSkyBrowser::setWebpageBorderColor(glm::ivec3 color)  {
+        std::string stringColor = std::to_string(color.x) + "," 
+            + std::to_string(color.y) + "," + std::to_string(color.z);
+        std::string script = "document.body.style.backgroundColor = 'rgb("
+            + stringColor + ")';";
         executeJavascript(script);
     }
 
-    bool ScreenSpaceSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
+    void ScreenSpaceSkyBrowser::sendMessageToWwt(const ghoul::Dictionary& msg) {
         std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
         executeJavascript(script);
-        return true;
     }
 
-    void ScreenSpaceSkyBrowser::WWTfollowCamera() {
+    void ScreenSpaceSkyBrowser::syncWwtView() {
 
         // Start a thread to enable user interaction while sending the calls to WWT
-        _threadWWTMessages = std::thread([&] {
-            while (_camIsSyncedWWT) {
-                if (_skyTarget) {
-                    glm::dvec2 aim = _skyTarget->getTargetDirectionCelestial();
-                    // Calculate roll between up vector of camera and J2000 equatorial north
-                    glm::dvec3 upVector = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-                    glm::dvec3 viewVector = global::navigationHandler->camera()->viewDirectionWorldSpace();
-                    double roll = skybrowser::calculateRoll(upVector, viewVector);
-                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _vfieldOfView, roll);
-                    sendMessageToWWT(message);
+        _threadWwtMessages = std::thread([&] {
+            while (_syncViewWithWwt) {
+                if (_skyTarget) {                    
+                    // Message WorldWide Telescope current view
+                    glm::dvec3 cartesian = _skyTarget->targetDirectionEquatorial();
+
+                    ghoul::Dictionary message = wwtmessage::moveCamera(
+                        skybrowser::cartesianToSpherical(cartesian),
+                        _verticalFov, 
+                        skybrowser::cameraRoll()
+                    );
+                    sendMessageToWwt(message);
                 }
                 
                 // Sleep so we don't bombard WWT with too many messages
@@ -264,23 +281,24 @@ namespace openspace {
 
     }
         
-    /*
-    void ScreenSpaceSkyBrowser::translate(glm::vec2 translation) {
-        glm::vec3 position = _cartesianPosition;     
-        _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, 1.0f);
-    }*/
+    //
+    //void ScreenSpaceSkyBrowser::translate(glm::vec2 translation) {
+    //    glm::vec3 position = _cartesianPosition;     
+    //    _cartesianPosition =glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, 1.0f);
+    //}
 
-    glm::vec2 ScreenSpaceSkyBrowser::coordIsOnResizeArea(glm::vec2 coord) {
+    glm::vec2 ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 screenSpaceCoord) {
         glm::vec2 resizePosition = glm::vec2{ 0 };
-        // Make sure coord is on browser
-        if (!coordIsInsideCornersScreenSpace(coord)) return resizePosition;
+        // Make sure coordinate is on browser
+        if (!coordIsInsideCornersScreenSpace(screenSpaceCoord)) return resizePosition;
 
-        float resizeButtonSize = 0.1f;
-       
-        bool isOnTop = coord.y > getUpperRightCornerScreenSpace().y - (getScreenSpaceDimensions().y * resizeButtonSize);
-        bool isOnBottom = coord.y < getLowerLeftCornerScreenSpace().y + (getScreenSpaceDimensions().y * resizeButtonSize);
-        bool isOnRight = coord.x > getUpperRightCornerScreenSpace().x - (getScreenSpaceDimensions().x * resizeButtonSize);
-        bool isOnLeft = coord.x < getLowerLeftCornerScreenSpace().x + (getScreenSpaceDimensions().x * resizeButtonSize);
+        float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
+        float resizeAreaX = screenSpaceDimensions().x * _resizeAreaPercentage;
+
+        bool isOnTop = screenSpaceCoord.y > upperRightCornerScreenSpace().y - resizeAreaY;
+        bool isOnBottom = screenSpaceCoord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
+        bool isOnRight = screenSpaceCoord.x > upperRightCornerScreenSpace().x - resizeAreaX;
+        bool isOnLeft = screenSpaceCoord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
 
         resizePosition.x = isOnRight ? 1.f : isOnLeft ? -1.f : 0.f;
         resizePosition.y = isOnTop ? 1.f : isOnBottom ? -1.f : 0.f;
@@ -288,13 +306,13 @@ namespace openspace {
         return  resizePosition;
     }
     // Scales the ScreenSpaceBrowser to a new ratio
-    void ScreenSpaceSkyBrowser::scale(glm::vec2 scalingFactor) {       
+    void ScreenSpaceSkyBrowser::setScale(glm::vec2 scalingFactor) {       
 
         // Scale on the y axis, this is to ensure that _scale = 1 is
         // equal to the height of the window
-        scale(abs(scalingFactor.y)); 
+        setScale(abs(scalingFactor.y)); 
         // Resize the dimensions of the texture on the x axis
-        glm::vec2 newSize = abs(scalingFactor) * _startDimensionsSize;
+        glm::vec2 newSize = abs(scalingFactor) * _originalDimensions;
         _texture->setDimensions(glm::ivec3(newSize, 1));
         _objectSize = _texture->dimensions();
         _browserDimensions = newSize;
@@ -303,8 +321,9 @@ namespace openspace {
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
         // To ensure the plane has the right ratio
         // The _scale tells us how much of the windows height the
-        // browser covers: eg a browser that covers 0.25 of the 
+        // browser covers: e.g. a browser that covers 0.25 of the 
         // height of the window will have scale = 0.25
+
         float textureRatio =
             static_cast<float>(_texture->dimensions().x) / static_cast<float>(_texture->dimensions().y);
 
@@ -316,19 +335,19 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::saveResizeStartSize() {
-        _startDimensionsSize = glm::vec2(_dimensions.value().x, _dimensions.value().y);
-        _startScale = _scale.value();
+        _originalDimensions = _dimensions.value();
+        _originalScale = _scale.value();
     }
 
     // Updates the browser size to match the size of the texture
     void ScreenSpaceSkyBrowser::updateBrowserSize() {
         _dimensions = _texture->dimensions();
     }
-    void ScreenSpaceSkyBrowser::scale(float scalingFactor) {
-        _scale = _startScale * scalingFactor;
+    void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
+        _scale = _originalScale * scalingFactor;
     }
 
-    glm::vec2 ScreenSpaceSkyBrowser::getBrowserPixelDimensions() {
+    glm::vec2 ScreenSpaceSkyBrowser::browserPixelDimensions() const {
         return _browserDimensions.value();
     }
 
@@ -336,45 +355,62 @@ namespace openspace {
         return _opacity;
     }
 
-    std::deque<int>& ScreenSpaceSkyBrowser::selectedImages() {
+    std::deque<int>& ScreenSpaceSkyBrowser::getSelectedImages() {
         return _selectedImages;
     }
 
     void ScreenSpaceSkyBrowser::addSelectedImage(ImageData& image, int i) {
         // Ensure there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        if (it == std::end(_selectedImages)) {
+        bool found = it != std::end(_selectedImages);
+        if (!found) {
             // Push newly selected image to front
             _selectedImages.push_front(i);
             // Index of image is used as layer ID as it is unique in the image data set
-            sendMessageToWWT(wwtmessage::createImageLayer(std::to_string(i), image.imageUrl));
-            sendMessageToWWT(wwtmessage::setLayerOpacity(std::to_string(i), 1.0));
+            sendMessageToWwt(wwtmessage::addImage(std::to_string(i), image.imageUrl));
+            sendMessageToWwt(wwtmessage::setImageOpacity(std::to_string(i), 1.0));
         }
     }
 
     void ScreenSpaceSkyBrowser::removeSelectedImage(ImageData& image, int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        if (it != std::end(_selectedImages)) {
+        bool found = it != std::end(_selectedImages);
+        if (found) {
             _selectedImages.erase(it);
-            sendMessageToWWT(wwtmessage::removeImageLayer(std::to_string(i)));
+            sendMessageToWwt(wwtmessage::removeImage(std::to_string(i)));
         }
     }
 
-    void ScreenSpaceSkyBrowser::setImageLayerOrder(int i, int order, int version) {
-        // Remove from selected list
-        auto current = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+    void ScreenSpaceSkyBrowser::setImageOrder(int i, int order, int version) {
+
+        // Find the selected image
+        auto selected = std::find(
+            std::begin(_selectedImages), 
+            std::end(_selectedImages), 
+            i
+        );
+
+        // Find the target for the swap
         auto target = std::begin(_selectedImages) + order;
 
-        // Make sure the image was found in the list
-        if (current != std::end(_selectedImages) && target != std::end(_selectedImages)) {
+        // Make sure the selected and the target placement was found in the list
+        bool foundSelected = selected != std::end(_selectedImages);
+        bool foundTarget = target != std::end(_selectedImages);
+
+        if (foundSelected && foundTarget) {
             // Swap the two images
-            std::iter_swap(current, target);
+            std::iter_swap(selected, target);
         }
 
+        // The images in the selected list are displayed in the reverse order from how the 
+        // WorldWide Telescope application sees them 
         int reverseOrder = _selectedImages.size() - order - 1;
-        ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i), 
-            reverseOrder, version);
-        sendMessageToWWT(message);
+        ghoul::Dictionary message = wwtmessage::setLayerOrder(
+            std::to_string(i), 
+            reverseOrder, 
+            version
+        );
+        sendMessageToWwt(message);
     }
 }

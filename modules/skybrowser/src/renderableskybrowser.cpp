@@ -68,8 +68,8 @@ namespace openspace {
         , _url(UrlInfo)
         , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
         , _reload(ReloadInfo)
-        , _fov(70.f)
-        , _connectToWwt(false)
+        , _verticalFov(70.f)
+        , _syncViewWithWwt(false)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -182,22 +182,22 @@ namespace openspace {
         }
     }
 
-    bool RenderableSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
+    bool RenderableSkyBrowser::sendMessageToWwt(const ghoul::Dictionary& msg) {
         std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
         executeJavascript(script);
         return true;
     }
 
     void RenderableSkyBrowser::displayImage(ImageData& image, int i) {
-        sendMessageToWWT(wwtmessage::moveCamera(image.celestCoords, image.fov, 0.0));
-        _fov = image.fov;
+        sendMessageToWwt(wwtmessage::moveCamera(image.celestialCoords, image.fov, 0.0));
+        _verticalFov = image.fov;
         // Add to selected images if there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it == std::end(_selectedImages)) {
             // Push newly selected image to front
             _selectedImages.push_front(i);
             // Create image layer and center WWT app on the image
-            sendMessageToWWT(wwtmessage::createImageLayer(std::to_string(i), image.imageUrl));
+            sendMessageToWwt(wwtmessage::addImage(std::to_string(i), image.imageUrl));
             LINFO("Image has been loaded to " + identifier());
         }
     }
@@ -207,7 +207,7 @@ namespace openspace {
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it != std::end(_selectedImages)) {
             _selectedImages.erase(it);
-            sendMessageToWWT(wwtmessage::removeImageLayer(std::to_string(i)));
+            sendMessageToWwt(wwtmessage::removeImage(std::to_string(i)));
         }
     }
 
@@ -216,22 +216,22 @@ namespace openspace {
         executeJavascript("setId('" + id + "')");
     }
 
-    float RenderableSkyBrowser::fieldOfView() const {
-        return _fov;
+    float RenderableSkyBrowser::verticalFov() const {
+        return _verticalFov;
     }
 
-    void RenderableSkyBrowser::connectToWwt() {
+    void RenderableSkyBrowser::syncWwtView() {
         // If the camera is already synced, the browser is already initialized
-        if (!_connectToWwt) {
-            _connectToWwt = true;
+        if (!_syncViewWithWwt) {
+            _syncViewWithWwt = true;
             // Start a thread to enable user interaction while sending the calls to WWT
             _threadWwtMessages = std::thread([&] {
-                while (_connectToWwt) {
+                while (_syncViewWithWwt) {
 
                     glm::dvec2 aim{ 0.0 };
                     // Send a message just to establish contact
-                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _fov, 0.0);
-                    sendMessageToWWT(message);
+                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _verticalFov, 0.0);
+                    sendMessageToWwt(message);
 
                     // Sleep so we don't bombard WWT with too many messages
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -241,15 +241,15 @@ namespace openspace {
       
     }
 
-    void RenderableSkyBrowser::stopConnectingToWwt() {
-        _connectToWwt = false;
+    void RenderableSkyBrowser::stopSyncingWwtView() {
+        _syncViewWithWwt = false;
 
         if (_threadWwtMessages.joinable()) {
             _threadWwtMessages.join();
         }
     }
 
-    std::deque<int>& RenderableSkyBrowser::selectedImages() {
+    std::deque<int>& RenderableSkyBrowser::getSelectedImages() {
         return _selectedImages;
     }
 
@@ -267,7 +267,7 @@ namespace openspace {
         int reverseOrder = _selectedImages.size() - order - 1;
         ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i),
             reverseOrder, version);
-        sendMessageToWWT(message);
+        sendMessageToWwt(message);
     }
 
     

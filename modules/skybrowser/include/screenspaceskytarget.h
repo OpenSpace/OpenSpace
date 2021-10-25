@@ -19,64 +19,77 @@ namespace openspace {
     class ScreenSpaceSkyTarget : public ScreenSpaceRenderable {
     
     public:
+        // Constructor & destructor
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyTarget();
 
+        // ScreenSpaceRenderable inherited functions
         bool initializeGL() override;
         bool isReady() const override;
         void render() override;
         glm::mat4 scaleMatrix() override;
         void bindTexture() override; // Empty function but has to be defined
-
         void createShaders();
-        void initializeWithBrowser();
+
+        // Sky browser functionality
+        bool findSkyBrowser();
+        void matchAppearanceToSkyBrowser();
+        
+        // Getters
         ScreenSpaceSkyBrowser* getSkyBrowser();
-       
-        void setVerticalFOV(float VFOV);
+        glm::ivec3 borderColor() const;
+        float opacity() const;
+
+        // Setters
+        void setScale(float verticalFov);
         void setDimensions(glm::vec2 dimensions);
         void setColor(glm::ivec3 color);
-        glm::ivec3 getColor();
-        properties::FloatProperty& getOpacity();
+        void setOpacity(float opacity);
 
         // Target directions
-        glm::dvec3 getTargetDirectionGalactic();
-        glm::dvec2 getTargetDirectionCelestial();
+        glm::dvec3 targetDirectionGalactic() const;
+        glm::dvec3 targetDirectionEquatorial() const;
 
         // Locking functionality
-        void unlock();
         void lock();
+        void unlock();
         bool isLocked();
         
         // Animations
-        void startAnimation(glm::dvec2 coordsEnd, float FOVEnd, bool lockAfterwards = true);
-        void animateToCoord(double deltaTime);
-        bool animateToFOV(float endFOV, float deltaTime);
+        void startAnimation(glm::dvec3 coordsEnd, float FOVEnd, bool lockAfter = true);
+        void animateToCoordinate(double deltaTime);
+        bool animateToFov(float endFOV, float deltaTime);
 
-        properties::StringProperty _skyBrowserID;
+    private:
+        // Properties
+        properties::StringProperty _skyBrowserId;
         properties::FloatProperty _showCrosshairThreshold;
         properties::FloatProperty _showRectangleThreshold;
 
-    private:
+        // Flags
+        bool _isAnimated{ false };
+        bool _lockAfterAnimation{ false };
+        bool _isLocked{ false };
+
         // Shader
         UniformCache(modelTransform, viewProj, showCrosshair, showRectangle, lineWidth, dimensions, lineColor) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
-        glm::ivec3 _color;
-        float _verticalFOV = 100.f;
-        ScreenSpaceSkyBrowser* _skyBrowser;
         
-        // Locking target to a coordinate on the sky
-        bool _isLocked;
-        glm::dvec2 _lockedCoords;              // Spherical celestial coords
-        std::thread _lockTargetThread;
+        // Sky browser
+        ScreenSpaceSkyBrowser* _skyBrowser;
+        glm::ivec3 _color;
+        
+        // Lock target to a coordinate on the sky
+        glm::dvec3 _lockedCoordinates;              // Spherical celestial coordinates
+        std::thread _lockTarget;
 
-        // Animating the target
-        bool _isAnimated = false;
-        glm::dvec3 _coordsEndAnimation;        // Cartesian celestial coords
-        glm::dvec3 _coordsStartAnimation;      // Cartesian celestial coords
+        // Animation of target
+        glm::dvec3 _animationEnd;        // Cartesian celestial coordinates
+        glm::dvec3 _animationStart;      // Cartesian celestial coordinates
         double _animationTime = 1.0;
-        float _FOVEndAnimation;
-        bool _lockAfterAnimation;
+        float _vfovEndAnimation;
+        
     };
 }
 

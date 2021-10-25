@@ -498,25 +498,25 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
   
     return scale;
 }
-glm::vec2  ScreenSpaceRenderable::getScreenSpacePosition() {
+glm::vec2  ScreenSpaceRenderable::screenSpacePosition() {
     return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
 }
 
-glm::vec2  ScreenSpaceRenderable::getScreenSpaceDimensions() {
+glm::vec2  ScreenSpaceRenderable::screenSpaceDimensions() {
     return glm::vec2(2.f * _scale * static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y), 2.f * _scale);
 }
 
-glm::vec2 ScreenSpaceRenderable::getUpperRightCornerScreenSpace() {
-    return getScreenSpacePosition() + (getScreenSpaceDimensions() / 2.0f);
+glm::vec2 ScreenSpaceRenderable::upperRightCornerScreenSpace() {
+    return screenSpacePosition() + (screenSpaceDimensions() / 2.0f);
 }
 
-glm::vec2 ScreenSpaceRenderable::getLowerLeftCornerScreenSpace() {
-    return getScreenSpacePosition() - (getScreenSpaceDimensions() / 2.0f);
+glm::vec2 ScreenSpaceRenderable::lowerLeftCornerScreenSpace() {
+    return screenSpacePosition() - (screenSpaceDimensions() / 2.0f);
 }
 
 bool ScreenSpaceRenderable::coordIsInsideCornersScreenSpace(glm::vec2 coord) {
-    bool lessThanUpperRight = coord.x < getUpperRightCornerScreenSpace().x && coord.y < getUpperRightCornerScreenSpace().y;
-    bool moreThanLowerLeft = coord.x > getLowerLeftCornerScreenSpace().x && coord.y > getLowerLeftCornerScreenSpace().y;
+    bool lessThanUpperRight = coord.x < upperRightCornerScreenSpace().x && coord.y < upperRightCornerScreenSpace().y;
+    bool moreThanLowerLeft = coord.x > lowerLeftCornerScreenSpace().x && coord.y > lowerLeftCornerScreenSpace().y;
     return  lessThanUpperRight && moreThanLowerLeft;
 }
 

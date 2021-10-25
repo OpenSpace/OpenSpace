@@ -47,30 +47,35 @@ namespace openspace {
         RenderableSkyBrowser(const ghoul::Dictionary& dictionary);
         virtual ~RenderableSkyBrowser() = default;
 
+        // Inherited from RenderablePlane
         void initializeGL() override;
         void deinitializeGL() override;
-
         void update(const UpdateData& data) override;
 
+        // Web page communication
         void executeJavascript(std::string script) const;
-        bool sendMessageToWWT(const ghoul::Dictionary& msg);
-        void connectToWwt();
-        void stopConnectingToWwt();
+        void setIdInBrowser(std::string id);
+
+        // WorldWide Telescope communication
         void displayImage(ImageData& image, int i);
         void removeSelectedImage(ImageData& image, int i);
-        void setIdInBrowser(std::string id);
-        float fieldOfView() const;
-        std::deque<int>& selectedImages();
+        bool sendMessageToWwt(const ghoul::Dictionary& msg);
+        void syncWwtView();
+        void stopSyncingWwtView();
+
+        // Getters
+        float verticalFov() const;
+        std::deque<int>& getSelectedImages();
+        
+        // Setters
         void setImageLayerOrder(int i, int order, int version);
 
-    protected:
-
-        properties::Vec2Property _dimensions;
-        std::unique_ptr<BrowserInstance> _browserInstance;
-        std::unique_ptr<ghoul::opengl::Texture> _texture;
-       
-
     private:
+        // Properties
+        properties::Vec2Property _dimensions;
+        properties::StringProperty _url;
+        properties::TriggerProperty _reload;
+
         class ScreenSpaceRenderHandler : public WebRenderHandler {
         public:
             void draw() override;
@@ -79,23 +84,21 @@ namespace openspace {
             void setTexture(GLuint t);
         };
 
-        CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-
         void bindTexture() override;
 
-        properties::StringProperty _url;
-
-        properties::TriggerProperty _reload;
-
+        // Browser variables       
+        std::unique_ptr<BrowserInstance> _browserInstance;
+        std::unique_ptr<ghoul::opengl::Texture> _texture;
+        CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
         CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
+        // Flags
         bool _isUrlDirty = false;
         bool _isDimensionsDirty = false;
+        bool _syncViewWithWwt;
         
-        float _fov;
-        bool _connectToWwt;
+        float _verticalFov;
         std::thread _threadWwtMessages;
-
         std::deque<int> _selectedImages;
     };
 }

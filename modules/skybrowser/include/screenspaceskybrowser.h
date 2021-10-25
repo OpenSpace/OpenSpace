@@ -13,63 +13,88 @@ namespace openspace {
     class ScreenSpaceSkyBrowser : public ScreenSpaceBrowser
     {
     public:
+        // Constructor and destructor
         ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyBrowser();
 
+        // Inherited functions
         bool initializeGL() override;
         bool deinitializeGL() override;
-        bool setConnectedTarget();
+        glm::mat4 scaleMatrix() override;
+        
+        // Target - browser connection
+        bool connectToSkyTarget();
         void initializeBrowser();
-        void setIdInBrowser();
+        
+        // Getters returning values
+        bool hasLoadedImages() const;
+        glm::vec2 browserPixelDimensions() const;
+        glm::ivec3 borderColor() const;
+        float verticalFov() const;
 
-        // Communication with the webpage and WWT
-        void executeJavascript(std::string script) const;
-        bool sendMessageToWWT(const ghoul::Dictionary& msg);
-        void WWTfollowCamera();
-        float fieldOfView() const;
-        void setVerticalFieldOfView(float fov);
-        void scrollZoom(float scroll);
+        // Getters returning references
         ScreenSpaceSkyTarget* getSkyTarget();
-        bool hasLoadedCollections();
-        void setHasLoadedCollections(bool isLoaded);
+        std::deque<int>& getSelectedImages();
         properties::FloatProperty& getOpacity();
-        std::deque<int>& selectedImages();
+        
+        // Setters
+        void setHasLoadedImages(bool isLoaded);
+        void setVerticalFov(float vfov);
+        void setVerticalFovWithScroll(float scroll);
+        void setScale(glm::vec2 scalingFactor);
+        void setScale(float scalingFactor);
+        void setWebpageBorderColor(glm::ivec3 color);   
+
+        // Communication with the web page
+        void executeJavascript(std::string script);
+        void sendIdToBrowser();
+
+        // Communication with WorldWide Telescope
         void addSelectedImage(ImageData& image, int i);
         void removeSelectedImage(ImageData& image, int i);
-        void setImageLayerOrder(int i, int order, int version);
+        void setImageOrder(int i, int order, int version);
+        void sendMessageToWwt(const ghoul::Dictionary& msg);
+        void syncWwtView();
+
+        // Mouse interaction with the browser. Returns 1 or -1 at the coordinate in 
+        // image if the mouse is on a side of the browser
+        //            __1__
+        //   y|   -1 |_____|1 
+        //    |__x     -1  
+        glm::vec2 isOnResizeArea(glm::vec2 screenSpaceCoord);
+
+        // Resize functions
+        void saveResizeStartSize();
+        void updateBrowserSize();
 
         // Translation
         //void translate(glm::vec2 translation);
-
-        // Position and dimension and corners
-        glm::vec2 getBrowserPixelDimensions();
-        glm::vec2 coordIsOnResizeArea(glm::vec2 coord);
-        // Scaling
-        void scale(glm::vec2 scalingFactor);
-        void scale(float scalingFactor);
-        glm::mat4 scaleMatrix() override;
-        // Resizing
-        void saveResizeStartSize();
-        void updateBrowserSize();
-        void setBorderColor(glm::ivec3 addColor);
-        glm::ivec3 getColor();
-        // Flag for dimensions
-        bool _browserDimIsDirty;
-        properties::FloatProperty _vfieldOfView;
-        properties::StringProperty _skyTargetID;
-        properties::Vec3Property _borderColor;
+        
     private:
-        glm::vec2 _startDimensionsSize;
-        float _startScale;
+        // Properties
+        properties::FloatProperty _verticalFov;       
+        properties::StringProperty _skyTargetId;
         properties::Vec2Property _browserDimensions;
-        bool _camIsSyncedWWT;
-        ScreenSpaceSkyTarget* _skyTarget;
-        std::thread _threadWWTMessages;       
-        // For capping the calls to change the zoom from scrolling
-        constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
-        std::chrono::system_clock::time_point _lastUpdateTime;
-        bool _hasLoadedCollections{ false };
+        properties::Vec3Property _borderColor;
+
+        // Flags
+        bool _hasLoadedImages{ false };
+        bool _syncViewWithWwt{ false };
+
+        // Resizing of browser
+        glm::vec2 _originalDimensions;
+        float _originalScale;
+        float _resizeAreaPercentage{ 0.1f };
+        
+        // Target & images
+        ScreenSpaceSkyTarget* _skyTarget{ nullptr };
+        std::thread _threadWwtMessages;       
         std::deque<int> _selectedImages;
+
+        // Time variables
+        // For capping the calls to change the zoom from scrolling
+        constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
+        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 

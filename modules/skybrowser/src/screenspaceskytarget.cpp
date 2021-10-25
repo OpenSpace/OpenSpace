@@ -74,7 +74,7 @@ namespace {
 namespace openspace {
     ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
-        , _skyBrowserID(BrowserIDInfo)
+        , _skyBrowserId(BrowserIDInfo)
         , _skyBrowser(nullptr)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
         , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
@@ -82,17 +82,17 @@ namespace openspace {
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
-        _skyBrowserID = p.browserID.value_or(_skyBrowserID);
+        _skyBrowserId = p.browserID.value_or(_skyBrowserId);
         _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
         _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
          
-        addProperty(_skyBrowserID);
+        addProperty(_skyBrowserId);
         addProperty(_showCrosshairThreshold);
         addProperty(_showRectangleThreshold);
 
         // If the ID changes for the corresponding browser, update
-        _skyBrowserID.onChange([&]() {
-            initializeWithBrowser();
+        _skyBrowserId.onChange([&]() {
+            findSkyBrowser();
             });
 
         // Always make sure that the target and browser are visible together
@@ -115,14 +115,14 @@ namespace openspace {
 
         // Set the position to screen space z
         glm::dvec3 startPos{ _cartesianPosition.value().x, _cartesianPosition.value().y, 
-            skybrowser::SCREENSPACE_Z };
+            skybrowser::ScreenSpaceZ };
 
         _cartesianPosition.setValue(startPos);
     }
 
     ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
-        if (_lockTargetThread.joinable()) {
-            _lockTargetThread.join();
+        if (_lockTarget.joinable()) {
+            _lockTarget.join();
         }
     }
 
@@ -131,13 +131,18 @@ namespace openspace {
 
     }
 
-    void ScreenSpaceSkyTarget::initializeWithBrowser() {
+    bool ScreenSpaceSkyTarget::findSkyBrowser() {
         _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(
-            global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+            global::renderEngine->screenSpaceRenderable(_skyBrowserId.value()));
+        matchAppearanceToSkyBrowser();
+        return _skyBrowser;
+    }
+
+    void ScreenSpaceSkyTarget::matchAppearanceToSkyBrowser() {
         if (_skyBrowser) {
-            _color = _skyBrowser->getColor();
-            _objectSize = _skyBrowser->getBrowserPixelDimensions();
-            setVerticalFOV(_skyBrowser->_vfieldOfView.value());
+            _color = _skyBrowser->borderColor();
+            _objectSize = _skyBrowser->browserPixelDimensions();
+            setScale(_skyBrowser->verticalFov());
         }
     }
 
@@ -156,10 +161,10 @@ namespace openspace {
 
     glm::mat4 ScreenSpaceSkyTarget::scaleMatrix() {
         // To ensure the plane has the right ratio
-        // The _scale us how much of the windows height the browser covers: eg a browser 
+        // The _scale us how much of the windows height the browser covers: e.g. a browser 
         // that covers 0.25 of the height of the window will have scale = 0.25
-        float ratio = static_cast<float>(_objectSize.x) / 
-            static_cast<float>(_objectSize.y);
+        glm::vec2 floatObjectSize = glm::abs(_objectSize);
+        float ratio = floatObjectSize.x / floatObjectSize.y;
 
         glm::mat4 scale = glm::scale(
             glm::mat4(1.f),
@@ -186,7 +191,7 @@ namespace openspace {
         _color = color;
     }
 
-    glm::ivec3 ScreenSpaceSkyTarget::getColor() {
+    glm::ivec3 ScreenSpaceSkyTarget::borderColor() const {
         return _color;
     }
 
@@ -196,20 +201,18 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::render() {
 
-        glDisable(GL_CULL_FACE);
-       
+        bool showCrosshair = _skyBrowser->verticalFov() < _showCrosshairThreshold;
+        bool showRectangle = _skyBrowser->verticalFov() > _showRectangleThreshold;
+        glm::vec4 color = { glm::vec3(_color) / 255.f, _opacity.value() };
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
             localRotationMatrix() * scaleMatrix();
         float lineWidth = 0.0016f/_scale.value();
 
-        _shader->activate();
+        glDisable(GL_CULL_FACE);
 
-        bool showCrosshair = _verticalFOV < _showCrosshairThreshold;
-        bool showRect = _verticalFOV > _showRectangleThreshold;
-        glm::vec4 color = { glm::vec3(_color) / 255.f, _opacity.value() };
-       
+        _shader->activate();
         _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
-        _shader->setUniform(_uniformCache.showRectangle, showRect);
+        _shader->setUniform(_uniformCache.showRectangle, showRectangle);
         _shader->setUniform(_uniformCache.lineWidth, lineWidth);
         _shader->setUniform(_uniformCache.dimensions, glm::vec2(_objectSize));
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
@@ -231,7 +234,7 @@ namespace openspace {
         _objectSize = dimensions;
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::getTargetDirectionGalactic() {
+    glm::dvec3 ScreenSpaceSkyTarget::targetDirectionGalactic() const {
         glm::dmat4 rotation = glm::inverse(
             global::navigationHandler->camera()->viewRotationMatrix());
         glm::dvec4 position = glm::dvec4(_cartesianPosition.value(), 1.0);
@@ -239,20 +242,26 @@ namespace openspace {
         return glm::normalize(rotation * position);
     }
 
-    void ScreenSpaceSkyTarget::setVerticalFOV(float VFOV) { 
-        _verticalFOV = VFOV;
-
-        // Update the scale of the target
-        float horizFOV = global::windowDelegate->getHorizFieldOfView();
-        glm::ivec2 windowRatio = global::windowDelegate->currentWindowSize();
-        float verticFOV = horizFOV * (static_cast<float>(windowRatio.y) / static_cast<float>(windowRatio.x));
-        _scale = std::max((VFOV / verticFOV), (_showRectangleThreshold.value() / verticFOV));
+    // Update the scale of the target (the height of the target in relation to the 
+    // OpenSpace window)
+    void ScreenSpaceSkyTarget::setScale(float verticalFov) {
+        
+        // Calculate the vertical field of view of the OpenSpace window
+        float hFovOs = global::windowDelegate->getHorizFieldOfView();
+        glm::vec2 windowRatio = glm::vec2(global::windowDelegate->currentWindowSize());
+        float vFovOs = hFovOs * windowRatio.y / windowRatio.x;
+        
+        // Cap the scale at small scales so it is still visible
+        float heightRatio = verticalFov / vFovOs;
+        float smallestHeightRatio = _showRectangleThreshold.value() / vFovOs;
+        
+        _scale = std::max(heightRatio, smallestHeightRatio);
     }
 
     void ScreenSpaceSkyTarget::unlock() {
         _isLocked = false;
-        if (_lockTargetThread.joinable()) {
-            _lockTargetThread.join();
+        if (_lockTarget.joinable()) {
+            _lockTarget.join();
         }
     }
 
@@ -261,13 +270,13 @@ namespace openspace {
             unlock();
         }
         _isLocked = true;
-        _lockedCoords = getTargetDirectionCelestial();
+        _lockedCoordinates = targetDirectionEquatorial();
 
         // Start a thread to enable user interactions while locking target
-        _lockTargetThread = std::thread([&] {
+        _lockTarget = std::thread([&] {
             while (_isLocked) {
-                glm::vec3 imageCoordsScreenSpace = skybrowser::J2000SphericalToScreenSpace(_lockedCoords);
-                _cartesianPosition = imageCoordsScreenSpace;
+                glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace(_lockedCoordinates);
+                _cartesianPosition = coordsScreen;
             }
         });
     }
@@ -276,57 +285,55 @@ namespace openspace {
         return _isLocked;
     }
 
-    glm::dvec2 ScreenSpaceSkyTarget::getTargetDirectionCelestial() {
+    glm::dvec3 ScreenSpaceSkyTarget::targetDirectionEquatorial() const {
         // Calculate the galactic coordinate of the target direction 
-        // with infinite radius
-        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-        constexpr double infinity = std::numeric_limits<float>::max();
-        glm::dvec3 galCoord = camPos + (infinity * getTargetDirectionGalactic());
-        return skybrowser::galacticCartesianToJ2000Spherical(galCoord);
+        // projected onto the celestial sphere
+        return skybrowser::screenSpaceToEquatorial(_cartesianPosition.value());
     }
 
-    void ScreenSpaceSkyTarget::animateToCoord(double deltaTime) {
+    void ScreenSpaceSkyTarget::animateToCoordinate(double deltaTime) {
         if (_isAnimated) {
             // Find smallest angle between the two vectors
-            double smallestAngle = std::acos(glm::dot(_coordsStartAnimation, _coordsEndAnimation) / (glm::length(_coordsStartAnimation) * glm::length(_coordsEndAnimation)));
+            double smallestAngle = std::acos(glm::dot(_animationStart, _animationEnd) / (glm::length(_animationStart) * glm::length(_animationEnd)));
             // Only keep animating when target is not at final position
             if (abs(smallestAngle) > 0.0005) {
                 // Calculate rotation this frame
                 double rotationAngle = smallestAngle * deltaTime * 5.0;
                 // Create the rotation matrix
-                glm::dvec3 rotationAxis = glm::normalize(glm::cross(_coordsStartAnimation, _coordsEndAnimation));
+                glm::dvec3 rotationAxis = glm::normalize(glm::cross(_animationStart, _animationEnd));
                 glm::dmat4 rotmat = glm::rotate(rotationAngle, rotationAxis);
                 // Rotate target direction
-                glm::dvec3 newDir = rotmat * glm::dvec4(_coordsStartAnimation, 1.0);
-                // Convert to screenspace
-                _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(newDir);
+                glm::dvec3 newDir = rotmat * glm::dvec4(_animationStart, 1.0);
+                // Convert to screen space
+                _cartesianPosition = skybrowser::equatorialToScreenSpace(newDir);
                 // Update position
-                _coordsStartAnimation = glm::normalize(newDir);
+                _animationStart = glm::normalize(newDir);
             }
             else {
                 // Set the exact target position 
-                _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(_coordsEndAnimation);
+                _cartesianPosition = skybrowser::equatorialToScreenSpace(_animationEnd);
                 // Lock target when it first arrives to the position
                 if (!_isLocked && _lockAfterAnimation) {
                     lock();
                 }
                 // When target is in position, animate the FOV until it has finished
-                if(animateToFOV(_FOVEndAnimation, deltaTime)) {
+                if(animateToFov(_vfovEndAnimation, deltaTime)) {
                     _isAnimated = false;
                 }
             }
         }
     }
 
-    bool ScreenSpaceSkyTarget::animateToFOV(float endFOV, float deltaTime) {
+    bool ScreenSpaceSkyTarget::animateToFov(float endFOV, float deltaTime) {
         if (!_skyBrowser) {
-            initializeWithBrowser();
+            findSkyBrowser();
         }
         if (_skyBrowser) {
-            double distance = static_cast<double>(_skyBrowser->_vfieldOfView.value()) - endFOV;
+            double distance = static_cast<double>(_skyBrowser->verticalFov()) - endFOV;
+            
             // If distance is too large, keep animating
             if (abs(distance) > 0.01) {
-                _skyBrowser->scrollZoom(distance);
+                _skyBrowser->setVerticalFovWithScroll(distance);
                 return false;
             }
             // Animation is finished
@@ -339,18 +346,22 @@ namespace openspace {
         return true;     
     }
 
-    void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd,
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 coordsEnd, float FOVEnd,
         bool lockAfterwards) {
         // Save the Cartesian celestial coordinates for animation
         // The coordinates are Cartesian to avoid wrap-around issues
-        _coordsEndAnimation = glm::normalize(skybrowser::sphericalToCartesian(coordsEnd));
-        _coordsStartAnimation = glm::normalize(skybrowser::sphericalToCartesian(
-            getTargetDirectionCelestial()));
-        _FOVEndAnimation = FOVEnd;
+        _animationEnd = glm::normalize(coordsEnd);
+        _animationStart = glm::normalize(targetDirectionEquatorial());
+        _vfovEndAnimation = FOVEnd;
         _isAnimated = true;
         _lockAfterAnimation = lockAfterwards;
     }
-    properties::FloatProperty& ScreenSpaceSkyTarget::getOpacity() {
-        return _opacity;
+
+    float ScreenSpaceSkyTarget::opacity() const {
+        return _opacity.value();
+    }
+
+    void ScreenSpaceSkyTarget::setOpacity(float opacity) {
+        _opacity = opacity;
     }
 }

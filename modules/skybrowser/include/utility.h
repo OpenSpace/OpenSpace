@@ -10,45 +10,49 @@
 
 namespace openspace {
     namespace skybrowser {
-        const double SCREENSPACE_Z = -2.1;
-        const double RAD_TO_DEG = 180.0 / M_PI;
-        const double DEG_TO_RAD = M_PI / 180.0;
-        const glm::dvec3 NORTH_POLE = { 0.0 , 0.0 , 1.0 };
-        constexpr double infinity = std::numeric_limits<float>::max();
+        // Constants
+        constexpr const double ScreenSpaceZ = -2.1;
+        constexpr const glm::dvec3 NorthPole = { 0.0 , 0.0 , 1.0 };
+        constexpr const double CelestialSphereRadius = std::numeric_limits<float>::max();  
 
-        // Conversion matrix from this paper: https://arxiv.org/abs/1010.3773v1
+        // Conversion matrix - J2000 equatorial <-> galactic
+        // https://arxiv.org/abs/1010.3773v1
         const glm::dmat3 conversionMatrix = glm::dmat3({
                    -0.054875539390,  0.494109453633, -0.867666135681, // col 0
                    -0.873437104725, -0.444829594298, -0.198076389622, // col 1
                    -0.483834991775,  0.746982248696,  0.455983794523 // col 2
             });
 
-        // J2000 to galactic conversion and vice versa
-        glm::dvec2 cartesianToSpherical(glm::dvec3 cartesianCoords);
-        glm::dvec3 sphericalToCartesian(glm::dvec2 sphericalCoords);
-        glm::dvec3 galacticCartesianToJ2000Cartesian(glm::dvec3 rGal);
-        glm::dvec2 galacticCartesianToJ2000Spherical(glm::dvec3 rGal);
-        glm::dvec3 galacticCartesianToCameraLocalCartesian(glm::dvec3 galCoords);
-        glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords,
-            double distance = infinity);
-        glm::dvec3 J2000CartesianToGalacticCartesian(glm::dvec3 coords,
-            double distance = infinity);
-        // Convert J2000, spherical or Cartesian, to screen space
-        glm::dvec3 J2000SphericalToScreenSpace(glm::dvec2 coords);
-        glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords);
-        glm::dvec3 galacticToScreenSpace(glm::dvec3 galacticCoord);
-        double calculateRoll(glm::dvec3 upWorld, glm::dvec3 forwardWorld);
-        glm::dvec3 cameraDirectionJ2000Cartesian();
+        // Conversion spherical <-> Cartesian
+        glm::dvec2 cartesianToSpherical(glm::dvec3 coords);
+        glm::dvec3 sphericalToCartesian(glm::dvec2 coords);
+
+        // Conversion J2000 equatorial <-> galactic
+        glm::dvec3 galacticToEquatorial(glm::dvec3 coords);
+        glm::dvec3 galacticToCameraLocal(glm::dvec3 coords);
+        glm::dvec3 equatorialToGalactic(glm::dvec3 coords);
+
+        // Conversion J2000 equatorial / galactic <-> screen space
+        glm::dvec3 equatorialToScreenSpace(glm::dvec3 coords);
+        glm::dvec3 galacticToScreenSpace(glm::dvec3 coords);
+        glm::dvec3 screenSpaceToGalactic(glm::dvec3 coords);
+        glm::dvec3 screenSpaceToEquatorial(glm::dvec3 coords);
+
+        // Camera roll and direction
+        // Camera roll is with respect to the equatorial North Pole
+        double cameraRoll();
+        glm::dvec3 cameraDirectionGalactic();
+        glm::dvec3 cameraDirectionEquatorial();
     }
+    // WorldWide Telescope messages
     namespace wwtmessage {
-        // WWT messages
         ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords,
             const double fov, const double roll, const bool moveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
-        ghoul::Dictionary createImageLayer(const std::string& id, const std::string& url);
-        ghoul::Dictionary removeImageLayer(const std::string& id);
-        ghoul::Dictionary setLayerOpacity(const std::string& id, double opacity);
+        ghoul::Dictionary addImage(const std::string& id, const std::string& url);
+        ghoul::Dictionary removeImage(const std::string& id);
+        ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);
         ghoul::Dictionary setLayerOrder(const std::string& id, int order, int version);
     }

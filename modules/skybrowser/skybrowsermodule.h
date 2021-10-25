@@ -43,7 +43,7 @@ class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class RenderableSkyBrowser;
 class ScreenSpaceRenderable;
-class WWTDataHandler;
+class WwtDataHandler;
 class SceneGraphNode;
 class ImageData;
 
@@ -51,32 +51,42 @@ class ImageData;
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
-    constexpr static const int FROM_DIRECTORY = 0;
-    constexpr static const int FROM_URL = 1;
-
+    
+    // Constructor & destructor
     SkyBrowserModule();
     virtual ~SkyBrowserModule();
-    glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
-    void addRenderable(ScreenSpaceRenderable* object);
-    WWTDataHandler* getWWTDataHandler();
+
+    // Getters
     std::map<std::string, ScreenSpaceSkyBrowser*>& getSkyBrowsers();
     std::vector<ScreenSpaceRenderable*>& getBrowsersAndTargets();
     SceneGraphNode* get3dBrowser();
-    void startRotation(glm::dvec2 coordsEnd);
-    void rotateCamera(double deltaTime);
-    bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
+    WwtDataHandler* getWWTDataHandler();
+    std::string selectedBrowserId();
+
+    // Setters
     void setSelectedBrowser(ScreenSpaceSkyBrowser* ptr);
     void setSelectedBrowser(std::string id);
-    bool browserIdExists(std::string id);
-    std::string selectedBrowserId();
-    int loadImages(const std::string& root, const std::string& directory);
     void set3dBrowser(SceneGraphNode* node);
+
+    // Rotation and animation
+    void startRotation(glm::dvec3 endAnimation); // Pass in galactic coord
+    void rotateCamera(double deltaTime);
+    bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
+    void lookAt3dBrowser();
+   
+    // Boolean functions
+    bool browserIdExists(std::string id);
     bool cameraInSolarSystem();
+
+    // Managing the browsers 
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
+    void addRenderable(ScreenSpaceRenderable* object);
     void place3dBrowser(ImageData& image);
-    void lookAt3dBrowser();
-    int getAndIncrementLayerOrder();
+    
+    // Image collection handling
+    int loadImages(const std::string& root, const std::string& directory);
+    int getAndIncrementMessageOrder(); // For version handling calls to WWT
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -84,43 +94,42 @@ public:
 protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
-    
-    // Using snake case on these casting functions to make them similar to eg std::to_string
-    ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
-    ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
+
+private:
+    // Cast screen space renderable to either target or browser
+    ScreenSpaceSkyBrowser* toBrowser(ScreenSpaceRenderable* ptr);
+    ScreenSpaceSkyTarget* toTarget(ScreenSpaceRenderable* ptr);
 
     // The browsers and targets
-    std::vector<ScreenSpaceRenderable*> renderables;
-    // Only the browsers
-    std::map<std::string, ScreenSpaceSkyBrowser*> browsers;
-    // 3D browser
-    SceneGraphNode* _browser3d;
-    // Pointer to what mouse is currently on
-    ScreenSpaceRenderable* _mouseOnObject;
-    // Dragging
-    glm::vec2 startDragMousePos;
-    glm::vec2 startDragObjectPos;
-    bool changeViewWithinBrowser;
-    // Resizing
-    glm::vec2 startResizeBrowserSize;
-    glm::vec2 resizeVector;
-    // The current mouse position in screenspace coordinates
-    glm::vec2 _mousePosition;
-    // Current interaction status
-    bool currentlyResizingBrowser;
-    bool currentlyDraggingObject;
-    // Data handler
-    WWTDataHandler* dataHandler; 
-    // For animating rotation of camera to look at coordinate
-    glm::dvec3 _coordsToAnimateTo;
-    glm::dvec3 _coordsStartAnimation;
-    bool isRotating = false;
-    // For tracking the currently selected browser
-    std::string selectedBrowser;
-    glm::ivec3 highlightAddition;
-    // Mode of browsing
-    bool _cameraInSolarSystem;
-    int _layerOrderCounter;
+    std::vector<ScreenSpaceRenderable*> _renderables; // 2D browsers and targets
+    std::map<std::string, ScreenSpaceSkyBrowser*> _browsers;  // Only the 2D browsers
+    ScreenSpaceRenderable* _mouseOnObject{ nullptr }; // Pointer to what mouse is currently on
+    SceneGraphNode* _browser3d{ nullptr };
+    std::string _selectedBrowser; // Currently selected browser (2D or 3D)
+    
+    // Flags
+    bool _fineTuneMode{ false };
+    bool _isResizing{ false };
+    bool _isDragging{ false };
+    bool _cameraInSolarSystem{ true };
+    bool _isRotating = false;
+
+    // Mouse interaction - dragging and resizing
+    glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
+    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
+    glm::vec2 _startMousePosition;
+    glm::vec2 _startDragPosition;
+    glm::vec2 _startBrowserSize;
+    glm::vec2 _resizeDirection{ 0.f };
+
+    // Animation of rotation of camera to look at coordinate galactic coordinates
+    glm::dvec3 _startAnimation;
+    glm::dvec3 _endAnimation;
+    
+    // Data handler for the image collections
+    WwtDataHandler* _dataHandler;
+    int _messageOrder{ 0 }; // Version handler for WorldWide Telescope messages
+    
 };
 
 } // namespace openspace

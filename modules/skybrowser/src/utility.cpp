@@ -12,103 +12,118 @@
 
 namespace openspace::skybrowser {
 
-    glm::dvec3 sphericalToCartesian(glm::dvec2 sphericalCoords) {
+    glm::dvec3 sphericalToCartesian(glm::dvec2 coords) {
+
+        glm::dvec2 coordsRadians = glm::radians(coords);
 
         glm::dvec3 cartesian = glm::dvec3(
-            cos(sphericalCoords.x * DEG_TO_RAD) * cos(sphericalCoords.y * DEG_TO_RAD),
-            sin(sphericalCoords.x * DEG_TO_RAD) * cos(sphericalCoords.y * DEG_TO_RAD),
-            sin(sphericalCoords.y * DEG_TO_RAD)
+            cos(coordsRadians.x) * cos(coordsRadians.y),
+            sin(coordsRadians.x) * cos(coordsRadians.y),
+            sin(coordsRadians.y)
         );
 
         return cartesian;
     }
 
-    glm::dvec2 cartesianToSpherical(glm::dvec3 cartesianCoords) {
-
-        double ra = atan2(cartesianCoords[1], cartesianCoords[0]);
-        double dec = atan2(cartesianCoords[2], glm::sqrt((cartesianCoords[0] * cartesianCoords[0]) + (cartesianCoords[1] * cartesianCoords[1])));
+    glm::dvec2 cartesianToSpherical(glm::dvec3 coord) {
+        // Equatorial coordinates RA = right ascension, Dec = declination
+        double ra = atan2(coord.y, coord.x);
+        double dec = atan2(coord.z, glm::sqrt((coord.x * coord.x) + (coord.y * coord.y)));
 
         ra = ra > 0 ? ra : ra + (2 * M_PI);
 
-        return glm::dvec2(RAD_TO_DEG * ra, RAD_TO_DEG * dec);
+        glm::dvec2 celestialCoords{ ra, dec };
+
+        return glm::degrees(celestialCoords);
     }
 
-    glm::dvec3 galacticCartesianToJ2000Cartesian(glm::dvec3 rGal) {
-        return glm::transpose(conversionMatrix) * rGal;
-    }
-
-    glm::dvec2 galacticCartesianToJ2000Spherical(glm::dvec3 rGal) {
-        return cartesianToSpherical(galacticCartesianToJ2000Cartesian(rGal));
-    }
-
-    glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords, double distance) {
-        glm::dvec3 rGalactic = conversionMatrix * sphericalToCartesian(coords); // on the unit sphere
-        return distance * rGalactic;
+    glm::dvec3 galacticToEquatorial(glm::dvec3 coords) {
+        return glm::transpose(conversionMatrix) * glm::normalize(coords);
     }
         
-    glm::dvec3 J2000CartesianToGalacticCartesian(glm::dvec3 coords, double distance) {
-        glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); // on the unit sphere
-        return distance * rGalactic;
+    glm::dvec3 equatorialToGalactic(glm::dvec3 coords) {
+        // On the unit sphere
+        glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); 
+        return rGalactic * CelestialSphereRadius;
     }
         
-    glm::dvec3 galacticToScreenSpace(glm::dvec3 imageCoordsGalacticCartesian) {
+    glm::dvec3 galacticToScreenSpace(glm::dvec3 coords) {
 
-        glm::dvec3 viewDirectionLocal = galacticCartesianToCameraLocalCartesian(imageCoordsGalacticCartesian);
-        // Ensure that if the coord is behind the camera, the converted coord will be there too
-        double zCoord = viewDirectionLocal.z > 0 ? -SCREENSPACE_Z : SCREENSPACE_Z;
+        glm::dvec3 localCameraSpace = galacticToCameraLocal(coords);
+        // Ensure that if the coord is behind the camera, 
+        // the converted coordinate will be there too
+        double zCoord = localCameraSpace.z > 0 ? -ScreenSpaceZ : ScreenSpaceZ;
 
         // Calculate screen space coords x and y
-        long double tan_x = viewDirectionLocal.x / viewDirectionLocal.z;
-        long double tan_y = viewDirectionLocal.y / viewDirectionLocal.z;
+        double tan_x = localCameraSpace.x / localCameraSpace.z;
+        double tan_y = localCameraSpace.y / localCameraSpace.z;
 
-        glm::dvec2 angleCoordsLocal = glm::dvec2(std::atanl(tan_x), std::atanl(tan_y));
-        glm::dvec3 imageCoordsScreenSpace = glm::dvec3(zCoord * static_cast<double>(std::tanl(angleCoordsLocal.x)), zCoord * static_cast<double>(std::tanl(angleCoordsLocal.y)), zCoord);
+        glm::dvec3 screenSpace = glm::dvec3(zCoord * tan_x, zCoord * tan_y, zCoord);
             
-        return imageCoordsScreenSpace;
+        return screenSpace;
+    }
+
+    glm::dvec3 screenSpaceToGalactic(glm::dvec3 coords) {
+        glm::dmat4 rotation = glm::inverse(
+            global::navigationHandler->camera()->viewRotationMatrix());
+        glm::dvec4 position = glm::dvec4(coords, 1.0);
+
+        return glm::normalize(rotation * position) * skybrowser::CelestialSphereRadius;
+    }
+
+    glm::dvec3 screenSpaceToEquatorial(glm::dvec3 coords) {
+        // Calculate the galactic coordinate of the target direction 
+        // projected onto the celestial sphere
+        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+        glm::dvec3 galactic = camPos + skybrowser::screenSpaceToGalactic(coords);
+
+        return skybrowser::galacticToEquatorial(galactic);
     }
     
-    glm::dvec3 galacticCartesianToCameraLocalCartesian(glm::dvec3 galCoords) {
+    glm::dvec3 galacticToCameraLocal(glm::dvec3 coords) {
         // Transform vector to camera's local coordinate system
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-        glm::dvec3 camToCoordsDir = glm::normalize(galCoords - camPos);
         glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
-        glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(camToCoordsDir, 1.0);
-        viewDirectionLocal = glm::normalize(viewDirectionLocal);
-        return viewDirectionLocal;
+        glm::dvec3 viewDirectionWorld = glm::normalize(coords - camPos);
+        glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(viewDirectionWorld, 1.0);
+
+        return glm::normalize(viewDirectionLocal);
     }
 
-    glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords) {
+    glm::dvec3 equatorialToScreenSpace(glm::dvec3 coords) {
         // Transform equatorial J2000 to galactic coord with infinite radius    
-        glm::dvec3 imageCoordsGalacticCartesian = J2000CartesianToGalacticCartesian(coords, infinity);
+        glm::dvec3 galactic = equatorialToGalactic(coords);
         // Transform galactic coord to screen space
-        return galacticToScreenSpace(imageCoordsGalacticCartesian);
+        return galacticToScreenSpace(galactic);
     }
 
-    glm::dvec3 J2000SphericalToScreenSpace(glm::dvec2 coords) {         
-        // Transform equatorial J2000 to galactic coord with infinite radius
-        glm::dvec3 imageCoordsGalacticCartesian = J2000SphericalToGalacticCartesian(coords, infinity);
-        // Transform galactic coord to screen space
-        return galacticToScreenSpace(imageCoordsGalacticCartesian);
-    }
+    double cameraRoll() {
+        openspace::Camera* camera = global::navigationHandler->camera();
+        glm::dvec3 upWorld = camera->lookUpVectorWorldSpace();
+        glm::dvec3 forwardWorld = camera->viewDirectionWorldSpace();
 
-    double calculateRoll(glm::dvec3 upWorld, glm::dvec3 forwardWorld) {
-        glm::dvec3 camUpJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(upWorld);
-        glm::dvec3 camForwardJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(forwardWorld);
+        glm::dvec3 camUpJ2000 = skybrowser::galacticToEquatorial(upWorld);
+        glm::dvec3 camForwardJ2000 = skybrowser::galacticToEquatorial(forwardWorld);
 
-        glm::dvec3 crossUpNorth = glm::cross(camUpJ2000, skybrowser::NORTH_POLE);
-        double dotNorthUp = glm::dot(skybrowser::NORTH_POLE, camUpJ2000);
+        glm::dvec3 crossUpNorth = glm::cross(camUpJ2000, skybrowser::NorthPole);
+        double dotNorthUp = glm::dot(skybrowser::NorthPole, camUpJ2000);
         double dotCrossUpNorthForward = glm::dot(crossUpNorth, camForwardJ2000);
-        double roll = glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
-        return roll;
+        
+        return glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
     }
 
-    glm::dvec3 cameraDirectionJ2000Cartesian() {
+    glm::dvec3 cameraDirectionEquatorial() {
         // Get the view direction of the screen in cartesian J2000 coordinates
+        return galacticToEquatorial(cameraDirectionGalactic());
+    }    
+    
+    glm::dvec3 cameraDirectionGalactic() {
+        // Get the view direction of the screen in galactic coordinates
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-        constexpr double infinity = std::numeric_limits<float>::max();
-        glm::dvec3 galCoord = camPos + (infinity * global::navigationHandler->camera()->viewDirectionWorldSpace());
-        glm::dvec3 cartesianJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(galCoord);
-        return cartesianJ2000;
+        glm::dvec3 view = global::navigationHandler->camera()->viewDirectionWorldSpace();
+        glm::dvec3 galCoord = camPos + (skybrowser::CelestialSphereRadius * view);
+
+        return galCoord;
     }
 }
 
@@ -150,7 +165,7 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary createImageLayer(const std::string& id, const std::string& url) {
+    ghoul::Dictionary addImage(const std::string& id, const std::string& url) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_create"s);
@@ -162,7 +177,7 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary removeImageLayer(const std::string& imageId) {
+    ghoul::Dictionary removeImage(const std::string& imageId) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_remove"s);
@@ -171,7 +186,7 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary setLayerOpacity(const std::string& imageId, double opacity) {
+    ghoul::Dictionary setImageOpacity(const std::string& imageId, double opacity) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_set"s);

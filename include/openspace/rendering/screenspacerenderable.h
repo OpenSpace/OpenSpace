@@ -73,10 +73,10 @@ public:
 
     // Added by skybrowser team
     // Screen space functionality in these coords: [-1,1][-ratio,ratio]
-    glm::vec2 getScreenSpacePosition();
-    glm::vec2 getScreenSpaceDimensions();
-    glm::vec2 getUpperRightCornerScreenSpace();
-    glm::vec2 getLowerLeftCornerScreenSpace();
+    glm::vec2 screenSpacePosition();
+    glm::vec2 screenSpaceDimensions();
+    glm::vec2 upperRightCornerScreenSpace();
+    glm::vec2 lowerLeftCornerScreenSpace();
     bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     friend bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs);

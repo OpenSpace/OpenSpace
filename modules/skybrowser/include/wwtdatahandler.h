@@ -57,12 +57,12 @@ namespace openspace {
 		std::string name;
 		std::string thumbnailUrl;
         std::string imageUrl;
-		std::string credits;
 		std::string creditsUrl;
-		glm::dvec2 celestCoords;
+        std::string credits;
+		glm::dvec2 celestialCoords;
 		std::string collection;
 		float fov;
-        bool hasCelestCoords{ false };
+        bool hasCelestialCoords{ false };
         bool has3dCoords{ false };
 	    glm::dvec3 position3d;
 	};
@@ -73,24 +73,31 @@ namespace openspace {
 		bool loaded = false;
 	};
 
-	class WWTDataHandler {
+	class WwtDataHandler {
 	
 	public:
-		WWTDataHandler() = default;
-		~WWTDataHandler();
-		// Image downloading and xml parsing
-		bool downloadFile(std::string& url, std::string& fileDestination);
-		void loadWTMLCollectionsFromURL(std::string directory, std::string url, std::string fileName);
-		bool loadWTMLCollectionsFromDirectory(std::string directory);
-		int loadImagesFromLoadedXMLs();
+        // Constructor and destructor
+		WwtDataHandler() = default;
+		~WwtDataHandler();
 
+		// Image downloading and xml parsing
+		bool loadWtmlCollectionsFromUrl(std::string directory, std::string url, 
+            std::string fileName);
+		bool loadWtmlCollectionsFromDirectory(std::string directory);
+		int loadImagesFromLoadedXmls();
+
+        // Loading speck files
+        void loadSpeckData(speck::Dataset& dataset);
+
+        // Getters
 		const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
 		std::vector<ImageData>& getLoadedImages();
-		void loadSpeckData(speck::Dataset& dataset);
-        std::string createSearchableString(std::string name);
 
 	private:
-		void loadImagesFromXML(tinyxml2::XMLElement* node, 
+
+        // Parsing and downloading of wtml files
+        bool downloadFile(std::string& url, std::string& fileDestination);
+		void loadImagesFromXml(tinyxml2::XMLElement* node, 
                                 std::string collectionName);
 		int loadImageFromXmlNode(tinyxml2::XMLElement* imageSet, 
                                 std::string collectionName);
@@ -105,17 +112,22 @@ namespace openspace {
 
 		std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, 
                                                     std::string elementName);
-		std::string getURLFromPlace(tinyxml2::XMLElement* place);
+		std::string getUrlFromPlace(tinyxml2::XMLElement* place);
 		tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, 
                                                  std::string name);
 		tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
 
-		std::vector<ImageData> images;
-		std::vector<ImageCollection> imageUrls;
-		std::vector<tinyxml2::XMLDocument*> xmls;
+        // Used for matching names 
+        std::string createSearchableString(std::string name);
+        
+        // Images
+		std::vector<ImageData> _images;
+		std::vector<ImageCollection> _imageUrls;
+		std::vector<tinyxml2::XMLDocument*> _xmls;
+
 		// 3D position data loaded from speck files
 		std::unordered_map<std::string, glm::dvec3> _3dPositions;
-        int nImagesWith3dPositions = 0;
+        int _nImagesWith3dPositions = 0;
 	};
 }
 

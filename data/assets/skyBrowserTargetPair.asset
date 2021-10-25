@@ -11,7 +11,7 @@ local browser = {
    Name = "Sky Browser",
    Url = serverUrl,
    FaceCamera = false,
-   TargetID = targetId,
+   TargetId = targetId,
    CartesianPosition = {-1.0, -0.5, -2.1},
 };
 

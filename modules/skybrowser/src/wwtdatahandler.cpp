@@ -20,20 +20,37 @@ namespace {
 
 namespace openspace {
 
-    WWTDataHandler::~WWTDataHandler() {
-        // Call destructor of all allocated xmls
-        xmls.clear();
+    bool hasAttribute(tinyxml2::XMLElement* element, std::string name) {
+         return element->FindAttribute(name.c_str());
     }
 
-    bool WWTDataHandler::downloadFile(std::string& url, std::string& fileDestination) {
-        // Get the webpage and save to file
+    std::string getAttribute(tinyxml2::XMLElement* element, std::string name) {
+        if (hasAttribute(element, name)) {
+            return element->FindAttribute(name.c_str())->Value();
+        }
+        else {
+            return "";
+        }
+    }
+
+    WwtDataHandler::~WwtDataHandler() {
+        // Call destructor of all allocated xmls
+        _xmls.clear();
+    }
+
+    bool WwtDataHandler::downloadFile(std::string& url, std::string& fileDestination) {
+        // Get the web page and save to file
         HttpRequest::RequestOptions opt{ 5 };
-        SyncHttpFileDownload wtml_root(url, fileDestination, HttpFileDownload::Overwrite::Yes);
+        SyncHttpFileDownload wtml_root(
+            url, fileDestination, HttpFileDownload::Overwrite::Yes
+        );
         wtml_root.download(opt);
         return wtml_root.hasSucceeded();
     }
 
-    void WWTDataHandler::loadWTMLCollectionsFromURL(std::string directory, std::string url, std::string fileName) {
+    bool WwtDataHandler::loadWtmlCollectionsFromUrl(std::string directory, 
+                                                    std::string url, std::string fileName) 
+    {
         // Look for WWT image data folder
         if (!directoryExists(directory)) {
             std::string newDir = directory;
@@ -46,7 +63,7 @@ namespace openspace {
         std::string file = directory + fileName + ".aspx";
         if (!downloadFile(url, file)) {
             LINFO("Couldn't download file " + url);
-            return;
+            return false;
         }
         // Parse to XML
         using namespace tinyxml2;
@@ -55,41 +72,52 @@ namespace openspace {
 
         XMLElement* root = doc->RootElement();
         XMLElement* element = root->FirstChildElement(std::string("Folder").c_str());
+
         // If there are no folders, or there are folder but without urls, stop recursion
-        if (!element || (element && !element->FindAttribute("Url"))) {
+        bool folderExists = element;
+        bool folderContainNoUrls = folderExists && !hasAttribute(element, "Url");
+
+        if (!folderExists || folderContainNoUrls) {
             // Save the url
-            std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
-            if (collectionName != "") {
+            if (hasAttribute(root, "Name")) {
+                std::string collectionName = getAttribute(root, "Name");
                 ImageCollection newCollection{ collectionName, url };
-                imageUrls.push_back(newCollection);
+                _imageUrls.push_back(newCollection);
             }
-            xmls.push_back(doc);
+            _xmls.push_back(doc);
             LINFO("Saving " + url);
 
-            return;
+            return true;
         }
         // Iterate through all the folders
         while (element && std::string(element->Value()) == "Folder") {
-            // Get all attributes for the <Folder>
-            std::string subUrl = element->FindAttribute("Url") ? element->FindAttribute("Url")->Value() : "";
-            std::string subName = element->FindAttribute("Name") ? element->FindAttribute("Name")->Value() : "";
-            if (subUrl != "" && subName != "") {
-                loadWTMLCollectionsFromURL(directory, subUrl, subName);
+            
+            // Get all attributes for the <Folder>            
+            if (hasAttribute(element, "Url") && hasAttribute(element, "Name")) {
+                std::string subUrl = getAttribute(element, "Url");
+                std::string subName = getAttribute(element, "Name");
+                loadWtmlCollectionsFromUrl(directory, subUrl, subName);
             }
             element = element->NextSiblingElement();
         }
     }
 
 
-    bool WWTDataHandler::directoryExists(std::string& path)
+    bool WwtDataHandler::directoryExists(std::string& path)
     {
         struct stat info;
 
         int statRC = stat(path.c_str(), &info);
         if (statRC != 0)
         {
-            if (errno == ENOENT) { return false; } // something along the path does not exist
-            if (errno == ENOTDIR) { return false; } // something in path prefix is not a dir
+            // something along the path does not exist
+            if (errno == ENOENT) { 
+                return false; 
+            } 
+            // something in path prefix is not a dir
+            if (errno == ENOTDIR) { 
+                return false; 
+            } 
             return false;
         }
 
@@ -98,43 +126,49 @@ namespace openspace {
         return  directoryExists;
     }
 
-    bool WWTDataHandler::loadWTMLCollectionsFromDirectory(std::string directory) {
+    bool WwtDataHandler::loadWtmlCollectionsFromDirectory(std::string directory) {
        
         if (!directoryExists(directory)) return false;
 
         for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-            tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-          
-            if (doc->LoadFile(entry.path().u8string().c_str()) == tinyxml2::XMLError::XML_SUCCESS) {
-                tinyxml2::XMLElement* root = doc->RootElement();
-                std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
-                if (collectionName != "") {
-                    ImageCollection newCollection{collectionName, entry.path().u8string()};               
-                    imageUrls.push_back(newCollection);
+            
+            tinyxml2::XMLDocument* document = new tinyxml2::XMLDocument();
+            std::string path = entry.path().u8string();
+            tinyxml2::XMLError successCode = document->LoadFile(path.c_str());
+            bool fileIsLoaded = successCode == tinyxml2::XMLError::XML_SUCCESS;
+
+            if (fileIsLoaded) {
+                tinyxml2::XMLElement* root = document->RootElement();
+                
+                if (hasAttribute(root, "Name")) {
+                    std::string collectionName = getAttribute(root, "Name");
+                    ImageCollection newCollection{ collectionName, path };
+                    _imageUrls.push_back(newCollection);
                 }
-                xmls.push_back(doc);
+                _xmls.push_back(document);
             }
         }
         return true;
     }
 
     std::ostream& operator<<(std::ostream& os, const ImageData& img) {
-        os << "Name: " << img.name << " Coords: ra: " << img.celestCoords.x << " dec: " << img.celestCoords.y << std::endl;
+        os << "Name: " << img.name << " Coords: ra: " << img.celestialCoords.x 
+                       << " dec: " << img.celestialCoords.y << std::endl;
         os << "Thumbnail: " << img.thumbnailUrl << std::endl;
         os << "Collection: " << img.collection << std::endl << std::endl;
         return os;
     }
 
 
-    int WWTDataHandler::loadImagesFromLoadedXMLs() {
-        for (tinyxml2::XMLDocument* doc : xmls) {
+    int WwtDataHandler::loadImagesFromLoadedXmls() {
+        for (tinyxml2::XMLDocument* doc : _xmls) {
             tinyxml2::XMLElement* root = doc->FirstChildElement();
             std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
-            loadImagesFromXML(root, collectionName);
+            loadImagesFromXml(root, collectionName);
         }
-        // Sort images in alphabetial order
-        std::sort(images.begin(), images.end(), [](ImageData a, ImageData b) {
-            // If the first charachter in the names are lowercase, make it upper case
+        // Sort images in alphabetical order
+        std::sort(_images.begin(), _images.end(), [](ImageData a, ImageData b) {
+            // If the first character in the names are lowercase, make it upper case
             if (std::islower(a.name[0])) {
                 // convert string to upper case
                 a.name[0] = ::toupper(a.name[0]);
@@ -144,16 +178,16 @@ namespace openspace {
             }
             return a.name < b.name;
             });
-        LINFO(std::to_string(nImagesWith3dPositions) + " 3D positions were matched in the speck files!");
+        LINFO(std::to_string(_nImagesWith3dPositions) + " 3D positions were matched in the speck files!");
 
-        return images.size();
+        return _images.size();
     }
 
-    const std::vector<ImageCollection>& WWTDataHandler::getAllImageCollectionUrls() const {
-        return imageUrls;
+    const std::vector<ImageCollection>& WwtDataHandler::getAllImageCollectionUrls() const {
+        return _imageUrls;
     }
 
-    void WWTDataHandler::loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName) {
+    void WwtDataHandler::loadImagesFromXml(tinyxml2::XMLElement* node, std::string collectionName) {
         // Get direct child of node called "Place"
         using namespace tinyxml2;
         XMLElement* ptr = node->FirstChildElement();
@@ -171,7 +205,7 @@ namespace openspace {
                 if (ptr->FindAttribute("Name")) {
                     newCollectionName += std::string(ptr->FindAttribute("Name")->Value());
                 }
-                loadImagesFromXML(ptr, newCollectionName);
+                loadImagesFromXml(ptr, newCollectionName);
             }
 
             ptr = ptr->NextSiblingElement();
@@ -179,7 +213,7 @@ namespace openspace {
         
     }
 
-    int WWTDataHandler::loadImageFromXmlNode(tinyxml2::XMLElement* node, std::string collectionName) {
+    int WwtDataHandler::loadImageFromXmlNode(tinyxml2::XMLElement* node, std::string collectionName) {
         // Only load "Sky" type images
         if (std::string(node->FindAttribute("DataSetType")->Value()) != "Sky")
             return -1;
@@ -195,7 +229,7 @@ namespace openspace {
             imageSet = node;
         }
         else if (std::string(node->Name()) == "Place") {
-            thumbnailUrl = getURLFromPlace(node);
+            thumbnailUrl = getUrlFromPlace(node);
             imageSet = getChildNode(node, "ImageSet");
         }
         else {
@@ -218,19 +252,19 @@ namespace openspace {
         ImageData image{};
         setImageDataValues(node, credits, creditsUrl, thumbnailUrl, collectionName, imageUrl, image);
 
-        images.push_back(image);
+        _images.push_back(image);
         // Return index of image in vector
-        return images.size();
+        return _images.size();
     }
 
-    std::string WWTDataHandler::getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, std::string elementName) {
+    std::string WwtDataHandler::getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, std::string elementName) {
         // FInd the thumbnail image url
        // The thumbnail is the last node so traverse backwards for speed
         tinyxml2::XMLElement* imageSetChild = imageSet->FirstChildElement(elementName.c_str());
         return imageSetChild ? imageSetChild->GetText() ? imageSetChild->GetText() : "" : "";
     }
 
-    std::string WWTDataHandler::getURLFromPlace(tinyxml2::XMLElement* place)  {
+    std::string WwtDataHandler::getUrlFromPlace(tinyxml2::XMLElement* place)  {
         // Get thumbnail attribute, if there is one
         std::string url = place->FindAttribute("Thumbnail") ? place->FindAttribute("Thumbnail")->Value() : "";
         // Url found! Return it
@@ -244,14 +278,14 @@ namespace openspace {
         return imageSet ? getChildNodeContentFromImageSet(imageSet, "ThumbnailUrl") : "";
     }
 
-    tinyxml2::XMLElement* WWTDataHandler::getDirectChildNode(tinyxml2::XMLElement* node, std::string name) {
+    tinyxml2::XMLElement* WwtDataHandler::getDirectChildNode(tinyxml2::XMLElement* node, std::string name) {
         while (node && std::string(node->Name()) != name) {
             node = node->FirstChildElement();
         }
         return node;
     }
 
-    tinyxml2::XMLElement* WWTDataHandler::getChildNode(tinyxml2::XMLElement* node, std::string name) {
+    tinyxml2::XMLElement* WwtDataHandler::getChildNode(tinyxml2::XMLElement* node, std::string name) {
         // Traverse the children and look at all their first child to find ImageSet
         tinyxml2::XMLElement* child = node->FirstChildElement();
         tinyxml2::XMLElement* imageSet = nullptr;
@@ -263,7 +297,7 @@ namespace openspace {
         return imageSet;
     }
 
-    void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, 
+    void WwtDataHandler::setImageDataValues(tinyxml2::XMLElement* node, 
                                             std::string credits, 
                                             std::string creditsUrl, 
                                             std::string thumbnail, 
@@ -272,11 +306,11 @@ namespace openspace {
                                             ImageData& img) {
         // Get attributes for the image
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
-        img.hasCelestCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
-        if (img.hasCelestCoords) {
+        img.hasCelestialCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
+        if (img.hasCelestialCoords) {
             // The RA from WWT is in the unit hours: to convert to degrees, multiply with 360 (deg) /24 (h) = 15
-            img.celestCoords.x = 15.0f * std::stof(node->FindAttribute("RA")->Value());
-            img.celestCoords.y = std::stof(node->FindAttribute("Dec")->Value());
+            img.celestialCoords.x = 15.0f * std::stof(node->FindAttribute("RA")->Value());
+            img.celestialCoords.y = std::stof(node->FindAttribute("Dec")->Value());
         }
         img.collection = collectionName;
         img.thumbnailUrl = thumbnail;
@@ -292,15 +326,15 @@ namespace openspace {
         if (it != _3dPositions.end()) {
             img.position3d = it->second;
             img.has3dCoords = true;
-            nImagesWith3dPositions++;
+            _nImagesWith3dPositions++;
         }
     }
     
-    std::vector<ImageData>& WWTDataHandler::getLoadedImages() {
-        return images;
+    std::vector<ImageData>& WwtDataHandler::getLoadedImages() {
+        return _images;
     }
 
-    void WWTDataHandler::loadSpeckData(speck::Dataset& dataset) {
+    void WwtDataHandler::loadSpeckData(speck::Dataset& dataset) {
         for (speck::Dataset::Entry entry : dataset.entries) {
             if (entry.comment.has_value()) {
                 std::string name = createSearchableString(entry.comment.value());
@@ -310,7 +344,7 @@ namespace openspace {
         LINFO("Loaded speck file with " + std::to_string(_3dPositions.size()) + " entries!");
     }
 
-    std::string WWTDataHandler::createSearchableString(std::string str) {
+    std::string WwtDataHandler::createSearchableString(std::string str) {
         // Remove white spaces and all special characters
         str.erase(std::remove_if(str.begin(), str.end(), [](char c) {
             bool isNumberOrLetter = std::isdigit(c) || std::isalpha(c);
@@ -322,7 +356,6 @@ namespace openspace {
             [](unsigned char c) { return std::tolower(c); });
         return str;
     }
-
 }
 
 // Loading of speck files
