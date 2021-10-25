@@ -162,7 +162,7 @@ void ScriptScheduler::clearSchedule(std::optional<int> group) {
 
 std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     std::vector<std::string> result;
-    if (!_enabled || newTime == _currentTime) {
+    if (!_enabled || newTime == _currentTime || _scripts.empty()) {
         // Update the new time
         _currentTime = newTime;
         return result;
