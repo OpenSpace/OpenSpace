@@ -43,6 +43,7 @@ public:
     void initializeStateMachine(const ghoul::Dictionary& states,
         const ghoul::Dictionary& transitions,
         const std::optional<std::string> startState = std::nullopt);
+    void deinitializeStateMachine();
 
     bool hasStateMachine() const;
 

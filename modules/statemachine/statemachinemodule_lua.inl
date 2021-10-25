@@ -47,6 +47,15 @@ int createStateMachine(lua_State* L) {
     return 0;
 }
 
+
+int destroyStateMachine(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::destroyStateMachine");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    module->deinitializeStateMachine();
+    return 0;
+}
+
 int goToState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goToState");
     std::string newState = ghoul::lua::value<std::string>(L);

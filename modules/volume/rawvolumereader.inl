@@ -77,9 +77,8 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
     return indexToCoords(linear, dimensions());
 }
 
-
 template <typename VoxelType>
-std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
+std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
     std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
         dims
@@ -103,7 +102,24 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
         throw ghoul::RuntimeError("Error reading volume file");
     }
 
-    return volume;
+    if (invertZ) {
+        std::unique_ptr<RawVolume<VoxelType>> newVolume = 
+            std::make_unique<RawVolume<VoxelType>>(dims);
+
+        for (int i = 0; i < volume->nCells(); ++i) {
+            const glm::uvec3& coords = volume->indexToCoords(i);
+            glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
+
+            size_t newIndex = volume->coordsToIndex(newcoords);
+            size_t oldIndex = volume->coordsToIndex(coords);
+
+            newVolume->set(newcoords, volume->get(coords));
+        }
+        return newVolume;
+    }
+    else {
+        return volume;
+    }
 }
 
 } // namespace openspace::volume
