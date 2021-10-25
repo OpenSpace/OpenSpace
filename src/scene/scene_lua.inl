@@ -901,6 +901,31 @@ int worldRotation(lua_State* L) {
     return 1;
 }
 
+int setParent(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setParent");
+    auto [identifier, newParent] = ghoul::lua::values<std::string, std::string>(L);
+
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+    SceneGraphNode* newParentNode = sceneGraphNode(newParent);
+    if (!newParentNode) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for new parent identifier: {} ", newParent)
+        );
+    }
+
+    node->setParent(*newParentNode);
+    global::renderEngine->scene()->markNodeRegistryDirty();
+
+    return 0;
+}
+
 /**
  * \ingroup LuaScripts
  * isBoolValue(const std::string& s):

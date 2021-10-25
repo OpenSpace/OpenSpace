@@ -25,10 +25,14 @@
 #ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 #define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 
 #include <functional>
+#include <optional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -44,8 +48,10 @@ struct LuaLibrary;
  * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
  * interface for retrieveing scheduled scripts
  */
-class ScriptScheduler {
+class ScriptScheduler : public properties::PropertyOwner {
 public:
+    ScriptScheduler();
+
     struct ScheduledScript {
         ScheduledScript() = default;
         ScheduledScript(const ghoul::Dictionary& dict);
@@ -54,6 +60,8 @@ public:
         std::string forwardScript;
         std::string backwardScript;
         std::string universalScript;
+
+        int group = 0;
     };
 
     /**
@@ -73,8 +81,11 @@ public:
 
     /**
      * Removes all scripts for the schedule.
+     *
+     * \param An int that specifies which group to clear.
+     *        If none given then all scripts is cleared from the schedule.
      */
-    void clearSchedule();
+    void clearSchedule(std::optional<int> group = std::nullopt);
 
     /**
     * Progresses the script schedulers time and returns all scripts that has been
@@ -97,8 +108,17 @@ public:
      */
 //    std::queue<std::string> progressTo(const std::string& timeStr);
 
-    using ScriptIt = std::vector<std::string>::const_iterator;
-    std::pair<ScriptIt, ScriptIt> progressTo(double newTime);
+    /**
+    * Progresses the script schedulers time and returns all scripts that has been
+    * scheduled to run between \param newTime and the time provided in the last invocation
+    * of this method.
+    *
+    * \param newTime A j2000 time value specifying the new time stamp that
+    * the script scheduler should progress to.
+    *
+    * \returns vector with the scheduled scripts that should be run from begining to end.
+    */
+    std::vector<std::string> progressTo(double newTime);
 
     /**
      * Returns the the j2000 time value that the script scheduler is currently at
@@ -106,9 +126,19 @@ public:
     double currentTime() const;
 
     /**
-     * \returns a vector of all scripts that has been loaded
+     * Updates the current time to the given j2000 time value
      */
-    std::vector<ScheduledScript> allScripts() const;
+    void setCurrentTime(double time);
+
+    /**
+    * Function that returns all scripts currently loaded in the script scheduler
+    *
+    * \param group An int specifying which group to return, if empty all scripts
+    *              will be returned
+    *
+    * \returns a vector of all scripts that has been loaded
+    */
+    std::vector<ScheduledScript> allScripts(std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.
@@ -137,9 +167,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<double> _timings;
-    std::vector<std::string> _forwardScripts;
-    std::vector<std::string> _backwardScripts;
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _shouldRunAllTimeJump;
+    std::vector<ScheduledScript> _scripts;
 
     int _currentIndex = 0;
     double _currentTime = 0;
