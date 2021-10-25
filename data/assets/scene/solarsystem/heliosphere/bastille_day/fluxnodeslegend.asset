@@ -55,6 +55,5 @@ asset.meta = {
   Description = [[Screen space renderable image legend of flux nodes for the bastille day CME event]],
   Author = "Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "MIT",
-  Identifier = {"LegendFluxNodes-bastille-day-2000"}
+  License = "MIT"
 }

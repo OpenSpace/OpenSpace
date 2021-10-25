@@ -90,11 +90,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, Sun
 
 asset.meta = {
   Name = "Sun Transforms",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Sun transforms: Solar System Barycenter, SUN IAU and
    SUN J2000]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SolarSystemBarycenter", "SunIAU", "SunECLIPJ2000"}
+  License = "MIT license"
 }

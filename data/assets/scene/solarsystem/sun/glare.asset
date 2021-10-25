@@ -30,10 +30,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { SunGlare })
 
 asset.meta = {
   Name = "Sun Glare",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Image plane with sun glare effect.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SunGlare"}
+  License = "MIT license"
 }

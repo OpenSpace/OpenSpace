@@ -61,7 +61,8 @@ local PlutoLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Pluto Label",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = "Label for Pluto, visible at the solarsystem overview zoom level"
   }
 }
 

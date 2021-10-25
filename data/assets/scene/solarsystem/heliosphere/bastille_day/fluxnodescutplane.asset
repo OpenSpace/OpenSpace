@@ -97,6 +97,5 @@ asset.meta = {
   Description = [[Cutplanes for the bastille day CME event]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"MeridialCutplane-bastille-day-2000", "EquatorialCutplane-bastille-day-2000"}
+  License = "CC-BY"
 }

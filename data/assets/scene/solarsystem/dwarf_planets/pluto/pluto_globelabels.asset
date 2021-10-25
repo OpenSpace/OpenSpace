@@ -5,3 +5,13 @@ local LabelsPath = asset.syncedResource({
   Version = 1
 })
 asset.export("LabelsPath", LabelsPath)
+
+
+asset.meta = {
+  Name = "Pluto Globe Labels",
+  Version = "1.0",
+  Description = [[ This asset contains the sync files for pluto (and charon) labels.]],
+  Author = "USGS",
+  URL = "https://planetarynames.wr.usgs.gov/Page/PLUTO/target",
+  License = "USGS"
+}
