@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require("./../../io_textures").TexturesPath
 local globeIdentifier = asset.require("./../../io").Io.Identifier
 
@@ -6,12 +7,7 @@ local layer = {
   FilePath = texturesPath .. "/io.jpg",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
-
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 asset.meta = {
   Name = "Io Texutre",

@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
@@ -18,21 +19,16 @@ local layer = {
     (Description from URL).]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "Themis IR Day [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Themis Day layer for Mars. This map is hosted on the OpenSpace server
     in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12",
-  License = "NASA/PDS",
-  Identifiers = {"Themis_IR_Day_Utah"}
+  License = "NASA/PDS"
 }

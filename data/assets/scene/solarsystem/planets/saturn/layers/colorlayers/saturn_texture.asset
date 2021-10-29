@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require("./../../saturn_textures").TexturesPath
 local globeIdentifier = asset.require("./../../saturn").Saturn.Identifier
 
@@ -6,11 +7,7 @@ local layer = {
   FilePath = texturesPath .. "/saturn.jpg",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {

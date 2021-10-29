@@ -6,3 +6,14 @@ local kernels = asset.syncedResource({
 })
 
 asset.export('kernels', kernels)
+
+
+asset.meta = {
+  Name = "Earth Lagrange Spice Kernels",
+  Version = "1.0",
+  Description = [[ Sync asset for earth_lagrange_kernels. This asset is to be included by 
+  other asset files]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

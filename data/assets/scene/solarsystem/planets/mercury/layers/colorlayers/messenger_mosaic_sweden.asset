@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
@@ -7,8 +8,4 @@ local layer = {
   FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")

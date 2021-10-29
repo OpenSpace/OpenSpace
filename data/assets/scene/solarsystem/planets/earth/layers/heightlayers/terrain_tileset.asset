@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
@@ -16,19 +17,14 @@ local layer = {
     data from the USGS elsewhere. Vertical units are measured in meters.]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")
 
 
 asset.meta = {
   Name = "World Elevation (3D)",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Main web loaded height layer for Earth. This layer is hosted by ESRI.]],
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
-  License = "Esri Master License Agreement",
-  Identifiers = {"Terrain_tileset"}
+  License = "Esri Master License Agreement"
 }

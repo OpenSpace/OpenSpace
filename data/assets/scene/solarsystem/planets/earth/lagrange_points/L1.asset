@@ -57,3 +57,13 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   L1,
   L1Label
 })
+
+
+asset.meta = {
+  Name = "Lagrange point L1",
+  Version = "1.0",
+  Description = [[ Lagrange point L1 node and label]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

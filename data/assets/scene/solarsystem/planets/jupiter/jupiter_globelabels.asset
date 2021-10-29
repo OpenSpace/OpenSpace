@@ -5,3 +5,14 @@ local LabelsPath = asset.syncedResource({
   Version = 1
 })
 asset.export("LabelsPath", LabelsPath)
+
+
+asset.meta = {
+  Name = "Jupiter Labels",
+  Version = "1.1",
+  Description = [[ Sync asset for jupiter_labels. This asset is to be included by other
+  asset files]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

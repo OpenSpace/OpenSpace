@@ -34,11 +34,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrailEarth })
 
 asset.meta = {
   Name = "Mercury Trail from Earth",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Alternate trail of Mercury, as observed by the Earth rather then the
     Sun.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MercuryTrailEarth"}
+  License = "MIT license"
 }

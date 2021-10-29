@@ -41,10 +41,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
 
 asset.meta = {
   Name = "Static generic magnetosphere of fieldlines",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Magnetic fieldlines for the bastille day CME event",
   Author = "CCMC",
   URL = "",
-  License = "",
-  Identifier = {"EarthMagnetosphere"}
+  License = ""
 }

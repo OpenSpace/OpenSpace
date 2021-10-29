@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
@@ -7,8 +8,14 @@ local layer = {
   FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "Overlays")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Earth Reference Labels",
+  Version = "1.0",
+  Description = [[ Reference Labels layer for Earth globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

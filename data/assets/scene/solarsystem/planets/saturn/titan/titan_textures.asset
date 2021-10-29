@@ -5,3 +5,14 @@ local TexturesPath = asset.syncedResource({
   Version = 2
 })
 asset.export("TexturesPath", TexturesPath)
+
+
+asset.meta = {
+  Name = "Titan Textures",
+  Version = "1.0",
+  Description = [[ Sync asset for titan_textures. This asset is to be included by other
+  asset files]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

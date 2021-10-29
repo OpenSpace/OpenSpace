@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
@@ -7,8 +8,15 @@ local layer = {
   FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "WaterMasks")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "MODIS Water Mask",
+  Version = "1.0",
+  Description = [[ MODIS Water  Mask layer for Earth globe.]],
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..
+    "eosdis-components/gibs",
+  License = "NASA"
+}

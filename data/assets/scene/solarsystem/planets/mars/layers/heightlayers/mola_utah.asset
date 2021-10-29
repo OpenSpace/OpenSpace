@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
@@ -22,21 +23,16 @@ local layer = {
     URL). Data Reference: (See URL).]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")
 
 
 asset.meta = {
   Name = "Mola Elevation [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Global elevation layer for Mars. This layer is hosted on the
     OpenSpace server in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
     "Mars_MGS_MOLA_DEM_mosaic_global_463m",
-  License = "NASA/PDS",
-  Identifiers = {"Mola_Utah"}
+  License = "NASA/PDS"
 }

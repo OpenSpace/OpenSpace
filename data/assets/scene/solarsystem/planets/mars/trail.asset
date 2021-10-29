@@ -32,10 +32,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrail })
 
 asset.meta = {
   Name = "Mars Trail",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Main Mars trail from SPICE.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MarsTrail"}
+  License = "MIT license"
 }

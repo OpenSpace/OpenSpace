@@ -77,6 +77,5 @@ asset.meta = {
   Description = [[ Earth is a special planet with special needs ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Earth", "EarthLabel"}
+  License = "MIT license"
 }

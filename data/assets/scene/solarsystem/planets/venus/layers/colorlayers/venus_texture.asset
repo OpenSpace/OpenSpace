@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require("./../../venus_textures").TexturesPath
 local globeIdentifier = asset.require("./../../venus").Venus.Identifier
 
@@ -10,8 +11,14 @@ local layer = {
   }
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Venus Texture",
+  Version = "1.0",
+  Description = [[ This asset supplies a default texture for venus.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

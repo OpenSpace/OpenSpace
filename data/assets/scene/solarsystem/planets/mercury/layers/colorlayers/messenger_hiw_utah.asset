@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
@@ -7,8 +8,16 @@ local layer = {
   FilePath = mapServiceConfigs .. "/Utah/MessengerHIW.wms",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Messenger HIW [Utah]",
+  Version = "1.0",
+  Description = [[ Mercury HIW layer for Mercury globe. 
+  This map is hosted on the OpenSpace server in Utah.]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}
+

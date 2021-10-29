@@ -61,10 +61,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
 
 asset.meta = {
   Name = "Deimos",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableGlobe and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Deimos", "DeimosTrail"}
+  License = "MIT license"
 }

@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require("./../../mercury_textures").TexturesPath
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
@@ -8,8 +9,14 @@ local layer = {
   BlendMode = "Multiply",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Mercury Silicon Abundance",
+  Version = "1.0",
+  Description = [[ Silicon Abundance layer for Mercury globe]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

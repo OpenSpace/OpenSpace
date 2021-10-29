@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
@@ -15,21 +16,16 @@ local layer = {
     lossless LERC compression.(Description from URL).]],
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")
 
 
 asset.meta = {
   Name = "Mars HRSC MOLA Blended DEM Global 200m v2",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ESRI Hosted ars HRSC MOLA Blended DEM.]],
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=225adad86379474ebc3d51a74573c99b",
-  License = "Esri Master License Agreement",
-  Identifiers = {"MDEM200M"}
+  License = "Esri Master License Agreement"
 }
 
 

@@ -61,10 +61,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Phobos, PhobosTrail })
 
 asset.meta = {
   Name = "Phobos",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableGlobe and Trail for Phobos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Phobos", "PhobosTrail"}
+  License = "MIT license"
 }
