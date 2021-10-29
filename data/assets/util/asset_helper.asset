@@ -90,6 +90,16 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
   end
 end
 
+local registerLayerAndExport = function (sceneAsset, layer, globeIdentifier, layerGroup)
+
+  sceneAsset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, layerGroup, layer)
+    sceneAsset.registerIdentifierWithMeta(layer.Identifier)
+  end)
+
+  sceneAsset.export("layer", layer)
+end
+
 local requireAll = function (sceneAsset, directory)
   function string.ends(String,End)
     return End=='' or string.sub(String,-string.len(End))==End
@@ -155,6 +165,7 @@ end
 
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
+asset.export("registerLayerAndExport", registerLayerAndExport)
 asset.export("registerScreenSpaceRenderables", registerScreenSpaceRenderables)
 asset.export("registerSpiceKernels", registerSpiceKernels)
 asset.export("registerDashboardItems", registerDashboardItems)
