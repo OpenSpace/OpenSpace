@@ -43,6 +43,80 @@ namespace {
     constexpr const char* _loggerCat = "ScriptEngine";
 
     constexpr const int TableOffset = -3; // top-first argument-second argument
+
+    std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
+                                          std::string prefix)
+    {
+        using namespace openspace::scripting;
+
+        std::vector<std::string> result;
+
+        std::string total = prefix;
+        if (!library.name.empty()) {
+            total += library.name + ".";
+        }
+
+        for (const LuaLibrary::Function& function : library.functions) {
+            result.push_back(total + function.name);
+        }
+
+        for (const LuaLibrary& sl : library.subLibraries) {
+            std::vector<std::string> r = luaFunctions(sl, total);
+            result.insert(result.end(), r.begin(), r.end());
+        }
+
+        for (const LuaLibrary::Documentation& doc : library.documentations) {
+            result.push_back(total + doc.name);
+        }
+
+        return result;
+    }
+
+    void toJson(const openspace::scripting::LuaLibrary& library, std::stringstream& json)
+    {
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
+
+        using namespace openspace;
+        using namespace openspace::scripting;
+
+        json << "{";
+        json << fmt::format(replStr, "library", library.name);
+        json << "\"functions\": [";
+
+        for (const LuaLibrary::Function& f : library.functions) {
+            json << "{";
+            json << fmt::format(replStr, "name", f.name);
+            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
+            json << "}";
+            if (&f != &library.functions.back() || !library.documentations.empty()) {
+                json << ",";
+            }
+        }
+
+        for (const LuaLibrary::Documentation& doc : library.documentations) {
+            json << "{";
+            json << fmt::format(replStr, "name", doc.name);
+            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
+            json << fmt::format(replStr2, "help", escapedJson(doc.description));
+            json << "}";
+            if (&doc != &library.documentations.back()) {
+                json << ",";
+            }
+        }
+
+        json << "],";
+
+        json << "\"subLibraries\": [";
+        for (const LuaLibrary& sl : library.subLibraries) {
+            toJson(sl, json);
+            if (&sl != &library.subLibraries.back()) {
+                json << ",";
+            }
+        }
+        json << "]}";
+    }
 } // namespace
 
 namespace openspace::scripting {
@@ -99,8 +173,7 @@ ghoul::lua::LuaState* ScriptEngine::luaState() {
 void ScriptEngine::addLibrary(LuaLibrary library) {
     ZoneScoped
 
-    auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
-    {
+    auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs) {
         return lhs.name < rhs.name;
     };
 
@@ -111,50 +184,18 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
         [&library](const LuaLibrary& lib) { return lib.name == library.name; }
     );
 
-    if (it == _registeredLibraries.end()) {
-        // If not, we can add it after we sorted it
-        std::sort(library.functions.begin(), library.functions.end(), sortFunc);
-        _registeredLibraries.push_back(std::move(library));
-        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
-    }
-    else {
-        // otherwise, we merge the libraries
-
-        LuaLibrary merged = *it;
-        for (const LuaLibrary::Function& fun : library.functions) {
-            const auto itf = std::find_if(
-                merged.functions.begin(),
-                merged.functions.end(),
-                [&fun](const LuaLibrary::Function& function) {
-                    return fun.name == function.name;
-                }
-            );
-            if (itf != merged.functions.end()) {
-                // the function with the desired name is already present, but we don't
-                // want to overwrite it
-                LERROR(fmt::format(
-                    "Lua function '{}' in library '{}' has been defined twice",
-                    fun.name,
-                    library.name
-                ));
-                return;
-            }
-            else {
-                merged.functions.push_back(fun);
-            }
-        }
-
-        for (const std::filesystem::path& script : library.scripts) {
-            merged.scripts.push_back(script);
-        }
-
+    if (it != _registeredLibraries.end()) {
+        // if we found the library, we want to merge them
+        LuaLibrary cpy = *it;
+        cpy.merge(std::move(library));
         _registeredLibraries.erase(it);
-
-        // Sort the merged library before inserting it
-        std::sort(merged.functions.begin(), merged.functions.end(), sortFunc);
-        _registeredLibraries.push_back(std::move(merged));
-        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
+        library = cpy;
     }
+
+    // If not, we can add it after we sorted it
+    std::sort(library.functions.begin(), library.functions.end(), sortFunc);
+    _registeredLibraries.push_back(std::move(library));
+    std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
 }
 
 bool ScriptEngine::hasLibrary(const std::string& name) {
@@ -312,6 +353,22 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         }
         lua_pushcclosure(state, p.function, static_cast<int>(p.userdata.size()));
         lua_settable(state, TableOffset);
+    }
+
+    for (LuaLibrary& sl : library.subLibraries) {
+        ghoul::lua::push(state, sl.name);
+        lua_newtable(state);
+        lua_settable(state, TableOffset);
+
+        // Retrieve the table
+        ghoul::lua::push(state, sl.name);
+        lua_gettable(state, -2);
+
+        // Add the library functions into the table
+        addLibraryFunctions(state, sl, Replace::No);
+
+        // Pop the table
+        lua_pop(state, 1);
     }
 
     for (const std::filesystem::path& script : library.scripts) {
@@ -567,27 +624,10 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     ZoneScoped
 
     std::vector<std::string> result;
-
     for (const LuaLibrary& library : _registeredLibraries) {
-        for (const LuaLibrary::Function& function : library.functions) {
-            std::string total = "openspace.";
-            if (!library.name.empty()) {
-                total += library.name + ".";
-            }
-            total += function.name;
-            result.push_back(std::move(total));
-        }
-
-        for (const LuaLibrary::Documentation& doc : library.documentations) {
-            std::string total = "openspace.";
-            if (!library.name.empty()) {
-                total += library.name + ".";
-            }
-            total += doc.name;
-            result.push_back(std::move(total));
-        }
+        std::vector<std::string> r = luaFunctions(library, "openspace.");
+        result.insert(result.end(), r.begin(), r.end());
     }
-
     return result;
 }
 
@@ -600,42 +640,12 @@ std::string ScriptEngine::generateJson() const {
 
     bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
-        constexpr const char* replStr = R"("{}": "{}", )";
-        constexpr const char* replStr2 = R"("{}": "{}")";
-
         if (!first) {
             json << ",";
         }
         first = false;
 
-        json << "{";
-        json << fmt::format(replStr, "library", l.name);
-        json << "\"functions\": [";
-
-        for (const LuaLibrary::Function& f : l.functions) {
-            json << "{";
-            json << fmt::format(replStr, "name", f.name);
-            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
-            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
-            json << "}";
-            if (&f != &l.functions.back() || !l.documentations.empty()) {
-                json << ",";
-            }
-        }
-
-        for (const LuaLibrary::Documentation& doc : l.documentations) {
-            json << "{";
-            json << fmt::format(replStr, "name", doc.name);
-            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
-            json << fmt::format(replStr2, "help", escapedJson(doc.description));
-            json << "}";
-            if (&doc != &l.documentations.back()) {
-                json << ",";
-            }
-        }
-
-        json << "]}";
-
+        toJson(l, json);
     }
     json << "]";
 
