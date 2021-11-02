@@ -252,11 +252,6 @@
       "name": "Scene.Apollo11.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
-    },
-    {
-      "name": "NavigationHandler.PathNavigator.SpeedScale",
-      "type": "setPropertyValueSingle",
-      "value": "0.8"
     }
   ],
   "time": {
