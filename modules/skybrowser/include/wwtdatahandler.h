@@ -4,13 +4,13 @@
 #include <openspace/documentation/documentation.h>
 #include <modules/skybrowser/tinyxml2/tinyxml2.h>
 #include <unordered_map>
+#include <string>
+#include <vector>
 // For speck loading
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
 #include <optional>
-#include <string>
-#include <vector>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -49,28 +49,41 @@ namespace openspace::speck {
 	Dataset loadSpeckFile(std::filesystem::path path,
 		SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
 
-} // namespace openspace::speck
+} // namespace openspace::speck\
+
+namespace openspace::wwt {
+    const std::string Thumbnail = "Thumbnail";
+    const std::string Name = "Name";
+    const std::string ImageSet = "ImageSet";
+    const std::string Dec = "Dec";
+    const std::string RA = "RA";
+    const std::string Undefined = "";
+    const std::string Folder = "Folder";
+    const std::string Place = "Place";
+    const std::string ThumbnailUrl = "ThumbnailUrl";
+    const std::string Url = "Url";
+    const std::string Credits = "Credits";
+    const std::string CreditsUrl = "CreditsUrl";
+    const std::string ZoomLevel = "ZoomLevel";
+    const std::string DataSetType = "DataSetType";
+    const std::string Sky = "Sky";
+} // namespace openspace::wwt\
 
 namespace openspace {
 
-	struct ImageData {
-		std::string name;
-		std::string thumbnailUrl;
-        std::string imageUrl;
-		std::string creditsUrl;
-        std::string credits;
-		glm::dvec2 celestialCoords;
-		std::string collection;
-		float fov;
+    struct ImageData {
+        std::string name{ wwt::Undefined };
+        std::string thumbnailUrl{ wwt::Undefined };
+        std::string imageUrl{ wwt::Undefined };
+        std::string credits{ wwt::Undefined };
+        std::string creditsUrl{ wwt::Undefined };
+        std::string collection{ wwt::Undefined };
         bool hasCelestialCoords{ false };
         bool has3dCoords{ false };
-	    glm::dvec3 position3d;
-	};
-
-	struct ImageCollection {
-		std::string name;
-		std::string url;
-		bool loaded = false;
+        float fov{ 0.f };
+        glm::dvec2 equatorialSpherical{ 0.0 };
+        glm::dvec3 equatorialCartesian{ 0.0 };
+        glm::dvec3 position3d{ 0.0 };
 	};
 
 	class WwtDataHandler {
@@ -80,54 +93,24 @@ namespace openspace {
 		WwtDataHandler() = default;
 		~WwtDataHandler();
 
-		// Image downloading and xml parsing
-		bool loadWtmlCollectionsFromUrl(std::string directory, std::string url, 
-            std::string fileName);
-		bool loadWtmlCollectionsFromDirectory(std::string directory);
-		int loadImagesFromLoadedXmls();
-
-        // Loading speck files
-        void loadSpeckData(speck::Dataset& dataset);
-
-        // Getters
-		const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
-		std::vector<ImageData>& getLoadedImages();
+        void loadImages(const std::string& root, const std::string& directory, 
+                       std::vector<std::filesystem::path>& speckFiles);
+        int nLoadedImages() const;
+        const ImageData& getImage(const int i) const;
 
 	private:
 
-        // Parsing and downloading of wtml files
-        bool downloadFile(std::string& url, std::string& fileDestination);
-		void loadImagesFromXml(tinyxml2::XMLElement* node, 
-                                std::string collectionName);
-		int loadImageFromXmlNode(tinyxml2::XMLElement* imageSet, 
-                                std::string collectionName);
-        void setImageDataValues(tinyxml2::XMLElement* node,
-                                std::string credits,
-                                std::string creditsUrl,
-                                std::string thumbnail,
-                                std::string collectionName,
-                                std::string imageUrl,
-                                ImageData& img);
-        bool directoryExists(std::string& path);
+        void saveImageFromNode(tinyxml2::XMLElement* node, std::string collection);
+        void saveImagesFromXml(tinyxml2::XMLElement* root, std::string collection);
 
-		std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, 
-                                                    std::string elementName);
-		std::string getUrlFromPlace(tinyxml2::XMLElement* place);
-		tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, 
-                                                 std::string name);
-		tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
-
-        // Used for matching names 
-        std::string createSearchableString(std::string name);
-        
         // Images
 		std::vector<ImageData> _images;
-		std::vector<ImageCollection> _imageUrls;
 		std::vector<tinyxml2::XMLDocument*> _xmls;
+        int _nMatched3dPositions = 0;
 
 		// 3D position data loaded from speck files
 		std::unordered_map<std::string, glm::dvec3> _3dPositions;
-        int _nImagesWith3dPositions = 0;
+        
 	};
 }
 

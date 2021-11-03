@@ -57,18 +57,21 @@ namespace openspace {
         void setIdInBrowser(std::string id);
 
         // WorldWide Telescope communication
-        void displayImage(ImageData& image, int i);
-        void removeSelectedImage(ImageData& image, int i);
+        void displayImage(const ImageData& image, int i);
+        void removeSelectedImage(const ImageData& image, int i);
         bool sendMessageToWwt(const ghoul::Dictionary& msg);
         void syncWwtView();
         void stopSyncingWwtView();
+
+        // Place
+        void placeAt3dPosition(const ImageData& image);
 
         // Getters
         float verticalFov() const;
         std::deque<int>& getSelectedImages();
         
         // Setters
-        void setImageLayerOrder(int i, int order, int version);
+        void setImageLayerOrder(int i, int order);
 
     private:
         // Properties

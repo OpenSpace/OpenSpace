@@ -34,7 +34,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
     {
-        "BrowserID",
+        "BrowserId",
         "Browser Identifier",
         "The identifier of the corresponding sky browser."
     };
@@ -55,16 +55,39 @@ namespace {
         "be rendered in the target."
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
+    {
+        "AnimationSpeed",
+        "Animation Speed",
+        "The factor which is multiplied with the animation speed of the target."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo AnimationThresholdInfo =
+    {
+        "AnimationThreshold",
+        "Animation Threshold",
+        "The threshold for when the target is determined to have appeared at its "
+        "destination. Angle in radians between the destination and the target position in"
+        "equatorial Cartesian coordinate system."
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
 
         // [[codegen::verbatim(BrowserIDInfo.description)]]
-        std::optional<std::string> browserID;
+        std::optional<std::string> browserId;
 
         // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
         std::optional<float> crosshairThreshold;
 
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
         std::optional<float> rectangleThreshold;
+
+        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
+        std::optional<double> animationSpeed;
+
+        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
+        std::optional<float> animationThreshold;
+
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -78,17 +101,23 @@ namespace openspace {
         , _skyBrowser(nullptr)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
         , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
+        , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 1.0)
+        , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
         , _color(220, 220, 220)  
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
-        _skyBrowserId = p.browserID.value_or(_skyBrowserId);
+        _skyBrowserId = p.browserId.value_or(_skyBrowserId);
         _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
         _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
+        _stopAnimationThreshold = p.crosshairThreshold.value_or(_stopAnimationThreshold);
+        _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
          
         addProperty(_skyBrowserId);
         addProperty(_showCrosshairThreshold);
         addProperty(_showRectangleThreshold);
+        addProperty(_stopAnimationThreshold);
+        addProperty(_animationSpeed);
 
         // If the ID changes for the corresponding browser, update
         _skyBrowserId.onChange([&]() {
@@ -201,8 +230,13 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::render() {
 
-        bool showCrosshair = _skyBrowser->verticalFov() < _showCrosshairThreshold;
-        bool showRectangle = _skyBrowser->verticalFov() > _showRectangleThreshold;
+        bool showCrosshair = false;
+        bool showRectangle = true;
+        if (_skyBrowser) {
+            showCrosshair = _skyBrowser->verticalFov() < _showCrosshairThreshold;
+            showRectangle = _skyBrowser->verticalFov() > _showRectangleThreshold;
+        }
+        
         glm::vec4 color = { glm::vec3(_color) / 255.f, _opacity.value() };
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
             localRotationMatrix() * scaleMatrix();
@@ -245,15 +279,12 @@ namespace openspace {
     // Update the scale of the target (the height of the target in relation to the 
     // OpenSpace window)
     void ScreenSpaceSkyTarget::setScale(float verticalFov) {
-        
-        // Calculate the vertical field of view of the OpenSpace window
-        float hFovOs = global::windowDelegate->getHorizFieldOfView();
-        glm::vec2 windowRatio = glm::vec2(global::windowDelegate->currentWindowSize());
-        float vFovOs = hFovOs * windowRatio.y / windowRatio.x;
+
+        glm::dvec2 fovs = skybrowser::fovWindow();
         
         // Cap the scale at small scales so it is still visible
-        float heightRatio = verticalFov / vFovOs;
-        float smallestHeightRatio = _showRectangleThreshold.value() / vFovOs;
+        float heightRatio = verticalFov / fovs.y;
+        float smallestHeightRatio = _showRectangleThreshold.value() / fovs.y;
         
         _scale = std::max(heightRatio, smallestHeightRatio);
     }
@@ -275,8 +306,7 @@ namespace openspace {
         // Start a thread to enable user interactions while locking target
         _lockTarget = std::thread([&] {
             while (_isLocked) {
-                glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace(_lockedCoordinates);
-                _cartesianPosition = coordsScreen;
+                _cartesianPosition = skybrowser::equatorialToScreenSpace(_lockedCoordinates);
             }
         });
     }
@@ -288,22 +318,27 @@ namespace openspace {
     glm::dvec3 ScreenSpaceSkyTarget::targetDirectionEquatorial() const {
         // Calculate the galactic coordinate of the target direction 
         // projected onto the celestial sphere
-        return skybrowser::screenSpaceToEquatorial(_cartesianPosition.value());
+        return skybrowser::localCameraToEquatorial(_cartesianPosition.value());
     }
 
     void ScreenSpaceSkyTarget::animateToCoordinate(double deltaTime) {
+       
         if (_isAnimated) {
+           
             // Find smallest angle between the two vectors
-            double smallestAngle = std::acos(glm::dot(_animationStart, _animationEnd) / (glm::length(_animationStart) * glm::length(_animationEnd)));
+            double smallestAngle = skybrowser::angleVector(_animationStart, _animationEnd);
             // Only keep animating when target is not at final position
-            if (abs(smallestAngle) > 0.0005) {
-                // Calculate rotation this frame
-                double rotationAngle = smallestAngle * deltaTime * 5.0;
-                // Create the rotation matrix
-                glm::dvec3 rotationAxis = glm::normalize(glm::cross(_animationStart, _animationEnd));
-                glm::dmat4 rotmat = glm::rotate(rotationAngle, rotationAxis);
+            if (smallestAngle > _stopAnimationThreshold) {
+                glm::dmat4 rotMat;
+                skybrowser::incrementalAnimationMatrix(
+                    rotMat,
+                    _animationStart,
+                    _animationEnd,
+                    deltaTime,
+                    _animationSpeed
+                );
                 // Rotate target direction
-                glm::dvec3 newDir = rotmat * glm::dvec4(_animationStart, 1.0);
+                glm::dvec3 newDir = rotMat * glm::dvec4(_animationStart, 1.0);
                 // Convert to screen space
                 _cartesianPosition = skybrowser::equatorialToScreenSpace(newDir);
                 // Update position
@@ -344,6 +379,16 @@ namespace openspace {
         }
         
         return true;     
+    }
+
+    void ScreenSpaceSkyTarget::highlight(glm::ivec3 addition)
+    {
+        _color += addition;
+    }
+
+    void ScreenSpaceSkyTarget::removeHighlight(glm::ivec3 removal)
+    {
+        _color -= removal;
     }
 
     void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 coordsEnd, float FOVEnd,

@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/distanceconstants.h>
 #include <thread>
 #include <string>
 
@@ -43,6 +44,7 @@ class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class RenderableSkyBrowser;
 class ScreenSpaceRenderable;
+class ScreenSpaceImageLocal;
 class WwtDataHandler;
 class SceneGraphNode;
 class ImageData;
@@ -50,73 +52,117 @@ class ImageData;
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
+
     constexpr static const char* Name = "SkyBrowser";
-    
+
+    class Pair {
+    public:
+
+        Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target)
+            : _target(target), _browser(browser) {}
+
+        Pair(Pair const&) = default;
+
+        Pair& operator=(Pair other)
+        {
+            std::swap(_target, other._target);
+            std::swap(_browser, other._browser);
+            return *this;
+        }
+
+        ScreenSpaceSkyTarget* getTarget() {
+            return _target;
+        }
+
+        ScreenSpaceSkyBrowser* getBrowser() {
+            return _browser;
+        }
+
+        friend bool operator==(const Pair& lhs, const Pair& rhs) {
+            return lhs._target == rhs._target && lhs._browser == rhs._browser;
+        }
+        friend bool operator!=(const Pair& lhs, const Pair& rhs) {
+            return !(lhs == rhs);
+        }
+
+    private:
+        ScreenSpaceSkyTarget* _target{ nullptr };
+        ScreenSpaceSkyBrowser* _browser{ nullptr };
+    };
+
     // Constructor & destructor
     SkyBrowserModule();
     virtual ~SkyBrowserModule();
 
     // Getters
-    std::map<std::string, ScreenSpaceSkyBrowser*>& getSkyBrowsers();
-    std::vector<ScreenSpaceRenderable*>& getBrowsersAndTargets();
+    std::vector<Pair>& getPairs();
+    Pair* getPair(std::string id);
     SceneGraphNode* get3dBrowser();
-    WwtDataHandler* getWWTDataHandler();
+    const WwtDataHandler* getWWTDataHandler();
     std::string selectedBrowserId();
 
     // Setters
     void setSelectedBrowser(ScreenSpaceSkyBrowser* ptr);
     void setSelectedBrowser(std::string id);
     void set3dBrowser(SceneGraphNode* node);
-
+    void selectImage2dBrowser(int i);
+    void selectImage3dBrowser(int i);
+   
     // Rotation and animation
-    void startRotation(glm::dvec3 endAnimation); // Pass in galactic coord
+    void startRotation(glm::dvec3 endAnimation); // Pass in galactic coordinate
     void rotateCamera(double deltaTime);
     bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
     void lookAt3dBrowser();
    
     // Boolean functions
-    bool browserIdExists(std::string id);
     bool cameraInSolarSystem();
 
     // Managing the browsers 
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
-    void addRenderable(ScreenSpaceRenderable* object);
-    void place3dBrowser(ImageData& image);
+    void addTargetBrowserPair(ScreenSpaceSkyTarget* target, ScreenSpaceSkyBrowser* browser);
+    void moveHoverCircle(int i);
     
     // Image collection handling
-    int loadImages(const std::string& root, const std::string& directory);
-    int getAndIncrementMessageOrder(); // For version handling calls to WWT
+    void loadImages(const std::string& root, const std::string& directory, 
+                   std::vector<std::filesystem::path>& speckFiles);
+    int nLoadedImages();
+
+    // Manage mouse interactions
+    void setSelectedObject();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
+
 
 protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
 
 private:
-    // Cast screen space renderable to either target or browser
-    ScreenSpaceSkyBrowser* toBrowser(ScreenSpaceRenderable* ptr);
-    ScreenSpaceSkyTarget* toTarget(ScreenSpaceRenderable* ptr);
-
     // The browsers and targets
-    std::vector<ScreenSpaceRenderable*> _renderables; // 2D browsers and targets
-    std::map<std::string, ScreenSpaceSkyBrowser*> _browsers;  // Only the 2D browsers
-    ScreenSpaceRenderable* _mouseOnObject{ nullptr }; // Pointer to what mouse is currently on
+    std::vector<Pair> _targetsBrowsers;
+    Pair* _mouseOnPair{ nullptr };
+    Pair* _selectedPair{ nullptr };
+    bool _isBrowser{ false };
+    ScreenSpaceImageLocal* _hoverCircle{ nullptr };
     SceneGraphNode* _browser3d{ nullptr };
-    std::string _selectedBrowser; // Currently selected browser (2D or 3D)
+    std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
+
+    // 2D vs 3D visualization mode
+    double _solarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
+    double _fadingTime = 2.0;
     
     // Flags
     bool _fineTuneMode{ false };
     bool _isResizing{ false };
     bool _isDragging{ false };
     bool _cameraInSolarSystem{ true };
-    bool _isRotating = false;
+    bool _cameraIsRotating = false;
 
     // Mouse interaction - dragging and resizing
-    glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
     glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
+    glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
     glm::vec2 _startMousePosition;
     glm::vec2 _startDragPosition;
     glm::vec2 _startBrowserSize;
@@ -125,11 +171,11 @@ private:
     // Animation of rotation of camera to look at coordinate galactic coordinates
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
+    double _threshold{ 0.0005 };
+    double _speed{ 1.0 };
     
     // Data handler for the image collections
-    WwtDataHandler* _dataHandler;
-    int _messageOrder{ 0 }; // Version handler for WorldWide Telescope messages
-    
+    WwtDataHandler* _dataHandler;    
 };
 
 } // namespace openspace

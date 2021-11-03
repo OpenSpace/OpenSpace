@@ -4,6 +4,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/numericalproperty.h>
@@ -60,11 +61,17 @@ namespace openspace {
         void animateToCoordinate(double deltaTime);
         bool animateToFov(float endFOV, float deltaTime);
 
+        // Display
+        void highlight(glm::ivec3 addition);
+        void removeHighlight(glm::ivec3 removal);
+
     private:
         // Properties
         properties::StringProperty _skyBrowserId;
         properties::FloatProperty _showCrosshairThreshold;
         properties::FloatProperty _showRectangleThreshold;
+        properties::DoubleProperty _stopAnimationThreshold;
+        properties::DoubleProperty _animationSpeed;
 
         // Flags
         bool _isAnimated{ false };

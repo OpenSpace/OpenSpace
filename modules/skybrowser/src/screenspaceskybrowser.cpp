@@ -66,7 +66,7 @@ namespace {
         std::optional<std::string> targetId;
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
-        std::optional<glm::vec3> borderColor;
+        std::optional<glm::ivec3> borderColor;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -78,7 +78,7 @@ namespace openspace {
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0), glm::ivec2(300))
         , _verticalFov(VerticalFovInfo, 10.f, 0.1f, 70.f)
-        , _borderColor(BorderColorInfo, glm::vec3(rand() % 256, rand() % 256, rand() % 256))
+        , _borderColor(BorderColorInfo, glm::ivec3(200), glm::ivec3(0), glm::ivec3(255))
         , _skyTargetId(TargetIdInfo)
     {
         // Make the color property display a color picker in the GUI
@@ -139,7 +139,7 @@ namespace openspace {
         // Make sure the RGB color at least is 50% brightness
         // By making each channel 50% bright in general
         // 222 = sqrt(3*(0.5*256)^2)
-        while (glm::length(_borderColor.value()) < 222) {
+        while (glm::length(glm::vec3(_borderColor.value())) < 222.f) {
             _borderColor = glm::vec3(rand() % 256, rand() % 256, rand() % 256);
         }
     }
@@ -162,6 +162,18 @@ namespace openspace {
         executeJavascript("setId('" + identifier() + "')");
     }
 
+    void ScreenSpaceSkyBrowser::highlight(glm::ivec3 addition)
+    {
+        glm::ivec3 color = glm::ivec3(_borderColor.value());
+        setWebpageBorderColor( color + addition );
+    }
+
+    void ScreenSpaceSkyBrowser::removeHighlight(glm::ivec3 removal)
+    {
+        glm::ivec3 color = glm::ivec3(_borderColor.value());
+        setWebpageBorderColor( color - removal );
+    }
+    
     void ScreenSpaceSkyBrowser::initializeBrowser() {
         // If the camera is already synced, the browser is already initialized
         if (!_syncViewWithWwt) {
@@ -175,6 +187,21 @@ namespace openspace {
             // Track target
             syncWwtView();
         }
+    }
+
+    glm::dvec2 ScreenSpaceSkyBrowser::fineTuneTarget(glm::dvec2 drag) {
+        // Fine tuning of target
+        glm::dvec2 wwtFov = fieldsOfView();
+        glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
+
+        glm::dvec2 browserDim = screenSpaceDimensions();
+        glm::dvec2 angleResult = wwtFov * (drag / browserDim);
+        glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
+
+        // Convert to screen space coordinate system
+        glm::dvec2 convertToScreenSpace{ (2 * skybrowser::windowRatio()), 2.f };
+        glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
+        return result;
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -244,6 +271,14 @@ namespace openspace {
         return _verticalFov.value();
     }
 
+    glm::dvec2 ScreenSpaceSkyBrowser::fieldsOfView() {
+        glm::dvec2 browserDim = screenSpaceDimensions();
+        double browserRatio = browserDim.x / browserDim.y;
+        glm::dvec2 browserFov = glm::dvec2(verticalFov() * browserRatio, verticalFov());
+
+        return browserFov;
+    }
+
     void ScreenSpaceSkyBrowser::setWebpageBorderColor(glm::ivec3 color)  {
         std::string stringColor = std::to_string(color.x) + "," 
             + std::to_string(color.y) + "," + std::to_string(color.z);
@@ -292,6 +327,7 @@ namespace openspace {
         // Make sure coordinate is on browser
         if (!coordIsInsideCornersScreenSpace(screenSpaceCoord)) return resizePosition;
 
+        // TO DO: turn this into a vector and use prettier vector arithmetic
         float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
         float resizeAreaX = screenSpaceDimensions().x * _resizeAreaPercentage;
 
@@ -359,7 +395,7 @@ namespace openspace {
         return _selectedImages;
     }
 
-    void ScreenSpaceSkyBrowser::addSelectedImage(ImageData& image, int i) {
+    void ScreenSpaceSkyBrowser::addSelectedImage(const ImageData& image, int i) {
         // Ensure there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         bool found = it != std::end(_selectedImages);
@@ -372,7 +408,7 @@ namespace openspace {
         }
     }
 
-    void ScreenSpaceSkyBrowser::removeSelectedImage(ImageData& image, int i) {
+    void ScreenSpaceSkyBrowser::removeSelectedImage(const ImageData& image, int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         bool found = it != std::end(_selectedImages);
@@ -382,7 +418,7 @@ namespace openspace {
         }
     }
 
-    void ScreenSpaceSkyBrowser::setImageOrder(int i, int order, int version) {
+    void ScreenSpaceSkyBrowser::setImageOrder(int i, int order) {
 
         // Find the selected image
         auto selected = std::find(
@@ -408,8 +444,7 @@ namespace openspace {
         int reverseOrder = _selectedImages.size() - order - 1;
         ghoul::Dictionary message = wwtmessage::setLayerOrder(
             std::to_string(i), 
-            reverseOrder, 
-            version
+            reverseOrder
         );
         sendMessageToWwt(message);
     }

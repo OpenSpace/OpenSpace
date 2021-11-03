@@ -5,6 +5,7 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/ivec3property.h>
 #include <deque>
 
 namespace openspace {
@@ -25,12 +26,14 @@ namespace openspace {
         // Target - browser connection
         bool connectToSkyTarget();
         void initializeBrowser();
+        glm::dvec2 fineTuneTarget(glm::dvec2 drag);
         
         // Getters returning values
         bool hasLoadedImages() const;
         glm::vec2 browserPixelDimensions() const;
         glm::ivec3 borderColor() const;
         float verticalFov() const;
+        glm::dvec2 fieldsOfView();
 
         // Getters returning references
         ScreenSpaceSkyTarget* getSkyTarget();
@@ -49,10 +52,14 @@ namespace openspace {
         void executeJavascript(std::string script);
         void sendIdToBrowser();
 
+        // Display
+        void highlight(glm::ivec3 addition);
+        void removeHighlight(glm::ivec3 removal);
+
         // Communication with WorldWide Telescope
-        void addSelectedImage(ImageData& image, int i);
-        void removeSelectedImage(ImageData& image, int i);
-        void setImageOrder(int i, int order, int version);
+        void addSelectedImage(const ImageData& image, int i);
+        void removeSelectedImage(const ImageData& image, int i);
+        void setImageOrder(int i, int order);
         void sendMessageToWwt(const ghoul::Dictionary& msg);
         void syncWwtView();
 
@@ -75,7 +82,7 @@ namespace openspace {
         properties::FloatProperty _verticalFov;       
         properties::StringProperty _skyTargetId;
         properties::Vec2Property _browserDimensions;
-        properties::Vec3Property _borderColor;
+        properties::IVec3Property _borderColor;
 
         // Flags
         bool _hasLoadedImages{ false };

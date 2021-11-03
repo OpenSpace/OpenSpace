@@ -1,3 +1,4 @@
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/renderableskybrowser.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/utility.h>
@@ -8,6 +9,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <ghoul/misc/profiling.h>
@@ -188,8 +190,8 @@ namespace openspace {
         return true;
     }
 
-    void RenderableSkyBrowser::displayImage(ImageData& image, int i) {
-        sendMessageToWwt(wwtmessage::moveCamera(image.celestialCoords, image.fov, 0.0));
+    void RenderableSkyBrowser::displayImage(const ImageData& image, int i) {
+        sendMessageToWwt(wwtmessage::moveCamera(image.equatorialSpherical, image.fov, 0.0));
         _verticalFov = image.fov;
         // Add to selected images if there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
@@ -202,7 +204,7 @@ namespace openspace {
         }
     }
 
-    void RenderableSkyBrowser::removeSelectedImage(ImageData& image, int i) {
+    void RenderableSkyBrowser::removeSelectedImage(const ImageData& image, int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it != std::end(_selectedImages)) {
@@ -249,11 +251,59 @@ namespace openspace {
         }
     }
 
-    std::deque<int>& RenderableSkyBrowser::getSelectedImages() {
+	void RenderableSkyBrowser::placeAt3dPosition(const ImageData& image)
+	{
+        std::string renderableId = dynamic_cast<SceneGraphNode*>(
+            this)->renderable()->identifier();
+        // Uris for properties
+        std::string sizeUri = "Scene." + _identifier + "." + renderableId + ".Size";
+        std::string positionUri = "Scene." + _identifier + ".Translation.Position";
+        std::string rotationUri = "Scene." + _identifier + ".Rotation.Rotation";
+        std::string cameraAim = "NavigationHandler.OrbitalNavigator.Aim";
+        glm::dvec3 position = image.position3d * distanceconstants::Parsec;
+        // Calculate the size of the plane with trigonometry
+        // Calculate in equatorial coordinate system since the FOV is from Earth
+        //  /|
+        // /_|    Adjacent is the horizontal line, opposite the vertical 
+        // \ |    Calculate for half the triangle first, then multiply with 2
+        //  \|
+        glm::dvec3 j2000 = skybrowser::galacticToEquatorial(position);
+        double adjacent = glm::length(j2000);
+        double opposite = 2 * adjacent * glm::tan(glm::radians(image.fov * 0.5));
+
+        // Calculate rotation to make the plane face the solar system barycenter
+        glm::dvec3 normal = glm::normalize(-position);
+        glm::dvec3 newRight = glm::normalize(
+            glm::cross(glm::dvec3(0.0, 0.0, 1.0), normal)
+        );
+        glm::dvec3 newUp = glm::cross(normal, newRight);
+        // Face the Solar System Barycenter
+        glm::dmat3 rotation = glm::dmat3(1.0);
+        rotation[0] = newRight;
+        rotation[1] = newUp;
+        rotation[2] = normal;
+
+        std::string setValue = "openspace.setPropertyValueSingle('";
+
+        openspace::global::scriptEngine->queueScript(
+            setValue + sizeUri + "', " + std::to_string(opposite) + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        openspace::global::scriptEngine->queueScript(
+            setValue + positionUri + "', " + ghoul::to_string(position) + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        openspace::global::scriptEngine->queueScript(
+            setValue + rotationUri + "', " + ghoul::to_string(rotation) + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+	}
+
+	std::deque<int>& RenderableSkyBrowser::getSelectedImages() {
         return _selectedImages;
     }
 
-    void RenderableSkyBrowser::setImageLayerOrder(int i, int order, int version) {
+    void RenderableSkyBrowser::setImageLayerOrder(int i, int order) {
         // Remove from selected list
         auto current = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         auto target = std::begin(_selectedImages) + order;
@@ -266,7 +316,7 @@ namespace openspace {
 
         int reverseOrder = _selectedImages.size() - order - 1;
         ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i),
-            reverseOrder, version);
+            reverseOrder);
         sendMessageToWwt(message);
     }
 

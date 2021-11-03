@@ -20,17 +20,16 @@ local target = {
    Identifier = targetId,
    Name = "Sky Target",
    FaceCamera = false,
-   BrowserID = browserId,
+   BrowserId = browserId,
 };
 
 asset.onInitialize(function ()
  openspace.addScreenSpaceRenderable(browser)
  openspace.addScreenSpaceRenderable(target)
- openspace.skybrowser.addToSkyBrowserModule(browserId)
- openspace.skybrowser.addToSkyBrowserModule(targetId)
  openspace.skybrowser.connectBrowserTarget(browserId)
  openspace.skybrowser.connectBrowserTarget(targetId)
- openspace.skybrowser.setSelectedBrowser(browserId)
+ openspace.skybrowser.addPairToSkyBrowserModule(targetId,browserId)
+  openspace.skybrowser.setSelectedBrowser(browserId)
 end)
 
 asset.onDeinitialize(function ()

@@ -23,29 +23,40 @@ namespace openspace {
                    -0.483834991775,  0.746982248696,  0.455983794523 // col 2
             });
 
+        // Galactic coordinates are projected onto the celestial sphere
+        // Equatorial coordinates are unit length
         // Conversion spherical <-> Cartesian
         glm::dvec2 cartesianToSpherical(glm::dvec3 coords);
         glm::dvec3 sphericalToCartesian(glm::dvec2 coords);
 
         // Conversion J2000 equatorial <-> galactic
         glm::dvec3 galacticToEquatorial(glm::dvec3 coords);
-        glm::dvec3 galacticToCameraLocal(glm::dvec3 coords);
+        glm::dvec3 galacticToLocalCamera(glm::dvec3 coords);
         glm::dvec3 equatorialToGalactic(glm::dvec3 coords);
 
         // Conversion J2000 equatorial / galactic <-> screen space
         glm::dvec3 equatorialToScreenSpace(glm::dvec3 coords);
         glm::dvec3 galacticToScreenSpace(glm::dvec3 coords);
-        glm::dvec3 screenSpaceToGalactic(glm::dvec3 coords);
-        glm::dvec3 screenSpaceToEquatorial(glm::dvec3 coords);
+        glm::dvec3 localCameraToGalactic(glm::dvec3 coords);
+        glm::dvec3 localCameraToEquatorial(glm::dvec3 coords);
 
         // Camera roll and direction
         // Camera roll is with respect to the equatorial North Pole
+        bool coordinateIsOutsideView(glm::dvec3 equatorial);
+        float windowRatio();
         double cameraRoll();
+        glm::vec2 pixelToScreenSpace(glm::vec2& mouseCoordinate);
+        glm::dvec2 fovWindow();
         glm::dvec3 cameraDirectionGalactic();
         glm::dvec3 cameraDirectionEquatorial();
+        double angleVector(glm::dvec3 start, glm::dvec3 end);
+        void incrementalAnimationMatrix(glm::dmat4& rotation, glm::dvec3 start, 
+                                        glm::dvec3 end, double deltaTime, 
+                                        double speedFactor = 1.0);       
     }
     // WorldWide Telescope messages
     namespace wwtmessage {
+        inline int messageCounter{ 0 };
         ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords,
             const double fov, const double roll, const bool moveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
@@ -54,7 +65,7 @@ namespace openspace {
         ghoul::Dictionary removeImage(const std::string& id);
         ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);
-        ghoul::Dictionary setLayerOrder(const std::string& id, int order, int version);
+        ghoul::Dictionary setLayerOrder(const std::string& id, int version);
     }
 }
 
