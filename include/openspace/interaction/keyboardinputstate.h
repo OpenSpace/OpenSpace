@@ -22,58 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
+#ifndef __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__
+#define __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__
 
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace::interaction {
 
-struct JoystickInputStates;
-struct WebsocketInputStates;
-
 // This class represents the global input state of interaction devices
-class InputState {
+class KeyboardInputState {
 public:
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
 
     // Accessors
     const std::vector<std::pair<Key, KeyModifier>>& pressedKeys() const;
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
     bool isKeyPressed(Key key) const;
 
-    const std::vector<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
-
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
-
-    WebsocketInputStates& websocketInputStates();
-    float websocketAxis(int i) const;
-    bool websocketButton(int i) const;
-    bool hasWebsocketStates() const;
-    void resetWebsockets();
-
 private:
     // Input from keyboard
     std::vector<std::pair<Key, KeyModifier>> _keysDown;
-
-    // Input from mouse
-    std::vector<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition = glm::dvec2(0.0);
-    double _mouseScrollDelta;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__
+#endif // __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__

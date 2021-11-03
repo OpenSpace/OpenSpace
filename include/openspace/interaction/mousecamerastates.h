@@ -29,11 +29,15 @@
 
 namespace openspace::interaction {
 
+class MouseInputState;
+class KeyboardInputState;
+
 class MouseCameraStates : public CameraInteractionStates {
 public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime);
+    void updateStateFromInput(const MouseInputState& mouseinputState,
+        const KeyboardInputState& keyboardinputState, double deltaTime);
 
     void setInvertMouseButton(bool value);
 

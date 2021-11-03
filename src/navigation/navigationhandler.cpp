@@ -188,7 +188,11 @@ void NavigationHandler::updateCamera(double deltaTime) {
                     JoystickInputState()
                 );
             }
-            _orbitalNavigator.updateStatesFromInput(_inputState, deltaTime);
+            _orbitalNavigator.updateStatesFromInput(
+                _mouseInputState,
+                _keyboardInputState,
+                deltaTime
+            );
             _orbitalNavigator.updateCameraStateFromStates(deltaTime);
             updateCameraTransitions();
         }
@@ -351,25 +355,29 @@ Camera* NavigationHandler::camera() const {
     return _camera;
 }
 
-const InputState& NavigationHandler::inputState() const {
-    return _inputState;
+const MouseInputState& NavigationHandler::mouseInputState() const {
+    return _mouseInputState;
+}
+
+const KeyboardInputState& NavigationHandler::keyboardInputState() const {
+    return _keyboardInputState;
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (!_disableMouseInputs) {
-        _inputState.mouseButtonCallback(button, action);
+        _mouseInputState.mouseButtonCallback(button, action);
     }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
     if (!_disableMouseInputs) {
-        _inputState.mousePositionCallback(x, y);
+        _mouseInputState.mousePositionCallback(x, y);
     }
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
     if (!_disableMouseInputs) {
-        _inputState.mouseScrollWheelCallback(pos);
+        _mouseInputState.mouseScrollWheelCallback(pos);
     }
 }
 
@@ -377,7 +385,7 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 {
     // There is no need to disable the keyboard callback based on a property as the vast
     // majority of input is coming through Lua scripts anyway which are not blocked here
-    _inputState.keyboardCallback(key, modifier, action);
+    _keyboardInputState.keyboardCallback(key, modifier, action);
 }
 
 NavigationState NavigationHandler::navigationState() const {

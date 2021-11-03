@@ -24,8 +24,6 @@
 
 #include <openspace/interaction/camerainteractionstates.h>
 
-#include <openspace/interaction/inputstate.h>
-
 namespace openspace::interaction {
 
 CameraInteractionStates::InteractionState::InteractionState(double scaleFactor)

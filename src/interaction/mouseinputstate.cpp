@@ -22,63 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#include <openspace/interaction/mouseinputstate.h>
 
-#include <openspace/interaction/delayedvariable.h>
-#include <ghoul/glm.h>
+#include <algorithm>
 
 namespace openspace::interaction {
 
-class CameraInteractionStates {
-public:
-    /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
-     */
-    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
-    virtual ~CameraInteractionStates() = default;
+void MouseInputState::mouseButtonCallback(MouseButton button, MouseAction action) {
+    if (action == MouseAction::Press) {
+        _mouseButtonsDown.push_back(button);
+    }
+    else if (action == MouseAction::Release) {
+        _mouseButtonsDown.erase(
+            std::remove(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), button),
+            _mouseButtonsDown.end()
+        );
+    }
+}
 
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+void MouseInputState::mousePositionCallback(double mouseX, double mouseY) {
+    _mousePosition = glm::dvec2(mouseX, mouseY);
+}
 
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    glm::dvec2 truckMovementVelocity() const;
-    glm::dvec2 localRollVelocity() const;
-    glm::dvec2 globalRollVelocity() const;
+void MouseInputState::mouseScrollWheelCallback(double mouseScrollDelta) {
+    _mouseScrollDelta = mouseScrollDelta;
+}
 
-    void resetVelocities();
+const std::vector<MouseButton>& MouseInputState::pressedMouseButtons() const {
+    return _mouseButtonsDown;
+}
 
-    /*
-     * Returns true if any of the velocities are larger than zero,
-     * i.e. wether an interaction happened
-     */
-    bool hasNonZeroVelocities();
+glm::dvec2 MouseInputState::mousePosition() const {
+    return _mousePosition;
+}
 
-protected:
-    struct InteractionState {
-        InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
+double MouseInputState::mouseScrollDelta() const {
+    return _mouseScrollDelta;
+}
 
-        glm::dvec2 previousPosition = glm::dvec2(0.0);
-        DelayedVariable<glm::dvec2, double> velocity;
-    };
-
-    double _sensitivity = 0.0;
-
-    InteractionState _globalRotationState;
-    InteractionState _localRotationState;
-    InteractionState _truckMovementState;
-    InteractionState _localRollState;
-    InteractionState _globalRollState;
-};
+bool MouseInputState::isMouseButtonPressed(MouseButton mouseButton) const {
+    auto it = std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), mouseButton);
+    return it != _mouseButtonsDown.end();
+}
 
 } // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

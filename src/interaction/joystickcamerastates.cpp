@@ -25,7 +25,6 @@
 #include <openspace/interaction/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/exception.h>
 #include <cmath>

@@ -26,8 +26,9 @@
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/keyboardinputstate.h>
+#include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationstate.h>
@@ -81,7 +82,8 @@ public:
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
-    const InputState& inputState() const;
+    const MouseInputState& mouseInputState() const;
+    const KeyboardInputState& keyboardInputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
@@ -144,7 +146,8 @@ private:
 
     bool _playbackModeEnabled = false;
 
-    InputState _inputState;
+    MouseInputState _mouseInputState;
+    KeyboardInputState _keyboardInputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 

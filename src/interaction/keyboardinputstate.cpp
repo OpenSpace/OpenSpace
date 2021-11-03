@@ -22,17 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/interaction/joystickinputstate.h>
-#include <openspace/interaction/websocketinputstate.h>
-#include <ghoul/fmt.h>
 #include <algorithm>
 
 namespace openspace::interaction {
 
-void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+void KeyboardInputState::keyboardCallback(Key key, KeyModifier modifier,
+                                          KeyAction action)
+{
     if (action == KeyAction::Press) {
         _keysDown.emplace_back(key, modifier);
     }
@@ -51,47 +49,15 @@ void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 }
 
-void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (action == MouseAction::Press) {
-        _mouseButtonsDown.push_back(button);
-    }
-    else if (action == MouseAction::Release) {
-        _mouseButtonsDown.erase(
-            std::remove(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), button),
-            _mouseButtonsDown.end()
-        );
-    }
-}
-
-void InputState::mousePositionCallback(double mouseX, double mouseY) {
-    _mousePosition = glm::dvec2(mouseX, mouseY);
-}
-
-void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
-    _mouseScrollDelta = mouseScrollDelta;
-}
-
-const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
+const std::vector<std::pair<Key, KeyModifier>>& KeyboardInputState::pressedKeys() const {
     return _keysDown;
 }
 
-const std::vector<MouseButton>& InputState::pressedMouseButtons() const {
-    return _mouseButtonsDown;
-}
-
-glm::dvec2 InputState::mousePosition() const {
-    return _mousePosition;
-}
-
-double InputState::mouseScrollDelta() const {
-    return _mouseScrollDelta;
-}
-
-bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
+bool KeyboardInputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
     return std::find(_keysDown.begin(), _keysDown.end(), keyModPair) != _keysDown.end();
 }
 
-bool InputState::isKeyPressed(Key key) const {
+bool KeyboardInputState::isKeyPressed(Key key) const {
     auto it = std::find_if(
         _keysDown.begin(),
         _keysDown.end(),
@@ -100,39 +66,6 @@ bool InputState::isKeyPressed(Key key) const {
         }
     );
     return it != _keysDown.end();
-}
-
-bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
-    auto it = std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), mouseButton);
-    return it != _mouseButtonsDown.end();
-}
-
-float InputState::joystickAxis(int i) const {
-    return global::joystickInputStates->axis(i);
-}
-
-bool InputState::joystickButton(int i) const {
-    return global::joystickInputStates->button(i, JoystickAction::Press);
-}
-
-float InputState::websocketAxis(int i) const {
-    return global::websocketInputStates->axis(i);
-}
-
-bool InputState::websocketButton(int i) const {
-    return global::websocketInputStates->button(i, WebsocketAction::Press);
-}
-
-void InputState::resetWebsockets() {
-    using K = size_t;
-    using V = WebsocketInputState*;
-    for (const std::pair<const K, V>& p : *global::websocketInputStates) {
-        p.second->isConnected = false;
-    }
-}
-
-bool InputState::hasWebsocketStates() const {
-    return !global::websocketInputStates->empty();
 }
 
 } // namespace openspace::interaction

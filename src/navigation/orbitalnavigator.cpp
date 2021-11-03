@@ -543,10 +543,11 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
+void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
+                                             const KeyboardInputState& keyboardInputState,
                                              double deltaTime)
 {
-    _mouseStates.updateStateFromInput(inputState, deltaTime);
+    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
     _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
     _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
     _scriptStates.updateStateFromInput(deltaTime);

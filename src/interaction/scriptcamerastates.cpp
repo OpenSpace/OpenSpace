@@ -24,8 +24,6 @@
 
 #include <openspace/interaction/scriptcamerastates.h>
 
-#include <openspace/interaction/inputstate.h>
-
 namespace openspace::interaction {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
