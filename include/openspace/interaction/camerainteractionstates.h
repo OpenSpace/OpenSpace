@@ -42,8 +42,6 @@ public:
     CameraInteractionStates(double sensitivity, double velocityScaleFactor);
     virtual ~CameraInteractionStates() = default;
 
-    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
-
     void setRotationalFriction(double friction);
     void setHorizontalFriction(double friction);
     void setVerticalFriction(double friction);

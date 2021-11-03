@@ -33,7 +33,7 @@ class ScriptCameraStates : public CameraInteractionStates {
 public:
     ScriptCameraStates();
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+    void updateStateFromInput(double deltaTime);
 
     void addLocalRotation(const glm::dvec2& delta);
     void addGlobalRotation(const glm::dvec2& delta);

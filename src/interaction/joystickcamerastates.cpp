@@ -37,7 +37,8 @@ JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocitySc
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
+void JoystickCameraStates::updateStateFromInput(
+                                           const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
     std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
@@ -52,7 +53,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             continue;
         }
 
-        float rawValue = inputState.joystickAxis(i);
+        float rawValue = joystickInputStates.axis(i);
         float value = rawValue;
 
         if (t.isSticky) {

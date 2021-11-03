@@ -33,7 +33,7 @@ class MouseCameraStates : public CameraInteractionStates {
 public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+    void updateStateFromInput(const InputState& inputState, double deltaTime);
 
     void setInvertMouseButton(bool value);
 

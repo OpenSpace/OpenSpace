@@ -547,9 +547,9 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
                                              double deltaTime)
 {
     _mouseStates.updateStateFromInput(inputState, deltaTime);
-    _joystickStates.updateStateFromInput(inputState, deltaTime);
-    _websocketStates.updateStateFromInput(inputState, deltaTime);
-    _scriptStates.updateStateFromInput(inputState, deltaTime);
+    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
+    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
+    _scriptStates.updateStateFromInput(deltaTime);
 
     bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||

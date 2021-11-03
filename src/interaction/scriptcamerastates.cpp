@@ -30,7 +30,7 @@ namespace openspace::interaction {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
 
-void ScriptCameraStates::updateStateFromInput(const InputState&, double deltaTime) {
+void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {
         _localRotationState.velocity.set(
             _localRotation * _sensitivity,
