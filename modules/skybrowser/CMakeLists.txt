@@ -30,9 +30,10 @@ set(HEADER_FILES
     include/screenspaceskybrowser.h
     include/screenspaceskytarget.h
     include/wwtdatahandler.h
-    tinyxml2/tinyxml2.h
     include/utility.h
     include/renderableskybrowser.h
+	include/pair.h
+	tinyxml2/tinyxml2.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -44,9 +45,10 @@ set(SOURCE_FILES
     src/screenspaceskybrowser.cpp
     src/screenspaceskytarget.cpp
     src/wwtdatahandler.cpp
-    tinyxml2/tinyxml2.cpp
     src/utility.cpp
     src/renderableskybrowser.cpp
+	src/pair.cpp
+	tinyxml2/tinyxml2.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

@@ -11,6 +11,7 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/renderableskybrowser.h>
+#include <modules/skybrowser/include/pair.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/utility.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -75,8 +76,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         const std::string id = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         if (module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
-            pair->getTarget()->lock();
+            module->getPair(id)->lock();
         }
         return 0;
     }
@@ -86,8 +86,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         const std::string id = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         if (module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
-            pair->getTarget()->unlock();
+            module->getPair(id)->unlock();
         }
         return 0;
     }
@@ -101,8 +100,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
         if (module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
-            pair->getBrowser()->setImageOrder(i, order);
+            module->getPair(id)->setImageOrder(i, order);
         }
         else if (module->get3dBrowser() != nullptr) {
             RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
@@ -153,8 +151,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         // Send out ID's to the browsers
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        std::vector<SkyBrowserModule::Pair> pairs = module->getPairs();
-        for (SkyBrowserModule::Pair pair : pairs) {
+        std::vector<Pair> pairs = module->getPairs();
+        for (Pair pair : pairs) {
             pair.getBrowser()->sendIdToBrowser();
         }
         SceneGraphNode* node = module->get3dBrowser();
@@ -362,9 +360,9 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         // Pass data for all the browsers and the corresponding targets
         if (module->cameraInSolarSystem()) {
-            std::vector<SkyBrowserModule::Pair> pairs = module->getPairs();
+            std::vector<Pair> pairs = module->getPairs();
 
-            for (SkyBrowserModule::Pair pair : pairs) {
+            for (Pair pair : pairs) {
                 ScreenSpaceSkyBrowser* browser = pair.getBrowser();
                 ScreenSpaceSkyTarget* target = pair.getTarget();
                 std::string id = browser->identifier();
@@ -461,7 +459,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
         if(module->cameraInSolarSystem() && module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
+            Pair* pair = module->getPair(id);
             module->startRotation(pair->getTarget()->targetDirectionGalactic());
         }
         else if (!module->cameraInSolarSystem() && module->get3dBrowser()) {
@@ -475,7 +473,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::set3dSelectedImagesAs2dSelection");
         const std::string id = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        SkyBrowserModule::Pair* pair = module->getPair(id);
+        Pair* pair = module->getPair(id);
 
         if (pair && module->get3dBrowser()) { 
             RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
@@ -502,7 +500,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::Dictionary message = wwtmessage::setImageOpacity(i, opacity);
 
         if (module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
+            Pair* pair = module->getPair(id);
             pair->getBrowser()->sendMessageToWwt(message);
         }
         else if (module->get3dBrowser() != nullptr) {
@@ -518,7 +516,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::centerTargetOnScreen");
         const std::string id = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        SkyBrowserModule::Pair* pair = module->getPair(id);
+        Pair* pair = module->getPair(id);
         if (pair) {
             // Animate the target to the center of the screen
             pair->getTarget()->unlock();
@@ -591,7 +589,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         
 
         if (module->getPair(id)) {
-            SkyBrowserModule::Pair* pair = module->getPair(id);
+            Pair* pair = module->getPair(id);
             // Remove image
             pair->getBrowser()->removeSelectedImage(image, i);
         }

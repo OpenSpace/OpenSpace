@@ -43,52 +43,17 @@ namespace openspace {
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class RenderableSkyBrowser;
-class ScreenSpaceRenderable;
 class ScreenSpaceImageLocal;
 class WwtDataHandler;
 class SceneGraphNode;
 class ImageData;
+class Pair;
 
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
 
     constexpr static const char* Name = "SkyBrowser";
-
-    class Pair {
-    public:
-
-        Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target)
-            : _target(target), _browser(browser) {}
-
-        Pair(Pair const&) = default;
-
-        Pair& operator=(Pair other)
-        {
-            std::swap(_target, other._target);
-            std::swap(_browser, other._browser);
-            return *this;
-        }
-
-        ScreenSpaceSkyTarget* getTarget() {
-            return _target;
-        }
-
-        ScreenSpaceSkyBrowser* getBrowser() {
-            return _browser;
-        }
-
-        friend bool operator==(const Pair& lhs, const Pair& rhs) {
-            return lhs._target == rhs._target && lhs._browser == rhs._browser;
-        }
-        friend bool operator!=(const Pair& lhs, const Pair& rhs) {
-            return !(lhs == rhs);
-        }
-
-    private:
-        ScreenSpaceSkyTarget* _target{ nullptr };
-        ScreenSpaceSkyBrowser* _browser{ nullptr };
-    };
 
     // Constructor & destructor
     SkyBrowserModule();

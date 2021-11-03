@@ -37,6 +37,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <modules/skybrowser/include/pair.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include "skybrowsermodule_lua.inl"
 #include <glm/gtx/vector_angle.hpp>
@@ -391,7 +392,7 @@ SkyBrowserModule::SkyBrowserModule()
         double deltaTime = global::windowDelegate->deltaTime();
 
         // Fade out or in browser & target
-        for (SkyBrowserModule::Pair pair : _targetsBrowsers) {
+        for (Pair pair : _targetsBrowsers) {
             ScreenSpaceSkyBrowser* browser = pair.getBrowser();
             // If outside solar system and browser is visible
             if (!_cameraInSolarSystem && browser->isEnabled()) {
@@ -668,12 +669,12 @@ const WwtDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return _dataHandler;
 }
 
-std::vector<SkyBrowserModule::Pair>& SkyBrowserModule::getPairs()
+std::vector<Pair>& SkyBrowserModule::getPairs()
 {
     return _targetsBrowsers;
 }
 
-SkyBrowserModule::Pair* SkyBrowserModule::getPair(std::string id)
+Pair* SkyBrowserModule::getPair(std::string id)
 {
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&](Pair& pair) {
