@@ -498,7 +498,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
     }
 }
 
-void NavigationHandler::setJoystickAxisMapping(int axis,
+void NavigationHandler::setJoystickAxisMapping(const std::string& joystickName, int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                       JoystickCameraStates::AxisNormalize shouldNormalize,
@@ -506,6 +506,7 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
+        joystickName,
         axis,
         mapping,
         shouldInvert,
@@ -530,25 +531,31 @@ void NavigationHandler::setWebsocketAxisMapping(int axis,
 
 
 JoystickCameraStates::AxisInformation
-NavigationHandler::joystickAxisMapping(int axis) const
+NavigationHandler::joystickAxisMapping(const std::string& joystickName, int axis) const
 {
-    return _orbitalNavigator.joystickStates().axisMapping(axis);
+    return _orbitalNavigator.joystickStates().axisMapping(joystickName, axis);
 }
 
-void NavigationHandler::setJoystickAxisDeadzone(int axis, float deadzone) {
-    _orbitalNavigator.joystickStates().setDeadzone(axis, deadzone);
+void NavigationHandler::setJoystickAxisDeadzone(const std::string& joystickName, int axis,
+                                                float deadzone)
+{
+    _orbitalNavigator.joystickStates().setDeadzone(joystickName, axis, deadzone);
 }
 
-float NavigationHandler::joystickAxisDeadzone(int axis) const {
-    return _orbitalNavigator.joystickStates().deadzone(axis);
+float NavigationHandler::joystickAxisDeadzone(const std::string& joystickName,
+                                              int axis) const
+{
+    return _orbitalNavigator.joystickStates().deadzone(joystickName, axis);
 }
 
-void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
+void NavigationHandler::bindJoystickButtonCommand(const std::string& joystickName,
+                                                  int button, std::string command,
                                                   JoystickAction action,
                                          JoystickCameraStates::ButtonCommandRemote remote,
                                                                 std::string documentation)
 {
     _orbitalNavigator.joystickStates().bindButtonCommand(
+        joystickName,
         button,
         std::move(command),
         action,
@@ -557,12 +564,16 @@ void NavigationHandler::bindJoystickButtonCommand(int button, std::string comman
     );
 }
 
-void NavigationHandler::clearJoystickButtonCommand(int button) {
-    _orbitalNavigator.joystickStates().clearButtonCommand(button);
+void NavigationHandler::clearJoystickButtonCommand(const std::string& joystickName,
+                                                   int button)
+{
+    _orbitalNavigator.joystickStates().clearButtonCommand(joystickName, button);
 }
 
-std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
-    return _orbitalNavigator.joystickStates().buttonCommand(button);
+std::vector<std::string> NavigationHandler::joystickButtonCommand(
+                                        const std::string& joystickName, int button) const
+{
+    return _orbitalNavigator.joystickStates().buttonCommand(joystickName, button);
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

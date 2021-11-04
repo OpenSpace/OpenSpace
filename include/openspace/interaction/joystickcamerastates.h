@@ -77,43 +77,55 @@ public:
     void updateStateFromInput(
         const JoystickInputStates& joystickInputStates, double deltaTime);
 
-    void setAxisMapping(int axis, AxisType mapping,
+    void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No,
         bool isSticky = false, double sensitivity = 0.0
     );
 
-    AxisInformation axisMapping(int axis) const;
+    AxisInformation axisMapping(const std::string& joystickName, int axis) const;
 
-    void setDeadzone(int axis, float deadzone);
-    float deadzone(int axis) const;
+    void setDeadzone(const std::string& joystickName, int axis, float deadzone);
+    float deadzone(const std::string& joystickName, int axis) const;
 
-
-    void bindButtonCommand(int button, std::string command, JoystickAction action,
-        ButtonCommandRemote remote, std::string documentation);
-    void clearButtonCommand(int button);
-    std::vector<std::string> buttonCommand(int button) const;
+    void bindButtonCommand(const std::string& joystickName, int button,
+        std::string command, JoystickAction action, ButtonCommandRemote remote,
+        std::string documentation);
+    void clearButtonCommand(const std::string& joystickName, int button);
+    std::vector<std::string> buttonCommand(const std::string& joystickName,
+        int button) const;
 
 private:
-    // We use an array for the axes and a map for the buttons since the axis are going to
-    // be accessed much more often and thus have to be more efficient. And storing a few
-    // extra AxisInformation that are not used will not matter that much; finding an axis
-    // location in a potential map each frame, however, would
+    struct JoystickCameraState {
+        std::string joystickName;
 
-    std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
+        // We use an array for the axes and a map for the buttons since the axis are going to
+        // be accessed much more often and thus have to be more efficient. And storing a few
+        // extra AxisInformation that are not used will not matter that much; finding an axis
+        // location in a potential map each frame, however, would
 
-    // This array is used to store the old axis values from the previous frame,
-    // it is used to calculate the difference in the values in the case of a sticky axis
-    std::array<float, JoystickInputState::MaxAxes> _prevAxisValues;
+        std::array<AxisInformation, JoystickInputState::MaxAxes> axisMapping;
 
-    struct ButtonInformation {
-        std::string command;
-        JoystickAction action;
-        ButtonCommandRemote synchronization;
-        std::string documentation;
+        // This array is used to store the old axis values from the previous frame,
+        // it is used to calculate the difference in the values in the case of a sticky axis
+        std::array<float, JoystickInputState::MaxAxes> prevAxisValues;
+
+        struct ButtonInformation {
+            std::string command;
+            JoystickAction action;
+            ButtonCommandRemote synchronization;
+            std::string documentation;
+        };
+
+        std::multimap<int, ButtonInformation> buttonMapping;
     };
 
-    std::multimap<int, ButtonInformation> _buttonMapping;
+    std::vector<JoystickCameraState> _joystickCameraStates;
+
+    // Find the item in _joystickCameraStates that corresponds to the given joystickName
+    // return a pointer to the item, if not found then return nullptr
+    JoystickCameraState* getJoystickCameraState(const std::string& joystickName);
+    const JoystickCameraState* getJoystickCameraState(const std::string& joystickName) const;
 };
 
 } // namespace openspace::interaction

@@ -98,7 +98,8 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
+    void setJoystickAxisMapping(const std::string& joystickName,
+        int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::AxisNormalize shouldNormalize =
@@ -106,16 +107,20 @@ public:
         bool isSticky = false, double sensitivity = 0.0
     );
 
-    JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
+    JoystickCameraStates::AxisInformation joystickAxisMapping(
+        const std::string& joystickName, int axis) const;
 
-    void setJoystickAxisDeadzone(int axis, float deadzone);
-    float joystickAxisDeadzone(int axis) const;
+    void setJoystickAxisDeadzone(const std::string& joystickName, int axis,
+        float deadzone);
+    float joystickAxisDeadzone(const std::string& joystickName, int axis) const;
 
-    void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
+    void bindJoystickButtonCommand(const std::string& joystickName, int button,
+        std::string command, JoystickAction action,
         JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
 
-    void clearJoystickButtonCommand(int button);
-    std::vector<std::string> joystickButtonCommand(int button) const;
+    void clearJoystickButtonCommand(const std::string& joystickName, int button);
+    std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
+        int button) const;
 
     // Websockets
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,

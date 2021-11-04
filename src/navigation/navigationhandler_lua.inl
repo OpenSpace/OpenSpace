@@ -151,10 +151,11 @@ int retargetAim(lua_State* L) {
 }
 
 int bindJoystickAxis(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 6 }, "lua::bindJoystickAxis");
-    auto [axis, axisType, shouldInvert, shouldNormalize, isSticky, sensitivity] =
+    ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxis");
+    auto [joystickName, axis, axisType, shouldInvert, shouldNormalize, isSticky,
+          sensitivity] =
         ghoul::lua::values<
-            int, std::string, std::optional<bool>, std::optional<bool>,
+            std::string, int, std::string, std::optional<bool>, std::optional<bool>,
             std::optional<bool>, std::optional<double>
         >(L);
     shouldInvert = shouldInvert.value_or(false);
@@ -163,6 +164,7 @@ int bindJoystickAxis(lua_State* L) {
     sensitivity = sensitivity.value_or(0.0);
 
     global::navigationHandler->setJoystickAxisMapping(
+        joystickName,
         axis,
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
@@ -174,11 +176,11 @@ int bindJoystickAxis(lua_State* L) {
 }
 
 int joystickAxis(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::joystickAxis");
-    const int axis = ghoul::lua::value<int>(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickAxis");
+    auto [joystickName, axis] = ghoul::lua::values<std::string, int>(L);
 
     using AI = interaction::JoystickCameraStates::AxisInformation;
-    AI info = global::navigationHandler->joystickAxisMapping(axis);
+    AI info = global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
     ghoul::lua::push(
         L,
@@ -192,27 +194,32 @@ int joystickAxis(lua_State* L) {
 }
 
 int setJoystickAxisDeadzone(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setJoystickAxisDeadzone");
-    auto [axis, deadzone] = ghoul::lua::values<int, float>(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setJoystickAxisDeadzone");
+    auto [joystickName, axis, deadzone] = ghoul::lua::values<std::string, int, float>(L);
 
-    global::navigationHandler->setJoystickAxisDeadzone(axis, deadzone);
+    global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
     return 0;
 }
 
 int joystickAxisDeadzone(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::joystickAxisDeadzone");
-    const int axis = ghoul::lua::value<int>(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickAxisDeadzone");
+    auto [joystickName, axis] = ghoul::lua::values<std::string, int>(L);
 
-    const float deadzone = global::navigationHandler->joystickAxisDeadzone(axis);
+    const float deadzone = global::navigationHandler->joystickAxisDeadzone(joystickName, axis);
     ghoul::lua::push(L, deadzone);
     return 1;
 }
 
 int bindJoystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 5 }, "lua::bindJoystickButton");
-    auto [button, command, documentation, actionStr, isRemote] =
+    ghoul::lua::checkArgumentsAndThrow(L, { 4, 6 }, "lua::bindJoystickButton");
+    auto [joystickName, button, command, documentation, actionStr, isRemote] =
         ghoul::lua::values<
-            int, std::string, std::string, std::optional<std::string>, std::optional<bool>
+            std::string,
+            int,
+            std::string,
+            std::string,
+            std::optional<std::string>,
+            std::optional<bool>
         >(L);
     actionStr = actionStr.value_or("Press");
     isRemote = isRemote.value_or(true);
@@ -221,6 +228,7 @@ int bindJoystickButton(lua_State* L) {
         ghoul::from_string<interaction::JoystickAction>(*actionStr);
 
     global::navigationHandler->bindJoystickButtonCommand(
+        joystickName,
         button,
         command,
         action,
@@ -231,18 +239,19 @@ int bindJoystickButton(lua_State* L) {
 }
 
 int clearJoystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::clearJoystickButton");
-    const int button = ghoul::lua::value<int>(L);
-    global::navigationHandler->clearJoystickButtonCommand(button);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::clearJoystickButton");
+    auto [joystickName, button] = ghoul::lua::values<std::string, int>(L);
+
+    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
     return 0;
 }
 
 int joystickButton(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::joystickButton");
-    const int button = ghoul::lua::value<int>(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickButton");
+    auto [joystickName, button] = ghoul::lua::values<std::string, int>(L);
 
     const std::vector<std::string>& cmds =
-        global::navigationHandler->joystickButtonCommand(button);
+        global::navigationHandler->joystickButtonCommand(joystickName, button);
 
     std::string cmd = std::accumulate(
         cmds.cbegin(),
