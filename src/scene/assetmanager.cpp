@@ -118,13 +118,16 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
                 "add",
                 &luascriptfunctions::asset::add,
                 "string",
-                ""
+                "Adds an asset to the current scene. The parameter passed into this "
+                "function is the path to the file that should be loaded"
             },
             {
                 "remove",
                 &luascriptfunctions::asset::remove,
                 "string",
-                ""
+                "Removes the asset with the specfied name from the scene. The parameter "
+                "to this function is the same that was originally used to load this "
+                "asset, i.e. the path to the asset file"
             }
         }
     };

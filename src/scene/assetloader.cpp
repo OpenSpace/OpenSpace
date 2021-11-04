@@ -545,10 +545,11 @@ void AssetLoader::callOnInitialize(Asset* asset) {
     for (int init : _onInitializationFunctionRefs[asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(
-                "When initializing " + asset->assetFilePath() + ": " +
+            throw ghoul::lua::LuaRuntimeException(fmt::format(
+                "When initializing {}: {}",
+                asset->assetFilePath(),
                 ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            );
+            ));
         }
         // Clean up lua stack, in case the pcall left anything there.
         lua_settop(*_luaState, 0);
@@ -562,10 +563,11 @@ void AssetLoader::callOnDeinitialize(Asset* asset) {
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(
-                "When deinitializing " + asset->assetFilePath() + ": " +
+            throw ghoul::lua::LuaRuntimeException(fmt::format(
+                "When deinitializing {}: {}",
+                asset->assetFilePath(),
                 ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            );
+            ));
         }
         // Clean up lua stack, in case the pcall left anything there.
         lua_settop(*_luaState, 0);
@@ -578,11 +580,11 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
     for (int init : _onDependencyInitializationFunctionRefs[dependant][asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(
-                "When initializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " +
+            throw ghoul::lua::LuaRuntimeException(fmt::format(
+                "When initializing dependency {} -> {}: {}",
+                dependant->assetFilePath(), asset->assetFilePath(),
                 ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            );
+            ));
         }
         // Clean up lua stack, in case the pcall left anything there.
         lua_settop(*_luaState, 0);
@@ -601,11 +603,11 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(
-                "When deinitializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " +
+            throw ghoul::lua::LuaRuntimeException(fmt::format(
+                "When deinitializing dependency {} -> {}: {}",
+                dependant->assetFilePath(), asset->assetFilePath(),
                 ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            );
+            ));
         }
         // Clean up lua stack, in case the pcall left anything there.
         lua_settop(*_luaState, 0);
