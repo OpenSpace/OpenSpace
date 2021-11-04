@@ -209,15 +209,15 @@ void Asset::syncStateChanged(ResourceSynchronization* sync,
 }
 
 bool Asset::isSyncResolveReady() {
-    std::vector<Asset*> requiredAssets = this->requiredAssets();
+    std::vector<Asset*> reqAssets = requiredAssets();
 
     const auto unsynchronizedAsset = std::find_if(
-        requiredAssets.cbegin(),
-        requiredAssets.cend(),
+        reqAssets.cbegin(),
+        reqAssets.cend(),
         [](Asset* a) { return !a->isSynchronized(); }
     );
 
-    if (unsynchronizedAsset != requiredAssets.cend()) {
+    if (unsynchronizedAsset != reqAssets.cend()) {
         // Not considered resolved if there is one or more unresolved children
         return false;
     }
@@ -285,32 +285,24 @@ bool Asset::isSyncingOrResolved() const {
 }
 
 bool Asset::hasLoadedParent() {
-    {
-        auto it = _requiringAssets.begin();
-        while (it != _requiringAssets.end()) {
-            std::shared_ptr<Asset> parent = it->lock();
-            if (!parent) {
-                it = _requiringAssets.erase(it);
-                continue;
-            }
-            if (parent->isLoaded()) {
-                return true;
-            }
-            ++it;
+    for (auto it = _requiringAssets.begin(); it != _requiringAssets.end(); it++) {
+        std::shared_ptr<Asset> parent = it->lock();
+        if (!parent) {
+            it = _requiringAssets.erase(it);
+            continue;
+        }
+        if (parent->isLoaded()) {
+            return true;
         }
     }
-    {
-        auto it = _requestingAssets.begin();
-        while (it != _requestingAssets.end()) {
-            std::shared_ptr<Asset> parent = it->lock();
-            if (!parent) {
-                it = _requestingAssets.erase(it);
-                continue;
-            }
-            if (parent->isLoaded() || parent->hasLoadedParent()) {
-                return true;
-            }
-            ++it;
+    for (auto it = _requestingAssets.begin(); it != _requestingAssets.end(); it++) {
+        std::shared_ptr<Asset> parent = it->lock();
+        if (!parent) {
+            it = _requestingAssets.erase(it);
+            continue;
+        }
+        if (parent->isLoaded() || parent->hasLoadedParent()) {
+            return true;
         }
     }
 

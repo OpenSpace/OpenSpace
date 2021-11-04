@@ -179,54 +179,54 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
 
     // Register local resource function
     // string localResource(string path)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::localResource, 1);
     lua_setfield(*_luaState, assetTableIndex, LocalResourceFunctionName);
 
     // Register synced resource function
     // string syncedResource(string path)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::syncedResource, 1);
     lua_setfield(*_luaState, assetTableIndex, SyncedResourceFunctionName);
 
     // Register require function
     // Asset, Dependency require(string path)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::require, 1);
     lua_setfield(*_luaState, assetTableIndex, RequireFunctionName);
 
     // Register exists function
     // bool exists(string path)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exists, 1);
     lua_setfield(*_luaState, assetTableIndex, ExistsFunctionName);
 
     // Register export-dependency function
     // export(string key, any value)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exportAsset, 1);
     lua_setfield(*_luaState, assetTableIndex, ExportFunctionName);
 
     // Register onInitialize function
     // void onInitialize(function<void()> initializationFunction)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::onInitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnInitializeFunctionName);
 
     // Register onDeinitialize function
     // void onDeinitialize(function<void()> deinitializationFunction)
-    lua_pushlightuserdata(*_luaState, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
 
     // Register directory constant
     // string directory
-    lua_pushstring(*_luaState, asset->assetDirectory().c_str());
+    ghoul::lua::push(*_luaState, asset->assetDirectory());
     lua_setfield(*_luaState, assetTableIndex, DirectoryConstantName);
 
     // Register filePath constant
     // string filePath
-    lua_pushstring(*_luaState, asset->assetFilePath().c_str());
+    ghoul::lua::push(*_luaState, asset->assetFilePath());
     lua_setfield(*_luaState, assetTableIndex, FilePathConstantName);
 
     // Attach Asset table to AssetInfo table
