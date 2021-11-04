@@ -1742,7 +1742,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
-                {},
                 "",
                 "Toggles the shutdown mode that will close the application after the "
                 "count down timer is reached"
@@ -1750,21 +1749,18 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "writeDocumentation",
                 &luascriptfunctions::writeDocumentation,
-                {},
                 "",
                 "Writes out documentation files"
             },
             {
                 "downloadFile",
                 &luascriptfunctions::downloadFile,
-                {},
                 "",
                 "Downloads a file from Lua scope"
             },
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
-                {},
                 "type, name, identifier,"
                 "[description, value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
@@ -1772,42 +1768,36 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "removeVirtualProperty",
                 &luascriptfunctions::removeVirtualProperty,
-                {},
                 "string",
                 "Removes a previously added virtual property"
             },
             {
                 "removeAllVirtualProperties",
                 &luascriptfunctions::removeAllVirtualProperties,
-                {},
                 "",
                 "Remove all registered virtual properties"
             },
             {
                 "setScreenshotFolder",
                 &luascriptfunctions::setScreenshotFolder,
-                {},
                 "string",
                 "Sets the folder used for storing screenshots or session recording frames"
             },
             {
                 "addTag",
                 &luascriptfunctions::addTag,
-                {},
                 "string, string",
                 "Adds a tag (second argument) to a scene graph node (first argument)"
             },
             {
                 "removeTag",
                 &luascriptfunctions::removeTag,
-                {},
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             },
             {
                 "createSingleColorImage",
                 &luascriptfunctions::createSingleColorImage,
-                {},
                 "string, vec3",
                 "Creates a 1 pixel image with a certain color in the cache folder and "
                 "returns the path to the file. If a cached file with the given name "
@@ -1818,7 +1808,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "isMaster",
                 &luascriptfunctions::isMaster,
-                {},
                 "",
                 "Returns whether the current OpenSpace instance is the master node of a "
                 "cluster configuration. If this instance is not part of a cluster, this "

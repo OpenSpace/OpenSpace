@@ -112,7 +112,6 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
     res.functions.push_back({
         "registerEventAction",
         &luascriptfunctions::registerEventAction,
-        {},
         "string, string [, table]",
         "Registers an action (second parameter) to be executed whenever an event (first "
         "parameter) is encountered. If the optional third parameter is provided, it "
@@ -122,7 +121,6 @@ scripting::LuaLibrary EventEngine::luaLibrary() {
     res.functions.push_back({
         "unregisterEventAction",
         &luascriptfunctions::unregisterEventAction,
-        {},
         "string, string [, table]",
         "Unregisters a specific combination of event (first parameter), action (second "
         "parameter), and potentially a filter (optional third argument)"

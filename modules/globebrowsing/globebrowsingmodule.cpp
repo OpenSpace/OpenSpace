@@ -340,7 +340,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "addLayer",
             &globebrowsing::luascriptfunctions::addLayer,
-            {},
             "string, string, table",
             "Adds a layer to the specified globe. The first argument specifies the "
             "name of the scene graph node of which to add the layer. The renderable "
@@ -352,7 +351,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            {},
             "string, string",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
@@ -364,7 +362,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLayers",
             &globebrowsing::luascriptfunctions::getLayers,
-            {},
             "string, string",
             "Returns the list of layers for the scene graph node specified in the first "
             "parameter. The second parameter specifies which layer type should be "
@@ -373,7 +370,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
-            {},
             "string, string, number, number",
             "Rearranges the order of a single layer in a scene graph node. The first "
             "parameter specifies the scene graph node, the second parameter specifies "
@@ -385,14 +381,12 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
-            {},
             "void",
             "Go to chunk with given index x, y, level"
         },
         {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
-            {},
             "[string], number, number, [number]",
             "Go to geographic coordinates of a globe. The first (optional) argument is "
             "the identifier of a scene graph node that has a RenderableGlobe attached. "
@@ -408,7 +402,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             // paths work really well close to surfaces
             "flyToGeo",
             &globebrowsing::luascriptfunctions::flyToGeo,
-            {},
             "[string], number, number, number [, bool, number]",
             "Fly the camera to geographic coordinates of a globe, using the path "
             "navigation system. The first (optional) argument is the identifier of a "
@@ -422,7 +415,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLocalPositionFromGeo",
             &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
-            {},
             "string, number, number, number",
             "Returns a position in the local Cartesian coordinate system of the globe "
             "identified by the first argument, that corresponds to the given geographic "
@@ -433,7 +425,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            {},
             "void",
             "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
@@ -441,7 +432,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            {},
             "string, string, string",
             "Loads and parses the WMS capabilities xml file from a remote server. "
             "The first argument is the name of the capabilities that can be used to "
@@ -452,7 +442,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "removeWMSServer",
             &globebrowsing::luascriptfunctions::removeWMSServer,
-            {},
             "string",
             "Removes the WMS server identified by the first argument from the list "
             "of available servers. The parameter corrsponds to the first argument in "
@@ -461,7 +450,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "capabilitiesWMS",
             &globebrowsing::luascriptfunctions::capabilities,
-            {},
             "string",
             "Returns an array of tables that describe the available layers that are "
             "supported by the WMS server identified by the provided name. The 'URL'"

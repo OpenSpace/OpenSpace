@@ -2559,7 +2559,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startRecording",
                 &luascriptfunctions::startRecording,
-                {},
                 "string",
                 "Starts a recording session. The string argument is the filename used "
                 "for the file where the recorded keyframes are saved. "
@@ -2568,7 +2567,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startRecordingAscii",
                 &luascriptfunctions::startRecordingAscii,
-                {},
                 "string",
                 "Starts a recording session. The string argument is the filename used "
                 "for the file where the recorded keyframes are saved. "
@@ -2577,14 +2575,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "stopRecording",
                 &luascriptfunctions::stopRecording,
-                {},
                 "void",
                 "Stops a recording session"
             },
             {
                 "startPlayback",
                 &luascriptfunctions::startPlaybackDefault,
-                {},
                 "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
@@ -2598,7 +2594,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackApplicationTime",
                 &luascriptfunctions::startPlaybackApplicationTime,
-                {},
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "application time (seconds since OpenSpace application started). "
@@ -2609,7 +2604,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackRecordedTime",
                 &luascriptfunctions::startPlaybackRecordedTime,
-                {},
                 "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
@@ -2622,7 +2616,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackSimulationTime",
                 &luascriptfunctions::startPlaybackSimulationTime,
-                {},
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "the simulated date & time. The string argument is the filename to pull "
@@ -2632,14 +2625,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "stopPlayback",
                 &luascriptfunctions::stopPlayback,
-                {},
-                "void",
+                "",
                 "Stops a playback session before playback of all keyframes is complete"
             },
             {
                 "enableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::enableTakeScreenShotDuringPlayback,
-                {},
                 "[int]",
                 "Enables that rendered frames should be saved during playback. The "
                 "parameter determines the number of frames that are exported per second "
@@ -2648,14 +2639,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "disableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::disableTakeScreenShotDuringPlayback,
-                {},
-                "void",
+                "",
                 "Used to disable that renderings are saved during playback"
             },
             {
                 "fileFormatConversion",
                 &luascriptfunctions::fileFormatConversion,
-                {},
                 "string",
                 "Performs a conversion of the specified file to the most most recent "
                 "file format, creating a copy of the recording file."
@@ -2663,14 +2652,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "setPlaybackPause",
                 &luascriptfunctions::setPlaybackPause,
-                {},
                 "bool",
                 "Pauses or resumes the playback progression through keyframes"
             },
             {
                 "togglePlaybackPause",
                 &luascriptfunctions::togglePlaybackPause,
-                {},
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
                 " and restoring it afterwards"
@@ -2678,7 +2665,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                "isPlayingBack",
                 & luascriptfunctions::isPlayingBack,
-                {},
                 "",
                 "Returns true if session recording is currently playing back a recording"
             }

@@ -145,7 +145,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setTime",
                 &luascriptfunctions::time_setTime,
-                {},
                 "{number, string}",
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
@@ -157,7 +156,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setDeltaTime",
                 &luascriptfunctions::time_setDeltaTime,
-                {},
                 "number",
                 "Sets the amount of simulation time that happens "
                 "in one second of real time"
@@ -165,7 +163,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setDeltaTimeSteps",
                 &luascriptfunctions::time_setDeltaTimeSteps,
-                {},
                 "List of numbers",
                 "Sets the list of discrete delta time steps for the simulation speed "
                 "that can be quickly jumped between. The list will be sorted to be in "
@@ -175,7 +172,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "deltaTime",
                 &luascriptfunctions::time_deltaTime,
-                {},
                 "",
                 "Returns the amount of simulated time that passes in one "
                 "second of real time"
@@ -183,14 +179,12 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setPause",
                 &luascriptfunctions::time_setPause,
-                {},
                 "bool",
                 "Pauses the simulation time or restores the delta time"
             },
             {
                 "togglePause",
                 &luascriptfunctions::time_togglePause,
-                {},
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to "
                 "0 and restoring it afterwards"
@@ -198,7 +192,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolateTime",
                 &luascriptfunctions::time_interpolateTime,
-                {},
                 "{number, string} [, number]",
                 "Sets the current simulation time to the specified value. "
                 "If the first parameter is a number, the target is the number "
@@ -211,7 +204,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolateTimeRelative",
                 &luascriptfunctions::time_interpolateTimeRelative,
-                {},
                 "number [, number]",
                 "Increments the current simulation time by the specified number of "
                 "seconds. If a second input value is given, the interpolation is done "
@@ -220,7 +212,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolateDeltaTime",
                 &luascriptfunctions::time_interpolateDeltaTime,
-                {},
                 "number [, number]",
                 "Sets the amount of simulation time that happens in one second of real "
                 "time. If a second input value is given, the interpolation is done "
@@ -229,7 +220,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setNextDeltaTimeStep",
                 &luascriptfunctions::time_setNextDeltaTimeStep,
-                {},
                 "",
                 "Immediately set the simulation speed to the first delta time step in "
                 "the list that is larger than the current choice of simulation speed, "
@@ -238,7 +228,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setPreviousDeltaTimeStep",
                 &luascriptfunctions::time_setPreviousDeltaTimeStep,
-                {},
                 "",
                 "Immediately set the simulation speed to the first delta time step in "
                 "the list that is smaller than the current choice of simulation speed. "
@@ -247,7 +236,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolateNextDeltaTimeStep",
                 &luascriptfunctions::time_interpolateNextDeltaTimeStep,
-                {},
                 "[number]",
                 "Interpolate the simulation speed to the first delta time step in the "
                 "list that is larger than the current simulation speed, if any. If an "
@@ -257,7 +245,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolatePreviousDeltaTimeStep",
                 &luascriptfunctions::time_interpolatePreviousDeltaTimeStep,
-                {},
                 "[number]",
                 "Interpolate the simulation speed to the first delta time step in the "
                 "list that is smaller than the current simulation speed, if any. If an "
@@ -267,7 +254,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolatePause",
                 &luascriptfunctions::time_interpolatePause,
-                {},
                 "bool [, number]",
                 "Pauses the simulation time or restores the delta time. If a second "
                 "input value is given, the interpolation is done over the specified "
@@ -276,7 +262,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "interpolateTogglePause",
                 &luascriptfunctions::time_interpolateTogglePause,
-                {},
                 "[number]",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
                 " and restoring it afterwards. If an input value is given, the "
@@ -285,7 +270,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "pauseToggleViaKeyboard",
                 &luascriptfunctions::time_pauseToggleViaKeyboard,
-                {},
                 "",
                 "Toggles the pause function from a keypress. This function behaves like"
                 " interpolateTogglePause during normal mode, and behaves like"
@@ -294,7 +278,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "currentTime",
                 &luascriptfunctions::time_currentTime,
-                {},
                 "",
                 "Returns the current time as the number of seconds since "
                 "the J2000 epoch"
@@ -302,7 +285,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "UTC",
                 &luascriptfunctions::time_currentTimeUTC,
-                {},
                 "",
                 "Returns the current time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH:MN:SS)"
@@ -310,7 +292,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "currentWallTime",
                 &luascriptfunctions::time_currentWallTime,
-                {},
                 "",
                 "Returns the current wall time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"
@@ -318,7 +299,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "currentApplicationTime",
                 &luascriptfunctions::time_currentApplicationTime,
-                {},
                 "",
                 "Returns the current application time as the number of seconds "
                 "since the OpenSpace application started"
@@ -326,7 +306,6 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "advancedTime",
                 &luascriptfunctions::time_advancedTime,
-                {},
                 "string or number, string or number",
                 "Modifies the passed time (first argument) by the delta time (second "
                 "argument). The first argument can either be an ISO 8601 date string or "

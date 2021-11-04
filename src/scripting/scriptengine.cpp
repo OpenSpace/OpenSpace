@@ -348,10 +348,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_pop(state, 1);
         }
         ghoul::lua::push(state, p.name);
-        for (void* d : p.userdata) {
-            lua_pushlightuserdata(state, d);
-        }
-        lua_pushcclosure(state, p.function, static_cast<int>(p.userdata.size()));
+        lua_pushcfunction(state, p.function);
         lua_settable(state, TableOffset);
     }
 
@@ -420,7 +417,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'"
@@ -428,7 +424,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printDebug",
                 &luascriptfunctions::printDebug,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'"
@@ -436,7 +431,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printInfo",
                 &luascriptfunctions::printInfo,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'"
@@ -444,7 +438,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printWarning",
                 &luascriptfunctions::printWarning,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'"
@@ -452,7 +445,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printError",
                 &luascriptfunctions::printError,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'"
@@ -460,7 +452,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printFatal",
                 &luascriptfunctions::printFatal,
-                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'"
@@ -468,7 +459,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "absPath",
                 &luascriptfunctions::absolutePath,
-                {},
                 "string",
                 "Returns the absolute path to the passed path, resolving path tokens as "
                 "well as resolving relative paths"
@@ -476,28 +466,24 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "fileExists",
                 &luascriptfunctions::fileExists,
-                {},
                 "string",
                 "Checks whether the provided file exists."
             },
             {
                 "readFile",
                 &luascriptfunctions::readFile,
-                {},
                 "string",
                 "Reads a file from disk and return its contents"
             },
             {
                 "directoryExists",
                 &luascriptfunctions::directoryExists,
-                {},
                 "string",
                 "Chckes whether the provided directory exists."
             },
             {
                 "setPathToken",
                 &luascriptfunctions::setPathToken,
-                {},
                 "string, string",
                 "Registers a new path token provided by the first argument to the path "
                 "provided in the second argument"
@@ -505,7 +491,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectory",
                 &luascriptfunctions::walkDirectory,
-                {},
                 "string [bool, bool]",
                 "Walks a directory and returns all contents (files and directories) of "
                 "the directory as absolute paths. The first argument is the path of the "
@@ -516,7 +501,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFiles",
                 &luascriptfunctions::walkDirectoryFiles,
-                {},
                 "string [bool, bool]",
                 "Walks a directory and returns the files of the directory as absolute "
                 "paths. The first argument is the path of the directory that should be "
@@ -527,7 +511,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFolder",
                 &luascriptfunctions::walkDirectoryFolder,
-                {},
                 "string [bool, bool]",
                 "Walks a directory and returns the subfolders of the directory as "
                 "absolute paths. The first argument is the path of the directory that "
@@ -538,7 +521,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "directoryForPath",
                 &luascriptfunctions::directoryForPath,
-                {},
                 "string",
                 "This function extracts the directory part of the passed path. For "
                 "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
@@ -547,7 +529,6 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "unzipFile",
                 &luascriptfunctions::unzipFile,
-                {},
                 "string, string [bool]",
                 "This function extracts the contents of a zip file. The first "
                 "argument is the path to the zip file. The second argument is the "
@@ -558,10 +539,9 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "saveLastChangeToProfile",
                 &luascriptfunctions::saveLastChangeToProfile,
-                {},
                 "",
-                "This function saves the last script log action into the profile "
-            },
+                "This function saves the last script log action into the profile."
+            }
         }
     };
     addLibrary(lib);
