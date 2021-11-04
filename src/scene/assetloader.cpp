@@ -24,7 +24,6 @@
 
 #include <openspace/scene/assetloader.h>
 
-#include <openspace/scene/assetlistener.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
@@ -98,6 +97,70 @@ namespace {
         }
         return PathType::RelativeToAssetRoot;
     }
+
+    std::filesystem::path generateAssetPath(const std::filesystem::path& baseDirectory,
+                                            const std::string& rootDirectory,
+                                            const std::string& assetPath)
+    {
+        // Support paths that are
+        // 1) Relative to baseDirectory (./* or ../*)
+        // 3) Absolute paths (*:/* or /*)
+        // 2) Relative to the global asset root (*)
+
+        PathType pathType = classifyPath(assetPath);
+        std::string prefix;
+        if (pathType == PathType::RelativeToAsset) {
+            prefix = baseDirectory.string() + '/';
+        }
+        else if (pathType == PathType::RelativeToAssetRoot) {
+            prefix = rootDirectory + '/';
+        }
+
+        // Construct the full path including the .asset extension
+        std::string assetSuffix = std::string(".") + AssetFileSuffix;
+        const bool hasAssetSuffix =
+            (assetPath.size() > assetSuffix.size()) &&
+            (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
+        std::string fullAssetPath =
+            (pathType == PathType::Tokenized) ?
+            absPath(assetPath).string() :
+            prefix + assetPath;
+        if (!hasAssetSuffix) {
+            fullAssetPath += assetSuffix;
+        }
+        bool fullAssetPathExists =
+            std::filesystem::is_regular_file(absPath(fullAssetPath));
+
+        // Construct the full path including the .scene extension
+        const std::string sceneSuffix = std::string(".") + SceneFileSuffix;
+        const bool hasSceneSuffix =
+            (assetPath.size() > sceneSuffix.size()) &&
+            (assetPath.substr(assetPath.size() - sceneSuffix.size()) == sceneSuffix);
+        const std::string fullScenePath =
+            hasSceneSuffix ?
+            prefix + assetPath :
+            prefix + assetPath + sceneSuffix;
+        const bool fullScenePathExists =
+            std::filesystem::is_regular_file(absPath(fullScenePath));
+
+        if (fullAssetPathExists && fullScenePathExists) {
+            LWARNING(fmt::format(
+                "'{}' and '{}' file found with non-specific request '{}'. Loading '{}'. "
+                "Explicitly add extension to suppress this warning.",
+                fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
+            ));
+
+            return absPath(fullAssetPath);
+        }
+
+        if (fullScenePathExists) {
+            return absPath(fullScenePath);
+        }
+
+        // We don't check whether the file exists here as the error will be more
+        // comprehensively logged by Lua either way
+        return absPath(fullAssetPath);
+    }
 } // namespace
 
 namespace openspace {
@@ -121,19 +184,6 @@ AssetLoader::~AssetLoader() {
     _currentAsset = nullptr;
     _rootAsset = nullptr;
     luaL_unref(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-}
-
-void AssetLoader::trackAsset(std::shared_ptr<Asset> asset) {
-    _trackedAssets.emplace(asset->id(), asset);
-    setUpAssetLuaTable(asset.get());
-}
-
-void AssetLoader::untrackAsset(Asset* asset) {
-    tearDownAssetLuaTable(asset);
-    const auto it = _trackedAssets.find(asset->id());
-    if (it != _trackedAssets.end()) {
-        _trackedAssets.erase(it);
-    }
 }
 
 void AssetLoader::setUpAssetLuaTable(Asset* asset) {
@@ -373,77 +423,19 @@ void AssetLoader::unloadAsset(Asset* asset) {
     _onDependencyDeinitializationFunctionRefs.erase(asset);
 
     asset->clearSynchronizations();
-    untrackAsset(asset);
-}
-
-std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
-                                           const std::string& assetPath) const
-{
-    // Support paths that are
-    // 1) Relative to baseDirectory (./* or ../*)
-    // 3) Absolute paths (*:/* or /*)
-    // 2) Relative to the global asset root (*)
-
-    PathType pathType = classifyPath(assetPath);
-    std::string prefix;
-    if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory + '/';
+    tearDownAssetLuaTable(asset);
+    const auto it = _trackedAssets.find(asset->id());
+    if (it != _trackedAssets.end()) {
+        _trackedAssets.erase(it);
     }
-    else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory + '/';
-    }
-
-    // Construct the full path including the .asset extension
-    std::string assetSuffix = std::string(".") + AssetFileSuffix;
-    const bool hasAssetSuffix =
-        (assetPath.size() > assetSuffix.size()) &&
-        (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
-    std::string fullAssetPath =
-        (pathType == PathType::Tokenized) ?
-        absPath(assetPath).string() :
-        prefix + assetPath;
-    if (!hasAssetSuffix) {
-        fullAssetPath += assetSuffix;
-    }
-    bool fullAssetPathExists = std::filesystem::is_regular_file(absPath(fullAssetPath));
-
-    // Construct the full path including the .scene extension
-    const std::string sceneSuffix = std::string(".") + SceneFileSuffix;
-    const bool hasSceneSuffix =
-        (assetPath.size() > sceneSuffix.size()) &&
-        (assetPath.substr(assetPath.size() - sceneSuffix.size()) == sceneSuffix);
-    const std::string fullScenePath =
-        hasSceneSuffix ?
-        prefix + assetPath :
-        prefix + assetPath + sceneSuffix;
-    const bool fullScenePathExists =
-        std::filesystem::is_regular_file(absPath(fullScenePath));
-
-    if (fullAssetPathExists && fullScenePathExists) {
-        LWARNING(fmt::format(
-            "'{}' and '{}' file found with non-specific request '{}'. Loading '{}'. "
-            "Explicitly add extension to suppress this warning.",
-            fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
-        ));
-
-        return absPath(fullAssetPath).string();
-    }
-
-    if (fullScenePathExists) {
-        return absPath(fullScenePath).string();
-    }
-
-    // We don't check whether the file exists here as the error will be more
-    // comprehensively logged by Lua either way
-    return absPath(fullAssetPath).string();
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
     std::filesystem::path directory = currentDirectory();
-    const std::string path = generateAssetPath(directory.string(), name);
+    std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     // Check if asset is already loaded.
-    const auto it = _trackedAssets.find(path);
+    const auto it = _trackedAssets.find(path.string());
 
     if (it != _trackedAssets.end()) {
         if (std::shared_ptr<Asset> a = it->second.lock(); a != nullptr) {
@@ -454,10 +446,11 @@ std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
     std::shared_ptr<Asset> asset = std::make_shared<Asset>(
         this,
         _synchronizationWatcher,
-        path
+        path.string()
     );
 
-    trackAsset(asset);
+    _trackedAssets.emplace(asset->id(), asset);
+    setUpAssetLuaTable(asset.get());
     return asset;
 }
 
@@ -501,13 +494,6 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-void AssetLoader::unrequest(const std::string& identifier) {
-    std::shared_ptr<Asset> asset = has(identifier);
-    Asset* parent = _currentAsset;
-    parent->unrequest(asset.get());
-    assetUnrequested(parent, asset);
-}
-
 std::filesystem::path AssetLoader::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
@@ -522,9 +508,7 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
 
     setCurrentAsset(_rootAsset.get());
     std::shared_ptr<Asset> asset = getAsset(identifier);
-    Asset* parent = _currentAsset;
-    parent->request(asset);
-    assetRequested(parent, asset);
+    _currentAsset->request(asset);
     return asset;
 }
 
@@ -532,14 +516,15 @@ void AssetLoader::remove(const std::string& identifier) {
     ZoneScoped
 
     setCurrentAsset(_rootAsset.get());
-    unrequest(identifier);
+    std::shared_ptr<Asset> asset = has(identifier);
+    _currentAsset->unrequest(asset.get());
 }
 
-std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
+std::shared_ptr<Asset> AssetLoader::has(const std::string& name) const {
     std::filesystem::path directory = currentDirectory();
-    std::string path = generateAssetPath(directory.string(), identifier);
+    std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
-    const auto it = _trackedAssets.find(path);
+    const auto it = _trackedAssets.find(path.string());
     if (it == _trackedAssets.end()) {
         return nullptr;
     }
@@ -552,10 +537,6 @@ const Asset& AssetLoader::rootAsset() const {
 
 Asset& AssetLoader::rootAsset() {
     return *_rootAsset;
-}
-
-const std::string& AssetLoader::assetRootDirectory() const {
-    return _assetRootDirectory;
 }
 
 void AssetLoader::callOnInitialize(Asset* asset) {
@@ -740,10 +721,10 @@ int AssetLoader::requireLua(Asset* dependant) {
 int AssetLoader::existsLua(Asset*) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::exists");
 
-    const std::string assetName = luaL_checkstring(*_luaState, 1);
+    const std::string name = luaL_checkstring(*_luaState, 1);
 
     const std::filesystem::path directory = currentDirectory();
-    const std::string path = generateAssetPath(directory.string(), assetName);
+    std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     lua_settop(*_luaState, 0);
     lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));
@@ -807,40 +788,6 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
     lua_setfield(*_luaState, dependantsTableIndex, dependantId.c_str());
 
     lua_settop(*_luaState, top);
-}
-
-void AssetLoader::addAssetListener(AssetListener* listener) {
-    const auto it = std::find(_assetListeners.cbegin(), _assetListeners.cend(), listener);
-
-    if (it == _assetListeners.cend()) {
-        _assetListeners.push_back(listener);
-    }
-}
-
-void AssetLoader::removeAssetListener(AssetListener* listener) {
-    _assetListeners.erase(std::remove(
-        _assetListeners.begin(),
-        _assetListeners.end(),
-        listener
-    ));
-}
-
-void AssetLoader::assetStateChanged(Asset* asset, Asset::State state) {
-    for (AssetListener* listener : _assetListeners) {
-        listener->assetStateChanged(asset, state);
-    }
-}
-
-void AssetLoader::assetRequested(Asset* parent, std::shared_ptr<Asset> child) {
-    for (AssetListener* listener : _assetListeners) {
-        listener->assetRequested(parent, child);
-    }
-}
-
-void AssetLoader::assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) {
-    for (AssetListener* listener : _assetListeners) {
-        listener->assetUnrequested(parent, child);
-    }
 }
 
 } // namespace openspace

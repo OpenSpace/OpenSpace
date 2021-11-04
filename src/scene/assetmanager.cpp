@@ -45,14 +45,12 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
 void AssetManager::initialize() {
     ZoneScoped
 
-    _assetLoader.addAssetListener(this);
     _assetLoader.rootAsset().initialize();
 }
 
 void AssetManager::deinitialize() {
     _assetLoader.rootAsset().deinitialize();
     _assetLoader.rootAsset().unload();
-    _assetLoader.removeAssetListener(this);
 }
 
 bool AssetManager::update() {
@@ -84,21 +82,6 @@ bool AssetManager::update() {
     _synchronizationWatcher.notify();
 
     return false;
-}
-
-void AssetManager::assetStateChanged(Asset*, Asset::State) {
-    // Potential todo: notify user about asset stage change
-    //LINFO(asset->id() << " changed state to " << static_cast<int>(state));
-}
-
-void AssetManager::assetRequested(Asset*, std::shared_ptr<Asset>) {
-    // Potential todo: notify user about asset request
-    //LINFO(parent->id() << " requested " << child->id());
-}
-
-void AssetManager::assetUnrequested(Asset*, std::shared_ptr<Asset>) {
-    // Potential todo: notify user about asset unrequest
-    //LINFO(parent->id() << " unrequested " << child->id());
 }
 
 void AssetManager::add(const std::string& path) {

@@ -330,7 +330,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h

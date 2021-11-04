@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
-#include <openspace/scene/assetlistener.h>
-
 #include <openspace/scene/assetloader.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
@@ -49,11 +47,9 @@ class SynchronizationWatcher;
  * synchronized. Also, setting a target state of an asset to Unloaded will only unload an
  * asset from the system if it is not a dependency of a loaded asset.
  */
-class AssetManager : AssetListener {
+class AssetManager {
 public:
     AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory);
-
-    virtual ~AssetManager() = default;
 
     void initialize();
     void deinitialize();
@@ -62,10 +58,6 @@ public:
     void removeAll();
     const Asset& rootAsset() const;
     Asset& rootAsset();
-
-    void assetStateChanged(Asset* asset, Asset::State state) override;
-    void assetRequested(Asset* parent, std::shared_ptr<Asset> child) override;
-    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) override;
 
     bool update();
     scripting::LuaLibrary luaLibrary();

@@ -111,8 +111,6 @@ void Asset::setState(Asset::State state) {
     }
     _state = state;
 
-    _loader->assetStateChanged(this, state);
-
     for (const std::weak_ptr<Asset>& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
             a->requiredAssetChangedState(state);

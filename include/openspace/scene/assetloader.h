@@ -75,31 +75,16 @@ public:
     void remove(const std::string& identifier);
 
     /**
-     * Enable the asset to be reused when the same path is required/requested again
-     */
-    void trackAsset(std::shared_ptr<Asset> asset);
-
-    /**
-     * Disable the asset from being reused when the same path is required/requested again
-     */
-    void untrackAsset(Asset* asset);
-
-    /**
      * Return the asset identified by the identifier,
      * if the asset is tracked. Otherwise return nullptr.
      */
-    std::shared_ptr<Asset> has(const std::string& identifier) const;
+    std::shared_ptr<Asset> has(const std::string& name) const;
 
     /// Return the root asset
     const Asset& rootAsset() const;
 
     /// Return the root asset
     Asset& rootAsset();
-
-    /**
-     * Return the asset root directory
-     */
-    const std::string& assetRootDirectory() const;
 
     /**
      * Load an asset
@@ -131,41 +116,7 @@ public:
      */
     void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
 
-    /**
-     * Generate the absolute path for an asset specified as `path`
-     * relative to `baseDirectory`
-     */
-    std::string generateAssetPath(const std::string& baseDirectory,
-        const std::string& assetPath) const;
-
-    /**
-     * Add listener to asset state changes
-     */
-    void addAssetListener(AssetListener* listener);
-
-    /**
-     * Remove listener to asset state changes
-     */
-    void removeAssetListener(AssetListener* listener);
-
-    /**
-     * Notify listeners about asset state change
-     */
-    void assetStateChanged(Asset* asset, Asset::State state);
-
-    /**
-     * Notify listeners about new requests
-     */
-    void assetRequested(Asset* parent, std::shared_ptr<Asset> child);
-
-    /**
-     * Notify listeners about removed requests
-     */
-    void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child);
-
 private:
-    void unrequest(const std::string& identifier);
-
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
@@ -205,9 +156,6 @@ private:
     SynchronizationWatcher* _synchronizationWatcher;
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState;
-
-    // State change listeners
-    std::vector<AssetListener*> _assetListeners;
 
     // References to Lua values
     std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
