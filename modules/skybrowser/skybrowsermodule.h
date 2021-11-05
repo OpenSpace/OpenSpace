@@ -63,7 +63,7 @@ public:
     std::vector<Pair>& getPairs();
     Pair* getPair(std::string id);
     SceneGraphNode* get3dBrowser();
-    const WwtDataHandler* getWWTDataHandler();
+    const std::unique_ptr<WwtDataHandler>& getWWTDataHandler();
     std::string selectedBrowserId();
 
     // Setters
@@ -74,9 +74,12 @@ public:
     void selectImage3dBrowser(int i);
    
     // Rotation and animation
-    void startRotation(glm::dvec3 endAnimation); // Pass in galactic coordinate
+    
+    void lookAtTarget(std::string id);
     void rotateCamera(double deltaTime);
-    bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
+    bool fadeBrowserTargetsToTransparent(double deltaTime);
+    bool fadeBrowserTargetsToOpaque(double deltaTime);
+    void animateTargets(double deltaTime);
     void lookAt3dBrowser();
    
     // Boolean functions
@@ -85,7 +88,7 @@ public:
     // Managing the browsers 
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
-    void addTargetBrowserPair(ScreenSpaceSkyTarget* target, ScreenSpaceSkyBrowser* browser);
+    void addTargetBrowserPair(std::string targetId, std::string browserId);
     void moveHoverCircle(int i);
     
     // Image collection handling
@@ -105,6 +108,8 @@ protected:
     void internalDeinitialize() override;
 
 private:
+
+    void rotateCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     // The browsers and targets
     std::vector<Pair> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
@@ -124,6 +129,7 @@ private:
     bool _isDragging{ false };
     bool _cameraInSolarSystem{ true };
     bool _cameraIsRotating = false;
+    bool _isTransitioningVizMode{ false };
 
     // Mouse interaction - dragging and resizing
     glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
@@ -136,11 +142,11 @@ private:
     // Animation of rotation of camera to look at coordinate galactic coordinates
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
-    double _threshold{ 0.0005 };
+    double _stopAnimationThreshold{ 0.0005 };
     double _speed{ 1.0 };
     
     // Data handler for the image collections
-    WwtDataHandler* _dataHandler;    
+    std::unique_ptr<WwtDataHandler> _dataHandler;    
 };
 
 } // namespace openspace

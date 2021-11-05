@@ -25,8 +25,12 @@ namespace openspace {
         
         // Target - browser connection
         bool connectToSkyTarget();
-        void initializeBrowser();
-        glm::dvec2 fineTuneTarget(glm::dvec2 drag);
+        bool isAnimated();
+        void startFovAnimation(float fov);
+        void incrementallyAnimateToFov(float deltaTime);
+
+        void startSyncingWithWwt();
+        glm::dvec2 fineTuneVector(glm::dvec2 drag);
         
         // Getters returning values
         bool hasLoadedImages() const;
@@ -37,7 +41,7 @@ namespace openspace {
 
         // Getters returning references
         ScreenSpaceSkyTarget* getSkyTarget();
-        std::deque<int>& getSelectedImages();
+        const std::deque<int>& getSelectedImages();
         properties::FloatProperty& getOpacity();
         
         // Setters
@@ -58,7 +62,7 @@ namespace openspace {
 
         // Communication with WorldWide Telescope
         void addSelectedImage(const ImageData& image, int i);
-        void removeSelectedImage(const ImageData& image, int i);
+        void removeSelectedImage(int i);
         void setImageOrder(int i, int order);
         void sendMessageToWwt(const ghoul::Dictionary& msg);
         void syncWwtView();
@@ -87,6 +91,9 @@ namespace openspace {
         // Flags
         bool _hasLoadedImages{ false };
         bool _syncViewWithWwt{ false };
+        bool _fovIsAnimated{ false };
+        float _endVfov{ 0.f };
+        float _fovDiff{ 0.01f };
 
         // Resizing of browser
         glm::vec2 _originalDimensions;

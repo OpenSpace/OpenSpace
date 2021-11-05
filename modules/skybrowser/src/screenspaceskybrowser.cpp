@@ -174,22 +174,18 @@ namespace openspace {
         setWebpageBorderColor( color - removal );
     }
     
-    void ScreenSpaceSkyBrowser::initializeBrowser() {
-        // If the camera is already synced, the browser is already initialized
+    void ScreenSpaceSkyBrowser::startSyncingWithWwt() {
+        // If the camera is already synced, the browser is already syncing
         if (!_syncViewWithWwt) {
             _syncViewWithWwt = true;
             // Set border color
             setWebpageBorderColor(_borderColor.value());
-            // Connect to target if they haven't been connected
-            if (!_skyTarget) {
-                connectToSkyTarget();
-            }
             // Track target
             syncWwtView();
         }
     }
 
-    glm::dvec2 ScreenSpaceSkyBrowser::fineTuneTarget(glm::dvec2 drag) {
+    glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(glm::dvec2 drag) {
         // Fine tuning of target
         glm::dvec2 wwtFov = fieldsOfView();
         glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
@@ -218,6 +214,29 @@ namespace openspace {
         _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(
             global::renderEngine->screenSpaceRenderable(_skyTargetId.value()));
         return _skyTarget;
+    }
+
+    bool ScreenSpaceSkyBrowser::isAnimated()
+    {
+        return _fovIsAnimated;
+    }
+
+    void ScreenSpaceSkyBrowser::startAnimation(float fov)
+    {
+        _fovIsAnimated = true;
+        _endVfov = fov;
+    }
+
+    void ScreenSpaceSkyBrowser::animateToFov(float deltaTime)
+    {
+        // If distance is small enough, stop animating
+        float diff = verticalFov() - _endVfov;
+        if (abs(diff) > _fovDiff) {
+            setVerticalFovWithScroll(diff);
+        }
+        else {           
+            _fovIsAnimated = false;
+        }
     }
 
     ScreenSpaceSkyTarget* ScreenSpaceSkyBrowser::getSkyTarget() {
@@ -299,7 +318,7 @@ namespace openspace {
             while (_syncViewWithWwt) {
                 if (_skyTarget) {                    
                     // Message WorldWide Telescope current view
-                    glm::dvec3 cartesian = _skyTarget->targetDirectionEquatorial();
+                    glm::dvec3 cartesian = _skyTarget->directionEquatorial();
 
                     ghoul::Dictionary message = wwtmessage::moveCamera(
                         skybrowser::cartesianToSpherical(cartesian),
@@ -391,7 +410,7 @@ namespace openspace {
         return _opacity;
     }
 
-    std::deque<int>& ScreenSpaceSkyBrowser::getSelectedImages() {
+    const std::deque<int>& ScreenSpaceSkyBrowser::getSelectedImages() {
         return _selectedImages;
     }
 
@@ -408,7 +427,7 @@ namespace openspace {
         }
     }
 
-    void ScreenSpaceSkyBrowser::removeSelectedImage(const ImageData& image, int i) {
+    void ScreenSpaceSkyBrowser::removeSelectedImage(int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         bool found = it != std::end(_selectedImages);

@@ -42,7 +42,7 @@ namespace openspace {
 
         // Camera roll and direction
         // Camera roll is with respect to the equatorial North Pole
-        bool coordinateIsOutsideView(glm::dvec3 equatorial);
+        bool coordinateIsInView(glm::dvec3 equatorial);
         float windowRatio();
         double cameraRoll();
         glm::vec2 pixelToScreenSpace(glm::vec2& mouseCoordinate);
@@ -50,7 +50,7 @@ namespace openspace {
         glm::dvec3 cameraDirectionGalactic();
         glm::dvec3 cameraDirectionEquatorial();
         double angleVector(glm::dvec3 start, glm::dvec3 end);
-        void incrementalAnimationMatrix(glm::dmat4& rotation, glm::dvec3 start, 
+        glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start,
                                         glm::dvec3 end, double deltaTime, 
                                         double speedFactor = 1.0);       
     }

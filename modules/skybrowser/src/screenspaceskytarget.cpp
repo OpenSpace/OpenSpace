@@ -188,6 +188,14 @@ namespace openspace {
         return isReady();
     }
 
+    bool ScreenSpaceSkyTarget::deinitializeGL()
+    {
+        if (isLocked()) {
+            unlock();
+         }
+        return ScreenSpaceRenderable::deinitializeGL();
+    }
+
     glm::mat4 ScreenSpaceSkyTarget::scaleMatrix() {
         // To ensure the plane has the right ratio
         // The _scale us how much of the windows height the browser covers: e.g. a browser 
@@ -268,7 +276,7 @@ namespace openspace {
         _objectSize = dimensions;
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::targetDirectionGalactic() const {
+    glm::dvec3 ScreenSpaceSkyTarget::directionGalactic() const {
         glm::dmat4 rotation = glm::inverse(
             global::navigationHandler->camera()->viewRotationMatrix());
         glm::dvec4 position = glm::dvec4(_cartesianPosition.value(), 1.0);
@@ -301,7 +309,7 @@ namespace openspace {
             unlock();
         }
         _isLocked = true;
-        _lockedCoordinates = targetDirectionEquatorial();
+        _lockedCoordinates = directionEquatorial();
 
         // Start a thread to enable user interactions while locking target
         _lockTarget = std::thread([&] {
@@ -315,71 +323,56 @@ namespace openspace {
         return _isLocked;
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::targetDirectionEquatorial() const {
+    bool ScreenSpaceSkyTarget::isAnimated()
+    {
+        return _isAnimated;
+    }
+
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 end, bool lockAfter)
+    {
+        _animationStart = glm::normalize(directionEquatorial());
+        _animationEnd = glm::normalize(end);
+        _lockAfterAnimation = lockAfter;
+        _isAnimated = true;
+    }
+
+    void ScreenSpaceSkyTarget::animateToCoordinate(float deltaTime)
+    {
+        // Find smallest angle between the two vectors
+        double smallestAngle = skybrowser::angleVector(_animationStart, _animationEnd);
+        // Only keep animating when target is not at final position
+        if (smallestAngle <= _stopAnimationThreshold) {
+            // Set the exact target position 
+            _cartesianPosition = skybrowser::equatorialToScreenSpace(_animationEnd);
+            _isAnimated = false;
+            // Lock target when it first arrives to the position
+            if (!isLocked() && _lockAfterAnimation) {
+                lock();
+            }
+
+            return;
+        }
+
+        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+            _animationStart,
+            _animationEnd,
+            deltaTime,
+            _animationSpeed
+        );
+        // Rotate target direction
+        glm::dvec3 newDir = rotMat * glm::dvec4(_animationStart, 1.0);
+        // Convert to screen space
+        _cartesianPosition = skybrowser::equatorialToScreenSpace(newDir);
+        // Update position
+        _animationStart = glm::normalize(newDir);        
+    }
+
+    glm::dvec3 ScreenSpaceSkyTarget::directionEquatorial() const {
         // Calculate the galactic coordinate of the target direction 
         // projected onto the celestial sphere
         return skybrowser::localCameraToEquatorial(_cartesianPosition.value());
     }
 
-    void ScreenSpaceSkyTarget::animateToCoordinate(double deltaTime) {
-       
-        if (_isAnimated) {
-           
-            // Find smallest angle between the two vectors
-            double smallestAngle = skybrowser::angleVector(_animationStart, _animationEnd);
-            // Only keep animating when target is not at final position
-            if (smallestAngle > _stopAnimationThreshold) {
-                glm::dmat4 rotMat;
-                skybrowser::incrementalAnimationMatrix(
-                    rotMat,
-                    _animationStart,
-                    _animationEnd,
-                    deltaTime,
-                    _animationSpeed
-                );
-                // Rotate target direction
-                glm::dvec3 newDir = rotMat * glm::dvec4(_animationStart, 1.0);
-                // Convert to screen space
-                _cartesianPosition = skybrowser::equatorialToScreenSpace(newDir);
-                // Update position
-                _animationStart = glm::normalize(newDir);
-            }
-            else {
-                // Set the exact target position 
-                _cartesianPosition = skybrowser::equatorialToScreenSpace(_animationEnd);
-                // Lock target when it first arrives to the position
-                if (!_isLocked && _lockAfterAnimation) {
-                    lock();
-                }
-                // When target is in position, animate the FOV until it has finished
-                if(animateToFov(_vfovEndAnimation, deltaTime)) {
-                    _isAnimated = false;
-                }
-            }
-        }
-    }
-
-    bool ScreenSpaceSkyTarget::animateToFov(float endFOV, float deltaTime) {
-        if (!_skyBrowser) {
-            findSkyBrowser();
-        }
-        if (_skyBrowser) {
-            double distance = static_cast<double>(_skyBrowser->verticalFov()) - endFOV;
-            
-            // If distance is too large, keep animating
-            if (abs(distance) > 0.01) {
-                _skyBrowser->setVerticalFovWithScroll(distance);
-                return false;
-            }
-            // Animation is finished
-            return true;
-        }
-        else {
-            LINFO("Target can't connect to browser!");
-        }
-        
-        return true;     
-    }
 
     void ScreenSpaceSkyTarget::highlight(glm::ivec3 addition)
     {
@@ -389,17 +382,6 @@ namespace openspace {
     void ScreenSpaceSkyTarget::removeHighlight(glm::ivec3 removal)
     {
         _color -= removal;
-    }
-
-    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 coordsEnd, float FOVEnd,
-        bool lockAfterwards) {
-        // Save the Cartesian celestial coordinates for animation
-        // The coordinates are Cartesian to avoid wrap-around issues
-        _animationEnd = glm::normalize(coordsEnd);
-        _animationStart = glm::normalize(targetDirectionEquatorial());
-        _vfovEndAnimation = FOVEnd;
-        _isAnimated = true;
-        _lockAfterAnimation = lockAfterwards;
     }
 
     float ScreenSpaceSkyTarget::opacity() const {

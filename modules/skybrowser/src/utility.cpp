@@ -131,7 +131,7 @@ namespace openspace::skybrowser {
         return windowRatio.x / windowRatio.y;
     }
 
-    bool coordinateIsOutsideView(glm::dvec3 equatorial) {
+    bool coordinateIsInView(glm::dvec3 equatorial) {
         // Check if image coordinate is within current FOV
         glm::dvec3 coordsScreen = equatorialToScreenSpace(equatorial);
         double r = static_cast<float>(windowRatio());
@@ -140,7 +140,7 @@ namespace openspace::skybrowser {
             abs(coordsScreen.y) < 1.f && coordsScreen.z < 0);
         bool coordIsBehindCamera = coordsScreen.z > 0;
         // If the coordinate is not in view, rotate camera
-        return !coordIsWithinView || coordIsBehindCamera;
+        return coordIsWithinView;
     }
 
     // Transforms a pixel coordinate to a screen space coordinate
@@ -172,7 +172,7 @@ namespace openspace::skybrowser {
         return std::acos(cos);
     }
 
-    void incrementalAnimationMatrix(glm::dmat4& rotation, glm::dvec3 start, 
+    glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start,
                                     glm::dvec3 end, double deltaTime, 
                                     double speedFactor) {
         
@@ -182,7 +182,7 @@ namespace openspace::skybrowser {
 
         // Create the rotation matrix for local camera space
         glm::dvec3 rotationAxis = glm::normalize(glm::cross(start, end));
-        rotation = glm::rotate(rotationAngle, rotationAxis);
+        return glm::rotate(rotationAngle, rotationAxis);
     }
 
 }

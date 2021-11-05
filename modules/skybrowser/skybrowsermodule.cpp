@@ -39,6 +39,8 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/pair.h>
 #include <modules/skybrowser/skybrowsermodule.h>
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include "skybrowsermodule_lua.inl"
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/string_cast.hpp> // For printing glm data
@@ -288,7 +290,7 @@ SkyBrowserModule::SkyBrowserModule()
                     }
                     // If you start dragging around the target, it should unlock
                     else {
-                        _mouseOnPair->getTarget()->unlock();
+                        _mouseOnPair->unlock();
                     }
                     _isDragging = true;
 
@@ -296,7 +298,7 @@ SkyBrowserModule::SkyBrowserModule()
                 }
                 else if (_isBrowser && button == MouseButton::Right) {
                     // If you start dragging around on the browser, the target should unlock
-                    _mouseOnPair->getTarget()->unlock();
+                    _mouseOnPair->unlock();
                     // Change view (by moving target) within browser if right mouse click on browser
                     _startMousePosition = _mousePosition;
                     _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
@@ -338,8 +340,8 @@ SkyBrowserModule::SkyBrowserModule()
                     if (_isResizing) {
                         // Calculate scaling factor
                         glm::vec2 mouseDragVector = (_mousePosition - _startMousePosition);
-                        glm::vec2 scalingVector = mouseDragVector * _resizeDirection;
-                        glm::vec2 newSizeRelToOld = (_startBrowserSize + (scalingVector)) / _startBrowserSize;
+                        glm::vec2 scaling = mouseDragVector * _resizeDirection;
+                        glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) / _startBrowserSize;
                         // Scale the browser
                         _mouseOnPair->getBrowser()->setScale(newSizeRelToOld);
 
@@ -358,7 +360,7 @@ SkyBrowserModule::SkyBrowserModule()
                     }
                 }
                 else if (_fineTuneMode) {
-                    glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneTarget(translation);
+                    glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneVector(translation);
                     _mouseOnPair->getTarget()->translate(fineTune, _startDragPosition);
                 }
                 // If there is no dragging or resizing, look for new objects
@@ -385,41 +387,41 @@ SkyBrowserModule::SkyBrowserModule()
 
 
     global::callback::preSync->emplace_back([this]() {
+
         // Disable browser and targets when camera is outside of solar system
-        double cameraSSBDistance = glm::length(
-            global::navigationHandler->camera()->positionVec3());
-        _cameraInSolarSystem = cameraSSBDistance < _solarSystemRadius;
+        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         double deltaTime = global::windowDelegate->deltaTime();
+        bool camWasInSolarSystem = _cameraInSolarSystem;
+        _cameraInSolarSystem = glm::length(cameraPos) < _solarSystemRadius;
 
-        // Fade out or in browser & target
-        for (Pair pair : _targetsBrowsers) {
-            ScreenSpaceSkyBrowser* browser = pair.getBrowser();
-            // If outside solar system and browser is visible
-            if (!_cameraInSolarSystem && browser->isEnabled()) {
-                bool fadingIsFinished = fadeBrowserAndTarget(true, _fadingTime, deltaTime);
+        // Fading flags
+        bool fadeIsFinished{ false };
+        if (_cameraInSolarSystem != camWasInSolarSystem) {
+            _isTransitioningVizMode = true;
 
-                if (fadingIsFinished) {
-                    pair.getBrowser()->property("Enabled")->set(false);
-                    // Select the 3D browser when moving out of the solar system
-                    if (_browser3d != nullptr) {
-                        _selectedBrowser = _browser3d->renderable()->identifier();
-                    }
-                }
+            // Select the 3D browser when moving out of the solar system
+            if (!_cameraInSolarSystem && _browser3d != nullptr) {
+                _selectedBrowser = _browser3d->renderable()->identifier();
             }
-            // If within solar system and browser is not visible
-            else if (_cameraInSolarSystem && !browser->isEnabled()) {
-                pair.getBrowser()->property("Enabled")->set(true);
-                // Select the first 2D browser when moving into the solar system
-                if (_targetsBrowsers.size() != 0) {
-                    _selectedBrowser = std::begin(_targetsBrowsers)->getBrowser()->identifier();
-                }
-            }
-            // If within solar system and browser is visible
-            if (_cameraInSolarSystem && browser->isEnabled()) {
-                fadeBrowserAndTarget(false, _fadingTime, deltaTime);
+        }
 
-                pair.getTarget()->animateToCoordinate(deltaTime);
+        // Fade pairs if the camera moved in or out the solar system
+        if (_isTransitioningVizMode) {
+            if (_cameraInSolarSystem) {
+                fadeIsFinished = fadeBrowserTargetsToOpaque(deltaTime);
             }
+            else {
+                fadeIsFinished = fadeBrowserTargetsToTransparent(deltaTime);
+            }
+
+            // The transition is over when the fade is finished
+            if (fadeIsFinished) {
+                _isTransitioningVizMode = false;
+            }
+        }
+
+        if (_cameraInSolarSystem) {
+            animateTargets(deltaTime);
         }
         if (_cameraIsRotating) {
             rotateCamera(deltaTime);
@@ -431,7 +433,6 @@ SkyBrowserModule::SkyBrowserModule()
 } 
 
 SkyBrowserModule::~SkyBrowserModule() {
-    delete _dataHandler;
 }
 
 void SkyBrowserModule::internalDeinitialize() {
@@ -455,7 +456,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     fRenderable->registerClass<RenderableSkyBrowser>("RenderableSkyBrowser");
     // Create data handler dynamically to avoid the linking error that
     // came up when including the include file in the module header file
-    _dataHandler = new WwtDataHandler();
+    _dataHandler = std::make_unique<WwtDataHandler>();
 }
 
 void SkyBrowserModule::setSelectedObject()
@@ -464,46 +465,52 @@ void SkyBrowserModule::setSelectedObject()
     Pair* lastObj = _mouseOnPair;
 
     // Find and save what mouse is currently hovering on
-    auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),[&](Pair &pair) {            
+    auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+        [&] (Pair &pair) {      
             bool onBrowser = pair.getBrowser()->coordIsInsideCornersScreenSpace(_mousePosition);
             bool onTarget = pair.getTarget()->coordIsInsideCornersScreenSpace(_mousePosition);
-            if (onBrowser || onTarget) {
-                _mouseOnPair = &pair;
-                _isBrowser = onBrowser;
-                return true;
+            if (onBrowser) {
+                _selectedBrowser = pair.getBrowser()->identifier();
             }
-            return false;
+            _isBrowser = onBrowser;
+
+            return onBrowser || onTarget;
         });
 
     if (it == std::end(_targetsBrowsers)) {
         _mouseOnPair = nullptr;
     }
-
+    else {
+        _mouseOnPair = &(*it);
+    }
 
     // Selection has changed
     if (lastObj != _mouseOnPair) {
        
         // Remove highlight
         if (lastObj) {
-            lastObj->getBrowser()->removeHighlight(_highlightAddition);
-            lastObj->getTarget()->removeHighlight(_highlightAddition);
+            lastObj->removeHighlight(_highlightAddition);
         }
         // Add highlight to new selection
         if (_mouseOnPair) {
-            _mouseOnPair->getBrowser()->highlight(_highlightAddition);
-            _mouseOnPair->getTarget()->highlight(_highlightAddition);
-            std::string id = _mouseOnPair->getBrowser()->identifier();
-            std::string info = "Currently selected browser is " + id;
-            LINFO(info + id);
+            _mouseOnPair->highlight(_highlightAddition);
         }
         
     }
 }
 
-void SkyBrowserModule::addTargetBrowserPair(ScreenSpaceSkyTarget* newTarget, ScreenSpaceSkyBrowser* newBrowser) {
+void SkyBrowserModule::addTargetBrowserPair(std::string targetId, std::string browserId) {
+    
+    ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(
+        global::renderEngine->screenSpaceRenderable(targetId)
+        );
+    ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
+        global::renderEngine->screenSpaceRenderable(browserId)
+        );
+    
     // Assert pair to have both target and browser
-    if (newBrowser && newTarget) {
-        Pair newPair(newBrowser, newTarget);
+    if (browser && target) {
+        Pair newPair(browser, target);
         _targetsBrowsers.push_back(newPair);
     }
 }
@@ -547,17 +554,13 @@ void SkyBrowserModule::createTargetBrowserPair() {
     );
 
     openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
+        + idBrowser + "');",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.connectBrowserTarget('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.skybrowser.connectBrowserTarget('" + idTarget + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','" + idBrowser + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
@@ -576,11 +579,10 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& id) {
     auto it = std::remove(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
                           *found);
 
-    std::string browserId = found->getBrowser()->identifier();
     std::string targetId = found->getTarget()->identifier();
     // Remove from engine
     openspace::global::scriptEngine->queueScript(
-        "openspace.removeScreenSpaceRenderable('" + browserId + "');",
+        "openspace.removeScreenSpaceRenderable('" + found->browserId() + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
@@ -606,37 +608,40 @@ void SkyBrowserModule::selectImage2dBrowser(int i)
         const ImageData& image = _dataHandler->getImage(i);
         // Load image into browser
         LINFO("Loading image " + image.name);
-        selected->getBrowser()->addSelectedImage(image, i);
-
-        // If the image has coordinates, move the target
+        selected->selectImage(image, i);
+        
+        bool isInView = skybrowser::coordinateIsInView(image.equatorialCartesian);
+        // If the coordinate is not in view, rotate camera
         if (image.hasCelestialCoords) {
-
-            // Animate the target to the image coordinate position
-            selected->getTarget()->unlock();
-            selected->getTarget()->startAnimation(image.equatorialCartesian, image.fov);
-
-            // If the coordinate is not in view, rotate camera
-            if (skybrowser::coordinateIsOutsideView(image.equatorialCartesian)) {
-                glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
-                startRotation(galactic);
+            if(!isInView) {
+                rotateCamera(skybrowser::equatorialToGalactic(image.equatorialCartesian));
             }
         }
     }
 }
 
-
 void SkyBrowserModule::selectImage3dBrowser(int i)
 {
-    const ImageData& image = _dataHandler->getImage(i);
-    if (_browser3d) {
-        RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
-            _browser3d->renderable());
-        if (browser3d) {
-            browser3d->displayImage(image, i);
-        }
+    if (!_browser3d) {
+        return;
     }
+    RenderableSkyBrowser* renderable = dynamic_cast<RenderableSkyBrowser*>(
+        _browser3d->renderable());
+    if (renderable) {
+        const ImageData& image = _dataHandler->getImage(i);
+        renderable->displayImage(image, i);
+    }
+    
 }
 
+void SkyBrowserModule::lookAtTarget(std::string id)
+{
+    Pair* pair = getPair(id);
+    if (pair) {
+        rotateCamera(pair->targetDirectionGalactic());
+    }
+}
+    
 void SkyBrowserModule::moveHoverCircle(int i)
 {
     const ImageData& image = _dataHandler->getImage(i);
@@ -665,7 +670,7 @@ int SkyBrowserModule::nLoadedImages()
     return _dataHandler->nLoadedImages();
 }
 
-const WwtDataHandler* SkyBrowserModule::getWWTDataHandler() {
+const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWWTDataHandler() {
     return _dataHandler;
 }
 
@@ -678,8 +683,8 @@ Pair* SkyBrowserModule::getPair(std::string id)
 {
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&](Pair& pair) {
-            bool foundBrowser = pair.getBrowser()->identifier() == id;
-            bool foundTarget = pair.getTarget()->identifier() == id;
+            bool foundBrowser = pair.browserId() == id;
+            bool foundTarget = pair.targetId() == id;
             return foundBrowser || foundTarget;
         });
     return &(*it);
@@ -690,6 +695,9 @@ SceneGraphNode* SkyBrowserModule::get3dBrowser() {
 }
 
 void SkyBrowserModule::lookAt3dBrowser() {
+    if (!_browser3d) {
+        return;
+    }
     std::string id = _browser3d->identifier();
     // Target camera on the 3D sky browser
     openspace::global::scriptEngine->queueScript(
@@ -709,7 +717,7 @@ void SkyBrowserModule::lookAt3dBrowser() {
     );
 }
 
-void SkyBrowserModule::startRotation(glm::dvec3 endAnimation) {
+void SkyBrowserModule::rotateCamera(glm::dvec3 endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
     _endAnimation = endAnimation;
     _startAnimation = skybrowser::cameraDirectionGalactic();
@@ -721,11 +729,9 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
     // Find smallest angle between the two vectors
     double smallestAngle = skybrowser::angleVector(_startAnimation, _endAnimation);
 
-    if(smallestAngle > _threshold) {
+    if(smallestAngle > _stopAnimationThreshold) {
         
-        glm::dmat4 rotMat;
-        skybrowser::incrementalAnimationMatrix(
-            rotMat,
+        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
             _startAnimation, 
             _endAnimation, 
             deltaTime, 
@@ -743,61 +749,39 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
     }
 }
 
-bool SkyBrowserModule::fadeBrowserAndTarget(bool makeTransparent, double fadeTime, 
-                                            double deltaTime) {
-    float opacityDelta = static_cast<float>(deltaTime / fadeTime);
-    float highTreshold = 0.99f;
-    float lowThreshold = 0.01f;
-    float transparent = 0.0;
-    float opaque = 1.0;
-
-    if (makeTransparent) {
-        opacityDelta *= -1.f;
-    }
-    bool finished = true;
-
+bool SkyBrowserModule::fadeBrowserTargetsToTransparent(double deltaTime)
+{
+    bool fadeIsFinished{ false };
     for (Pair pair : _targetsBrowsers) {
-        ScreenSpaceSkyBrowser* browser = pair.getBrowser();
-        ScreenSpaceSkyTarget* target = pair.getTarget();
-
-        bool targetFinished = true;
-        bool browserFinished = true;
-
-        if (target) {
-            target->setOpacity(target->opacity() + opacityDelta);
-            float opacityTarget = abs(target->opacity());
-            
-            if (makeTransparent) {
-                targetFinished = opacityTarget < lowThreshold;
+        if (pair.isEnabled()) {
+            bool finished = pair.fadeToTransparent(_fadingTime, deltaTime);
+            if (finished) {
+                pair.disable();
             }
-            else {
-                targetFinished = opacityTarget > highTreshold;
-            }
-            if (targetFinished) {
-                float newOpacity = makeTransparent ? transparent : opaque;
-                target->setOpacity(newOpacity);
-            }
+            fadeIsFinished &= finished;
         }
-        // Keep fading the browsers until all are finished
-        browser->getOpacity() = browser->getOpacity().value() + opacityDelta;
-        float opacityBrowser = abs(browser->getOpacity().value());
-
-        if (makeTransparent) {
-            browserFinished = opacityBrowser < lowThreshold;
-        }
-        else {
-            browserFinished = opacityBrowser > highTreshold;
-        }
-        
-        if (browserFinished && targetFinished) {
-            browser->getOpacity() = makeTransparent ? transparent : opaque;
-        }
-        else {
-            finished = false;
-        }
-        
     }
-    return finished;
+    return fadeIsFinished;
+}
+
+bool SkyBrowserModule::fadeBrowserTargetsToOpaque(double deltaTime)
+{
+    bool fadeIsFinished{ false };
+     for (Pair pair : _targetsBrowsers) {
+        if (pair.isEnabled()) {
+            fadeIsFinished &= pair.fadeToOpaque(_fadingTime, deltaTime);
+        }
+    }
+     return fadeIsFinished;
+}
+
+void SkyBrowserModule::animateTargets(double deltaTime)
+{
+    for (Pair pair : _targetsBrowsers) {
+        if (pair.isEnabled()) {
+            pair.animateToCoordinate(deltaTime);
+        }
+    }
 }
 
 void SkyBrowserModule::setSelectedBrowser(ScreenSpaceSkyBrowser* browser) {

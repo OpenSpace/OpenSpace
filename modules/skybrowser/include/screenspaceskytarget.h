@@ -26,6 +26,7 @@ namespace openspace {
 
         // ScreenSpaceRenderable inherited functions
         bool initializeGL() override;
+        bool deinitializeGL() override;
         bool isReady() const override;
         void render() override;
         glm::mat4 scaleMatrix() override;
@@ -48,19 +49,18 @@ namespace openspace {
         void setOpacity(float opacity);
 
         // Target directions
-        glm::dvec3 targetDirectionGalactic() const;
-        glm::dvec3 targetDirectionEquatorial() const;
+        glm::dvec3 directionGalactic() const;
+        glm::dvec3 directionEquatorial() const;
 
         // Locking functionality
         void lock();
         void unlock();
         bool isLocked();
-        
-        // Animations
-        void startAnimation(glm::dvec3 coordsEnd, float FOVEnd, bool lockAfter = true);
-        void animateToCoordinate(double deltaTime);
-        bool animateToFov(float endFOV, float deltaTime);
 
+        // Animation
+        bool isAnimated();
+        void startAnimation(glm::dvec3 end, bool lockAfter);
+        void animateToCoordinate(float deltaTime);
         // Display
         void highlight(glm::ivec3 addition);
         void removeHighlight(glm::ivec3 removal);
@@ -74,9 +74,9 @@ namespace openspace {
         properties::DoubleProperty _animationSpeed;
 
         // Flags
+        bool _isLocked{ false };
         bool _isAnimated{ false };
         bool _lockAfterAnimation{ false };
-        bool _isLocked{ false };
 
         // Shader
         UniformCache(modelTransform, viewProj, showCrosshair, showRectangle, lineWidth, dimensions, lineColor) _uniformCache;
@@ -91,11 +91,8 @@ namespace openspace {
         glm::dvec3 _lockedCoordinates;              // Spherical celestial coordinates
         std::thread _lockTarget;
 
-        // Animation of target
         glm::dvec3 _animationEnd;        // Cartesian celestial coordinates
         glm::dvec3 _animationStart;      // Cartesian celestial coordinates
-        double _animationTime = 1.0;
-        float _vfovEndAnimation;
         
     };
 }

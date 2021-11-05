@@ -190,7 +190,7 @@ namespace openspace {
         return true;
     }
 
-    void RenderableSkyBrowser::displayImage(const ImageData& image, int i) {
+    void RenderableSkyBrowser::displayImage(const ImageData& image, const int i) {
         sendMessageToWwt(wwtmessage::moveCamera(image.equatorialSpherical, image.fov, 0.0));
         _verticalFov = image.fov;
         // Add to selected images if there are no duplicates
