@@ -416,7 +416,6 @@ SkyBrowserModule::SkyBrowserModule()
         _cameraInSolarSystem = glm::length(cameraPos) < _solarSystemRadius;
 
         // Fading flags
-        bool fadeIsFinished{ false };
         if (_cameraInSolarSystem != camWasInSolarSystem) {
             _isTransitioningVizMode = true;
 
@@ -429,20 +428,15 @@ SkyBrowserModule::SkyBrowserModule()
         // Fade pairs if the camera moved in or out the solar system
         if (_isTransitioningVizMode) {
             if (_cameraInSolarSystem) {
-                fadeIsFinished = fadeBrowserTargetsToOpaque(deltaTime);
+                incrementallyFadeBrowserTargets(Transparency::Opaque, deltaTime);
             }
             else {
-                fadeIsFinished = fadeBrowserTargetsToTransparent(deltaTime);
-            }
-
-            // The transition is over when the fade is finished
-            if (fadeIsFinished) {
-                _isTransitioningVizMode = false;
+                incrementallyFadeBrowserTargets(Transparency::Transparent, deltaTime);
             }
         }
 
         if (_cameraInSolarSystem) {
-            animateTargets(deltaTime);
+            incrementallyAnimateTargets(deltaTime);
         }
         if (_cameraIsRotating) {
             incrementallyRotateCamera(deltaTime);
@@ -776,33 +770,29 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
     }
 }
 
-bool SkyBrowserModule::fadeBrowserTargetsToTransparent(double deltaTime)
+void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float deltaTime)
 {
-    bool fadeIsFinished{ false };
-    for (Pair pair : _targetsBrowsers) {
-        if (pair.isEnabled()) {
-            bool finished = pair.fadeToTransparent(_fadingTime, deltaTime);
-            if (finished) {
-                pair.disable();
-            }
-            fadeIsFinished &= finished;
-        }
-    }
-    return fadeIsFinished;
-}
-
-bool SkyBrowserModule::fadeBrowserTargetsToOpaque(double deltaTime)
-{
-    bool fadeIsFinished{ false };
+     float transparency = static_cast<float>(goal);
+     bool isAllFinished{ false };
      for (Pair pair : _targetsBrowsers) {
-        if (pair.isEnabled()) {
-            fadeIsFinished &= pair.fadeToOpaque(_fadingTime, deltaTime);
-        }
-    }
-     return fadeIsFinished;
+         if (pair.isEnabled()) {
+             pair.incrementallyFade(transparency, _fadingTime, deltaTime);
+             bool isPairFinished = pair.isFinishedFading(transparency);
+
+             if (isPairFinished && goal == Transparency::Transparent) {
+                 pair.disable();
+             }
+             isAllFinished &= isPairFinished;
+         }
+     }
+
+     // The transition is over when the fade is finished
+     if (isAllFinished) {
+         _isTransitioningVizMode = false;
+     }
 }
 
-void SkyBrowserModule::animateTargets(double deltaTime)
+void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 {
     for (Pair pair : _targetsBrowsers) {
         if (pair.isEnabled()) {
@@ -824,8 +814,6 @@ void SkyBrowserModule::setSelectedBrowser(std::string id) {
 std::string SkyBrowserModule::selectedBrowserId() {
     return _selectedBrowser;
 }
-
-
 
 bool SkyBrowserModule::cameraInSolarSystem() {
     return _cameraInSolarSystem;

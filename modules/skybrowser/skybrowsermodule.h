@@ -49,6 +49,10 @@ class SceneGraphNode;
 class ImageData;
 class Pair;
 
+enum class Transparency {
+    Transparent = 0,
+    Opaque = 1
+};
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
@@ -77,8 +81,7 @@ public:
     
     void lookAtTarget(std::string id);
     void incrementallyRotateCamera(double deltaTime);
-    bool fadeBrowserTargetsToTransparent(double deltaTime);
-    bool fadeBrowserTargetsToOpaque(double deltaTime);
+    void fadeBrowserTargets(Transparency goal, float deltaTime);
     void animateTargets(double deltaTime);
     void lookAt3dBrowser();
    
