@@ -76,7 +76,7 @@ public:
     // Rotation and animation
     
     void lookAtTarget(std::string id);
-    void rotateCamera(double deltaTime);
+    void incrementallyRotateCamera(double deltaTime);
     bool fadeBrowserTargetsToTransparent(double deltaTime);
     bool fadeBrowserTargetsToOpaque(double deltaTime);
     void animateTargets(double deltaTime);
@@ -109,7 +109,7 @@ protected:
 
 private:
 
-    void rotateCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
+    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     // The browsers and targets
     std::vector<Pair> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
@@ -142,7 +142,7 @@ private:
     // Animation of rotation of camera to look at coordinate galactic coordinates
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
-    double _stopAnimationThreshold{ 0.0005 };
+    double _stopAnimationThreshold{ 0.05 };
     double _speed{ 1.0 };
     
     // Data handler for the image collections

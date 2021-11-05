@@ -52,8 +52,6 @@ namespace openspace {
         void setScale(float scalingFactor);
         void setWebpageBorderColor(glm::ivec3 color);   
 
-        // Communication with the web page
-        void executeJavascript(std::string script);
         void sendIdToBrowser();
 
         // Display
@@ -82,6 +80,9 @@ namespace openspace {
         //void translate(glm::vec2 translation);
         
     private:
+        // Communication with the web page
+        void executeJavascript(std::string script);
+
         // Properties
         properties::FloatProperty _verticalFov;       
         properties::StringProperty _skyTargetId;

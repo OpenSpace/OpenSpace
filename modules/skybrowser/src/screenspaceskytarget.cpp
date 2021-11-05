@@ -314,7 +314,9 @@ namespace openspace {
         // Start a thread to enable user interactions while locking target
         _lockTarget = std::thread([&] {
             while (_isLocked) {
-                _cartesianPosition = skybrowser::equatorialToScreenSpace(_lockedCoordinates);
+                _cartesianPosition = skybrowser::equatorialToScreenSpace(
+                    _lockedCoordinates
+                );
             }
         });
     }

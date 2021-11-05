@@ -76,7 +76,12 @@ namespace openspace {
 
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
-        , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0), glm::ivec2(300))
+        , _browserDimensions(
+            BrowserDimensionInfo, 
+            _dimensions, 
+            glm::ivec2(0), 
+            glm::ivec2(300)
+        )
         , _verticalFov(VerticalFovInfo, 10.f, 0.1f, 70.f)
         , _borderColor(BorderColorInfo, glm::ivec3(200), glm::ivec3(0), glm::ivec3(255))
         , _skyTargetId(TargetIdInfo)
@@ -221,13 +226,13 @@ namespace openspace {
         return _fovIsAnimated;
     }
 
-    void ScreenSpaceSkyBrowser::startAnimation(float fov)
+    void ScreenSpaceSkyBrowser::startFovAnimation(float fov)
     {
         _fovIsAnimated = true;
         _endVfov = fov;
     }
 
-    void ScreenSpaceSkyBrowser::animateToFov(float deltaTime)
+    void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime)
     {
         // If distance is small enough, stop animating
         float diff = verticalFov() - _endVfov;
@@ -334,26 +339,20 @@ namespace openspace {
         });
 
     }
-        
-    //
-    //void ScreenSpaceSkyBrowser::translate(glm::vec2 translation) {
-    //    glm::vec3 position = _cartesianPosition;     
-    //    _cartesianPosition =glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, 1.0f);
-    //}
 
-    glm::vec2 ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 screenSpaceCoord) {
+    glm::vec2 ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 coord) {
         glm::vec2 resizePosition = glm::vec2{ 0 };
         // Make sure coordinate is on browser
-        if (!coordIsInsideCornersScreenSpace(screenSpaceCoord)) return resizePosition;
+        if (!coordIsInsideCornersScreenSpace(coord)) return resizePosition;
 
         // TO DO: turn this into a vector and use prettier vector arithmetic
         float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
         float resizeAreaX = screenSpaceDimensions().x * _resizeAreaPercentage;
 
-        bool isOnTop = screenSpaceCoord.y > upperRightCornerScreenSpace().y - resizeAreaY;
-        bool isOnBottom = screenSpaceCoord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
-        bool isOnRight = screenSpaceCoord.x > upperRightCornerScreenSpace().x - resizeAreaX;
-        bool isOnLeft = screenSpaceCoord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
+        bool isOnTop = coord.y > upperRightCornerScreenSpace().y - resizeAreaY;
+        bool isOnBottom = coord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
+        bool isOnRight = coord.x > upperRightCornerScreenSpace().x - resizeAreaX;
+        bool isOnLeft = coord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
 
         resizePosition.x = isOnRight ? 1.f : isOnLeft ? -1.f : 0.f;
         resizePosition.y = isOnTop ? 1.f : isOnBottom ? -1.f : 0.f;
@@ -379,8 +378,8 @@ namespace openspace {
         // browser covers: e.g. a browser that covers 0.25 of the 
         // height of the window will have scale = 0.25
 
-        float textureRatio =
-            static_cast<float>(_texture->dimensions().x) / static_cast<float>(_texture->dimensions().y);
+        float textureRatio = static_cast<float>(_texture->dimensions().x) / 
+                             static_cast<float>(_texture->dimensions().y);
 
         glm::mat4 scale = glm::scale(
             glm::mat4(1.f),

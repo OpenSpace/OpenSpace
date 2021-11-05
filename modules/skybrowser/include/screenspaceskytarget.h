@@ -79,7 +79,14 @@ namespace openspace {
         bool _lockAfterAnimation{ false };
 
         // Shader
-        UniformCache(modelTransform, viewProj, showCrosshair, showRectangle, lineWidth, dimensions, lineColor) _uniformCache;
+        UniformCache(
+            modelTransform, 
+            viewProj, 
+            showCrosshair, 
+            showRectangle, 
+            lineWidth,
+            dimensions, 
+            lineColor) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
         

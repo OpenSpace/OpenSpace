@@ -274,16 +274,25 @@ SkyBrowserModule::SkyBrowserModule()
                 if (button == MouseButton::Left) {
                     _cameraIsRotating = false;
                     _startMousePosition = _mousePosition;
-                    _startDragPosition = _isBrowser ? _mouseOnPair->getBrowser()->screenSpacePosition()
-                        : _mouseOnPair->getTarget()->screenSpacePosition();
+                    if (_isBrowser) {
+                        _startDragPosition = _mouseOnPair->getBrowser()->
+                                             screenSpacePosition();
+                    }
+                    else {
+                        _startDragPosition = _mouseOnPair->getTarget()->
+                                             screenSpacePosition();
+                    }
 
                     // If current object is browser, check for resizing
                     if (_isBrowser) {
                         // Resize browser if mouse is over resize button
-                        _resizeDirection = _mouseOnPair->getBrowser()->isOnResizeArea(_mousePosition);
+                        _resizeDirection = _mouseOnPair->getBrowser()->isOnResizeArea(
+                            _mousePosition
+                        );
                         if (_resizeDirection != glm::vec2{ 0 }) {
                             _mouseOnPair->getBrowser()->saveResizeStartSize();
-                            _startBrowserSize = _mouseOnPair->getBrowser()->screenSpaceDimensions();
+                            _startBrowserSize = _mouseOnPair->getBrowser()->
+                                                screenSpaceDimensions();
                             _isResizing = true;
                             return true;
                         }
@@ -297,9 +306,10 @@ SkyBrowserModule::SkyBrowserModule()
                     return true;
                 }
                 else if (_isBrowser && button == MouseButton::Right) {
-                    // If you start dragging around on the browser, the target should unlock
+                    // If you start dragging around on the browser, the target unlocks
                     _mouseOnPair->unlock();
-                    // Change view (by moving target) within browser if right mouse click on browser
+                    // Change view (by moving target) within browser if right mouse 
+                    // click on browser
                     _startMousePosition = _mousePosition;
                     _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
                     _fineTuneMode = true;
@@ -339,28 +349,37 @@ SkyBrowserModule::SkyBrowserModule()
                 if (_isDragging || _isResizing) {
                     if (_isResizing) {
                         // Calculate scaling factor
-                        glm::vec2 mouseDragVector = (_mousePosition - _startMousePosition);
+                        glm::vec2 mouseDragVector = (_mousePosition-_startMousePosition);
                         glm::vec2 scaling = mouseDragVector * _resizeDirection;
-                        glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) / _startBrowserSize;
+                        glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) / 
+                                                     _startBrowserSize;
                         // Scale the browser
                         _mouseOnPair->getBrowser()->setScale(newSizeRelToOld);
 
-                        // For dragging functionality, translate so it looks like the browser 
-                        // isn't moving. Make sure the browser doesn't move in directions it's 
-                        // not supposed to 
+                        // For dragging functionality, translate so it looks like the 
+                        // browser isn't moving. Make sure the browser doesn't move in 
+                        // directions it's not supposed to 
                         translation = mouseDragVector * abs(_resizeDirection) / 2.f;
 
                     }
                     // Translate
                     if (_isBrowser) {
-                        _mouseOnPair->getBrowser()->translate(translation, _startDragPosition);
+                        _mouseOnPair->getBrowser()->translate(
+                            translation, 
+                            _startDragPosition
+                        );
                     }
                     else {
-                        _mouseOnPair->getTarget()->translate(translation, _startDragPosition);
+                        _mouseOnPair->getTarget()->translate(
+                            translation, 
+                            _startDragPosition
+                        );
                     }
                 }
                 else if (_fineTuneMode) {
-                    glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneVector(translation);
+                    glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneVector(
+                        translation
+                    );
                     _mouseOnPair->getTarget()->translate(fineTune, _startDragPosition);
                 }
                 // If there is no dragging or resizing, look for new objects
@@ -377,7 +396,9 @@ SkyBrowserModule::SkyBrowserModule()
             
             // If mouse is on browser or target, apply zoom
             if (_mouseOnPair) {
-                _mouseOnPair->getBrowser()->setVerticalFovWithScroll(static_cast<float>(scroll));
+                _mouseOnPair->getBrowser()->setVerticalFovWithScroll(
+                    static_cast<float>(scroll)
+                );
                 return true;
             }
             
@@ -424,7 +445,7 @@ SkyBrowserModule::SkyBrowserModule()
             animateTargets(deltaTime);
         }
         if (_cameraIsRotating) {
-            rotateCamera(deltaTime);
+            incrementallyRotateCamera(deltaTime);
         }
     });
 
@@ -467,8 +488,12 @@ void SkyBrowserModule::setSelectedObject()
     // Find and save what mouse is currently hovering on
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&] (Pair &pair) {      
-            bool onBrowser = pair.getBrowser()->coordIsInsideCornersScreenSpace(_mousePosition);
-            bool onTarget = pair.getTarget()->coordIsInsideCornersScreenSpace(_mousePosition);
+            bool onBrowser = pair.getBrowser()->coordIsInsideCornersScreenSpace(
+                _mousePosition
+            );
+            bool onTarget = pair.getTarget()->coordIsInsideCornersScreenSpace(
+                _mousePosition
+            );
             if (onBrowser) {
                 _selectedBrowser = pair.getBrowser()->identifier();
             }
@@ -614,7 +639,9 @@ void SkyBrowserModule::selectImage2dBrowser(int i)
         // If the coordinate is not in view, rotate camera
         if (image.hasCelestialCoords) {
             if(!isInView) {
-                rotateCamera(skybrowser::equatorialToGalactic(image.equatorialCartesian));
+                startRotatingCamera(
+                    skybrowser::equatorialToGalactic(image.equatorialCartesian)
+                );
             }
         }
     }
@@ -638,7 +665,7 @@ void SkyBrowserModule::lookAtTarget(std::string id)
 {
     Pair* pair = getPair(id);
     if (pair) {
-        rotateCamera(pair->targetDirectionGalactic());
+        startRotatingCamera(pair->targetDirectionGalactic());
     }
 }
     
@@ -717,14 +744,14 @@ void SkyBrowserModule::lookAt3dBrowser() {
     );
 }
 
-void SkyBrowserModule::rotateCamera(glm::dvec3 endAnimation) {
+void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
     _endAnimation = endAnimation;
     _startAnimation = skybrowser::cameraDirectionGalactic();
     _cameraIsRotating = true;
 }
 
-void SkyBrowserModule::rotateCamera(double deltaTime) {
+void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
 
     // Find smallest angle between the two vectors
     double smallestAngle = skybrowser::angleVector(_startAnimation, _endAnimation);

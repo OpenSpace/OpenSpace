@@ -178,7 +178,9 @@ namespace openspace {
 
     void RenderableSkyBrowser::executeJavascript(std::string script) const {
         //LINFOC(_loggerCat, "Executing javascript " + script);
-        if (_browserInstance && _browserInstance->getBrowser() && _browserInstance->getBrowser()->GetMainFrame()) {
+        bool isBrowserReady = _browserInstance && _browserInstance->getBrowser();
+        bool isMainFrameReady = _browserInstance->getBrowser()->GetMainFrame();
+        if (isBrowserReady && isMainFrameReady) {
             CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
             frame->ExecuteJavaScript(script, frame->GetURL(), 0);
         }
@@ -191,7 +193,12 @@ namespace openspace {
     }
 
     void RenderableSkyBrowser::displayImage(const ImageData& image, const int i) {
-        sendMessageToWwt(wwtmessage::moveCamera(image.equatorialSpherical, image.fov, 0.0));
+        ghoul::Dictionary msg = wwtmessage::moveCamera(
+            image.equatorialSpherical,
+            image.fov,
+            0.0
+        );
+        sendMessageToWwt(msg);
         _verticalFov = image.fov;
         // Add to selected images if there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
@@ -232,8 +239,12 @@ namespace openspace {
 
                     glm::dvec2 aim{ 0.0 };
                     // Send a message just to establish contact
-                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _verticalFov, 0.0);
-                    sendMessageToWwt(message);
+                    ghoul::Dictionary msg = wwtmessage::moveCamera(
+                        aim, 
+                        _verticalFov, 
+                        0.0
+                    );
+                    sendMessageToWwt(msg);
 
                     // Sleep so we don't bombard WWT with too many messages
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -305,7 +316,11 @@ namespace openspace {
 
     void RenderableSkyBrowser::setImageLayerOrder(int i, int order) {
         // Remove from selected list
-        auto current = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+        auto current = std::find(
+            std::begin(_selectedImages), 
+            std::end(_selectedImages), 
+            i
+        );
         auto target = std::begin(_selectedImages) + order;
 
         // Make sure the image was found in the list

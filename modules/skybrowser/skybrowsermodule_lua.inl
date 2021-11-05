@@ -116,8 +116,10 @@ namespace openspace::skybrowser::luascriptfunctions {
         LINFO("Connection established to WorldWide Telescope application in " + id);
         LINFO("Loading image collections to " + id);
 
-        // Load the collections here because here we know that the browser can execute javascript
-        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+        // Load the collections here because here we know that the browser can execute 
+        // javascript
+        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/"
+                           "wwt-web-client/master/assets/webclient-explore-root.wtml";
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
@@ -238,8 +240,10 @@ namespace openspace::skybrowser::luascriptfunctions {
 		// If no data has been loaded yet, download the data from the web!
 
 		if (module->nLoadedImages() == 0) {
-            std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
-            //std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
+            std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/"
+                               "wwt-web-client/master/assets/webclient-explore-root.wtml";
+            //std::string hubble = "http://www.worldwidetelescope.org/wwtweb/"
+            //"catalog.aspx?W=hubble";
             std::string directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/");
 
             // 3D images
@@ -249,7 +253,10 @@ namespace openspace::skybrowser::luascriptfunctions {
             // Load speck files for 3D positions
             std::filesystem::path globularClusters = absPath(http + globular);
             std::filesystem::path openClusters = absPath(http + open);
-            std::vector<std::filesystem::path> specks = { openClusters, globularClusters };
+            std::vector<std::filesystem::path> specks = {
+                openClusters, 
+                globularClusters
+            };
 
             module->loadImages(root, directory, specks);
 		}
@@ -259,11 +266,11 @@ namespace openspace::skybrowser::luascriptfunctions {
 
 		for (int i = 0; i < module->nLoadedImages(); i++) {
             const ImageData& img = module->getWWTDataHandler()->getImage(i);
-            glm::dvec3 cartCoords = img.equatorialCartesian;
+            glm::dvec3 coords = img.equatorialCartesian;
             glm::dvec3 position = img.position3d;
 
             // Conversions for ghoul
-            std::vector<double> cartCoordsVec = { cartCoords.x, cartCoords.y, cartCoords.z };
+            std::vector<double> cartCoordsVec = { coords.x, coords.y, coords.z };
             std::vector<double> position3d = { position.x, position.y, position.z };
             
             // Index for current ImageData 
@@ -310,10 +317,10 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Add the window data for OpenSpace
         ghoul::lua::push(L, "OpenSpace");
         lua_newtable(L);
-        glm::dvec3 cartesianJ2000 = skybrowser::cameraDirectionEquatorial();
-        glm::dvec2 sphericalJ2000 = skybrowser::cartesianToSpherical(cartesianJ2000);
+        glm::dvec3 cartesian = skybrowser::cameraDirectionEquatorial();
+        glm::dvec2 spherical = skybrowser::cartesianToSpherical(cartesian);
         // Convert to vector so ghoul can read it
-        std::vector<double> viewDirCelestVec = { cartesianJ2000.x, cartesianJ2000.y, cartesianJ2000.z };
+        std::vector<double> viewDirCelestVec = { cartesian.x, cartesian.y, cartesian.z };
        
         
         // Calculate the smallest FOV of vertical and horizontal
@@ -324,9 +331,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         lua_settable(L, -3);
         ghoul::lua::push(L, "cartesianDirection", viewDirCelestVec);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "ra", sphericalJ2000.x);
+        ghoul::lua::push(L, "ra", spherical.x);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "dec", sphericalJ2000.y);
+        ghoul::lua::push(L, "dec", spherical.y);
         lua_settable(L, -3);
         ghoul::lua::push(L, "selectedBrowserId", module->selectedBrowserId());
         lua_settable(L, -3);
@@ -348,10 +355,14 @@ namespace openspace::skybrowser::luascriptfunctions {
                     selectedImagesVector.push_back(i);
                     });
                 
-                glm::dvec3 celestialCart = pair.targetDirectionEquatorial();
-                glm::dvec2 celestialSpherical = skybrowser::cartesianToSpherical(celestialCart);
+                glm::dvec3 cartesian = pair.targetDirectionEquatorial();
+                glm::dvec2 spherical = skybrowser::cartesianToSpherical(cartesian);
                    
-                std::vector<double> celestialCartVec = { celestialCart.x, celestialCart.y, celestialCart.z };
+                std::vector<double> cartesianVec = { 
+                    cartesian.x, 
+                    cartesian.y, 
+                    cartesian.z 
+                };
                 // Convert color to vector so ghoul can read it
                 glm::ivec3 color = pair.borderColor();
                 std::vector<int> colorVec = { color.r, color.g, color.b };
@@ -367,11 +378,11 @@ namespace openspace::skybrowser::luascriptfunctions {
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "selectedImages", selectedImagesVector);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "cartesianDirection", celestialCartVec);
+                ghoul::lua::push(L, "cartesianDirection", cartesianVec);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "ra", celestialSpherical.x);
+                ghoul::lua::push(L, "ra", spherical.x);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "dec", celestialSpherical.y);
+                ghoul::lua::push(L, "dec", spherical.y);
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "color", colorVec);
                 lua_settable(L, -3);
@@ -393,10 +404,14 @@ namespace openspace::skybrowser::luascriptfunctions {
             std::for_each(selectedImages.begin(), selectedImages.end(), [&](int index) {
                 selectedImagesVector.push_back(index);
                 });
-            glm::dvec3 worldPosition = node->position();
-            glm::dvec3 celestialCart = skybrowser::galacticToEquatorial(worldPosition);
-            glm::dvec2 celestialSpherical = skybrowser::cartesianToSpherical(celestialCart);
-            std::vector<double> celestialCartVec = { celestialCart.x, celestialCart.y, celestialCart.z };
+            glm::dvec3 position3dBrowser = node->position();
+            glm::dvec3 cartesian = skybrowser::galacticToEquatorial(position3dBrowser);
+            glm::dvec2 spherical = skybrowser::cartesianToSpherical(cartesian);
+            std::vector<double> celestialCartVec = { 
+                cartesian.x, 
+                cartesian.y, 
+                cartesian.z 
+            };
             // Convert color to vector so ghoul can read it
             //glm::ivec3 color = browser->_borderColor.value();
             std::vector<int> colorVec = { 200, 200, 200 };
@@ -414,9 +429,9 @@ namespace openspace::skybrowser::luascriptfunctions {
             lua_settable(L, -3);
             ghoul::lua::push(L, "cartesianDirection", celestialCartVec);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "ra", celestialSpherical.x);
+            ghoul::lua::push(L, "ra", spherical.x);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "dec", celestialSpherical.y);
+            ghoul::lua::push(L, "dec", spherical.y);
             lua_settable(L, -3);
             ghoul::lua::push(L, "color", colorVec);
             lua_settable(L, -3);
@@ -471,7 +486,10 @@ namespace openspace::skybrowser::luascriptfunctions {
         const int i = ghoul::lua::value<int>(L, 2);
         double opacity = ghoul::lua::value<double>(L, 3);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ghoul::Dictionary message = wwtmessage::setImageOpacity(std::to_string(i), opacity);
+        ghoul::Dictionary message = wwtmessage::setImageOpacity(
+            std::to_string(i), 
+            opacity
+        );
 
         if (module->getPair(id)) {
             module->getPair(id)->setImageOpacity(i, opacity);
