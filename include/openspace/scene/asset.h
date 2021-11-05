@@ -27,6 +27,7 @@
 
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -70,11 +71,10 @@ public:
     Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath);
 
     std::string id() const;
-    const std::string& assetFilePath() const;
+    std::filesystem::path assetFilePath() const;
     bool hasAssetFile() const;
     std::string assetDirectory() const;
     const std::string& assetName() const;
-    AssetLoader* loader() const;
     State state() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);

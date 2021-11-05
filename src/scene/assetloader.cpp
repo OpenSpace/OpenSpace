@@ -317,7 +317,7 @@ bool AssetLoader::loadAsset(Asset* asset) {
 
     if (!std::filesystem::is_regular_file(asset->assetFilePath())) {
         LERROR(fmt::format(
-            "Could not load asset '{}': File does not exist", asset->assetFilePath())
+            "Could not load asset {}: File does not exist", asset->assetFilePath())
         );
         lua_settop(*_luaState, top);
         return false;
@@ -328,7 +328,7 @@ bool AssetLoader::loadAsset(Asset* asset) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
-            "Could not load asset '{}': {}", asset->assetFilePath(), e.message)
+            "Could not load asset {}: {}", asset->assetFilePath(), e.message)
         );
         lua_settop(*_luaState, top);
         return false;
@@ -343,7 +343,7 @@ bool AssetLoader::loadAsset(Asset* asset) {
         // The 'meta' object exist;  quick sanity check that it is a table
         if (!lua_istable(*_luaState, -1)) {
             LWARNING(fmt::format(
-                "When loading asset '{}', encountered a '{}' entry that was not a table",
+                "When loading asset {}, encountered a '{}' entry that was not a table",
                 asset->assetFilePath(), MetaInformationKey
             ));
         }

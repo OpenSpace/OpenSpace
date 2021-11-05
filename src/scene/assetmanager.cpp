@@ -97,7 +97,7 @@ void AssetManager::removeAll() {
 
     _pendingStateChangeCommands.clear();
     for (const Asset* a : _assetLoader.rootAsset().requestedAssets()) {
-        _pendingStateChangeCommands[a->assetFilePath()] = false;
+        _pendingStateChangeCommands[a->assetFilePath().string()] = false;
     }
 }
 
@@ -107,6 +107,10 @@ const Asset& AssetManager::rootAsset() const {
 
 Asset& AssetManager::rootAsset() {
     return _assetLoader.rootAsset();
+}
+
+AssetLoader& AssetManager::assetLoader() {
+    return _assetLoader;
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {

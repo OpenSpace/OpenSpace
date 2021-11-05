@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/assetmanager.h>
+
 namespace openspace::assetloader {
 
 /**
@@ -30,7 +34,7 @@ namespace openspace::assetloader {
  */
 int onInitialize(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->onInitializeLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().onInitializeLua(asset);
 }
 
 /**
@@ -39,7 +43,7 @@ int onInitialize(lua_State* L) {
  */
 int onDeinitialize(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->onDeinitializeLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().onDeinitializeLua(asset);
 }
 
 /**
@@ -49,7 +53,7 @@ int onDeinitialize(lua_State* L) {
 int onInitializeDependency(lua_State* L) {
     Asset* dependant = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     Asset* dependency = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(2)));
-    return dependant->loader()->onInitializeDependencyLua(dependant, dependency);
+    return global::openSpaceEngine->assetManager().assetLoader().onInitializeDependencyLua(dependant, dependency);
 }
 
 /**
@@ -59,7 +63,7 @@ int onInitializeDependency(lua_State* L) {
 int onDeinitializeDependency(lua_State* L) {
     Asset* dependant = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     Asset* dependency = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(2)));
-    return dependant->loader()->onDeinitializeDependencyLua(dependant, dependency);
+    return global::openSpaceEngine->assetManager().assetLoader().onDeinitializeDependencyLua(dependant, dependency);
 }
 
 /**
@@ -71,27 +75,27 @@ int onDeinitializeDependency(lua_State* L) {
  */
 int require(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->requireLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().requireLua(asset);
 }
 
 int exists(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->existsLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().existsLua(asset);
 }
 
 int localResource(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->localResourceLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().localResourceLua(asset);
 }
 
 int syncedResource(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->syncedResourceLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().syncedResourceLua(asset);
 }
 
 int exportAsset(lua_State* L) {
     Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
-    return asset->loader()->exportAssetLua(asset);
+    return global::openSpaceEngine->assetManager().assetLoader().exportAssetLua(asset);
 }
 
 } // namespace openspace::assetloader

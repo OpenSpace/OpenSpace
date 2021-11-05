@@ -62,6 +62,8 @@ public:
     bool update();
     scripting::LuaLibrary luaLibrary();
 
+    AssetLoader& assetLoader();
+
 private:
     std::unordered_map<std::string, bool> _pendingStateChangeCommands;
     std::mutex _pendingInitializationsMutex;

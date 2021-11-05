@@ -27,6 +27,8 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
+#include <filesystem>
+
 namespace openspace { class Asset; }
 
 namespace openspace::gui {
@@ -38,7 +40,7 @@ public:
     void render() override;
 
 private:
-    void renderTree(const Asset& asset, const std::string& relativeToPath);
+    void renderTree(const Asset& asset, const std::filesystem::path& relativeToPath);
 };
 
 } // namespace openspace::gui

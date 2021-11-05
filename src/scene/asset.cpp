@@ -454,7 +454,7 @@ bool Asset::load() {
         return true;
     }
 
-    const bool loaded = loader()->loadAsset(this);
+    const bool loaded = _loader->loadAsset(this);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -465,7 +465,7 @@ void Asset::unload() {
     }
 
     setState(State::Unloaded);
-    loader()->unloadAsset(this);
+    _loader->unloadAsset(this);
 
     for (Asset* child : requiredAssets()) {
         unrequire(child);
@@ -508,7 +508,7 @@ bool Asset::initialize() {
 
     // 3. Call lua onInitialize
     try {
-        loader()->callOnInitialize(this);
+        _loader->callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format("Failed to initialize asset {}", id()));
@@ -524,7 +524,7 @@ bool Asset::initialize() {
     // 5. Call dependency lua onInitialize of this and requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
         try {
-            loader()->callOnDependencyInitialize(child.get(), this);
+            _loader->callOnDependencyInitialize(child.get(), this);
         }
         catch (const ghoul::lua::LuaRuntimeException& e) {
             LERROR(fmt::format(
@@ -541,7 +541,7 @@ bool Asset::initialize() {
     for (const std::shared_ptr<Asset>& child : _requestedAssets) {
         if (child->isInitialized()) {
             try {
-                loader()->callOnDependencyInitialize(child.get(), this);
+                _loader->callOnDependencyInitialize(child.get(), this);
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
@@ -558,7 +558,7 @@ bool Asset::initialize() {
         std::shared_ptr<Asset> p = parent.lock();
         if (p && p->isInitialized()) {
             try {
-                loader()->callOnDependencyInitialize(this, p.get());
+                _loader->callOnDependencyInitialize(this, p.get());
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
@@ -592,7 +592,7 @@ void Asset::deinitialize() {
         std::shared_ptr<Asset> p = parent.lock();
         if (p && p->isInitialized()) {
             try {
-                loader()->callOnDependencyDeinitialize(this, p.get());
+                _loader->callOnDependencyDeinitialize(this, p.get());
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
@@ -607,7 +607,7 @@ void Asset::deinitialize() {
     for (const std::shared_ptr<Asset>& child : _requestedAssets) {
         if (child->isInitialized()) {
             try {
-                loader()->callOnDependencyDeinitialize(child.get(), this);
+                _loader->callOnDependencyDeinitialize(child.get(), this);
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
                 LERROR(fmt::format(
@@ -621,7 +621,7 @@ void Asset::deinitialize() {
     // 5. Call dependency lua onInitialize of this and requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
         try {
-            loader()->callOnDependencyDeinitialize(child.get(), this);
+            _loader->callOnDependencyDeinitialize(child.get(), this);
         }
         catch (const ghoul::lua::LuaRuntimeException& e) {
             LERROR(fmt::format(
@@ -636,7 +636,7 @@ void Asset::deinitialize() {
 
     // 3. Call lua onInitialize
     try {
-        loader()->callOnDeinitialize(this);
+        _loader->callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
@@ -655,7 +655,7 @@ std::string Asset::id() const {
     return _hasAssetPath ? _assetPath : "$root";
 }
 
-const std::string& Asset::assetFilePath() const {
+std::filesystem::path Asset::assetFilePath() const {
     return _assetPath;
 }
 
@@ -669,10 +669,6 @@ std::string Asset::assetDirectory() const {
 
 const std::string& Asset::assetName() const {
     return _assetName;
-}
-
-AssetLoader* Asset::loader() const {
-    return _loader;
 }
 
 bool Asset::requires(const Asset* asset) const {
@@ -758,7 +754,7 @@ void Asset::unrequire(Asset* child) {
 void Asset::request(std::shared_ptr<Asset> child) {
     const auto it = std::find(_requestedAssets.cbegin(), _requestedAssets.cend(), child);
     if (it != _requestedAssets.cend()) {
-        // Do nothing if the request already exists.
+        // Do nothing if the request already exists
         return;
     }
 
@@ -785,7 +781,7 @@ void Asset::unrequest(Asset* child) {
         [child](const std::shared_ptr<Asset>& asset) { return asset.get() == child; }
     );
     if (childIt == _requestedAssets.cend()) {
-        // Do nothing if the request node not exist.
+        // Do nothing if the request node not exist
         return;
     }
 
@@ -829,7 +825,7 @@ std::vector<Asset*> Asset::requiringAssets() const {
     std::vector<Asset*> res;
     res.reserve(_requiringAssets.size());
     for (const std::weak_ptr<Asset>& a : _requiringAssets) {
-        if (std::shared_ptr<Asset> shared = a.lock(); shared) {
+        if (std::shared_ptr<Asset> shared = a.lock();  shared) {
             res.push_back(shared.get());
         }
     }
@@ -849,7 +845,7 @@ std::vector<Asset*> Asset::requestingAssets() const {
     std::vector<Asset*> res;
     res.reserve(_requestingAssets.size());
     for (const std::weak_ptr<Asset>& a : _requestingAssets) {
-        if (std::shared_ptr<Asset> shared = a.lock(); shared) {
+        if (std::shared_ptr<Asset> shared = a.lock();  shared) {
             res.push_back(shared.get());
         }
     }

@@ -85,18 +85,19 @@ void GuiAssetComponent::render() {
     ImGui::End();
 }
 
-void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relativeToPath)
+void GuiAssetComponent::renderTree(const Asset& asset,
+                                   const std::filesystem::path& relativeToPath)
 {
     using namespace ghoul::filesystem;
 
-    std::string assetPath = asset.assetFilePath();
-    std::string assetDirectory = std::filesystem::path(assetPath).parent_path().string();
+    std::filesystem::path assetPath = asset.assetFilePath();
+    std::filesystem::path assetDirectory = assetPath.parent_path();
 
     if (!relativeToPath.empty()) {
-        assetPath = std::filesystem::relative(assetPath, relativeToPath).string();
+        assetPath = std::filesystem::relative(assetPath, relativeToPath);
     }
 
-    std::string assetText = assetPath + " " + assetStateToString(asset.state());
+    std::string assetText = assetPath.string() + " " + assetStateToString(asset.state());
 
     if (asset.state() == Asset::State::Synchronizing) {
         int prog = static_cast<int>(asset.requiredSynchronizationProgress() * 100);
