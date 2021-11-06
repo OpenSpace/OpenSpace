@@ -39,21 +39,6 @@ namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 
-namespace assetloader {
-
-int onInitialize(lua_State* state);
-int onDeinitialize(lua_State* state);
-int onInitializeDependency(lua_State* state);
-int onDeinitializeDependency(lua_State* state);
-int require(lua_State* state);
-int exists(lua_State* state);
-int localResource(lua_State* state);
-int syncedResource(lua_State* state);
-int exportAsset(lua_State* state);
-
-} // namespace assetloader
-
-class AssetListener;
 class ResourceSynchronization;
 class SynchronizationWatcher;
 
@@ -137,17 +122,6 @@ private:
     int localResourceLua(Asset* asset);
     int syncedResourceLua(Asset* asset);
     int exportAssetLua(Asset* asset);
-
-    // Friend C closures (callable from Lua, and maps to Lua functions above)
-    friend int assetloader::onInitialize(lua_State* state);
-    friend int assetloader::onDeinitialize(lua_State* state);
-    friend int assetloader::onInitializeDependency(lua_State* state);
-    friend int assetloader::onDeinitializeDependency(lua_State* state);
-    friend int assetloader::require(lua_State* state);
-    friend int assetloader::exists(lua_State* state);
-    friend int assetloader::localResource(lua_State* state);
-    friend int assetloader::syncedResource(lua_State* state);
-    friend int assetloader::exportAsset(lua_State* state);
 
     // Member variables
     std::shared_ptr<Asset> _rootAsset;

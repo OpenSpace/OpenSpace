@@ -139,7 +139,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
