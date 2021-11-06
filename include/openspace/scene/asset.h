@@ -100,7 +100,7 @@ public:
      */
     bool startSynchronizations();
     float requiredSynchronizationProgress() const;
-    float requestedSynchronizationProgress();
+    float requestedSynchronizationProgress() const;
 
     /**
      * Initialize this asset and return true if successful,
@@ -113,18 +113,14 @@ public:
     void deinitializeIfUnwanted();
 
     // Dependency graph
-    bool requires(const Asset* asset) const;
     void require(std::shared_ptr<Asset> child);
     void unrequire(Asset* child);
 
-    bool requests(Asset* asset) const;
     void request(std::shared_ptr<Asset> child);
     void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
-    std::vector<Asset*> requestingAssets() const;
     std::vector<Asset*> requiredAssets() const;
-    std::vector<Asset*> requiringAssets() const;
 
     std::vector<const Asset*> subTreeAssets() const;
     std::vector<Asset*> childAssets() const;

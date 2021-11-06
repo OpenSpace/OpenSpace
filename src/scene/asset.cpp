@@ -66,7 +66,6 @@ namespace {
     }
 } // namespace
 
-
 Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
     : _state(State::SyncResolved)
     , _loader(loader)
@@ -252,7 +251,7 @@ std::vector<const Asset*> Asset::subTreeAssets() const {
         }
 
         std::vector<const Asset*> subTree = c->subTreeAssets();
-        std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
+        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
     }
     std::vector<const Asset*> assetVector(assets.begin(), assets.end());
     return assetVector;
@@ -262,7 +261,7 @@ std::vector<const Asset*> Asset::requiredSubTreeAssets() const {
     std::unordered_set<const Asset*> assets({ this });
     for (const std::shared_ptr<Asset>& dep : _requiredAssets) {
         std::vector<const Asset*> subTree = dep->requiredSubTreeAssets();
-        std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
+        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
     }
     std::vector<const Asset*> assetVector(assets.begin(), assets.end());
     return assetVector;
@@ -444,7 +443,7 @@ float Asset::requiredSynchronizationProgress() const {
     return syncProgress(assets);
 }
 
-float Asset::requestedSynchronizationProgress() {
+float Asset::requestedSynchronizationProgress() const {
     std::vector<const Asset*> assets = subTreeAssets();
     return syncProgress(assets);
 }
@@ -671,15 +670,6 @@ const std::string& Asset::assetName() const {
     return _assetName;
 }
 
-bool Asset::requires(const Asset* asset) const {
-    const auto it = std::find_if(
-        _requiredAssets.cbegin(),
-        _requiredAssets.cend(),
-        [asset](const std::shared_ptr<Asset> dep) { return dep.get() == asset; }
-    );
-    return it != _requiredAssets.cend();
-}
-
 void Asset::require(std::shared_ptr<Asset> child) {
     if (state() != Asset::State::Unloaded) {
         throw ghoul::RuntimeError("Cannot require child asset when already loaded");
@@ -701,10 +691,8 @@ void Asset::require(std::shared_ptr<Asset> child) {
         unrequire(child.get());
     }
 
-    if (isSynchronized()) {
-        if (child->isLoaded() && !child->isSynchronized()) {
-            child->startSynchronizations();
-        }
+    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
+        child->startSynchronizations();
     }
 
     if (isInitialized()) {
@@ -803,15 +791,6 @@ void Asset::unrequest(Asset* child) {
     child->unloadIfUnwanted();
 }
 
-bool Asset::requests(Asset* asset) const {
-    const auto it = std::find_if(
-        _requestedAssets.cbegin(),
-        _requestedAssets.cend(),
-        [asset](const std::shared_ptr<Asset>& dep) { return dep.get() == asset; }
-    );
-    return it != _requiredAssets.cend();
-}
-
 std::vector<Asset*> Asset::requiredAssets() const {
     std::vector<Asset*> res;
     res.reserve(_requiredAssets.size());
@@ -821,33 +800,11 @@ std::vector<Asset*> Asset::requiredAssets() const {
     return res;
 }
 
-std::vector<Asset*> Asset::requiringAssets() const {
-    std::vector<Asset*> res;
-    res.reserve(_requiringAssets.size());
-    for (const std::weak_ptr<Asset>& a : _requiringAssets) {
-        if (std::shared_ptr<Asset> shared = a.lock();  shared) {
-            res.push_back(shared.get());
-        }
-    }
-    return res;
-}
-
 std::vector<Asset*> Asset::requestedAssets() const {
     std::vector<Asset*> res;
     res.reserve(_requestedAssets.size());
     for (const std::shared_ptr<Asset>& a : _requestedAssets) {
         res.push_back(a.get());
-    }
-    return res;
-}
-
-std::vector<Asset*> Asset::requestingAssets() const {
-    std::vector<Asset*> res;
-    res.reserve(_requestingAssets.size());
-    for (const std::weak_ptr<Asset>& a : _requestingAssets) {
-        if (std::shared_ptr<Asset> shared = a.lock();  shared) {
-            res.push_back(shared.get());
-        }
     }
     return res;
 }
