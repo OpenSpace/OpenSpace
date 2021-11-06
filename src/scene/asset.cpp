@@ -55,7 +55,7 @@ namespace {
                 else if (sync->isSyncing()) {
                     // A resource is still synchronizing but its size is unknown.
                     // Impossible to know the global progress.
-                    return 0;
+                    return 0.f;
                 }
             }
         }
@@ -124,21 +124,16 @@ void Asset::setState(Asset::State state) {
 }
 
 void Asset::requiredAssetChangedState(Asset::State childState) {
-    if (!isLoaded()) {
-        // Prohibit state change to SyncResolved if additional requirements
-        // may still be added
+    if (!isLoaded() || isInitialized() || _state == State::InitializationFailed) {
+        // 1. Prohibit state change to SyncResolved if additional requirements may still
+        //    be added
+        // 2. Do not do anything if this asset was already initialized. This may happen if
+        //    there are multiple requirement paths from this asset to the same child,
+        //    which causes this method to be called more than once
+        // 3. Do not do anything if the asset failed to initialize
         return;
     }
-    if (isInitialized()) {
-        // Do not do anything if this asset was already initialized. This may happen if
-        // there are multiple requirement paths from this asset to the same child, which
-        // causes this method to be called more than once
-        return;
-    }
-    if (_state == State::InitializationFailed) {
-        // Do not do anything if the asset failed to initialize
-        return;
-    }
+
     if (childState == State::SyncResolved) {
         if (isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -166,8 +161,7 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
     _synchronizations.push_back(sync);
 
     // Set up callback for synchronization state change
-    // The synchronization watcher will make sure that callbacks
-    // are invoked in the main thread.
+    // The synchronization watcher ensures that callbacks are invoked in the main thread
 
     SynchronizationWatcher::WatchHandle watch =
         _synchronizationWatcher->watchSynchronization(

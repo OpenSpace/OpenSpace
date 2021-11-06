@@ -111,18 +111,6 @@ private:
     void setCurrentAsset(Asset* asset);
     void addLuaDependencyTable(Asset* dependant, Asset* dependency);
 
-    // Lua functions
-    int onInitializeLua(Asset* asset);
-    int onDeinitializeLua(Asset* asset);
-    int onInitializeDependencyLua(Asset* dependant, Asset* dependency);
-    int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
-    int requireLua(Asset* dependant);
-    int requestLua(Asset* parent);
-    int existsLua(Asset* asset);
-    int localResourceLua(Asset* asset);
-    int syncedResourceLua(Asset* asset);
-    int exportAssetLua(Asset* asset);
-
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
     Asset* _currentAsset = nullptr;
