@@ -101,10 +101,10 @@ void HttpSynchronization::start() {
         return;
     }
 
-    const std::string& query =
-        std::string("?") + QueryKeyIdentifier + "=" + _identifier + "&" +
-        QueryKeyFileVersion + "=" + std::to_string(_version) + "&" +
-        QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
+    const std::string& query = fmt::format(
+        "?identifier={}&file_version={}&application_version={}",
+        _identifier, _version, ApplicationVersion
+    );
 
     _syncThread = std::thread(
         [this](const std::string& q) {

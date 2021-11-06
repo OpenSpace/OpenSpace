@@ -120,7 +120,7 @@ private:
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
-    std::shared_ptr<Asset> getAsset(const std::string& name);
+    std::shared_ptr<Asset> asset(const std::string& name);
     std::filesystem::path currentDirectory() const;
 
     void setCurrentAsset(Asset* asset);

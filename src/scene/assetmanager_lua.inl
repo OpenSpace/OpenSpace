@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 
 namespace openspace::luascriptfunctions::asset {
@@ -31,25 +30,13 @@ namespace openspace::luascriptfunctions::asset {
 int add(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
     const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    if (global::renderEngine->scene()) {
-        AssetManager& assetManager = global::openSpaceEngine->assetManager();
-        assetManager.add(assetName);
-    }
-    else {
-        // The scene might not exist yet if OpenSpace was started without specifying an
-        // initial asset
-        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
-    }
-
+    global::openSpaceEngine->assetManager().add(assetName);
     return 0;
 }
 
 int remove(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
     const std::string assetName = ghoul::lua::value<std::string>(L);
-
-
     global::openSpaceEngine->assetManager().remove(assetName);
     return 0;
 }

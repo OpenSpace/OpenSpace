@@ -39,7 +39,6 @@ public:
 
     virtual ~HttpSynchronization();
 
-
     std::string directory() override;
     void start() override;
     void cancel() override;

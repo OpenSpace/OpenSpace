@@ -41,28 +41,6 @@
 namespace {
     constexpr const char* AssetGlobalVariableName = "asset";
 
-    constexpr const char* RequireFunctionName = "require";
-    constexpr const char* ExistsFunctionName = "exists";
-    constexpr const char* ExportFunctionName = "export";
-
-    constexpr const char* SyncedResourceFunctionName = "syncedResource";
-    constexpr const char* LocalResourceFunctionName = "localResource";
-
-    constexpr const char* OnInitializeFunctionName = "onInitialize";
-    constexpr const char* OnDeinitializeFunctionName = "onDeinitialize";
-
-    constexpr const char* DirectoryConstantName = "directory";
-    constexpr const char* FilePathConstantName = "filePath";
-
-    constexpr const char* MetaInformationKey = "meta";
-    constexpr const char* MetaInformationName = "Name";
-    constexpr const char* MetaInformationVersion = "Version";
-    constexpr const char* MetaInformationDescription = "Description";
-    constexpr const char* MetaInformationAuthor = "Author";
-    constexpr const char* MetaInformationURL = "URL";
-    constexpr const char* MetaInformationLicense = "License";
-    constexpr const char* MetaInformationIdentifiers = "Identifiers";
-
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
     constexpr const char* DependantsTableName = "_dependants";
@@ -194,7 +172,6 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     // |  |- localResource
     // |  |- syncedResource
     // |  |- require
-    // |  |- request
     // |  |- exists
     // |  |- export
     // |  |- onInitialize
@@ -231,53 +208,53 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     // string localResource(string path)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::localResource, 1);
-    lua_setfield(*_luaState, assetTableIndex, LocalResourceFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "localResource");
 
     // Register synced resource function
     // string syncedResource(string path)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::syncedResource, 1);
-    lua_setfield(*_luaState, assetTableIndex, SyncedResourceFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "syncedResource");
 
     // Register require function
     // Asset, Dependency require(string path)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::require, 1);
-    lua_setfield(*_luaState, assetTableIndex, RequireFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "require");
 
     // Register exists function
     // bool exists(string path)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exists, 1);
-    lua_setfield(*_luaState, assetTableIndex, ExistsFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "exists");
 
     // Register export-dependency function
     // export(string key, any value)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::exportAsset, 1);
-    lua_setfield(*_luaState, assetTableIndex, ExportFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "export");
 
     // Register onInitialize function
     // void onInitialize(function<void()> initializationFunction)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::onInitialize, 1);
-    lua_setfield(*_luaState, assetTableIndex, OnInitializeFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "onInitialize");
 
     // Register onDeinitialize function
     // void onDeinitialize(function<void()> deinitializationFunction)
     ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(*_luaState, &assetloader::onDeinitialize, 1);
-    lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
+    lua_setfield(*_luaState, assetTableIndex, "onDeinitialize");
 
     // Register directory constant
     // string directory
     ghoul::lua::push(*_luaState, asset->assetDirectory());
-    lua_setfield(*_luaState, assetTableIndex, DirectoryConstantName);
+    lua_setfield(*_luaState, assetTableIndex, "directory");
 
     // Register filePath constant
     // string filePath
     ghoul::lua::push(*_luaState, asset->assetFilePath());
-    lua_setfield(*_luaState, assetTableIndex, FilePathConstantName);
+    lua_setfield(*_luaState, assetTableIndex, "filePath");
 
     // Attach Asset table to AssetInfo table
     lua_setfield(*_luaState, assetInfoTableIndex, AssetTableName);
@@ -338,13 +315,13 @@ bool AssetLoader::loadAsset(Asset* asset) {
     // 1. Load the asset table
     lua_getglobal(*_luaState, AssetGlobalVariableName);
     ghoul_assert(lua_istable(*_luaState, -1), "Expected 'asset' table");
-    lua_getfield(*_luaState, -1, MetaInformationKey);
+    lua_getfield(*_luaState, -1, "meta");
     if (!lua_isnil(*_luaState, -1)) {
         // The 'meta' object exist;  quick sanity check that it is a table
         if (!lua_istable(*_luaState, -1)) {
             LWARNING(fmt::format(
-                "When loading asset {}, encountered a '{}' entry that was not a table",
-                asset->assetFilePath(), MetaInformationKey
+                "When loading asset {}, encountered a 'meta' entry that was not a table",
+                asset->assetFilePath()
             ));
         }
         else {
@@ -353,32 +330,27 @@ bool AssetLoader::loadAsset(Asset* asset) {
             ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
 
             Asset::MetaInformation meta;
-            if (metaDict.hasValue<std::string>(MetaInformationName)) {
-                meta.name = metaDict.value<std::string>(MetaInformationName);
-
+            if (metaDict.hasValue<std::string>("Name")) {
+                meta.name = metaDict.value<std::string>("Name");
             }
-            if (metaDict.hasValue<std::string>(MetaInformationVersion)) {
-                meta.version = metaDict.value<std::string>(MetaInformationVersion);
-
+            if (metaDict.hasValue<std::string>("Version")) {
+                meta.version = metaDict.value<std::string>("Version");
             }
-            if (metaDict.hasValue<std::string>(MetaInformationDescription)) {
-                meta.description =
-                    metaDict.value<std::string>(MetaInformationDescription);
-
+            if (metaDict.hasValue<std::string>("Description")) {
+                meta.description = metaDict.value<std::string>("Description");
             }
-            if (metaDict.hasValue<std::string>(MetaInformationAuthor)) {
-                meta.author = metaDict.value<std::string>(MetaInformationAuthor);
-
+            if (metaDict.hasValue<std::string>("Author")) {
+                meta.author = metaDict.value<std::string>("Author");
             }
-            if (metaDict.hasValue<std::string>(MetaInformationURL)) {
-                meta.url = metaDict.value<std::string>(MetaInformationURL);
+            if (metaDict.hasValue<std::string>("URL")) {
+                meta.url = metaDict.value<std::string>("URL");
             }
-            if (metaDict.hasValue<std::string>(MetaInformationLicense)) {
-                meta.license = metaDict.value<std::string>(MetaInformationLicense);
+            if (metaDict.hasValue<std::string>("License")) {
+                meta.license = metaDict.value<std::string>("License");
             }
-            if (metaDict.hasValue<ghoul::Dictionary>(MetaInformationIdentifiers)) {
+            if (metaDict.hasValue<ghoul::Dictionary>("Identifiers")) {
                 ghoul::Dictionary iddict =
-                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                    metaDict.value<ghoul::Dictionary>("Identifiers");
                 for (size_t i = 1; i <= iddict.size(); ++i) {
                     std::string key = std::to_string(i);
                     std::string identifier = iddict.value<std::string>(key);
@@ -430,13 +402,12 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
 }
 
-std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
+std::shared_ptr<Asset> AssetLoader::asset(const std::string& name) {
     std::filesystem::path directory = currentDirectory();
     std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path.string());
-
     if (it != _trackedAssets.end()) {
         if (std::shared_ptr<Asset> a = it->second.lock(); a != nullptr) {
             return a;
@@ -507,9 +478,9 @@ std::shared_ptr<Asset> AssetLoader::add(const std::string& identifier) {
     ZoneScoped
 
     setCurrentAsset(_rootAsset.get());
-    std::shared_ptr<Asset> asset = getAsset(identifier);
-    _currentAsset->request(asset);
-    return asset;
+    std::shared_ptr<Asset> a = asset(identifier);
+    _currentAsset->request(a);
+    return a;
 }
 
 void AssetLoader::remove(const std::string& identifier) {
@@ -684,7 +655,7 @@ int AssetLoader::requireLua(Asset* dependant) {
     std::string assetName = luaL_checkstring(*_luaState, 1);
     lua_settop(*_luaState, 0);
 
-    std::shared_ptr<Asset> dependency = getAsset(assetName);
+    std::shared_ptr<Asset> dependency = asset(assetName);
     _currentAsset->require(dependency);
 
     if (!dependency) {
@@ -774,14 +745,14 @@ void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
     lua_pushlightuserdata(*_luaState, dependant);
     lua_pushlightuserdata(*_luaState, dependency);
     lua_pushcclosure(*_luaState, &assetloader::onInitializeDependency, 2);
-    lua_setfield(*_luaState, currentDependantTableIndex, OnInitializeFunctionName);
+    lua_setfield(*_luaState, currentDependantTableIndex, "onInitialize");
 
     // Register onDependencyDeinitialize function
     // void onDeinitialize(function<void()> deinitializationFunction)
     lua_pushlightuserdata(*_luaState, dependant);
     lua_pushlightuserdata(*_luaState, dependency);
     lua_pushcclosure(*_luaState, &assetloader::onDeinitializeDependency, 2);
-    lua_setfield(*_luaState, currentDependantTableIndex, OnDeinitializeFunctionName);
+    lua_setfield(*_luaState, currentDependantTableIndex, "onDeinitialize");
 
     // Duplicate the table reference on the stack, so it remains after assignment.
     lua_pushvalue(*_luaState, -1);
