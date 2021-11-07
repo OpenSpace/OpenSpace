@@ -60,8 +60,8 @@ public:
     void remove(const std::string& identifier);
 
     /**
-     * Return the asset identified by the identifier,
-     * if the asset is tracked. Otherwise return nullptr.
+     * Return the asset identified by the identifier, if the asset is tracked. Otherwise 
+     * return nullptr.
      */
     std::shared_ptr<Asset> has(const std::string& name) const;
 
@@ -91,16 +91,6 @@ public:
      */
     void callOnDeinitialize(Asset* asset);
 
-    /**
-     * Call the dependency.onInitialize function specified in the asset file
-     */
-    void callOnDependencyInitialize(Asset* asset, Asset* dependant);
-
-    /**
-     * Call the dependency.onDeinitialize function specified in the asset file
-     */
-    void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
-
 private:
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
@@ -109,7 +99,6 @@ private:
     std::filesystem::path currentDirectory() const;
 
     void setCurrentAsset(Asset* asset);
-    void addLuaDependencyTable(Asset* dependant, Asset* dependency);
 
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
@@ -120,12 +109,8 @@ private:
     ghoul::lua::LuaState* _luaState;
 
     // References to Lua values
-    std::unordered_map<Asset*, std::vector<int>> _onInitializationFunctionRefs;
-    std::unordered_map<Asset*, std::vector<int>> _onDeinitializationFunctionRefs;
-    std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
-        _onDependencyInitializationFunctionRefs;
-    std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
-        _onDependencyDeinitializationFunctionRefs;
+    std::unordered_map<Asset*, std::vector<int>> _onInitializeFunctionRefs;
+    std::unordered_map<Asset*, std::vector<int>> _onDeinitializeFunctionRefs;
 
     int _assetsTableRef = 0;
 };

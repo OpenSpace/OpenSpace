@@ -513,55 +513,6 @@ bool Asset::initialize() {
 
     // 4. Update state
     setState(State::Initialized);
-
-    // 5. Call dependency lua onInitialize of this and requirements
-    for (const std::shared_ptr<Asset>& child : _requiredAssets) {
-        try {
-            _loader->callOnDependencyInitialize(child.get(), this);
-        }
-        catch (const ghoul::lua::LuaRuntimeException& e) {
-            LERROR(fmt::format(
-                "Failed to initialize required asset {} of {}; {}: {}",
-                child->id(), id(), e.component, e.message
-            ));
-            // TODO: rollback;
-            setState(State::InitializationFailed);
-            return false;
-        }
-    }
-
-    // 6. Call dependency lua onInitialize of this and initialized requests
-    for (const std::shared_ptr<Asset>& child : _requestedAssets) {
-        if (child->isInitialized()) {
-            try {
-                _loader->callOnDependencyInitialize(child.get(), this);
-            }
-            catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR(fmt::format(
-                    "Failed to initialize requested asset {} of {}; {}: {}",
-                    child->id(), id(), e.component, e.message
-                ));
-                // TODO: rollback;
-            }
-        }
-    }
-
-    // 7. Call dependency lua onInitialize of initialized requesting assets and this
-    for (const std::weak_ptr<Asset>& parent : _requestingAssets) {
-        std::shared_ptr<Asset> p = parent.lock();
-        if (p && p->isInitialized()) {
-            try {
-                _loader->callOnDependencyInitialize(this, p.get());
-            }
-            catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR(fmt::format(
-                    "Failed to initialize required asset {} of {}; {}: {}",
-                    id(), p->id(), e.component, e.message
-                ));
-                // TODO: rollback;
-            }
-        }
-    }
     return true;
 }
 
@@ -578,51 +529,7 @@ void Asset::deinitialize() {
     }
     LDEBUG(fmt::format("Deintializing asset '{}'", id()));
 
-    // Perform inverse actions as in initialize, in reverse order (7 - 1)
-
-    // 7. Call dependency lua onDeinitialize of initialized requesting assets and this
-    for (const std::weak_ptr<Asset>& parent : _requestingAssets) {
-        std::shared_ptr<Asset> p = parent.lock();
-        if (p && p->isInitialized()) {
-            try {
-                _loader->callOnDependencyDeinitialize(this, p.get());
-            }
-            catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR(fmt::format(
-                    "Failed to deinitialize requested asset {} of {}; {}: {}",
-                    id(), p->id(), e.component, e.message
-                ));
-            }
-        }
-    }
-
-    // 6. Call dependency lua onDeinitialize of this and initialized requests
-    for (const std::shared_ptr<Asset>& child : _requestedAssets) {
-        if (child->isInitialized()) {
-            try {
-                _loader->callOnDependencyDeinitialize(child.get(), this);
-            }
-            catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR(fmt::format(
-                    "Failed to deinitialize requested asset {} of {}; {}: {}",
-                    child->id(), id(), e.component, e.message
-                ));
-            }
-        }
-    }
-
-    // 5. Call dependency lua onInitialize of this and requirements
-    for (const std::shared_ptr<Asset>& child : _requiredAssets) {
-        try {
-            _loader->callOnDependencyDeinitialize(child.get(), this);
-        }
-        catch (const ghoul::lua::LuaRuntimeException& e) {
-            LERROR(fmt::format(
-                "Failed to deinitialize required asset {} of {}; {}: {}",
-                child->id(), id(), e.component, e.message
-            ));
-        }
-    }
+    // Perform inverse actions as in initialize, in reverse order (4 - 1)
 
     // 4. Update state
     setState(Asset::State::SyncResolved);

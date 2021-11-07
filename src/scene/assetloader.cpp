@@ -44,7 +44,6 @@ namespace {
 
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
-    constexpr const char* DependantsTableName = "_dependants";
 
     constexpr const char* _loggerCat = "AssetLoader";
 
@@ -226,14 +225,13 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
 
     // Register require function
     // Asset, Dependency require(string path)
-    ghoul::lua::push(*_luaState, asset, this);
+    ghoul::lua::push(*_luaState, this);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetLoader* loader = ghoul::lua::userData<AssetLoader>(L, 2);
+            AssetLoader* loader = ghoul::lua::userData<AssetLoader>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
             
             std::string assetName = ghoul::lua::value<std::string>(L);
@@ -248,32 +246,13 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
                 );
             }
 
-            loader->addLuaDependencyTable(asset, dependency.get());
-
             // Get the exports table
             lua_rawgeti(L, LUA_REGISTRYINDEX, loader->_assetsTableRef);
             lua_getfield(L, -1, dependency->id().c_str());
             lua_getfield(L, -1, ExportsTableName);
-            const int exportsTableIndex = lua_gettop(L);
-
-            // Get the dependency table
-            lua_rawgeti(L, LUA_REGISTRYINDEX, loader->_assetsTableRef);
-            lua_getfield(L, -1, dependency->id().c_str());
-            lua_getfield(L, -1, DependantsTableName);
-            lua_getfield(L, -1, asset->id().c_str());
-            const int dependencyTableIndex = lua_gettop(L);
-
-            lua_pushvalue(L, exportsTableIndex);
-            lua_pushvalue(L, dependencyTableIndex);
-
-            lua_replace(L, 2);
-            lua_replace(L, 1);
-            lua_settop(L, 2);
-
-            ghoul_assert(lua_gettop(L) == 2, "Incorrect number of items left on stack");
-            return 2;
+            return 1;
         },
-        2
+        1
     );
     lua_setfield(*_luaState, assetTableIndex, "require");
 
@@ -316,7 +295,11 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
             AssetLoader* loader = ghoul::lua::userData<AssetLoader>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::exportAsset");
 
-            const std::string exportName = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+            const std::string exportName = ghoul::lua::value<std::string>(
+                L,
+                1,
+                ghoul::lua::PopValue::No
+            );
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, loader->_assetsTableRef);
             lua_getfield(L, -1, asset->id().c_str());
@@ -348,7 +331,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            loader->_onInitializationFunctionRefs[asset].push_back(referenceIndex);
+            loader->_onInitializeFunctionRefs[asset].push_back(referenceIndex);
             
             lua_settop(L, 0);
             return 0;
@@ -371,7 +354,7 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            loader->_onDeinitializationFunctionRefs[asset].push_back(referenceIndex);
+            loader->_onDeinitializeFunctionRefs[asset].push_back(referenceIndex);
 
             lua_settop(L, 0);
             return 0;
@@ -392,11 +375,6 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
 
     // Attach Asset table to AssetInfo table
     lua_setfield(*_luaState, assetInfoTableIndex, AssetTableName);
-
-    // Register empty dependant table on AssetInfo table.
-    // (importer => dependant object)
-    lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetInfoTableIndex, DependantsTableName);
 
     // Extend global asset info table (pushed to the lua stack earlier)
     // with this AssetInfo table
@@ -500,33 +478,15 @@ bool AssetLoader::loadAsset(Asset* asset) {
 }
 
 void AssetLoader::unloadAsset(Asset* asset) {
-    for (int ref : _onInitializationFunctionRefs[asset]) {
+    for (int ref : _onInitializeFunctionRefs[asset]) {
        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
-    _onInitializationFunctionRefs[asset].clear();
+    _onInitializeFunctionRefs[asset].clear();
 
-    for (int ref : _onDeinitializationFunctionRefs[asset]) {
+    for (int ref : _onDeinitializeFunctionRefs[asset]) {
         luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
-    _onDeinitializationFunctionRefs[asset].clear();
-
-    for (std::pair<Asset*, std::vector<int>> it :
-         _onDependencyInitializationFunctionRefs[asset])
-    {
-        for (int ref : it.second) {
-            luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
-        }
-    }
-    _onDependencyInitializationFunctionRefs.erase(asset);
-
-    for (std::pair<Asset*, std::vector<int>> it :
-         _onDependencyDeinitializationFunctionRefs[asset])
-    {
-        for (int ref : it.second) {
-            luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
-        }
-    }
-    _onDependencyDeinitializationFunctionRefs.erase(asset);
+    _onDeinitializeFunctionRefs[asset].clear();
 
     asset->clearSynchronizations();
     tearDownAssetLuaTable(asset);
@@ -606,8 +566,9 @@ Asset& AssetLoader::rootAsset() {
 
 void AssetLoader::callOnInitialize(Asset* asset) {
     ZoneScoped
+    ghoul_precondition(asset, "Asset must not be nullptr");
 
-    for (int init : _onInitializationFunctionRefs[asset]) {
+    for (int init : _onInitializeFunctionRefs[asset]) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
@@ -623,8 +584,9 @@ void AssetLoader::callOnInitialize(Asset* asset) {
 
 void AssetLoader::callOnDeinitialize(Asset* asset) {
     ZoneScoped
+    ghoul_precondition(asset, "Asset must not be nullptr");
 
-    const std::vector<int>& funs = _onDeinitializationFunctionRefs[asset];
+    const std::vector<int>& funs = _onDeinitializeFunctionRefs[asset];
     for (auto it = funs.rbegin(); it != funs.rend(); it++) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
@@ -639,48 +601,9 @@ void AssetLoader::callOnDeinitialize(Asset* asset) {
     }
 }
 
-void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
-    ZoneScoped
-
-    for (int init : _onDependencyInitializationFunctionRefs[dependant][asset]) {
-        lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
-        if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "When initializing dependency {} -> {}: {}",
-                dependant->assetFilePath(), asset->assetFilePath(),
-                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            ));
-        }
-        // Clean up lua stack, in case the pcall left anything there.
-        lua_settop(*_luaState, 0);
-    }
-    // Potential Todo:
-    // Call dependency->onInitialize with the asset table
-    // exported by the child asset as argument
-}
-
-void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
-    ZoneScoped
-
-    const std::vector<int>& funs =
-        _onDependencyDeinitializationFunctionRefs[dependant][asset];
-
-    for (auto it = funs.rbegin(); it != funs.rend(); it++) {
-        lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
-        if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "When deinitializing dependency {} -> {}: {}",
-                dependant->assetFilePath(), asset->assetFilePath(),
-                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
-            ));
-        }
-        // Clean up lua stack, in case the pcall left anything there.
-        lua_settop(*_luaState, 0);
-    }
-}
-
 void AssetLoader::setCurrentAsset(Asset* asset) {
     ZoneScoped
+    ghoul_precondition(asset, "Asset must not be nullptr");
 
     const int top = lua_gettop(*_luaState);
 
@@ -698,81 +621,6 @@ void AssetLoader::setCurrentAsset(Asset* asset) {
     lua_getfield(*_luaState, -1, asset->id().c_str());
     lua_getfield(*_luaState, -1, AssetTableName);
     lua_setglobal(*_luaState, AssetGlobalVariableName);
-
-    lua_settop(*_luaState, top);
-}
-
-void AssetLoader::addLuaDependencyTable(Asset* dependant, Asset* dependency) {
-    const int top = lua_gettop(*_luaState);
-
-    const std::string dependantId = dependant->id();
-    const std::string dependencyId = dependency->id();
-
-    // Extract the imported asset's dependants table
-    lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
-    lua_getfield(*_luaState, -1, dependencyId.c_str());
-    lua_getfield(*_luaState, -1, DependantsTableName);
-    const int dependantsTableIndex = lua_gettop(*_luaState);
-
-    // Set up Dependency object
-    lua_newtable(*_luaState);
-    const int currentDependantTableIndex = lua_gettop(*_luaState);
-
-    // Register onDependencyInitialize function
-    // Adds a Lua function to be called when a dependency link is initialized
-    // void onInitialize(function<void()> initializationFunction)
-    ghoul::lua::push(*_luaState, dependant, dependency, this);
-    lua_pushcclosure(
-        *_luaState,
-        [](lua_State* L) {
-            ZoneScoped
-            
-            Asset* dependant = ghoul::lua::userData<Asset>(L, 1);
-            Asset* dependency = ghoul::lua::userData<Asset>(L, 2);
-            AssetLoader* loader = ghoul::lua::userData<AssetLoader>(L, 3);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitializeDependency");
-
-            const int refIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            auto& map = loader->_onDependencyInitializationFunctionRefs;
-            map[dependant][dependency].push_back(refIndex);
-
-            lua_settop(L, 0);
-            return 0;
-        },
-        3
-    );
-    lua_setfield(*_luaState, currentDependantTableIndex, "onInitialize");
-
-    // Register onDependencyDeinitialize function
-    // Adds a Lua function to be called upon asset deinitialization
-    // void onDeinitialize(function<void()> deinitializationFunction)
-    ghoul::lua::push(*_luaState, dependant, dependency, this);
-    lua_pushcclosure(
-        *_luaState,
-        [](lua_State* L) {
-            ZoneScoped
-                
-            Asset* dependant = ghoul::lua::userData<Asset>(L, 1);
-            Asset* dependency = ghoul::lua::userData<Asset>(L, 2);
-            AssetLoader* loader = ghoul::lua::userData<AssetLoader>(L, 3);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitializeDependency");
-
-            const int refIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            auto& map = loader->_onDependencyDeinitializationFunctionRefs;
-            map[dependant][dependency].push_back(refIndex);
-
-            lua_settop(L, 0);
-            return 0;
-        },
-        3
-    );
-    lua_setfield(*_luaState, currentDependantTableIndex, "onDeinitialize");
-
-    // Duplicate the table reference on the stack, so it remains after assignment.
-    lua_pushvalue(*_luaState, -1);
-
-    // Register the dependant table on the imported asset's dependants table.
-    lua_setfield(*_luaState, dependantsTableIndex, dependantId.c_str());
 
     lua_settop(*_luaState, top);
 }
