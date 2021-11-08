@@ -26,7 +26,6 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
-#include <modules/sync/tasks/syncassettask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/rendering/renderable.h>
@@ -119,10 +118,6 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             }
         }
     );
-
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<SyncAssetTask>("SyncAssetTask");
 }
 
 std::string SyncModule::synchronizationRoot() const {

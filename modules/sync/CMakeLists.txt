@@ -28,7 +28,6 @@ set(HEADER_FILES
   syncmodule.h
   syncs/httpsynchronization.h
   syncs/urlsynchronization.h
-  tasks/syncassettask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,7 +36,6 @@ set(SOURCE_FILES
   syncmodule_lua.inl
   syncs/httpsynchronization.cpp
   syncs/urlsynchronization.cpp
-  tasks/syncassettask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

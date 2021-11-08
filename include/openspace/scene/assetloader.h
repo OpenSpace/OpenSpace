@@ -39,16 +39,19 @@ namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 
+class AssetManager;
 class ResourceSynchronization;
 class SynchronizationWatcher;
 
 class AssetLoader {
 public:
+    friend class AssetManager;
+
     AssetLoader(ghoul::lua::LuaState* luaState, SynchronizationWatcher* syncWatcher,
         std::string assetRootDirectory);
 
     ~AssetLoader();
-
+private:
     /**
      * Add the asset as a request of the root asset
      */
@@ -58,7 +61,6 @@ public:
      * Remove the asset as a request of the root asset
      */
     void remove(const std::string& identifier);
-
     /**
      * Return the asset identified by the identifier, if the asset is tracked. Otherwise 
      * return nullptr.
@@ -70,6 +72,7 @@ public:
 
     /// Return the root asset
     Asset& rootAsset();
+public:
 
     /**
      * Load an asset
