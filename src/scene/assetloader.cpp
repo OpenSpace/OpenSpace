@@ -51,7 +51,7 @@ namespace {
     constexpr const char* SceneFileSuffix = "scene";
 
     enum class PathType {
-        RelativeToAsset = 0,
+        RelativeToAsset,
         RelativeToAssetRoot,
         Absolute,
         Tokenized

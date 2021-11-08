@@ -57,26 +57,22 @@ bool AssetManager::update() {
     ZoneScoped
 
     // Add assets
-    for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+    for (const std::string& asset : _assetAddQueue) {
         ZoneScopedN("(add) Pending State Change")
-        const std::string& path = c.first;
-        const bool add = c.second;
-        if (add) {
-            _assetLoader.add(path);
-            global::profile->addAsset(path);
-        }
+        _assetLoader.add(asset);
+        global::profile->addAsset(asset);
     }
+    _assetAddQueue.clear();
+
     // Remove assets
-    for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+    for (const std::string& asset : _assetRemoveQueue) {
         ZoneScopedN("(remove) Pending State change")
-        const std::string& path = c.first;
-        const bool remove = !c.second;
-        if (remove && _assetLoader.has(path)) {
-            _assetLoader.remove(path);
-            global::profile->removeAsset(path);
+        if (_assetLoader.has(asset)) {
+            _assetLoader.remove(asset);
+            global::profile->removeAsset(asset);
         }
     }
-    _pendingStateChangeCommands.clear();
+    _assetRemoveQueue.clear();
 
     // Change state based on synchronizations
     _synchronizationWatcher.notify();
@@ -85,19 +81,32 @@ bool AssetManager::update() {
 }
 
 void AssetManager::add(const std::string& path) {
-    _pendingStateChangeCommands[path] = true;
+    // First check if the path is already in the remove queue. If so, remove it from there
+    const auto it = _assetRemoveQueue.find(path);
+    if (it != _assetRemoveQueue.end()) {
+        _assetRemoveQueue.erase(it);
+    }
+
+    _assetAddQueue.insert(path);
 }
 
 void AssetManager::remove(const std::string& path) {
-    _pendingStateChangeCommands[path] = false;
+    // First check if the path is already in the add queue. If so, remove it from there
+    const auto it = _assetAddQueue.find(path);
+    if (it != _assetAddQueue.end()) {
+        _assetAddQueue.erase(it);
+    }
+
+    _assetRemoveQueue.insert(path);
 }
 
 void AssetManager::removeAll() {
     ZoneScoped
 
-    _pendingStateChangeCommands.clear();
+    _assetAddQueue.clear();
+    _assetRemoveQueue.clear();
     for (const Asset* a : _assetLoader.rootAsset().requestedAssets()) {
-        _pendingStateChangeCommands[a->assetFilePath().string()] = false;
+        _assetRemoveQueue.insert(a->assetFilePath().string());
     }
 }
 
@@ -107,10 +116,6 @@ const Asset& AssetManager::rootAsset() const {
 
 Asset& AssetManager::rootAsset() {
     return _assetLoader.rootAsset();
-}
-
-AssetLoader& AssetManager::assetLoader() {
-    return _assetLoader;
 }
 
 scripting::LuaLibrary AssetManager::luaLibrary() {

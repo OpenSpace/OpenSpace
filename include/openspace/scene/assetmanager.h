@@ -29,7 +29,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <memory>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace openspace {
@@ -62,10 +62,9 @@ public:
     bool update();
     scripting::LuaLibrary luaLibrary();
 
-    AssetLoader& assetLoader();
-
 private:
-    std::unordered_map<std::string, bool> _pendingStateChangeCommands;
+    std::unordered_set<std::string> _assetAddQueue;
+    std::unordered_set<std::string> _assetRemoveQueue;
     std::mutex _pendingInitializationsMutex;
     std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
