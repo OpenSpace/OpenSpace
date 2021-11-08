@@ -51,8 +51,8 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
-#include <openspace/scene/assetloader.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>

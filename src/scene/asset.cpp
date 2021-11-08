@@ -24,7 +24,7 @@
 
 #include <openspace/scene/asset.h>
 
-#include <openspace/scene/assetloader.h>
+#include <openspace/scene/assetmanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -66,7 +66,7 @@ namespace {
     }
 } // namespace
 
-Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
+Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher)
     : _state(State::SyncResolved)
     , _loader(loader)
     , _synchronizationWatcher(watcher)
@@ -74,7 +74,7 @@ Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
     , _assetName("Root Asset")
 {}
 
-Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath)
+Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath)
     : _state(State::Unloaded)
     , _loader(loader)
     , _synchronizationWatcher(watcher)
@@ -447,7 +447,7 @@ bool Asset::load() {
         return true;
     }
 
-    const bool loaded = _loader->loadAsset(this);
+    const bool loaded = _loader->loader_loadAsset(this);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -458,7 +458,7 @@ void Asset::unload() {
     }
 
     setState(State::Unloaded);
-    _loader->unloadAsset(this);
+    _loader->loader_unloadAsset(this);
 
     for (Asset* child : requiredAssets()) {
         unrequire(child);
@@ -501,7 +501,7 @@ bool Asset::initialize() {
 
     // 3. Call lua onInitialize
     try {
-        _loader->callOnInitialize(this);
+        _loader->loader_callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format("Failed to initialize asset {}", id()));
@@ -536,7 +536,7 @@ void Asset::deinitialize() {
 
     // 3. Call lua onInitialize
     try {
-        _loader->callOnDeinitialize(this);
+        _loader->loader_callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(

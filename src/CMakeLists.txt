@@ -138,7 +138,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
@@ -329,7 +328,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/profile.h

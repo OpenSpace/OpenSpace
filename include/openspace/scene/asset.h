@@ -35,7 +35,7 @@
 
 namespace openspace {
 
-class AssetLoader;
+class AssetManager;
 
 class Asset : public std::enable_shared_from_this<Asset> {
 public:
@@ -63,12 +63,12 @@ public:
     /**
      * Root asset constructor
      */
-    Asset(AssetLoader* loader, SynchronizationWatcher* watcher);
+    Asset(AssetManager* loader, SynchronizationWatcher* watcher);
 
     /**
      * Regular asset constructor
      */
-    Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath);
+    Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath);
 
     std::string id() const;
     std::filesystem::path assetFilePath() const;
@@ -144,7 +144,7 @@ private:
     std::vector<const Asset*> requiredSubTreeAssets() const;
 
     std::atomic<State> _state;
-    AssetLoader* _loader;
+    AssetManager* _loader;
     SynchronizationWatcher* _synchronizationWatcher;
 
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
