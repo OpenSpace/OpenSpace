@@ -118,7 +118,7 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
     , _assetRootDirectory(std::move(assetRootDirectory))
     , _luaState(state)
 {
-    loader_setCurrentAsset(_rootAsset.get());
+    setCurrentAsset(_rootAsset.get());
 
     // Create _assets table
     lua_newtable(*_luaState);
@@ -134,21 +134,25 @@ AssetManager::~AssetManager() {
 void AssetManager::initialize() {
     ZoneScoped
 
-    loader_rootAsset().initialize();
+    _rootAsset->initialize();
 }
 
 void AssetManager::deinitialize() {
-    loader_rootAsset().deinitialize();
-    loader_rootAsset().unload();
+    ZoneScoped
+
+    _rootAsset->deinitialize();
+    _rootAsset->unload();
 }
 
-bool AssetManager::update() {
+void AssetManager::update() {
     ZoneScoped
 
     // Add assets
     for (const std::string& asset : _assetAddQueue) {
         ZoneScopedN("(add) Pending State Change")
-        loader_add(asset);
+        setCurrentAsset(_rootAsset.get());
+        std::shared_ptr<Asset> a = retrieveAsset(asset);
+        _currentAsset->request(a);
         global::profile->addAsset(asset);
     }
     _assetAddQueue.clear();
@@ -156,8 +160,13 @@ bool AssetManager::update() {
     // Remove assets
     for (const std::string& asset : _assetRemoveQueue) {
         ZoneScopedN("(remove) Pending State change")
-        if (loader_has(asset)) {
-            loader_remove(asset);
+        std::filesystem::path directory = currentDirectory();
+        std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, asset);
+
+        const auto it = _trackedAssets.find(path.string());
+        if (it != _trackedAssets.end()) {
+            setCurrentAsset(_rootAsset.get());
+            _currentAsset->unrequest(it->second.lock().get());
             global::profile->removeAsset(asset);
         }
     }
@@ -165,8 +174,6 @@ bool AssetManager::update() {
 
     // Change state based on synchronizations
     _synchronizationWatcher.notify();
-
-    return false;
 }
 
 void AssetManager::add(const std::string& path) {
@@ -194,26 +201,26 @@ void AssetManager::removeAll() {
 
     _assetAddQueue.clear();
     _assetRemoveQueue.clear();
-    for (const Asset* a : loader_rootAsset().requestedAssets()) {
+    for (const Asset* a : _rootAsset->requestedAssets()) {
         _assetRemoveQueue.insert(a->assetFilePath().string());
     }
 }
 
 const Asset& AssetManager::rootAsset() const {
-    return loader_rootAsset();
+    return *_rootAsset;
 }
 
 Asset& AssetManager::rootAsset() {
-    return loader_rootAsset();
+    return *_rootAsset;
 }
 
-bool AssetManager::loader_loadAsset(Asset* asset) {
+bool AssetManager::loadAsset(Asset* asset) {
     const int top = lua_gettop(*_luaState);
     Asset* parentAsset = _currentAsset;
 
-    loader_setCurrentAsset(asset);
+    setCurrentAsset(asset);
     defer {
-        loader_setCurrentAsset(parentAsset);
+        setCurrentAsset(parentAsset);
     };
 
     if (!std::filesystem::is_regular_file(asset->assetFilePath())) {
@@ -289,7 +296,7 @@ bool AssetManager::loader_loadAsset(Asset* asset) {
     return true;
 }
 
-void AssetManager::loader_unloadAsset(Asset* asset) {
+void AssetManager::unloadAsset(Asset* asset) {
     for (int ref : _onInitializeFunctionRefs[asset]) {
        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
@@ -301,51 +308,14 @@ void AssetManager::loader_unloadAsset(Asset* asset) {
     _onDeinitializeFunctionRefs[asset].clear();
 
     asset->clearSynchronizations();
-    loader_tearDownAssetLuaTable(asset);
+    tearDownAssetLuaTable(asset);
     const auto it = _trackedAssets.find(asset->id());
     if (it != _trackedAssets.end()) {
         _trackedAssets.erase(it);
     }
 }
 
-
-std::shared_ptr<Asset> AssetManager::loader_add(const std::string& identifier) {
-    ZoneScoped
-
-    loader_setCurrentAsset(_rootAsset.get());
-    std::shared_ptr<Asset> a = loader_asset(identifier);
-    _currentAsset->request(a);
-    return a;
-}
-
-void AssetManager::loader_remove(const std::string& identifier) {
-    ZoneScoped
-
-    loader_setCurrentAsset(_rootAsset.get());
-    std::shared_ptr<Asset> asset = loader_has(identifier);
-    _currentAsset->unrequest(asset.get());
-}
-
-std::shared_ptr<Asset> AssetManager::loader_has(const std::string& name) const {
-    std::filesystem::path directory = loader_currentDirectory();
-    std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
-
-    const auto it = _trackedAssets.find(path.string());
-    if (it == _trackedAssets.end()) {
-        return nullptr;
-    }
-    return it->second.lock();
-}
-
-const Asset& AssetManager::loader_rootAsset() const {
-    return *_rootAsset;
-}
-
-Asset& AssetManager::loader_rootAsset() {
-    return *_rootAsset;
-}
-
-void AssetManager::loader_setUpAssetLuaTable(Asset* asset) {
+void AssetManager::setUpAssetLuaTable(Asset* asset) {
     // Set up lua table:
     // AssetInfo
     // |- Exports (table<name, exported data>)
@@ -445,7 +415,7 @@ void AssetManager::loader_setUpAssetLuaTable(Asset* asset) {
             
             std::string assetName = ghoul::lua::value<std::string>(L);
 
-            std::shared_ptr<Asset> dependency = loader->loader_asset(assetName);
+            std::shared_ptr<Asset> dependency = loader->retrieveAsset(assetName);
             loader->_currentAsset->require(dependency);
 
             if (!dependency) {
@@ -478,7 +448,7 @@ void AssetManager::loader_setUpAssetLuaTable(Asset* asset) {
             
             const std::string name = ghoul::lua::value<std::string>(L);
 
-            const std::filesystem::path directory = loader->loader_currentDirectory();
+            const std::filesystem::path directory = loader->currentDirectory();
             std::filesystem::path path = generateAssetPath(
                 directory,
                 loader->_assetRootDirectory,
@@ -591,7 +561,7 @@ void AssetManager::loader_setUpAssetLuaTable(Asset* asset) {
     lua_settop(*_luaState, top);
 }
 
-void AssetManager::loader_tearDownAssetLuaTable(Asset* asset) {
+void AssetManager::tearDownAssetLuaTable(Asset* asset) {
     const int top = lua_gettop(*_luaState);
     // Push the global table of AssetInfos to the lua stack.
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
@@ -605,8 +575,8 @@ void AssetManager::loader_tearDownAssetLuaTable(Asset* asset) {
 }
 
 
-std::shared_ptr<Asset> AssetManager::loader_asset(const std::string& name) {
-    std::filesystem::path directory = loader_currentDirectory();
+std::shared_ptr<Asset> AssetManager::retrieveAsset(const std::string& name) {
+    std::filesystem::path directory = currentDirectory();
     std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     // Check if asset is already loaded.
@@ -624,11 +594,11 @@ std::shared_ptr<Asset> AssetManager::loader_asset(const std::string& name) {
     );
 
     _trackedAssets.emplace(asset->id(), asset);
-    loader_setUpAssetLuaTable(asset.get());
+    setUpAssetLuaTable(asset.get());
     return asset;
 }
 
-std::filesystem::path AssetManager::loader_currentDirectory() const {
+std::filesystem::path AssetManager::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
     }
@@ -637,7 +607,7 @@ std::filesystem::path AssetManager::loader_currentDirectory() const {
     }
 }
 
-void AssetManager::loader_callOnInitialize(Asset* asset) {
+void AssetManager::callOnInitialize(Asset* asset) {
     ZoneScoped
     ghoul_precondition(asset, "Asset must not be nullptr");
 
@@ -655,7 +625,7 @@ void AssetManager::loader_callOnInitialize(Asset* asset) {
     }
 }
 
-void AssetManager::loader_callOnDeinitialize(Asset* asset) {
+void AssetManager::callOnDeinitialize(Asset* asset) {
     ZoneScoped
     ghoul_precondition(asset, "Asset must not be nullptr");
 
@@ -674,7 +644,7 @@ void AssetManager::loader_callOnDeinitialize(Asset* asset) {
     }
 }
 
-void AssetManager::loader_setCurrentAsset(Asset* asset) {
+void AssetManager::setCurrentAsset(Asset* asset) {
     ZoneScoped
     ghoul_precondition(asset, "Asset must not be nullptr");
 
@@ -697,7 +667,6 @@ void AssetManager::loader_setCurrentAsset(Asset* asset) {
 
     lua_settop(*_luaState, top);
 }
-
 
 scripting::LuaLibrary AssetManager::luaLibrary() {
     return {

@@ -447,7 +447,7 @@ bool Asset::load() {
         return true;
     }
 
-    const bool loaded = _loader->loader_loadAsset(this);
+    const bool loaded = _loader->loadAsset(this);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -458,7 +458,7 @@ void Asset::unload() {
     }
 
     setState(State::Unloaded);
-    _loader->loader_unloadAsset(this);
+    _loader->unloadAsset(this);
 
     for (Asset* child : requiredAssets()) {
         unrequire(child);
@@ -501,7 +501,7 @@ bool Asset::initialize() {
 
     // 3. Call lua onInitialize
     try {
-        _loader->loader_callOnInitialize(this);
+        _loader->callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format("Failed to initialize asset {}", id()));
@@ -536,7 +536,7 @@ void Asset::deinitialize() {
 
     // 3. Call lua onInitialize
     try {
-        _loader->loader_callOnDeinitialize(this);
+        _loader->callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(

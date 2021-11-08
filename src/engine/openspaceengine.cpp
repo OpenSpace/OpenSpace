@@ -1212,17 +1212,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdown.timer -= static_cast<float>(global::windowDelegate->averageDeltaTime());
     }
 
-    const bool updated = _assetManager->update();
-    if (updated) {
-        if (_writeDocumentationTask.valid()) {
-            // If there still is a documentation creation task the previous frame, we need
-            // to wait for it to finish first, or else we might write to the same file
-            _writeDocumentationTask.wait();
-        }
-        _writeDocumentationTask = std::async(
-            &OpenSpaceEngine::writeSceneDocumentation, this
-        );
-    }
+    _assetManager->update();
 
     global::renderEngine->updateScene();
     global::renderEngine->updateRenderer();

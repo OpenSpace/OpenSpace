@@ -61,75 +61,49 @@ public:
     const Asset& rootAsset() const;
     Asset& rootAsset();
 
-    bool update();
+    void update();
     scripting::LuaLibrary luaLibrary();
 
     /**
      * Load an asset
      */
-    bool loader_loadAsset(Asset* asset);
+    bool loadAsset(Asset* asset);
 
     /**
      * Unload an asset
      */
-    void loader_unloadAsset(Asset* asset);
+    void unloadAsset(Asset* asset);
 
     /**
      * Call the onInitialize function specified in the asset file
      */
-    void loader_callOnInitialize(Asset* asset);
+    void callOnInitialize(Asset* asset);
 
     /**
      * Call the onDeinitialize function specified in the asset file
      */
-    void loader_callOnDeinitialize(Asset* asset);
+    void callOnDeinitialize(Asset* asset);
 
 private:
-    /**
-     * Add the asset as a request of the root asset
-     */
-    std::shared_ptr<Asset> loader_add(const std::string& identifier);
+    void setUpAssetLuaTable(Asset* asset);
+    void tearDownAssetLuaTable(Asset* asset);
 
-    /**
-     * Remove the asset as a request of the root asset
-     */
-    void loader_remove(const std::string& identifier);
-    /**
-     * Return the asset identified by the identifier, if the asset is tracked. Otherwise 
-     * return nullptr.
-     */
-    std::shared_ptr<Asset> loader_has(const std::string& name) const;
+    std::shared_ptr<Asset> retrieveAsset(const std::string& name);
+    std::filesystem::path currentDirectory() const;
 
-    /// Return the root asset
-    const Asset& loader_rootAsset() const;
-
-    /// Return the root asset
-    Asset& loader_rootAsset();
-
-    void loader_setUpAssetLuaTable(Asset* asset);
-    void loader_tearDownAssetLuaTable(Asset* asset);
-
-    std::shared_ptr<Asset> loader_asset(const std::string& name);
-    std::filesystem::path loader_currentDirectory() const;
-
-    void loader_setCurrentAsset(Asset* asset);
-
+    void setCurrentAsset(Asset* asset);
 
     std::unordered_set<std::string> _assetAddQueue;
     std::unordered_set<std::string> _assetRemoveQueue;
-    std::mutex _pendingInitializationsMutex;
-    std::vector<std::shared_ptr<Asset>> _pendingInitializations;
 
     SynchronizationWatcher _synchronizationWatcher;
-    //AssetLoader _assetLoader;
-
 
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
     Asset* _currentAsset = nullptr;
     std::unordered_map<std::string, std::weak_ptr<Asset>> _trackedAssets;
     std::string _assetRootDirectory;
-    ghoul::lua::LuaState* _luaState;
+    ghoul::lua::LuaState* _luaState = nullptr;
 
     // References to Lua values
     std::unordered_map<Asset*, std::vector<int>> _onInitializeFunctionRefs;
