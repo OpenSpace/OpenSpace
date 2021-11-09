@@ -40,6 +40,7 @@ namespace openspace::datamessagestructures {
 
 enum class Type : uint32_t {
     CameraData = 0,
+    IndependentCameraData,
     TimelineData,
     ScriptData
 };

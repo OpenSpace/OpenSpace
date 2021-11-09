@@ -104,7 +104,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IndependentViewInfo = {
         "IndependentView",
         "Independent View",
-        "Enables host-independent camera viewpoint. Requires a connection."
+        "Enables host-independent camera viewpoint. As host, this option enables/disables "
+        "the optional use of independent view for all non-host clients."
     };
 } // namespace
 
@@ -120,7 +121,7 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _hasIndependentView(IndependentViewInfo)
+    , _independentView(IndependentViewInfo)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
 {
@@ -135,20 +136,15 @@ ParallelPeer::ParallelPeer()
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
 
-    addProperty(_hasIndependentView);
-    _hasIndependentView.setReadOnly(true);
-    _hasIndependentView.onChange([this]() {
-        if (isHost() && _hasIndependentView) {
-            _hasIndependentView = false;
-            LERROR("This option is redundant as host.");
+    addProperty(_independentView);
+    _independentView.setReadOnly(true);
+    _independentView.onChange([this]() {
+        if (_isConnected) {
+            setViewStatus();
         }
-        else if (!isHost()) {
-            if (_hasIndependentView) {
-                setViewStatus(ParallelConnection::ViewStatus::IndependentView);
-            }
-            else {
-                setViewStatus(ParallelConnection::ViewStatus::HostView);
-            }
+        else {
+            _independentView = false;
+            LERROR("This option requires a connection.");
         }
     });
 }
@@ -167,16 +163,6 @@ void ParallelPeer::connect() {
 
     _isConnected = true;
 
-    // Default ViewStatus is HostView
-    /*if (!isHost()) {
-        setViewStatus(ParallelConnection::ViewStatus::HostView);
-        _hasIndependentView.setReadOnly(false);
-        reloadUI();
-    }
-    else {
-        setViewStatus(ParallelConnection::ViewStatus::Host);
-    }*/
-
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
         atoi(_port.value().c_str())
@@ -188,12 +174,6 @@ void ParallelPeer::connect() {
     sendAuthentication();
 
     _receiveThread = std::make_unique<std::thread>([this]() { handleCommunication(); });
-
-
-    if (isHost()) // is not true
-    {
-        LINFO(fmt::format("isHost at end of connect"));
-    }
 }
 
 void ParallelPeer::disconnect() {
@@ -208,7 +188,7 @@ void ParallelPeer::disconnect() {
 
     _isConnected = false;
 
-    _hasIndependentView.setReadOnly(true);
+    _independentView.setReadOnly(true);
     reloadUI();
 }
 
@@ -265,6 +245,12 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             break;
         case ParallelConnection::MessageType::NConnections:
             nConnectionsMessageReceived(message.content);
+            break;
+        case ParallelConnection::MessageType::IndependentSessionOn:
+            IndependentOnMessageReceived();
+            break;
+        case ParallelConnection::MessageType::IndependentSessionOff:
+            IndependentOffMessageReceived();
             break;
         default:
             // unknown message type
@@ -325,89 +311,106 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     std::vector<char> buffer(message.begin() + offset, message.end());
 
     switch (static_cast<datamessagestructures::Type>(type)) {
-        case datamessagestructures::Type::CameraData: {
-            datamessagestructures::CameraKeyframe kf(buffer);
-            const double convertedTimestamp = convertTimestamp(kf._timestamp);
+    case datamessagestructures::Type::CameraData: {
+        datamessagestructures::CameraKeyframe kf(buffer);
+        const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
-            global::navigationHandler->keyframeNavigator().removeKeyframesAfter(
-                convertedTimestamp
+        global::navigationHandler->keyframeNavigator().removeKeyframesAfter(
+            convertedTimestamp
+        );
+
+        interaction::KeyframeNavigator::CameraPose pose;
+        pose.focusNode = kf._focusNode;
+        pose.position = kf._position;
+        pose.rotation = kf._rotation;
+        pose.scale = kf._scale;
+        pose.followFocusNodeRotation = kf._followNodeRotation;
+
+        global::navigationHandler->keyframeNavigator().addKeyframe(
+            convertedTimestamp,
+            pose
+        );
+        break;
+    }
+    case datamessagestructures::Type::IndependentCameraData: {
+        datamessagestructures::CameraKeyframe kf(buffer);
+        const double convertedTimestamp = convertTimestamp(kf._timestamp);
+
+        global::navigationHandler->keyframeNavigator().clearKeyframes();
+
+        interaction::KeyframeNavigator::CameraPose pose;
+        pose.focusNode = kf._focusNode;
+        pose.position = kf._position;
+        pose.rotation = kf._rotation;
+        pose.scale = kf._scale;
+        pose.followFocusNodeRotation = kf._followNodeRotation;
+
+        //TODO: handle independent client's data
+
+        break;
+    }
+    case datamessagestructures::Type::TimelineData: {
+        const double now = global::windowDelegate->applicationTime();
+        datamessagestructures::TimeTimeline timelineMessage(buffer);
+
+        if (timelineMessage._clear) {
+            global::timeManager->removeKeyframesAfter(
+                convertTimestamp(timestamp),
+                true
             );
+        }
 
-            interaction::KeyframeNavigator::CameraPose pose;
-            pose.focusNode = kf._focusNode;
-            pose.position = kf._position;
-            pose.rotation = kf._rotation;
-            pose.scale = kf._scale;
-            pose.followFocusNodeRotation = kf._followNodeRotation;
+        const std::vector<datamessagestructures::TimeKeyframe>& keyframesMessage =
+            timelineMessage._keyframes;
 
-            global::navigationHandler->keyframeNavigator().addKeyframe(
-                convertedTimestamp,
-                pose
+        // If there are new keyframes incoming, make sure to erase all keyframes
+        // that already exist after the first new keyframe.
+        if (!keyframesMessage.empty()) {
+            const double convertedTimestamp =
+                convertTimestamp(keyframesMessage[0]._timestamp);
+
+            global::timeManager->removeKeyframesAfter(convertedTimestamp, true);
+        }
+
+        for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
+        {
+            TimeKeyframeData timeKeyframeData;
+            timeKeyframeData.delta = kfMessage._dt;
+            timeKeyframeData.pause = kfMessage._paused;
+            timeKeyframeData.time = Time(kfMessage._time);
+            timeKeyframeData.jump = kfMessage._requiresTimeJump;
+
+            const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
+
+            // We only need at least one keyframe before the current timestamp,
+            // so we can remove any other previous ones
+            if (kfTimestamp < now) {
+                global::timeManager->removeKeyframesBefore(kfTimestamp, true);
+            }
+            global::timeManager->addKeyframe(
+                kfTimestamp,
+                timeKeyframeData
             );
-            break;
         }
-        case datamessagestructures::Type::TimelineData: {
-            const double now = global::windowDelegate->applicationTime();
-            datamessagestructures::TimeTimeline timelineMessage(buffer);
+        break;
+    }
+    case datamessagestructures::Type::ScriptData: {
+        datamessagestructures::ScriptMessage sm;
+        sm.deserialize(buffer);
 
-            if (timelineMessage._clear) {
-                global::timeManager->removeKeyframesAfter(
-                    convertTimestamp(timestamp),
-                    true
-                );
-            }
-
-            const std::vector<datamessagestructures::TimeKeyframe>& keyframesMessage =
-                timelineMessage._keyframes;
-
-            // If there are new keyframes incoming, make sure to erase all keyframes
-            // that already exist after the first new keyframe.
-            if (!keyframesMessage.empty()) {
-                const double convertedTimestamp =
-                    convertTimestamp(keyframesMessage[0]._timestamp);
-
-                global::timeManager->removeKeyframesAfter(convertedTimestamp, true);
-            }
-
-            for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
-            {
-                TimeKeyframeData timeKeyframeData;
-                timeKeyframeData.delta = kfMessage._dt;
-                timeKeyframeData.pause = kfMessage._paused;
-                timeKeyframeData.time = Time(kfMessage._time);
-                timeKeyframeData.jump = kfMessage._requiresTimeJump;
-
-                const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
-
-                // We only need at least one keyframe before the current timestamp,
-                // so we can remove any other previous ones
-                if (kfTimestamp < now) {
-                    global::timeManager->removeKeyframesBefore(kfTimestamp, true);
-                }
-                global::timeManager->addKeyframe(
-                    kfTimestamp,
-                    timeKeyframeData
-                );
-            }
-            break;
-        }
-        case datamessagestructures::Type::ScriptData: {
-            datamessagestructures::ScriptMessage sm;
-            sm.deserialize(buffer);
-
-            global::scriptEngine->queueScript(
-                sm._script,
-                scripting::ScriptEngine::RemoteScripting::No
-            );
-            break;
-        }
-        default: {
-            LERROR(fmt::format(
-                "Unidentified message with identifier {} received in parallel connection",
-                type
-            ));
-            break;
-        }
+        global::scriptEngine->queueScript(
+            sm._script,
+            scripting::ScriptEngine::RemoteScripting::No
+        );
+        break;
+    }
+    default: {
+        LERROR(fmt::format(
+            "Unidentified message with identifier {} received in parallel connection",
+            type
+        ));
+        break;
+    }
     }
 }
 
@@ -467,6 +470,16 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
     setNConnections(nConnections);
 }
 
+void ParallelPeer::IndependentOnMessageReceived() {
+    _independentViewAllowed = true;
+    LINFO(fmt::format("The host is now allowing host-independent viewpoints"));
+}
+
+void ParallelPeer::IndependentOffMessageReceived() {
+    _independentViewAllowed = false;
+    LINFO(fmt::format("The host is now NOT allowing host-independent viewpoints"));
+}
+
 void ParallelPeer::handleCommunication() {
     while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
         try {
@@ -504,6 +517,9 @@ void ParallelPeer::requestHostship() {
         ParallelConnection::MessageType::HostshipRequest,
         buffer
     ));
+
+    //setViewStatus(ParallelConnection::ViewStatus::Host);
+    setViewStatus();
 }
 
 void ParallelPeer::resignHostship() {
@@ -512,6 +528,8 @@ void ParallelPeer::resignHostship() {
         ParallelConnection::MessageType::HostshipResignation,
         buffer
     ));
+
+    // TODO: setViewStatus to independent?
 }
 
 void ParallelPeer::setPassword(std::string password) {
@@ -561,8 +579,8 @@ void ParallelPeer::preSynchronization() {
 
     double now = global::windowDelegate->applicationTime();
 
-    if (isHost()) { // || viewStatus() == ParallelConnection::ViewStatus::IndependentView
-        // Allow view-independent peers to send camera information...
+    if (isHost() || viewStatus() == ParallelConnection::ViewStatus::IndependentView) {
+    // Allow view-independent peers to send camera information...
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
             _lastCameraKeyframeTimestamp = now;
@@ -576,7 +594,7 @@ void ParallelPeer::preSynchronization() {
         _lastTimeKeyframeTimestamp = now;
         _timeJumped = false;
         _timeTimelineChanged = false;
-        }
+    }
     if (_shouldDisconnect) {
         disconnect();
     }
@@ -657,22 +675,67 @@ ParallelConnection::Status ParallelPeer::status() {
     return _status;
 }
 
-void ParallelPeer::setViewStatus(ParallelConnection::ViewStatus status) {
-    if (!_isConnected) {
-        _hasIndependentView = false;
-        LERROR("This action requires a connection.");
+void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
+    if (isHost()) {
+        _viewStatus = ParallelConnection::ViewStatus::Host;
+        LINFO(fmt::format("setViewStatus: host"));
+        std::vector<char> buffer;
 
-        return;
+        if (_independentView) {
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::IndependentSessionOn,
+                buffer
+            ));
+            LINFO(fmt::format("sent message: IndependentViewOn"));
+        }
+        else {
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::IndependentSessionOff,
+                buffer
+            ));
+            LINFO(fmt::format("sent message: IndependentViewOff"));
+        }
     }
-    
-    _viewStatus = status;
+    else if (_independentView) {
+        if (_independentViewAllowed) {
+            _viewStatus = ParallelConnection::ViewStatus::IndependentView;
 
-    if (!isHost()) {
-
-        LINFO(fmt::format("not isHost in setViewStatus"));
+            std::vector<char> buffer;
+            _connection.sendMessage(ParallelConnection::Message(
+                ParallelConnection::MessageType::ViewRequest,
+                buffer
+            ));
+            LINFO(fmt::format("setViewStatus: independent view"));
+        }
+        else {
+            _independentView = false;
+            LERROR("The host is not currently allowing host-independent viewpoints.");
+        }
+    }
+    else {
+        _viewStatus = ParallelConnection::ViewStatus::HostView;
 
         std::vector<char> buffer;
-        
+        _connection.sendMessage(ParallelConnection::Message(
+            ParallelConnection::MessageType::ViewRequest,
+            buffer
+        ));
+    }
+}
+
+
+    /*if (!_isConnected) {
+        _IndependentView = false;
+        LERROR("This action requires a connection.");
+        return;
+    }
+
+    _viewStatus = status;
+    //TODO: _connectionEvent->publish("statusChanged"); if you have gotten confirmation to enable indView
+
+    if (!isHost()) {
+        std::vector<char> buffer;
+
         if (_viewStatus == ParallelConnection::ViewStatus::IndependentView) {
             _connection.sendMessage(ParallelConnection::Message(
                 ParallelConnection::MessageType::ViewRequest,
@@ -685,8 +748,8 @@ void ParallelPeer::setViewStatus(ParallelConnection::ViewStatus status) {
                 buffer
             ));
         }
-    }
-}
+    }*/
+
 
 ParallelConnection::ViewStatus ParallelPeer::viewStatus() {
     return _viewStatus;
@@ -707,8 +770,8 @@ bool ParallelPeer::isHost() {
     return _status == ParallelConnection::Status::Host;
 }
 
-bool ParallelPeer::hasIndependentView() {
-    return _hasIndependentView;
+bool ParallelPeer::IndependentView() { // TODO: remove if still unused
+    return _independentView;
 }
 
 void ParallelPeer::setHostName(const std::string& hostName) {
@@ -757,12 +820,22 @@ void ParallelPeer::sendCameraKeyframe() {
     kf.serialize(buffer);
 
     const double timestamp = global::windowDelegate->applicationTime();
+
     // Send message
-    _connection.sendDataMessage(ParallelConnection::DataMessage(
-        datamessagestructures::Type::CameraData,
-        timestamp,
-        buffer
-    ));
+    if (isHost()) {
+        _connection.sendDataMessage(ParallelConnection::DataMessage(
+            datamessagestructures::Type::CameraData,
+            timestamp,
+            buffer
+        ));
+    }
+    else {
+        _connection.sendDataMessage(ParallelConnection::DataMessage(
+            datamessagestructures::Type::IndependentCameraData,
+            timestamp,
+            buffer
+        ));
+    }
 }
 
 void ParallelPeer::sendTimeTimeline() {

@@ -81,6 +81,10 @@ private:
     void setNConnections(size_t nConnections);
     void sendConnectionStatus(Peer& peer);
     void setViewStatus(Peer& peer, ParallelConnection::ViewStatus viewStatus);
+    void sendIndependentSessionOn(Peer& peer);
+    void sendIndependentSessionOff(Peer& peer);
+
+    bool _independentViewAllowed = false;
 
     void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleData(const Peer& peer, std::vector<char> data);
@@ -88,6 +92,8 @@ private:
     void handleHostshipResignation(Peer& peer);
     void handleViewRequest(Peer& peer);
     void handleViewResignation(Peer& peer);
+    void handleIndependentSessionOn(Peer& peer);
+    void handleIndependentSessionOff(Peer& peer);
 
     void handleNewPeers();
     void eventLoop();

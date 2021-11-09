@@ -89,18 +89,19 @@ private:
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
-    void viewMessageReceived(const std::vector<char>& message);
+    void IndependentOnMessageReceived();
+    void IndependentOffMessageReceived();
 
     void sendCameraKeyframe();
     void sendTimeTimeline();
     void reloadUI();
 
     void setStatus(ParallelConnection::Status status);
-    void setViewStatus(ParallelConnection::ViewStatus status);
+    void setViewStatus();
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
-    bool hasIndependentView();
+    bool IndependentView();
 
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
@@ -116,7 +117,9 @@ private:
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
-    properties::BoolProperty _hasIndependentView;
+    properties::BoolProperty _independentView;
+
+    bool _independentViewAllowed = false;
 
     double _lastTimeKeyframeTimestamp = 0.0;
     double _lastCameraKeyframeTimestamp = 0.0;

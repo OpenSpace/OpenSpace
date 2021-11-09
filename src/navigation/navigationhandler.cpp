@@ -106,6 +106,7 @@ void NavigationHandler::initialize() {
         [this]() {
             _useKeyFrameInteraction = (global::parallelPeer->status() ==
                 ParallelConnection::Status::ClientWithHost);
+            //TODO: and not independentView
         }
     );
 }
