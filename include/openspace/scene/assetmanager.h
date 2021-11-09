@@ -77,12 +77,12 @@ public:
     /**
      * Call the onInitialize function specified in the asset file
      */
-    void callOnInitialize(Asset* asset);
+    void callOnInitialize(Asset* asset) const;
 
     /**
      * Call the onDeinitialize function specified in the asset file
      */
-    void callOnDeinitialize(Asset* asset);
+    void callOnDeinitialize(Asset* asset) const;
 
 private:
     void setUpAssetLuaTable(Asset* asset);

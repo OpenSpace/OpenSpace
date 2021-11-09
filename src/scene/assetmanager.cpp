@@ -161,7 +161,11 @@ void AssetManager::update() {
     for (const std::string& asset : _assetRemoveQueue) {
         ZoneScopedN("(remove) Pending State change")
         std::filesystem::path directory = currentDirectory();
-        std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, asset);
+        std::filesystem::path path = generateAssetPath(
+            directory,
+            _assetRootDirectory,
+            asset
+        );
 
         const auto it = _trackedAssets.find(path.string());
         if (it != _trackedAssets.end()) {
@@ -387,6 +391,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             ghoul::Dictionary d;
             ghoul::lua::luaDictionaryFromState(L, d);
+            lua_pop(L, 1);
 
             std::unique_ptr<ResourceSynchronization> sync =
                 ResourceSynchronization::createFromDictionary(d);
@@ -394,7 +399,6 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             const std::string absolutePath = sync->directory();
             asset->addSynchronization(std::move(sync));
 
-            lua_settop(L, 0);
             ghoul::lua::push(L, absolutePath);
             return 1;
         },
@@ -403,20 +407,19 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     lua_setfield(*_luaState, assetTableIndex, "syncedResource");
 
     // Register require function
-    // Asset, Dependency require(string path)
+    // Asset require(string path)
     ghoul::lua::push(*_luaState, this);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
-            AssetManager* loader = ghoul::lua::userData<AssetManager>(L, 1);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
-            
             std::string assetName = ghoul::lua::value<std::string>(L);
 
-            std::shared_ptr<Asset> dependency = loader->retrieveAsset(assetName);
-            loader->_currentAsset->require(dependency);
+            std::shared_ptr<Asset> dependency = manager->retrieveAsset(assetName);
+            manager->_currentAsset->require(dependency);
 
             if (!dependency) {
                 return ghoul::lua::luaError(
@@ -426,7 +429,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             }
 
             // Get the exports table
-            lua_rawgeti(L, LUA_REGISTRYINDEX, loader->_assetsTableRef);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, manager->_assetsTableRef);
             lua_getfield(L, -1, dependency->id().c_str());
             lua_getfield(L, -1, ExportsTableName);
             return 1;
@@ -443,15 +446,14 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         [](lua_State* L) {
             ZoneScoped
                 
-            AssetManager* loader = ghoul::lua::userData<AssetManager>(L, 1);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::exists");
-            
             const std::string name = ghoul::lua::value<std::string>(L);
 
-            const std::filesystem::path directory = loader->currentDirectory();
+            const std::filesystem::path directory = manager->currentDirectory();
             std::filesystem::path path = generateAssetPath(
                 directory,
-                loader->_assetRootDirectory,
+                manager->_assetRootDirectory,
                 name
             );
 
@@ -471,7 +473,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
                 
             Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* loader = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::exportAsset");
 
             const std::string exportName = ghoul::lua::value<std::string>(
@@ -480,7 +482,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 ghoul::lua::PopValue::No
             );
 
-            lua_rawgeti(L, LUA_REGISTRYINDEX, loader->_assetsTableRef);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, manager->_assetsTableRef);
             lua_getfield(L, -1, asset->id().c_str());
             lua_getfield(L, -1, ExportsTableName);
             const int exportsTableIndex = lua_gettop(L);
@@ -506,11 +508,11 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
             
             Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* loader = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            loader->_onInitializeFunctionRefs[asset].push_back(referenceIndex);
+            manager->_onInitializeFunctionRefs[asset].push_back(referenceIndex);
             
             lua_settop(L, 0);
             return 0;
@@ -529,11 +531,11 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
                 
             Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* loader = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
-            loader->_onDeinitializeFunctionRefs[asset].push_back(referenceIndex);
+            manager->_onDeinitializeFunctionRefs[asset].push_back(referenceIndex);
 
             lua_settop(L, 0);
             return 0;
@@ -574,7 +576,6 @@ void AssetManager::tearDownAssetLuaTable(Asset* asset) {
     lua_settop(*_luaState, top);
 }
 
-
 std::shared_ptr<Asset> AssetManager::retrieveAsset(const std::string& name) {
     std::filesystem::path directory = currentDirectory();
     std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
@@ -607,11 +608,16 @@ std::filesystem::path AssetManager::currentDirectory() const {
     }
 }
 
-void AssetManager::callOnInitialize(Asset* asset) {
+void AssetManager::callOnInitialize(Asset* asset) const {
     ZoneScoped
     ghoul_precondition(asset, "Asset must not be nullptr");
 
-    for (int init : _onInitializeFunctionRefs[asset]) {
+    auto it = _onInitializeFunctionRefs.find(asset);
+    if (it == _onInitializeFunctionRefs.end()) {
+        return;
+    }
+
+    for (int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
@@ -625,13 +631,17 @@ void AssetManager::callOnInitialize(Asset* asset) {
     }
 }
 
-void AssetManager::callOnDeinitialize(Asset* asset) {
+void AssetManager::callOnDeinitialize(Asset* asset) const {
     ZoneScoped
     ghoul_precondition(asset, "Asset must not be nullptr");
 
-    const std::vector<int>& funs = _onDeinitializeFunctionRefs[asset];
-    for (auto it = funs.rbegin(); it != funs.rend(); it++) {
-        lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, *it);
+    auto it = _onDeinitializeFunctionRefs.find(asset);
+    if (it == _onDeinitializeFunctionRefs.end()) {
+        return;
+    }
+
+    for (int deinit : it->second) {
+        lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, deinit);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
                 "When deinitializing {}: {}",
