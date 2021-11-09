@@ -4,8 +4,21 @@ local shared = asset.require('util/tle_helper')
 local group = {
   Title = "Geostationary",
   Url = "http://celestrak.com/NORAD/elements/geo.txt",
-  TrailColor = { 0.9, 0.9, 0.0 }
+  TrailColor = { 0.9, 0.9, 0.0 },
+  Description = [[Satellites that currently active and in a Geosynchronous orbit, meaning 
+  their orbital period matches Earth’s rotation.]]
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+
+asset.meta = {
+  Name = "Satellites Communications - Geostationary",
+  Version = "1.0",
+  Description = [[ Satellites asset for Communications - Geostationary. Data from 
+  Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}
