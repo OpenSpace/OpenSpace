@@ -58,6 +58,7 @@ class SkyBrowserModule : public OpenSpaceModule {
 public:
 
     constexpr static const char* Name = "SkyBrowser";
+    const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
     // Constructor & destructor
     SkyBrowserModule();
@@ -86,7 +87,7 @@ public:
     void lookAt3dBrowser();
    
     // Boolean functions
-    bool cameraInSolarSystem();
+    bool isCameraInSolarSystem();
 
     // Managing the browsers 
     void createTargetBrowserPair();
@@ -122,16 +123,15 @@ private:
     SceneGraphNode* _browser3d{ nullptr };
     std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
 
-    // 2D vs 3D visualization mode
-    double _solarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
+    // Fading
     double _fadingTime = 2.0;
     
     // Flags
-    bool _fineTuneMode{ false };
+    bool _isFineTuneMode{ false };
     bool _isResizing{ false };
     bool _isDragging{ false };
-    bool _cameraInSolarSystem{ true };
-    bool _cameraIsRotating = false;
+    bool _isCameraInSolarSystem{ true };
+    bool _isCameraRotating = false;
     bool _isTransitioningVizMode{ false };
 
     // Mouse interaction - dragging and resizing
@@ -146,7 +146,7 @@ private:
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
     double _stopAnimationThreshold{ 0.05 };
-    double _speed{ 1.0 };
+    double _animationSpeed{ 1.0 };
     
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;    

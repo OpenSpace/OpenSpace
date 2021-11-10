@@ -240,7 +240,7 @@ namespace openspace {
     {
         // If distance too large, keep animating. Else, stop animation
         float diff = verticalFov() - _endVfov;
-        bool shouldAnimate = abs(diff) > _fovDiff;
+        const bool shouldAnimate = abs(diff) > _fovDiff;
 
         if (shouldAnimate) {
             setVerticalFovWithScroll(diff);
@@ -283,8 +283,8 @@ namespace openspace {
 
     void ScreenSpaceSkyBrowser::executeJavascript(std::string script) {
         // Make sure that the browser has a main frame
-        bool browserExists = _browserInstance && _browserInstance->getBrowser();
-        bool frameIsLoaded = browserExists && 
+        const bool browserExists = _browserInstance && _browserInstance->getBrowser();
+        const bool frameIsLoaded = browserExists && 
             _browserInstance->getBrowser()->GetMainFrame();
 
         if (frameIsLoaded) {
@@ -355,10 +355,10 @@ namespace openspace {
         float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
         float resizeAreaX = screenSpaceDimensions().x * _resizeAreaPercentage;
 
-        bool isOnTop = coord.y > upperRightCornerScreenSpace().y - resizeAreaY;
-        bool isOnBottom = coord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
-        bool isOnRight = coord.x > upperRightCornerScreenSpace().x - resizeAreaX;
-        bool isOnLeft = coord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
+        const bool isOnTop = coord.y > upperRightCornerScreenSpace().y - resizeAreaY;
+        const bool isOnBottom = coord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
+        const bool isOnRight = coord.x > upperRightCornerScreenSpace().x - resizeAreaX;
+        const bool isOnLeft = coord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
 
         resizePosition.x = isOnRight ? 1.f : isOnLeft ? -1.f : 0.f;
         resizePosition.y = isOnTop ? 1.f : isOnBottom ? -1.f : 0.f;
@@ -422,8 +422,7 @@ namespace openspace {
     void ScreenSpaceSkyBrowser::addSelectedImage(const ImageData& image, int i) {
         // Ensure there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        bool found = it != std::end(_selectedImages);
-        if (!found) {
+        if (it == std::end(_selectedImages)) {
             // Push newly selected image to front
             _selectedImages.push_front(i);
             // Index of image is used as layer ID as it is unique in the image data set
@@ -435,8 +434,8 @@ namespace openspace {
     void ScreenSpaceSkyBrowser::removeSelectedImage(int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        bool found = it != std::end(_selectedImages);
-        if (found) {
+
+        if (it != std::end(_selectedImages)) {
             _selectedImages.erase(it);
             sendMessageToWwt(wwtmessage::removeImage(std::to_string(i)));
         }
@@ -455,8 +454,8 @@ namespace openspace {
         auto target = std::begin(_selectedImages) + order;
 
         // Make sure the selected and the target placement was found in the list
-        bool foundSelected = selected != std::end(_selectedImages);
-        bool foundTarget = target != std::end(_selectedImages);
+        const bool foundSelected = selected != std::end(_selectedImages);
+        const bool foundTarget = target != std::end(_selectedImages);
 
         if (foundSelected && foundTarget) {
             // Swap the two images

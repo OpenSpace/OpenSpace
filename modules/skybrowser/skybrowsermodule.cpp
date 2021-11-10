@@ -272,7 +272,7 @@ SkyBrowserModule::SkyBrowserModule()
                 setSelectedBrowser(_mouseOnPair->getBrowser());
 
                 if (button == MouseButton::Left) {
-                    _cameraIsRotating = false;
+                    _isCameraRotating = false;
                     _startMousePosition = _mousePosition;
                     if (_isBrowser) {
                         _startDragPosition = _mouseOnPair->getBrowser()->
@@ -312,7 +312,7 @@ SkyBrowserModule::SkyBrowserModule()
                     // click on browser
                     _startMousePosition = _mousePosition;
                     _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
-                    _fineTuneMode = true;
+                    _isFineTuneMode = true;
 
                     return true;
                 }
@@ -323,8 +323,8 @@ SkyBrowserModule::SkyBrowserModule()
 
                     return true;
                 }
-                if (_fineTuneMode) {
-                    _fineTuneMode = false;
+                if (_isFineTuneMode) {
+                    _isFineTuneMode = false;
                     return true;
                 }
                 if (_isResizing) {
@@ -341,9 +341,9 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
             
-            if (_cameraInSolarSystem) {
+            if (_isCameraInSolarSystem) {
                 glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
-                _mousePosition = skybrowser::pixelToScreenSpace(pixel);
+                _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
                 glm::vec2 translation = _mousePosition - _startMousePosition;
 
                 if (_isDragging || _isResizing) {
@@ -376,7 +376,7 @@ SkyBrowserModule::SkyBrowserModule()
                         );
                     }
                 }
-                else if (_fineTuneMode) {
+                else if (_isFineTuneMode) {
                     glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneVector(
                         translation
                     );
@@ -412,22 +412,22 @@ SkyBrowserModule::SkyBrowserModule()
         // Disable browser and targets when camera is outside of solar system
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         double deltaTime = global::windowDelegate->deltaTime();
-        bool camWasInSolarSystem = _cameraInSolarSystem;
-        _cameraInSolarSystem = glm::length(cameraPos) < _solarSystemRadius;
+        bool camWasInSolarSystem = _isCameraInSolarSystem;
+        _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
 
         // Fading flags
-        if (_cameraInSolarSystem != camWasInSolarSystem) {
+        if (_isCameraInSolarSystem != camWasInSolarSystem) {
             _isTransitioningVizMode = true;
 
             // Select the 3D browser when moving out of the solar system
-            if (!_cameraInSolarSystem && _browser3d != nullptr) {
+            if (!_isCameraInSolarSystem && _browser3d != nullptr) {
                 _selectedBrowser = _browser3d->renderable()->identifier();
             }
         }
 
         // Fade pairs if the camera moved in or out the solar system
         if (_isTransitioningVizMode) {
-            if (_cameraInSolarSystem) {
+            if (_isCameraInSolarSystem) {
                 incrementallyFadeBrowserTargets(Transparency::Opaque, deltaTime);
             }
             else {
@@ -435,10 +435,10 @@ SkyBrowserModule::SkyBrowserModule()
             }
         }
 
-        if (_cameraInSolarSystem) {
+        if (_isCameraInSolarSystem) {
             incrementallyAnimateTargets(deltaTime);
         }
-        if (_cameraIsRotating) {
+        if (_isCameraRotating) {
             incrementallyRotateCamera(deltaTime);
         }
     });
@@ -668,12 +668,12 @@ void SkyBrowserModule::moveHoverCircle(int i)
     const ImageData& image = _dataHandler->getImage(i);
 
     // Only move and show circle if the image has coordinates
-    if (_hoverCircle && image.hasCelestialCoords && _cameraInSolarSystem) {
+    if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
         // Make circle visible
         _hoverCircle->property("Enabled")->set(true);
 
         // Calculate coords for the circle and translate
-        glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace(
+        glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace3d(
             image.equatorialCartesian
         );
         _hoverCircle->property("CartesianPosition")->set(coordsScreen);
@@ -742,13 +742,13 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
     _endAnimation = endAnimation;
     _startAnimation = skybrowser::cameraDirectionGalactic();
-    _cameraIsRotating = true;
+    _isCameraRotating = true;
 }
 
 void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
 
     // Find smallest angle between the two vectors
-    double smallestAngle = skybrowser::angleVector(_startAnimation, _endAnimation);
+    double smallestAngle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
 
     if(smallestAngle > _stopAnimationThreshold) {
         
@@ -756,7 +756,7 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
             _startAnimation, 
             _endAnimation, 
             deltaTime, 
-            _speed
+            _animationSpeed
         );
 
         // Rotate
@@ -766,7 +766,7 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
         _startAnimation = skybrowser::cameraDirectionGalactic();
     }
     else {
-        _cameraIsRotating = false;
+        _isCameraRotating = false;
     }
 }
 
@@ -815,8 +815,8 @@ std::string SkyBrowserModule::selectedBrowserId() {
     return _selectedBrowser;
 }
 
-bool SkyBrowserModule::cameraInSolarSystem() {
-    return _cameraInSolarSystem;
+bool SkyBrowserModule::isCameraInSolarSystem() {
+    return _isCameraInSolarSystem;
 }
 
 //std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {

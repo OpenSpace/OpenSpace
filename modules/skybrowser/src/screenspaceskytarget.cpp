@@ -316,7 +316,7 @@ namespace openspace {
         // Start a thread to enable user interactions while locking target
         _lockTarget = std::thread([&] {
             while (_isLocked) {
-                _cartesianPosition = skybrowser::equatorialToScreenSpace(
+                _cartesianPosition = skybrowser::equatorialToScreenSpace3d(
                     _lockedCoordinates
                 );
             }
@@ -343,8 +343,8 @@ namespace openspace {
     void ScreenSpaceSkyTarget::incrementallyAnimateToCoordinate(float deltaTime)
     {
         // Find smallest angle between the two vectors
-        double smallestAngle = skybrowser::angleVector(_animationStart, _animationEnd);
-        bool shouldAnimate = smallestAngle > _stopAnimationThreshold;
+        double smallestAngle = skybrowser::angleBetweenVectors(_animationStart, _animationEnd);
+        const bool shouldAnimate = smallestAngle > _stopAnimationThreshold;
 
         // Only keep animating when target is not at goal position
         if (shouldAnimate) {
@@ -359,14 +359,14 @@ namespace openspace {
             glm::dvec3 newDir = rotMat * glm::dvec4(_animationStart, 1.0);
             
             // Convert to screen space
-            _cartesianPosition = skybrowser::equatorialToScreenSpace(newDir);
+            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(newDir);
             
             // Update position
             _animationStart = glm::normalize(newDir);
         }
         else {
             // Set the exact target position 
-            _cartesianPosition = skybrowser::equatorialToScreenSpace(_animationEnd);
+            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(_animationEnd);
             _isAnimated = false;
             
             // Lock target when it first arrives to the position

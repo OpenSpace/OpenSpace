@@ -47,7 +47,7 @@ namespace openspace::skybrowser {
         return rGalactic * CelestialSphereRadius;
     }
         
-    glm::dvec3 galacticToScreenSpace(glm::dvec3 coords) {
+    glm::dvec3 galacticToScreenSpace3d(glm::dvec3 coords) {
 
         glm::dvec3 localCameraSpace = galacticToLocalCamera(coords);
         // Ensure that if the coord is behind the camera, 
@@ -90,11 +90,11 @@ namespace openspace::skybrowser {
         return glm::normalize(viewDirectionLocal);
     }
 
-    glm::dvec3 equatorialToScreenSpace(glm::dvec3 coords) {
+    glm::dvec3 equatorialToScreenSpace3d(glm::dvec3 coords) {
         // Transform equatorial J2000 to galactic coord with infinite radius    
         glm::dvec3 galactic = equatorialToGalactic(coords);
         // Transform galactic coord to screen space
-        return galacticToScreenSpace(galactic);
+        return galacticToScreenSpace3d(galactic);
     }
 
     double cameraRoll() {
@@ -133,18 +133,18 @@ namespace openspace::skybrowser {
 
     bool isCoordinateInView(glm::dvec3 equatorial) {
         // Check if image coordinate is within current FOV
-        glm::dvec3 coordsScreen = equatorialToScreenSpace(equatorial);
+        glm::dvec3 coordsScreen = equatorialToScreenSpace3d(equatorial);
         double r = static_cast<float>(windowRatio());
 
-        bool coordIsWithinView = (abs(coordsScreen.x) < r &&
-            abs(coordsScreen.y) < 1.f && coordsScreen.z < 0);
-        bool coordIsBehindCamera = coordsScreen.z > 0;
+        bool isCoordInView = abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f && 
+                                 coordsScreen.z < 0;
+
         // If the coordinate is not in view, rotate camera
-        return coordIsWithinView;
+        return isCoordInView;
     }
 
     // Transforms a pixel coordinate to a screen space coordinate
-    glm::vec2 pixelToScreenSpace(glm::vec2& mouseCoordinate) {
+    glm::vec2 pixelToScreenSpace2d(glm::vec2& mouseCoordinate) {
         glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
         // Change origin to middle of the window
         glm::vec2 screenSpacePos = mouseCoordinate - (size / 2.0f);
@@ -165,7 +165,7 @@ namespace openspace::skybrowser {
         return OpenSpaceFOV;
     }
 
-    double angleVector(glm::dvec3 start, glm::dvec3 end) {
+    double angleBetweenVectors(glm::dvec3 start, glm::dvec3 end) {
     
         // Find smallest angle between the two vectors
         double cos = glm::dot(start, end) / (glm::length(start) * glm::length(end));
@@ -176,7 +176,7 @@ namespace openspace::skybrowser {
                                     glm::dvec3 end, double deltaTime, 
                                     double speedFactor) {
         
-        double smallestAngle = angleVector(start, end);
+        double smallestAngle = angleBetweenVectors(start, end);
         // Calculate rotation this frame
         double rotationAngle = smallestAngle * deltaTime * speedFactor;
 

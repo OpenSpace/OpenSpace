@@ -59,7 +59,7 @@ namespace openspace {
         // WorldWide Telescope communication
         void displayImage(const ImageData& image, int i);
         void removeSelectedImage(const ImageData& image, int i);
-        bool sendMessageToWwt(const ghoul::Dictionary& msg);
+        void sendMessageToWwt(const ghoul::Dictionary& msg);
         void syncWwtView();
         void stopSyncingWwtView();
 

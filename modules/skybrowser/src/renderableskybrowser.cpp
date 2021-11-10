@@ -178,18 +178,17 @@ namespace openspace {
 
     void RenderableSkyBrowser::executeJavascript(std::string script) const {
         //LINFOC(_loggerCat, "Executing javascript " + script);
-        bool isBrowserReady = _browserInstance && _browserInstance->getBrowser();
-        bool isMainFrameReady = _browserInstance->getBrowser()->GetMainFrame();
+        const bool isBrowserReady = _browserInstance && _browserInstance->getBrowser();
+        const bool isMainFrameReady = _browserInstance->getBrowser()->GetMainFrame();
         if (isBrowserReady && isMainFrameReady) {
             CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
             frame->ExecuteJavaScript(script, frame->GetURL(), 0);
         }
     }
 
-    bool RenderableSkyBrowser::sendMessageToWwt(const ghoul::Dictionary& msg) {
+    void RenderableSkyBrowser::sendMessageToWwt(const ghoul::Dictionary& msg) {
         std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
         executeJavascript(script);
-        return true;
     }
 
     void RenderableSkyBrowser::displayImage(const ImageData& image, const int i) {

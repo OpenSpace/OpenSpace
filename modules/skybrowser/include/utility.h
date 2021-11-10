@@ -31,34 +31,38 @@ namespace openspace {
 
         // Conversion J2000 equatorial <-> galactic
         glm::dvec3 galacticToEquatorial(glm::dvec3 coords);
-        glm::dvec3 galacticToLocalCamera(glm::dvec3 coords);
         glm::dvec3 equatorialToGalactic(glm::dvec3 coords);
 
-        // Conversion J2000 equatorial / galactic <-> screen space
-        glm::dvec3 equatorialToScreenSpace(glm::dvec3 coords);
-        glm::dvec3 galacticToScreenSpace(glm::dvec3 coords);
+        // Conversion to screen space from J2000 equatorial / galactic / pixels
+        glm::dvec3 equatorialToScreenSpace3d(glm::dvec3 coords);
+        glm::dvec3 galacticToScreenSpace3d(glm::dvec3 coords);
+        glm::vec2 pixelToScreenSpace2d(glm::vec2& mouseCoordinate);
+
+        // Conversion local camera space <-> galactic / equatorial
+        glm::dvec3 galacticToLocalCamera(glm::dvec3 coords);
         glm::dvec3 localCameraToGalactic(glm::dvec3 coords);
         glm::dvec3 localCameraToEquatorial(glm::dvec3 coords);
 
         // Camera roll and direction
-        // Camera roll is with respect to the equatorial North Pole
-        bool isCoordinateInView(glm::dvec3 equatorial);
-        float windowRatio();
-        double cameraRoll();
-        glm::vec2 pixelToScreenSpace(glm::vec2& mouseCoordinate);
-        glm::dvec2 fovWindow();
+        double cameraRoll(); // Camera roll is with respect to the equatorial North Pole
         glm::dvec3 cameraDirectionGalactic();
         glm::dvec3 cameraDirectionEquatorial();
-        double angleVector(glm::dvec3 start, glm::dvec3 end);
-        glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start,
-                                        glm::dvec3 end, double deltaTime, 
-                                        double speedFactor = 1.0);       
+
+        // Window and field of view
+        float windowRatio();
+        glm::dvec2 fovWindow();
+        bool isCoordinateInView(glm::dvec3 equatorial);
+
+        // Animation for target and camera 
+        double angleBetweenVectors(glm::dvec3 start, glm::dvec3 end);
+        glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start, glm::dvec3 end, 
+                                              double deltaTime, double speedFactor = 1.0);       
     }
     // WorldWide Telescope messages
     namespace wwtmessage {
         inline int messageCounter{ 0 };
-        ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords,
-            const double fov, const double roll, const bool shouldMoveInstantly = true);
+        ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, 
+                const double roll, const bool shouldMoveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
         ghoul::Dictionary addImage(const std::string& id, const std::string& url);

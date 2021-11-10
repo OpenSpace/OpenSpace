@@ -38,7 +38,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 		const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-        if (module->cameraInSolarSystem()) {
+        if (module->isCameraInSolarSystem()) {
             module->selectImage2dBrowser(i);
         }
         else {
@@ -337,13 +337,13 @@ namespace openspace::skybrowser::luascriptfunctions {
         lua_settable(L, -3);
         ghoul::lua::push(L, "selectedBrowserId", module->selectedBrowserId());
         lua_settable(L, -3);
-        ghoul::lua::push(L, "cameraInSolarSystem", module->cameraInSolarSystem());
+        ghoul::lua::push(L, "cameraInSolarSystem", module->isCameraInSolarSystem());
         lua_settable(L, -3);
         // Set table for the current ImageData
         lua_settable(L, -3);
 
         // Pass data for all the browsers and the corresponding targets
-        if (module->cameraInSolarSystem()) {
+        if (module->isCameraInSolarSystem()) {
             std::vector<Pair> pairs = module->getPairs();
 
             for (Pair pair : pairs) {
@@ -448,7 +448,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         const std::string id = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-        if(module->cameraInSolarSystem()) {
+        if(module->isCameraInSolarSystem()) {
             module->lookAtTarget(id);
         }
         else {

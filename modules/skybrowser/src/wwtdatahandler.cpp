@@ -63,7 +63,7 @@ namespace openspace {
             return false;
         }
 
-        bool directoryExists = (info.st_mode & S_IFDIR);
+        const bool directoryExists = (info.st_mode & S_IFDIR);
 
         return  directoryExists;
     }
@@ -71,7 +71,7 @@ namespace openspace {
     std::string createSearchableString(std::string str) {
         // Remove white spaces and all special characters
         str.erase(std::remove_if(std::begin(str), std::end(str), [](char c) {
-            bool isNumberOrLetter = std::isdigit(c) || std::isalpha(c);
+            const bool isNumberOrLetter = std::isdigit(c) || std::isalpha(c);
             return !isNumberOrLetter;
             }),
             std::end(str));
@@ -202,8 +202,8 @@ namespace openspace {
         // Search XML file for folders with urls
         XMLElement* root = doc->RootElement();
         XMLElement* element = root->FirstChildElement(wwt::Folder.c_str());
-        bool folderExists = element;
-        bool folderContainNoUrls = folderExists && !hasAttribute(element, wwt::Url);
+        const bool folderExists = element;
+        const bool folderContainNoUrls = folderExists && !hasAttribute(element, wwt::Url);
         
         // If the file contains no folders, or there are folders but without urls, 
         // stop recursion
@@ -312,9 +312,9 @@ namespace openspace {
 
         // Only collect the images that have a thumbnail image, that are sky images and 
         // that have an image
-        bool hasThumbnailUrl = thumbnailUrl != wwt::Undefined;
-        bool isSkyImage = getAttribute(node, wwt::DataSetType) == wwt::Sky;
-        bool hasImageUrl = imageSet ? hasAttribute(imageSet, wwt::Url) : false;
+        const bool hasThumbnailUrl = thumbnailUrl != wwt::Undefined;
+        const bool isSkyImage = getAttribute(node, wwt::DataSetType) == wwt::Sky;
+        const bool hasImageUrl = imageSet ? hasAttribute(imageSet, wwt::Url) : false;
         
         if (!(hasThumbnailUrl && isSkyImage && hasImageUrl)) {
             return;
@@ -330,7 +330,7 @@ namespace openspace {
 
         // Collect equatorial coordinates. All-sky surveys do not have this kind of 
         // coordinate
-        bool hasCelestialCoords = hasAttribute(node, wwt::RA) &&
+        const bool hasCelestialCoords = hasAttribute(node, wwt::RA) &&
             hasAttribute(node, wwt::Dec);
         glm::dvec2 equatorialSpherical{ 0.0 };
         glm::dvec3 equatorialCartesian{ 0.0 };

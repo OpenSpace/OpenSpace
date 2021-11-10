@@ -90,8 +90,8 @@ namespace openspace {
 
     bool Pair::isCoordOnPair(glm::vec2 mousePosition)
     {
-        bool onBrowser = _browser->coordIsInsideCornersScreenSpace(mousePosition);
-        bool onTarget = _target->coordIsInsideCornersScreenSpace(mousePosition);
+        const bool onBrowser = _browser->coordIsInsideCornersScreenSpace(mousePosition);
+        const bool onTarget = _target->coordIsInsideCornersScreenSpace(mousePosition);
         if (onBrowser) {
             _selected = _browser->identifier();
         }
@@ -211,9 +211,9 @@ namespace openspace {
         }
     }
 
-    void Pair::startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool lockAfter)
+    void Pair::startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter)
     {
-        _target->startAnimation(coordsEnd, lockAfter);
+        _target->startAnimation(coordsEnd, shouldLockAfter);
         _browser->startFovAnimation(fovEnd);
     }
 
