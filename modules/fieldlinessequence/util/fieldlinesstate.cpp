@@ -349,7 +349,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; ++lineIndex) {
         json jData = json::array();
-        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; ++i, ++pointIndex) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = { pos.x, pos.y, pos.z };
 
@@ -400,7 +400,6 @@ std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessf
 
 // Moves the points in @param line over to _vertexPositions and updates
 // _lineStart & _lineCount accordingly.
-
 void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     const size_t nNewPoints = line.size();
     const size_t nOldPoints = _vertexPositions.size();
@@ -415,8 +414,59 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
     line.clear();
 }
 
+void FieldlinesState::addLinesToBeRendered() {
+    //for (int i = 0; i < _fieldLinesPerPath.size(); ++i) {
+    //    addLine(_fieldLinesPerPath[i][0]);
+    //}
+
+    // i for each originally given seed point
+    // the 0 is for only the first fieldline on that pathline
+    for (int i = 0; i < _allPathLines.size(); ++i) {
+        std::vector<glm::vec3> line;
+        //size_t nLinesPerPath = _allPathLines[i].fieldlines.size();
+        //for (size_t n = 0; n < nLinesPerPath; ++n) {
+            for (Vertex v : _allPathLines[i].fieldlines[0].vertecies) {
+                line.push_back(v.position);
+            }
+            addLine(line);
+        //}
+    }
+}
+
 void FieldlinesState::appendToExtra(size_t idx, float val) {
     _extraQuantities[idx].push_back(val);
+}
+
+void FieldlinesState::addPathLine(const int i) {
+    PathLine pl;
+    _allPathLines.push_back(pl);
+}
+
+void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline, 
+                                   const float time, const int pathLineIndex)
+{
+    Fieldline f;
+    for (glm::vec3 pos : fieldline) {
+        Vertex v;
+        v.position = pos * fls::ReToMeter;
+        f.vertecies.push_back(v);
+    }
+
+    f.timeToNextFieldline = time;
+
+    // TAODO: check if even correct. Probably will need both front and back to be < x.yf
+    // to be considered closed
+    if (glm::length(fieldline.front()) < 3.5f) {
+        f.topology = Fieldline::Topology::Closed;
+    }
+    else if (glm::length(fieldline.back()) < 3.5f) {
+        f.topology = Fieldline::Topology::Open;
+    }
+    else {
+        f.topology = Fieldline::Topology::Imf;
+    }
+
+    _allPathLines[pathLineIndex].fieldlines.push_back(f);
 }
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
@@ -438,6 +488,10 @@ const std::vector<GLsizei>& FieldlinesState::lineCount() const {
 
 const std::vector<GLint>& FieldlinesState::lineStart() const {
     return _lineStart;
+}
+
+const std::vector<FieldlinesState::PathLine>& FieldlinesState::allPathLines() const {
+    return _allPathLines;
 }
 
 fls::Model FieldlinesState::FieldlinesState::model() const {

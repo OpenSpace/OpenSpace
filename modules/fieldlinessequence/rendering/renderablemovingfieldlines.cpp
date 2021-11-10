@@ -35,7 +35,7 @@
 
 
 #include <fstream>
-
+#pragma optimize("", off)
 namespace {
     constexpr const char* _loggerCat = "RenderableMovingFieldlines";
 
@@ -78,8 +78,13 @@ namespace {
         std::filesystem::path seedPointFile;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
-        // Which variable in CDF file to trace. b is default for fieldline
+        // Which variable in CDF file to trace. 'b' is default. b is for magnetic field
         std::optional<std::string> tracingVariable;
+        // The number of points on the 'path line' which fieldlines will be moving
+        std::optional<int> numberOfPointsOnPathLine;
+        // The number of points on the fieldlines that uses the 'path line' vertecis
+        // as seed points
+        std::optional<int> numberOfPointsOnFieldlines;
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
         // [[codegen::verbatim(ColorMethodInfo.description)]]
@@ -108,6 +113,10 @@ std::vector<std::string>
 
 documentation::Documentation RenderableMovingFieldlines::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablemovingfieldlines");
+}
+
+glm::vec3 lerp(glm::vec3 current, glm::vec3 next, float time) {
+    return current * (1.f - time) + next * time;
 }
 
 RenderableMovingFieldlines::RenderableMovingFieldlines(
@@ -160,6 +169,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     if (!std::filesystem::is_regular_file(_seedFilePath) || 
         _seedFilePath.extension() != ".txt") 
     {
+        // TODO: add support for whatever actual seepoint files are being used
         throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .txt file"));
     }
     std::string seedFile = _seedFilePath.string();
@@ -186,9 +196,35 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     _extraVars = p.extraVariables.value_or(_extraVars);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
+    if (p.numberOfPointsOnPathLine.has_value()) {
+        //TODO Check if nPointsOnPathLine = 100 if not specified
+        if (p.numberOfPointsOnPathLine.value() < 0) {
+            LWARNING(fmt::format("Number of points on path line: {}, must be positive "
+                "and have therefor been replaced with the default 200 points",
+                p.numberOfPointsOnPathLine.value()
+            ));
+        }
+        else {
+            _nPointsOnPathLine = static_cast<size_t>(p.numberOfPointsOnPathLine.value());
+        }
+    }
+
+    if (p.numberOfPointsOnFieldlines.has_value()) {
+        //TODO Check if nPointsOnFieldlines = 100 if not specified
+        if (p.numberOfPointsOnFieldlines.value() < 0) {
+            LWARNING(fmt::format("Number of points on fieldlines: {}, must be positive "
+                "and have therefor been replaced with the default 100 points",
+                p.numberOfPointsOnFieldlines.value()
+            ));
+        }
+        else {
+            _nPointsOnFieldlines = 
+                static_cast<size_t>(p.numberOfPointsOnFieldlines.value());
+        }
+    }
+
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
-
 
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
     _colorMethod.addOption(static_cast<int>(ColorMethod::ByQuantity), "By Quantity");
@@ -227,10 +263,15 @@ void RenderableMovingFieldlines::initialize() {
 
     bool stateSuccuess = getStateFromCdfFiles();
     if (!stateSuccuess) {
-        throw ghoul::RuntimeError("Trying to convert cdf file failed");
+        throw ghoul::RuntimeError("Trying to read cdf file failed");
     }
-    bool nExtraQuantities = _fieldlineState.nExtraQuantities();
-
+    for (int i = 0; i < _fieldlineState.lineCount().size(); ++i) {
+        _timeSinceLastInterpolation.push_back(0.f);
+        _pathsVertexIndex.push_back(0.f);
+    }
+    _renderedLines = _fieldlineState.vertexPositions();
+    size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
+        
     addPropertySubOwner(_colorGroup);
     _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
@@ -246,9 +287,9 @@ void RenderableMovingFieldlines::initialize() {
         _colorGroup.addProperty(_colorQuantity);
         _colorGroup.addProperty(_colorTablePath);
 
-        const std::vector<std::string>& extraNamesVec = _fieldlineState.extraQuantityNames();
+        const std::vector<std::string>& extraNames = _fieldlineState.extraQuantityNames();
         for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
-            _colorQuantity.addOption(i, extraNamesVec[i]);
+            _colorQuantity.addOption(i, extraNames[i]);
         }
 
         _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
@@ -297,15 +338,29 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     bool isSuccessful = false;
     for (const std::filesystem::path entry : _sourceFiles) {
         const std::string& cdfPath = entry.string();
-        isSuccessful = fls::convertCdfToFieldlinesState(
+        isSuccessful = fls::convertCdfToMovingFieldlinesState(
             _fieldlineState,
             cdfPath,
             seedpointsPlaceholder,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
-            extraMagVars
+            extraMagVars,
+            _nPointsOnPathLine,
+            _nPointsOnFieldlines
         );
+    }
+
+    _fieldlineState.addLinesToBeRendered();
+
+    if (isSuccessful) {
+        switch (_fieldlineState.model()) {
+        case fls::Model::Batsrus:
+            _fieldlineState.scalePositions(fls::ReToMeter);
+            break;
+        default:
+            break;
+        }
     }
 
     return isSuccessful;
@@ -320,7 +375,7 @@ void RenderableMovingFieldlines::deinitializeGL() {
 
     glDeleteBuffers(1, &_vertexColorBuffer);
     _vertexColorBuffer = 0;
-    
+
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
@@ -382,9 +437,174 @@ void RenderableMovingFieldlines::update(const UpdateData& data) {
         _shaderProgram->rebuildFromFile();
     }
 
+    const double previousTime = data.previousFrameTime.j2000Seconds();
+    const double currentTime = data.time.j2000Seconds();
+    const double dt = currentTime - previousTime;
+    if (abs(dt) > DBL_EPSILON) {
+        moveLines(dt);
+    }
+
     updateVertexPositionBuffer();
     if (_fieldlineState.nExtraQuantities() > 0) {
         updateVertexColorBuffer();
+    }
+}
+
+void RenderableMovingFieldlines::moveLines(const double dt) {
+    bool forward = std::signbit(dt) ? false : true;
+
+    std::vector<FieldlinesState::PathLine> allPathLines = _fieldlineState.allPathLines();
+    size_t nDrawnLines = _fieldlineState.lineCount().size();
+    
+    // for each path line
+    for (size_t i = 0; i < nDrawnLines; ++i) {
+        bool atStart = false;
+        bool atEnd = false;
+        _timeSinceLastInterpolation[i] += float(dt);
+        GLint lineStart = _fieldlineState.lineStart()[i];
+        GLsizei nVertices = _fieldlineState.lineCount()[i];
+
+        if (forward) {
+            std::vector<FieldlinesState::Fieldline>::iterator fieldlineIt = 
+                allPathLines[i].fieldlines.begin();
+            std::advance(fieldlineIt, _pathsVertexIndex[i]);
+            FieldlinesState::Fieldline& currentFieldline = *fieldlineIt;
+            FieldlinesState::Fieldline& nextFieldline = *(fieldlineIt + 1);
+
+            // if we past the next vertex on pathline, advance paths vertex index 
+            // and reset this paths time since last interpolation
+            if (_timeSinceLastInterpolation[i] > currentFieldline.timeToNextFieldline) {
+                // -2 is becaue: -1 because size = index+1, -1 for second to last line
+                if (_pathsVertexIndex[i] != allPathLines[i].fieldlines.size()-2) {
+                    _timeSinceLastInterpolation[i] -= 
+                        currentFieldline.timeToNextFieldline;
+                    ++(_pathsVertexIndex[i]);
+                    ++fieldlineIt;
+                    currentFieldline = *fieldlineIt;
+                    nextFieldline = *(fieldlineIt + 1);
+                }
+                // if we reach end of path line. 
+                else {
+                    // TAODO: see why/if this is needed: set to previous timeSince?
+                    //FieldlinesState::Fieldline& previousFieldline = *(fieldlineIt - 1);
+                    //_timeSinceLastInterpolation[i] =
+                    //    previousFieldline.timeToNextFieldline;
+                    int fieldlineVertex = 0;
+                    // j = rendered line vertex index
+                    for (int j = lineStart; j < nVertices + lineStart; ++j) {
+                        // set the rendered lines vertex positions
+                        _renderedLines[j] =
+                            // to be = to current fieldlines vertex
+                            currentFieldline.vertecies[fieldlineVertex].position;
+                        ++fieldlineVertex;
+                    }
+                    atEnd = true;
+                    break;
+                }
+            }
+
+            if (atEnd) continue;
+
+            // if there is a topology change to the next fieldline: no lerping
+            if (nextFieldline.topology != currentFieldline.topology) {
+                ++_pathsVertexIndex[i];
+                ++fieldlineIt;
+                currentFieldline = *fieldlineIt;
+                nextFieldline = *(fieldlineIt + 1);
+                _timeSinceLastInterpolation[i] = 0.f;
+
+                int fieldlineVertex = 0;
+                // j = rendered line vertex index
+                for (int j = lineStart; j < nVertices + lineStart; ++j) {
+                    _renderedLines[j] =
+                        currentFieldline.vertecies[fieldlineVertex].position;
+                    ++fieldlineVertex;
+                }
+            }
+            else {
+                float timeDifference = _timeSinceLastInterpolation[i] /
+                    currentFieldline.timeToNextFieldline;
+                int fieldlineVertex = 0;
+                // j = rendered line vertex index
+                for (int j = lineStart; j < nVertices + lineStart; ++j) {
+                    glm::vec3 currentPosition = 
+                        currentFieldline.vertecies[fieldlineVertex].position;
+                    glm::vec3 nextPosition =
+                        nextFieldline.vertecies[fieldlineVertex].position;
+                    _renderedLines[j] =
+                        lerp(currentPosition, nextPosition, timeDifference);
+                    ++fieldlineVertex;
+                }
+            }
+        }
+        //backwards
+        else {
+            std::vector<FieldlinesState::Fieldline>::iterator fieldlineIt =
+                allPathLines[i].fieldlines.begin();
+            std::advance(fieldlineIt, _pathsVertexIndex[i]);
+            FieldlinesState::Fieldline& currentFieldline = *fieldlineIt;
+            // if backing past prev fieldline
+            if (_timeSinceLastInterpolation[i] < FLT_EPSILON) {
+
+                //if we're back to start
+                if (_pathsVertexIndex[i] > 1) {
+                    _timeSinceLastInterpolation[i] +=
+                        currentFieldline.timeToNextFieldline;
+                    --_pathsVertexIndex[i];
+                    --fieldlineIt;
+                    currentFieldline = *fieldlineIt;
+                }
+                else {
+                    int fieldlineVertex = 0;
+                    for (int j = lineStart; j < nVertices + lineStart; ++j) {
+                        _renderedLines[j] =
+                            currentFieldline.vertecies[fieldlineVertex].position;
+                        ++fieldlineVertex;
+                    }
+                    atStart = true;
+                }
+            }
+
+            if (atStart) continue;
+            FieldlinesState::Fieldline& nextFieldline = *(fieldlineIt - 1);
+
+            //if different topology
+            if (nextFieldline.topology != currentFieldline.topology) {
+                --_pathsVertexIndex[i];
+                _timeSinceLastInterpolation[i] = currentFieldline.timeToNextFieldline;
+                int fieldlineVertex = 0;
+                // j = rendered line vertex index
+                // for (int j = lineStart; j < lineCount + lineStart; ++j) {
+                for (int j = 0; j < nVertices; ++j) {
+                    _renderedLines[lineStart + j] =
+                        currentFieldline.vertecies[fieldlineVertex].position;
+                    ++fieldlineVertex;
+                }
+            }
+            else {
+                float timeDifference = _timeSinceLastInterpolation[i] /
+                    nextFieldline.timeToNextFieldline;
+                int fieldlineVertex = 0;
+                // j = rendered line vertex index
+                for (int j = lineStart; j < nVertices + lineStart; ++j) {
+                    glm::vec3 currentPosition =
+                        currentFieldline.vertecies[fieldlineVertex].position;
+                    glm::vec3 nextPosition =
+                        nextFieldline.vertecies[fieldlineVertex].position;
+                    _renderedLines[j] =
+                        lerp(nextPosition, currentPosition, timeDifference);
+                    ++fieldlineVertex;
+                }
+            }
+
+
+
+
+
+        }
+
+
+
     }
 }
 
@@ -392,7 +612,7 @@ void RenderableMovingFieldlines::updateVertexPositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    const std::vector<glm::vec3>& vertPos = _fieldlineState.vertexPositions();
+    const std::vector<glm::vec3>& vertPos = _renderedLines;
 
     glBufferData(
         GL_ARRAY_BUFFER,

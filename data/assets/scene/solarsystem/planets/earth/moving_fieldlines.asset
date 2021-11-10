@@ -2,33 +2,36 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
 
 --local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
-local fieldlinesDirectory =  'D:/data/2000_01_01_event/cdf'
+local fieldlinesDirectory = 'D:/data/2000_01_01_event/cdf'
 --local seedPointFile = 'C:/Users/elono/Documents/OpenSpace/data/Chris/seedpoints/lines.txt'
 local seedPointFile = 'D:/data/2000_01_01_event/cdf/GM_CDF/sw_fieldline_seeds_test.txt'
 
 local movingLines = {
-    Identifier = "MovingFieldlines",
-    Parent = transforms.GSMReferenceFrame.Identifier,
-    Renderable = {
-        Type = "RenderableMovingFieldlines",
-        SourceFolder = fieldlinesDirectory,
-        SeedPointFile = seedPointFile,
-    },
-    GUI = {
-        Path = "/Solar System/Planets/Earth",
-        Name = "Moving fieldlines",
-        Description = "moving"
-    }
+  Identifier = "MovingFieldlines",
+  Parent = transforms.GSMReferenceFrame.Identifier,
+  Renderable = {
+    Type = "RenderableMovingFieldlines",
+    SourceFolder = fieldlinesDirectory,
+    SeedPointFile = seedPointFile,
+    TracingVariable = "u_perp_b",
+    NumberOfPointsOnPathLine = 200,
+    NumberOfPointsOnFieldlines = 100
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth",
+    Name = "Moving fieldlines",
+    Description = "moving"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
 
 asset.meta = {
-    Name = "M",
-    Version = "1.0",
-    Description = "",
-    Author = "",
-    URL = "",
-    License = "",
-    Identifier = {"MovingFieldlines"}
+  Name = "M",
+  Version = "1.0",
+  Description = "",
+  Author = "",
+  URL = "",
+  License = "",
+  Identifier = {"MovingFieldlines"}
 }

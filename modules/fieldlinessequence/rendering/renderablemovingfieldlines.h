@@ -35,9 +35,6 @@
 
 #include <openspace/rendering/transferfunction.h>
 
-
-
-
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -59,9 +56,19 @@ private:
     bool getStateFromCdfFiles();
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
+    void moveLines(const double dt);
 
-    struct Mover {
+    struct PathLineTraverser : public FieldlinesState::PathLine {
+        float timeSinceInterpolation;
+        std::vector<FieldlinesState::Fieldline>::iterator currentFieldline;
+        int pathsVertexIndex;
 
+        std::vector<FieldlinesState::Fieldline>::iterator advanceFieldline(bool forward) {
+            if (forward)
+                return currentFieldline++;
+            else
+                return currentFieldline--;
+        };
     };
 
     enum class ColorMethod {
@@ -71,7 +78,7 @@ private:
 
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
-    
+
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
     // Uniform or transfer function
@@ -112,10 +119,16 @@ private:
     std::vector<glm::vec3> _seedPoints;
     // Extra variables such as rho, p or t
     std::vector<std::string> _extraVars;
+    size_t _nPointsOnPathLine = 200;
+    size_t _nPointsOnFieldlines = 100;
     // which tracing vaiable to trace. 'b' for fieldline is default
-    std::string _tracingVariable = "b";
+    std::string _tracingVariable = "u_perp_b";
+    std::vector<float> _timeSinceLastInterpolation;
+    // keeps track of what vertex on the pathline we're on right now during runtime,
+    // starting at 0 for each drawn line
+    std::vector<size_t> _pathsVertexIndex;
+
+    std::vector<glm::vec3> _renderedLines;
 };
-
 }
-
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__

@@ -35,6 +35,25 @@ namespace openspace {
 
 class FieldlinesState {
 public:
+    struct Vertex {
+        glm::vec3 position;
+    };
+    struct Fieldline {
+        enum class Topology {
+            Closed,
+            Open,
+            Imf
+        };
+        Topology topology;
+        std::vector<Vertex> vertecies;
+        float timeToNextFieldline;
+    };
+    struct PathLine {
+        std::vector<Fieldline> fieldlines;
+        //std::vector<glm::vec3> line;
+        //float lifetime; // for when multiple cdf-files come into play ?
+    };
+
     void convertLatLonToCartesian(float scale = 1.f);
     void scalePositions(float scale);
 
@@ -49,6 +68,7 @@ public:
     const std::vector<std::string>& extraQuantityNames() const;
     const std::vector<GLsizei>& lineCount() const;
     const std::vector<GLint>& lineStart() const;
+    const std::vector<PathLine>& allPathLines() const;
 
     fls::Model model() const;
     size_t nExtraQuantities() const;
@@ -62,8 +82,12 @@ public:
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
 
+    void addLinesToBeRendered();
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
+
+    void addPathLine(const int i);
+    void addFieldLine(const std::vector<glm::vec3> fieldLines, const float time, const int i);
 
 private:
     bool _isMorphable = false;
@@ -74,6 +98,11 @@ private:
     std::vector<std::string> _extraQuantityNames;
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
+
+    std::vector<PathLine> _allPathLines;    // replaces _fieldLinesPerPath
+
+
+    std::vector<std::vector<std::vector<glm::vec3>>> _fieldLinesPerPath;
     std::vector<glm::vec3> _vertexPositions;
 };
 
