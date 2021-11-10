@@ -38,14 +38,7 @@ namespace openspace {
         assert(browser != nullptr, "Sky browser is null pointer!");
         assert(target != nullptr, "Sky target is null pointer!");
     }
-
-    Pair& Pair::operator=(Pair other)
-    {
-        std::swap(_target, other._target);
-        std::swap(_browser, other._browser);
-        return *this;
-    }
-
+    
     void Pair::lock() {
         _target->lock();
     }
@@ -61,7 +54,7 @@ namespace openspace {
     void Pair::connectPair()
     {
         _browser->connectToSkyTarget();
-        _target->findSkyBrowser();
+        _target->connectoToSkyBrowser();
     }
 
     void Pair::synchronizeWithWwt()
@@ -206,21 +199,22 @@ namespace openspace {
     {
         _browser->sendIdToBrowser();
     }
-
+#pragma optimize("", off)
     void Pair::incrementallyAnimateToCoordinate(double deltaTime) 
     {
+        // Animate the target before the field of view starts to animate
         if (_target->isAnimated()) {
-            _target->animateToCoordinate(deltaTime);
+            _target->incrementallyAnimateToCoordinate(deltaTime);
         }
         else if (_browser->isAnimated()) {
             _browser->incrementallyAnimateToFov(deltaTime);
         }
     }
 
-    void Pair::startAnimation(glm::dvec3 coordsEnd, float FOVEnd, bool lockAfter)
+    void Pair::startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool lockAfter)
     {
         _target->startAnimation(coordsEnd, lockAfter);
-        _browser->startFovAnimation(FOVEnd);
+        _browser->startFovAnimation(fovEnd);
     }
 
     void Pair::centerTargetOnScreen()
@@ -234,7 +228,7 @@ namespace openspace {
         startAnimation(viewDirection, currentFov, false);
     }
 
-    bool Pair::isFinishedFading(float goalState)
+    bool Pair::hasFinishedFading(float goalState)
     {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
     }

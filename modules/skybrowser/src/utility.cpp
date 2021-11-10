@@ -131,7 +131,7 @@ namespace openspace::skybrowser {
         return windowRatio.x / windowRatio.y;
     }
 
-    bool coordinateIsInView(glm::dvec3 equatorial) {
+    bool isCoordinateInView(glm::dvec3 equatorial) {
         // Check if image coordinate is within current FOV
         glm::dvec3 coordsScreen = equatorialToScreenSpace(equatorial);
         double r = static_cast<float>(windowRatio());
@@ -191,7 +191,7 @@ namespace openspace::skybrowser {
 namespace openspace::wwtmessage {
     // WWT messages
     ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, 
-                                 const double roll, const bool moveInstantly) {
+                                 const double roll, const bool shouldMoveInstantly) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
 
@@ -201,7 +201,7 @@ namespace openspace::wwtmessage {
         msg.setValue("dec", celestCoords.y);
         msg.setValue("fov", fov);
         msg.setValue("roll", roll);
-        msg.setValue("instant", moveInstantly);
+        msg.setValue("instant", shouldMoveInstantly);
 
         return msg;
     }

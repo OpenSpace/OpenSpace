@@ -40,9 +40,6 @@ public:
     constexpr static const float AcceptableDiff = 0.01f;
 
     Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
-    Pair(Pair const&) = default;
-
-    Pair& operator=(Pair other);
 
     void lock();
     void unlock();
@@ -54,11 +51,11 @@ public:
     void enable();
     void disable();
     
-    void startAnimation(glm::dvec3 coordsEnd, float FOVEnd, bool shouldLockAfter = true);
+    void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);
     void centerTargetOnScreen();
     void incrementallyAnimateToCoordinate(double deltaTime);
     void incrementallyFade(float goalState, float fadeTime, float deltaTime);
-    bool isFinishedFading(float goalState);
+    bool hasFinishedFading(float goalState);
     bool isCoordOnPair(glm::vec2 mousePosition);    
     bool isEnabled();
     bool isLocked();

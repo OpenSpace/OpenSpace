@@ -91,8 +91,8 @@ namespace openspace {
 
         // Flags
         bool _hasLoadedImages{ false };
-        bool _syncViewWithWwt{ false };
-        bool _fovIsAnimated{ false };
+        bool _isSyncedWithWwt{ false };
+        bool _isFovAnimated{ false };
         float _endVfov{ 0.f };
         float _fovDiff{ 0.01f };
 

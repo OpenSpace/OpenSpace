@@ -81,8 +81,8 @@ public:
     
     void lookAtTarget(std::string id);
     void incrementallyRotateCamera(double deltaTime);
-    void fadeBrowserTargets(Transparency goal, float deltaTime);
-    void animateTargets(double deltaTime);
+    void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
+    void incrementallyAnimateTargets(double deltaTime);
     void lookAt3dBrowser();
    
     // Boolean functions

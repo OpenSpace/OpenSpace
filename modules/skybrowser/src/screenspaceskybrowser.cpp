@@ -151,7 +151,7 @@ namespace openspace {
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
         // Set flag to false so the thread can exit
-        _syncViewWithWwt = false;
+        _isSyncedWithWwt = false;
         if (_threadWwtMessages.joinable()) {
             _threadWwtMessages.join();
             LINFO("Joined thread");
@@ -181,8 +181,8 @@ namespace openspace {
     
     void ScreenSpaceSkyBrowser::startSyncingWithWwt() {
         // If the camera is already synced, the browser is already syncing
-        if (!_syncViewWithWwt) {
-            _syncViewWithWwt = true;
+        if (!_isSyncedWithWwt) {
+            _isSyncedWithWwt = true;
             // Set border color
             setWebpageBorderColor(_borderColor.value());
             // Track target
@@ -204,10 +204,14 @@ namespace openspace {
         glm::dvec2 result = - convertToScreenSpace * resultRelativeOs;
         return result;
     }
-
+    /*
+    void ScreenSpaceBrowser::setXCallback(std::function<void()> callback) {
+        _originalDimensions.onChange(std::move(callback));
+    }
+    */
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         // Set flag to false so the thread can exit
-        _syncViewWithWwt = false;
+        _isSyncedWithWwt = false;
         if (_threadWwtMessages.joinable()) {
             _threadWwtMessages.join();
             LINFO("Joined thread");
@@ -223,24 +227,26 @@ namespace openspace {
 
     bool ScreenSpaceSkyBrowser::isAnimated()
     {
-        return _fovIsAnimated;
+        return _isFovAnimated;
     }
 
     void ScreenSpaceSkyBrowser::startFovAnimation(float fov)
     {
-        _fovIsAnimated = true;
+        _isFovAnimated = true;
         _endVfov = fov;
     }
 
     void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime)
     {
-        // If distance is small enough, stop animating
+        // If distance too large, keep animating. Else, stop animation
         float diff = verticalFov() - _endVfov;
-        if (abs(diff) > _fovDiff) {
+        bool shouldAnimate = abs(diff) > _fovDiff;
+
+        if (shouldAnimate) {
             setVerticalFovWithScroll(diff);
         }
         else {           
-            _fovIsAnimated = false;
+            _isFovAnimated = false;
         }
     }
 
@@ -320,7 +326,7 @@ namespace openspace {
 
         // Start a thread to enable user interaction while sending the calls to WWT
         _threadWwtMessages = std::thread([&] {
-            while (_syncViewWithWwt) {
+            while (_isSyncedWithWwt) {
                 if (_skyTarget) {                    
                     // Message WorldWide Telescope current view
                     glm::dvec3 cartesian = _skyTarget->directionEquatorial();

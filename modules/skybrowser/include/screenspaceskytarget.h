@@ -34,7 +34,7 @@ namespace openspace {
         void createShaders();
 
         // Sky browser functionality
-        bool findSkyBrowser();
+        bool connectoToSkyBrowser();
         void matchAppearanceToSkyBrowser();
         
         // Getters
@@ -59,8 +59,8 @@ namespace openspace {
 
         // Animation
         bool isAnimated();
-        void startAnimation(glm::dvec3 end, bool lockAfter);
-        void animateToCoordinate(float deltaTime);
+        void startAnimation(glm::dvec3 end, bool shouldLockAfter);
+        void incrementallyAnimateToCoordinate(float deltaTime);
         // Display
         void highlight(glm::ivec3 addition);
         void removeHighlight(glm::ivec3 removal);
@@ -76,7 +76,7 @@ namespace openspace {
         // Flags
         bool _isLocked{ false };
         bool _isAnimated{ false };
-        bool _lockAfterAnimation{ false };
+        bool _shouldLockAfterAnimation{ false };
 
         // Shader
         UniformCache(

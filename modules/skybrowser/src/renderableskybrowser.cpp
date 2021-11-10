@@ -71,7 +71,7 @@ namespace openspace {
         , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
         , _reload(ReloadInfo)
         , _verticalFov(70.f)
-        , _syncViewWithWwt(false)
+        , _isSyncedWithWwt(false)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -231,11 +231,11 @@ namespace openspace {
 
     void RenderableSkyBrowser::syncWwtView() {
         // If the camera is already synced, the browser is already initialized
-        if (!_syncViewWithWwt) {
-            _syncViewWithWwt = true;
+        if (!_isSyncedWithWwt) {
+            _isSyncedWithWwt = true;
             // Start a thread to enable user interaction while sending the calls to WWT
             _threadWwtMessages = std::thread([&] {
-                while (_syncViewWithWwt) {
+                while (_isSyncedWithWwt) {
 
                     glm::dvec2 aim{ 0.0 };
                     // Send a message just to establish contact
@@ -255,7 +255,7 @@ namespace openspace {
     }
 
     void RenderableSkyBrowser::stopSyncingWwtView() {
-        _syncViewWithWwt = false;
+        _isSyncedWithWwt = false;
 
         if (_threadWwtMessages.joinable()) {
             _threadWwtMessages.join();

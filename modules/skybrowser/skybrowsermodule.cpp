@@ -629,7 +629,7 @@ void SkyBrowserModule::selectImage2dBrowser(int i)
         LINFO("Loading image " + image.name);
         selected->selectImage(image, i);
         
-        bool isInView = skybrowser::coordinateIsInView(image.equatorialCartesian);
+        bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
         // If the coordinate is not in view, rotate camera
         if (image.hasCelestialCoords) {
             if(!isInView) {
@@ -774,10 +774,10 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
 {
      float transparency = static_cast<float>(goal);
      bool isAllFinished{ false };
-     for (Pair pair : _targetsBrowsers) {
+     for (Pair& pair : _targetsBrowsers) {
          if (pair.isEnabled()) {
              pair.incrementallyFade(transparency, _fadingTime, deltaTime);
-             bool isPairFinished = pair.isFinishedFading(transparency);
+             bool isPairFinished = pair.hasFinishedFading(transparency);
 
              if (isPairFinished && goal == Transparency::Transparent) {
                  pair.disable();
@@ -794,9 +794,9 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
 
 void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 {
-    for (Pair pair : _targetsBrowsers) {
+    for (Pair& pair : _targetsBrowsers) {
         if (pair.isEnabled()) {
-            pair.animateToCoordinate(deltaTime);
+            pair.incrementallyAnimateToCoordinate(deltaTime);
         }
     }
 }

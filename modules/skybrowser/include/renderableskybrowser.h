@@ -98,7 +98,7 @@ namespace openspace {
         // Flags
         bool _isUrlDirty = false;
         bool _isDimensionsDirty = false;
-        bool _syncViewWithWwt;
+        bool _isSyncedWithWwt;
         
         float _verticalFov;
         std::thread _threadWwtMessages;

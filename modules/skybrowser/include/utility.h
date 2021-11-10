@@ -42,7 +42,7 @@ namespace openspace {
 
         // Camera roll and direction
         // Camera roll is with respect to the equatorial North Pole
-        bool coordinateIsInView(glm::dvec3 equatorial);
+        bool isCoordinateInView(glm::dvec3 equatorial);
         float windowRatio();
         double cameraRoll();
         glm::vec2 pixelToScreenSpace(glm::vec2& mouseCoordinate);
@@ -58,7 +58,7 @@ namespace openspace {
     namespace wwtmessage {
         inline int messageCounter{ 0 };
         ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords,
-            const double fov, const double roll, const bool moveInstantly = true);
+            const double fov, const double roll, const bool shouldMoveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
         ghoul::Dictionary addImage(const std::string& id, const std::string& url);
