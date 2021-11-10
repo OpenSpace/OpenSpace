@@ -64,6 +64,8 @@ public:
     void update();
     scripting::LuaLibrary luaLibrary();
 
+    std::vector<const Asset*> allAssets() const;
+
     /**
      * Load an asset
      */

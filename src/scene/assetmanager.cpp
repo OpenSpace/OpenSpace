@@ -153,6 +153,7 @@ void AssetManager::update() {
         setCurrentAsset(_rootAsset.get());
         std::shared_ptr<Asset> a = retrieveAsset(asset);
         _currentAsset->request(a);
+        //_currentAsset->require(a);
         global::profile->addAsset(asset);
     }
     _assetAddQueue.clear();
@@ -216,6 +217,29 @@ const Asset& AssetManager::rootAsset() const {
 
 Asset& AssetManager::rootAsset() {
     return *_rootAsset;
+}
+
+namespace {
+std::vector<const Asset*> subTreeAssets(Asset* asset) {
+    std::unordered_set<const Asset*> assets({ asset });
+    for (Asset* c : asset->childAssets()) {
+        if (c == asset) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Detected cycle in asset inclusion for {} at {}",
+                asset->assetName(), asset->assetFilePath()
+            ));
+        }
+
+        std::vector<const Asset*> subTree = subTreeAssets(c);
+        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
+    }
+    std::vector<const Asset*> assetVector(assets.begin(), assets.end());
+    return assetVector;
+}
+} // namespace
+
+std::vector<const Asset*> AssetManager::allAssets() const {
+    return subTreeAssets(_rootAsset.get());
 }
 
 bool AssetManager::loadAsset(Asset* asset) {

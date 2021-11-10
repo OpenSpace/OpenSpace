@@ -39,31 +39,6 @@ namespace openspace {
 
 namespace {
     constexpr const char* _loggerCat = "Asset";
-
-    float syncProgress(const std::vector<const Asset*>& assets) {
-        size_t nTotalBytes = 0;
-        size_t nSyncedBytes = 0;
-
-        for (const Asset* a : assets) {
-            std::vector<ResourceSynchronization*> s = a->ownSynchronizations();
-
-            for (ResourceSynchronization* sync : s) {
-                if (sync->nTotalBytesIsKnown()) {
-                    nTotalBytes += sync->nTotalBytes();
-                    nSyncedBytes += sync->nSynchronizedBytes();
-                }
-                else if (sync->isSyncing()) {
-                    // A resource is still synchronizing but its size is unknown.
-                    // Impossible to know the global progress.
-                    return 0.f;
-                }
-            }
-        }
-        if (nTotalBytes == 0) {
-            return 0.f;
-        }
-        return static_cast<float>(nSyncedBytes) / static_cast<float>(nTotalBytes);
-    }
 } // namespace
 
 Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher)
@@ -167,7 +142,21 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
         _synchronizationWatcher->watchSynchronization(
             sync,
             [this, sync](ResourceSynchronization::State state) {
-                syncStateChanged(sync.get(), state);
+                ZoneScoped
+
+                if (state == ResourceSynchronization::State::Resolved) {
+                    if (!isSynchronized() && isSyncResolveReady()) {
+                        setState(State::SyncResolved);
+                    }
+                }
+                else if (state == ResourceSynchronization::State::Rejected) {
+                    LERROR(fmt::format(
+                        "Failed to synchronize resource '{}' in asset '{}'",
+                        sync->name(), id()
+                    ));
+
+                    setState(State::SyncRejected);
+                }
             }
         );
     _syncWatches.push_back(watch);
@@ -180,32 +169,13 @@ void Asset::clearSynchronizations() {
     _syncWatches.clear();
 }
 
-void Asset::syncStateChanged(ResourceSynchronization* sync,
-                             ResourceSynchronization::State state)
-{
-    ZoneScoped
-
-    if (state == ResourceSynchronization::State::Resolved) {
-        if (!isSynchronized() && isSyncResolveReady()) {
-            setState(State::SyncResolved);
-        }
-    }
-    else if (state == ResourceSynchronization::State::Rejected) {
-        LERROR(fmt::format(
-            "Failed to synchronize resource '{}' in asset '{}'", sync->name(), id()
-        ));
-
-        setState(State::SyncRejected);
-    }
-}
-
-bool Asset::isSyncResolveReady() {
-    std::vector<Asset*> reqAssets = requiredAssets();
+bool Asset::isSyncResolveReady() const {
+    const std::vector<std::shared_ptr<Asset>>& reqAssets = _requiredAssets;
 
     const auto unsynchronizedAsset = std::find_if(
         reqAssets.cbegin(),
         reqAssets.cend(),
-        [](Asset* a) { return !a->isSynchronized(); }
+        [](const std::shared_ptr<Asset>& a) { return !a->isSynchronized(); }
     );
 
     if (unsynchronizedAsset != reqAssets.cend()) {
@@ -233,32 +203,6 @@ std::vector<ResourceSynchronization*> Asset::ownSynchronizations() const {
     );
 
     return res;
-}
-
-std::vector<const Asset*> Asset::subTreeAssets() const {
-    std::unordered_set<const Asset*> assets({ this });
-    for (Asset* c : childAssets()) {
-        if (c == this) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Detected cycle in asset inclusion for {} at {}", _assetName, _assetPath
-            ));
-        }
-
-        std::vector<const Asset*> subTree = c->subTreeAssets();
-        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
-    }
-    std::vector<const Asset*> assetVector(assets.begin(), assets.end());
-    return assetVector;
-}
-
-std::vector<const Asset*> Asset::requiredSubTreeAssets() const {
-    std::unordered_set<const Asset*> assets({ this });
-    for (const std::shared_ptr<Asset>& dep : _requiredAssets) {
-        std::vector<const Asset*> subTree = dep->requiredSubTreeAssets();
-        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
-    }
-    std::vector<const Asset*> assetVector(assets.begin(), assets.end());
-    return assetVector;
 }
 
 bool Asset::isLoaded() const {
@@ -367,7 +311,7 @@ bool Asset::startSynchronizations() {
     bool childFailed = false;
 
     // Start synchronization of all children first
-    for (Asset* child : requiredAssets()) {
+    for (const std::shared_ptr<Asset>& child : _requiredAssets) {
         if (!child->startSynchronizations()) {
             childFailed = true;
         }
@@ -387,10 +331,14 @@ bool Asset::startSynchronizations() {
 }
 
 bool Asset::cancelAllSynchronizations() {
-    std::vector<Asset*> children = childAssets();
     bool cancelledAnySync = std::any_of(
-        children.cbegin(),
-        children.cend(),
+        _requiredAssets.cbegin(),
+        _requiredAssets.cend(),
+        std::mem_fn(&Asset::cancelAllSynchronizations)
+    );
+    cancelledAnySync |= std::any_of(
+        _requestedAssets.cbegin(),
+        _requestedAssets.cend(),
         std::mem_fn(&Asset::cancelAllSynchronizations)
     );
 
@@ -412,10 +360,14 @@ bool Asset::cancelUnwantedSynchronizations() {
         return false;
     }
 
-    const std::vector<Asset*>& children = childAssets();
     bool cancelledAnySync = std::any_of(
-        children.begin(),
-        children.end(),
+        _requiredAssets.begin(),
+        _requiredAssets.end(),
+        std::mem_fn(&Asset::cancelUnwantedSynchronizations)
+    );
+    cancelledAnySync |= std::any_of(
+        _requestedAssets.begin(),
+        _requestedAssets.end(),
         std::mem_fn(&Asset::cancelUnwantedSynchronizations)
     );
 
@@ -430,16 +382,6 @@ bool Asset::cancelUnwantedSynchronizations() {
         setState(State::Loaded);
     }
     return cancelledAnySync;
-}
-
-float Asset::requiredSynchronizationProgress() const {
-    std::vector<const Asset*> assets = requiredSubTreeAssets();
-    return syncProgress(assets);
-}
-
-float Asset::requestedSynchronizationProgress() const {
-    std::vector<const Asset*> assets = subTreeAssets();
-    return syncProgress(assets);
 }
 
 bool Asset::load() {
@@ -460,20 +402,17 @@ void Asset::unload() {
     setState(State::Unloaded);
     _loader->unloadAsset(this);
 
-    for (Asset* child : requiredAssets()) {
-        unrequire(child);
+    for (const std::shared_ptr<Asset>& child : _requiredAssets) {
+        unrequire(child.get());
     }
     for (Asset* child : requestedAssets()) {
         unrequest(child);
     }
 }
 
-void Asset::unloadIfUnwanted() {
-    if (hasLoadedParent()) {
-        return;
-    }
-    unload();
-}
+//void Asset::unloadIfUnwanted() {
+//
+//}
 
 bool Asset::initialize() {
     ZoneScoped
@@ -637,7 +576,9 @@ void Asset::unrequire(Asset* child) {
 
     child->deinitializeIfUnwanted();
     child->cancelUnwantedSynchronizations();
-    child->unloadIfUnwanted();
+    if (!child->hasLoadedParent()) {
+        child->unload();
+    }
 }
 
 void Asset::request(std::shared_ptr<Asset> child) {
@@ -689,16 +630,9 @@ void Asset::unrequest(Asset* child) {
 
     child->deinitializeIfUnwanted();
     child->cancelUnwantedSynchronizations();
-    child->unloadIfUnwanted();
-}
-
-std::vector<Asset*> Asset::requiredAssets() const {
-    std::vector<Asset*> res;
-    res.reserve(_requiredAssets.size());
-    for (const std::shared_ptr<Asset>& a : _requiredAssets) {
-        res.push_back(a.get());
+    if (!child->hasLoadedParent()) {
+        child->unload();
     }
-    return res;
 }
 
 std::vector<Asset*> Asset::requestedAssets() const {

@@ -81,9 +81,6 @@ public:
     void clearSynchronizations();
     std::vector<ResourceSynchronization*> ownSynchronizations() const;
 
-    void syncStateChanged(ResourceSynchronization* sync,
-        ResourceSynchronization::State state);
-
     /**
      * Load this asset and return true if successful,
      * i.e. if this and all required assets loaded without errors.
@@ -92,15 +89,12 @@ public:
     bool hasLoadedParent();
     bool isLoaded() const;
     void unload();
-    void unloadIfUnwanted();
 
     /**
      * Start synchronizations of this asset and return true if all
      * its own synchronizations and required assets' synchronizations could start.
      */
     bool startSynchronizations();
-    float requiredSynchronizationProgress() const;
-    float requestedSynchronizationProgress() const;
 
     /**
      * Initialize this asset and return true if successful,
@@ -120,9 +114,6 @@ public:
     void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
-    std::vector<Asset*> requiredAssets() const;
-
-    std::vector<const Asset*> subTreeAssets() const;
     std::vector<Asset*> childAssets() const;
 
     void setMetaInformation(MetaInformation metaInformation);
@@ -136,12 +127,10 @@ private:
 
     bool isSynchronized() const;
     bool isSyncingOrResolved() const;
-    bool isSyncResolveReady();
+    bool isSyncResolveReady() const;
     bool hasSyncingOrResolvedParent() const;
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
-
-    std::vector<const Asset*> requiredSubTreeAssets() const;
 
     std::atomic<State> _state;
     AssetManager* _loader;
