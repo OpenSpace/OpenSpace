@@ -1345,7 +1345,6 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "loadKernel",
                 &luascriptfunctions::loadKernel,
-                {},
                 "string",
                 "Loads the provided SPICE kernel by name. The name can contain path "
                 "tokens, which are automatically resolved"
@@ -1353,7 +1352,6 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "unloadKernel",
                 &luascriptfunctions::unloadKernel,
-                {},
                 "{string, number}",
                 "Unloads the provided SPICE kernel. The name can contain path tokens, "
                 "which are automatically resolved"
@@ -1361,21 +1359,18 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "getSpkCoverage",
                 &luascriptfunctions::spkCoverage,
-                {},
                 "string",
                 "Returns a list of SPK coverage intervals for the target."
             },
             {
                 "getCkCoverage",
                 &luascriptfunctions::ckCoverage,
-                {},
                 "string",
                 "Returns a list of CK coverage intervals for the target."
             },
             {
                 "rotationMatrix",
                 &luascriptfunctions::rotationMatrix,
-                {},
                 "{string, string, string}",
                 "Returns the rotationMatrix for a given body in a frame of reference at "
                 "a specific time. The first agument is the target body, the second is "
@@ -1386,7 +1381,6 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "position",
                 &luascriptfunctions::position,
-                {},
                 "{string, string, string, string}",
                 "Returns the position for a target by an observer in a frame of "
                 "reference at a specific time. The first agument is the target body, the "
@@ -1397,7 +1391,6 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "getSpiceBodies",
                 &luascriptfunctions::spiceBodies,
-                {},
                 "{ builtInFrames [, printValues] }",
                 "Returns a list of Spice Bodies loaded into the system. Returns SPICE "
                 "built in frames if builtInFrames. Returns User loaded frames if "

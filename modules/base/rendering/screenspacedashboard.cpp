@@ -139,14 +139,12 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
             {
                 "addDashboardItemToScreenSpace",
                 &luascriptfunctions::addDashboardItemToScreenSpace,
-                {},
                 "string, table",
                 "Adds a new dashboard item to an existing SceenSpaceDashboard."
             },
             {
                 "removeDashboardItemsFromScreenSpace",
                 &luascriptfunctions::removeDashboardItemsFromScreenSpace,
-                {},
                 "string",
                 "Removes all dashboard items from an existing ScreenSpaceDashboard."
             }

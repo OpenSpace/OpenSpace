@@ -819,7 +819,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
             continue;
         }
 
-        std::ifstream seedFile(spFile);
+        std::ifstream seedFile(spFile.path());
         if (!seedFile.good()) {
             LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();

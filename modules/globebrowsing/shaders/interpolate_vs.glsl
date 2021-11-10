@@ -22,46 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/globals.h>
+#version __CONTEXT__
 
-namespace openspace::luascriptfunctions::asset {
+layout (location = 0) in vec2 in_position;
+layout (location = 1) in vec2 in_texCoords;
 
-int add(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
+out vec2 texCoord;
 
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    if (global::renderEngine->scene()) {
-        assetManager.add(assetName);
-    }
-    else {
-        // The scene might not exist yet if OpenSpace was started without specifying an
-        // initial asset
-        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
-    }
-
-    return 0;
+void main() {
+  texCoord = in_texCoords;
+  gl_Position = vec4(in_position, 0.0, 1.0);
 }
-
-int remove(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    assetManager.remove(assetName);
-    return 0;
-}
-
-int removeAll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    assetManager.removeAll();
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions

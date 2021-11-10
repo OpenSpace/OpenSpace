@@ -22,46 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/globals.h>
+#include "fragment.glsl"
 
-namespace openspace::luascriptfunctions::asset {
+uniform sampler2D prevTexture;
+uniform sampler2D nextTexture;
+uniform sampler2D colormapTexture;
+uniform float blendFactor;
 
-int add(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
+in vec2 texCoord;
 
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    const std::string assetName = ghoul::lua::value<std::string>(L);
+Fragment getFragment() {
+  vec4 texel0 = texture2D(prevTexture, texCoord);
+  vec4 texel1 = texture2D(nextTexture, texCoord);
 
-    if (global::renderEngine->scene()) {
-        assetManager.add(assetName);
-    }
-    else {
-        // The scene might not exist yet if OpenSpace was started without specifying an
-        // initial asset
-        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
-    }
+  vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
-    return 0;
+  Fragment frag;  
+  if (mixedTexture.r > 0.999) {
+    vec2 position = vec2(mixedTexture.r - 0.01, 0.5);
+    frag.color = texture2D(colormapTexture, position);
+  }
+  else {
+    vec2 position = vec2(mixedTexture.r , 0.5);
+    frag.color = texture2D(colormapTexture, position);
+  }
+
+  frag.color.a = mixedTexture.a;
+  return frag;
 }
-
-int remove(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    const std::string assetName = ghoul::lua::value<std::string>(L);
-
-    assetManager.remove(assetName);
-    return 0;
-}
-
-int removeAll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
-
-    AssetManager& assetManager = global::openSpaceEngine->assetManager();
-    assetManager.removeAll();
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions

@@ -427,35 +427,30 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "isFlying",
                 &luascriptfunctions::isFlying,
-                {},
                 "",
                 "Returns true if a camera path is currently running, and false otherwise"
             },
             {
                 "continuePath",
                 &luascriptfunctions::continuePath,
-                {},
                 "",
                 "Continue playing a paused camera path"
             },
             {
                 "pausePath",
                 &luascriptfunctions::pausePath,
-                {},
                 "",
                 "Pause a playing camera path"
             },
             {
                 "stopPath",
                 &luascriptfunctions::stopPath,
-                {},
                 "",
                 "Stops a path, if one is being played"
             },
             {
                 "goTo",
                 &luascriptfunctions::goTo,
-                {},
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
                 "double specifies the duration of the motion. If the optional bool is "
@@ -465,7 +460,6 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "goToHeight",
                 &luascriptfunctions::goToHeight,
-                {},
                 "string, double [, bool, double]",
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
@@ -477,7 +471,6 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
              {
                 "goToNavigationState",
                 &luascriptfunctions::goToNavigationState,
-                {},
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
                 "The optional double specifies the target duration of the motion. Note "
@@ -487,7 +480,6 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             {
                 "createPath",
                 &luascriptfunctions::createPath,
-                {},
                 "table",
                 "Create the path as described by the lua table input argument"
             },
