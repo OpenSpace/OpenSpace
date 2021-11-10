@@ -87,3 +87,14 @@ asset.onInitialize(function ()
     end
   end
 end)
+
+
+asset.meta = {
+  Name = "Customization - globebrowsing",
+  Version = "1.0",
+  Description = [[ Include this asset to add downloaded layers to Mars, the Moon 
+  or Mercury]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
