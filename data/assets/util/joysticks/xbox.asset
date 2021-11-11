@@ -47,7 +47,7 @@ local XBoxController = {
 
 asset.onInitialize(function()
   local controller = XBoxController;
-  local name = "";
+  local name = "Xbox Controller";
 
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], 0.15)
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], 0.15)

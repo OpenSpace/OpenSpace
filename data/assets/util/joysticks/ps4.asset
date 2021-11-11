@@ -49,7 +49,7 @@ local PS4Controller = {
 
 asset.onInitialize(function()
   local controller = PS4Controller;
-  local name = "";
+  local name = "Wireless Controller";
 
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[1], 0.15)
   openspace.navigation.setAxisDeadZone(name, controller.LeftThumbStick[2], 0.15)
