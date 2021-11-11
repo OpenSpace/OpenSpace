@@ -1,29 +1,14 @@
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderengine.h>
+
+#include <modules/skybrowser/skybrowsermodule.h>
+
+#include <modules/skybrowser/include/renderableskybrowser.h>
+#include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/camera.h>
-#include <modules/base/rendering/screenspaceimagelocal.h>
-#include <modules/base/rendering/renderableplaneimagelocal.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/skybrowser/include/renderableskybrowser.h>
-#include <modules/skybrowser/include/pair.h>
-#include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/utility.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
-#include <sstream>
-#include <thread> 
-#include <limits>
 
 namespace {
 	constexpr const char _loggerCat[] = "SkyBrowserModule";

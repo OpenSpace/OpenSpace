@@ -1,12 +1,7 @@
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/engine/globals.h>
-#include <openspace/util/camera.h>
-#include <cmath> // For atan2
-#include <glm/gtx/string_cast.hpp> // For printing glm data
-#define _USE_MATH_DEFINES
-#include <math.h>
+#ifndef __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
+#define __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
     namespace skybrowser {
@@ -73,7 +68,7 @@ namespace openspace {
     }
 }
 
-
+#endif // __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
     
     
 

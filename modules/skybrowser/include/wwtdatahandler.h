@@ -1,11 +1,10 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <openspace/documentation/documentation.h>
 #include <modules/skybrowser/tinyxml2/tinyxml2.h>
+#include <openspace/documentation/documentation.h>
 #include <unordered_map>
-#include <string>
-#include <vector>
+
 // For speck loading
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>

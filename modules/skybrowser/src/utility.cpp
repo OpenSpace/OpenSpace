@@ -1,14 +1,13 @@
-
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/engine/globals.h>
-#include <openspace/util/camera.h>
 #include <modules/skybrowser/include/utility.h>
-#include <cmath> // For atan2
-#include <glm/gtx/string_cast.hpp> // For printing glm data
-#include <glm/gtx/vector_angle.hpp>
+
+#include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/util/camera.h>
+#include <glm/gtx/vector_angle.hpp>
+#include <cmath> // For atan2
 #define _USE_MATH_DEFINES
-#include <cmath>
+#include <math.h> // For M_PI
 
 namespace openspace::skybrowser {
 

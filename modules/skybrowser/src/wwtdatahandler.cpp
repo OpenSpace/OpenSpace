@@ -1,12 +1,13 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
+
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/util/httprequest.h> // For downloading files from url
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <filesystem> // To iterate through files in directory
+#include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <algorithm>
 
 // For loading the speck files
 #include <ghoul/fmt.h>
@@ -25,7 +26,7 @@ namespace openspace {
          return element->FindAttribute(name.c_str());
     }
 
-    std::string getAttribute(const tinyxml2::XMLElement* element, const std::string& name) {
+    std::string attribute(const tinyxml2::XMLElement* element, const std::string& name) {
         if (hasAttribute(element, name)) {
             return element->FindAttribute(name.c_str())->Value();
         }
@@ -142,7 +143,7 @@ namespace openspace {
         
         // If the place has a thumbnail url, return it
         if (hasAttribute(place, wwt::Thumbnail)) {
-            return getAttribute(place, wwt::Thumbnail);
+            return attribute(place, wwt::Thumbnail);
         } 
 
         // If the place doesn't have a thumbnail url data attribute,
@@ -219,8 +220,8 @@ namespace openspace {
 
             // If folder contains urls, download and parse those urls
             if (hasAttribute(element, wwt::Url) && hasAttribute(element, wwt::Name)) {
-                std::string url = getAttribute(element, wwt::Url);
-                std::string fileName = getAttribute(element, wwt::Name);
+                std::string url = attribute(element, wwt::Url);
+                std::string fileName = attribute(element, wwt::Name);
                 downloadAndParseWtmlFilesFromUrl(_xmls, directory, url, fileName);
             }
             element = element->NextSiblingElement();
@@ -257,7 +258,7 @@ namespace openspace {
         // Traverse through the collected wtml documents and collect the images
         for (tinyxml2::XMLDocument* doc : _xmls) {
             tinyxml2::XMLElement* root = doc->FirstChildElement();
-            std::string collectionName = getAttribute(root, wwt::Name);
+            std::string collectionName = attribute(root, wwt::Name);
             saveImagesFromXml(root, collectionName);
         }
 
@@ -313,7 +314,7 @@ namespace openspace {
         // Only collect the images that have a thumbnail image, that are sky images and 
         // that have an image
         const bool hasThumbnailUrl = thumbnailUrl != wwt::Undefined;
-        const bool isSkyImage = getAttribute(node, wwt::DataSetType) == wwt::Sky;
+        const bool isSkyImage = attribute(node, wwt::DataSetType) == wwt::Sky;
         const bool hasImageUrl = imageSet ? hasAttribute(imageSet, wwt::Url) : false;
         
         if (!(hasThumbnailUrl && isSkyImage && hasImageUrl)) {
@@ -321,8 +322,8 @@ namespace openspace {
         }
 
         // Collect name, image url and credits
-        std::string  name = getAttribute(node, wwt::Name);
-        std::string imageUrl = getAttribute(imageSet, wwt::Url);
+        std::string  name = attribute(node, wwt::Name);
+        std::string imageUrl = attribute(imageSet, wwt::Url);
         std::string credits = getChildNodeContentFromImageSet(imageSet, wwt::Credits);
         std::string creditsUrl = getChildNodeContentFromImageSet(
             imageSet, wwt::CreditsUrl
@@ -338,8 +339,8 @@ namespace openspace {
         if (hasCelestialCoords) {
             // The RA from WWT is in the unit hours: 
             // to convert to degrees, multiply with 360 (deg) /24 (h) = 15
-            double ra = 15.0 * std::stod(getAttribute(node, wwt::RA));
-            double dec = std::stod(getAttribute(node, wwt::Dec));
+            double ra = 15.0 * std::stod(attribute(node, wwt::RA));
+            double dec = std::stod(attribute(node, wwt::Dec));
             equatorialSpherical = { ra, dec };
             equatorialCartesian = skybrowser::sphericalToCartesian(
                 equatorialSpherical
@@ -349,7 +350,7 @@ namespace openspace {
         // Collect field of view. The WWT definition of ZoomLevel is: VFOV = ZoomLevel / 6
         float fov{ 0.f };
         if (hasAttribute(node, wwt::ZoomLevel)) {
-            fov = std::stof(getAttribute(node, wwt::ZoomLevel)) / 6.0;
+            fov = std::stof(attribute(node, wwt::ZoomLevel)) / 6.0;
         }
 
         // Find 3D position by matching with speck file
@@ -398,7 +399,7 @@ namespace openspace {
             // If node is another folder, open recursively
             else if (name == wwt::Folder) {
                 std::string newCollectionName = collection + "/";
-                newCollectionName += getAttribute(node, wwt::Name);
+                newCollectionName += attribute(node, wwt::Name);
 
                 saveImagesFromXml(node, newCollectionName);
             }

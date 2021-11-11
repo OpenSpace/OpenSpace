@@ -25,29 +25,21 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
 
+#include <modules/skybrowser/include/pair.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
+ //#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/distanceconstants.h>
-#include <thread>
-#include <string>
-
-#include <iostream>
 #include <fstream>
 
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
-class ScreenSpaceSkyTarget;
-class RenderableSkyBrowser;
-class ScreenSpaceImageLocal;
-class WwtDataHandler;
-class SceneGraphNode;
-class ImageData;
-class Pair;
 
 enum class Transparency {
     Transparent = 0,

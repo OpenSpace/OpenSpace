@@ -23,33 +23,16 @@
  ****************************************************************************************/
 
 
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/globals.h>
+#include <modules/skybrowser/skybrowsermodule.h>
+
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include "skybrowsermodule_lua.inl"
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/util/distanceconstants.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/skybrowser/include/pair.h>
-#include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
-#include "skybrowsermodule_lua.inl"
-#include <glm/gtx/vector_angle.hpp>
-#include <glm/gtx/string_cast.hpp> // For printing glm data
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
-#include <cmath> // For atan2
-#include <algorithm>
-#include <fstream>    
-
 
 namespace {
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -57,9 +40,6 @@ namespace {
     };
     
     #include "skybrowsermodule_codegen.cpp"
-    
-    
-    
 } // namespace
 
 namespace openspace {

@@ -1,28 +1,14 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
-#include <modules/skybrowser/include/utility.h>
-#include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
+
 #include <modules/webbrowser/include/browserinstance.h>
-#include <modules/webbrowser/include/screenspacebrowser.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/util/camera.h>
-#include <openspace/scene/scene.h>
-#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <ghoul/opengl/texture.h>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/rotate_vector.hpp >
-#include <thread>
-#include <chrono> // Milliseconds
 #include <optional>
-#include <openspace/util/coordinateconversion.h> // to adjust camera angle
 
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
@@ -419,14 +405,14 @@ namespace openspace {
         return _selectedImages;
     }
 
-    void ScreenSpaceSkyBrowser::addSelectedImage(const ImageData& image, int i) {
+    void ScreenSpaceSkyBrowser::addSelectedImage(const std::string& url, int i) {
         // Ensure there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it == std::end(_selectedImages)) {
             // Push newly selected image to front
             _selectedImages.push_front(i);
             // Index of image is used as layer ID as it is unique in the image data set
-            sendMessageToWwt(wwtmessage::addImage(std::to_string(i), image.imageUrl));
+            sendMessageToWwt(wwtmessage::addImage(std::to_string(i), url));
             sendMessageToWwt(wwtmessage::setImageOpacity(std::to_string(i), 1.0));
         }
     }

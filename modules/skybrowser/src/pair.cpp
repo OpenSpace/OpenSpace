@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/pair.h>
+
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/utility.h>
 
 namespace openspace {
@@ -167,7 +166,7 @@ namespace openspace {
     void Pair::selectImage(const ImageData& image, int i)
     {
         // Load image into browser
-        _browser->addSelectedImage(image, i);
+        _browser->addSelectedImage(image.imageUrl, i);
 
         // If the image has coordinates, move the target
         if (image.hasCelestialCoords) {

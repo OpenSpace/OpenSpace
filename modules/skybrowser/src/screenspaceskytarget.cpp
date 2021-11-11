@@ -1,28 +1,15 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
-#include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/helper.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/vector_angle.hpp>
-#include <optional>
-#define _USE_MATH_DEFINES
-#include <cmath>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyTarget";

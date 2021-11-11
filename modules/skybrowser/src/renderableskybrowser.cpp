@@ -1,24 +1,17 @@
-#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/renderableskybrowser.h>
-#include <modules/skybrowser/skybrowsermodule.h>
+
 #include <modules/skybrowser/include/utility.h>
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/util/distanceconstants.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
+#include <openspace/util/distanceconstants.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <deque>
+
 
 namespace {
 
@@ -210,7 +203,7 @@ namespace openspace {
         }
     }
 
-    void RenderableSkyBrowser::removeSelectedImage(const ImageData& image, int i) {
+    void RenderableSkyBrowser::removeSelectedImage(const ImageData& image, const int i) {
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it != std::end(_selectedImages)) {

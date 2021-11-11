@@ -25,14 +25,15 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___PAIR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___PAIR___H__
 
+#include <modules/skybrowser/include/wwtdatahandler.h>
+//#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
 
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
-class ScreenSpaceSkyTarget;
-class ImageData;
 
 class Pair {
 public:

@@ -1,9 +1,12 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYBROWSER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYBROWSER___H__
 
+#include <modules/skybrowser/include/wwtdatahandler.h>
+#include <modules/webbrowser/include/webrenderhandler.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/documentation/documentation.h>
-#include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/triggerproperty.h>
 #include <deque>
@@ -34,11 +37,6 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-    class BrowserInstance;
-    class RenderHandler;
-    class WebKeyboardHandler;
-    class ImageData;
-
     class RenderableSkyBrowser : public RenderablePlane
     {
     public:
@@ -57,8 +55,8 @@ namespace openspace {
         void setIdInBrowser(std::string id);
 
         // WorldWide Telescope communication
-        void displayImage(const ImageData& image, int i);
-        void removeSelectedImage(const ImageData& image, int i);
+        void displayImage(const ImageData& image, const int i);
+        void removeSelectedImage(const ImageData& image, const int i);
         void sendMessageToWwt(const ghoul::Dictionary& msg);
         void syncWwtView();
         void stopSyncingWwtView();

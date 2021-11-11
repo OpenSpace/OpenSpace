@@ -1,15 +1,16 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
+#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec3property.h>
 #include <deque>
 
 namespace openspace {
-    class ScreenSpaceSkyTarget;
+    //class ScreenSpaceSkyTarget;
 
     class ScreenSpaceSkyBrowser : public ScreenSpaceBrowser
     {
@@ -59,7 +60,7 @@ namespace openspace {
         void removeHighlight(glm::ivec3 removal);
 
         // Communication with WorldWide Telescope
-        void addSelectedImage(const ImageData& image, int i);
+        void addSelectedImage(const std::string& url, int i);
         void removeSelectedImage(int i);
         void setImageOrder(int i, int order);
         void sendMessageToWwt(const ghoul::Dictionary& msg);
