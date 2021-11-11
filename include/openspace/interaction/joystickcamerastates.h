@@ -49,7 +49,8 @@ public:
         GlobalRollX,
         GlobalRollY,
         PanX,
-        PanY
+        PanY,
+        Property
     };
 
     BooleanType(AxisInvert);
@@ -70,6 +71,12 @@ public:
 
         // Every axis can have their own sensitivity
         double sensitivity = 0.0;
+
+        // The property info if the type is Property
+        std::string propertyUri;
+        float minValue = 0.f;
+        float maxValue = 1.f;
+        bool isRemote = true;
     };
 
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
@@ -81,6 +88,12 @@ public:
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No,
         bool isSticky = false, double sensitivity = 0.0
+    );
+
+    void setAxisMappingProperty(const std::string& joystickName, int axis,
+        const std::string& propertyUri, float min = 0.f, float max = 1.f,
+        AxisInvert shouldInvert = AxisInvert::No,
+        bool isSticky = false, double sensitivity = 0.0, bool isRemote = true
     );
 
     AxisInformation axisMapping(const std::string& joystickName, int axis) const;
@@ -126,6 +139,10 @@ private:
     // return a pointer to the item, if not found then return nullptr
     JoystickCameraState* getJoystickCameraState(const std::string& joystickName);
     const JoystickCameraState* getJoystickCameraState(const std::string& joystickName) const;
+
+    // Ues getJoystickCameraState(name) to find the joystickCameraState that
+    // corresponds to the given joystickName. If not found then add a new item if possible
+    JoystickCameraState* findOrAddJoystickCameraState(const std::string& joystickName);
 };
 
 } // namespace openspace::interaction
@@ -172,6 +189,7 @@ from_string(std::string_view string)
     if (string == "GlobalRoll Y") { return T::GlobalRollY; }
     if (string == "Pan X") { return T::PanX; }
     if (string == "Pan Y") { return T::PanY; }
+    if (string == "Property") { return T::Property; }
 
     throw RuntimeError("Unkonwn axis type '" + std::string(string) + "'");
 }

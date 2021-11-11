@@ -175,6 +175,36 @@ int bindJoystickAxis(lua_State* L) {
     return 0;
 }
 
+int bindJoystickAxisProperty(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 3, 9 }, "lua::bindJoystickAxisProperty");
+    auto [joystickName, axis, propertyUri, min, max, shouldInvert, isSticky, sensitivity,
+        isRemote] =
+        ghoul::lua::values<
+            std::string, int, std::string, std::optional<float>, std::optional<float>,
+            std::optional<bool>, std::optional<bool>, std::optional<double>,
+            std::optional<bool>
+        >(L);
+    min = min.value_or(0.f);
+    max = max.value_or(1.f);
+    shouldInvert = shouldInvert.value_or(false);
+    isSticky = isSticky.value_or(false);
+    sensitivity = sensitivity.value_or(0.0);
+    isRemote = isRemote.value_or(true);
+
+    global::navigationHandler->setJoystickAxisMappingProperty(
+        joystickName,
+        axis,
+        propertyUri,
+        *min,
+        *max,
+        interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
+        *isSticky,
+        *sensitivity,
+        *isRemote
+    );
+    return 0;
+}
+
 int joystickAxis(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::joystickAxis");
     auto [joystickName, axis] = ghoul::lua::values<std::string, int>(L);
@@ -188,9 +218,13 @@ int joystickAxis(lua_State* L) {
         static_cast<bool>(info.invert),
         static_cast<bool>(info.normalize),
         info.isSticky,
-        info.sensitivity
+        info.sensitivity,
+        info.propertyUri,
+        info.minValue,
+        info.maxValue,
+        info.isRemote
     );
-    return 5;
+    return 9;
 }
 
 int setJoystickAxisDeadzone(lua_State* L) {

@@ -516,6 +516,27 @@ void NavigationHandler::setJoystickAxisMapping(const std::string& joystickName, 
     );
 }
 
+void NavigationHandler::setJoystickAxisMappingProperty(const std::string& joystickName,
+                                                       int axis,
+                                                       const std::string& propertyUri,
+                                                       float min, float max,
+                                            JoystickCameraStates::AxisInvert shouldInvert,
+                                                       bool isSticky, double sensitivity,
+                                                       bool isRemote)
+{
+    _orbitalNavigator.joystickStates().setAxisMappingProperty(
+        joystickName,
+        axis,
+        propertyUri,
+        min,
+        max,
+        shouldInvert,
+        isSticky,
+        sensitivity,
+        isRemote
+    );
+}
+
 void NavigationHandler::setWebsocketAxisMapping(int axis,
                                                 WebsocketCameraStates::AxisType mapping,
                                            WebsocketCameraStates::AxisInvert shouldInvert,
@@ -638,57 +659,88 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "bindJoystickAxis",
                 &luascriptfunctions::bindJoystickAxis,
                 {},
-                "int, axisType [, isInverted, isNormalized]",
-                "Binds the axis identified by the first argument to be used as the type "
-                "identified by the second argument. If 'isInverted' is 'true', the axis "
-                "value is inverted, if 'isNormalized' is true the axis value is "
-                "normalized from [-1, 1] to [0,1]."
+                "name, axis, axisType [, isInverted, isNormalized, isSticky, sensitivity]",
+                "Finds the input joystick with the given 'name' and binds the axis "
+                "identified by the second argument to be used as the type identified by "
+                "the third argument. If 'isInverted' is 'true', the axis value is "
+                "inverted, if 'isNormalized' is true the axis value is normalized from "
+                "[-1, 1] to [0,1]. If 'isSticky' is 'true', the value is calculated "
+                "relative to the previous value. If 'sensitivity' is given then that "
+                "value will affect the sensitivity of the axis together with "
+                "the global sensitivity."
+            },
+            {
+                "bindJoystickAxisProperty",
+                &luascriptfunctions::bindJoystickAxisProperty,
+                {},
+                "name, axis, propertyUri [, min, max, isInverted, isSticky, sensitivity, "
+                "isRemote]",
+                "Finds the input joystick with the given 'name' and binds the axis "
+                "identified by the second argument to be bound to the property "
+                "identified by the third argument. 'min' and 'max' is the minimum and "
+                "the maximum allowed value for the given property and the axis value is "
+                "rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' "
+                "is 'true', the axis value is inverted. If 'isSticky' is 'true', the "
+                "value is calculated relative to the previous value. If 'sensitivity' is "
+                "given then that value will affect the sensitivity of the axis together "
+                "with the global sensitivity. The last argument determines whether the "
+                "property change is going to be executed locally or remotely, where the "
+                "latter is the default."
             },
             {
                 "joystickAxis",
                 &luascriptfunctions::joystickAxis,
                 {},
-                "int",
-                "Returns the joystick axis information for the passed axis. The "
-                "information that is returned is the current axis binding as a string, "
-                "whether the values are inverted as bool, and whether the value are "
-                "normalized as a bool"
+                "name, axis",
+                "Finds the input joystick with the given 'name' and returns the joystick "
+                "axis information for the passed axis. The information that is returned "
+                "is the current axis binding as a string, whether the values are "
+                "inverted as bool, whether the value are normalized as a bool, whether "
+                "the axis is sticky as bool, the sensitivity as number, the property uri "
+                "bound to the axis as string (empty is type is not Property), the min "
+                "and max values for the property as numbers and whether the property "
+                "change will be executed remotly as bool."
             },
             {
                 "setAxisDeadZone",
                 &luascriptfunctions::setJoystickAxisDeadzone,
                 {},
-                "int, float",
-                "Sets the deadzone for a particular joystick axis which means that any "
-                "input less than this value is completely ignored."
+                "name, axis, float",
+                "Finds the input joystick with the given 'name' and sets the deadzone "
+                "for a particular joystick axis, which means that any input less than "
+                "this value is completely ignored."
             },
             {
                 "bindJoystickButton",
                 &luascriptfunctions::bindJoystickButton,
                 {},
-                "int, string [, string, bool]",
-                "Binds a Lua script to be executed when the joystick button identified "
-                "by the first argument is triggered. The third argument determines when "
-                "the script should be executed, this defaults to 'pressed', which means "
-                "that the script is run when the user presses the button. The last "
-                "argument determines whether the command is going to be executable "
-                "locally or remotely. The latter being the default."
+                "name, button, string [, string, string, bool]",
+                "Finds the input joystick with the given 'name' and binds a Lua script "
+                "given by the third argument to be executed when the joystick button "
+                "identified by the second argument is triggered. The fifth argument "
+                "determines when the script should be executed, this defaults to "
+                "'Press', which means that the script is run when the user presses the "
+                "button. The fourth arguemnt is the documentation of the script in the "
+                "third argument. The sixth argument determines whether the command is "
+                "going to be executable locally or remotely, where the latter is the "
+                "default."
             },
             {
                 "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
                 {},
-                "int",
-                "Removes all commands that are currently bound to the button identified "
-                "by the first argument"
+                "name, button",
+                "Finds the input joystick with the given 'name' and removes all commands "
+                "that are currently bound to the button identified by the second argument."
             },
             {
                 "joystickButton",
                 &luascriptfunctions::joystickButton,
                 {},
-                "int",
-                "Returns the script that is currently bound to be executed when the "
-                "provided button is pressed"
+                "name, button",
+                "Finds the input joystick with the given 'name' and returns the script "
+                "that is currently bound to be executed when the provided button is "
+                "pressed."
             },
             {
                 "addGlobalRotation",

@@ -107,6 +107,14 @@ public:
         bool isSticky = false, double sensitivity = 0.0
     );
 
+    void setJoystickAxisMappingProperty(const std::string& joystickName,
+        int axis, const std::string& propertyUri,
+        float min = 0.f, float max = 1.f,
+        JoystickCameraStates::AxisInvert shouldInvert =
+        JoystickCameraStates::AxisInvert::No,
+        bool isSticky = false, double sensitivity = 0.0, bool isRemote = true
+    );
+
     JoystickCameraStates::AxisInformation joystickAxisMapping(
         const std::string& joystickName, int axis) const;
 
