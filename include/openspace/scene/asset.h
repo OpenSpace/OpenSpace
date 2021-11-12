@@ -75,7 +75,7 @@ public:
     bool hasAssetFile() const;
     std::string assetDirectory() const;
     const std::string& assetName() const;
-    State state() const;
+    //State state() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();

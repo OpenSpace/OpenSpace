@@ -65,9 +65,9 @@ std::optional<Asset::MetaInformation> Asset::metaInformation() const {
     return _metaInformation;
 }
 
-Asset::State Asset::state() const {
-    return _state;
-}
+//Asset::State Asset::state() const {
+//    return _state;
+//}
 
 void Asset::setState(Asset::State state) {
     ZoneScoped
