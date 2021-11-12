@@ -501,7 +501,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 void NavigationHandler::setJoystickAxisMapping(const std::string& joystickName, int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                          JoystickCameraStates::JoystickType joystickType,
                                                bool isSticky,
                                                double sensitivity)
 {
@@ -510,7 +510,7 @@ void NavigationHandler::setJoystickAxisMapping(const std::string& joystickName, 
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize,
+        joystickType,
         isSticky,
         sensitivity
     );
@@ -652,15 +652,15 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "bindJoystickAxis",
                 &luascriptfunctions::bindJoystickAxis,
-                "name, axis, axisType [, isInverted, isNormalized, isSticky, sensitivity]",
+                "name, axis, axisType [, isInverted, joystickType, isSticky, sensitivity]",
                 "Finds the input joystick with the given 'name' and binds the axis "
                 "identified by the second argument to be used as the type identified by "
                 "the third argument. If 'isInverted' is 'true', the axis value is "
-                "inverted, if 'isNormalized' is true the axis value is normalized from "
-                "[-1, 1] to [0,1]. If 'isSticky' is 'true', the value is calculated "
-                "relative to the previous value. If 'sensitivity' is given then that "
-                "value will affect the sensitivity of the axis together with "
-                "the global sensitivity."
+                "inverted. 'joystickType' is if the joystick behaves more like a "
+                "joystick or a trigger, where the first is the default. If 'isSticky' is "
+                "'true', the value is calculated relative to the previous value. If "
+                "'sensitivity' is given then that value will affect the sensitivity of "
+                "the axis together with the global sensitivity."
             },
             {
                 "bindJoystickAxisProperty",
@@ -686,11 +686,11 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "Finds the input joystick with the given 'name' and returns the joystick "
                 "axis information for the passed axis. The information that is returned "
                 "is the current axis binding as a string, whether the values are "
-                "inverted as bool, whether the value are normalized as a bool, whether "
-                "the axis is sticky as bool, the sensitivity as number, the property uri "
-                "bound to the axis as string (empty is type is not Property), the min "
-                "and max values for the property as numbers and whether the property "
-                "change will be executed remotly as bool."
+                "inverted as bool, the joystick type as a string, whether the axis is "
+                "sticky as bool, the sensitivity as number, the property uri bound to "
+                "the axis as string (empty is type is not Property), the min and max "
+                "values for the property as numbers and whether the property change will "
+                "be executed remotly as bool."
             },
             {
                 "setAxisDeadZone",

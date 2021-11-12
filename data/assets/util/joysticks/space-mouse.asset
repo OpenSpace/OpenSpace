@@ -15,7 +15,8 @@ local joystickHelper = asset.require('./joystick_helper')
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted
--- Fifth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameter determines whether the axis behaves like a joystick or a Trigger.
+--       Allowed values are "JoystickLike" and "TriggerLike", the first one is the default
 -- Sixth parameters determins if the axis should be "Sticky" or not.
 --       The axis values can either go back to 0 when the joystick is released or it can
 --       stay at the value it was before the joystick was released.
@@ -35,12 +36,12 @@ asset.onInitialize(function()
   local controller = SpaceMouse;
   local name = "SpaceNavigator";
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, false, true, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, false, true, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, false, true, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, false, true, 35.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, false, true, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", false, false, true, 35.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false, "JoystickLike", true, 40.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false, "JoystickLike", true, 40.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, 40.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, 35.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, 40.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", "JoystickLike", false, true, 35.0);
 
   openspace.navigation.bindJoystickButton(
     name,

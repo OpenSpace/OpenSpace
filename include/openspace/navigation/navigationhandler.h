@@ -102,8 +102,8 @@ public:
         int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::AxisNormalize shouldNormalize =
-            JoystickCameraStates::AxisNormalize::No,
+        JoystickCameraStates::JoystickType joystickType =
+            JoystickCameraStates::JoystickType::JoystickLike,
         bool isSticky = false, double sensitivity = 0.0
     );
 

@@ -53,14 +53,18 @@ public:
         Property
     };
 
+    enum class JoystickType {
+        JoystickLike = 0,
+        TriggerLike
+    };
+
     BooleanType(AxisInvert);
-    BooleanType(AxisNormalize);
     BooleanType(ButtonCommandRemote);
 
     struct AxisInformation {
         AxisType type = AxisType::None;
         AxisInvert invert = AxisInvert::No;
-        AxisNormalize normalize = AxisNormalize::No;
+        JoystickType joystickType = JoystickType::JoystickLike;
 
         // The axis values can either go back to 0 when the joystick is released or it can
         // stay at the value it was before the joystick was released.
@@ -86,7 +90,7 @@ public:
 
     void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
-        AxisNormalize shouldNormalize = AxisNormalize::No,
+        JoystickType joystickType = JoystickType::JoystickLike,
         bool isSticky = false, double sensitivity = 0.0
     );
 
@@ -192,6 +196,30 @@ from_string(std::string_view string)
     if (string == "Property") { return T::Property; }
 
     throw RuntimeError("Unkonwn axis type '" + std::string(string) + "'");
+}
+
+template <>
+inline std::string to_string(
+    const openspace::interaction::JoystickCameraStates::JoystickType& value)
+{
+    using T = openspace::interaction::JoystickCameraStates::JoystickType;
+    switch (value) {
+    case T::JoystickLike: return "JoystickLike";
+    case T::TriggerLike:  return "TriggerLike";
+    default:              return "";
+    }
+}
+
+template <>
+constexpr openspace::interaction::JoystickCameraStates::JoystickType
+from_string(std::string_view string)
+{
+    using T = openspace::interaction::JoystickCameraStates::JoystickType;
+
+    if (string == "JoystickLike") { return T::JoystickLike; }
+    if (string == "TriggerLike") { return T::TriggerLike; }
+
+    throw RuntimeError("Unkonwn joystick type '" + std::string(string) + "'");
 }
 
 } // namespace ghoul

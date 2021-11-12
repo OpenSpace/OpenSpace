@@ -15,7 +15,8 @@ local joystickHelper = asset.require('./joystick_helper')
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted
--- Fifth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameter determines whether the axis behaves like a joystick or a Trigger.
+--       Allowed values are "JoystickLike" and "TriggerLike", the first one is the default
 -- Sixth parameters determins if the axis should be "Sticky" or not.
 --       The axis values can either go back to 0 when the joystick is released or it can
 --       stay at the value it was before the joystick was released.

@@ -152,23 +152,22 @@ int retargetAim(lua_State* L) {
 
 int bindJoystickAxis(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxis");
-    auto [joystickName, axis, axisType, shouldInvert, shouldNormalize, isSticky,
+    auto [joystickName, axis, axisType, shouldInvert, joystickType, isSticky,
           sensitivity] =
         ghoul::lua::values<
-            std::string, int, std::string, std::optional<bool>, std::optional<bool>,
-            std::optional<bool>, std::optional<double>
+            std::string, int, std::string, std::optional<bool>,
+            std::optional<std::string>, std::optional<bool>, std::optional<double>
         >(L);
-    shouldInvert = shouldInvert.value_or(false);
-    shouldNormalize = shouldNormalize.value_or(false);
     isSticky = isSticky.value_or(false);
     sensitivity = sensitivity.value_or(0.0);
+    joystickType = joystickType.value_or("JoystickLike");
 
     global::navigationHandler->setJoystickAxisMapping(
         joystickName,
         axis,
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
-        interaction::JoystickCameraStates::AxisNormalize(*shouldNormalize),
+        ghoul::from_string<interaction::JoystickCameraStates::JoystickType>(*joystickType),
         *isSticky,
         *sensitivity
     );
@@ -216,7 +215,7 @@ int joystickAxis(lua_State* L) {
         L,
         ghoul::to_string(info.type),
         static_cast<bool>(info.invert),
-        static_cast<bool>(info.normalize),
+        ghoul::to_string(info.joystickType),
         info.isSticky,
         info.sensitivity,
         info.propertyUri,

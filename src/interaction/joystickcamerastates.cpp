@@ -77,7 +77,10 @@ void JoystickCameraStates::updateStateFromInput(
                 joystickCameraState->prevAxisValues[i] = rawValue;
             }
 
-            if (std::fabs(value) <= t.deadzone) {
+            if ((t.joystickType == JoystickType::JoystickLike &&
+                 std::fabs(value) <= t.deadzone) ||
+                (t.joystickType == JoystickType::TriggerLike && value <= -1 + t.deadzone))
+            {
                 continue;
             }
 
@@ -85,7 +88,9 @@ void JoystickCameraStates::updateStateFromInput(
                 value *= -1.f;
             }
 
-            if (t.normalize || t.type == AxisType::Property) {
+            if (t.joystickType == JoystickType::TriggerLike ||
+                t.type == AxisType::Property)
+            {
                 value = (value + 1.f) / 2.f;
             }
 
@@ -214,7 +219,7 @@ void JoystickCameraStates::updateStateFromInput(
 void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
                                           int axis, AxisType mapping,
                                           AxisInvert shouldInvert,
-                                          AxisNormalize shouldNormalize,
+                                          JoystickType joystickType,
                                           bool isSticky,
                                           double sensitivity)
 {
@@ -227,7 +232,7 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
 
     joystickCameraState->axisMapping[axis].type = mapping;
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].normalize = shouldNormalize;
+    joystickCameraState->axisMapping[axis].joystickType = joystickType;
     joystickCameraState->axisMapping[axis].isSticky = isSticky;
     joystickCameraState->axisMapping[axis].sensitivity = sensitivity;
 
