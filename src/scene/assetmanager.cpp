@@ -240,6 +240,17 @@ std::vector<const Asset*> subTreeAssets(Asset* asset) {
 } // namespace
 
 std::vector<const Asset*> AssetManager::allAssets() const {
+    std::vector<const Asset*> aa = subTreeAssets(_rootAsset.get());
+    std::sort(aa.begin(), aa.end());
+
+    std::vector<const Asset*> ab;
+    ab.push_back(_rootAsset.get());
+    for (const std::pair<const std::string, std::unique_ptr<Asset>>& p : _trackedAssets) {
+        ab.push_back(p.second.get());
+    }
+    std::sort(ab.begin(), ab.end());
+
+    bool aabb = aa == ab;
     return subTreeAssets(_rootAsset.get());
 }
 

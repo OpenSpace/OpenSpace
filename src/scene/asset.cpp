@@ -109,10 +109,10 @@ void Asset::requiredAssetChangedState(Asset::State childState) {
 
 void Asset::requestedAssetChangedState(Asset* child, Asset::State childState) {
     if (child->hasInitializedParent()) {
-        if (childState == State::Loaded && child->state() == State::Loaded) {
+        if (childState == State::Loaded && child->_state == State::Loaded) {
             child->startSynchronizations();
         }
-        if (childState == State::SyncResolved && child->state() == State::SyncResolved) {
+        if (childState == State::SyncResolved && child->_state == State::SyncResolved) {
             child->initialize();
         }
     }
@@ -489,7 +489,7 @@ const std::string& Asset::assetName() const {
 }
 
 void Asset::require(Asset* child) {
-    if (state() != Asset::State::Unloaded) {
+    if (_state != Asset::State::Unloaded) {
         throw ghoul::RuntimeError("Cannot require child asset when already loaded");
     }
 
@@ -524,7 +524,7 @@ void Asset::require(Asset* child) {
 }
 
 void Asset::unrequire(Asset* child) {
-    if (state() != Asset::State::Unloaded) {
+    if (_state != Asset::State::Unloaded) {
         throw ghoul::RuntimeError("Cannot unrequire child asset is in a loaded state");
     }
 
