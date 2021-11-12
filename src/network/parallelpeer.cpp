@@ -678,7 +678,6 @@ ParallelConnection::Status ParallelPeer::status() {
 void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
     if (isHost()) {
         _viewStatus = ParallelConnection::ViewStatus::Host;
-        LINFO(fmt::format("setViewStatus: host"));
         std::vector<char> buffer;
 
         if (_independentView) {
@@ -686,14 +685,12 @@ void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
                 ParallelConnection::MessageType::IndependentSessionOn,
                 buffer
             ));
-            LINFO(fmt::format("sent message: IndependentViewOn"));
         }
         else {
             _connection.sendMessage(ParallelConnection::Message(
                 ParallelConnection::MessageType::IndependentSessionOff,
                 buffer
             ));
-            LINFO(fmt::format("sent message: IndependentViewOff"));
         }
     }
     else if (_independentView) {
@@ -705,7 +702,6 @@ void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
                 ParallelConnection::MessageType::ViewRequest,
                 buffer
             ));
-            LINFO(fmt::format("setViewStatus: independent view"));
         }
         else {
             _independentView = false;
@@ -717,7 +713,7 @@ void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
 
         std::vector<char> buffer;
         _connection.sendMessage(ParallelConnection::Message(
-            ParallelConnection::MessageType::ViewRequest,
+            ParallelConnection::MessageType::ViewResignation,
             buffer
         ));
     }
