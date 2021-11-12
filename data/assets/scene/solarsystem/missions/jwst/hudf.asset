@@ -1,14 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local jwstTransforms = asset.require('scene/solarsystem/missions/jwst/jwst')
+local jwstTransforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
-local image = asset.syncedResource({
-  Name = "HUDF image",
-  Type = "HttpSynchronization",
-  Identifier = "hudf_image",
-  Version = 1
-})
+local image = asset.require('./image').image
 
 local DISTANCE = 9.2E15;
 
@@ -29,9 +23,12 @@ local HUDFPosition = {
     }
   },
   GUI = {
-    Name = "Hubble Ultra Deep field",
-    Path = "/Solar System/Missions/JWST",
-    Hidden = true
+    Name = "Hubble Ultra Deep Field Position",
+    Path = "/Solar System/Missions/JWST/HUDF",
+    Hidden = true,
+    Description = [[
+      Galactic cartesian position for the Hubble Ultra Deep Field
+    ]],
   }
 }
 
@@ -39,18 +36,27 @@ local HUDFImage = {
   Identifier = "HUDFImage",
   Enabled = false,
   Type = "ScreenSpaceImageLocal",
-  Name = "Hubble Ultra Deep field",
+  Name = "Hubble Ultra Deep Field",
   UseRadiusAzimuthElevation = true,
   FaceCamera = false,
-  RadiusAzimuthElevation = { 200.0, 0.5, 0.15 },
+  RadiusAzimuthElevation = { 200.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "/Hubble_ultra_deep_field.jpg",
+  TexturePath = image .. "/Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf" },
+  Description = [[
+    Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and
+    the HUDF Team.
+  ]],
 }
 
 local HUDFJWSTLine = {
   Identifier = "HUDFJWSTLine",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Enabled = false,
@@ -63,7 +69,10 @@ local HUDFJWSTLine = {
   Tag = { "mission_jwst_hudf" },
   GUI = {
     Name = "JWST to HUDF Line",
-    Path = "/Solar System/Missions/JWST",
+    Path = "/Solar System/Missions/JWST/HUDF",
+    Description = [[
+      Line from the James Webb Space Telescope to the Hubble Ultra Deep Field
+    ]],
   }
 }
 
@@ -75,3 +84,16 @@ end)
 asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
 end)
+
+asset.meta = {
+  Name = "Hubble Ultra Deep Field Image and Line",
+  Version = "1.0",
+  Description = [[
+    Screenspace image of the Hubble Ultra Deep Field and a line from the
+    James Webb Space Telescope to the Hubble Ultra Deep Field position.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"HUDFPosition", "HUDFImage", "HUDFJWSTLine"}
+}

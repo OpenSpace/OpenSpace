@@ -151,14 +151,29 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 
     properties::PropertyOwner* layerGroup = ptr->owner();
     properties::PropertyOwner* layerManager = layerGroup->owner();
-    properties::PropertyOwner* globe = layerManager->owner();
-    properties::PropertyOwner* sceneGraphNode = globe->owner();
 
-    global::eventEngine->publishEvent<events::EventLayerAdded>(
-        sceneGraphNode->identifier(),
-        layerGroup->identifier(),
-        ptr->identifier()
-    );
+    // @TODO (emmbr, 2021-11-03) If the layer is added as part of the globe's
+    // dictionary during construction this function is called in the LayerManager's
+    // initialize function. This means that the layerManager does not exists yet, and
+    // we cannot find which SGN it belongs to... Want to avoid doing this check, so
+    // this should be fixed (probably as part of a cleanup/rewite of the LayerManager)
+    if (!layerManager) {
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            "", // we don't know this yet
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+    else {
+        properties::PropertyOwner* globe = layerManager->owner();
+        properties::PropertyOwner* sceneGraphNode = globe->owner();
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            sceneGraphNode->identifier(),
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+
     return ptr;
 }
 

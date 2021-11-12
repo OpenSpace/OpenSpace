@@ -117,21 +117,18 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "hasAction",
                 &luascriptfunctions::hasAction,
-                {},
                 "string",
                 "Checks if the passed identifier corresponds to an action"
             },
             {
                 "removeAction",
                 &luascriptfunctions::removeAction,
-                {},
                 "string",
                 "Removes an existing action from the list of possible actions"
             },
             {
                 "registerAction",
                 &luascriptfunctions::registerAction,
-                {},
                 "table",
                 "Registers a new action. The table must at least contain the keys "
                 "'Identifier' and 'Command' represeting the unique identifier and the "
@@ -145,7 +142,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "action",
                 &luascriptfunctions::action,
-                {},
                 "string",
                 "Returns information about the action as a table with the keys "
                 "'Identifier', 'Command', 'Name', 'Documentation', 'GuiPath', and "
@@ -154,7 +150,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "actions",
                 &luascriptfunctions::actions,
-                {},
                 "",
                 "Returns all registered actions in the system as a table of tables each "
                 "containing the keys 'Identifier', 'Command', 'Name', 'Documentation', "
@@ -163,7 +158,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "triggerAction",
                 &luascriptfunctions::triggerAction,
-                {},
                 "string",
                 "Triggers the action given by the specified identifier"
             }

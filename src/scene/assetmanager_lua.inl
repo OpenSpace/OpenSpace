@@ -31,13 +31,11 @@ namespace openspace::luascriptfunctions::asset {
 int add(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
 
-    AssetManager* assetManager = reinterpret_cast<AssetManager*>(
-        lua_touserdata(L, lua_upvalueindex(1))
-    );
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
     const std::string assetName = ghoul::lua::value<std::string>(L);
 
     if (global::renderEngine->scene()) {
-        assetManager->add(assetName);
+        assetManager.add(assetName);
     }
     else {
         // The scene might not exist yet if OpenSpace was started without specifying an
@@ -51,21 +49,18 @@ int add(lua_State* L) {
 int remove(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(L, lua_upvalueindex(1)));
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
     const std::string assetName = ghoul::lua::value<std::string>(L);
 
-    assetManager->remove(assetName);
+    assetManager.remove(assetName);
     return 0;
 }
 
 int removeAll(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(L, lua_upvalueindex(1)));
-
-    assetManager->removeAll();
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
+    assetManager.removeAll();
     return 0;
 }
 

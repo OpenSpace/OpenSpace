@@ -150,7 +150,6 @@ scripting::LuaLibrary SyncModule::luaLibrary() const {
         {
             "syncResource",
             &luascriptfunctions::syncResource,
-            {},
             "string, number",
             "Synchronizes the http resource identified by the name passed as the "
             "first parameter and the version provided as the second parameter. The "
@@ -159,7 +158,6 @@ scripting::LuaLibrary SyncModule::luaLibrary() const {
         {
             "unsyncResource",
             &luascriptfunctions::unsyncResource,
-            {},
             "string [, number]",
             "Unsynchronizes the http resources identified by the name passed as the "
             "first parameter by removing all data that was downloaded as part of the "

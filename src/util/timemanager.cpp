@@ -30,6 +30,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
@@ -405,6 +406,7 @@ void TimeManager::setTimeNextFrame(Time t) {
     _shouldSetTime = true;
     _timeNextFrame = std::move(t);
     clearKeyframes();
+    global::scriptScheduler->setCurrentTime(t.j2000Seconds());
 }
 
 void TimeManager::setDeltaTime(double deltaTime) {

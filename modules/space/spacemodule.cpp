@@ -149,7 +149,6 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         {
             "convertFromRaDec",
             &space::luascriptfunctions::convertFromRaDec,
-            {},
             "string/double, string/double, double",
             "Returns the cartesian world position of a ra dec coordinate with distance. "
             "If the coordinate is given as strings the format should be ra 'XhYmZs' and "
@@ -159,7 +158,6 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         {
             "convertToRaDec",
             &space::luascriptfunctions::convertToRaDec,
-            {},
             "double, double, double",
             "Returns the formatted ra, dec strings and distance for a given cartesian "
             "world coordinate."

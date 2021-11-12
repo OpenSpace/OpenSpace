@@ -1,30 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
+local transforms = asset.require('./transforms')
+local models = asset.require('./model').models
 asset.require('spice/base')
-asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_points')
-local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
-
-local JWSTKernel = asset.syncedResource({
-  Name = "JWST Kernel",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_kernels",
-  Version = 1
-})
-
---[[local JWSTHorizons = asset.syncedResource({
-  Name = "JWST Horizons",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_horizons",
-  Version = 1
-})]]--
-
-local model = asset.syncedResource({
-  Name = "JWST Model",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_model",
-  Version = 2
-})
 
 local band = asset.syncedResource({
   Name = "JWST band texture",
@@ -33,47 +11,14 @@ local band = asset.syncedResource({
   Version = 1
 })
 
-local JWSTPosition = {
-  Identifier = "JWSTPosition",
-  Parent = transforms.L2.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "JWST",
-      Observer = "392", -- L2
-      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
-    },
-  },
-  GUI = {
-    Name = "JWST Position",
-    Path = "/Solar System/Missions/JWST",
-    Hidden = true,
-  }
-}
-
-local JWSTRotation = {
-  Identifier = "JWSTRotation",
-  Parent = JWSTPosition.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "FixedRotation",
-      Attached = "JWSTRotation",
-      XAxis = { 1, 0, 0 },
-      XAxisOrthogonal = true,
-      YAxisInvert = true,
-      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
-    }
-  },
-  GUI = {
-    Name = "JWST Rotation",
-    Path = "/Solar System/Missions/JWST",
-    Hidden = true,
-  }
-}
-
 local JWSTBand = {
   Identifier = "JWSTBand",
-  Parent = JWSTPosition.Identifier,
+  Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Transform = {
     Rotation = {
       Type = "FixedRotation",
@@ -97,25 +42,28 @@ local JWSTBand = {
   Tag = { "mission_jwst_fov" },
   GUI = {
     Name = "JWST Safe Viewing Band",
-    Path = "/Solar System/Missions/JWST"
+    Path = "/Solar System/Missions/JWST",
+    Description = [[
+      The safe viewing band for the James Webb Space Telescope at its current position
+    ]],
   }
 }
 
 local JWSTModel = {
   Identifier = "JWSTModel",
-  Parent = JWSTRotation.Identifier,
+  Parent = transforms.JWSTRotation.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2020 JAN 01",
-    End = "2024 JAN 01"
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/JWST.osmodel",
-    ModelScale = "Foot",
-    InvertModelScale = true,
+    GeometryFile = models .. "/jwst_anim74_2fps_2018_nb.osmodel",
+    ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
     EnableAnimation = true,
-    AnimationStartTime = "2018 10 01 14:05:52",
+    AnimationStartTime = "2018 10 01 14:06:03",
+    AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
       {
@@ -131,55 +79,21 @@ local JWSTModel = {
   GUI = {
     Name = "James Webb Space Telescope Model",
     Path = "/Solar System/Missions/JWST",
-  }
-}
-
-local JWSTTrail = {
-  Identifier = "JWSTTrail",
-  Parent = transforms.L2.Identifier,
-  Renderable = {
-    Type = "RenderableTrailOrbit",
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "JWST",
-      Observer = "392", -- L2
-      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
-    },
-    Color = { 0.9, 0.9, 0.0 },
-    Period = 91.3105,
-    Resolution = 100
-  },
-  GUI = {
-    Name = "JWST Trail",
-    Path = "/Solar System/Missions/JWST"
-  }
-}
-
-local JWSTSunTrail = {
-  Identifier = "JWSTSunTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Enabled = false,
-    Type = "RenderableTrailOrbit",
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "JWST",
-      Observer = "SSB",
-      Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
-    },
-    Color = { 0.0, 0.9, 0.9 },
-    Period = 365.242,
-    Resolution = 1000
-  },
-  GUI = {
-    Name = "JWST Sun Trail",
-    Path = "/Solar System/Missions/JWST"
+    Description = [[
+      Animated model of the James Webb Space Telescope that shows its deployment in
+      real time
+    ]],
   }
 }
 
 local JWSTFov = {
   Identifier = "JWSTFov",
   Parent = JWSTModel.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
+  },
   Renderable = {
     Enabled = false,
     Type = "RenderablePrism",
@@ -200,103 +114,53 @@ local JWSTFov = {
   GUI = {
     Name = "JWST Field of View",
     Path = "/Solar System/Missions/JWST",
+    Description = [[
+      The field of view for the James Webb Space Telescope at its current position
+    ]],
   }
 }
 
--- Launch, coming soon
---[[local JWSTLaunchPosition = {
-  Identifier = "JWSTLaunchPosition",
-  Parent = transforms.L2.Identifier,
-  Transform = {
-    Translation = {
-      Type = "HorizonsTranslation",
-      HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
-    },
-  },
-  GUI = {
-    Name = "JWST Launch Position",
-    Path = "/Solar System/Missions/JWST",
-    Hidden = true,
-  }
-}
-
-local JWSTLaunchModel = {
-  Identifier = "JWSTLaunchModel",
-  Parent = JWSTLaunchPosition.Identifier,
+local JWSTLabel = {
+  Identifier = "JWSTLabel",
+  Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:05:52",
-    End = "2019 OCT 01"
-  },
-  Transform = {
-    Rotation = {
-      Type = "FixedRotation",
-      Attached = "JWSTRotation",
-      XAxis = { 1, 0, 0 },
-      XAxisOrthogonal = true,
-      YAxisInvert = true,
-      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
-    }
+    Start = "2018 OCT 01 14:06:03",
+    End = "2021 OCT 01"
   },
   Renderable = {
-    Type = "RenderableModel",
-    GeometryFile = model .. "/JWST.osmodel",
-    ModelScale = "Foot",
-    InvertModelScale = true,
-    EnableAnimation = true,
-    AnimationStartTime = "2018 10 01 14:05:52",
-    AnimationMode = "Once",
-    LightSources = {
-      {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-      }
-    },
-    PerformShading = true,
-    DisableFaceCulling = true
+    Enabled = true,
+    Type = "RenderableLabels",
+    Text = "JWST",
+    FontSize = 20,
+    Size = 6.25,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
   },
   GUI = {
-    Name = "JWST Launch Model",
+    Name = "JWST Label",
     Path = "/Solar System/Missions/JWST",
+    Description = "Main label for the James Webb Space Telescope"
   }
 }
-
-local JWSTLaunchTrail = {
-  Identifier = "JWSTLaunchTrail",
-  Parent = transforms.L2.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 13:18:00",
-    End = "2019 OCT 01"
-  },
-  Renderable = {
-    Type = "RenderableTrailTrajectory",
-    Translation = {
-      Type = "HorizonsTranslation",
-      HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
-    },
-    Color = { 0.9, 0.9, 0.0 },
-    StartTime = "2018 OCT 01 13:18:00",
-    EndTime = "2019 OCT 01",
-    SampleInterval = 600
-  },
-  GUI = {
-    Name = "JWST Launch Trail",
-    Path = "/Solar System/Missions/JWST"
-  }
-}]]--
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTTrail,
-  JWSTSunTrail,
-  --JWSTLaunchTrail,
-  JWSTPosition,
-  --JWSTLaunchPosition,
-  JWSTRotation,
   JWSTBand,
   JWSTModel,
-  --JWSTLaunchModel,
-  JWSTFov
+  JWSTFov,
+  JWSTLabel
 })
+
+asset.meta = {
+  Name = "James Webb Space Telescope",
+  Version = "1.0",
+  Description = [[
+    James Webb Space Telescope animated model, safe viewing band, field of view and label.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JWSTBand", "JWSTModel", "JWSTFov", "JWSTLabel"}
+}

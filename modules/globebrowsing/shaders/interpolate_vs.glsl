@@ -22,32 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#version __CONTEXT__
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/timeline.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
+layout (location = 0) in vec2 in_position;
+layout (location = 1) in vec2 in_texCoords;
 
-namespace openspace {
+out vec2 texCoord;
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class TimelineTranslation : public Translation {
-public:
-    TimelineTranslation(const ghoul::Dictionary& dictionary);
-
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
-
-private:
-    Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
-    properties::BoolProperty _shouldInterpolate;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+void main() {
+  texCoord = in_texCoords;
+  gl_Position = vec4(in_position, 0.0, 1.0);
+}

@@ -58,7 +58,6 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
         {
             "renderCameraPath",
             &luascriptfunctions::renderCameraPath,
-            {},
             "[number, bool, number]",
             "Render the current camera path from the path navigation system. The "
             "first optional argument is the number of samples to take along the path "
@@ -71,14 +70,12 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
         {
             "removeRenderedCameraPath",
             &luascriptfunctions::removeRenderedCameraPath,
-            {},
             "",
             "Removes the rendered camera path, if there is one"
         },
         {
             "renderPathControlPoints",
             &luascriptfunctions::renderPathControlPoints,
-            {},
             "[number]",
             "Render the control points for the camera path spline as spheres. The "
             "optional argument can be used to set the radius of the created spheres. "
@@ -86,14 +83,12 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
         {
             "removePathControlPoints",
             &luascriptfunctions::removePathControlPoints,
-            {},
             "",
             "Removes the rendered control points"
         },
         {
             "addCartesianAxes",
             &luascriptfunctions::addCartesianAxes,
-            {},
             "string, [number]",
             "Adds a set of Cartesian axes to the scene graph node identified by the "
             "first string, to illustrate its local coordinate system. The second "

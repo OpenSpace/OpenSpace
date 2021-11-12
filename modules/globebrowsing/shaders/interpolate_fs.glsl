@@ -22,32 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/timeline.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
+uniform sampler2D prevTexture;
+uniform sampler2D nextTexture;
+uniform sampler2D colormapTexture;
+uniform float blendFactor;
 
-namespace openspace {
+in vec2 texCoord;
 
-struct UpdateData;
+Fragment getFragment() {
+  vec4 texel0 = texture2D(prevTexture, texCoord);
+  vec4 texel1 = texture2D(nextTexture, texCoord);
 
-namespace documentation { struct Documentation; }
+  vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
-class TimelineTranslation : public Translation {
-public:
-    TimelineTranslation(const ghoul::Dictionary& dictionary);
+  Fragment frag;  
+  if (mixedTexture.r > 0.999) {
+    vec2 position = vec2(mixedTexture.r - 0.01, 0.5);
+    frag.color = texture2D(colormapTexture, position);
+  }
+  else {
+    vec2 position = vec2(mixedTexture.r , 0.5);
+    frag.color = texture2D(colormapTexture, position);
+  }
 
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
-
-private:
-    Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
-    properties::BoolProperty _shouldInterpolate;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
+  frag.color.a = mixedTexture.a;
+  return frag;
+}

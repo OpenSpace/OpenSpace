@@ -59,7 +59,7 @@ namespace {
         // settings, the file(s) pointed to by this URLSynchronization will always be
         // downloaded, thus overwriting the local files. This is useful for files that are
         // updated regularly remotely and should be fetch at every startup
-        std::optional<bool> forceOverride [[codegen::key("override")]];
+        std::optional<bool> forceOverride [[codegen::key("Override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended
         // to the directory name to produce a unique directory under all circumstances. If
