@@ -90,7 +90,7 @@ private:
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
-    std::shared_ptr<Asset> retrieveAsset(const std::string& name);
+    Asset* retrieveAsset(const std::string& name);
     std::filesystem::path currentDirectory() const;
 
     void setCurrentAsset(Asset* asset);
@@ -103,7 +103,10 @@ private:
     // Member variables
     std::shared_ptr<Asset> _rootAsset;
     Asset* _currentAsset = nullptr;
-    std::unordered_map<std::string, std::weak_ptr<Asset>> _trackedAssets;
+
+    //std::vector<std::unique_ptr<Asset>> _assets;
+
+    std::unordered_map<std::string, std::unique_ptr<Asset>> _trackedAssets;
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState = nullptr;
 

@@ -37,7 +37,7 @@ namespace openspace {
 
 class AssetManager;
 
-class Asset : public std::enable_shared_from_this<Asset> {
+class Asset {
 public:
     enum class State {
         Unloaded,
@@ -107,10 +107,10 @@ public:
     void deinitializeIfUnwanted();
 
     // Dependency graph
-    void require(std::shared_ptr<Asset> child);
+    void require(Asset* child);
     void unrequire(Asset* child);
 
-    void request(std::shared_ptr<Asset> child);
+    void request(Asset* child);
     void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
@@ -148,16 +148,16 @@ private:
     std::optional<MetaInformation> _metaInformation;
 
     // Required assets
-    std::vector<std::shared_ptr<Asset>> _requiredAssets;
+    std::vector<Asset*> _requiredAssets;
 
     // Assets that refers to this asset as a required asset
-    std::vector<std::weak_ptr<Asset>> _requiringAssets;
+    std::vector<Asset*> _requiringAssets;
 
     // Requested assets
-    std::vector<std::shared_ptr<Asset>> _requestedAssets;
+    std::vector<Asset*> _requestedAssets;
 
     // Assets that refers to this asset as a requested asset
-    std::vector<std::weak_ptr<Asset>> _requestingAssets;
+    std::vector<Asset*> _requestingAssets;
 
     // Synchronization watches
     std::vector<SynchronizationWatcher::WatchHandle> _syncWatches;

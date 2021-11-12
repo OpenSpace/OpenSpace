@@ -126,6 +126,7 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
 }
 
 AssetManager::~AssetManager() {
+    _trackedAssets.clear();
     _currentAsset = nullptr;
     _rootAsset = nullptr;
     luaL_unref(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
@@ -151,7 +152,7 @@ void AssetManager::update() {
     for (const std::string& asset : _assetAddQueue) {
         ZoneScopedN("(add) Pending State Change")
         setCurrentAsset(_rootAsset.get());
-        std::shared_ptr<Asset> a = retrieveAsset(asset);
+        Asset* a = retrieveAsset(asset);
         _currentAsset->request(a);
         //_currentAsset->require(a);
         global::profile->addAsset(asset);
@@ -171,7 +172,7 @@ void AssetManager::update() {
         const auto it = _trackedAssets.find(path.string());
         if (it != _trackedAssets.end()) {
             setCurrentAsset(_rootAsset.get());
-            _currentAsset->unrequest(it->second.lock().get());
+            _currentAsset->unrequest(it->second.get());
             global::profile->removeAsset(asset);
         }
     }
@@ -442,7 +443,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
             std::string assetName = ghoul::lua::value<std::string>(L);
 
-            std::shared_ptr<Asset> dependency = manager->retrieveAsset(assetName);
+            Asset* dependency = manager->retrieveAsset(assetName);
             manager->_currentAsset->require(dependency);
 
             if (!dependency) {
@@ -600,27 +601,26 @@ void AssetManager::tearDownAssetLuaTable(Asset* asset) {
     lua_settop(*_luaState, top);
 }
 
-std::shared_ptr<Asset> AssetManager::retrieveAsset(const std::string& name) {
+Asset* AssetManager::retrieveAsset(const std::string& name) {
     std::filesystem::path directory = currentDirectory();
     std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path.string());
     if (it != _trackedAssets.end()) {
-        if (std::shared_ptr<Asset> a = it->second.lock(); a != nullptr) {
-            return a;
-        }
+        return it->second.get();
     }
 
-    std::shared_ptr<Asset> asset = std::make_shared<Asset>(
+    std::unique_ptr<Asset> asset = std::make_unique<Asset>(
         this,
         &_synchronizationWatcher,
         path.string()
     );
+    Asset* res = asset.get();
 
-    _trackedAssets.emplace(asset->id(), asset);
-    setUpAssetLuaTable(asset.get());
-    return asset;
+    _trackedAssets.emplace(asset->id(), std::move(asset));
+    setUpAssetLuaTable(res);
+    return res;
 }
 
 std::filesystem::path AssetManager::currentDirectory() const {
