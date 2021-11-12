@@ -30,7 +30,6 @@
 #include <openspace/interaction/websocketinputstate.h>
 
 namespace openspace::interaction {
-
     struct WebsocketInputStates;
     struct WebsocketInputState;
 }

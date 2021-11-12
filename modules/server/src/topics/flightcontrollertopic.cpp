@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>

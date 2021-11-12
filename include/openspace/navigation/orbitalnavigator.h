@@ -41,7 +41,6 @@
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
-
 #include <optional>
 
 namespace openspace {
@@ -53,7 +52,8 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-class InputState;
+class MouseInputState;
+class KeyboardInputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
