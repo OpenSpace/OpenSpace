@@ -24,6 +24,7 @@
 
 #include <openspace/scene/assetmanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/profile.h>
@@ -109,6 +110,17 @@ namespace {
         // comprehensively logged by Lua either way
         return absPath(fullAssetPath);
     }
+
+    struct [[codegen::Dictionary(AssetMeta)]] Parameters {
+        std::optional<std::string> name;
+        std::optional<std::string> version;
+        std::optional<std::string> description;
+        std::optional<std::string> author;
+        std::optional<std::string> url [[codegen::key("URL")]];
+        std::optional<std::string> license;
+        std::optional<std::vector<std::string>> identifiers;
+    };
+#include "assetmanager_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -212,46 +224,13 @@ void AssetManager::removeAll() {
     }
 }
 
-const Asset& AssetManager::rootAsset() const {
-    return *_rootAsset;
-}
-
-Asset& AssetManager::rootAsset() {
-    return *_rootAsset;
-}
-
-namespace {
-std::vector<const Asset*> subTreeAssets(Asset* asset) {
-    std::unordered_set<const Asset*> assets({ asset });
-    for (Asset* c : asset->childAssets()) {
-        if (c == asset) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Detected cycle in asset inclusion for {} at {}",
-                asset->assetName(), asset->assetFilePath()
-            ));
-        }
-
-        std::vector<const Asset*> subTree = subTreeAssets(c);
-        std::copy(subTree.cbegin(), subTree.cend(), std::inserter(assets, assets.end()));
-    }
-    std::vector<const Asset*> assetVector(assets.begin(), assets.end());
-    return assetVector;
-}
-} // namespace
-
 std::vector<const Asset*> AssetManager::allAssets() const {
-    std::vector<const Asset*> aa = subTreeAssets(_rootAsset.get());
-    std::sort(aa.begin(), aa.end());
-
-    std::vector<const Asset*> ab;
-    ab.push_back(_rootAsset.get());
+    std::vector<const Asset*> res;
+    res.push_back(_rootAsset.get());
     for (const std::pair<const std::string, std::unique_ptr<Asset>>& p : _trackedAssets) {
-        ab.push_back(p.second.get());
+        res.push_back(p.second.get());
     }
-    std::sort(ab.begin(), ab.end());
-
-    bool aabb = aa == ab;
-    return subTreeAssets(_rootAsset.get());
+    return res;
 }
 
 bool AssetManager::loadAsset(Asset* asset) {
@@ -287,49 +266,19 @@ bool AssetManager::loadAsset(Asset* asset) {
     lua_getglobal(*_luaState, AssetGlobalVariableName);
     ghoul_assert(lua_istable(*_luaState, -1), "Expected 'asset' table");
     lua_getfield(*_luaState, -1, "meta");
-    if (!lua_isnil(*_luaState, -1)) {
-        // The 'meta' object exist;  quick sanity check that it is a table
-        if (!lua_istable(*_luaState, -1)) {
-            LWARNING(fmt::format(
-                "When loading asset {}, encountered a 'meta' entry that was not a table",
-                asset->assetFilePath()
-            ));
-        }
-        else {
-            // The 'meta' object exists and it is a table
-            ghoul::Dictionary metaDict;
-            ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
+    ghoul::Dictionary metaDict = ghoul::lua::luaDictionaryFromState(*_luaState);
+    if (!metaDict.isEmpty()) {
+        Parameters p = codegen::bake<Parameters>(metaDict);
 
-            Asset::MetaInformation meta;
-            if (metaDict.hasValue<std::string>("Name")) {
-                meta.name = metaDict.value<std::string>("Name");
-            }
-            if (metaDict.hasValue<std::string>("Version")) {
-                meta.version = metaDict.value<std::string>("Version");
-            }
-            if (metaDict.hasValue<std::string>("Description")) {
-                meta.description = metaDict.value<std::string>("Description");
-            }
-            if (metaDict.hasValue<std::string>("Author")) {
-                meta.author = metaDict.value<std::string>("Author");
-            }
-            if (metaDict.hasValue<std::string>("URL")) {
-                meta.url = metaDict.value<std::string>("URL");
-            }
-            if (metaDict.hasValue<std::string>("License")) {
-                meta.license = metaDict.value<std::string>("License");
-            }
-            if (metaDict.hasValue<ghoul::Dictionary>("Identifiers")) {
-                ghoul::Dictionary iddict =
-                    metaDict.value<ghoul::Dictionary>("Identifiers");
-                for (size_t i = 1; i <= iddict.size(); ++i) {
-                    std::string key = std::to_string(i);
-                    std::string identifier = iddict.value<std::string>(key);
-                    meta.identifiers.push_back(identifier);
-                }
-            }
-            asset->setMetaInformation(std::move(meta));
-        }
+        Asset::MetaInformation meta;
+        meta.name = p.name.value_or("");
+        meta.version = p.version.value_or("");
+        meta.description = p.description.value_or("");
+        meta.author = p.author.value_or("");
+        meta.url = p.url.value_or("");
+        meta.license = p.license.value_or("");
+        meta.identifiers = p.identifiers.value_or(std::vector<std::string>());
+        asset->setMetaInformation(std::move(meta));
     }
 
     lua_settop(*_luaState, top);
@@ -444,13 +393,14 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
     // Register require function
     // Asset require(string path)
-    ghoul::lua::push(*_luaState, this);
+    ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
             std::string assetName = ghoul::lua::value<std::string>(L);
 

@@ -58,8 +58,6 @@ public:
     void add(const std::string& path);
     void remove(const std::string& path);
     void removeAll();
-    const Asset& rootAsset() const;
-    Asset& rootAsset();
 
     void update();
     scripting::LuaLibrary luaLibrary();

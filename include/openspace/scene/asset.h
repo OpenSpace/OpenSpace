@@ -75,7 +75,6 @@ public:
     bool hasAssetFile() const;
     std::string assetDirectory() const;
     const std::string& assetName() const;
-    //State state() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
@@ -114,7 +113,6 @@ public:
     void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
-    std::vector<Asset*> childAssets() const;
 
     void setMetaInformation(MetaInformation metaInformation);
     std::optional<MetaInformation> metaInformation() const;

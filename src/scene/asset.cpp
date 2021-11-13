@@ -65,10 +65,6 @@ std::optional<Asset::MetaInformation> Asset::metaInformation() const {
     return _metaInformation;
 }
 
-//Asset::State Asset::state() const {
-//    return _state;
-//}
-
 void Asset::setState(Asset::State state) {
     ZoneScoped
 
@@ -463,7 +459,11 @@ void Asset::deinitialize() {
     }
 
     // 2 and 1. Deinitialize unwanted requirements and requests
-    for (Asset* dependency : childAssets()) {
+    for (Asset* dependency : _requiredAssets) {
+        dependency->deinitializeIfUnwanted();
+    }
+
+    for (Asset* dependency : _requestedAssets) {
         dependency->deinitializeIfUnwanted();
     }
 }
@@ -616,19 +616,6 @@ std::vector<Asset*> Asset::requestedAssets() const {
         res.push_back(a);
     }
     return res;
-}
-
-std::vector<Asset*> Asset::childAssets() const {
-    std::vector<Asset*> children;
-    children.reserve(_requiredAssets.size() + _requestedAssets.size());
-
-    for (Asset* a : _requiredAssets) {
-        children.push_back(a);
-    }
-    for (Asset* a : _requestedAssets) {
-        children.push_back(a);
-    }
-    return children;
 }
 
 } // namespace openspace
