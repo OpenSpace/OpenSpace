@@ -693,12 +693,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(end)");
 }
 
-void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
-    _hasScheduledAssetLoading = true;
-    _scheduledAssetPathToLoad = std::move(assetPath);
-}
-
-void OpenSpaceEngine::loadAsset(const std::string& assetName) {
+void OpenSpaceEngine::loadAssets() {
     ZoneScoped
 
     LTRACE("OpenSpaceEngine::loadAsset(begin)");
@@ -758,9 +753,6 @@ void OpenSpaceEngine::loadAsset(const std::string& assetName) {
     }
 
     _assetManager->removeAll();
-    if (!assetName.empty()) {
-        _assetManager->add(assetName);
-    }
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
     }
@@ -1110,19 +1102,9 @@ void OpenSpaceEngine::preSynchronization() {
     // Reset the temporary, frame-based storage
     global::memoryManager->TemporaryMemory.reset();
 
-    if (_hasScheduledAssetLoading) {
-        LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
+    if (_isRenderingFirstFrame) {
         global::profile->ignoreUpdates = true;
-        loadAsset(_scheduledAssetPathToLoad);
-        global::profile->ignoreUpdates = false;
-        resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
-        _hasScheduledAssetLoading = false;
-        _scheduledAssetPathToLoad.clear();
-        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>();
-    }
-    else if (_isRenderingFirstFrame) {
-        global::profile->ignoreUpdates = true;
-        loadAsset("");
+        loadAssets();
         global::renderEngine->scene()->setPropertiesFromProfile(*global::profile);
         global::timeManager->setTimeFromProfile(*global::profile);
         global::timeManager->setDeltaTimeSteps(global::profile->deltaTimes);

@@ -71,10 +71,43 @@ void Asset::setState(Asset::State state) {
     if (_state == state) {
         return;
     }
+    auto toString = [](Asset::State s) {
+        switch (s) {
+            case Asset::State::Unloaded: return "Unloaded";
+            case Asset::State::LoadingFailed: return "LoadingFailed";
+            case Asset::State::Loaded: return "Loaded";
+            case Asset::State::Synchronizing: return "Synchronizing";
+            case Asset::State::SyncResolved: return "SyncResolved";
+            case Asset::State::SyncRejected: return "SyncRejected";
+            case Asset::State::Initialized: return "Initialized";
+            case Asset::State::InitializationFailed: return "InitializationFailed";
+        }
+    };
+    LINFOC("Asset", fmt::format("{}:  {} -> {}", id(), toString(_state), toString(state)));
     _state = state;
 
     for (Asset* requiringAsset : _requiringAssets) {
-        requiringAsset->requiredAssetChangedState(state);
+        if (// Prohibit state change to SyncResolved if additional requirements may still
+            // be added
+            !requiringAsset->isLoaded() ||
+            // Do not do anything if this asset was already initialized. This may happen
+            // if there are multiple requirement paths from this asset to the same child,
+            // which causes this method to be called more than once
+            requiringAsset->isInitialized() ||
+            // Do not do anything if the asset failed to initialize
+            requiringAsset->_state == State::InitializationFailed)
+        {
+            continue;
+        }
+
+        if (state == State::SyncResolved) {
+            if (requiringAsset->isSyncResolveReady()) {
+                requiringAsset->setState(State::SyncResolved);
+            }
+        }
+        else if (state == State::SyncRejected) {
+            requiringAsset->setState(State::SyncRejected);
+        }
     }
 
     if (hasInitializedParent()) {
@@ -84,27 +117,6 @@ void Asset::setState(Asset::State state) {
         if (state == State::SyncResolved && _state == State::SyncResolved) {
             initialize();
         }
-    }
-}
-
-void Asset::requiredAssetChangedState(Asset::State childState) {
-    if (!isLoaded() || isInitialized() || _state == State::InitializationFailed) {
-        // 1. Prohibit state change to SyncResolved if additional requirements may still
-        //    be added
-        // 2. Do not do anything if this asset was already initialized. This may happen if
-        //    there are multiple requirement paths from this asset to the same child,
-        //    which causes this method to be called more than once
-        // 3. Do not do anything if the asset failed to initialize
-        return;
-    }
-
-    if (childState == State::SyncResolved) {
-        if (isSyncResolveReady()) {
-            setState(State::SyncResolved);
-        }
-    }
-    else if (childState == State::SyncRejected) {
-        setState(State::SyncRejected);
     }
 }
 
@@ -196,16 +208,12 @@ bool Asset::isSyncingOrResolved() const {
 }
 
 bool Asset::hasLoadedParent() {
-    for (auto it = _requiringAssets.begin(); it != _requiringAssets.end(); it++) {
-        Asset* parent = *it;
-        if (!parent) {
-            it = _requiringAssets.erase(it);
-            continue;
-        }
+    for (Asset* parent : _requiredAssets) {
         if (parent->isLoaded()) {
             return true;
         }
     }
+
     for (Asset* parent : _requestingAssets) {
         if (parent->isLoaded() || parent->hasLoadedParent()) {
             return true;
@@ -217,9 +225,6 @@ bool Asset::hasLoadedParent() {
 
 bool Asset::hasSyncingOrResolvedParent() const {
     for (Asset* p : _requiringAssets) {
-        if (!p) {
-            continue;
-        }
         if (p->isSyncingOrResolved()) {
             return true;
         }
@@ -234,17 +239,11 @@ bool Asset::hasSyncingOrResolvedParent() const {
 
 bool Asset::hasInitializedParent() const {
     for (Asset* p : _requiringAssets) {
-        if (!p) {
-            continue;
-        }
         if (p->isInitialized()) {
             return true;
         }
     }
     for (Asset* p : _requestingAssets) {
-        if (!p) {
-            continue;
-        }
         if (p->isInitialized() || p->hasInitializedParent()) {
             return true;
         }
@@ -537,29 +536,6 @@ void Asset::unrequire(Asset* child) {
     child->cancelUnwantedSynchronizations();
     if (!child->hasLoadedParent()) {
         child->unload();
-    }
-}
-
-void Asset::request(Asset* child) {
-    const auto it = std::find(_requestedAssets.cbegin(), _requestedAssets.cend(), child);
-    if (it != _requestedAssets.cend()) {
-        // Do nothing if the request already exists
-        return;
-    }
-
-    _requestedAssets.push_back(child);
-    child->_requestingAssets.push_back(this);
-
-    if (!child->isLoaded()) {
-        child->load();
-    }
-
-    if (child->isLoaded() && !child->isSynchronized()) {
-        child->startSynchronizations();
-    }
-
-    if (child->isSynchronized() && !child->isInitialized()) {
-        child->initialize();
     }
 }
 

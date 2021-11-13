@@ -591,14 +591,6 @@ int property_getProperty(lua_State* L) {
     return 1;
 }
 
-int loadScene(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
-    std::string sceneFile = ghoul::lua::value<std::string>(L);
-
-    global::openSpaceEngine->scheduleLoadSingleAsset(std::move(sceneFile));
-    return 0;
-}
-
 int addSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addSceneGraphNode");
     const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);

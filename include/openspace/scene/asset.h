@@ -109,7 +109,6 @@ public:
     void require(Asset* child);
     void unrequire(Asset* child);
 
-    void request(Asset* child);
     void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
@@ -119,8 +118,6 @@ public:
 
 //private:
     void setState(State state);
-
-    void requiredAssetChangedState(Asset::State childState);
 
     bool isSynchronized() const;
     bool isSyncingOrResolved() const;
