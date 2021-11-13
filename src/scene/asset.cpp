@@ -77,8 +77,13 @@ void Asset::setState(Asset::State state) {
         requiringAsset->requiredAssetChangedState(state);
     }
 
-    for (Asset* requestingAsset : _requestingAssets) {
-        requestingAsset->requestedAssetChangedState(this, state);
+    if (hasInitializedParent()) {
+        if (state == State::Loaded && _state == State::Loaded) {
+            startSynchronizations();
+        }
+        if (state == State::SyncResolved && _state == State::SyncResolved) {
+            initialize();
+        }
     }
 }
 
@@ -100,17 +105,6 @@ void Asset::requiredAssetChangedState(Asset::State childState) {
     }
     else if (childState == State::SyncRejected) {
         setState(State::SyncRejected);
-    }
-}
-
-void Asset::requestedAssetChangedState(Asset* child, Asset::State childState) {
-    if (child->hasInitializedParent()) {
-        if (childState == State::Loaded && child->_state == State::Loaded) {
-            child->startSynchronizations();
-        }
-        if (childState == State::SyncResolved && child->_state == State::SyncResolved) {
-            child->initialize();
-        }
     }
 }
 
@@ -212,12 +206,7 @@ bool Asset::hasLoadedParent() {
             return true;
         }
     }
-    for (auto it = _requestingAssets.begin(); it != _requestingAssets.end(); it++) {
-        Asset* parent = *it;
-        if (!parent) {
-            it = _requestingAssets.erase(it);
-            continue;
-        }
+    for (Asset* parent : _requestingAssets) {
         if (parent->isLoaded() || parent->hasLoadedParent()) {
             return true;
         }
@@ -236,9 +225,6 @@ bool Asset::hasSyncingOrResolvedParent() const {
         }
     }
     for (Asset* p : _requestingAssets) {
-        if (!p) {
-            continue;
-        }
         if (p->isSyncingOrResolved() || p->hasSyncingOrResolvedParent()) {
             return true;
         }
@@ -275,7 +261,7 @@ bool Asset::startSynchronizations() {
         LWARNING(fmt::format("Cannot start synchronizations of unloaded asset {}", id()));
         return false;
     }
-    for (Asset* child : requestedAssets()) {
+    for (Asset* child : _requestedAssets) {
         child->startSynchronizations();
     }
 
@@ -383,20 +369,20 @@ void Asset::unload() {
     for (Asset* child : _requiredAssets) {
         unrequire(child);
     }
-    for (Asset* child : requestedAssets()) {
+    for (Asset* child : _requestedAssets) {
         unrequest(child);
     }
 }
 
-bool Asset::initialize() {
+void Asset::initialize() {
     ZoneScoped
 
     if (isInitialized()) {
-        return true;
+        return;
     }
     if (!isSynchronized()) {
         LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
-        return false;
+        return;
     }
     LDEBUG(fmt::format("Initializing asset '{}'", id()));
 
@@ -421,12 +407,11 @@ bool Asset::initialize() {
         LERROR(fmt::format("{}: {}", e.component, e.message));
         // TODO: rollback;
         setState(State::InitializationFailed);
-        return false;
+        return;
     }
 
     // 4. Update state
     setState(State::Initialized);
-    return true;
 }
 
 void Asset::deinitializeIfUnwanted() {
@@ -569,11 +554,11 @@ void Asset::request(Asset* child) {
         child->load();
     }
 
-    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
+    if (child->isLoaded() && !child->isSynchronized()) {
         child->startSynchronizations();
     }
 
-    if (isInitialized() && child->isSynchronized() && !child->isInitialized()) {
+    if (child->isSynchronized() && !child->isInitialized()) {
         child->initialize();
     }
 }

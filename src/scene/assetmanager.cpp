@@ -153,6 +153,10 @@ void AssetManager::initialize() {
 void AssetManager::deinitialize() {
     ZoneScoped
 
+    //for (Asset* asset : _rootAssets) {
+    //    asset->deinitialize();
+    //    asset->unload();
+    //}
     _rootAsset->deinitialize();
     _rootAsset->unload();
 }
@@ -163,10 +167,30 @@ void AssetManager::update() {
     // Add assets
     for (const std::string& asset : _assetAddQueue) {
         ZoneScopedN("(add) Pending State Change")
-        setCurrentAsset(_rootAsset.get());
         Asset* a = retrieveAsset(asset);
-        _currentAsset->request(a);
-        //_currentAsset->require(a);
+
+        const auto it = std::find(_rootAssets.begin(), _rootAssets.end(), a);
+        if (it != _rootAssets.end()) {
+            // Do nothing if the request already exists
+            continue;
+        }
+
+        _rootAssets.push_back(a);
+        _rootAsset->_requestedAssets.push_back(a);
+        a->_requestingAssets.push_back(_rootAsset.get());
+        if (!a->isLoaded()) {
+            a->load();
+        }
+
+        if (a->isLoaded() && !a->isSynchronized()) {
+            a->startSynchronizations();
+        }
+
+        if (a->isSynchronized() && !a->isInitialized()) {
+            a->initialize();
+        }
+
+        //_rootAsset->request(a);
         global::profile->addAsset(asset);
     }
     _assetAddQueue.clear();

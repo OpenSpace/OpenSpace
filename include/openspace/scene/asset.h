@@ -99,7 +99,7 @@ public:
      * Initialize this asset and return true if successful,
      * i.e. if this and all required assets initialized without errors.
      */
-    bool initialize();
+    void initialize();
     bool hasInitializedParent() const;
     bool isInitialized() const;
     void deinitialize();
@@ -117,11 +117,10 @@ public:
     void setMetaInformation(MetaInformation metaInformation);
     std::optional<MetaInformation> metaInformation() const;
 
-private:
+//private:
     void setState(State state);
 
     void requiredAssetChangedState(Asset::State childState);
-    void requestedAssetChangedState(Asset* child, Asset::State childState);
 
     bool isSynchronized() const;
     bool isSyncingOrResolved() const;

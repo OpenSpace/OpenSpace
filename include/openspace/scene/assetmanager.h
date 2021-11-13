@@ -95,6 +95,7 @@ private:
 
     // Member variables
     std::unique_ptr<Asset> _rootAsset;
+    std::vector<Asset*> _rootAssets;
     Asset* _currentAsset = nullptr;
 
     //std::vector<std::unique_ptr<Asset>> _assets;
