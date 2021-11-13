@@ -126,7 +126,7 @@ namespace {
 namespace openspace {
 
 AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory)
-    : _rootAsset(std::make_shared<Asset>(this, &_synchronizationWatcher))
+    : _rootAsset(std::make_unique<Asset>(this, &_synchronizationWatcher))
     , _assetRootDirectory(std::move(assetRootDirectory))
     , _luaState(state)
 {
@@ -401,11 +401,12 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
             std::string assetName = ghoul::lua::value<std::string>(L);
 
             Asset* dependency = manager->retrieveAsset(assetName);
-            manager->_currentAsset->require(dependency);
+            asset->require(dependency);
 
             if (!dependency) {
                 return ghoul::lua::luaError(
@@ -420,7 +421,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             lua_getfield(L, -1, ExportsTableName);
             return 1;
         },
-        1
+        2
     );
     lua_setfield(*_luaState, assetTableIndex, "require");
 

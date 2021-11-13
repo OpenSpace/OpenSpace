@@ -26,20 +26,15 @@
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
 #include <openspace/util/synchronizationwatcher.h>
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
-#include <memory>
-#include <mutex>
+#include <filesystem>
 #include <unordered_set>
-#include <vector>
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
 
 class Asset;
-class AssetLoader;
-class SynchronizationWatcher;
 
 /**
  * Interface for managing assets.
@@ -99,7 +94,7 @@ private:
     SynchronizationWatcher _synchronizationWatcher;
 
     // Member variables
-    std::shared_ptr<Asset> _rootAsset;
+    std::unique_ptr<Asset> _rootAsset;
     Asset* _currentAsset = nullptr;
 
     //std::vector<std::unique_ptr<Asset>> _assets;
