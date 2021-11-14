@@ -41,19 +41,10 @@ namespace {
     constexpr const char* _loggerCat = "Asset";
 } // namespace
 
-Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher)
-    : _state(State::SyncResolved)
-    , _loader(loader)
-    , _synchronizationWatcher(watcher)
-    , _hasAssetPath(false)
-    , _assetName("Root Asset")
-{}
-
 Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath)
     : _state(State::Unloaded)
     , _loader(loader)
     , _synchronizationWatcher(watcher)
-    , _hasAssetPath(true)
     , _assetPath(std::move(assetPath))
 {}
 
@@ -71,19 +62,7 @@ void Asset::setState(Asset::State state) {
     if (_state == state) {
         return;
     }
-    auto toString = [](Asset::State s) {
-        switch (s) {
-            case Asset::State::Unloaded: return "Unloaded";
-            case Asset::State::LoadingFailed: return "LoadingFailed";
-            case Asset::State::Loaded: return "Loaded";
-            case Asset::State::Synchronizing: return "Synchronizing";
-            case Asset::State::SyncResolved: return "SyncResolved";
-            case Asset::State::SyncRejected: return "SyncRejected";
-            case Asset::State::Initialized: return "Initialized";
-            case Asset::State::InitializationFailed: return "InitializationFailed";
-        }
-    };
-    LINFOC("Asset", fmt::format("{}:  {} -> {}", id(), toString(_state), toString(state)));
+    
     _state = state;
 
     for (Asset* requiringAsset : _requiringAssets) {
@@ -208,47 +187,27 @@ bool Asset::isSyncingOrResolved() const {
 }
 
 bool Asset::hasLoadedParent() {
-    for (Asset* parent : _requiringAssets) {
-        if (parent->isLoaded()) {
-            return true;
-        }
-    }
-
-    for (Asset* parent : _requestingAssets) {
-        if (parent->isLoaded() || parent->hasLoadedParent()) {
-            return true;
-        }
-    }
-
-    return false;
+    return std::any_of(
+        _requiringAssets.begin(),
+        _requiringAssets.end(),
+        std::mem_fn(&Asset::isLoaded)
+    );
 }
 
 bool Asset::hasSyncingOrResolvedParent() const {
-    for (Asset* p : _requiringAssets) {
-        if (p->isSyncingOrResolved()) {
-            return true;
-        }
-    }
-    for (Asset* p : _requestingAssets) {
-        if (p->isSyncingOrResolved() || p->hasSyncingOrResolvedParent()) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(
+        _requiringAssets.begin(),
+        _requiringAssets.end(),
+        std::mem_fn(&Asset::isSyncingOrResolved)
+    );
 }
 
 bool Asset::hasInitializedParent() const {
-    for (Asset* p : _requiringAssets) {
-        if (p->isInitialized()) {
-            return true;
-        }
-    }
-    for (Asset* p : _requestingAssets) {
-        if (p->isInitialized() || p->hasInitializedParent()) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(
+        _requiringAssets.begin(),
+        _requiringAssets.end(),
+        std::mem_fn(&Asset::isInitialized)
+    );
 }
 
 bool Asset::isInitialized() const {
@@ -315,10 +274,6 @@ void Asset::unload() {
         Asset* child = _requiredAssets.front();
         unrequire(child);
     }
-    //while (!_requestedAssets.empty()) {
-    //    Asset* child = _requestedAssets.front();
-    //    unrequest(child);
-    //}
 }
 
 void Asset::initialize() {
@@ -338,14 +293,7 @@ void Asset::initialize() {
         child->initialize();
     }
 
-    // 2. Initialize requests
-    for (Asset* child : _requestedAssets) {
-        if (child->isSynchronized()) {
-            child->initialize();
-        }
-    }
-
-    // 3. Call lua onInitialize
+    // 2. Call lua onInitialize
     try {
         _loader->callOnInitialize(this);
     }
@@ -357,7 +305,7 @@ void Asset::initialize() {
         return;
     }
 
-    // 4. Update state
+    // 3. Update state
     setState(State::Initialized);
 }
 
@@ -375,10 +323,10 @@ void Asset::deinitialize() {
 
     // Perform inverse actions as in initialize, in reverse order (4 - 1)
 
-    // 4. Update state
+    // 3. Update state
     setState(Asset::State::SyncResolved);
 
-    // 3. Call lua onInitialize
+    // 2. Call lua onInitialize
     try {
         _loader->callOnDeinitialize(this);
     }
@@ -389,34 +337,18 @@ void Asset::deinitialize() {
         return;
     }
 
-    // 2 and 1. Deinitialize unwanted requirements and requests
+    // 1. Deinitialize unwanted requirements
     for (Asset* dependency : _requiredAssets) {
-        dependency->deinitializeIfUnwanted();
-    }
-
-    for (Asset* dependency : _requestedAssets) {
         dependency->deinitializeIfUnwanted();
     }
 }
 
 std::string Asset::id() const {
-    return _hasAssetPath ? _assetPath : "$root";
-}
-
-std::filesystem::path Asset::assetFilePath() const {
     return _assetPath;
-}
-
-bool Asset::hasAssetFile() const {
-    return _hasAssetPath;
 }
 
 std::string Asset::assetDirectory() const {
     return std::filesystem::path(_assetPath).parent_path().string();
-}
-
-const std::string& Asset::assetName() const {
-    return _assetName;
 }
 
 void Asset::require(Asset* child) {
@@ -485,45 +417,6 @@ void Asset::unrequire(Asset* child) {
     if (!child->hasLoadedParent()) {
         child->unload();
     }
-}
-
-//void Asset::unrequest(Asset* child) {
-//    const auto childIt = std::find(
-//        _requestedAssets.cbegin(),
-//        _requestedAssets.cend(),
-//        child
-//    );
-//    if (childIt == _requestedAssets.cend()) {
-//        // Do nothing if the request node not exist
-//        return;
-//    }
-//
-//    _requestedAssets.erase(childIt);
-//
-//    const auto parentIt = std::find(
-//        child->_requestingAssets.cbegin(),
-//        child->_requestingAssets.cend(),
-//        this
-//    );
-//    if (parentIt == child->_requestingAssets.cend()) {
-//        return;
-//    }
-//
-//    child->_requestingAssets.erase(parentIt);
-//
-//    child->deinitializeIfUnwanted();
-//    if (!child->hasLoadedParent()) {
-//        child->unload();
-//    }
-//}
-
-std::vector<Asset*> Asset::requestedAssets() const {
-    std::vector<Asset*> res;
-    res.reserve(_requestedAssets.size());
-    for (Asset* a : _requestedAssets) {
-        res.push_back(a);
-    }
-    return res;
 }
 
 } // namespace openspace

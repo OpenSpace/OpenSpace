@@ -41,10 +41,4 @@ int remove(lua_State* L) {
     return 0;
 }
 
-int removeAll(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
-    global::openSpaceEngine->assetManager().removeAll();
-    return 0;
-}
-
 } // namespace openspace::luascriptfunctions

@@ -61,20 +61,12 @@ public:
     };
 
     /**
-     * Root asset constructor
-     */
-    Asset(AssetManager* loader, SynchronizationWatcher* watcher);
-
-    /**
      * Regular asset constructor
      */
     Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath);
 
     std::string id() const;
-    std::filesystem::path assetFilePath() const;
-    bool hasAssetFile() const;
     std::string assetDirectory() const;
-    const std::string& assetName() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
@@ -95,6 +87,8 @@ public:
      */
     bool startSynchronizations();
 
+    bool isSynchronized() const;
+
     /**
      * Initialize this asset and return true if successful,
      * i.e. if this and all required assets initialized without errors.
@@ -109,17 +103,12 @@ public:
     void require(Asset* child);
     void unrequire(Asset* child);
 
-    //void unrequest(Asset* child);
-
-    std::vector<Asset*> requestedAssets() const;
-
     void setMetaInformation(MetaInformation metaInformation);
     std::optional<MetaInformation> metaInformation() const;
 
-//private:
+private:
     void setState(State state);
 
-    bool isSynchronized() const;
     bool isSyncingOrResolved() const;
     bool isSyncResolveReady() const;
     bool hasSyncingOrResolvedParent() const;
@@ -129,10 +118,6 @@ public:
     SynchronizationWatcher* _synchronizationWatcher;
 
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
-
-    bool _hasAssetPath;
-    // The name of the asset
-    std::string _assetName;
 
     // Absolute path to asset file
     std::string _assetPath;
@@ -144,12 +129,6 @@ public:
 
     // Assets that refers to this asset as a required asset
     std::vector<Asset*> _requiringAssets;
-
-    // Requested assets
-    std::vector<Asset*> _requestedAssets;
-
-    // Assets that refers to this asset as a requested asset
-    std::vector<Asset*> _requestingAssets;
 
     // Synchronization watches
     std::vector<SynchronizationWatcher::WatchHandle> _syncWatches;

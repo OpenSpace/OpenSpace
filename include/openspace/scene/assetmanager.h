@@ -79,6 +79,8 @@ public:
      */
     void callOnDeinitialize(Asset* asset) const;
 
+    bool isFinishedLoading();
+
 private:
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
@@ -94,7 +96,6 @@ private:
     SynchronizationWatcher _synchronizationWatcher;
 
     // Member variables
-    std::unique_ptr<Asset> _rootAsset;
     std::vector<Asset*> _rootAssets;
     Asset* _currentAsset = nullptr;
 
@@ -102,6 +103,7 @@ private:
 
     std::unordered_map<std::string, std::unique_ptr<Asset>> _trackedAssets;
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
+    std::vector<Asset*> _toBeInitialized;
 
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState = nullptr;

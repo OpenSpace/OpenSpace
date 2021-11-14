@@ -760,44 +760,48 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    _assetManager->update();
+    //_assetManager->update();
 
-    _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
-    _loadingScreen->postMessage("Synchronizing assets");
-
-    std::vector<const Asset*> allAssets = _assetManager->allAssets();
-
-    std::unordered_set<ResourceSynchronization*> resourceSyncs;
-    for (const Asset* a : allAssets) {
-        std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
-
-        for (ResourceSynchronization* s : syncs) {
-            ZoneScopedN("Update resource synchronization")
-
-            if (s->state() == ResourceSynchronization::State::Syncing) {
-                LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = s->progress();
-
-                resourceSyncs.insert(s);
-                _loadingScreen->updateItem(
-                    s->name(),
-                    s->name(),
-                    LoadingScreen::ItemStatus::Started,
-                    progressInfo
-                );
-            }
-        }
-    }
-    _loadingScreen->setItemNumber(static_cast<int>(resourceSyncs.size()));
+    //_loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
+    //_loadingScreen->postMessage("Synchronizing assets");
 
     bool loading = true;
-    while (loading) {
+    while (true) {
+        std::vector<const Asset*> allAssets = _assetManager->allAssets();
+
+        std::unordered_set<ResourceSynchronization*> resourceSyncs;
+        for (const Asset* a : allAssets) {
+            std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
+
+            for (ResourceSynchronization* s : syncs) {
+                ZoneScopedN("Update resource synchronization")
+
+                    if (s->state() == ResourceSynchronization::State::Syncing) {
+                        LoadingScreen::ProgressInfo progressInfo;
+                        progressInfo.progress = s->progress();
+
+                        resourceSyncs.insert(s);
+                        _loadingScreen->updateItem(
+                            s->name(),
+                            s->name(),
+                            LoadingScreen::ItemStatus::Started,
+                            progressInfo
+                        );
+                    }
+            }
+        }
+        _loadingScreen->setItemNumber(static_cast<int>(resourceSyncs.size()));
+
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
             break;
         }
         _loadingScreen->render();
         _assetManager->update();
+
+        if (_assetManager->isFinishedLoading()) {
+            break;
+        }
 
         loading = false;
         auto it = resourceSyncs.begin();
