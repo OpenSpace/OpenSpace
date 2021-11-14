@@ -208,7 +208,7 @@ bool Asset::isSyncingOrResolved() const {
 }
 
 bool Asset::hasLoadedParent() {
-    for (Asset* parent : _requiredAssets) {
+    for (Asset* parent : _requiringAssets) {
         if (parent->isLoaded()) {
             return true;
         }
@@ -260,9 +260,6 @@ bool Asset::startSynchronizations() {
         LWARNING(fmt::format("Cannot start synchronizations of unloaded asset {}", id()));
         return false;
     }
-    for (Asset* child : _requestedAssets) {
-        child->startSynchronizations();
-    }
 
     // Do not attempt to resync if this is already done
     if (isSyncingOrResolved()) {
@@ -293,60 +290,6 @@ bool Asset::startSynchronizations() {
     return !childFailed;
 }
 
-bool Asset::cancelAllSynchronizations() {
-    bool cancelledAnySync = std::any_of(
-        _requiredAssets.cbegin(),
-        _requiredAssets.cend(),
-        std::mem_fn(&Asset::cancelAllSynchronizations)
-    );
-    cancelledAnySync |= std::any_of(
-        _requestedAssets.cbegin(),
-        _requestedAssets.cend(),
-        std::mem_fn(&Asset::cancelAllSynchronizations)
-    );
-
-    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
-        if (s->isSyncing()) {
-            cancelledAnySync = true;
-            s->cancel();
-            setState(State::Loaded);
-        }
-    }
-    if (cancelledAnySync) {
-        setState(State::Loaded);
-    }
-    return cancelledAnySync;
-}
-
-bool Asset::cancelUnwantedSynchronizations() {
-    if (hasSyncingOrResolvedParent()) {
-        return false;
-    }
-
-    bool cancelledAnySync = std::any_of(
-        _requiredAssets.begin(),
-        _requiredAssets.end(),
-        std::mem_fn(&Asset::cancelUnwantedSynchronizations)
-    );
-    cancelledAnySync |= std::any_of(
-        _requestedAssets.begin(),
-        _requestedAssets.end(),
-        std::mem_fn(&Asset::cancelUnwantedSynchronizations)
-    );
-
-    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
-        if (s->isSyncing()) {
-            cancelledAnySync = true;
-            s->cancel();
-            setState(State::Loaded);
-        }
-    }
-    if (cancelledAnySync) {
-        setState(State::Loaded);
-    }
-    return cancelledAnySync;
-}
-
 bool Asset::load() {
     if (isLoaded()) {
         return true;
@@ -365,10 +308,15 @@ void Asset::unload() {
     setState(State::Unloaded);
     _loader->unloadAsset(this);
 
-    for (Asset* child : _requiredAssets) {
+    // This while loop looks a bit weird, but it is this way because the unrequire
+    // function removes the asset passed into it from the requiredAssets list, so we are
+    // guaranteed that the list is shrinking with each loop iteration
+    while (!_requiredAssets.empty()) {
+        Asset* child = _requiredAssets.front();
         unrequire(child);
     }
-    for (Asset* child : _requestedAssets) {
+    while (!_requestedAssets.empty()) {
+        Asset* child = _requestedAssets.front();
         unrequest(child);
     }
 }
@@ -414,17 +362,16 @@ void Asset::initialize() {
 }
 
 void Asset::deinitializeIfUnwanted() {
-    if (hasInitializedParent()) {
-        return;
+    if (!hasInitializedParent()) {
+        deinitialize();
     }
-    deinitialize();
 }
 
 void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(fmt::format("Deintializing asset '{}'", id()));
+    LDEBUG(fmt::format("Deinitializing asset '{}'", id()));
 
     // Perform inverse actions as in initialize, in reverse order (4 - 1)
 
@@ -508,32 +455,33 @@ void Asset::require(Asset* child) {
 }
 
 void Asset::unrequire(Asset* child) {
-    if (_state != Asset::State::Unloaded) {
-        throw ghoul::RuntimeError("Cannot unrequire child asset is in a loaded state");
-    }
-
-    const auto childIt = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), child);
-
-    if (childIt == _requiredAssets.cend()) {
-        // Do nothing if the request node not exist.
-        return;
-    }
+    ghoul_assert(
+        _state == Asset::State::Unloaded,
+        "Cannot unrequire child asset in a loaded state"
+    );
+    auto childIt = std::find(_requiredAssets.begin(), _requiredAssets.end(), child);
+    ghoul_assert(
+        childIt != _requiredAssets.end(),
+        "Requested node must exist in the parent"
+    );
 
     _requiredAssets.erase(childIt);
 
-    const auto parentIt = std::find(
+
+
+    auto parentIt = std::find(
         child->_requiringAssets.cbegin(),
         child->_requiringAssets.cend(),
         this
     );
-    if (parentIt == child->_requiringAssets.cend()) {
-        return;
-    }
+    ghoul_assert(
+        parentIt != child->_requiringAssets.cend(),
+        "Parent asset was not correctly registered"
+    );
 
     child->_requiringAssets.erase(parentIt);
 
     child->deinitializeIfUnwanted();
-    child->cancelUnwantedSynchronizations();
     if (!child->hasLoadedParent()) {
         child->unload();
     }
@@ -564,7 +512,6 @@ void Asset::unrequest(Asset* child) {
     child->_requestingAssets.erase(parentIt);
 
     child->deinitializeIfUnwanted();
-    child->cancelUnwantedSynchronizations();
     if (!child->hasLoadedParent()) {
         child->unload();
     }

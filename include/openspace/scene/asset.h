@@ -123,8 +123,6 @@ public:
     bool isSyncingOrResolved() const;
     bool isSyncResolveReady() const;
     bool hasSyncingOrResolvedParent() const;
-    bool cancelAllSynchronizations();
-    bool cancelUnwantedSynchronizations();
 
     std::atomic<State> _state;
     AssetManager* _loader;

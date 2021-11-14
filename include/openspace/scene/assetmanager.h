@@ -101,6 +101,8 @@ private:
     //std::vector<std::unique_ptr<Asset>> _assets;
 
     std::unordered_map<std::string, std::unique_ptr<Asset>> _trackedAssets;
+    std::vector<std::unique_ptr<Asset>> _toBeDeleted;
+
     std::string _assetRootDirectory;
     ghoul::lua::LuaState* _luaState = nullptr;
 

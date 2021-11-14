@@ -159,10 +159,14 @@ void AssetManager::deinitialize() {
     //}
     _rootAsset->deinitialize();
     _rootAsset->unload();
+    _toBeDeleted.clear();
 }
 
 void AssetManager::update() {
     ZoneScoped
+
+    // Delete all the assets that have been marked for deletion in the previous frame
+    _toBeDeleted.clear();
 
     // Add assets
     for (const std::string& asset : _assetAddQueue) {
@@ -176,8 +180,11 @@ void AssetManager::update() {
         }
 
         _rootAssets.push_back(a);
+        // tmp-begin
         _rootAsset->_requestedAssets.push_back(a);
         a->_requestingAssets.push_back(_rootAsset.get());
+        // tmp-end
+
         if (!a->isLoaded()) {
             a->load();
         }
@@ -207,8 +214,39 @@ void AssetManager::update() {
 
         const auto it = _trackedAssets.find(path.string());
         if (it != _trackedAssets.end()) {
-            setCurrentAsset(_rootAsset.get());
-            _currentAsset->unrequest(it->second.get());
+            Asset* a = it->second.get();
+            auto jt = std::find(_rootAssets.begin(), _rootAssets.end(), a);
+            if (jt == _rootAssets.end()) {
+                // Tried to remove a non-root asset
+                continue;
+            }
+
+
+
+
+            //_rootAsset->unrequest(it->second.get());
+            _rootAssets.erase(jt);
+            // tmp-begin
+            _rootAsset->_requestedAssets.erase(
+                std::find(
+                    _rootAsset->_requestedAssets.begin(),
+                    _rootAsset->_requestedAssets.end(),
+                    a
+                )
+            );
+            a->_requestingAssets.erase(
+                std::find(
+                    a->_requestingAssets.begin(),
+                    a->_requestingAssets.end(),
+                    _rootAsset.get()
+                )
+            );
+            // tmp-end
+
+            a->deinitializeIfUnwanted();
+            if (!a->hasLoadedParent()) {
+                a->unload();
+            }
             global::profile->removeAsset(asset);
         }
     }
@@ -324,7 +362,12 @@ void AssetManager::unloadAsset(Asset* asset) {
     tearDownAssetLuaTable(asset);
     const auto it = _trackedAssets.find(asset->id());
     if (it != _trackedAssets.end()) {
-        _trackedAssets.erase(it);
+        LINFOC("AssetManager", fmt::format("Unloading asset {}", asset->id()));
+        // Instead of deleting the asset directly, we are moving it into a to-delete queue
+        // as this unloadAsset function is called from the asset that we are manipulating
+        // right now. And deleting the asset while we are in a function of the same asset
+        // might be painful
+        _toBeDeleted.push_back(std::move(it->second));
     }
 }
 
