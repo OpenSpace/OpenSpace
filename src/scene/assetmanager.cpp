@@ -153,10 +153,10 @@ void AssetManager::initialize() {
 void AssetManager::deinitialize() {
     ZoneScoped
 
-    //for (Asset* asset : _rootAssets) {
-    //    asset->deinitialize();
-    //    asset->unload();
-    //}
+    for (Asset* asset : _rootAssets) {
+        asset->deinitializeIfUnwanted();
+        asset->unload();
+    }
     _rootAsset->deinitialize();
     _rootAsset->unload();
     _toBeDeleted.clear();
@@ -181,8 +181,8 @@ void AssetManager::update() {
 
         _rootAssets.push_back(a);
         // tmp-begin
-        _rootAsset->_requestedAssets.push_back(a);
-        a->_requestingAssets.push_back(_rootAsset.get());
+        //_rootAsset->_requestedAssets.push_back(a);
+        //a->_requestingAssets.push_back(_rootAsset.get());
         // tmp-end
 
         if (!a->isLoaded()) {
@@ -193,6 +193,10 @@ void AssetManager::update() {
             a->startSynchronizations();
         }
 
+        while (!a->isSynchronized()) {
+            _synchronizationWatcher.notify();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
         if (a->isSynchronized() && !a->isInitialized()) {
             a->initialize();
         }
@@ -227,20 +231,20 @@ void AssetManager::update() {
             //_rootAsset->unrequest(it->second.get());
             _rootAssets.erase(jt);
             // tmp-begin
-            _rootAsset->_requestedAssets.erase(
-                std::find(
-                    _rootAsset->_requestedAssets.begin(),
-                    _rootAsset->_requestedAssets.end(),
-                    a
-                )
-            );
-            a->_requestingAssets.erase(
-                std::find(
-                    a->_requestingAssets.begin(),
-                    a->_requestingAssets.end(),
-                    _rootAsset.get()
-                )
-            );
+            //_rootAsset->_requestedAssets.erase(
+            //    std::find(
+            //        _rootAsset->_requestedAssets.begin(),
+            //        _rootAsset->_requestedAssets.end(),
+            //        a
+            //    )
+            //);
+            //a->_requestingAssets.erase(
+            //    std::find(
+            //        a->_requestingAssets.begin(),
+            //        a->_requestingAssets.end(),
+            //        _rootAsset.get()
+            //    )
+            //);
             // tmp-end
 
             a->deinitializeIfUnwanted();

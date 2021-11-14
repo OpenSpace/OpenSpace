@@ -109,7 +109,7 @@ public:
     void require(Asset* child);
     void unrequire(Asset* child);
 
-    void unrequest(Asset* child);
+    //void unrequest(Asset* child);
 
     std::vector<Asset*> requestedAssets() const;
 

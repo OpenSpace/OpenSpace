@@ -315,10 +315,10 @@ void Asset::unload() {
         Asset* child = _requiredAssets.front();
         unrequire(child);
     }
-    while (!_requestedAssets.empty()) {
-        Asset* child = _requestedAssets.front();
-        unrequest(child);
-    }
+    //while (!_requestedAssets.empty()) {
+    //    Asset* child = _requestedAssets.front();
+    //    unrequest(child);
+    //}
 }
 
 void Asset::initialize() {
@@ -487,35 +487,35 @@ void Asset::unrequire(Asset* child) {
     }
 }
 
-void Asset::unrequest(Asset* child) {
-    const auto childIt = std::find(
-        _requestedAssets.cbegin(),
-        _requestedAssets.cend(),
-        child
-    );
-    if (childIt == _requestedAssets.cend()) {
-        // Do nothing if the request node not exist
-        return;
-    }
-
-    _requestedAssets.erase(childIt);
-
-    const auto parentIt = std::find(
-        child->_requestingAssets.cbegin(),
-        child->_requestingAssets.cend(),
-        this
-    );
-    if (parentIt == child->_requestingAssets.cend()) {
-        return;
-    }
-
-    child->_requestingAssets.erase(parentIt);
-
-    child->deinitializeIfUnwanted();
-    if (!child->hasLoadedParent()) {
-        child->unload();
-    }
-}
+//void Asset::unrequest(Asset* child) {
+//    const auto childIt = std::find(
+//        _requestedAssets.cbegin(),
+//        _requestedAssets.cend(),
+//        child
+//    );
+//    if (childIt == _requestedAssets.cend()) {
+//        // Do nothing if the request node not exist
+//        return;
+//    }
+//
+//    _requestedAssets.erase(childIt);
+//
+//    const auto parentIt = std::find(
+//        child->_requestingAssets.cbegin(),
+//        child->_requestingAssets.cend(),
+//        this
+//    );
+//    if (parentIt == child->_requestingAssets.cend()) {
+//        return;
+//    }
+//
+//    child->_requestingAssets.erase(parentIt);
+//
+//    child->deinitializeIfUnwanted();
+//    if (!child->hasLoadedParent()) {
+//        child->unload();
+//    }
+//}
 
 std::vector<Asset*> Asset::requestedAssets() const {
     std::vector<Asset*> res;
