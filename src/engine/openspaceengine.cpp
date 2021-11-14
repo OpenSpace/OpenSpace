@@ -388,8 +388,6 @@ void OpenSpaceEngine::initialize() {
         func();
     }
 
-    global::openSpaceEngine->_assetManager->initialize();
-
     LTRACE("OpenSpaceEngine::initialize(end)");
 }
 
@@ -752,7 +750,6 @@ void OpenSpaceEngine::loadAssets() {
         );
     }
 
-    _assetManager->removeAll();
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
     }
@@ -767,6 +764,9 @@ void OpenSpaceEngine::loadAssets() {
 
     bool loading = true;
     while (true) {
+        _loadingScreen->render();
+        _assetManager->update();
+
         std::vector<const Asset*> allAssets = _assetManager->allAssets();
 
         std::unordered_set<ResourceSynchronization*> resourceSyncs;
@@ -796,10 +796,12 @@ void OpenSpaceEngine::loadAssets() {
             global::windowDelegate->terminate();
             break;
         }
-        _loadingScreen->render();
-        _assetManager->update();
 
-        if (_assetManager->isFinishedLoading()) {
+        bool finishedLoading = std::all_of(
+            allAssets.begin(), allAssets.end(), std::mem_fn(&Asset::isInitialized)
+        );
+        
+        if (finishedLoading) {
             break;
         }
 

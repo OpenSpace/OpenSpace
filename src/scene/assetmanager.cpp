@@ -142,11 +142,6 @@ AssetManager::~AssetManager() {
     luaL_unref(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
 }
 
-void AssetManager::initialize() {
-    ZoneScoped
-
-}
-
 void AssetManager::deinitialize() {
     ZoneScoped
 
@@ -155,10 +150,6 @@ void AssetManager::deinitialize() {
         asset->unload();
     }
     _toBeDeleted.clear();
-}
-
-bool AssetManager::isFinishedLoading() {
-    return _toBeInitialized.empty();
 }
 
 void AssetManager::update() {
@@ -254,16 +245,6 @@ void AssetManager::remove(const std::string& path) {
     }
 
     _assetRemoveQueue.insert(path);
-}
-
-void AssetManager::removeAll() {
-    ZoneScoped
-
-    _assetAddQueue.clear();
-    _assetRemoveQueue.clear();
-    for (const std::pair<const std::string, std::unique_ptr<Asset>>& p : _trackedAssets) {
-        _assetRemoveQueue.insert(p.first);
-    }
 }
 
 std::vector<const Asset*> AssetManager::allAssets() const {

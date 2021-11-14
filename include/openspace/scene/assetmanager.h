@@ -48,11 +48,9 @@ public:
     AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory);
     ~AssetManager();
 
-    void initialize();
     void deinitialize();
     void add(const std::string& path);
     void remove(const std::string& path);
-    void removeAll();
 
     void update();
     scripting::LuaLibrary luaLibrary();
@@ -78,8 +76,6 @@ public:
      * Call the onDeinitialize function specified in the asset file
      */
     void callOnDeinitialize(Asset* asset) const;
-
-    bool isFinishedLoading();
 
 private:
     void setUpAssetLuaTable(Asset* asset);
