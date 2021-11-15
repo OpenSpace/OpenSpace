@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ASSET___H__
 
 #include <openspace/util/synchronizationwatcher.h>
+#include <filesystem>
 #include <optional>
 
 namespace openspace {
@@ -44,10 +45,10 @@ public:
         std::vector<std::string> identifiers;
     };
 
-    Asset(AssetManager& manager, SynchronizationWatcher& watcher, std::string assetPath);
+    Asset(AssetManager& manager, SynchronizationWatcher& watcher,
+        std::filesystem::path assetPath);
 
-    std::string id() const;
-    std::string assetDirectory() const;
+    std::filesystem::path path() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
@@ -111,7 +112,7 @@ private:
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
 
     // Absolute path to asset file
-    std::string _assetPath;
+    std::filesystem::path _assetPath;
 
     std::optional<MetaInformation> _metaInformation;
 

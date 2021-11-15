@@ -42,7 +42,7 @@ namespace {
 } // namespace
 
 Asset::Asset(AssetManager& manager, SynchronizationWatcher& watcher,
-             std::string assetPath)
+             std::filesystem::path assetPath)
     : _manager(manager)
     , _synchronizationWatcher(watcher)
     , _assetPath(std::move(assetPath))
@@ -120,8 +120,8 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
                 }
                 else if (state == ResourceSynchronization::State::Rejected) {
                     LERROR(fmt::format(
-                        "Failed to synchronize resource '{}' in asset '{}'",
-                        sync->name(), id()
+                        "Failed to synchronize resource '{}' in asset {}",
+                        sync->name(), _assetPath
                     ));
 
                     setState(State::SyncRejected);
@@ -205,7 +205,9 @@ bool Asset::isInitialized() const {
 
 bool Asset::startSynchronizations() {
     if (!isLoaded()) {
-        LWARNING(fmt::format("Cannot start synchronizations of unloaded asset {}", id()));
+        LWARNING(fmt::format(
+            "Cannot start synchronizations of unloaded asset {}", _assetPath
+        ));
         return false;
     }
 
@@ -272,10 +274,10 @@ void Asset::initialize() {
         return;
     }
     if (!isSynchronized()) {
-        LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
+        LERROR(fmt::format("Cannot initialize unsynchronized asset {}", _assetPath));
         return;
     }
-    LDEBUG(fmt::format("Initializing asset '{}'", id()));
+    LDEBUG(fmt::format("Initializing asset {}", _assetPath));
 
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
@@ -287,7 +289,7 @@ void Asset::initialize() {
         _manager.callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format("Failed to initialize asset {}", id()));
+        LERROR(fmt::format("Failed to initialize asset {}", path()));
         LERROR(fmt::format("{}: {}", e.component, e.message));
         // TODO: rollback;
         setState(State::InitializationFailed);
@@ -308,7 +310,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(fmt::format("Deinitializing asset '{}'", id()));
+    LDEBUG(fmt::format("Deinitializing asset {}", _assetPath));
 
     // Perform inverse actions as in initialize, in reverse order (4 - 1)
 
@@ -321,7 +323,7 @@ void Asset::deinitialize() {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
-            "Failed to deinitialize asset {}; {}: {}", id(), e.component, e.message
+            "Failed to deinitialize asset {}; {}: {}", _assetPath, e.component, e.message
         ));
         return;
     }
@@ -332,12 +334,8 @@ void Asset::deinitialize() {
     }
 }
 
-std::string Asset::id() const {
+std::filesystem::path Asset::path() const {
     return _assetPath;
-}
-
-std::string Asset::assetDirectory() const {
-    return std::filesystem::path(_assetPath).parent_path().string();
 }
 
 void Asset::require(Asset* child) {
