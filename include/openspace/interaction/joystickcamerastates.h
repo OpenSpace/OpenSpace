@@ -171,6 +171,7 @@ inline std::string to_string(
         case T::GlobalRollY: return "GlobalRoll Y";
         case T::PanX:        return "Pan X";
         case T::PanY:        return "Pan Y";
+        case T::Property:    return "Property";
         default:             return "";
         }
 }

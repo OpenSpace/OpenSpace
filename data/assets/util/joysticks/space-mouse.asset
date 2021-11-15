@@ -41,7 +41,7 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true, "JoystickLike", true, 40.0);
   openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false, "JoystickLike", true, 35.0);
   openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false, "JoystickLike", true, 40.0);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", "JoystickLike", false, true, 35.0);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", false, "JoystickLike", true, 35.0);
 
   openspace.navigation.bindJoystickButton(
     name,
