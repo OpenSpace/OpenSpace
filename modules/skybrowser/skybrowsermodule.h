@@ -137,7 +137,7 @@ private:
     glm::vec2 _startMousePosition;
     glm::vec2 _startDragPosition;
     glm::vec2 _startBrowserSize;
-    glm::vec2 _resizeDirection{ 0.f };
+    glm::ivec2 _resizeDirection{ 0 };
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
     glm::dvec3 _startAnimation;

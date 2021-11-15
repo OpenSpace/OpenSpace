@@ -26,6 +26,7 @@
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
@@ -34,8 +35,8 @@ namespace openspace {
     Pair::Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target)
        : _target(target), _browser(browser)
     {
-        assert(browser != nullptr, "Sky browser is null pointer!");
-        assert(target != nullptr, "Sky target is null pointer!");
+        ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
+        ghoul_assert(target != nullptr, "Sky target is null pointer!");
     }
     
     void Pair::lock() {

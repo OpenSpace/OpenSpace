@@ -275,7 +275,7 @@ SkyBrowserModule::SkyBrowserModule()
                         _resizeDirection = _mouseOnPair->getBrowser()->isOnResizeArea(
                             _mousePosition
                         );
-                        if (_resizeDirection != glm::vec2{ 0 }) {
+                        if (_resizeDirection != glm::ivec2{ 0 }) {
                             _mouseOnPair->getBrowser()->saveResizeStartSize();
                             _startBrowserSize = _mouseOnPair->getBrowser()->
                                                 screenSpaceDimensions();
@@ -336,7 +336,7 @@ SkyBrowserModule::SkyBrowserModule()
                     if (_isResizing) {
                         // Calculate scaling factor
                         glm::vec2 mouseDragVector = (_mousePosition-_startMousePosition);
-                        glm::vec2 scaling = mouseDragVector * _resizeDirection;
+                        glm::vec2 scaling = mouseDragVector * glm::vec2(_resizeDirection);
                         glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) / 
                                                      _startBrowserSize;
                         // Scale the browser
@@ -345,7 +345,9 @@ SkyBrowserModule::SkyBrowserModule()
                         // For dragging functionality, translate so it looks like the 
                         // browser isn't moving. Make sure the browser doesn't move in 
                         // directions it's not supposed to 
-                        translation = mouseDragVector * abs(_resizeDirection) / 2.f;
+                        translation = 0.5f * mouseDragVector * abs(
+                            glm::vec2(_resizeDirection)
+                        );
 
                     }
                     // Translate
