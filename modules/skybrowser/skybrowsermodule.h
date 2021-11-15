@@ -43,8 +43,8 @@ class ScreenSpaceSkyBrowser;
 class RenderableSkyBrowser;
 
 enum class Transparency {
-    Transparent = 0,
-    Opaque = 1
+    Transparent,
+    Opaque
 };
 
 class SkyBrowserModule : public OpenSpaceModule {

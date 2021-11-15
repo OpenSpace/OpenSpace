@@ -814,7 +814,16 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
 
 void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float deltaTime)
 {
-     float transparency = static_cast<float>(goal);
+    float transparency = [](Transparency goal) {
+        switch (goal) {
+        case Transparency::Transparent:
+            return 0.f;
+
+        case Transparency::Opaque:
+            return 1.f;
+        }
+    }(goal);
+    
      bool isAllFinished{ false };
      for (Pair& pair : _targetsBrowsers) {
          if (pair.isEnabled()) {
