@@ -158,6 +158,7 @@ int bindJoystickAxis(lua_State* L) {
             std::string, int, std::string, std::optional<bool>,
             std::optional<std::string>, std::optional<bool>, std::optional<double>
         >(L);
+    shouldInvert = shouldInvert.value_or(false);
     isSticky = isSticky.value_or(false);
     sensitivity = sensitivity.value_or(0.0);
     joystickType = joystickType.value_or("JoystickLike");

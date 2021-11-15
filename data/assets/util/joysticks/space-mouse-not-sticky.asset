@@ -36,12 +36,12 @@ asset.onInitialize(function()
   local controller = SpaceMouse;
   local name = "SpaceNavigator";
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X", false);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y", false);
+  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X");
+  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y");
   openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y", false);
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom", false);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X", false);
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y");
+  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom");
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X");
 
   openspace.navigation.bindJoystickButton(
     name,
