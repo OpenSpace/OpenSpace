@@ -25,13 +25,8 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
-#include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
-#include <filesystem>
-#include <memory>
 #include <optional>
-#include <string>
-#include <vector>
 
 namespace openspace {
 
@@ -39,17 +34,6 @@ class AssetManager;
 
 class Asset {
 public:
-    enum class State {
-        Unloaded,
-        LoadingFailed,
-        Loaded,
-        Synchronizing,
-        SyncResolved,
-        SyncRejected,
-        Initialized,
-        InitializationFailed
-    };
-
     struct MetaInformation {
         std::string name;
         std::string version;
@@ -60,17 +44,14 @@ public:
         std::vector<std::string> identifiers;
     };
 
-    /**
-     * Regular asset constructor
-     */
-    Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath);
+    Asset(AssetManager& manager, SynchronizationWatcher& watcher, std::string assetPath);
 
     std::string id() const;
     std::string assetDirectory() const;
 
     void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
-    std::vector<ResourceSynchronization*> ownSynchronizations() const;
+    std::vector<ResourceSynchronization*> synchronizations() const;
 
     /**
      * Load this asset and return true if successful,
@@ -94,7 +75,6 @@ public:
      * i.e. if this and all required assets initialized without errors.
      */
     void initialize();
-    bool hasInitializedParent() const;
     bool isInitialized() const;
     void deinitialize();
     void deinitializeIfUnwanted();
@@ -107,15 +87,26 @@ public:
     std::optional<MetaInformation> metaInformation() const;
 
 private:
+    enum class State {
+        Unloaded,
+        LoadingFailed,
+        Loaded,
+        Synchronizing,
+        SyncResolved,
+        SyncRejected,
+        Initialized,
+        InitializationFailed
+    };
+
     void setState(State state);
 
     bool isSyncingOrResolved() const;
     bool isSyncResolveReady() const;
-    bool hasSyncingOrResolvedParent() const;
+    bool hasInitializedParent() const;
 
-    std::atomic<State> _state;
-    AssetManager* _loader;
-    SynchronizationWatcher* _synchronizationWatcher;
+    std::atomic<State> _state = State::Unloaded;
+    AssetManager& _manager;
+    SynchronizationWatcher& _synchronizationWatcher;
 
     std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
 

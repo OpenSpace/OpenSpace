@@ -81,25 +81,34 @@ private:
     void setUpAssetLuaTable(Asset* asset);
 
     Asset* retrieveAsset(const std::string& name, Asset* base);
-
     void setCurrentAsset(Asset* asset);
 
-    std::unordered_set<std::string> _assetAddQueue;
-    std::unordered_set<std::string> _assetRemoveQueue;
+    // The authoratative list of all assets that have been loaded through the AssetManager
+    std::vector<std::unique_ptr<Asset>> _assets;
 
-    SynchronizationWatcher _synchronizationWatcher;
-
-    // Member variables
+    // A list of all root assets that have been loaded directly through the `add` function
     std::vector<Asset*> _rootAssets;
 
-    std::unordered_map<std::string, std::unique_ptr<Asset>> _trackedAssets;
-    std::vector<std::unique_ptr<Asset>> _toBeDeleted;
+    // This list contains all of the assets that are queued to be loading in the next
+    // update call
+    std::unordered_set<std::string> _assetAddQueue;
+
+    // The list contains all of the assets that should be removed in the next update call
+    std::unordered_set<std::string> _assetRemoveQueue;
+
+    // This list contains all assets that need to be initializaed in the next update call
     std::vector<Asset*> _toBeInitialized;
 
+    // This list contains all of the assets that should be deleted in the next update call
+    std::vector<std::unique_ptr<Asset>> _toBeDeleted;
+    
+    SynchronizationWatcher _synchronizationWatcher;
+
     std::string _assetRootDirectory;
+    
     ghoul::lua::LuaState* _luaState = nullptr;
 
-    // References to Lua values
+    // References to the onInitialize and the onDeinitialize functions for each Asset
     std::unordered_map<Asset*, std::vector<int>> _onInitializeFunctionRefs;
     std::unordered_map<Asset*, std::vector<int>> _onDeinitializeFunctionRefs;
 

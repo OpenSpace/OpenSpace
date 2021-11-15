@@ -126,7 +126,7 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
 }
 
 AssetManager::~AssetManager() {
-    _trackedAssets.clear();
+    _assets.clear();
     luaL_unref(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
 }
 
@@ -191,9 +191,13 @@ void AssetManager::update() {
             asset
         );
 
-        const auto it = _trackedAssets.find(path.string());
-        if (it != _trackedAssets.end()) {
-            Asset* a = it->second.get();
+        const auto it = std::find_if(
+            _assets.begin(),
+            _assets.end(),
+            [&path](const std::unique_ptr<Asset>& asset) { return asset->id() == path; }
+        );
+        if (it != _assets.end()) {
+            Asset* a = it->get();
             auto jt = std::find(_rootAssets.begin(), _rootAssets.end(), a);
             if (jt == _rootAssets.end()) {
                 // Tried to remove a non-root asset
@@ -236,8 +240,9 @@ void AssetManager::remove(const std::string& path) {
 
 std::vector<const Asset*> AssetManager::allAssets() const {
     std::vector<const Asset*> res;
-    for (const std::pair<const std::string, std::unique_ptr<Asset>>& p : _trackedAssets) {
-        res.push_back(p.second.get());
+    res.reserve(_assets.size());
+    for (const std::unique_ptr<Asset>& asset : _assets) {
+        res.push_back(asset.get());
     }
     return res;
 }
@@ -318,14 +323,18 @@ void AssetManager::unloadAsset(Asset* asset) {
     lua_settop(*_luaState, top);
 
     
-    const auto it = _trackedAssets.find(asset->id());
-    if (it != _trackedAssets.end()) {
-        LINFOC("AssetManager", fmt::format("Unloading asset {}", asset->id()));
+    const auto it = std::find_if(
+        _assets.begin(),
+        _assets.end(),
+        [&asset](const std::unique_ptr<Asset>& a) { return a->id() == asset->id(); }
+    );
+    if (it != _assets.end()) {
         // Instead of deleting the asset directly, we are moving it into a to-delete queue
         // as this unloadAsset function is called from the asset that we are manipulating
         // right now. And deleting the asset while we are in a function of the same asset
         // might be painful
-        _toBeDeleted.push_back(std::move(it->second));
+        _toBeDeleted.push_back(std::move(*it));
+        _assets.erase(it);
     }
 }
 
@@ -581,19 +590,23 @@ Asset* AssetManager::retrieveAsset(const std::string& name, Asset* base) {
     std::filesystem::path path = generateAssetPath(directory, _assetRootDirectory, name);
 
     // Check if asset is already loaded.
-    const auto it = _trackedAssets.find(path.string());
-    if (it != _trackedAssets.end()) {
-        return it->second.get();
+    const auto it = std::find_if(
+        _assets.begin(),
+        _assets.end(),
+        [&path](const std::unique_ptr<Asset>& asset) { return asset->id() == path; }
+    );
+    if (it != _assets.end()) {
+        return it->get();
     }
 
     std::unique_ptr<Asset> asset = std::make_unique<Asset>(
-        this,
-        &_synchronizationWatcher,
+        *this,
+        _synchronizationWatcher,
         path.string()
     );
     Asset* res = asset.get();
 
-    _trackedAssets.emplace(asset->id(), std::move(asset));
+    _assets.push_back(std::move(asset));
     setUpAssetLuaTable(res);
     return res;
 }

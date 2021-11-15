@@ -771,7 +771,7 @@ void OpenSpaceEngine::loadAssets() {
 
         std::unordered_set<ResourceSynchronization*> resourceSyncs;
         for (const Asset* a : allAssets) {
-            std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
+            std::vector<ResourceSynchronization*> syncs = a->synchronizations();
 
             for (ResourceSynchronization* s : syncs) {
                 ZoneScopedN("Update resource synchronization")

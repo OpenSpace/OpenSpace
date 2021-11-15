@@ -41,9 +41,9 @@ namespace {
     constexpr const char* _loggerCat = "Asset";
 } // namespace
 
-Asset::Asset(AssetManager* loader, SynchronizationWatcher* watcher, std::string assetPath)
-    : _state(State::Unloaded)
-    , _loader(loader)
+Asset::Asset(AssetManager& manager, SynchronizationWatcher& watcher,
+             std::string assetPath)
+    : _manager(manager)
     , _synchronizationWatcher(watcher)
     , _assetPath(std::move(assetPath))
 {}
@@ -108,7 +108,7 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
     // The synchronization watcher ensures that callbacks are invoked in the main thread
 
     SynchronizationWatcher::WatchHandle watch =
-        _synchronizationWatcher->watchSynchronization(
+        _synchronizationWatcher.watchSynchronization(
             sync,
             [this, sync](ResourceSynchronization::State state) {
                 ZoneScoped
@@ -133,7 +133,7 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
 
 void Asset::clearSynchronizations() {
     for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
-        _synchronizationWatcher->unwatchSynchronization(h);
+        _synchronizationWatcher.unwatchSynchronization(h);
     }
     _syncWatches.clear();
 }
@@ -160,15 +160,12 @@ bool Asset::isSyncResolveReady() const {
     return unresolvedOwnSynchronization == _synchronizations.cend();
 }
 
-std::vector<ResourceSynchronization*> Asset::ownSynchronizations() const {
+std::vector<ResourceSynchronization*> Asset::synchronizations() const {
     std::vector<ResourceSynchronization*> res;
     res.reserve(_synchronizations.size());
-    std::transform(
-        _synchronizations.begin(), _synchronizations.end(),
-        std::back_inserter(res),
-        std::mem_fn(&std::shared_ptr<ResourceSynchronization>::get)
-    );
-
+    for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
+        res.push_back(sync.get());
+    }
     return res;
 }
 
@@ -191,14 +188,6 @@ bool Asset::hasLoadedParent() {
         _requiringAssets.begin(),
         _requiringAssets.end(),
         std::mem_fn(&Asset::isLoaded)
-    );
-}
-
-bool Asset::hasSyncingOrResolvedParent() const {
-    return std::any_of(
-        _requiringAssets.begin(),
-        _requiringAssets.end(),
-        std::mem_fn(&Asset::isSyncingOrResolved)
     );
 }
 
@@ -254,7 +243,7 @@ bool Asset::load(Asset* parent) {
         return true;
     }
 
-    const bool loaded = _loader->loadAsset(this, parent);
+    const bool loaded = _manager.loadAsset(this, parent);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -265,7 +254,7 @@ void Asset::unload() {
     }
 
     setState(State::Unloaded);
-    _loader->unloadAsset(this);
+    _manager.unloadAsset(this);
 
     // This while loop looks a bit weird, but it is this way because the unrequire
     // function removes the asset passed into it from the requiredAssets list, so we are
@@ -295,7 +284,7 @@ void Asset::initialize() {
 
     // 2. Call lua onInitialize
     try {
-        _loader->callOnInitialize(this);
+        _manager.callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format("Failed to initialize asset {}", id()));
@@ -328,7 +317,7 @@ void Asset::deinitialize() {
 
     // 2. Call lua onInitialize
     try {
-        _loader->callOnDeinitialize(this);
+        _manager.callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format(
