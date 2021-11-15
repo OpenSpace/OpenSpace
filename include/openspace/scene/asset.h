@@ -76,7 +76,7 @@ public:
      * Load this asset and return true if successful,
      * i.e. if this and all required assets loaded without errors.
      */
-    bool load();
+    bool load(Asset* parent);
     bool hasLoadedParent();
     bool isLoaded() const;
     void unload();

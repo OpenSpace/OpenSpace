@@ -24,6 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::luascriptfunctions::asset {
 

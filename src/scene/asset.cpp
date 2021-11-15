@@ -249,12 +249,12 @@ bool Asset::startSynchronizations() {
     return !childFailed;
 }
 
-bool Asset::load() {
+bool Asset::load(Asset* parent) {
     if (isLoaded()) {
         return true;
     }
 
-    const bool loaded = _loader->loadAsset(this);
+    const bool loaded = _loader->loadAsset(this, parent);
     setState(loaded ? State::Loaded : State::LoadingFailed);
     return loaded;
 }
@@ -358,7 +358,7 @@ void Asset::require(Asset* child) {
 
     const auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), child);
     if (it != _requiredAssets.cend()) {
-        // Do nothing if the requirement already exists.
+        // Do nothing if the requirement already exists
         return;
     }
 
@@ -366,7 +366,7 @@ void Asset::require(Asset* child) {
     child->_requiringAssets.push_back(this);
 
     if (!child->isLoaded()) {
-        child->load();
+        child->load(this);
     }
     if (!child->isLoaded()) {
         unrequire(child);

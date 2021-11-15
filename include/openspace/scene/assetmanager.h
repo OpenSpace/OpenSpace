@@ -60,7 +60,7 @@ public:
     /**
      * Load an asset
      */
-    bool loadAsset(Asset* asset);
+    bool loadAsset(Asset* asset, Asset* parent);
 
     /**
      * Unload an asset
@@ -79,10 +79,8 @@ public:
 
 private:
     void setUpAssetLuaTable(Asset* asset);
-    void tearDownAssetLuaTable(Asset* asset);
 
-    Asset* retrieveAsset(const std::string& name);
-    std::filesystem::path currentDirectory() const;
+    Asset* retrieveAsset(const std::string& name, Asset* base);
 
     void setCurrentAsset(Asset* asset);
 
@@ -93,9 +91,6 @@ private:
 
     // Member variables
     std::vector<Asset*> _rootAssets;
-    Asset* _currentAsset = nullptr;
-
-    //std::vector<std::unique_ptr<Asset>> _assets;
 
     std::unordered_map<std::string, std::unique_ptr<Asset>> _trackedAssets;
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
