@@ -243,6 +243,9 @@ namespace openspace {
     void Pair::incrementallyFade(float goalState, float fadeTime, float deltaTime)
     {
         float opacityDelta = static_cast<float>(deltaTime / fadeTime);
+        if (_target->opacity() > goalState) {
+            opacityDelta *= -1.f;
+        }
     
         if (!isTargetFadeFinished(goalState)) {
             _target->setOpacity(_target->opacity() + opacityDelta);

@@ -138,8 +138,8 @@ namespace openspace {
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
         // Set flag to false so the thread can exit
         _isSyncedWithWwt = false;
-        if (_threadWwtMessages.joinable()) {
-            _threadWwtMessages.join();
+        if (_wwtMessages.joinable()) {
+            _wwtMessages.join();
             LINFO("Joined thread");
         }
     }
@@ -198,8 +198,8 @@ namespace openspace {
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         // Set flag to false so the thread can exit
         _isSyncedWithWwt = false;
-        if (_threadWwtMessages.joinable()) {
-            _threadWwtMessages.join();
+        if (_wwtMessages.joinable()) {
+            _wwtMessages.join();
             LINFO("Joined thread");
         }
         return ScreenSpaceBrowser::deinitializeGL();
@@ -311,7 +311,7 @@ namespace openspace {
     void ScreenSpaceSkyBrowser::syncWwtView() {
 
         // Start a thread to enable user interaction while sending the calls to WWT
-        _threadWwtMessages = std::thread([&] {
+        _wwtMessages = std::thread([&] {
             while (_isSyncedWithWwt) {
                 if (_skyTarget) {                    
                     // Message WorldWide Telescope current view

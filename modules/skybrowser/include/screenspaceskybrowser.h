@@ -104,7 +104,7 @@ namespace openspace {
         
         // Target & images
         ScreenSpaceSkyTarget* _skyTarget{ nullptr };
-        std::thread _threadWwtMessages;       
+        std::thread _wwtMessages;       
         std::deque<int> _selectedImages;
 
         // Time variables

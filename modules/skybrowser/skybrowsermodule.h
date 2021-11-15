@@ -40,6 +40,7 @@
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
+class RenderableSkyBrowser;
 
 enum class Transparency {
     Transparent = 0,
@@ -59,45 +60,48 @@ public:
     // Getters
     std::vector<Pair>& getPairs();
     Pair* getPair(std::string id);
-    SceneGraphNode* get3dBrowser();
+    SceneGraphNode* get3dBrowserNode();
+    RenderableSkyBrowser* get3dBrowser();
+    RenderableSkyBrowser* get3dBrowser(const std::string& id);
     const std::unique_ptr<WwtDataHandler>& getWWTDataHandler();
     std::string selectedBrowserId();
 
     // Setters
+    void set3dBrowser(const std::string& id);
     void setSelectedBrowser(ScreenSpaceSkyBrowser* ptr);
-    void setSelectedBrowser(std::string id);
-    void set3dBrowser(SceneGraphNode* node);
+    void setSelectedBrowser(const std::string& id);
     void selectImage2dBrowser(int i);
     void selectImage3dBrowser(int i);
+    void setSelectedObject(); // Manage mouse interactions
    
-    // Rotation and animation
-    
+    // Rotation, animation, placement
     void lookAtTarget(std::string id);
     void incrementallyRotateCamera(double deltaTime);
     void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
     void incrementallyAnimateTargets(double deltaTime);
     void lookAt3dBrowser();
+    void place3dBrowser(const ImageData& image, const int i);
    
     // Boolean functions
     bool isCameraInSolarSystem();
 
-    // Managing the browsers 
+    // Managing the target browser pairs 
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
     void addTargetBrowserPair(std::string targetId, std::string browserId);
+
+    // Hover circle
     void moveHoverCircle(int i);
+    void disableHoverCircle();
     
     // Image collection handling
     void loadImages(const std::string& root, const std::string& directory, 
                    std::vector<std::filesystem::path>& speckFiles);
     int nLoadedImages();
-
-    // Manage mouse interactions
-    void setSelectedObject();
+    void add2dSelectedImagesTo3d(const std::string& pairId);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
-
 
 protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
@@ -112,7 +116,8 @@ private:
     Pair* _selectedPair{ nullptr };
     bool _isBrowser{ false };
     ScreenSpaceImageLocal* _hoverCircle{ nullptr };
-    SceneGraphNode* _browser3d{ nullptr };
+    SceneGraphNode* _browser3dNode{ nullptr };
+    RenderableSkyBrowser* _browser3d{ nullptr };
     std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
 
     // Fading
