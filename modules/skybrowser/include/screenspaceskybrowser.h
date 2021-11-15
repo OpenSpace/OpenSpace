@@ -29,13 +29,13 @@ namespace openspace {
         bool isAnimated();
         void startFovAnimation(float fov);
         void incrementallyAnimateToFov(float deltaTime);
+        glm::vec2 browserPixelDimensions();
 
         void startSyncingWithWwt();
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         
         // Getters returning values
         bool hasLoadedImages() const;
-        glm::vec2 browserPixelDimensions() const;
         glm::ivec3 borderColor() const;
         float verticalFov() const;
         glm::dvec2 fieldsOfView();
@@ -87,7 +87,6 @@ namespace openspace {
         // Properties
         properties::FloatProperty _verticalFov;       
         properties::StringProperty _skyTargetId;
-        properties::Vec2Property _browserDimensions;
         properties::IVec3Property _borderColor;
 
         // Flags

@@ -13,12 +13,6 @@
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo BrowserDimensionInfo =
-    {
-        "BrowserDimensions",
-        "Browser Dimensions",
-        "The pixel dimensions of the sky browser."
-    };
     constexpr const openspace::properties::Property::PropertyInfo VerticalFovInfo =
     {
         "VerticalFieldOfView",
@@ -42,9 +36,6 @@ namespace {
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
-        // [[codegen::verbatim(BrowserDimensionInfo.description)]]
-        std::optional<glm::vec2> browserDimensions;
-
         // [[codegen::verbatim(VerticalFovInfo.description)]]
         std::optional<float> verticalFov;
 
@@ -62,12 +53,6 @@ namespace openspace {
 
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
-        , _browserDimensions(
-            BrowserDimensionInfo, 
-            _dimensions, 
-            glm::ivec2(0), 
-            glm::ivec2(300)
-        )
         , _verticalFov(VerticalFovInfo, 10.f, 0.1f, 70.f)
         , _borderColor(BorderColorInfo, glm::ivec3(200), glm::ivec3(0), glm::ivec3(255))
         , _skyTargetId(TargetIdInfo)
@@ -77,22 +62,15 @@ namespace openspace {
 
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
-        _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
+
         _verticalFov = p.verticalFov.value_or(_verticalFov);
         _borderColor = p.borderColor.value_or(_borderColor);
         _skyTargetId = p.targetId.value_or(_skyTargetId);
 
-        addProperty(_browserDimensions);
         addProperty(_verticalFov);
         addProperty(_borderColor);
         addProperty(_skyTargetId);
 
-        _browserDimensions.onChange([&]() {
-            if (_skyTarget) {
-                glm::vec2 dim = browserPixelDimensions();
-                _skyTarget->setDimensions(dim);
-            }
-            });
         _verticalFov.onChange([&]() {
             if (_skyTarget) {
                 _skyTarget->setScale(_verticalFov);
@@ -209,6 +187,10 @@ namespace openspace {
         _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(
             global::renderEngine->screenSpaceRenderable(_skyTargetId.value()));
         return _skyTarget;
+    }
+
+    glm::vec2 ScreenSpaceSkyBrowser::browserPixelDimensions() {
+        return _dimensions.value();
     }
 
     bool ScreenSpaceSkyBrowser::isAnimated()
@@ -361,7 +343,6 @@ namespace openspace {
         glm::vec2 newSize = abs(scalingFactor) * _originalDimensions;
         _texture->setDimensions(glm::ivec3(newSize, 1));
         _objectSize = _texture->dimensions();
-        _browserDimensions = newSize;
     }
 
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
@@ -391,10 +372,6 @@ namespace openspace {
     }
     void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
         _scale = _originalScale * scalingFactor;
-    }
-
-    glm::vec2 ScreenSpaceSkyBrowser::browserPixelDimensions() const {
-        return _browserDimensions.value();
     }
 
     properties::FloatProperty& ScreenSpaceSkyBrowser::getOpacity() {
