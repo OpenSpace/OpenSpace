@@ -46,7 +46,13 @@ Asset::Asset(AssetManager& manager, SynchronizationWatcher& watcher,
     : _manager(manager)
     , _synchronizationWatcher(watcher)
     , _assetPath(std::move(assetPath))
-{}
+{
+    ghoul_precondition(!_assetPath.empty(), "Asset path must not be empty");
+    ghoul_precondition(
+        std::filesystem::is_regular_file(_assetPath),
+        "Asset path file must exist"
+    );
+}
 
 void Asset::setMetaInformation(MetaInformation metaInformation) {
     _metaInformation = std::move(metaInformation);
@@ -100,6 +106,7 @@ void Asset::setState(Asset::State state) {
 }
 
 void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization) {
+    ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
     std::shared_ptr<ResourceSynchronization> sync = std::move(synchronization);
 
     _synchronizations.push_back(sync);

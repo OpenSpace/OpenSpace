@@ -37,51 +37,114 @@ namespace scripting { struct LuaLibrary; }
 class Asset;
 
 /**
- * Interface for managing assets.
- * The asset manager interface is only concerned with "top level" assets, and not their
- * dependencies. However, an asset is not considered synchronized before all its deps are
- * synchronized. Also, setting a target state of an asset to Unloaded will only unload an
- * asset from the system if it is not a dependency of a loaded asset.
+ * The AssetManager class manages the loading, initialization, and unloading of all assets
+ * loaded in OpenSpace. Most actions of this class are doing in a two-step process where
+ * first the intend is registered, which is then executed in the next execution of the
+ * #update function.
+ * All assets are loading through the same Lua state.
  */
 class AssetManager {
 public:
-    AssetManager(ghoul::lua::LuaState* state, std::string assetRootDirectory);
+    AssetManager(ghoul::lua::LuaState* state, std::filesystem::path assetRootDirectory);
     ~AssetManager();
 
     void deinitialize();
+
+    /**
+     * Loads the asset at the provided \p path as a new root asset of the AssetManager.
+     * If the asset at that path was already loaded, nothing happens.
+     * 
+     * \param path The path from which the Asset is loaded. This path can be either
+     *        relative to the base directory (the path starting with . or ..), an absolute
+     *        path (that path starting with *:/ or /) or relative to the global asset root
+     *        (if the path starts any other way)
+     * \pre \p path must not be the empty string
+     */
     void add(const std::string& path);
+
+    /**
+     * Removes the asset at the provided \p path if it has been loaded by this
+     * AssetManager. If the asset at that path was not found, nothing happens.
+     * 
+     * \param path The path from which the Asset is loaded. This path can be either
+     *        relative to the base directory (the path starting with . or ..), an absolute
+     *        path (that path starting with *:/ or /) or relative to the global asset root
+     *        (if the path starts any other way)
+     * \pre \p path must not be the empty string
+     */
     void remove(const std::string& path);
 
+    /**
+     * Update function that should be called at least once per frame that will load all
+     * queued asset loads and asset removal
+     */
     void update();
+
     scripting::LuaLibrary luaLibrary();
 
+    /**
+     * Returns all assets that have been loaded by the AssetManager. The order of the
+     * assets is undefined.
+     * 
+     * \return A list of all assets that have been previously loaded by the AssetManager
+     */
     std::vector<const Asset*> allAssets() const;
 
     /**
-     * Load an asset
+     * Loads the provided \p asset as a child of the provided \p parent. Loading an asset
+     * means that asset file gets executed and the meta information is extracted from it.
+     * The \p parent is the asset file that caused this loading to happen and can be a
+     * \c nullptr if the asset is to be loaded as a root asset.
+     * 
+     * \param asset The asset that should be loaded
+     * \param parent The parent of the loaded asset file or \c nullptr if the asset is a
+     *        root asset
+     * \pre \p asset must not be a nullptr
      */
     bool loadAsset(Asset* asset, Asset* parent);
 
     /**
-     * Unload an asset
+     * Unload the provided \p asset by removing all information about it from the Lua
+     * state and placing the asset onto the deletion queue. Please note that the asset
+     * will not actually get destroyed until the next #update call to the AssetManager.
+     * 
+     * \param asset The asset that should get unloaded
+     * \pre \p asset must not be a nullptr
      */
     void unloadAsset(Asset* asset);
 
     /**
-     * Call the onInitialize function specified in the asset file
+     * This function calls the `onInitialize` function that was specified in the file of
+     * the provided \p asset.
+     * 
+     * \param asset The asset file whose `onInitialize` function should be called
      */
     void callOnInitialize(Asset* asset) const;
 
     /**
-     * Call the onDeinitialize function specified in the asset file
+     * This function calls the `onDeinitialize` function that was specified in the file of
+     * the provided \p asset.
+     *
+     * \param asset The asset file whose `onDeinitialize` function should be called
      */
     void callOnDeinitialize(Asset* asset) const;
 
 private:
+    // Creates and registers all of the callback functions that the asset is expected to
+    // call in the file, for example the `localResource`, `require`, etc.
     void setUpAssetLuaTable(Asset* asset);
 
-    Asset* retrieveAsset(const std::string& name, Asset* base);
+    // Returns the loaded Asset by either trying to load the asset at the provided path
+    // or returning a previously loaded copy
+    Asset* retrieveAsset(const std::filesystem::path& path);
+
+    // Setup the asset table of the provided asset in the shared Lua state
     void setCurrentAsset(Asset* asset);
+
+    // Takes the asset path, determines the type of path (relative to base, relative to
+    // root or absolute and returns fully formed path
+    std::filesystem::path generateAssetPath(const std::filesystem::path& baseDirectory,
+        const std::string& assetPath) const;
 
     // The authoratative list of all assets that have been loaded through the AssetManager
     std::vector<std::unique_ptr<Asset>> _assets;
@@ -104,7 +167,7 @@ private:
     
     SynchronizationWatcher _synchronizationWatcher;
 
-    std::string _assetRootDirectory;
+    std::filesystem::path _assetRootDirectory;
     
     ghoul::lua::LuaState* _luaState = nullptr;
 
