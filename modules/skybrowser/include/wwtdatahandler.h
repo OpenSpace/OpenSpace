@@ -1,7 +1,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
-#include <modules/skybrowser/tinyxml2/tinyxml2.h>
+#include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
 #include <openspace/documentation/documentation.h>
 #include <unordered_map>
 
