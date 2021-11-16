@@ -105,44 +105,57 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization) {
-    ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
-    std::shared_ptr<ResourceSynchronization> sync = std::move(synchronization);
+void Asset::addSynchronization(ResourceSynchronization* synchronization) {
+    //ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
+    //std::shared_ptr<ResourceSynchronization> sync = std::shared_ptr<ResourceSynchronization>(synchronization);
 
-    _synchronizations.push_back(sync);
+    _synchronizations.push_back(synchronization);
 
-    // Set up callback for synchronization state change
-    // The synchronization watcher ensures that callbacks are invoked in the main thread
+    //// Set up callback for synchronization state change
+    //// The synchronization watcher ensures that callbacks are invoked in the main thread
 
-    SynchronizationWatcher::WatchHandle watch =
-        _synchronizationWatcher.watchSynchronization(
-            sync,
-            [this, sync](ResourceSynchronization::State state) {
-                ZoneScoped
+    //SynchronizationWatcher::WatchHandle watch =
+    //    _synchronizationWatcher.watchSynchronization(
+    //        sync,
+    //        [this, sync](ResourceSynchronization::State state) {
+    //            ZoneScoped
 
-                if (state == ResourceSynchronization::State::Resolved) {
-                    if (!isSynchronized() && isSyncResolveReady()) {
-                        setState(State::Synchronized);
-                    }
-                }
-                else if (state == ResourceSynchronization::State::Rejected) {
-                    LERROR(fmt::format(
-                        "Failed to synchronize resource '{}' in asset {}",
-                        sync->name(), _assetPath
-                    ));
+    //            if (state == ResourceSynchronization::State::Resolved) {
+    //                if (!isSynchronized() && isSyncResolveReady()) {
+    //                    setState(State::Synchronized);
+    //                }
+    //            }
+    //            else if (state == ResourceSynchronization::State::Rejected) {
+    //                LERROR(fmt::format(
+    //                    "Failed to synchronize resource '{}' in asset {}",
+    //                    sync->name(), _assetPath
+    //                ));
 
-                    setState(State::SyncRejected);
-                }
-            }
-        );
-    _syncWatches.push_back(watch);
+    //                setState(State::SyncRejected);
+    //            }
+    //        }
+    //    );
+    //_syncWatches.push_back(watch);
 }
 
 void Asset::clearSynchronizations() {
-    for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
-        _synchronizationWatcher.unwatchSynchronization(h);
+    //for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
+    //    _synchronizationWatcher.unwatchSynchronization(h);
+    //}
+    //_syncWatches.clear();
+}
+
+void Asset::updateSynchronizationState(ResourceSynchronization::State state) {
+    ZoneScoped
+
+    if (state == ResourceSynchronization::State::Resolved) {
+        if (!isSynchronized() && isSyncResolveReady()) {
+            setState(State::Synchronized);
+        }
     }
-    _syncWatches.clear();
+    else if (state == ResourceSynchronization::State::Rejected) {
+        setState(State::SyncRejected);
+    }
 }
 
 bool Asset::isSyncResolveReady() const {
@@ -159,8 +172,8 @@ bool Asset::isSyncResolveReady() const {
 
     const auto unresolvedOwnSynchronization = std::find_if(
         _synchronizations.cbegin(),
-        _synchronizations.cend(),
-        [](const std::shared_ptr<ResourceSynchronization>& s) { return !s->isResolved(); }
+        _synchronizations.cend(), 
+        [](ResourceSynchronization* s) { return !s->isResolved(); }
     );
 
     // To be considered resolved, all own synchronizations need to be resolved
@@ -168,12 +181,13 @@ bool Asset::isSyncResolveReady() const {
 }
 
 std::vector<ResourceSynchronization*> Asset::synchronizations() const {
-    std::vector<ResourceSynchronization*> res;
-    res.reserve(_synchronizations.size());
-    for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
-        res.push_back(sync.get());
-    }
-    return res;
+    return _synchronizations;
+    //std::vector<ResourceSynchronization*> res;
+    //res.reserve(_synchronizations.size());
+    //for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
+    //    res.push_back(sync.get());
+    //}
+    //return res;
 }
 
 bool Asset::isLoaded() const {
@@ -231,7 +245,7 @@ void Asset::startSynchronizations() {
     }
 
     // Now synchronize its own synchronizations
-    for (const std::shared_ptr<ResourceSynchronization>& s : _synchronizations) {
+    for (ResourceSynchronization* s : _synchronizations) {
         if (!s->isResolved()) {
             s->start();
         }

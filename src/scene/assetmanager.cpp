@@ -184,7 +184,31 @@ void AssetManager::update() {
     _assetRemoveQueue.clear();
 
     // Change state based on synchronizations
-    _synchronizationWatcher.notify();
+    //_synchronizationWatcher.notify();
+
+    for (auto it = _unfinishedSynchronizations.begin();
+         it != _unfinishedSynchronizations.end();)
+    {
+        SyncItem* si = *it;
+        if (si->synchronization->isResolved()) {
+            for (Asset* asset : si->assets) {
+                asset->updateSynchronizationState(ResourceSynchronization::State::Resolved);
+            }
+            it = _unfinishedSynchronizations.erase(it);
+        }
+        else if (si->synchronization->isRejected()) {
+            LERROR(fmt::format(
+                "Failed to synchronize resource '{}'", si->synchronization->name()
+            ));
+            for (Asset* asset : si->assets) {
+                asset->updateSynchronizationState(ResourceSynchronization::State::Rejected);
+            }
+            it = _unfinishedSynchronizations.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
 }
 
 void AssetManager::add(const std::string& path) {
@@ -215,6 +239,17 @@ std::vector<const Asset*> AssetManager::allAssets() const {
     res.reserve(_assets.size());
     for (const std::unique_ptr<Asset>& asset : _assets) {
         res.push_back(asset.get());
+    }
+    return res;
+}
+
+std::vector<const ResourceSynchronization*> AssetManager::allSynchronizations() const {
+    std::vector<const ResourceSynchronization*> res;
+    res.reserve(_synchronizations.size());
+    using K = std::string;
+    using V = std::unique_ptr<SyncItem>;
+    for (const std::pair<const K, V>& p : _synchronizations) {
+        res.push_back(p.second->synchronization.get());
     }
     return res;
 }
@@ -373,28 +408,47 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
     // Register synced resource function
     // string syncedResource(table)
-    ghoul::lua::push(*_luaState, asset);
+    ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
 
             ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(L);
             lua_pop(L, 1);
 
-            std::unique_ptr<ResourceSynchronization> sync =
-                ResourceSynchronization::createFromDictionary(d);
+            std::string uid = ResourceSynchronization::generateUid(d);
+            SyncItem* syncItem = nullptr;
+            //ResourceSynchronization* sync = nullptr;
+            auto it = manager->_synchronizations.find(uid);
+            if (it == manager->_synchronizations.end()) {
+                std::unique_ptr<ResourceSynchronization> s =
+                    ResourceSynchronization::createFromDictionary(d);
 
-            const std::string absolutePath = sync->directory();
-            asset->addSynchronization(std::move(sync));
+                std::unique_ptr<SyncItem> si = std::make_unique<SyncItem>();
+                si->synchronization = std::move(s);
+                si->assets.push_back(asset);
+                syncItem = si.get();
+                manager->_synchronizations[uid] = std::move(si);
+            }
+            else {
+                syncItem = it->second.get();
+                syncItem->assets.push_back(asset);
+            }
 
-            ghoul::lua::push(L, absolutePath);
+            if (!syncItem->synchronization->isResolved()) {
+                manager->_unfinishedSynchronizations.push_back(syncItem);
+            }
+
+            asset->addSynchronization(syncItem->synchronization.get());
+            ghoul::lua::push(L, syncItem->synchronization->directory());
             return 1;
         },
-        1
+        2
     );
     lua_setfield(*_luaState, assetTableIndex, "syncedResource");
 

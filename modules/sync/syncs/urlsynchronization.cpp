@@ -275,15 +275,15 @@ void UrlSynchronization::clear() {
     // TODO: Remove all files from directory.
 }
 
-size_t UrlSynchronization::nSynchronizedBytes() {
+size_t UrlSynchronization::nSynchronizedBytes() const {
     return _nSynchronizedBytes;
 }
 
-size_t UrlSynchronization::nTotalBytes() {
+size_t UrlSynchronization::nTotalBytes() const {
     return _nTotalBytes;
 }
 
-bool UrlSynchronization::nTotalBytesIsKnown() {
+bool UrlSynchronization::nTotalBytesIsKnown() const {
     return _nTotalBytesKnown;
 }
 

@@ -105,7 +105,7 @@ public:
      *        Asset
      * \pre \p synchronization must not be nullptr
      */
-    void addSynchronization(std::unique_ptr<ResourceSynchronization> synchronization);
+    void addSynchronization(ResourceSynchronization* synchronization);
     
     /**
      * Removes all previously registered synchronizations from this Asset, which will both
@@ -120,6 +120,8 @@ public:
      * \return A list of all registered ResourceSynchronizations
      */
     std::vector<ResourceSynchronization*> synchronizations() const;
+
+    void updateSynchronizationState(ResourceSynchronization::State state);
 
     /**
      * If the asset has not yet been loaded, this function loads the asset and returns the
@@ -247,7 +249,7 @@ private:
     AssetManager& _manager;
     SynchronizationWatcher& _synchronizationWatcher;
 
-    std::vector<std::shared_ptr<ResourceSynchronization>> _synchronizations;
+    std::vector<ResourceSynchronization*> _synchronizations;
 
     // Absolute path to asset file
     std::filesystem::path _assetPath;

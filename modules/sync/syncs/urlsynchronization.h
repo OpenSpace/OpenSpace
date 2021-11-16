@@ -43,9 +43,9 @@ public:
     void cancel() override;
     void clear() override;
 
-    size_t nSynchronizedBytes() override;
-    size_t nTotalBytes() override;
-    bool nTotalBytesIsKnown() override;
+    size_t nSynchronizedBytes() const override;
+    size_t nTotalBytes() const override;
+    bool nTotalBytesIsKnown() const override;
 
     static documentation::Documentation Documentation();
 

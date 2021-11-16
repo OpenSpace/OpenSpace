@@ -28,6 +28,7 @@
 #include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/lua/luastate.h>
 #include <filesystem>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace openspace {
@@ -35,6 +36,7 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 class Asset;
+class ResourceSynchronization;
 
 /**
  * The AssetManager class manages the loading, initialization, and unloading of all assets
@@ -89,6 +91,8 @@ public:
      * \return A list of all assets that have been previously loaded by the AssetManager
      */
     std::vector<const Asset*> allAssets() const;
+
+    std::vector<const ResourceSynchronization*> allSynchronizations() const;
 
     /**
      * Loads the provided \p asset as a child of the provided \p parent. Loading an asset
@@ -165,6 +169,13 @@ private:
     // This list contains all of the assets that should be deleted in the next update call
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
     
+    struct SyncItem {
+        std::unique_ptr<ResourceSynchronization> synchronization;
+        std::vector<Asset*> assets;
+    };
+    std::unordered_map<std::string, std::unique_ptr<SyncItem>> _synchronizations;
+    std::vector<SyncItem*> _unfinishedSynchronizations;
+
     SynchronizationWatcher _synchronizationWatcher;
 
     std::filesystem::path _assetRootDirectory;

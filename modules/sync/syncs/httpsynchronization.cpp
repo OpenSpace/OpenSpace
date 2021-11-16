@@ -133,15 +133,15 @@ void HttpSynchronization::clear() {
     // TODO: Remove all files from directory.
 }
 
-size_t HttpSynchronization::nSynchronizedBytes() {
+size_t HttpSynchronization::nSynchronizedBytes() const {
     return _nSynchronizedBytes;
 }
 
-size_t HttpSynchronization::nTotalBytes() {
+size_t HttpSynchronization::nTotalBytes() const {
     return _nTotalBytes;
 }
 
-bool HttpSynchronization::nTotalBytesIsKnown() {
+bool HttpSynchronization::nTotalBytesIsKnown() const {
     return _nTotalBytesKnown;
 }
 

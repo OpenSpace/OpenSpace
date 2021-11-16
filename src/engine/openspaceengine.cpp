@@ -769,28 +769,48 @@ void OpenSpaceEngine::loadAssets() {
 
         std::vector<const Asset*> allAssets = _assetManager->allAssets();
 
-        std::unordered_set<ResourceSynchronization*> resourceSyncs;
-        for (const Asset* a : allAssets) {
-            std::vector<ResourceSynchronization*> syncs = a->synchronizations();
+        std::vector<const ResourceSynchronization*> allSyncs =
+            _assetManager->allSynchronizations();
 
-            for (ResourceSynchronization* s : syncs) {
-                ZoneScopedN("Update resource synchronization")
+        for (const ResourceSynchronization* sync : allSyncs) {
+            ZoneScopedN("Update resource synchronization")
 
-                    if (s->state() == ResourceSynchronization::State::Syncing) {
-                        LoadingScreen::ProgressInfo progressInfo;
-                        progressInfo.progress = s->progress();
+            if (sync->state() == ResourceSynchronization::State::Syncing) {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = sync->progress();
 
-                        resourceSyncs.insert(s);
-                        _loadingScreen->updateItem(
-                            s->name(),
-                            s->name(),
-                            LoadingScreen::ItemStatus::Started,
-                            progressInfo
-                        );
-                    }
+                _loadingScreen->updateItem(
+                    sync->name(),
+                    sync->name(),
+                    LoadingScreen::ItemStatus::Started,
+                    progressInfo
+                );
             }
         }
-        _loadingScreen->setItemNumber(static_cast<int>(resourceSyncs.size()));
+
+
+        //std::unordered_set<ResourceSynchronization*> resourceSyncs;
+        //for (const Asset* a : allAssets) {
+        //    std::vector<ResourceSynchronization*> syncs = a->synchronizations();
+
+        //    for (ResourceSynchronization* s : syncs) {
+        //        ZoneScopedN("Update resource synchronization")
+
+        //            if (s->state() == ResourceSynchronization::State::Syncing) {
+        //                LoadingScreen::ProgressInfo progressInfo;
+        //                progressInfo.progress = s->progress();
+
+        //                resourceSyncs.insert(s);
+        //                _loadingScreen->updateItem(
+        //                    s->name(),
+        //                    s->name(),
+        //                    LoadingScreen::ItemStatus::Started,
+        //                    progressInfo
+        //                );
+        //            }
+        //    }
+        //}
+        _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
 
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
@@ -806,8 +826,8 @@ void OpenSpaceEngine::loadAssets() {
         }
 
         loading = false;
-        auto it = resourceSyncs.begin();
-        while (it != resourceSyncs.end()) {
+        auto it = allSyncs.begin();
+        while (it != allSyncs.end()) {
             if ((*it)->state() == ResourceSynchronization::State::Syncing) {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = (*it)->progress();
@@ -837,7 +857,7 @@ void OpenSpaceEngine::loadAssets() {
                     LoadingScreen::ItemStatus::Finished,
                     progressInfo
                 );
-                it = resourceSyncs.erase(it);
+                it = allSyncs.erase(it);
             }
         }
     }

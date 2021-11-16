@@ -53,6 +53,8 @@ public:
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
+    static std::string generateUid(const ghoul::Dictionary& dictionary);
+
     ResourceSynchronization(const ghoul::Dictionary& dictionary);
     virtual ~ResourceSynchronization() = default;
 
@@ -61,10 +63,10 @@ public:
     virtual void cancel() = 0;
     virtual void clear() = 0;
 
-    virtual size_t nSynchronizedBytes() = 0;
-    virtual size_t nTotalBytes() = 0;
-    virtual bool nTotalBytesIsKnown() = 0;
-    virtual float progress();
+    virtual size_t nSynchronizedBytes() const = 0;
+    virtual size_t nTotalBytes() const = 0;
+    virtual bool nTotalBytesIsKnown() const = 0;
+    virtual float progress() const;
 
     State state() const;
     const std::string& name() const;

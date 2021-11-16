@@ -38,6 +38,10 @@ namespace {
         std::string type
             [[codegen::annotation("A ResourceSynchronization created by a factory")]];
 
+        // A unique identifier that is used to reference this specific
+        // ResourceSynchronization object
+        std::string identifier;
+
         // A user readable name of this synchronization
         std::string name;
     };
@@ -60,6 +64,11 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);
+}
+
+std::string ResourceSynchronization::generateUid(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    return fmt::format("{}/{}", p.type, p.identifier);
 }
 
 ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary&) {}
@@ -127,7 +136,7 @@ void ResourceSynchronization::setState(State state) {
     }
 }
 
-float ResourceSynchronization::progress() {
+float ResourceSynchronization::progress() const {
     if (!nTotalBytesIsKnown()) {
         return 0.f;
     }
