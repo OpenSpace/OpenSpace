@@ -142,17 +142,11 @@ void AssetManager::update() {
 
         _rootAssets.push_back(a);
         if (!a->isLoaded()) {
-            bool success = a->load(nullptr);
-            if (!success) {
-                continue;
-            }
+            a->load(nullptr);
         }
 
         if (!a->isSynchronized()) {
-            bool success = a->startSynchronizations();
-            if (!success) {
-                continue;
-            }
+            a->startSynchronizations();
         }
 
         _toBeInitialized.push_back(a);

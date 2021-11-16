@@ -76,7 +76,7 @@ public:
 
     /**
      * Update function that should be called at least once per frame that will load all
-     * queued asset loads and asset removal
+     * queued asset loads and asset removal.
      */
     void update();
 

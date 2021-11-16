@@ -116,6 +116,7 @@ public:
     
     /**
      * Returns a list of all registered ResourceSynchronizations.
+     * 
      * \return A list of all registered ResourceSynchronizations
      */
     std::vector<ResourceSynchronization*> synchronizations() const;
@@ -134,12 +135,14 @@ public:
 
     /**
      * Returns \c true if this Asset has at least one parent that is in the Loaded state.
+     * 
      * \return \c true if this Asset has at least one parent that is in the Loaded state
      */
     bool hasLoadedParent();
 
     /**
      * Returns \c true if this Asset has been successfully #load ed.
+     * 
      * /return \c true if this Asset has been successfully loaded
      */
     bool isLoaded() const;
@@ -163,6 +166,7 @@ public:
     /**
      * Returns \c true if this Asset's synchronizations (if any) have completed
      * successfully.
+     * 
      * \return \c true if this Asset is in the Synchronized or Initialized state
      */
     bool isSynchronized() const;
@@ -176,7 +180,8 @@ public:
     void initialize();
 
     /**
-     * Returns \c true if this Asset has been #initialize d successfully
+     * Returns \c true if this Asset has been #initialize d successfully.
+     *
      * \return \c true if this Asset has been #initialize d successfully. It returns
      *         \c false both if this initialization failed as well as if thie #initialize
      *         function has not been called on this Asset
@@ -192,7 +197,9 @@ public:
 
     void deinitializeIfUnwanted();
 
-
+    /**
+     * Marks the passed \p child as being required by \p this Asset. 
+     */
     void require(Asset* child);
     void unrequire(Asset* child);
 
