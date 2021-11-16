@@ -85,9 +85,9 @@ void Asset::setState(Asset::State state) {
             continue;
         }
 
-        if (state == State::SyncResolved) {
+        if (state == State::Synchronized) {
             if (requiringAsset->isSyncResolveReady()) {
-                requiringAsset->setState(State::SyncResolved);
+                requiringAsset->setState(State::Synchronized);
             }
         }
         else if (state == State::SyncRejected) {
@@ -99,7 +99,7 @@ void Asset::setState(Asset::State state) {
         if (state == State::Loaded && _state == State::Loaded) {
             startSynchronizations();
         }
-        if (state == State::SyncResolved && _state == State::SyncResolved) {
+        if (state == State::Synchronized && _state == State::Synchronized) {
             initialize();
         }
     }
@@ -122,7 +122,7 @@ void Asset::addSynchronization(std::unique_ptr<ResourceSynchronization> synchron
 
                 if (state == ResourceSynchronization::State::Resolved) {
                     if (!isSynchronized() && isSyncResolveReady()) {
-                        setState(State::SyncResolved);
+                        setState(State::Synchronized);
                     }
                 }
                 else if (state == ResourceSynchronization::State::Rejected) {
@@ -181,12 +181,12 @@ bool Asset::isLoaded() const {
 }
 
 bool Asset::isSynchronized() const {
-    return _state == State::SyncResolved || _state == State::Initialized ||
+    return _state == State::Synchronized || _state == State::Initialized ||
            _state == State::InitializationFailed;
 }
 
 bool Asset::isSyncingOrResolved() const {
-    return _state == State::Synchronizing || _state == State::SyncResolved ||
+    return _state == State::Synchronizing || _state == State::Synchronized ||
            _state == State::Initialized || _state == State::InitializationFailed;
 }
 
@@ -210,28 +210,24 @@ bool Asset::isInitialized() const {
     return _state == State::Initialized;
 }
 
-bool Asset::startSynchronizations() {
+void Asset::startSynchronizations() {
     if (!isLoaded()) {
         LWARNING(fmt::format(
             "Cannot start synchronizations of unloaded asset {}", _assetPath
         ));
-        return false;
+        return;
     }
 
     // Do not attempt to resync if this is already done
     if (isSyncingOrResolved()) {
-        return _state != State::SyncResolved;
+        return;
     }
 
     setState(State::Synchronizing);
 
-    bool childFailed = false;
-
     // Start synchronization of all children first
     for (Asset* child : _requiredAssets) {
-        if (!child->startSynchronizations()) {
-            childFailed = true;
-        }
+        child->startSynchronizations();
     }
 
     // Now synchronize its own synchronizations
@@ -242,19 +238,15 @@ bool Asset::startSynchronizations() {
     }
     // If all syncs are resolved (or no syncs exist), mark as resolved
     if (!isInitialized() && isSyncResolveReady()) {
-        setState(State::SyncResolved);
+        setState(State::Synchronized);
     }
-    return !childFailed;
 }
 
-bool Asset::load(Asset* parent) {
-    if (isLoaded()) {
-        return true;
+void Asset::load(Asset* parent) {
+    if (!isLoaded()) {
+        const bool loaded = _manager.loadAsset(this, parent);
+        setState(loaded ? State::Loaded : State::LoadingFailed);
     }
-
-    const bool loaded = _manager.loadAsset(this, parent);
-    setState(loaded ? State::Loaded : State::LoadingFailed);
-    return loaded;
 }
 
 void Asset::unload() {
@@ -265,12 +257,32 @@ void Asset::unload() {
     setState(State::Unloaded);
     _manager.unloadAsset(this);
 
-    // This while loop looks a bit weird, but it is this way because the unrequire
-    // function removes the asset passed into it from the requiredAssets list, so we are
-    // guaranteed that the list is shrinking with each loop iteration
     while (!_requiredAssets.empty()) {
-        Asset* child = _requiredAssets.front();
-        unrequire(child);
+        Asset* child = *_requiredAssets.begin();
+
+        ghoul_assert(
+            _state == Asset::State::Unloaded,
+            "Cannot unrequire child asset in a loaded state"
+        );
+
+        _requiredAssets.erase(_requiredAssets.begin());
+
+        auto parentIt = std::find(
+            child->_requiringAssets.cbegin(),
+            child->_requiringAssets.cend(),
+            this
+        );
+        ghoul_assert(
+            parentIt != child->_requiringAssets.cend(),
+            "Parent asset was not correctly registered"
+        );
+
+        child->_requiringAssets.erase(parentIt);
+
+        child->deinitializeIfUnwanted();
+        if (!child->hasLoadedParent()) {
+            child->unload();
+        }
     }
 }
 
@@ -322,7 +334,7 @@ void Asset::deinitialize() {
     // Perform inverse actions as in initialize, in reverse order (4 - 1)
 
     // 3. Update state
-    setState(Asset::State::SyncResolved);
+    setState(Asset::State::Synchronized);
 
     // 2. Call lua onInitialize
     try {
@@ -345,72 +357,17 @@ std::filesystem::path Asset::path() const {
     return _assetPath;
 }
 
-void Asset::require(Asset* child) {
-    if (_state != Asset::State::Unloaded) {
-        throw ghoul::RuntimeError("Cannot require child asset when already loaded");
-    }
+void Asset::require(Asset* dependency) {
+    ghoul_precondition(dependency, "Dependency must not be nullptr");
 
-    const auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), child);
+    const auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), dependency);
     if (it != _requiredAssets.cend()) {
         // Do nothing if the requirement already exists
         return;
     }
 
-    _requiredAssets.push_back(child);
-    child->_requiringAssets.push_back(this);
-
-    if (!child->isLoaded()) {
-        child->load(this);
-    }
-    if (!child->isLoaded()) {
-        unrequire(child);
-    }
-
-    if (isSynchronized() && child->isLoaded() && !child->isSynchronized()) {
-        child->startSynchronizations();
-    }
-
-    if (isInitialized()) {
-        if (child->isSynchronized() && !child->isInitialized()) {
-            child->initialize();
-        }
-        if (!child->isInitialized()) {
-            unrequire(child);
-        }
-    }
-}
-
-void Asset::unrequire(Asset* child) {
-    ghoul_assert(
-        _state == Asset::State::Unloaded,
-        "Cannot unrequire child asset in a loaded state"
-    );
-    auto childIt = std::find(_requiredAssets.begin(), _requiredAssets.end(), child);
-    ghoul_assert(
-        childIt != _requiredAssets.end(),
-        "Requested node must exist in the parent"
-    );
-
-    _requiredAssets.erase(childIt);
-
-
-
-    auto parentIt = std::find(
-        child->_requiringAssets.cbegin(),
-        child->_requiringAssets.cend(),
-        this
-    );
-    ghoul_assert(
-        parentIt != child->_requiringAssets.cend(),
-        "Parent asset was not correctly registered"
-    );
-
-    child->_requiringAssets.erase(parentIt);
-
-    child->deinitializeIfUnwanted();
-    if (!child->hasLoadedParent()) {
-        child->unload();
-    }
+    _requiredAssets.push_back(dependency);
+    dependency->_requiringAssets.push_back(this);
 }
 
 } // namespace openspace

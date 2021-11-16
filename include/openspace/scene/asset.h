@@ -125,13 +125,13 @@ public:
      * If the asset has not yet been loaded, this function loads the asset and returns the
      * success state. If the loading succeeded, the Asset transitions into the \c Loaded
      * state. The \p parent that is provided is the Asset that caused this load operation
-     * to be triggerd and might be \c nullptr if this asset does not have any parents. If
+     * to be triggered and might be \c nullptr if this asset does not have any parents. If
      * this Asset has been previously loaded (even with a different \p parent), this
      * function does nothing.
      * 
      * \param parent The parent asset (or \c nullptr) that triggered this loading
      */
-    bool load(Asset* parent);
+    void load(Asset* parent);
 
     /**
      * Returns \c true if this Asset has at least one parent that is in the Loaded state.
@@ -159,9 +159,10 @@ public:
     /**
      * Starts the registered synchronizations of this asset and returns \c true if all its
      * synchronizations and required assets' synchronizations could start. When all
-     * synchronizations have completed successfully, this Asset transitions into the 
+     * synchronizations have completed successfully, this Asset transitions into the
+     * Synchronized state.
      */
-    bool startSynchronizations();
+    void startSynchronizations();
 
     /**
      * Returns \c true if this Asset's synchronizations (if any) have completed
@@ -198,21 +199,39 @@ public:
     void deinitializeIfUnwanted();
 
     /**
-     * Marks the passed \p child as being required by \p this Asset. 
+     * Marks the passed \p child as being required by \p this Asset. If the \p child is
+     * already required by this asset, this function does nothing.
+     * 
+     * \param child The asset that is required by this asset
+     * \pre \p child must not be nullptr
      */
     void require(Asset* child);
-    void unrequire(Asset* child);
 
+    /**
+     * Sets the provided \p metaInformation as the meta information struct for this asset.
+     * If previous information existed, it will be silently overwritten.
+     *
+     * \param metaInformation The meta information about this asset
+     */
     void setMetaInformation(MetaInformation metaInformation);
+
+    /**
+     * Returns the meta information of this asset back to the caller. If no such
+     * information exists, a \c std::nullopt will be returned.
+     * 
+     * \return The MetaInformation about this asset or \c std::nullopt
+     */
     std::optional<MetaInformation> metaInformation() const;
 
 private:
+    /// All of the (internal) states that the Asset can move through. The externally
+    /// visible states (Loaded, Synchronized, Initialized) are a subset of these states
     enum class State {
         Unloaded,
         LoadingFailed,
         Loaded,
         Synchronizing,
-        SyncResolved,
+        Synchronized,
         SyncRejected,
         Initialized,
         InitializationFailed

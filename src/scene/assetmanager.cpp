@@ -141,9 +141,7 @@ void AssetManager::update() {
         }
 
         _rootAssets.push_back(a);
-        if (!a->isLoaded()) {
-            a->load(nullptr);
-        }
+        a->load(nullptr);
 
         if (!a->isSynchronized()) {
             a->startSynchronizations();
@@ -409,23 +407,37 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ZoneScoped
                 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* parent = ghoul::lua::userData<Asset>(L, 2);
 
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::require");
             std::string assetName = ghoul::lua::value<std::string>(L);
 
             std::filesystem::path path = manager->generateAssetPath(
-                asset->path().parent_path(),
+                parent->path().parent_path(),
                 assetName
             );
             Asset* dependency = manager->retrieveAsset(path);
-            asset->require(dependency);
-
             if (!dependency) {
                 return ghoul::lua::luaError(
                     L,
                     fmt::format("Asset '{}' not found", assetName)
                 );
+            }
+            // this = parent ;  child = dependency
+            if (parent->isLoaded()) {
+                return ghoul::lua::luaError(
+                    L,
+                    "Cannot require child asset when already loaded"
+                );
+
+            }
+            
+            dependency->load(parent);
+            if (dependency->isLoaded()) {
+                if (parent->isSynchronized()) {
+                    dependency->startSynchronizations();
+                }
+                parent->require(dependency);
             }
 
             // Get the exports table
