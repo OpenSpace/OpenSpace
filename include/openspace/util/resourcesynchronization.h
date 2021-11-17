@@ -45,7 +45,7 @@ public:
     ResourceSynchronization(const ghoul::Dictionary& dictionary);
     virtual ~ResourceSynchronization() = default;
 
-    virtual std::filesystem::path directory() = 0;
+    virtual std::filesystem::path directory() const = 0;
     virtual void start() = 0;
     virtual void cancel() = 0;
     virtual void clear() = 0;
@@ -69,6 +69,9 @@ protected:
         Resolved,
         Rejected
     };
+
+    void createSyncFile() const;
+    bool hasSyncFile() const;
 
     std::string _name;
     std::atomic<State> _state = State::Unsynced;

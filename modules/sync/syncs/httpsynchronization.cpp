@@ -83,7 +83,7 @@ HttpSynchronization::~HttpSynchronization() {
     }
 }
 
-std::filesystem::path HttpSynchronization::directory() {
+std::filesystem::path HttpSynchronization::directory() const {
     std::string d = fmt::format(
         "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
@@ -145,22 +145,6 @@ bool HttpSynchronization::nTotalBytesIsKnown() const {
     return _nTotalBytesKnown;
 }
 
-void HttpSynchronization::createSyncFile() {
-    const std::string& directoryName = directory().string();
-    const std::string& filepath = directoryName + ".ossync";
-
-    std::filesystem::create_directories(directoryName);
-
-    std::ofstream syncFile(filepath, std::ofstream::out);
-    syncFile << "Synchronized";
-    syncFile.close();
-}
-
-bool HttpSynchronization::hasSyncFile() {
-    const std::string& path = directory().string() + ".ossync";
-    return std::filesystem::is_regular_file(path);
-}
-
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpRequest::RequestOptions opt = {};
     opt.requestTimeoutSeconds = 0;
@@ -182,8 +166,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
-    std::string line;
-
     struct SizeData {
         bool totalKnown;
         size_t totalBytes;
@@ -197,13 +179,10 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
+    std::string line;
     while (fileList >> line) {
-        size_t lastSlash = line.find_last_of('/');
-        std::string filename = line.substr(lastSlash + 1);
-
-        std::string fileDestination = fmt::format(
-            "{}/{}{}", directory(), filename, TempSuffix
-        );
+        std::string filename = std::filesystem::path(line).filename().string();
+        std::string destination = (directory() / (filename + TempSuffix)).string();
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));
@@ -212,7 +191,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
             line,
-            fileDestination,
+            destination,
             HttpFileDownload::Overwrite::Yes
         ));
 
@@ -257,24 +236,24 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     startedAllDownloads = true;
 
     bool failed = false;
-    for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+    for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->wait();
         if (d->hasSucceeded()) {
             // If we are forcing the override, we download to a temporary file
             // first, so when we are done here, we need to rename the file to the
             // original name
 
-            const std::string& tempName = d->destination();
-            std::string originalName = tempName.substr(
-                0,
-                tempName.size() - strlen(TempSuffix)
-            );
+            std::filesystem::path tempName = d->destination();
+            std::filesystem::path originalName = tempName;
+            // Remove the .tmp extension
+            originalName.replace_extension("");
 
             if (std::filesystem::is_regular_file(originalName)) {
                 std::filesystem::remove(originalName);
             }
-            int success = rename(tempName.c_str(), originalName.c_str());
-            if (success != 0) {
+            std::error_code ec;
+            std::filesystem::rename(tempName, originalName);
+            if (ec) {
                 LERROR(fmt::format(
                     "Error renaming file {} to {}", tempName, originalName
                 ));
@@ -289,7 +268,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     if (!failed) {
         return true;
     }
-    for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+    for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->cancel();
     }
     return false;

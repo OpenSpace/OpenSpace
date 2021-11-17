@@ -425,7 +425,7 @@ bool HttpFileDownload::initDownload() {
     return true;
 }
 
-const std::string& HttpFileDownload::destination() const {
+std::filesystem::path HttpFileDownload::destination() const {
     return _destination;
 }
 

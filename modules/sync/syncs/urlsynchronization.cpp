@@ -35,7 +35,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
-#include <fstream>
 #include <numeric>
 #include <memory>
 #include <optional>
@@ -49,11 +48,9 @@ namespace {
         // provided, all files will be downloaded to the same directory
         std::variant<std::string, std::vector<std::string>> url;
 
-        // This optional identifier will be part of the used folder structure and, if
-        // provided, can be used to manually find the downloaded folder in the
-        // synchronization folder. If this value is not specified, 'UseHash' has to be set
-        // to 'true'
-        std::optional<std::string> identifier;
+        // This identifier will be part of the used folder structure and, can be used to
+        // manually find the downloaded folder in the synchronization folder
+        std::string identifier;
 
         // If this value is set to 'true' and it is not overwritten by the global
         // settings, the file(s) pointed to by this URLSynchronization will always be
@@ -100,37 +97,23 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     }
 
     _filename = p.filename.value_or(_filename);
-
-    bool useHash = p.useHash.value_or(true);
-
-    // We just merge all of the URLs together to generate a hash, it's not as stable to
-    // reordering URLs, but every other solution would be more error prone
-    std::string urlConcat = std::accumulate(_urls.begin(), _urls.end(), std::string());
-    size_t hash = std::hash<std::string>{}(urlConcat);
-    if (p.identifier.has_value()) {
-        if (useHash) {
-            _identifier = *p.identifier + "(" + std::to_string(hash) + ")";
-        }
-        else {
-            _identifier = *p.identifier;
-        }
-    }
-    else {
-        if (useHash) {
-            _identifier = std::to_string(hash);
-        }
-        else {
-            documentation::TestResult res;
-            res.success = false;
-            documentation::TestResult::Offense o;
-            o.offender = "Identifier|UseHash";
-            o.reason = documentation::TestResult::Offense::Reason::MissingKey;
-            res.offenses.push_back(o);
-            throw documentation::SpecificationError(std::move(res), "UrlSynchronization");
-        }
-    }
-
     _forceOverride = p.forceOverride.value_or(_forceOverride);
+
+    const bool useHash = p.useHash.value_or(true);
+
+
+    _identifier = p.identifier;
+
+    if (useHash) {
+        // We just merge all of the URLs together to generate a hash that works for this
+        std::vector<std::string> urls = _urls;
+        std::sort(urls.begin(), urls.end());
+
+        size_t hash = std::hash<std::string>{}(
+            std::accumulate(urls.begin(), urls.end(), std::string())
+        );
+        _identifier += fmt::format("({})", hash);
+    }
 }
 
 UrlSynchronization::~UrlSynchronization() {
@@ -138,6 +121,11 @@ UrlSynchronization::~UrlSynchronization() {
         cancel();
         _syncThread.join();
     }
+}
+
+std::filesystem::path UrlSynchronization::directory() const {
+    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
+    return absPath(d);
 }
 
 void UrlSynchronization::start() {
@@ -151,7 +139,7 @@ void UrlSynchronization::start() {
         return;
     }
 
-    _syncThread = std::thread([this] {
+    _syncThread = std::thread([this]() {
         std::unordered_map<std::string, size_t> fileSizes;
         std::mutex fileSizeMutex;
         std::atomic_size_t nDownloads(0);
@@ -160,53 +148,44 @@ void UrlSynchronization::start() {
 
         for (const std::string& url : _urls) {
             if (_filename.empty()) {
-                const size_t lastSlash = url.find_last_of('/');
-                std::string lastPartOfUrl = url.substr(lastSlash + 1);
-
-                // We can not create filenames with questionmarks
-                lastPartOfUrl.erase(
-                    std::remove(lastPartOfUrl.begin(), lastPartOfUrl.end(), '?'),
-                    lastPartOfUrl.end()
-                );
-                _filename = lastPartOfUrl;
+                std::string name = std::filesystem::path(url).filename().string();
+                
+                // We can not create filenames with question marks
+                name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
+                _filename = name;
             }
-            std::string fileDestination = fmt::format(
-                "{}/{}{}", directory(), _filename, TempSuffix
-            );
+            std::string destination = (directory() / (_filename + TempSuffix)).string();
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
                     url,
-                    fileDestination,
+                    destination,
                     HttpFileDownload::Overwrite::Yes
                 );
+            AsyncHttpFileDownload* dl = download.get();
 
             downloads.push_back(std::move(download));
 
-            std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
-
             ++nDownloads;
 
-            fileDownload->onProgress(
+            dl->onProgress(
                 [this, url, &fileSizes, &fileSizeMutex,
                 &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
             {
-                if (p.totalBytesKnown) {
-                    std::lock_guard guard(fileSizeMutex);
-                    fileSizes[url] = p.totalBytes;
+                if (!p.totalBytesKnown) {
+                    return !_shouldCancel;
+                }
 
-                    if (!_nTotalBytesKnown && startedAllDownloads &&
-                        fileSizes.size() == nDownloads)
-                    {
-                        _nTotalBytesKnown = true;
-                        _nTotalBytes = std::accumulate(
-                            fileSizes.begin(),
-                            fileSizes.end(),
-                            size_t(0),
-                            [](size_t a, const std::pair<const std::string, size_t> b) {
-                                return a + b.second;
-                            }
-                        );
+                std::lock_guard guard(fileSizeMutex);
+                fileSizes[url] = p.totalBytes;
+
+                if (!_nTotalBytesKnown && startedAllDownloads &&
+                    fileSizes.size() == nDownloads)
+                {
+                    _nTotalBytesKnown = true;
+                    _nTotalBytes = 0;
+                    for (const std::pair<const std::string, size_t>& fs : fileSizes) {
+                        _nTotalBytes += fs.second;
                     }
                 }
                 return !_shouldCancel;
@@ -214,41 +193,39 @@ void UrlSynchronization::start() {
 
             HttpRequest::RequestOptions opt = {};
             opt.requestTimeoutSeconds = 0;
-            fileDownload->start(opt);
+            dl->start(opt);
         }
 
         startedAllDownloads = true;
 
         bool failed = false;
-        for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+        for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
             d->wait();
-            if (d->hasSucceeded()) {
-                // If we are forcing the override, we download to a temporary file first,
-                // so when we are done here, we need to rename the file to the original
-                // name
+            if (!d->hasSucceeded()) {
+                failed = true;
+                continue;
+            }
 
-                const std::string& tempName = d->destination();
-                std::string originalName = tempName.substr(
-                    0,
-                    tempName.size() - strlen(TempSuffix)
+            // If we are forcing the override, we download to a temporary file first, so
+            // when we are done here, we need to rename the file to the original name
+
+            std::filesystem::path tempName = d->destination();
+            std::filesystem::path originalName = tempName;
+            // Remove the .tmp extension
+            originalName.replace_extension("");
+
+            if (std::filesystem::is_regular_file(originalName)) {
+                std::filesystem::remove(originalName);
+            }
+
+            std::error_code ec;
+            std::filesystem::rename(tempName, originalName, ec);
+            if (ec) {
+                LERRORC(
+                    "URLSynchronization",
+                    fmt::format("Error renaming file {} to {}", tempName, originalName)
                 );
 
-                if (std::filesystem::is_regular_file(originalName)) {
-                    std::filesystem::remove(originalName);
-                }
-                int success = rename(tempName.c_str(), originalName.c_str());
-                if (success != 0) {
-                    LERRORC(
-                        "URLSynchronization",
-                        fmt::format(
-                            "Error renaming file {} to {}", tempName, originalName
-                        )
-                    );
-
-                    failed = true;
-                }
-            }
-            else {
                 failed = true;
             }
         }
@@ -257,7 +234,7 @@ void UrlSynchronization::start() {
             createSyncFile();
         }
         else {
-            for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+            for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
                 d->cancel();
             }
         }
@@ -285,25 +262,6 @@ size_t UrlSynchronization::nTotalBytes() const {
 
 bool UrlSynchronization::nTotalBytesIsKnown() const {
     return _nTotalBytesKnown;
-}
-
-void UrlSynchronization::createSyncFile() {
-    std::string dir = directory();
-    std::string filepath = dir + ".ossync";
-    std::filesystem::create_directories(dir);
-    std::ofstream syncFile(filepath, std::ofstream::out);
-    syncFile << "Synchronized";
-    syncFile.close();
-}
-
-bool UrlSynchronization::hasSyncFile() {
-    const std::string& path = directory() + ".ossync";
-    return std::filesystem::is_regular_file(path);
-}
-
-std::string UrlSynchronization::directory() {
-    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
-    return absPath(d).string();
 }
 
 } // namespace openspace

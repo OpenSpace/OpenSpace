@@ -39,7 +39,7 @@ public:
 
     virtual ~HttpSynchronization();
 
-    std::filesystem::path directory() override;
+    std::filesystem::path directory() const override;
     void start() override;
     void cancel() override;
     void clear() override;
@@ -51,8 +51,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void createSyncFile();
-    bool hasSyncFile();
     bool trySyncFromUrl(std::string url);
 
     std::atomic_bool _nTotalBytesKnown = false;

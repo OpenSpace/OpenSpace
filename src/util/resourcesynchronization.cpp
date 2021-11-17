@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
+#include <fstream>
 
 namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
@@ -97,6 +98,22 @@ float ResourceSynchronization::progress() const {
 
 const std::string& ResourceSynchronization::name() const {
     return _name;
+}
+
+
+void ResourceSynchronization::createSyncFile() const {
+    std::filesystem::path dir = directory();
+    std::filesystem::create_directories(dir);
+
+    dir.replace_extension("ossync");
+    std::ofstream syncFile(dir, std::ofstream::out);
+    syncFile << "Synchronized";
+}
+
+bool ResourceSynchronization::hasSyncFile() const {
+    std::filesystem::path path = directory();
+    path.replace_extension("ossync");
+    return std::filesystem::is_regular_file(path);
 }
 
 } // namespace openspace

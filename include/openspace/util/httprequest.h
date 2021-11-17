@@ -28,6 +28,7 @@
 #include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <condition_variable>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <string>
@@ -211,7 +212,7 @@ public:
     HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
     virtual ~HttpFileDownload() = default;
 
-    const std::string& destination() const;
+    std::filesystem::path destination() const;
 
 protected:
     bool initDownload() override;

@@ -39,7 +39,7 @@ public:
 
     virtual ~UrlSynchronization();
 
-    std::filesystem::path directory() override;
+    std::filesystem::path directory() const override;
 
     void start() override;
     void cancel() override;
@@ -52,9 +52,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void createSyncFile();
-    bool hasSyncFile();
-
     std::vector<std::string> _urls;
     bool _forceOverride = false;
     std::string _synchronizationRoot;
