@@ -39,8 +39,48 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+
 class RenderableMovingFieldlines : public Renderable {
 public:
+    struct PathLineTraverser {
+        PathLineTraverser(const std::vector<FieldlinesState::Fieldline>& fieldlines_)
+            : fieldlines(fieldlines_)
+            , currentFieldline(fieldlines.begin())
+        {
+        }
+
+        const std::vector<FieldlinesState::Fieldline>& fieldlines;
+        float timeSinceInterpolation = 0.f;
+        bool forward = true;
+        std::vector<FieldlinesState::Fieldline>::const_iterator currentFieldline;
+        
+        std::vector<FieldlinesState::Fieldline>::const_iterator nextFieldline() {
+            if (forward) {
+                return (currentFieldline + 1);
+            }
+            else {
+                return (currentFieldline - 1);
+            }
+        };
+
+        void advanceCurrent() {
+            if (forward) {
+                timeSinceInterpolation -= currentFieldline->timeToNextFieldline;
+                currentFieldline++;
+            }
+            else {
+                timeSinceInterpolation -= nextFieldline()->timeToNextFieldline;
+                currentFieldline--;
+            }
+        };
+
+        bool isAtEnd() const {
+            return forward ?
+                (currentFieldline == fieldlines.end() - 1) :
+                (currentFieldline == fieldlines.begin());
+        };
+    };
+
     RenderableMovingFieldlines(const ghoul::Dictionary& dictionary);
     void initialize() override;
     void initializeGL() override;
@@ -57,19 +97,15 @@ private:
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void moveLines(const double dt);
-
-    struct PathLineTraverser : public FieldlinesState::PathLine {
-        float timeSinceInterpolation;
-        std::vector<FieldlinesState::Fieldline>::iterator currentFieldline;
-        int pathsVertexIndex;
-
-        std::vector<FieldlinesState::Fieldline>::iterator advanceFieldline(bool forward) {
-            if (forward)
-                return currentFieldline++;
-            else
-                return currentFieldline--;
-        };
-    };
+    
+    template <bool LerpLine>
+    void setNewRenderedLinePosition(
+        PathLineTraverser traverser,
+        GLint lineStart, GLsizei nVertices);
+    
+    void moveLine(const double dt, const FieldlinesState::PathLine& pathLine,
+        PathLineTraverser& traverser, GLint lineStart,
+        GLsizei nVertices);
 
     enum class ColorMethod {
         Uniform = 0,
@@ -123,12 +159,9 @@ private:
     size_t _nPointsOnFieldlines = 100;
     // which tracing vaiable to trace. 'b' for fieldline is default
     std::string _tracingVariable = "u_perp_b";
-    std::vector<float> _timeSinceLastInterpolation;
-    // keeps track of what vertex on the pathline we're on right now during runtime,
-    // starting at 0 for each drawn line
-    std::vector<size_t> _pathsVertexIndex;
 
     std::vector<glm::vec3> _renderedLines;
+    std::vector<PathLineTraverser> _traversers;
 };
 }
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEMOVINGFIELDLINES___H__
