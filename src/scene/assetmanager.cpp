@@ -642,11 +642,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path) {
         return it->get();
     }
 
-    std::unique_ptr<Asset> asset = std::make_unique<Asset>(
-        *this,
-        _synchronizationWatcher,
-        path
-    );
+    std::unique_ptr<Asset> asset = std::make_unique<Asset>(*this, path);
     Asset* res = asset.get();
 
     _assets.push_back(std::move(asset));

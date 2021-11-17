@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
-#include <openspace/util/synchronizationwatcher.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <filesystem>
 #include <optional>
 
@@ -81,14 +81,11 @@ public:
      *
      * \param manager The AssetManager that is responsible for loading this Asset and all
      *        of its dependencies
-     * \param watcher The SynchronizationWatcher that will delegate all notifications
-     *        about this Asset's ResourceSynchronization objects
      * \param assetPath The file path that will be used to load this Asset
      * 
      * \pre The \p assetPath must not be empty and must be an existing file
      */
-    Asset(AssetManager& manager, SynchronizationWatcher& watcher,
-        std::filesystem::path assetPath);
+    Asset(AssetManager& manager, std::filesystem::path assetPath);
 
     /**
      * Returns the path to the file that was used to initialize this Asset
@@ -247,7 +244,6 @@ private:
 
     std::atomic<State> _state = State::Unloaded;
     AssetManager& _manager;
-    SynchronizationWatcher& _synchronizationWatcher;
 
     std::vector<ResourceSynchronization*> _synchronizations;
 
@@ -261,9 +257,6 @@ private:
 
     // Assets that refers to this asset as a required asset
     std::vector<Asset*> _requiringAssets;
-
-    // Synchronization watches
-    std::vector<SynchronizationWatcher::WatchHandle> _syncWatches;
 };
 
 } // namespace openspace

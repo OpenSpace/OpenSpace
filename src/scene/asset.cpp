@@ -41,10 +41,8 @@ namespace {
     constexpr const char* _loggerCat = "Asset";
 } // namespace
 
-Asset::Asset(AssetManager& manager, SynchronizationWatcher& watcher,
-             std::filesystem::path assetPath)
+Asset::Asset(AssetManager& manager, std::filesystem::path assetPath)
     : _manager(manager)
-    , _synchronizationWatcher(watcher)
     , _assetPath(std::move(assetPath))
 {
     ghoul_precondition(!_assetPath.empty(), "Asset path must not be empty");

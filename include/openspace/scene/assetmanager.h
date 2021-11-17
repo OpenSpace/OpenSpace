@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
-#include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/lua/luastate.h>
 #include <filesystem>
 #include <unordered_map>
@@ -175,8 +174,6 @@ private:
     };
     std::unordered_map<std::string, std::unique_ptr<SyncItem>> _synchronizations;
     std::vector<SyncItem*> _unfinishedSynchronizations;
-
-    SynchronizationWatcher _synchronizationWatcher;
 
     std::filesystem::path _assetRootDirectory;
     

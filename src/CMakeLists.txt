@@ -176,7 +176,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
   ${OPENSPACE_BASE_DIR}/src/util/tstring.cpp
   ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
   ${OPENSPACE_BASE_DIR}/src/util/task.cpp
@@ -374,7 +373,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.inl
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
