@@ -95,6 +95,15 @@ namespace {
         "the sensitivity is the less impact a mouse motion will have."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+        "JoystickImpactFactor",
+        "Joystick Impact Factor",
+        "can be used to increse/lower the impact of the joystick during a camera path. "
+        "The lower the value is the less impact a joystick motion will have. Note that "
+        "the final sensitivity also depends on the sensitivity value set in "
+        "OrbitalNavigator!"
+    };
+
     // TEST: for now use constant friction
     const float Friction = 0.5f; // [0, 1]
     const float RollFriction = 1.f; // [0, 1]
@@ -116,6 +125,7 @@ PathNavigator::PathNavigator()
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
+    , _joystickImpactFactor(JoystickSensitivityInfo, 1.f, 0.0001f, 5.f)
     , _mouseStates(_mouseSensitivity * 0.0001, 1.0 / (Friction + 0.0000001))
 {
     _defaultPathType.addOptions({
@@ -143,6 +153,8 @@ PathNavigator::PathNavigator()
         _mouseStates.setSensitivity(_mouseSensitivity * 0.0001);
      });
     addProperty(_mouseSensitivity);
+
+    addProperty(_joystickImpactFactor);
 }
 
 PathNavigator::~PathNavigator() {} // NOLINT
@@ -403,17 +415,27 @@ void PathNavigator::findRelevantNodes() {
 }
 
 void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTime) {
-    const float maxAngle = glm::radians(30.f);
+    const constexpr float maxAngle = glm::radians(30.f);
 
-    const glm::dvec2 velocity = _mouseStates.globalRotationVelocity();
+    glm::dvec2 velocity = _mouseStates.globalRotationVelocity();
+    
+    float rollVelocity = 0.1f * _mouseStates.globalRollVelocity().x; // TODO: move this factor somewhere else?
+
+    // TODO (emmbr, 2021-11-17) It's really ugly ot depend on the orbital navigator's 
+    // joystickstates here, but we have to do so until we've figured out a nice way
+    // to break the axis binding logic out of the orbital navigator. 
+    JoystickCameraStates joystickStates = 
+        global::navigationHandler->orbitalNavigator().joystickStates();
+
+    velocity += joystickStates.globalRotationVelocity() * deltaTime;
+    rollVelocity += joystickStates.globalRollVelocity().x * deltaTime;
+
     _localPanAngle += velocity.x;
     _localPanAngle = std::clamp(_localPanAngle, -maxAngle, maxAngle);
     _localTiltAngle += velocity.y;
     _localTiltAngle = std::clamp(_localTiltAngle, -maxAngle, maxAngle);
-
-    const float rollVelocity = _mouseStates.globalRollVelocity().x; // OBS! Adding delta time leads to too small sensitivity
-    _localRollAngle = 0.1 * rollVelocity; // Note: Not adding here on purpose. The roll will be preserved between frams if roll is removed
-    //_localRollAngle = std::clamp(_localRollAngle, -maxAngle, maxAngle);
+    
+    _localRollAngle = rollVelocity; // Note: Not adding here on purpose. The roll will be preserved between frams if roll is removed
 
     //LINFO(fmt::format("Pan angle:  {}", _localPanAngle));
     //LINFO(fmt::format("Tilt angle: {}", _localTiltAngle));
@@ -424,17 +446,17 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
     const glm::dvec3 cameraRight = glm::cross(cameraForward, cameraUp);
 
     const glm::dquat panDiffRotation = glm::angleAxis(
-        static_cast<double>(_localPanAngle),
+        -static_cast<double>(_localPanAngle),
         cameraUp
     );
 
     const glm::dquat tiltDiffRotation = glm::angleAxis(
-        static_cast<double>(_localTiltAngle),
+        -static_cast<double>(_localTiltAngle),
         cameraRight
     );
 
     const glm::dquat rollDiffRotation = glm::angleAxis(
-        static_cast<double>(_localRollAngle),
+        -static_cast<double>(_localRollAngle),
         cameraForward
     );
 
@@ -442,6 +464,7 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
 
     // Reset velocities after every frame
     _mouseStates.resetVelocities();
+    joystickStates.resetVelocities();
 }
 
 void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {

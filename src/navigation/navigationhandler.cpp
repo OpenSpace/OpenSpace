@@ -173,15 +173,20 @@ void NavigationHandler::updateCamera(double deltaTime) {
         _pendingNavigationState.reset();
     }
     else if (!_playbackModeEnabled && _camera) {
+        _orbitalNavigator.updateStatesFromInput(
+            _mouseInputState,
+            _keyboardInputState,
+            deltaTime
+        );
+        _pathNavigator.updateStatesFromInput(
+            _mouseInputState,
+            _keyboardInputState,
+            deltaTime
+        );
         if (_useKeyFrameInteraction) {
             _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
         }
         else if (_pathNavigator.isPlayingPath()) {
-            _pathNavigator.updateStatesFromInput(
-                _mouseInputState,
-                _keyboardInputState,
-                deltaTime
-            );
             _pathNavigator.updateCamera(deltaTime);
             updateCameraTransitions();
         }
@@ -193,11 +198,6 @@ void NavigationHandler::updateCamera(double deltaTime) {
                     JoystickInputState()
                 );
             }
-            _orbitalNavigator.updateStatesFromInput(
-                _mouseInputState,
-                _keyboardInputState,
-                deltaTime
-            );
             _orbitalNavigator.updateCameraStateFromStates(deltaTime);
             updateCameraTransitions();
         }

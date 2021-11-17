@@ -27,8 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/interpolator.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
 #include <openspace/navigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -110,6 +109,8 @@ private:
     bool _hasInitializedRelevantNodes = false;
 
     properties::FloatProperty _mouseSensitivity;
+    properties::FloatProperty _joystickImpactFactor;
+
     MouseCameraStates _mouseStates;
 
     float _localPanAngle = 0.f;
