@@ -42,10 +42,10 @@ namespace {
 
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
         // The csv file to extract data from
-        std::filesystem::path inputDataFile;
+        std::string inputDataFile;
 
         // The speck file with star locations
-        std::filesystem::path inputSPECK;
+        std::string inputSPECK;
 
         // The bin file to export data into
         std::string outputBIN [[codegen::annotation("A valid filepath")]];
@@ -55,7 +55,7 @@ namespace {
 
         // The path to a teff to bv conversion file. Should be a txt file where each line
         // has the format 'teff,bv'
-        std::filesystem::path teffToBvFile;
+        std::string teffToBvFile;
     };
 #include "exoplanetsdatapreparationtask_codegen.cpp"
 } // namespace
@@ -71,11 +71,11 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inputDataPath = absPath(p.inputDataFile.string());
-    _inputSpeckPath = absPath(p.inputSPECK.string());
+    _inputDataPath = absPath(p.inputDataFile);
+    _inputSpeckPath = absPath(p.inputSPECK);
     _outputBinPath = absPath(p.outputBIN);
     _outputLutPath = absPath(p.outputLUT);
-    _teffToBvFilePath = absPath(p.teffToBvFile.string());
+    _teffToBvFilePath = absPath(p.teffToBvFile);
 }
 
 std::string ExoplanetsDataPreparationTask::description() {
