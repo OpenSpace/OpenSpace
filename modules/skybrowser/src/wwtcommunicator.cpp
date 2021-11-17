@@ -130,7 +130,7 @@ namespace openspace {
         return _hasLoadedImages;
     }
 
-    void WwtCommunicator::setImageLayerOrder(int i, int order) {
+    void WwtCommunicator::setImageOrder(int i, int order) {
         // Find in selected images list
         auto current = std::find(
             std::begin(_selectedImages),
@@ -149,6 +149,16 @@ namespace openspace {
         ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i),
             reverseOrder);
         sendMessageToWwt(message);
+    }
+
+    void WwtCommunicator::loadImageCollection(const std::string& collection) {
+        sendMessageToWwt(wwtmessage::loadCollection(collection));
+        _hasLoadedImages = true;
+    }
+
+    void WwtCommunicator::setImageOpacity(const int i, float opacity) {
+        ghoul::Dictionary msg = wwtmessage::setImageOpacity(std::to_string(i), opacity);
+        sendMessageToWwt(msg);
     }
 
     void WwtCommunicator::setHasLoadedImages(bool isLoaded) {

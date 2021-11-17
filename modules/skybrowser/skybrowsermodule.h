@@ -29,7 +29,6 @@
 #include <modules/skybrowser/include/pair.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
- //#include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -39,7 +38,6 @@
 
 namespace openspace {
 
-class ScreenSpaceSkyBrowser;
 class RenderableSkyBrowser;
 
 enum class Transparency {
@@ -59,7 +57,7 @@ public:
 
     // Getters
     std::vector<Pair>& getPairs();
-    Pair* getPair(std::string id);
+    Pair* getPair(const std::string& id);
     SceneGraphNode* get3dBrowserNode();
     RenderableSkyBrowser* get3dBrowser();
     RenderableSkyBrowser* get3dBrowser(const std::string& id);
@@ -68,7 +66,6 @@ public:
 
     // Setters
     void set3dBrowser(const std::string& id);
-    void setSelectedBrowser(ScreenSpaceSkyBrowser* ptr);
     void setSelectedBrowser(const std::string& id);
     void selectImage2dBrowser(int i);
     void selectImage3dBrowser(int i);

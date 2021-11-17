@@ -167,7 +167,7 @@ namespace openspace {
     void Pair::selectImage(const ImageData& image, int i)
     {
         // Load image into browser
-        _browser->addSelectedImage(image.imageUrl, i);
+        _browser->displayImage(image.imageUrl, i);
 
         // If the image has coordinates, move the target
         if (image.hasCelestialCoords) {
@@ -185,21 +185,23 @@ namespace openspace {
 
     void Pair::loadImages(std::string collection)
     {
-        _browser->sendMessageToWwt(wwtmessage::loadCollection(collection));
-        _browser->setHasLoadedImages(true);
+        _browser->loadImageCollection(collection);
     }
 
     void Pair::setImageOpacity(const int i, float opacity)
     {
-        ghoul::Dictionary msg = wwtmessage::setImageOpacity(std::to_string(i), opacity);
-        _browser->sendMessageToWwt(msg);
+        _browser->setImageOpacity(i, opacity);
     }
 
     void Pair::sendIdToBrowser()
     {
-        _browser->sendIdToBrowser();
+        _browser->setIdInBrowser();
     }
-#pragma optimize("", off)
+
+    void Pair::updateBrowserSize() {
+        _browser->updateBrowserSize();
+    }
+
     void Pair::incrementallyAnimateToCoordinate(double deltaTime) 
     {
         // Animate the target before the field of view starts to animate

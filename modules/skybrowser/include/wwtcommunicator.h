@@ -44,14 +44,12 @@ public:
     WwtCommunicator(WwtCommunicator const&) = default;
     virtual ~WwtCommunicator();
 
-    // Web page communication
-    
-    void setIdInBrowser(const std::string& id);
-
     // WorldWide Telescope communication
     void displayImage(const std::string& url, const int i);
     void removeSelectedImage(const int i);
-    void setImageLayerOrder(int i, int order);
+    void setImageOrder(int i, int order);
+    void loadImageCollection(const std::string& collection);
+    void setImageOpacity(const int i, float opacity);
 
     // Getters
     const std::deque<int>& getSelectedImages();
@@ -59,7 +57,6 @@ public:
     float verticalFov() const;
     glm::dvec2 fieldsOfView();
     bool hasLoadedImages() const;
-    
 
     // Setters
     void setHasLoadedImages(bool isLoaded);
@@ -72,6 +69,9 @@ public:
 
 protected:
     void sendMessageToWwt(const ghoul::Dictionary& msg);
+    // Web page communication
+    void setIdInBrowser(const std::string& id);
+
     properties::FloatProperty _verticalFov;
     properties::IVec3Property _borderColor;
 

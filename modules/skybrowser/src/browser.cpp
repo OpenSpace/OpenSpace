@@ -147,6 +147,7 @@ namespace openspace {
     }
 
     void Browser::update() {
+
         if (_isUrlDirty) {
             _browserInstance->loadUrl(_url);
             _isUrlDirty = false;

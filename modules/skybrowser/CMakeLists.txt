@@ -27,13 +27,15 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     
     skybrowsermodule.h
-    include/screenspaceskybrowser.h
     include/screenspaceskytarget.h
     include/wwtdatahandler.h
     include/utility.h
     include/renderableskybrowser.h
-	include/pair.h
-	tinyxml2/tinyxml2.h
+    include/pair.h
+    include/wwtcommunicator.h
+    include/browser.h
+    include/screenspaceskybrowser.h
+    ext/tinyxml2/tinyxml2.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -42,13 +44,15 @@ set(SOURCE_FILES
     
     skybrowsermodule.cpp
     skybrowsermodule_lua.inl
-    src/screenspaceskybrowser.cpp
     src/screenspaceskytarget.cpp
     src/wwtdatahandler.cpp
     src/utility.cpp
     src/renderableskybrowser.cpp
-	src/pair.cpp
-	tinyxml2/tinyxml2.cpp
+    src/pair.cpp
+    src/wwtcommunicator.cpp
+    src/browser.cpp
+    src/screenspaceskybrowser.cpp
+    ext/tinyxml2/tinyxml2.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

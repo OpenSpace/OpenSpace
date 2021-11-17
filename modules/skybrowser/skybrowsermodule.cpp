@@ -255,7 +255,7 @@ SkyBrowserModule::SkyBrowserModule()
             if (_mouseOnPair && action == MouseAction::Press) {
 
                 // Get the currently selected browser
-                setSelectedBrowser(_mouseOnPair->getBrowser());
+                setSelectedBrowser(_mouseOnPair->getBrowser()->identifier());
 
                 if (button == MouseButton::Left) {
                     _isCameraRotating = false;
@@ -315,7 +315,7 @@ SkyBrowserModule::SkyBrowserModule()
                 }
                 if (_isResizing) {
                     _isResizing = false;
-                    _mouseOnPair->getBrowser()->updateBrowserSize();
+                    _mouseOnPair->updateBrowserSize();
                     return true;
                 }
             }
@@ -447,10 +447,12 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
     // register ScreenSpaceTarget
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
+
+    // register ScreenSpaceTarget
+    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
     // Register Renderable Skybrowser
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -716,7 +718,7 @@ std::vector<Pair>& SkyBrowserModule::getPairs()
     return _targetsBrowsers;
 }
 
-Pair* SkyBrowserModule::getPair(std::string id)
+Pair* SkyBrowserModule::getPair(const std::string& id)
 {
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&](Pair& pair) {
@@ -855,14 +857,8 @@ void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
     }
 }
 
-void SkyBrowserModule::setSelectedBrowser(ScreenSpaceSkyBrowser* browser) {
-    if (browser) {
-        _selectedBrowser = browser->identifier();
-    }
-}
-
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    if (getPair(id) || _browser3dNode->identifier() == id) {
+    if (getPair(id) || (_browser3dNode && _browser3dNode->identifier() == id)) {
         _selectedBrowser = id;
     }
 }

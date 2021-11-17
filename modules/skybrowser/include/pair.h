@@ -74,6 +74,7 @@ public:
     void loadImages(std::string collection);
     void setImageOpacity(const int i, float opacity);
     void sendIdToBrowser();
+    void updateBrowserSize();
 
     ScreenSpaceSkyTarget* getTarget();
     ScreenSpaceSkyBrowser* getBrowser();
