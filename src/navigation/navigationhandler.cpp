@@ -177,6 +177,11 @@ void NavigationHandler::updateCamera(double deltaTime) {
             _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
         }
         else if (_pathNavigator.isPlayingPath()) {
+            _pathNavigator.updateStatesFromInput(
+                _mouseInputState,
+                _keyboardInputState,
+                deltaTime
+            );
             _pathNavigator.updateCamera(deltaTime);
             updateCameraTransitions();
         }

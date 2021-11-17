@@ -87,6 +87,17 @@ namespace {
         "List of tags for the nodes that are relevant for path creation, for example "
         "when avoiding collisions."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+        "MouseSensitivity",
+        "Mouse Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
+        "the sensitivity is the less impact a mouse motion will have."
+    };
+
+    // TEST: for now use constant friction
+    const float Friction = 0.5f; // [0, 1]
+    const float RollFriction = 1.f; // [0, 1]
 } // namespace
 
 #include "pathnavigator_lua.inl"
@@ -104,6 +115,8 @@ PathNavigator::PathNavigator()
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
+    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
+    , _mouseStates(_mouseSensitivity * 0.0001, 1.0 / (Friction + 0.0000001))
 {
     _defaultPathType.addOptions({
         { Path::Type::AvoidCollision, "AvoidCollision" },
@@ -124,6 +137,12 @@ PathNavigator::PathNavigator()
     };
     _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
     addProperty(_relevantNodeTags);
+
+    _mouseStates.setRotationalFriction(RollFriction);
+    _mouseSensitivity.onChange([&]() {
+        _mouseStates.setSensitivity(_mouseSensitivity * 0.0001);
+     });
+    addProperty(_mouseSensitivity);
 }
 
 PathNavigator::~PathNavigator() {} // NOLINT
@@ -195,6 +214,8 @@ void PathNavigator::updateCamera(double deltaTime) {
         removeRollRotation(newPose, deltaTime);
     }
 
+    applyLocalRotationFromInput(newPose, deltaTime);
+
     camera()->setPositionVec3(newPose.position);
     camera()->setRotation(newPose.rotation);
 
@@ -216,6 +237,13 @@ void PathNavigator::updateCamera(double deltaTime) {
         }
         return;
     }
+}
+
+void PathNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
+                                          const KeyboardInputState& keyboardInputState,
+                                          double deltaTime)
+{
+    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
@@ -271,6 +299,12 @@ void PathNavigator::startPath() {
 
     LINFO("Starting path");
     _isPlaying = true;
+
+    // TEST: interaction
+    _localPanAngle = 0.f;
+    _localTiltAngle = 0.f;
+    _localRollAngle = 0.f;
+    _mouseStates.resetVelocities();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 }
@@ -366,6 +400,48 @@ void PathNavigator::findRelevantNodes() {
     );
 
     _relevantNodes = resultingNodes;
+}
+
+void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTime) {
+    const float maxAngle = glm::radians(30.f);
+
+    const glm::dvec2 velocity = _mouseStates.globalRotationVelocity();
+    _localPanAngle += velocity.x;
+    _localPanAngle = std::clamp(_localPanAngle, -maxAngle, maxAngle);
+    _localTiltAngle += velocity.y;
+    _localTiltAngle = std::clamp(_localTiltAngle, -maxAngle, maxAngle);
+
+    const float rollVelocity = _mouseStates.globalRollVelocity().x; // OBS! Adding delta time leads to too small sensitivity
+    _localRollAngle = 0.1 * rollVelocity; // Note: Not adding here on purpose. The roll will be preserved between frams if roll is removed
+    //_localRollAngle = std::clamp(_localRollAngle, -maxAngle, maxAngle);
+
+    //LINFO(fmt::format("Pan angle:  {}", _localPanAngle));
+    //LINFO(fmt::format("Tilt angle: {}", _localTiltAngle));
+    //LINFO(fmt::format("Roll angle: {}", _localRollAngle));
+
+    const glm::dvec3 cameraForward = camera()->viewDirectionWorldSpace();
+    const glm::dvec3 cameraUp = camera()->lookUpVectorWorldSpace();
+    const glm::dvec3 cameraRight = glm::cross(cameraForward, cameraUp);
+
+    const glm::dquat panDiffRotation = glm::angleAxis(
+        static_cast<double>(_localPanAngle),
+        cameraUp
+    );
+
+    const glm::dquat tiltDiffRotation = glm::angleAxis(
+        static_cast<double>(_localTiltAngle),
+        cameraRight
+    );
+
+    const glm::dquat rollDiffRotation = glm::angleAxis(
+        static_cast<double>(_localRollAngle),
+        cameraForward
+    );
+
+    pose.rotation = tiltDiffRotation * panDiffRotation * rollDiffRotation * pose.rotation;
+
+    // Reset velocities after every frame
+    _mouseStates.resetVelocities();
 }
 
 void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {

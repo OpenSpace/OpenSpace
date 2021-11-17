@@ -27,6 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/interaction/delayedvariable.h>
+#include <openspace/interaction/interpolator.h>
+#include <openspace/interaction/mousecamerastates.h>
 #include <openspace/navigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
@@ -64,6 +67,10 @@ public:
     bool isPlayingPath() const;
 
     void updateCamera(double deltaTime);
+
+    void updateStatesFromInput(const MouseInputState& mouseInputState,
+        const KeyboardInputState& keyboardInputState, double deltaTime);
+
     void createPath(const ghoul::Dictionary& dictionary);
     void clearPath();
     void startPath();
@@ -86,6 +93,7 @@ private:
     */
     void findRelevantNodes();
 
+    void applyLocalRotationFromInput(CameraPose& pose, double deltaTime);
     void removeRollRotation(CameraPose& pose, double deltaTime);
 
     std::unique_ptr<Path> _currentPath = nullptr;
@@ -100,6 +108,13 @@ private:
 
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;
+
+    properties::FloatProperty _mouseSensitivity;
+    MouseCameraStates _mouseStates;
+
+    float _localPanAngle = 0.f;
+    float _localTiltAngle = 0.f;
+    float _localRollAngle = 0.f;
 };
 
 } // namespace openspace::interaction
