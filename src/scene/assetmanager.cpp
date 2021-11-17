@@ -43,8 +43,7 @@ namespace {
     enum class PathType {
         RelativeToAsset,
         RelativeToAssetRoot,
-        Absolute,
-        Tokenized
+        Absolute
     };
 
     PathType classifyPath(const std::string& path) {
@@ -56,9 +55,6 @@ namespace {
         }
         if (path.size() > 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
             return PathType::Absolute;
-        }
-        if (path.size() > 3 && path[0] == '$' && path[1] == '{') {
-            return PathType::Tokenized;
         }
         if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
             return PathType::Absolute;
@@ -111,20 +107,33 @@ void AssetManager::update() {
     ZoneScoped
 
     // Delete all the assets that have been marked for deletion in the previous frame
-    _toBeDeleted.clear();
+    {
+        ZoneScopedN("Deleting assets")
 
-    // Initialize all assets that have been loaded but not yet initialized
-    for (auto it = _toBeInitialized.begin(); it != _toBeInitialized.end(); ++it) {
+        _toBeDeleted.clear();
+    }
+
+    // Initialize all assets that have been loaded and synchronized but that not yet
+    // initialized
+    for (auto it = _toBeInitialized.cbegin(); it != _toBeInitialized.cend(); ++it) {
         ZoneScopedN("Initializing queued assets")
         Asset* a = *it;
-        if (a->isSynchronized() && !a->isInitialized()) {
-            a->initialize();
 
-            // We are only doing one asset per frame to keep the loading screen working a
-            // bit smoother, so we remove the current one and then break out of the loop
-            _toBeInitialized.erase(it);
-            break;
+        if (a->isInitialized() || !a->isSynchronized()) {
+            // nothing to do here
+            continue;
         }
+
+        a->initialize();
+
+        // We are only doing one asset per frame to keep the loading screen working a bit
+        // smoother, so we remove the current one and then break out of the loop
+        _toBeInitialized.erase(it);
+
+        // OBS: This can't be replaced with a (get the first one and then bail) as the
+        // first asset in the list might wait for its child later in the list to finished.
+        // So if we check the first one over and over again, we'll be in an infinite loop
+        break;
     }
 
     // Add all assets that have been queued for loading since the last `update` call
@@ -134,18 +143,18 @@ void AssetManager::update() {
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
         Asset* a = retrieveAsset(path);
 
-        const auto it = std::find(_rootAssets.begin(), _rootAssets.end(), a);
-        if (it != _rootAssets.end()) {
-            // Do nothing if the request already exists
+        const auto it = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
+        if (it != _rootAssets.cend()) {
+            // Do nothing if the asset has already been requested on a root level. Even if
+            // another asset has already required this asset, calling `load`,
+            // `startSynchronization`, etc on it are still fine since all of those
+            // functions bail out early if they already have been called before
             continue;
         }
 
         _rootAssets.push_back(a);
         a->load(nullptr);
-
-        if (!a->isSynchronized()) {
-            a->startSynchronizations();
-        }
+        a->startSynchronizations();
 
         _toBeInitialized.push_back(a);
         global::profile->addAsset(asset);
@@ -158,23 +167,35 @@ void AssetManager::update() {
         std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
 
         const auto it = std::find_if(
-            _assets.begin(),
-            _assets.end(),
+            _assets.cbegin(),
+            _assets.cend(),
             [&path](const std::unique_ptr<Asset>& asset) { return asset->path() == path; }
         );
-        if (it == _assets.end()) {
+        if (it == _assets.cend()) {
             LWARNING(fmt::format("Tried to remove unknown asset {}. Skipping", asset));
             continue;
         }
 
         Asset* a = it->get();
-        auto jt = std::find(_rootAssets.begin(), _rootAssets.end(), a);
-        if (jt == _rootAssets.end()) {
-            // Tried to remove a non-root asset
+        auto jt = std::find(_rootAssets.cbegin(), _rootAssets.cend(), a);
+        if (jt == _rootAssets.cend()) {
+            // Trying to remove an asset from the middle of the tree might have some
+            // unexpected behavior since if we were to remove an asset with children, we
+            // would have to unload those children as well. Also, we don't know if that
+            // Asset's parents are actually requiring the asset we are about to remove so
+            // we might break things horribly for people.
+            // We should figure out a way to fix this without reintroducing the
+            // require/request confusion, but until then, we'll prohibit removing non-root
+            // assets
+
+            LWARNING("Tried to remove an asset that was not on the root level. Skipping");
             continue;
         }
 
         _rootAssets.erase(jt);
+        // Even though we are removing a root asset, we might not be the only person that
+        // is interested in the asset, so we can only deinitialize it if we were, in fact,
+        // the only person, meaning that the asset never had any parents
         a->deinitializeIfUnwanted();
         if (!a->hasLoadedParent()) {
             a->unload();
@@ -183,14 +204,18 @@ void AssetManager::update() {
     }
     _assetRemoveQueue.clear();
 
-    // Change state based on synchronizations
+
+    // Change state based on synchronizations. If any of the unfinished synchronizations
+    // has finished since the last call of this function, we should notify the assets and
+    // remove the synchronization from the list of unfinished ones so that we don't need
+    // to check as much next time around
     for (auto it = _unfinishedSynchronizations.begin();
          it != _unfinishedSynchronizations.end();)
     {
         SyncItem* si = *it;
         if (si->synchronization->isResolved()) {
-            for (Asset* asset : si->assets) {
-                asset->updateSynchronizationState(ResourceSynchronization::State::Resolved);
+            for (Asset* a : si->assets) {
+                a->updateSynchronizationState(ResourceSynchronization::State::Resolved);
             }
             it = _unfinishedSynchronizations.erase(it);
         }
@@ -198,8 +223,8 @@ void AssetManager::update() {
             LERROR(fmt::format(
                 "Failed to synchronize resource '{}'", si->synchronization->name()
             ));
-            for (Asset* asset : si->assets) {
-                asset->updateSynchronizationState(ResourceSynchronization::State::Rejected);
+            for (Asset* a : si->assets) {
+                a->updateSynchronizationState(ResourceSynchronization::State::Rejected);
             }
             it = _unfinishedSynchronizations.erase(it);
         }
@@ -395,7 +420,10 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::localResourceLua");
 
             std::string name = ghoul::lua::value<std::string>(L);
-            ghoul::lua::push(L, (asset->path().parent_path() / name).string());
+            std::string path = fmt::format(
+                "{}/{}", asset->path().parent_path().string(), name
+            );
+            ghoul::lua::push(L, path);
             return 1;
         },
         1
@@ -525,14 +553,14 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
     // Register export-dependency function
     // export(string key, any value)
-    ghoul::lua::push(*_luaState, asset, this);
+    ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::exportAsset");
 
             const std::string exportName = ghoul::lua::value<std::string>(
@@ -558,17 +586,16 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     );
     lua_setfield(*_luaState, assetTableIndex, "export");
 
-    // Register onInitialize function
-    // Adds a Lua function to be called upon asset initialization
+    // Register onInitialize function to be called upon asset initialization
     // void onInitialize(function<void()> initializationFunction)
-    ghoul::lua::push(*_luaState, asset, this);
+    ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
             
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -581,17 +608,16 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     );
     lua_setfield(*_luaState, assetTableIndex, "onInitialize");
 
-    // Register onDeinitialize function
-    // Adds a Lua function to be called upon asset deinitialization
+    // Register onDeinitialize function to be called upon asset deinitialization
     // void onDeinitialize(function<void()> deinitializationFunction)
-    ghoul::lua::push(*_luaState, asset, this);
+    ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
                 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
-            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 2);
+            AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -638,8 +664,8 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path) {
     std::unique_ptr<Asset> asset = std::make_unique<Asset>(*this, path);
     Asset* res = asset.get();
 
-    _assets.push_back(std::move(asset));
     setUpAssetLuaTable(res);
+    _assets.push_back(std::move(asset));
     return res;
 }
 
@@ -727,13 +753,10 @@ std::filesystem::path AssetManager::generateAssetPath(
     }
 
     // Construct the full path including the .asset extension
-    std::string fullAssetPath =
-        (pathType == PathType::Tokenized) ?
-        absPath(assetPath).string() :
-        prefix + assetPath;
+    std::string fullAssetPath = prefix + assetPath;
     
-    const bool hasAssetExt = std::filesystem::path(assetPath).extension() == ".asset";
-    if (!hasAssetExt) {
+    const bool hasAssetExt = ;
+    if (std::filesystem::path(assetPath).extension() != ".asset") {
         fullAssetPath += ".asset";
     }
 

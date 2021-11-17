@@ -133,50 +133,69 @@ public:
     void callOnDeinitialize(Asset* asset) const;
 
 private:
-    // Creates and registers all of the callback functions that the asset is expected to
-    // call in the file, for example the `localResource`, `require`, etc.
+    /// Creates and registers all of the callback functions that the asset is expected to
+    /// call in the file, for example the `localResource`, `require`, etc.
     void setUpAssetLuaTable(Asset* asset);
 
-    // Returns the loaded Asset by either trying to load the asset at the provided path
-    // or returning a previously loaded copy
+    /// Returns the loaded Asset by either trying to load the asset at the provided path
+    /// or returning a previously loaded copy
     Asset* retrieveAsset(const std::filesystem::path& path);
 
-    // Setup the asset table of the provided asset in the shared Lua state
+    /// Setup the asset table of the provided asset in the shared Lua state
     void setCurrentAsset(Asset* asset);
 
-    // Takes the asset path, determines the type of path (relative to base, relative to
-    // root or absolute and returns fully formed path
+    /// Takes the asset path, determines the type of path (relative to base, relative to
+    /// root or absolute and returns fully formed path
     std::filesystem::path generateAssetPath(const std::filesystem::path& baseDirectory,
         const std::string& assetPath) const;
+
+    //
+    // Assets
+    //
 
     // The authoratative list of all assets that have been loaded through the AssetManager
     std::vector<std::unique_ptr<Asset>> _assets;
 
-    // A list of all root assets that have been loaded directly through the `add` function
+    /// A list of all root assets that have been loaded directly by the `add` function
     std::vector<Asset*> _rootAssets;
 
-    // This list contains all of the assets that are queued to be loading in the next
-    // update call
+    /// This list contains all of the assets that are queued to be loading in the next
+    /// update call
     std::unordered_set<std::string> _assetAddQueue;
 
-    // The list contains all of the assets that should be removed in the next update call
+    /// The list contains all of the assets that should be removed in the next update call
     std::unordered_set<std::string> _assetRemoveQueue;
 
-    // This list contains all assets that need to be initializaed in the next update call
+    /// This list contains all assets that need to be initializaed in the next update call
     std::vector<Asset*> _toBeInitialized;
 
-    // This list contains all of the assets that should be deleted in the next update call
+    /// This list contains all of the assets that will be deleted in the next update call
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
     
+    //
+    // ResourceSynchronizations
+    //
+
+    /// Collection that stores the assets that have requested each ResourceSynchronization
     struct SyncItem {
         std::unique_ptr<ResourceSynchronization> synchronization;
         std::vector<Asset*> assets;
     };
+    /// Authoritative list over all ResourceSynchronizations that have been requested by
+    /// any asset
     std::unordered_map<std::string, std::unique_ptr<SyncItem>> _synchronizations;
+    /// The list of ResourceSynchronizations that were not finished in the last update
+    /// call
     std::vector<SyncItem*> _unfinishedSynchronizations;
 
+    //
+    // Other values
+    //
+
+    /// The location of the asset root directory
     std::filesystem::path _assetRootDirectory;
     
+    /// The Lua state that is used for all asset initialization
     ghoul::lua::LuaState* _luaState = nullptr;
 
     // References to the onInitialize and the onDeinitialize functions for each Asset
