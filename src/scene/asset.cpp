@@ -52,15 +52,7 @@ Asset::Asset(AssetManager& manager, std::filesystem::path assetPath)
     );
 }
 
-void Asset::setMetaInformation(MetaInformation metaInformation) {
-    _metaInformation = std::move(metaInformation);
-}
-
-std::optional<Asset::MetaInformation> Asset::metaInformation() const {
-    return _metaInformation;
-}
-
-void Asset::setState(Asset::State state) {
+void Asset::setState(State state) {
     ZoneScoped
 
     if (_state == state) {
@@ -92,55 +84,16 @@ void Asset::setState(Asset::State state) {
             requiringAsset->setState(State::SyncRejected);
         }
     }
-
-    if (hasInitializedParent()) {
-        if (state == State::Loaded && _state == State::Loaded) {
-            startSynchronizations();
-        }
-        if (state == State::Synchronized && _state == State::Synchronized) {
-            initialize();
-        }
-    }
 }
 
 void Asset::addSynchronization(ResourceSynchronization* synchronization) {
-    //ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
-    //std::shared_ptr<ResourceSynchronization> sync = std::shared_ptr<ResourceSynchronization>(synchronization);
-
+    ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
+    ghoul_precondition(
+        std::find(_synchronizations.begin(), _synchronizations.end(), synchronization) ==
+            _synchronizations.end(),
+        "Synchronization must not have been added before"
+    );
     _synchronizations.push_back(synchronization);
-
-    //// Set up callback for synchronization state change
-    //// The synchronization watcher ensures that callbacks are invoked in the main thread
-
-    //SynchronizationWatcher::WatchHandle watch =
-    //    _synchronizationWatcher.watchSynchronization(
-    //        sync,
-    //        [this, sync](ResourceSynchronization::State state) {
-    //            ZoneScoped
-
-    //            if (state == ResourceSynchronization::State::Resolved) {
-    //                if (!isSynchronized() && isSyncResolveReady()) {
-    //                    setState(State::Synchronized);
-    //                }
-    //            }
-    //            else if (state == ResourceSynchronization::State::Rejected) {
-    //                LERROR(fmt::format(
-    //                    "Failed to synchronize resource '{}' in asset {}",
-    //                    sync->name(), _assetPath
-    //                ));
-
-    //                setState(State::SyncRejected);
-    //            }
-    //        }
-    //    );
-    //_syncWatches.push_back(watch);
-}
-
-void Asset::clearSynchronizations() {
-    //for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
-    //    _synchronizationWatcher.unwatchSynchronization(h);
-    //}
-    //_syncWatches.clear();
 }
 
 void Asset::updateSynchronizationState(ResourceSynchronization::State state) {
@@ -176,16 +129,6 @@ bool Asset::isSyncResolveReady() const {
 
     // To be considered resolved, all own synchronizations need to be resolved
     return unresolvedOwnSynchronization == _synchronizations.cend();
-}
-
-std::vector<ResourceSynchronization*> Asset::synchronizations() const {
-    return _synchronizations;
-    //std::vector<ResourceSynchronization*> res;
-    //res.reserve(_synchronizations.size());
-    //for (const std::shared_ptr<ResourceSynchronization>& sync : _synchronizations) {
-    //    res.push_back(sync.get());
-    //}
-    //return res;
 }
 
 bool Asset::isLoaded() const {
@@ -380,6 +323,14 @@ void Asset::require(Asset* dependency) {
 
     _requiredAssets.push_back(dependency);
     dependency->_requiringAssets.push_back(this);
+}
+
+void Asset::setMetaInformation(MetaInformation metaInformation) {
+    _metaInformation = std::move(metaInformation);
+}
+
+std::optional<Asset::MetaInformation> Asset::metaInformation() const {
+    return _metaInformation;
 }
 
 } // namespace openspace

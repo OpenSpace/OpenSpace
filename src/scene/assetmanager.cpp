@@ -184,8 +184,6 @@ void AssetManager::update() {
     _assetRemoveQueue.clear();
 
     // Change state based on synchronizations
-    //_synchronizationWatcher.notify();
-
     for (auto it = _unfinishedSynchronizations.begin();
          it != _unfinishedSynchronizations.end();)
     {
@@ -315,8 +313,6 @@ void AssetManager::unloadAsset(Asset* asset) {
     }
     _onDeinitializeFunctionRefs[asset].clear();
 
-    asset->clearSynchronizations();
-
     //
     // Tear down asset lua table
     const int top = lua_gettop(*_luaState);
@@ -417,13 +413,10 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
-
-            ghoul::Dictionary d = ghoul::lua::luaDictionaryFromState(L);
-            lua_pop(L, 1);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
             std::string uid = ResourceSynchronization::generateUid(d);
             SyncItem* syncItem = nullptr;
-            //ResourceSynchronization* sync = nullptr;
             auto it = manager->_synchronizations.find(uid);
             if (it == manager->_synchronizations.end()) {
                 std::unique_ptr<ResourceSynchronization> s =

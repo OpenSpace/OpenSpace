@@ -94,30 +94,23 @@ public:
     std::filesystem::path path() const;
 
     /**
-     * Adds a new dependent ResourceSynchronization object to this Asset. The
-     * SynchronizationWatcher passed into this Asset in its constructor will be notified
-     * as soon as the synchronization state of the \p synchronization changes
+     * Adds a new dependent ResourceSynchronization object to this Asset.
      * 
      * \param synchronization The resource synchronization object that is bound to this
      *        Asset
      * \pre \p synchronization must not be nullptr
+     * \pre \p synchronization must not have been added to this Asset before
      */
     void addSynchronization(ResourceSynchronization* synchronization);
     
     /**
-     * Removes all previously registered synchronizations from this Asset, which will both
-     * terminate the synchronization and also no longer inform the SynchronizationWatcher
-     * about any changes (which includes this termination)
-     */
-    void clearSynchronizations();
-    
-    /**
-     * Returns a list of all registered ResourceSynchronizations.
+     * Updates the state of this Asset based on the incoming state of one of its
+     * ResourceSynchronizations. Depending on the sum state of all registered
+     * synchronizations this Asset's state changes to successfull Synchronized, or Failed
      * 
-     * \return A list of all registered ResourceSynchronizations
+     * \param state The synchronization state of one of this Assets
+     *        ResourceSynchronizations that has changed
      */
-    std::vector<ResourceSynchronization*> synchronizations() const;
-
     void updateSynchronizationState(ResourceSynchronization::State state);
 
     /**
@@ -226,16 +219,33 @@ private:
     /// All of the (internal) states that the Asset can move through. The externally
     /// visible states (Loaded, Synchronized, Initialized) are a subset of these states
     enum class State {
+        /// The asset is created, but the Lua file has not been executed yet
         Unloaded,
+        /// The execution of the asset file as Lua failed with some error
         LoadingFailed,
+        /// The loading of the asset file succeeded
         Loaded,
+        /// The Asset is currently synchronizing its ResourceSynchronizations and waiting
+        /// for them to finish
         Synchronizing,
+        /// All registered synchronizations have completed successfully
         Synchronized,
+        /// At least one of the registered synchronizations failed to synchronize
         SyncRejected,
+        /// The onInitialize method (if the asset has one) was executed successfully
         Initialized,
+        /// The execution of the onInitialize method (if existing) resulted in a Lua error
         InitializationFailed
     };
 
+    /**
+     * Sets the \p state of this Asset to the new state. Depending on the current state of
+     * this Asset, if \p state is a state related to the synchronization, it will
+     * potentially propagate to this Asset's parents and cause them to be set to be
+     * successfully synchronized or faild.
+     * 
+     * \param state The new State that this Asset is set to
+     */
     void setState(State state);
 
     bool isSyncingOrResolved() const;
