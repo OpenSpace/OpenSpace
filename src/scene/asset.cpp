@@ -52,6 +52,10 @@ Asset::Asset(AssetManager& manager, std::filesystem::path assetPath)
     );
 }
 
+std::filesystem::path Asset::path() const {
+    return _assetPath;
+}
+
 void Asset::setState(State state) {
     ZoneScoped
 
@@ -61,6 +65,9 @@ void Asset::setState(State state) {
     
     _state = state;
 
+    // If we change our state, there might have been a parent of ours that was waiting for
+    // us to finish, so we give each asset that required us the chance to update its own
+    // state. This might cause a cascade up towards the roo asset in the best/worst case
     for (Asset* requiringAsset : _requiringAssets) {
         if (// Prohibit state change to SyncResolved if additional requirements may still
             // be added
@@ -69,7 +76,7 @@ void Asset::setState(State state) {
             // if there are multiple requirement paths from this asset to the same child,
             // which causes this method to be called more than once
             requiringAsset->isInitialized() ||
-            // Do not do anything if the asset failed to initialize
+            // Do not do anything if the parent asset failed to initialize
             requiringAsset->_state == State::InitializationFailed)
         {
             continue;
@@ -89,8 +96,11 @@ void Asset::setState(State state) {
 void Asset::addSynchronization(ResourceSynchronization* synchronization) {
     ghoul_precondition(synchronization != nullptr, "Synchronization must not be nullptr");
     ghoul_precondition(
-        std::find(_synchronizations.begin(), _synchronizations.end(), synchronization) ==
+        std::find(
+            _synchronizations.begin(),
             _synchronizations.end(),
+            synchronization
+        ) == _synchronizations.end(),
         "Synchronization must not have been added before"
     );
     _synchronizations.push_back(synchronization);
@@ -110,25 +120,21 @@ void Asset::updateSynchronizationState(ResourceSynchronization::State state) {
 }
 
 bool Asset::isSyncResolveReady() const {
-    const auto unsynchronizedAsset = std::find_if(
+    const bool allParentsSynced = std::all_of(
         _requiredAssets.cbegin(),
         _requiredAssets.cend(),
-        [](Asset* a) { return !a->isSynchronized(); }
+        std::mem_fn(&Asset::isSynchronized)
     );
 
-    if (unsynchronizedAsset != _requiredAssets.cend()) {
-        // Not considered resolved if there is one or more unresolved children
-        return false;
-    }
-
-    const auto unresolvedOwnSynchronization = std::find_if(
+    const bool allSynced = std::all_of(
         _synchronizations.cbegin(),
-        _synchronizations.cend(), 
-        [](ResourceSynchronization* s) { return !s->isResolved(); }
+        _synchronizations.cend(),
+        std::mem_fn(&ResourceSynchronization::isResolved)
     );
 
-    // To be considered resolved, all own synchronizations need to be resolved
-    return unresolvedOwnSynchronization == _synchronizations.cend();
+    // To be considered resolved, all own synchronizations need to be resolved and all
+    // parents have to be synchronized
+    return allParentsSynced && allSynced;
 }
 
 bool Asset::isLoaded() const {
@@ -166,12 +172,7 @@ bool Asset::isInitialized() const {
 }
 
 void Asset::startSynchronizations() {
-    if (!isLoaded()) {
-        LWARNING(fmt::format(
-            "Cannot start synchronizations of unloaded asset {}", _assetPath
-        ));
-        return;
-    }
+    ghoul_precondition(isLoaded(), "This Asset must have been Loaded before");
 
     // Do not attempt to resync if this is already done
     if (isSyncingOrResolved()) {
@@ -191,7 +192,8 @@ void Asset::startSynchronizations() {
             s->start();
         }
     }
-    // If all syncs are resolved (or no syncs exist), mark as resolved
+    // If all syncs are resolved (or no syncs exist), mark as resolved. If they are not,
+    // this asset will be told by the ResourceSynchronization when it finished instead
     if (!isInitialized() && isSyncResolveReady()) {
         setState(State::Synchronized);
     }
@@ -258,14 +260,13 @@ void Asset::initialize() {
         child->initialize();
     }
 
-    // 2. Call lua onInitialize
+    // 2. Call Lua onInitialize
     try {
         _manager.callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(fmt::format("Failed to initialize asset {}", path()));
         LERROR(fmt::format("{}: {}", e.component, e.message));
-        // TODO: rollback;
         setState(State::InitializationFailed);
         return;
     }
@@ -286,12 +287,12 @@ void Asset::deinitialize() {
     }
     LDEBUG(fmt::format("Deinitializing asset {}", _assetPath));
 
-    // Perform inverse actions as in initialize, in reverse order (4 - 1)
+    // Perform inverse actions as in initialize, in reverse order (3 - 1)
 
     // 3. Update state
     setState(Asset::State::Synchronized);
 
-    // 2. Call lua onInitialize
+    // 2. Call Lua onInitialize
     try {
         _manager.callOnDeinitialize(this);
     }
@@ -308,21 +309,14 @@ void Asset::deinitialize() {
     }
 }
 
-std::filesystem::path Asset::path() const {
-    return _assetPath;
-}
-
 void Asset::require(Asset* dependency) {
     ghoul_precondition(dependency, "Dependency must not be nullptr");
 
-    const auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), dependency);
-    if (it != _requiredAssets.cend()) {
-        // Do nothing if the requirement already exists
-        return;
+    auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), dependency);
+    if (it == _requiredAssets.cend()) {
+        _requiredAssets.push_back(dependency);
+        dependency->_requiringAssets.push_back(this);
     }
-
-    _requiredAssets.push_back(dependency);
-    dependency->_requiringAssets.push_back(this);
 }
 
 void Asset::setMetaInformation(MetaInformation metaInformation) {

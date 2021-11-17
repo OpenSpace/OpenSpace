@@ -754,8 +754,6 @@ std::filesystem::path AssetManager::generateAssetPath(
 
     // Construct the full path including the .asset extension
     std::string fullAssetPath = prefix + assetPath;
-    
-    const bool hasAssetExt = ;
     if (std::filesystem::path(assetPath).extension() != ".asset") {
         fullAssetPath += ".asset";
     }
