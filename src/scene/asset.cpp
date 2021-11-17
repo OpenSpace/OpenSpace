@@ -68,27 +68,27 @@ void Asset::setState(State state) {
     // If we change our state, there might have been a parent of ours that was waiting for
     // us to finish, so we give each asset that required us the chance to update its own
     // state. This might cause a cascade up towards the roo asset in the best/worst case
-    for (Asset* requiringAsset : _requiringAssets) {
+    for (Asset* parent : _parentAssets) {
         if (// Prohibit state change to SyncResolved if additional requirements may still
             // be added
-            !requiringAsset->isLoaded() ||
+            !parent->isLoaded() ||
             // Do not do anything if this asset was already initialized. This may happen
             // if there are multiple requirement paths from this asset to the same child,
             // which causes this method to be called more than once
-            requiringAsset->isInitialized() ||
+            parent->isInitialized() ||
             // Do not do anything if the parent asset failed to initialize
-            requiringAsset->_state == State::InitializationFailed)
+            parent->_state == State::InitializationFailed)
         {
             continue;
         }
 
         if (state == State::Synchronized) {
-            if (requiringAsset->isSyncResolveReady()) {
-                requiringAsset->setState(State::Synchronized);
+            if (parent->isSyncResolveReady()) {
+                parent->setState(State::Synchronized);
             }
         }
         else if (state == State::SyncRejected) {
-            requiringAsset->setState(State::SyncRejected);
+            parent->setState(State::SyncRejected);
         }
     }
 }
@@ -106,17 +106,18 @@ void Asset::addSynchronization(ResourceSynchronization* synchronization) {
     _synchronizations.push_back(synchronization);
 }
 
-void Asset::updateSynchronizationState(ResourceSynchronization::State state) {
+void Asset::setSynchronizationStateResolved() {
     ZoneScoped
 
-    if (state == ResourceSynchronization::State::Resolved) {
-        if (!isSynchronized() && isSyncResolveReady()) {
-            setState(State::Synchronized);
-        }
+    if (!isSynchronized() && isSyncResolveReady()) {
+        setState(State::Synchronized);
     }
-    else if (state == ResourceSynchronization::State::Rejected) {
-        setState(State::SyncRejected);
-    }
+}
+
+void Asset::setSynchronizationStateRejected() {
+    ZoneScoped
+
+    setState(State::SyncRejected);
 }
 
 bool Asset::isSyncResolveReady() const {
@@ -153,16 +154,16 @@ bool Asset::isSyncingOrResolved() const {
 
 bool Asset::hasLoadedParent() {
     return std::any_of(
-        _requiringAssets.begin(),
-        _requiringAssets.end(),
+        _parentAssets.begin(),
+        _parentAssets.end(),
         std::mem_fn(&Asset::isLoaded)
     );
 }
 
 bool Asset::hasInitializedParent() const {
     return std::any_of(
-        _requiringAssets.begin(),
-        _requiringAssets.end(),
+        _parentAssets.begin(),
+        _parentAssets.end(),
         std::mem_fn(&Asset::isInitialized)
     );
 }
@@ -225,16 +226,16 @@ void Asset::unload() {
         _requiredAssets.erase(_requiredAssets.begin());
 
         auto parentIt = std::find(
-            child->_requiringAssets.cbegin(),
-            child->_requiringAssets.cend(),
+            child->_parentAssets.cbegin(),
+            child->_parentAssets.cend(),
             this
         );
         ghoul_assert(
-            parentIt != child->_requiringAssets.cend(),
+            parentIt != child->_parentAssets.cend(),
             "Parent asset was not correctly registered"
         );
 
-        child->_requiringAssets.erase(parentIt);
+        child->_parentAssets.erase(parentIt);
 
         child->deinitializeIfUnwanted();
         if (!child->hasLoadedParent()) {
@@ -297,9 +298,8 @@ void Asset::deinitialize() {
         _manager.callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format(
-            "Failed to deinitialize asset {}; {}: {}", _assetPath, e.component, e.message
-        ));
+        LERROR(fmt::format("Failed to deinitialize asset {}", _assetPath));
+        LERROR(fmt::format("{}: {}", e.component, e.message));
         return;
     }
 
@@ -315,7 +315,7 @@ void Asset::require(Asset* dependency) {
     auto it = std::find(_requiredAssets.cbegin(), _requiredAssets.cend(), dependency);
     if (it == _requiredAssets.cend()) {
         _requiredAssets.push_back(dependency);
-        dependency->_requiringAssets.push_back(this);
+        dependency->_parentAssets.push_back(this);
     }
 }
 

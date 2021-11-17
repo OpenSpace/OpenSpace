@@ -26,11 +26,8 @@
 #define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 
 #include <atomic>
-#include <functional>
-#include <memory>
-#include <mutex>
+#include <filesystem>
 #include <string>
-#include <unordered_map>
 
 namespace ghoul { class Dictionary; }
 
@@ -40,16 +37,6 @@ namespace documentation { struct Documentation; }
 
 class ResourceSynchronization {
 public:
-    enum class State {
-        Unsynced,
-        Syncing,
-        Resolved,
-        Rejected
-    };
-
-    using CallbackHandle = size_t;
-    using StateChangeCallback = std::function<void(State)>;
-
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
@@ -58,7 +45,7 @@ public:
     ResourceSynchronization(const ghoul::Dictionary& dictionary);
     virtual ~ResourceSynchronization() = default;
 
-    virtual std::string directory() = 0;
+    virtual std::filesystem::path directory() = 0;
     virtual void start() = 0;
     virtual void cancel() = 0;
     virtual void clear() = 0;
@@ -66,32 +53,25 @@ public:
     virtual size_t nSynchronizedBytes() const = 0;
     virtual size_t nTotalBytes() const = 0;
     virtual bool nTotalBytesIsKnown() const = 0;
-    virtual float progress() const;
+    float progress() const;
 
-    State state() const;
     const std::string& name() const;
     bool isResolved() const;
     bool isRejected() const;
     bool isSyncing() const;
-    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
-    void removeStateChangeCallback(CallbackHandle id);
 
     static documentation::Documentation Documentation();
 
 protected:
-    void resolve();
-    void reject();
-    void reset();
-    void begin();
-
-private:
-    void setState(State state);
+    enum class State {
+        Unsynced,
+        Syncing,
+        Resolved,
+        Rejected
+    };
 
     std::string _name;
     std::atomic<State> _state = State::Unsynced;
-    std::mutex _callbackMutex;
-    CallbackHandle _nextCallbackId = 0;
-    std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;
 };
 
 } // namespace openspace

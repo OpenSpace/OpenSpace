@@ -775,7 +775,7 @@ void OpenSpaceEngine::loadAssets() {
         for (const ResourceSynchronization* sync : allSyncs) {
             ZoneScopedN("Update resource synchronization")
 
-            if (sync->state() == ResourceSynchronization::State::Syncing) {
+            if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = sync->progress();
 
@@ -828,7 +828,7 @@ void OpenSpaceEngine::loadAssets() {
         loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
-            if ((*it)->state() == ResourceSynchronization::State::Syncing) {
+            if ((*it)->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
                 progressInfo.progress = (*it)->progress();
 

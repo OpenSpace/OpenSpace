@@ -73,10 +73,6 @@ std::string ResourceSynchronization::generateUid(const ghoul::Dictionary& dictio
 
 ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary&) {}
 
-ResourceSynchronization::State ResourceSynchronization::state() const {
-    return _state;
-}
-
 bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
 }
@@ -87,53 +83,6 @@ bool ResourceSynchronization::isRejected() const {
 
 bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
-}
-
-ResourceSynchronization::CallbackHandle
-ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
-{
-    std::lock_guard guard(_callbackMutex);
-    CallbackHandle callbackId = _nextCallbackId++;
-    _stateChangeCallbacks[callbackId] = std::move(cb);
-    return callbackId;
-}
-
-void ResourceSynchronization::removeStateChangeCallback(CallbackHandle id) {
-    std::lock_guard guard(_callbackMutex);
-    _stateChangeCallbacks.erase(id);
-}
-
-void ResourceSynchronization::resolve() {
-    setState(State::Resolved);
-}
-
-void ResourceSynchronization::reject() {
-    setState(State::Rejected);
-}
-
-void ResourceSynchronization::reset() {
-    setState(State::Unsynced);
-}
-
-void ResourceSynchronization::begin() {
-    setState(State::Syncing);
-}
-
-void ResourceSynchronization::setState(State state) {
-    _state = state;
-
-    _callbackMutex.lock();
-    std::vector<StateChangeCallback> callbacks;
-    callbacks.reserve(_stateChangeCallbacks.size());
-    using K = CallbackHandle;
-    using V = StateChangeCallback;
-    for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
-        callbacks.push_back(it.second);
-    }
-    _callbackMutex.unlock();
-    for (const StateChangeCallback& cb : callbacks) {
-        cb(state);
-    }
 }
 
 float ResourceSynchronization::progress() const {

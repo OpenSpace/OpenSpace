@@ -144,10 +144,10 @@ void UrlSynchronization::start() {
     if (isSyncing()) {
         return;
     }
-    begin();
+    _state = State::Syncing;
 
     if (hasSyncFile() && !_forceOverride) {
-        resolve();
+        _state = State::Resolved;
         return;
     }
 
@@ -261,13 +261,13 @@ void UrlSynchronization::start() {
                 d->cancel();
             }
         }
-        resolve();
+        _state = State::Resolved;
     });
 }
 
 void UrlSynchronization::cancel() {
     _shouldCancel = true;
-    reset();
+    _state = State::Unsynced;
 }
 
 void UrlSynchronization::clear() {

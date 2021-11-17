@@ -66,7 +66,7 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
                                          std::string synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
-    : openspace::ResourceSynchronization(dict)
+    : ResourceSynchronization(dict)
     , _synchronizationRoot(std::move(synchronizationRoot))
     , _synchronizationRepositories(std::move(synchronizationRepositories))
 {
@@ -83,21 +83,21 @@ HttpSynchronization::~HttpSynchronization() {
     }
 }
 
-std::string HttpSynchronization::directory() {
+std::filesystem::path HttpSynchronization::directory() {
     std::string d = fmt::format(
         "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
-    return absPath(d).string();
+    return absPath(d);
 }
 
 void HttpSynchronization::start() {
     if (isSyncing()) {
         return;
     }
-    begin();
+    _state = State::Syncing;
 
     if (hasSyncFile()) {
-        resolve();
+        _state = State::Resolved;
         return;
     }
 
@@ -111,12 +111,12 @@ void HttpSynchronization::start() {
             for (const std::string& url : _synchronizationRepositories) {
                 if (trySyncFromUrl(url + q)) {
                     createSyncFile();
-                    resolve();
+                    _state = State::Resolved;
                     return;
                 }
             }
             if (!_shouldCancel) {
-                reject();
+                _state = State::Rejected;
             }
         },
         query
@@ -125,7 +125,7 @@ void HttpSynchronization::start() {
 
 void HttpSynchronization::cancel() {
     _shouldCancel = true;
-    reset();
+    _state = State::Unsynced;
 }
 
 void HttpSynchronization::clear() {
@@ -146,7 +146,7 @@ bool HttpSynchronization::nTotalBytesIsKnown() const {
 }
 
 void HttpSynchronization::createSyncFile() {
-    const std::string& directoryName = directory();
+    const std::string& directoryName = directory().string();
     const std::string& filepath = directoryName + ".ossync";
 
     std::filesystem::create_directories(directoryName);
@@ -157,7 +157,7 @@ void HttpSynchronization::createSyncFile() {
 }
 
 bool HttpSynchronization::hasSyncFile() {
-    const std::string& path = directory() + ".ossync";
+    const std::string& path = directory().string() + ".ossync";
     return std::filesystem::is_regular_file(path);
 }
 

@@ -215,7 +215,7 @@ void AssetManager::update() {
         SyncItem* si = *it;
         if (si->synchronization->isResolved()) {
             for (Asset* a : si->assets) {
-                a->updateSynchronizationState(ResourceSynchronization::State::Resolved);
+                a->setSynchronizationStateResolved();
             }
             it = _unfinishedSynchronizations.erase(it);
         }
@@ -224,7 +224,7 @@ void AssetManager::update() {
                 "Failed to synchronize resource '{}'", si->synchronization->name()
             ));
             for (Asset* a : si->assets) {
-                a->updateSynchronizationState(ResourceSynchronization::State::Rejected);
+                a->setSynchronizationStateRejected();
             }
             it = _unfinishedSynchronizations.erase(it);
         }

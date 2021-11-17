@@ -88,7 +88,8 @@ public:
     Asset(AssetManager& manager, std::filesystem::path assetPath);
 
     /**
-     * Returns the path to the file that was used to initialize this Asset
+     * Returns the path to the file that was used to initialize this Asset.
+     *
      * \return The path to the file that was used to initialize this Asset
      */
     std::filesystem::path path() const;
@@ -104,14 +105,18 @@ public:
     void addSynchronization(ResourceSynchronization* synchronization);
     
     /**
-     * Updates the state of this Asset based on the incoming state of one of its
-     * ResourceSynchronizations. Depending on the sum state of all registered
+     * Updates the state of this Asset based on the latest synchronization being
+     * successfully resolved. Depending on the sum state of all registered
      * synchronizations this Asset's state changes to successfull Synchronized, or Failed
-     * 
-     * \param state The synchronization state of one of this Assets
-     *        ResourceSynchronizations that has changed
      */
-    void updateSynchronizationState(ResourceSynchronization::State state);
+    void setSynchronizationStateResolved();
+
+    /**
+     * Updates the state of this Asset based on the latest synchronization being rejected.
+     * Depending on the sum state of all registered synchronizations this Asset's state
+     * changes to successfull Synchronized, or Failed
+     */
+    void setSynchronizationStateRejected();
 
     /**
      * If the asset has not yet been loaded, this function loads the asset and returns the
@@ -153,6 +158,8 @@ public:
      * synchronizations and required assets' synchronizations could start. When all
      * synchronizations have completed successfully, this Asset transitions into the
      * Synchronized state.
+     * 
+     * \pre This Asset must have been Loaded before
      */
     void startSynchronizations();
 
@@ -252,21 +259,26 @@ private:
     bool isSyncResolveReady() const;
     bool hasInitializedParent() const;
 
+    /// The state that this Asset is currently in
     std::atomic<State> _state = State::Unloaded;
+    
+    /// Reference to the manager that is responsible for loading and unloading this asset
     AssetManager& _manager;
 
-    std::vector<ResourceSynchronization*> _synchronizations;
-
-    // Absolute path to asset file
+    /// Absolute path to asset file
     std::filesystem::path _assetPath;
 
+    /// Additional information about this asset, such as its name, author, license, etc
     std::optional<MetaInformation> _metaInformation;
 
-    // Required assets
+    /// Assets that are required by this asset
     std::vector<Asset*> _requiredAssets;
 
-    // Assets that refers to this asset as a required asset
-    std::vector<Asset*> _requiringAssets;
+    /// Assets that refers to this asset as a required asset
+    std::vector<Asset*> _parentAssets;
+
+    /// Synchronizations that were requested by this asset
+    std::vector<ResourceSynchronization*> _synchronizations;
 };
 
 } // namespace openspace
