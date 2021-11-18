@@ -109,7 +109,8 @@ void HttpSynchronization::start() {
     _syncThread = std::thread(
         [this](const std::string& q) {
             for (const std::string& url : _synchronizationRepositories) {
-                if (trySyncFromUrl(url + q)) {
+                const bool success = trySyncFromUrl(url + q);
+                if (success) {
                     createSyncFile();
                     _state = State::Resolved;
                     return;
@@ -209,24 +210,17 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
             std::lock_guard guard(sizeDataMutex);
 
+            ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
             sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
 
-            SizeData size = std::accumulate(
-                sizeData.begin(),
-                sizeData.end(),
-                SizeData{ true, 0, 0 },
-                [](const SizeData& a, const std::pair<const std::string, SizeData>& b) {
-                    return SizeData {
-                        a.totalKnown && b.second.totalKnown,
-                        a.totalBytes + b.second.totalBytes,
-                        a.downloadedBytes + b.second.downloadedBytes
-                    };
-                }
-            );
-
-            _nTotalBytesKnown = size.totalKnown;
-            _nTotalBytes = size.totalBytes;
-            _nSynchronizedBytes = size.downloadedBytes;
+            _nTotalBytesKnown = true;
+            _nTotalBytes = 0;
+            _nSynchronizedBytes = 0;
+            for (const std::pair<const std::string, SizeData>& sd : sizeData) {
+                _nTotalBytesKnown = _nTotalBytesKnown && sd.second.totalKnown;
+                _nTotalBytes += sd.second.totalBytes;
+                _nSynchronizedBytes += sd.second.downloadedBytes;
+            }
 
             return !_shouldCancel;
         });
@@ -252,11 +246,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 std::filesystem::remove(originalName);
             }
             std::error_code ec;
-            std::filesystem::rename(tempName, originalName);
+            std::filesystem::rename(tempName, originalName, ec);
             if (ec) {
-                LERROR(fmt::format(
-                    "Error renaming file {} to {}", tempName, originalName
-                ));
+                LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
                 failed = true;
             }
         }
@@ -265,13 +257,12 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             failed = true;
         }
     }
-    if (!failed) {
-        return true;
+    if (failed) {
+        for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+            d->cancel();
+        }
     }
-    for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
-        d->cancel();
-    }
-    return false;
+    return !failed;
 }
 
 } // namespace openspace
