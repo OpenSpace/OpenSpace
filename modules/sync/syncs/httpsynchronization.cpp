@@ -120,14 +120,11 @@ void HttpSynchronization::cancel() {
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    HttpRequest::RequestOptions opt = {};
-    opt.requestTimeoutSeconds = 0;
-
     SyncHttpMemoryDownload fileListDownload(std::move(listUrl));
-    fileListDownload.onProgress([&c = _shouldCancel](HttpRequest::Progress) {
+    fileListDownload.onProgress([&c = _shouldCancel](bool, size_t, size_t) {
         return !c;
     });
-    fileListDownload.download(opt);
+    fileListDownload.download();
 
     if (!fileListDownload.hasSucceeded()) {
         return false;
@@ -181,15 +178,17 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         sizeData[line] = { false, 0, 0 };
 
         dl->onProgress(
-            [this, line, &sizeData, &mutex, &startedAllDownloads](HttpRequest::Progress p)
+            [this, line, &sizeData, &mutex, &startedAllDownloads](bool totalBytesKnown,
+                                                                  size_t totalBytes,
+                                                                  size_t downloadedBytes)
         {
-            if (!p.totalBytesKnown || !startedAllDownloads) {
+            if (!totalBytesKnown || !startedAllDownloads) {
                 return !_shouldCancel;
             }
 
             std::lock_guard guard(mutex);
 
-            sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
+            sizeData[line] = { totalBytesKnown, totalBytes, downloadedBytes };
 
             _nTotalBytesKnown = true;
             _nTotalBytes = 0;
@@ -203,7 +202,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             return !_shouldCancel;
         });
 
-        dl->start(opt);
+        dl->start();
     }
     startedAllDownloads = true;
 

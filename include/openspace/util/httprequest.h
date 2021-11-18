@@ -57,61 +57,51 @@ namespace curlfunctions {
 // Synchronous http request
 class HttpRequest {
 public:
-    enum class ReadyState : unsigned int {
+    enum class ReadyState {
         Unsent,
         Loading,
         ReceivedHeader,
         Fail,
         Success
     };
-
-    struct Progress {
-        bool totalBytesKnown = false;
-        size_t totalBytes = 0;
-        size_t downloadedBytes = 0;
-    };
-
-    struct Data {
-        char* buffer;
-        size_t size;
-    };
-
-    struct Header {
-        char* buffer;
-        size_t size;
-    };
-
     using ReadyStateChangeCallback = std::function<void(ReadyState)>;
 
-    // ProgressCallback: Return non-zero value to cancel download.
-    using ProgressCallback = std::function<int(Progress)>;
+    // ProgressCallback: Return non-zero value to cancel download
+    using ProgressCallback = std::function<
+        int(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
+    >;
 
-    // DataCallback: Return number of bytes successfully stored.
-    // If this does not match the data buffer sice reported in Data,
-    // the request will fail.
-    using DataCallback = std::function<size_t(Data)>;
+    // DataCallback: Return number of bytes successfully stored. If this does not match
+    // the data buffer sice reported in Data, the request will fail
+    using DataCallback = std::function<size_t(char* buffer, size_t size)>;
 
-    // HeaderCallback: Return number of bytes successfully stored.
-    // If this does not match the data buffer sice reported in Header,
-    // the request will fail.
-    using HeaderCallback = std::function<size_t(Header)>;
+    // HeaderCallback: Return number of bytes successfully stored. If this does not match
+    // the data buffer sice reported in Header, the request will fail
+    using HeaderCallback = std::function<size_t(char* buffer, size_t size)>;
 
-    struct RequestOptions {
-        int requestTimeoutSeconds; // 0 for no timeout
-    };
-
-    HttpRequest(std::string url);
+    explicit HttpRequest(std::string url);
 
     void onReadyStateChange(ReadyStateChangeCallback cb);
     void onHeader(HeaderCallback cb);
     void onProgress(ProgressCallback cb);
     void onData(DataCallback cb);
 
-    void perform(RequestOptions opt);
+    // 0 for no timeout
+    void perform(int requestTimeoutSeconds = 0);
 
     const std::string& url() const;
 
 private:
+    friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
+        void* userData);
+
+    friend int curlfunctions::progressCallback(void* userData,
+        int64_t nTotalDownloadBytes,
+        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
+
+    friend size_t curlfunctions::headerCallback(char* ptr, size_t size, size_t nmemb,
+        void* userData);
+
     void setReadyState(ReadyState state);
 
     std::string _url;
@@ -122,23 +112,14 @@ private:
     HeaderCallback _onHeader;
 
     ReadyState _readyState;
-    Progress _progress;
-
-    friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
-        void* userData);
-
-    friend int curlfunctions::progressCallback(void* userData,
-        int64_t nTotalDownloadBytes,
-        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
-
-    friend size_t curlfunctions::headerCallback(char* ptr, size_t size, size_t nmemb,
-       void* userData);
 };
 
 class HttpDownload {
 public:
-    using ProgressCallback = std::function<bool(HttpRequest::Progress)>;
-    using HeaderCallback = std::function<bool(HttpRequest::Header)>;
+    using ProgressCallback = std::function<
+        bool(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
+    >;
+    using HeaderCallback = std::function<bool(char* buffer, size_t size)>;
 
     HttpDownload();
     HttpDownload(HttpDownload&& d) = default;
@@ -151,11 +132,11 @@ public:
     bool hasSucceeded() const;
 
 protected:
-    virtual size_t handleData(HttpRequest::Data d) = 0;
+    virtual size_t handleData(char* buffer, size_t size) = 0;
     virtual bool initDownload() = 0;
     virtual bool deinitDownload() = 0;
 
-    bool callOnProgress(HttpRequest::Progress p);
+    bool callOnProgress(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes);
     void markAsStarted();
     void markAsSuccessful();
     void markAsFailed();
@@ -173,7 +154,7 @@ public:
     SyncHttpDownload(SyncHttpDownload&& d) = default;
     SyncHttpDownload& operator=(SyncHttpDownload&&) = default;
     virtual ~SyncHttpDownload() = default;
-    void download(HttpRequest::RequestOptions opt);
+    void download(int requestTimeoutSeconds = 0);
 
     const std::string& url() const;
 
@@ -186,14 +167,14 @@ public:
     AsyncHttpDownload(std::string url);
     AsyncHttpDownload(AsyncHttpDownload&& d);
     virtual ~AsyncHttpDownload() = default;
-    void start(HttpRequest::RequestOptions opt);
+    void start(int requestTimeoutSeconds = 0);
     void cancel();
     void wait();
 
     const std::string& url() const;
 
 protected:
-    void download(HttpRequest::RequestOptions opt);
+    void download(int requestTimeoutSeconds = 0);
 
 private:
     HttpRequest _httpRequest;
@@ -217,7 +198,7 @@ public:
 protected:
     bool initDownload() override;
     bool deinitDownload() override;
-    size_t handleData(HttpRequest::Data d) override;
+    size_t handleData(char* buffer, size_t size) override;
 
     static std::mutex _directoryCreationMutex;
     std::atomic_bool _hasHandle = false;
@@ -243,7 +224,7 @@ public:
 protected:
     bool initDownload() override;
     bool deinitDownload() override;
-    size_t handleData(HttpRequest::Data d) override;
+    size_t handleData(char* buffer, size_t size) override;
 
 private:
     std::vector<char> _downloadedData;

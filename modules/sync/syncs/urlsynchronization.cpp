@@ -141,8 +141,8 @@ void UrlSynchronization::start() {
     _syncThread = std::thread([this]() {
         std::unordered_map<std::string, size_t> fileSizes;
         std::mutex fileSizeMutex;
-        std::atomic_size_t nDownloads(0);
-        std::atomic_bool startedAllDownloads(false);
+        size_t nDownloads = 0;
+        std::atomic_bool startedAllDownloads = false;
         std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
@@ -169,14 +169,16 @@ void UrlSynchronization::start() {
 
             dl->onProgress(
                 [this, url, &fileSizes, &fileSizeMutex,
-                &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
+                &startedAllDownloads, &nDownloads](bool totalBytesKnown,
+                                                   size_t totalBytes,
+                                                   size_t)
             {
-                if (!p.totalBytesKnown) {
+                if (!totalBytesKnown) {
                     return !_shouldCancel;
                 }
 
                 std::lock_guard guard(fileSizeMutex);
-                fileSizes[url] = p.totalBytes;
+                fileSizes[url] = totalBytes;
 
                 if (!_nTotalBytesKnown && startedAllDownloads &&
                     fileSizes.size() == nDownloads)
@@ -190,9 +192,7 @@ void UrlSynchronization::start() {
                 return !_shouldCancel;
             });
 
-            HttpRequest::RequestOptions opt = {};
-            opt.requestTimeoutSeconds = 0;
-            dl->start(opt);
+            dl->start();
         }
 
         startedAllDownloads = true;

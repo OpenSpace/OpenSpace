@@ -40,9 +40,6 @@ VersionChecker::~VersionChecker() {
 }
 
 void VersionChecker::requestLatestVersion(const std::string& url) {
-    HttpRequest::RequestOptions opt;
-    opt.requestTimeoutSeconds = 0;
-
     std::string fullUrl = fmt::format(
         "{}?client_version={}&commit_hash={}",
         url, OPENSPACE_VERSION_NUMBER, OPENSPACE_GIT_COMMIT
@@ -55,7 +52,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     }
 
     _request = std::make_unique<AsyncHttpMemoryDownload>(std::move(fullUrl));
-    _request->start(opt);
+    _request->start();
 }
 
 void VersionChecker::cancel() {
