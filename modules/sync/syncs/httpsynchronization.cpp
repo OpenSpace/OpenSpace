@@ -47,10 +47,11 @@ namespace {
     constexpr const int ApplicationVersion = 1;
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
-        // A unique identifier for this resource
+        // The unique identifier for this resource that is used to request a set of files
+        // from the synchronization servers
         std::string identifier;
 
-        // The version of this resource
+        // The version of this resource that should be requested
         int version;
     };
 #include "httpsynchronization_codegen.cpp"
@@ -63,12 +64,12 @@ documentation::Documentation HttpSynchronization::Documentation() {
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
-                                         std::string synchronizationRoot,
+                                         std::filesystem::path synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
     : ResourceSynchronization(dict)
-    , _synchronizationRoot(std::move(synchronizationRoot))
-    , _synchronizationRepositories(std::move(synchronizationRepositories))
+    , _syncRoot(std::move(synchronizationRoot))
+    , _syncRepositories(std::move(synchronizationRepositories))
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
@@ -84,10 +85,7 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::filesystem::path HttpSynchronization::directory() const {
-    std::string d = fmt::format(
-        "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
-    );
-    return absPath(d);
+    return absPath(_syncRoot / "http" / _identifier / std::to_string(_version));
 }
 
 void HttpSynchronization::start() {
@@ -108,7 +106,7 @@ void HttpSynchronization::start() {
 
     _syncThread = std::thread(
         [this](const std::string& q) {
-            for (const std::string& url : _synchronizationRepositories) {
+            for (const std::string& url : _syncRepositories) {
                 const bool success = trySyncFromUrl(url + q);
                 if (success) {
                     createSyncFile();
@@ -168,9 +166,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
     struct SizeData {
-        bool totalKnown;
-        size_t totalBytes;
-        size_t downloadedBytes;
+        bool isTotalKnown = false;
+        size_t totalBytes = 0;
+        size_t downloadedBytes = 0;
     };
 
     std::unordered_map<std::string, SizeData> sizeData;
@@ -217,7 +215,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             _nTotalBytes = 0;
             _nSynchronizedBytes = 0;
             for (const std::pair<const std::string, SizeData>& sd : sizeData) {
-                _nTotalBytesKnown = _nTotalBytesKnown && sd.second.totalKnown;
+                _nTotalBytesKnown = _nTotalBytesKnown && sd.second.isTotalKnown;
                 _nTotalBytes += sd.second.totalBytes;
                 _nSynchronizedBytes += sd.second.downloadedBytes;
             }
