@@ -85,7 +85,7 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::filesystem::path HttpSynchronization::directory() const {
-    return absPath(_syncRoot / "http" / _identifier / std::to_string(_version));
+    return _syncRoot / "http" / _identifier / std::to_string(_version);
 }
 
 void HttpSynchronization::start() {
@@ -158,11 +158,11 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         return false;
     }
 
-    const std::vector<char>& buffer = fileListDownload.downloadedData();
     _nSynchronizedBytes = 0;
     _nTotalBytes = 0;
     _nTotalBytesKnown = false;
 
+    const std::vector<char>& buffer = fileListDownload.downloadedData();
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
     struct SizeData {
@@ -172,41 +172,46 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     };
 
     std::unordered_map<std::string, SizeData> sizeData;
-    std::mutex sizeDataMutex;
+    std::mutex mutex;
 
-    std::atomic_bool startedAllDownloads(false);
+    std::atomic_bool startedAllDownloads = false;
 
     std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
     std::string line;
     while (fileList >> line) {
+        if (line.empty() || line[0] == '#') {
+            // Skip all empty lines and commented out lines
+            continue;
+        }
+
         std::string filename = std::filesystem::path(line).filename().string();
         std::string destination = (directory() / (filename + TempSuffix)).string();
 
         if (sizeData.find(line) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));
+            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));
             continue;
         }
 
-        downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
-            line,
-            destination,
-            HttpFileDownload::Overwrite::Yes
-        ));
-
-        std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
+        std::unique_ptr<AsyncHttpFileDownload> download =
+            std::make_unique<AsyncHttpFileDownload>(
+                line,
+                destination,
+                HttpFileDownload::Overwrite::Yes
+            );
+        AsyncHttpDownload* dl = download.get();
+        downloads.push_back(std::move(download));
 
         sizeData[line] = { false, 0, 0 };
 
-        fileDownload->onProgress(
-            [this, line, &sizeData, &sizeDataMutex,
-             &startedAllDownloads](HttpRequest::Progress p)
+        dl->onProgress(
+            [this, line, &sizeData, &mutex, &startedAllDownloads](HttpRequest::Progress p)
         {
             if (!p.totalBytesKnown || !startedAllDownloads) {
                 return !_shouldCancel;
             }
 
-            std::lock_guard guard(sizeDataMutex);
+            std::lock_guard guard(mutex);
 
             ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
             sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
@@ -223,35 +228,35 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             return !_shouldCancel;
         });
 
-        fileDownload->start(opt);
+        dl->start(opt);
     }
     startedAllDownloads = true;
 
     bool failed = false;
     for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->wait();
-        if (d->hasSucceeded()) {
-            // If we are forcing the override, we download to a temporary file
-            // first, so when we are done here, we need to rename the file to the
-            // original name
-
-            std::filesystem::path tempName = d->destination();
-            std::filesystem::path originalName = tempName;
-            // Remove the .tmp extension
-            originalName.replace_extension("");
-
-            if (std::filesystem::is_regular_file(originalName)) {
-                std::filesystem::remove(originalName);
-            }
-            std::error_code ec;
-            std::filesystem::rename(tempName, originalName, ec);
-            if (ec) {
-                LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
-                failed = true;
-            }
-        }
-        else {
+        if (!d->hasSucceeded()) {
             LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            failed = true;
+            continue;
+        }
+
+        // If we are forcing the override, we download to a temporary file
+        // first, so when we are done here, we need to rename the file to the
+        // original name
+
+        std::filesystem::path tempName = d->destination();
+        std::filesystem::path originalName = tempName;
+        // Remove the .tmp extension
+        originalName.replace_extension("");
+
+        if (std::filesystem::is_regular_file(originalName)) {
+            std::filesystem::remove(originalName);
+        }
+        std::error_code ec;
+        std::filesystem::rename(tempName, originalName, ec);
+        if (ec) {
+            LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
             failed = true;
         }
     }

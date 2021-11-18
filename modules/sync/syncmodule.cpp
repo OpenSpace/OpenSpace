@@ -39,6 +39,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/templatefactory.h>
+#include <optional>
 
 #include "syncmodule_lua.inl"
 
@@ -46,6 +47,16 @@ namespace {
     constexpr const char* KeyHttpSynchronizationRepositories =
         "HttpSynchronizationRepositories";
     constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
+
+    struct [[codegen::Dictionary(SyncModule)]] Parameters {
+        // The list of all repository URLs that are used to fetch data from for
+        // HTTPSynchronizations
+        std::optional<std::vector<std::string>> httpSynchronizationRepositories;
+
+        // The folder where all of the synchronizations are stored
+        std::optional<std::filesystem::path> synchronizationRoot;
+    };
+#include "syncmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -53,6 +64,8 @@ namespace openspace {
 SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
+    const Parameters p = codegen::bake<Parameters>(configuration);
+
     if (configuration.hasKey(KeyHttpSynchronizationRepositories)) {
         ghoul::Dictionary dictionary = configuration.value<ghoul::Dictionary>(
             KeyHttpSynchronizationRepositories
@@ -64,7 +77,9 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     }
 
     if (configuration.hasKey(KeySynchronizationRoot)) {
-        _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
+        _synchronizationRoot = absPath(
+            configuration.value<std::string>(KeySynchronizationRoot)
+        );
     }
     else {
         LWARNINGC(
@@ -105,22 +120,16 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         [this](bool, const ghoul::Dictionary& dictionary, ghoul::MemoryPoolBase* pool) {
             if (pool) {
                 void* ptr = pool->allocate(sizeof(UrlSynchronization));
-                return new (ptr) UrlSynchronization(
-                    dictionary,
-                    _synchronizationRoot
-                );
+                return new (ptr) UrlSynchronization(dictionary, _synchronizationRoot);
             }
             else {
-                return new UrlSynchronization(
-                    dictionary,
-                    _synchronizationRoot
-                );
+                return new UrlSynchronization(dictionary, _synchronizationRoot);
             }
         }
     );
 }
 
-std::string SyncModule::synchronizationRoot() const {
+std::filesystem::path SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }
 

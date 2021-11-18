@@ -79,7 +79,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
 }
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
-                                       std::string synchronizationRoot)
+                                       std::filesystem::path synchronizationRoot)
     : ResourceSynchronization(dict)
     , _synchronizationRoot(std::move(synchronizationRoot))
 {
@@ -124,8 +124,7 @@ UrlSynchronization::~UrlSynchronization() {
 }
 
 std::filesystem::path UrlSynchronization::directory() const {
-    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
-    return absPath(d);
+    return _synchronizationRoot / "url" / _identifier / "files";
 }
 
 void UrlSynchronization::start() {

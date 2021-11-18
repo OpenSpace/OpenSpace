@@ -28,6 +28,7 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <atomic>
+#include <filesystem>
 #include <thread>
 #include <vector>
 
@@ -35,7 +36,8 @@ namespace openspace {
 
 class UrlSynchronization : public ResourceSynchronization {
 public:
-    UrlSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot);
+    UrlSynchronization(const ghoul::Dictionary& dict,
+        std::filesystem::path synchronizationRoot);
 
     virtual ~UrlSynchronization();
 
@@ -54,7 +56,7 @@ public:
 private:
     std::vector<std::string> _urls;
     bool _forceOverride = false;
-    std::string _synchronizationRoot;
+    std::filesystem::path _synchronizationRoot;
     std::string _identifier;
     std::string _filename;
 
