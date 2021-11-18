@@ -39,9 +39,6 @@ public:
 
     std::filesystem::path synchronizationRoot() const;
 
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
-
     std::vector<documentation::Documentation> documentations() const override;
 
     scripting::LuaLibrary luaLibrary() const override;

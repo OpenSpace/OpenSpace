@@ -33,7 +33,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -53,7 +52,6 @@ namespace {
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
     ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetManager assetLoader(
         state,
         absPath("${TESTDIR}/AssetLoaderTest/").string()
@@ -66,7 +64,6 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
     ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetManager assetLoader(
         state,
         absPath("${TESTDIR}/AssetLoaderTest/").string()
@@ -78,7 +75,6 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
     ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetManager assetLoader(
         state,
         absPath("${TESTDIR}/AssetLoaderTest/").string()

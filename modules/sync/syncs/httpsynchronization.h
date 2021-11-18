@@ -43,7 +43,6 @@ public:
     std::filesystem::path directory() const override;
     void start() override;
     void cancel() override;
-    void clear() override;
 
     size_t nSynchronizedBytes() const override;
     size_t nTotalBytes() const override;
@@ -59,7 +58,6 @@ private:
     std::atomic_size_t _nSynchronizedBytes = 0;
     std::atomic_bool _shouldCancel = false;
 
-    std::string _identifier;
     int _version = -1;
     const std::filesystem::path _syncRoot;
     const std::vector<std::string> _syncRepositories;

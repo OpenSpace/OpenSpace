@@ -777,8 +777,19 @@ void OpenSpaceEngine::loadAssets() {
 
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = sync->progress();
 
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                }(sync);
+                
                 _loadingScreen->updateItem(
                     sync->name(),
                     sync->name(),
@@ -830,7 +841,18 @@ void OpenSpaceEngine::loadAssets() {
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = (*it)->progress();
+
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                }(*it);
 
                 if ((*it)->nTotalBytesIsKnown()) {
                     progressInfo.currentSize = (*it)->nSynchronizedBytes();

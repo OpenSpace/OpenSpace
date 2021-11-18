@@ -54,7 +54,7 @@ namespace {
         std::optional<std::vector<std::string>> httpSynchronizationRepositories;
 
         // The folder where all of the synchronizations are stored
-        std::optional<std::filesystem::path> synchronizationRoot;
+        std::string synchronizationRoot;
     };
 #include "syncmodule_codegen.cpp"
 } // namespace
@@ -66,30 +66,11 @@ SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     const Parameters p = codegen::bake<Parameters>(configuration);
 
-    if (configuration.hasKey(KeyHttpSynchronizationRepositories)) {
-        ghoul::Dictionary dictionary = configuration.value<ghoul::Dictionary>(
-            KeyHttpSynchronizationRepositories
-        );
-
-        for (std::string_view key : dictionary.keys()) {
-            _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
-        }
+    if (p.httpSynchronizationRepositories.has_value()) {
+        _synchronizationRepositories = *p.httpSynchronizationRepositories;
     }
 
-    if (configuration.hasKey(KeySynchronizationRoot)) {
-        _synchronizationRoot = absPath(
-            configuration.value<std::string>(KeySynchronizationRoot)
-        );
-    }
-    else {
-        LWARNINGC(
-            "SyncModule",
-            "No synchronization root specified. Disabling resource synchronization"
-        );
-        //_synchronizationEnabled = false;
-        // TODO: Make it possible to disable synchronization manually.
-        // Group root and enabled into a sync config object that can be passed to syncs.
-    }
+    _synchronizationRoot = absPath(p.synchronizationRoot);
 
     auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
@@ -133,17 +114,10 @@ std::filesystem::path SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }
 
-void SyncModule::addHttpSynchronizationRepository(std::string repository) {
-    _synchronizationRepositories.push_back(std::move(repository));
-}
-
-std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
-    return _synchronizationRepositories;
-}
-
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
-        HttpSynchronization::Documentation()
+        HttpSynchronization::Documentation(),
+        UrlSynchronization::Documentation()
     };
 }
 

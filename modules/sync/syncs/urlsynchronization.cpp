@@ -24,19 +24,12 @@
 
 #include <modules/sync/syncs/urlsynchronization.h>
 
-#include <modules/sync/syncmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <filesystem>
 #include <numeric>
-#include <memory>
+#include <mutex>
 #include <optional>
 #include <variant>
 
@@ -80,8 +73,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
                                        std::filesystem::path synchronizationRoot)
-    : ResourceSynchronization(dict)
-    , _synchronizationRoot(std::move(synchronizationRoot))
+    : _synchronizationRoot(std::move(synchronizationRoot))
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
@@ -100,7 +92,6 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     _forceOverride = p.forceOverride.value_or(_forceOverride);
 
     const bool useHash = p.useHash.value_or(true);
-
 
     _identifier = p.identifier;
 
@@ -244,11 +235,6 @@ void UrlSynchronization::start() {
 void UrlSynchronization::cancel() {
     _shouldCancel = true;
     _state = State::Unsynced;
-}
-
-void UrlSynchronization::clear() {
-    cancel();
-    // TODO: Remove all files from directory.
 }
 
 size_t UrlSynchronization::nSynchronizedBytes() const {

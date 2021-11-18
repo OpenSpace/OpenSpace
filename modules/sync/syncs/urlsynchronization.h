@@ -29,6 +29,7 @@
 
 #include <atomic>
 #include <filesystem>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -45,7 +46,6 @@ public:
 
     void start() override;
     void cancel() override;
-    void clear() override;
 
     size_t nSynchronizedBytes() const override;
     size_t nTotalBytes() const override;
@@ -57,7 +57,6 @@ private:
     std::vector<std::string> _urls;
     bool _forceOverride = false;
     std::filesystem::path _synchronizationRoot;
-    std::string _identifier;
     std::string _filename;
 
     std::atomic_bool _nTotalBytesKnown = false;

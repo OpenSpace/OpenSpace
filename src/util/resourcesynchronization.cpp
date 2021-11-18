@@ -63,6 +63,7 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
+    sync->_identifier = p.identifier;
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);
 }
@@ -71,8 +72,6 @@ std::string ResourceSynchronization::generateUid(const ghoul::Dictionary& dictio
     const Parameters p = codegen::bake<Parameters>(dictionary);
     return fmt::format("{}/{}", p.type, p.identifier);
 }
-
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary&) {}
 
 bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
@@ -86,20 +85,9 @@ bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
 }
 
-float ResourceSynchronization::progress() const {
-    if (!nTotalBytesIsKnown()) {
-        return 0.f;
-    }
-    if (nTotalBytes() == 0) {
-        return 1.f;
-    }
-    return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
-}
-
 const std::string& ResourceSynchronization::name() const {
     return _name;
 }
-
 
 void ResourceSynchronization::createSyncFile() const {
     std::filesystem::path dir = directory();

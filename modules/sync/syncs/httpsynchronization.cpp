@@ -24,17 +24,10 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 
-#include <modules/sync/syncmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/httprequest.h>
-#include <ghoul/fmt.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <filesystem>
-#include <fstream>
-#include <numeric>
 
 namespace {
     constexpr const char* _loggerCat = "HttpSynchronization";
@@ -67,8 +60,7 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
                                          std::filesystem::path synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
-    : ResourceSynchronization(dict)
-    , _syncRoot(std::move(synchronizationRoot))
+    : _syncRoot(std::move(synchronizationRoot))
     , _syncRepositories(std::move(synchronizationRepositories))
 {
     const Parameters p = codegen::bake<Parameters>(dict);
@@ -99,7 +91,7 @@ void HttpSynchronization::start() {
         return;
     }
 
-    const std::string& query = fmt::format(
+    std::string query = fmt::format(
         "?identifier={}&file_version={}&application_version={}",
         _identifier, _version, ApplicationVersion
     );
@@ -125,11 +117,6 @@ void HttpSynchronization::start() {
 void HttpSynchronization::cancel() {
     _shouldCancel = true;
     _state = State::Unsynced;
-}
-
-void HttpSynchronization::clear() {
-    cancel();
-    // TODO: Remove all files from directory.
 }
 
 size_t HttpSynchronization::nSynchronizedBytes() const {
@@ -241,9 +228,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        // If we are forcing the override, we download to a temporary file
-        // first, so when we are done here, we need to rename the file to the
-        // original name
+        // If we are forcing the override, we download to a temporary file first, so when
+        // we are done here, we need to rename the file to the original name
 
         std::filesystem::path tempName = d->destination();
         std::filesystem::path originalName = tempName;
