@@ -32,6 +32,14 @@
 
 namespace openspace {
 
+/**
+ * A concreate ResourceSynchronization that will request a list of files from a central
+ * server (the server list is provided in the constructor) by asking for a specific
+ * identifier and a file version and application version addition. The server is expected
+ * to return a flat list of files that can be then directly downloaded into the #directory
+ * of this synchronization. That list of files can have empty lines and commented out
+ * lines (starting with a #).
+ */
 class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict,

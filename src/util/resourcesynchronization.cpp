@@ -95,6 +95,8 @@ void ResourceSynchronization::createSyncFile() const {
 
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
+    // The actual text what is written is not used anywhere, but it might be useful to
+    // user that wants to look at it
     syncFile << "Synchronized";
 }
 
