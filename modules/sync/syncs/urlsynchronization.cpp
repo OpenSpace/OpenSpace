@@ -38,7 +38,8 @@ namespace {
 
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
         // The URL or urls from where the files are downloaded. If multiple URLs are
-        // provided, all files will be downloaded to the same directory
+        // provided, all files will be downloaded to the same directory and the filename
+        // parameter must not be specified simultaneously
         std::variant<std::string, std::vector<std::string>> url;
 
         // This identifier will be part of the used folder structure and, can be used to
@@ -59,7 +60,8 @@ namespace {
         std::optional<bool> useHash;
 
         // Optional to provide filename to override the one which is otherwise
-        // automatically created from the url
+        // automatically created from the url. If this value is specified, the url
+        // parameter only only contain exactly one URL
         std::optional<std::string> filename;
     };
 #include "urlsynchronization_codegen.cpp"
@@ -71,11 +73,11 @@ documentation::Documentation UrlSynchronization::Documentation() {
     return codegen::doc<Parameters>("sync_synchronization_url");
 }
 
-UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
+UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
                                        std::filesystem::path synchronizationRoot)
-    : _synchronizationRoot(std::move(synchronizationRoot))
+    : ResourceSynchronization(std::move(synchronizationRoot))
 {
-    const Parameters p = codegen::bake<Parameters>(dict);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (std::holds_alternative<std::string>(p.url)) {
         _urls.push_back(std::get<std::string>(p.url));
@@ -87,7 +89,14 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     else {
         throw ghoul::MissingCaseException();
     }
-
+    
+    if (p.filename.has_value() && _urls.size() > 1) {
+        throw ghoul::RuntimeError(fmt::format(
+            "UrlSynchronization ({}) requested overwrite filename but specified {} URLs "
+            "to download, which is not legal",
+            p.identifier, _urls.size()
+        ));
+    }
     _filename = p.filename.value_or(_filename);
     _forceOverride = p.forceOverride.value_or(_forceOverride);
 
@@ -235,18 +244,6 @@ void UrlSynchronization::start() {
 void UrlSynchronization::cancel() {
     _shouldCancel = true;
     _state = State::Unsynced;
-}
-
-size_t UrlSynchronization::nSynchronizedBytes() const {
-    return _nSynchronizedBytes;
-}
-
-size_t UrlSynchronization::nTotalBytes() const {
-    return _nTotalBytes;
-}
-
-bool UrlSynchronization::nTotalBytesIsKnown() const {
-    return _nTotalBytesKnown;
 }
 
 } // namespace openspace

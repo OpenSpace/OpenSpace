@@ -60,7 +60,7 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
                                          std::filesystem::path synchronizationRoot,
                                       std::vector<std::string> synchronizationRepositories
 )
-    : _syncRoot(std::move(synchronizationRoot))
+    : ResourceSynchronization(std::move(synchronizationRoot))
     , _syncRepositories(std::move(synchronizationRepositories))
 {
     const Parameters p = codegen::bake<Parameters>(dict);
@@ -77,7 +77,7 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::filesystem::path HttpSynchronization::directory() const {
-    return _syncRoot / "http" / _identifier / std::to_string(_version);
+    return _synchronizationRoot / "http" / _identifier / std::to_string(_version);
 }
 
 void HttpSynchronization::start() {
@@ -117,18 +117,6 @@ void HttpSynchronization::start() {
 void HttpSynchronization::cancel() {
     _shouldCancel = true;
     _state = State::Unsynced;
-}
-
-size_t HttpSynchronization::nSynchronizedBytes() const {
-    return _nSynchronizedBytes;
-}
-
-size_t HttpSynchronization::nTotalBytes() const {
-    return _nTotalBytes;
-}
-
-bool HttpSynchronization::nTotalBytesIsKnown() const {
-    return _nTotalBytesKnown;
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
@@ -189,6 +177,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         AsyncHttpDownload* dl = download.get();
         downloads.push_back(std::move(download));
 
+        ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
         sizeData[line] = { false, 0, 0 };
 
         dl->onProgress(
@@ -200,7 +189,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
             std::lock_guard guard(mutex);
 
-            ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
             sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
 
             _nTotalBytesKnown = true;

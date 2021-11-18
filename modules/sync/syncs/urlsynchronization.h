@@ -35,35 +35,61 @@
 
 namespace openspace {
 
+/**
+ * The UrlSynchronization will download one or more files by directly being provided with
+ * the list of URLs to the files that should be downloaded. The \c Override option in the
+ * Dictionary determines what should happen in a file with the same name and the same
+ * identifier has been previously downloaded.
+ */
 class UrlSynchronization : public ResourceSynchronization {
 public:
-    UrlSynchronization(const ghoul::Dictionary& dict,
+    /**
+     * The constructor that takes the parameter \p dictionary and the
+     * \p synchronizationRoot to the location that is used as the base to compute the
+     * final storage location. The provided list of URLs must not contain any duplicates.
+     * 
+     * \param dictionary The parameter dictionary that contains all information that this
+     *        UrlSynchronization needs to download the provided files
+     * \param synchronizationRoot The base location based off which the final placement
+     *        is calculated
+     */
+    UrlSynchronization(const ghoul::Dictionary& dictionary,
         std::filesystem::path synchronizationRoot);
 
+    /// Contructor that will terminate the synchronization thread if it is still running
     virtual ~UrlSynchronization();
 
+    /**
+     * Returns the location to which files downloaded through this ResourceSynchronization
+     * are saved.
+     * 
+     * \return The location for files created by this class
+     */
     std::filesystem::path directory() const override;
 
+    /// Starts the synchronization for this ResourceSynchronization
     void start() override;
+    
+    /// Cancels any ongoing synchronization of this ResourceSynchronization
     void cancel() override;
-
-    size_t nSynchronizedBytes() const override;
-    size_t nTotalBytes() const override;
-    bool nTotalBytesIsKnown() const override;
 
     static documentation::Documentation Documentation();
 
 private:
+    /// The list of URLs that will be downloaded
     std::vector<std::string> _urls;
+
+    /// Setting whether existing files should be ignored (false) or overwritten (true)
     bool _forceOverride = false;
-    std::filesystem::path _synchronizationRoot;
+    
+    /// An optional filename that might overwrite the storage destination. This is only
+    /// valid if a single URL is specified
     std::string _filename;
 
-    std::atomic_bool _nTotalBytesKnown = false;
-    std::atomic_size_t _nTotalBytes = 0;
-    std::atomic_size_t _nSynchronizedBytes = 0;
+    /// Contains a flag whether the current transfer should be cancelled
     std::atomic_bool _shouldCancel = false;
 
+    // The thread that will be doing the synchronization
     std::thread _syncThread;
 };
 

@@ -73,6 +73,11 @@ std::string ResourceSynchronization::generateUid(const ghoul::Dictionary& dictio
     return fmt::format("{}/{}", p.type, p.identifier);
 }
 
+ResourceSynchronization::ResourceSynchronization(
+                                                std::filesystem::path synchronizationRoot)
+    : _synchronizationRoot(std::move(synchronizationRoot))
+{}
+
 bool ResourceSynchronization::isResolved() const {
     return _state == State::Resolved;
 }
@@ -83,6 +88,18 @@ bool ResourceSynchronization::isRejected() const {
 
 bool ResourceSynchronization::isSyncing() const {
     return _state == State::Syncing;
+}
+
+size_t ResourceSynchronization::nSynchronizedBytes() const {
+    return _nSynchronizedBytes;
+}
+
+size_t ResourceSynchronization::nTotalBytes() const {
+    return _nTotalBytes;
+}
+
+bool ResourceSynchronization::nTotalBytesIsKnown() const {
+    return _nTotalBytesKnown;
 }
 
 const std::string& ResourceSynchronization::name() const {

@@ -102,28 +102,34 @@ public:
 
     /**
      * Returns the number of bytes that have already been synchronized or 0 if the
-     * synchronization hasn't started yet.
+     * synchronization hasn't started yet. This number always will only contain the number
+     * of bytes of actual payload data, not any additional data transfers that some
+     * subtypes might require.
      * 
      * \return The number of synchronized bytes
      */
-    virtual size_t nSynchronizedBytes() const = 0;
+    size_t nSynchronizedBytes() const;
 
     /**
      * Returns the number of total bytes that ought to be synchronized for this
      * ResourceSynchronization to be considered complete. If that number is not known
-     * (yet), the returned value is 0.
+     * (yet), the returned value is 0. This number always will only contain the number of
+     * bytes of actual payload data, not any additional data transfers that some subtypes
+     * might require.
      * 
      * \return The total number of required bytes
      */
-    virtual size_t nTotalBytes() const = 0;
+    size_t nTotalBytes() const;
 
     /**
      * Returns \c true if the total number of bytes for this ResourceSynchronization is
-     * known. Will return \c false otherwise
+     * known. Will return \c false otherwise. This number always will only contain the
+     * number of bytes of actual payload data, not any additional data transfers that some
+     * subtypes might require.
      * 
      * \return The state whether the number of total bytes is known or not
      */
-    virtual bool nTotalBytesIsKnown() const = 0;
+    bool nTotalBytesIsKnown() const;
 
     /**
      * Returns the name of this ResourceSynchronization.
@@ -164,6 +170,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    // Empty constructor that just sets the synchronization root
+    ResourceSynchronization(std::filesystem::path synchronizationRoot);
+
     /// Representation of the state that this object can be in
     enum class State {
         Unsynced,
@@ -186,8 +195,20 @@ protected:
     /// The user-facing name of this ResourceSynchronization
     std::string _name;
 
+    /// The path to the root folder relative to which synchronization files are placed
+    const std::filesystem::path _synchronizationRoot;
+
     /// The current #State of this ResouceSynchronization
     std::atomic<State> _state = State::Unsynced;
+
+    /// Contains the fact whether the total number of payload bytes is known
+    std::atomic_bool _nTotalBytesKnown = false;
+    
+    /// Contains the total number of payload bytes or 0 if that number is not known
+    std::atomic_size_t _nTotalBytes = 0;
+
+    /// Contains the number of already synchronized payload bytes
+    std::atomic_size_t _nSynchronizedBytes = 0;
 };
 
 } // namespace openspace
