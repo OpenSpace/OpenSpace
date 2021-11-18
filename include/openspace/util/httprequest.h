@@ -45,15 +45,6 @@
 
 namespace openspace {
 
-namespace curlfunctions {
-    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData);
-
-    int progressCallback(void* userData, int64_t nTotalDownloadBytes,
-        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
-
-    size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData);
-}
-
 // Synchronous http request
 class HttpRequest {
 public:
@@ -92,16 +83,6 @@ public:
     const std::string& url() const;
 
 private:
-    friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
-        void* userData);
-
-    friend int curlfunctions::progressCallback(void* userData,
-        int64_t nTotalDownloadBytes,
-        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
-
-    friend size_t curlfunctions::headerCallback(char* ptr, size_t size, size_t nmemb,
-        void* userData);
-
     void setReadyState(ReadyState state);
 
     std::string _url;
@@ -146,20 +127,6 @@ private:
     bool _started = false;
     bool _failed = false;
     bool _successful = false;
-};
-
-class SyncHttpDownload : public virtual HttpDownload {
-public:
-    SyncHttpDownload(std::string url);
-    SyncHttpDownload(SyncHttpDownload&& d) = default;
-    SyncHttpDownload& operator=(SyncHttpDownload&&) = default;
-    virtual ~SyncHttpDownload() = default;
-    void download(int requestTimeoutSeconds = 0);
-
-    const std::string& url() const;
-
-protected:
-    HttpRequest _httpRequest;
 };
 
 class AsyncHttpDownload : public virtual HttpDownload {
@@ -228,24 +195,6 @@ protected:
 
 private:
     std::vector<char> _downloadedData;
-};
-
-// Synchronous download to memory
-class SyncHttpMemoryDownload : public SyncHttpDownload, public HttpMemoryDownload {
-public:
-    SyncHttpMemoryDownload(std::string url);
-    virtual ~SyncHttpMemoryDownload() = default;
-};
-
-// Synchronous download to file
-class SyncHttpFileDownload : public SyncHttpDownload, public HttpFileDownload {
-public:
-    SyncHttpFileDownload(
-        std::string url,
-        std::string destinationPath,
-        HttpFileDownload::Overwrite = Overwrite::No
-    );
-    virtual ~SyncHttpFileDownload() = default;
 };
 
 // Asynchronous download to memory

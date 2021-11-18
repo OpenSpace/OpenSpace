@@ -120,11 +120,12 @@ void HttpSynchronization::cancel() {
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    SyncHttpMemoryDownload fileListDownload(std::move(listUrl));
+    AsyncHttpMemoryDownload fileListDownload(std::move(listUrl));
     fileListDownload.onProgress([&c = _shouldCancel](bool, size_t, size_t) {
         return !c;
     });
-    fileListDownload.download();
+    fileListDownload.start();
+    fileListDownload.wait();
 
     if (!fileListDownload.hasSucceeded()) {
         return false;
