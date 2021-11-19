@@ -63,6 +63,12 @@ public:
     double pathLength() const;
 
     /**
+     * Return the remaining distance for the path, that is the path length 
+     * minus the travelled distance, in meters
+     */
+    double remainingDistance() const;
+
+    /**
      * Return a vector of positions corresponding to the control points of the path's
      * spline curve
      */

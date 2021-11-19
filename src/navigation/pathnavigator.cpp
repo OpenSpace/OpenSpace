@@ -417,8 +417,22 @@ void PathNavigator::findRelevantNodes() {
 void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTime) {
     const constexpr float maxAngle = glm::radians(30.f);
 
+    double almostArrivedDistance = 8.0 * _currentPath->endPoint().validBoundingSphere();
+    double remainingDistance = _currentPath->remainingDistance();
+
+    if (remainingDistance < almostArrivedDistance) {
+        // Interpolate back to the view the camera path wants and ignore any further input
+        double t = 1.0;
+        if (remainingDistance > 0.0) {
+            double clampedRemaining = std::clamp(remainingDistance, 0.0001, almostArrivedDistance);
+            t = 1.0 - std::log(clampedRemaining) / std::log(almostArrivedDistance);
+            t = ghoul::cubicEaseInOut(t);
+        }
+        pose.rotation = glm::mix(camera()->rotationQuaternion(), pose.rotation, t);
+        return;
+    }
+
     glm::dvec2 velocity = _mouseStates.globalRotationVelocity();
-    
     float rollVelocity = 0.1f * _mouseStates.globalRollVelocity().x; // TODO: move this factor somewhere else?
 
     // TODO (emmbr, 2021-11-17) It's really ugly ot depend on the orbital navigator's 

@@ -132,6 +132,8 @@ Waypoint Path::endPoint() const { return _end; }
 
 double Path::pathLength() const { return _curve->length(); }
 
+double Path::remainingDistance() const { return _curve->length() - _traveledDistance; }
+
 std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
