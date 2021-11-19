@@ -1,0 +1,68 @@
+local propertyHelper = asset.require('../property_helper')
+local joystickHelper = asset.require('./joystick_helper')
+
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+-- Sixth parameter is the sensitivity for the axis
+
+local TCAQEng1and2 = {
+  Sticks = { 0 , 1 }, -- left, right
+  LeftStickButton = 0,
+  RightStickButton = 1,
+  LeftFlip = 2,
+  RightFlip = 3,
+  LeftButton = 4,
+  RightButton = 5,
+  LeftSelected = 6,
+  RightSelected = 7,
+  LeftStages = {
+    Level1 = 8, -- away
+    Level2 = 9, -- middle
+    Level3 = 10, -- closest
+    Yellow = 11 -- inside yellow area (only accessible if enabled)
+  },
+  RightStages = {
+    Level1 = 12, -- away
+    Level2 = 13, -- middle
+    Level3 = 14, -- closest
+    Yellow = 15 -- inside yellow area (only accessible if enabled)
+  }
+}
+
+asset.onInitialize(function()
+  local controller = TCAQEng1and2;
+  local name = "TCA Q-Eng 1&2";
+
+  -- Deadzones
+  openspace.navigation.setAxisDeadZone(name, controller.Sticks[1], 0.15)
+  openspace.navigation.setAxisDeadZone(name, controller.Sticks[2], 0.15)
+
+  -- Bind axis
+  openspace.navigation.bindJoystickAxisProperty(
+    name,
+    controller.Sticks[1],
+    "NavigationHandler.PathNavigator.SpeedScale",
+    0.1,
+    5,
+    true
+  ); -- Assume they are bound together
+
+  -- Bind buttons
+end)

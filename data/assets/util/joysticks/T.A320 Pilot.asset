@@ -1,0 +1,74 @@
+local propertyHelper = asset.require('../property_helper')
+local joystickHelper = asset.require('./joystick_helper')
+
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+-- Sixth parameter is the sensitivity for the axis
+
+local TA320Pilot = {
+  Tilt = { 0, 1 }, -- left/right, back/forth
+  Twist = { 2 }, -- left/right
+  Thrust = { 3 }, -- up/down
+  Trigger = 0,
+  TriggerButton = 1,
+  LeftButton = 2,
+  RightButton = 3,
+  RightPanel = {
+    TopLeft = 6,
+    TopMid = 5,
+    TopRight = 4,
+    BotLeft = 7,
+    BotMid = 8,
+    BotRight = 9
+  },
+  LeftPanel = {
+    TopLeft = 10,
+    TopMid = 11,
+    TopRight = 12,
+    BotLeft = 15,
+    BotMid = 14,
+    BotRight = 13,
+  },
+  ThrustAllDown = 16,
+  MiniJoystick = {
+    Up = 17,
+    Right = 18,
+    Down = 19,
+    Left = 20
+  }
+}
+
+asset.onInitialize(function()
+  local controller = TA320Pilot;
+  local name = "T.A320 Pilot";
+
+  -- Deadzones
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], 0.15);
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], 0.15);
+  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], 0.15);
+  openspace.navigation.setAxisDeadZone(name, controller.Thrust[1], 0.15);
+
+  -- Bind axis
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "Orbit X");
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Orbit Y");
+  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "GlobalRoll X", true);
+
+  -- Bind buttons
+end)
