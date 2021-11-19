@@ -143,7 +143,7 @@ void UrlSynchronization::start() {
         std::mutex fileSizeMutex;
         size_t nDownloads = 0;
         std::atomic_bool startedAllDownloads = false;
-        std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
+        std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
             if (_filename.empty()) {
@@ -155,13 +155,13 @@ void UrlSynchronization::start() {
             }
             std::string destination = (directory() / (_filename + TempSuffix)).string();
 
-            std::unique_ptr<AsyncHttpFileDownload> download =
-                std::make_unique<AsyncHttpFileDownload>(
+            std::unique_ptr<HttpFileDownload> download =
+                std::make_unique<HttpFileDownload>(
                     url,
                     destination,
                     HttpFileDownload::Overwrite::Yes
                 );
-            AsyncHttpFileDownload* dl = download.get();
+            HttpFileDownload* dl = download.get();
 
             downloads.push_back(std::move(download));
 
@@ -198,7 +198,7 @@ void UrlSynchronization::start() {
         startedAllDownloads = true;
 
         bool failed = false;
-        for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+        for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
             d->wait();
             if (!d->hasSucceeded()) {
                 failed = true;
@@ -233,7 +233,7 @@ void UrlSynchronization::start() {
             createSyncFile();
         }
         else {
-            for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+            for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
                 d->cancel();
             }
         }

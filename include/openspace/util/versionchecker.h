@@ -49,7 +49,7 @@ public:
     SemanticVersion latestVersion();
 
 private:
-    std::unique_ptr<AsyncHttpMemoryDownload> _request;
+    std::unique_ptr<HttpMemoryDownload> _request;
     std::optional<SemanticVersion> _latestVersion;
 };
 

@@ -51,7 +51,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
         _request = nullptr;
     }
 
-    _request = std::make_unique<AsyncHttpMemoryDownload>(std::move(fullUrl));
+    _request = std::make_unique<HttpMemoryDownload>(std::move(fullUrl));
     _request->start();
 }
 

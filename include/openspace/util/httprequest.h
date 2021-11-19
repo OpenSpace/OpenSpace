@@ -35,28 +35,11 @@
 #include <thread>
 #include <vector>
 
-// @TODO:  This class is a diamond-of-death;  maybe some redesign to make the things into
-//         components, rather than inheritance?
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 namespace openspace {
 
 // Synchronous http request
 class HttpRequest {
 public:
-    enum class ReadyState {
-        Unsent,
-        Loading,
-        ReceivedHeader,
-        Fail,
-        Success
-    };
-    using ReadyStateChangeCallback = std::function<void(ReadyState)>;
-
     // ProgressCallback: Return non-zero value to cancel download
     using ProgressCallback = std::function<
         int(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
@@ -72,27 +55,22 @@ public:
 
     explicit HttpRequest(std::string url);
 
-    void onReadyStateChange(ReadyStateChangeCallback cb);
     void onHeader(HeaderCallback cb);
     void onProgress(ProgressCallback cb);
     void onData(DataCallback cb);
 
     // 0 for no timeout
-    void perform(int requestTimeoutSeconds = 0);
+    // return success
+    bool perform(int requestTimeoutSeconds = 0);
 
     const std::string& url() const;
 
 private:
-    void setReadyState(ReadyState state);
-
-    std::string _url;
-
-    ReadyStateChangeCallback _onReadyStateChange;
     ProgressCallback _onProgress;
     DataCallback _onData;
     HeaderCallback _onHeader;
 
-    ReadyState _readyState;
+    std::string _url;
 };
 
 class HttpDownload {
@@ -102,48 +80,32 @@ public:
     >;
     using HeaderCallback = std::function<bool(char* buffer, size_t size)>;
 
-    HttpDownload();
-    HttpDownload(HttpDownload&& d) = default;
-    HttpDownload& operator=(HttpDownload&&) = default;
+    HttpDownload(std::string url);
     virtual ~HttpDownload() = default;
+
     void onProgress(ProgressCallback progressCallback);
-    void onHeader(HeaderCallback headerCallback);
-    bool hasStarted() const;
-    bool hasFailed() const;
-    bool hasSucceeded() const;
 
-protected:
-    virtual size_t handleData(char* buffer, size_t size) = 0;
-    virtual bool initDownload() = 0;
-    virtual bool deinitDownload() = 0;
-
-    bool callOnProgress(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes);
-    void markAsStarted();
-    void markAsSuccessful();
-    void markAsFailed();
-
-private:
-    ProgressCallback _onProgress;
-    bool _started = false;
-    bool _failed = false;
-    bool _successful = false;
-};
-
-class AsyncHttpDownload : public virtual HttpDownload {
-public:
-    AsyncHttpDownload(std::string url);
-    AsyncHttpDownload(AsyncHttpDownload&& d);
-    virtual ~AsyncHttpDownload() = default;
     void start(int requestTimeoutSeconds = 0);
     void cancel();
     void wait();
 
+    bool hasFailed() const;
+    bool hasSucceeded() const;
+
     const std::string& url() const;
 
 protected:
-    void download(int requestTimeoutSeconds = 0);
+    virtual size_t handleData(char* buffer, size_t size) = 0;
+    virtual bool setup();
+    virtual bool teardown();
 
 private:
+    ProgressCallback _onProgress;
+    bool _started = false;
+    bool _finished = false;
+    bool _successful = false;
+
+    // async
     HttpRequest _httpRequest;
     std::thread _downloadThread;
     std::mutex _conditionMutex;
@@ -152,19 +114,19 @@ private:
     std::mutex _stateChangeMutex;
 };
 
-class HttpFileDownload : public virtual HttpDownload {
+class HttpFileDownload : public HttpDownload {
 public:
     BooleanType(Overwrite);
 
-    HttpFileDownload() = default;
-    HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
+    HttpFileDownload(std::string url, std::string destinationPath,
+        HttpFileDownload::Overwrite = Overwrite::No);
     virtual ~HttpFileDownload() = default;
 
     std::filesystem::path destination() const;
 
 protected:
-    bool initDownload() override;
-    bool deinitDownload() override;
+    bool setup() override;
+    bool teardown() override;
     size_t handleData(char* buffer, size_t size) override;
 
     static std::mutex _directoryCreationMutex;
@@ -179,47 +141,20 @@ private:
     static std::atomic_int nCurrentFilehandles;
 };
 
-class HttpMemoryDownload : public virtual HttpDownload {
+class HttpMemoryDownload : public HttpDownload {
 public:
-    HttpMemoryDownload() = default;
-    HttpMemoryDownload(HttpMemoryDownload&& d) = default;
-    HttpMemoryDownload& operator=(HttpMemoryDownload&&) = default;
+    HttpMemoryDownload(std::string url);
 
     virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData() const;
 
 protected:
-    bool initDownload() override;
-    bool deinitDownload() override;
     size_t handleData(char* buffer, size_t size) override;
 
 private:
     std::vector<char> _downloadedData;
 };
 
-// Asynchronous download to memory
-class AsyncHttpMemoryDownload : public AsyncHttpDownload, public HttpMemoryDownload {
-public:
-    AsyncHttpMemoryDownload(std::string url);
-    virtual ~AsyncHttpMemoryDownload() = default;
-};
-
-// Asynchronous download to file
-class AsyncHttpFileDownload : public AsyncHttpDownload, public HttpFileDownload {
-public:
-    AsyncHttpFileDownload(
-        std::string url,
-        std::string destinationPath,
-        HttpFileDownload::Overwrite = Overwrite::No
-    );
-    virtual ~AsyncHttpFileDownload() = default;
-};
-
 } // namespace openspace
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
 
 #endif // __OPENSPACE_CORE___HTTPREQUEST___H__

@@ -120,7 +120,7 @@ void HttpSynchronization::cancel() {
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    AsyncHttpMemoryDownload fileListDownload(std::move(listUrl));
+    HttpMemoryDownload fileListDownload(std::move(listUrl));
     fileListDownload.onProgress([&c = _shouldCancel](bool, size_t, size_t) {
         return !c;
     });
@@ -149,7 +149,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::atomic_bool startedAllDownloads = false;
 
-    std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
+    std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
     std::string line;
     while (fileList >> line) {
@@ -166,13 +166,13 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        std::unique_ptr<AsyncHttpFileDownload> download =
-            std::make_unique<AsyncHttpFileDownload>(
+        std::unique_ptr<HttpFileDownload> download =
+            std::make_unique<HttpFileDownload>(
                 line,
                 destination,
                 HttpFileDownload::Overwrite::Yes
             );
-        AsyncHttpDownload* dl = download.get();
+        HttpDownload* dl = download.get();
         downloads.push_back(std::move(download));
 
         ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
@@ -208,7 +208,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     startedAllDownloads = true;
 
     bool failed = false;
-    for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+    for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         d->wait();
         if (!d->hasSucceeded()) {
             LERROR(fmt::format("Error downloading file from URL {}", d->url()));
@@ -235,7 +235,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         }
     }
     if (failed) {
-        for (const std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
+        for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
             d->cancel();
         }
     }
