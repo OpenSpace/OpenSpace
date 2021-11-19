@@ -78,10 +78,9 @@ public:
     using ProgressCallback = std::function<
         bool(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
     >;
-    using HeaderCallback = std::function<bool(char* buffer, size_t size)>;
 
     HttpDownload(std::string url);
-    virtual ~HttpDownload() = default;
+    virtual ~HttpDownload();
 
     void onProgress(ProgressCallback progressCallback);
 
@@ -101,30 +100,28 @@ protected:
 
 private:
     ProgressCallback _onProgress;
+
     bool _started = false;
     bool _finished = false;
     bool _successful = false;
+    bool _shouldCancel = false;
 
-    // async
     HttpRequest _httpRequest;
     std::thread _downloadThread;
-    std::mutex _conditionMutex;
     std::condition_variable _downloadFinishCondition;
-    bool _shouldCancel = false;
-    std::mutex _stateChangeMutex;
 };
 
 class HttpFileDownload : public HttpDownload {
 public:
     BooleanType(Overwrite);
 
-    HttpFileDownload(std::string url, std::string destinationPath,
+    HttpFileDownload(std::string url, std::filesystem::path destinationPath,
         HttpFileDownload::Overwrite = Overwrite::No);
     virtual ~HttpFileDownload() = default;
 
     std::filesystem::path destination() const;
 
-protected:
+private:
     bool setup() override;
     bool teardown() override;
     size_t handleData(char* buffer, size_t size) override;
@@ -132,12 +129,10 @@ protected:
     static std::mutex _directoryCreationMutex;
     std::atomic_bool _hasHandle = false;
 
-private:
-    std::string _destination;
-    bool _overwrite;
+    std::filesystem::path _destination;
     std::ofstream _file;
 
-    static const int MaxFilehandles = 35;
+    static const int MaxFilehandles = 32;
     static std::atomic_int nCurrentFilehandles;
 };
 
@@ -148,10 +143,9 @@ public:
     virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData() const;
 
-protected:
+private:
     size_t handleData(char* buffer, size_t size) override;
 
-private:
     std::vector<char> _downloadedData;
 };
 

@@ -159,7 +159,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         }
 
         std::string filename = std::filesystem::path(line).filename().string();
-        std::string destination = (directory() / (filename + TempSuffix)).string();
+        std::filesystem::path destination = directory() / (filename + TempSuffix);
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));
@@ -172,7 +172,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 destination,
                 HttpFileDownload::Overwrite::Yes
             );
-        HttpDownload* dl = download.get();
+        HttpFileDownload* dl = download.get();
         downloads.push_back(std::move(download));
 
         ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");

@@ -179,6 +179,11 @@ HttpDownload::HttpDownload(std::string url)
     );
 }
 
+HttpDownload::~HttpDownload() {
+    cancel();
+    wait();
+}
+
 void HttpDownload::onProgress(ProgressCallback progressCallback) {
     _onProgress = std::move(progressCallback);
 }
@@ -192,7 +197,6 @@ bool HttpDownload::hasSucceeded() const {
 }
 
 void HttpDownload::start(int requestTimeoutSeconds) {
-    std::lock_guard guard(_stateChangeMutex);
     if (_started) {
         return;
     }
@@ -226,7 +230,8 @@ void HttpDownload::cancel() {
 }
 
 void HttpDownload::wait() {
-    std::unique_lock lock(_conditionMutex);
+    std::mutex conditionMutex;
+    std::unique_lock lock(conditionMutex);
     _downloadFinishCondition.wait(lock, [this]() { return _finished; });
     if (_downloadThread.joinable()) {
         _downloadThread.join();
@@ -261,23 +266,20 @@ size_t HttpMemoryDownload::handleData(char* buffer, size_t size) {
 std::atomic_int HttpFileDownload::nCurrentFilehandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
-HttpFileDownload::HttpFileDownload(std::string url, std::string destination,
-                                   HttpFileDownload::Overwrite overwrite)
+HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
+                                   Overwrite overwrite)
     : HttpDownload(std::move(url))
     , _destination(std::move(destination))
-    , _overwrite(overwrite)
-{}
+{
+    if (!overwrite && std::filesystem::is_regular_file(_destination)) {
+        throw ghoul::RuntimeError(fmt::format("File {} already exists", _destination));
+    }
+}
 
 bool HttpFileDownload::setup() {
-    if (!_overwrite && std::filesystem::is_regular_file(_destination)) {
-        LWARNING(fmt::format("File {} already exists", _destination));
-        return false;
-    }
-
-    std::filesystem::path d = std::filesystem::path(_destination).parent_path();
-
     {
         std::lock_guard g(_directoryCreationMutex);
+        std::filesystem::path d = _destination.parent_path();
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);
         }

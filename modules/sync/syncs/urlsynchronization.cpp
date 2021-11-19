@@ -153,7 +153,7 @@ void UrlSynchronization::start() {
                 name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
                 _filename = name;
             }
-            std::string destination = (directory() / (_filename + TempSuffix)).string();
+            std::filesystem::path destination = directory() / (_filename + TempSuffix);
 
             std::unique_ptr<HttpFileDownload> download =
                 std::make_unique<HttpFileDownload>(
