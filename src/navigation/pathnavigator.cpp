@@ -88,6 +88,32 @@ namespace {
         "when avoiding collisions."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo InteractionEnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If set to true, it is possible to interact a bit with the camera during a "
+        "path traversal, using ofr example a mouse or joystick. Note that changin this "
+        "in the middle of a flight might lead to weird behavior."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertedXInfo = {
+        "InvertedX",
+        "Inverted X",
+        "If true, the yaw motion is inverted compared to the input in the x direction."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertedYInfo = {
+        "InvertedY",
+        "Inverted Y",
+        "If true, the pitch motion is inverted compared to the input in the y direction."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo InvertedRollInfo = {
+        "InvertedRoll",
+        "Inverted Roll",
+        "If true, the roll motion is inverted compared to the input (in x direction)."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse Sensitivity",
@@ -113,6 +139,30 @@ namespace {
 
 namespace openspace::interaction {
 
+PathNavigator::MidFlightInteraction::MidFlightInteraction()
+    : properties::PropertyOwner({ "MidFlightInteraction" })
+    , enabled(InteractionEnabledInfo, true)
+    , invertedX(InvertedXInfo, true)
+    , invertedY(InvertedYInfo, true)
+    , invertedRoll(InvertedRollInfo, true)
+    , mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
+    , joystickImpactFactor(JoystickSensitivityInfo, 1.f, 0.0001f, 5.f)
+    , mouseStates(mouseSensitivity * 0.0001, 1.0 / (Friction + 0.0000001))
+{
+    addProperty(enabled);
+    addProperty(invertedX);
+    addProperty(invertedY);
+    addProperty(invertedRoll);
+
+    mouseStates.setRotationalFriction(RollFriction);
+    mouseSensitivity.onChange([&]() {
+        mouseStates.setSensitivity(mouseSensitivity * 0.0001);
+    });
+    addProperty(mouseSensitivity);
+
+    addProperty(joystickImpactFactor);
+}
+
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator" })
     , _defaultPathType(
@@ -124,9 +174,6 @@ PathNavigator::PathNavigator()
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
-    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
-    , _joystickImpactFactor(JoystickSensitivityInfo, 1.f, 0.0001f, 5.f)
-    , _mouseStates(_mouseSensitivity * 0.0001, 1.0 / (Friction + 0.0000001))
 {
     _defaultPathType.addOptions({
         { Path::Type::AvoidCollision, "AvoidCollision" },
@@ -148,13 +195,7 @@ PathNavigator::PathNavigator()
     _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
     addProperty(_relevantNodeTags);
 
-    _mouseStates.setRotationalFriction(RollFriction);
-    _mouseSensitivity.onChange([&]() {
-        _mouseStates.setSensitivity(_mouseSensitivity * 0.0001);
-     });
-    addProperty(_mouseSensitivity);
-
-    addProperty(_joystickImpactFactor);
+    addPropertySubOwner(_interaction);
 }
 
 PathNavigator::~PathNavigator() {} // NOLINT
@@ -255,7 +296,11 @@ void PathNavigator::updateStatesFromInput(const MouseInputState& mouseInputState
                                           const KeyboardInputState& keyboardInputState,
                                           double deltaTime)
 {
-    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
+    _interaction.mouseStates.updateStateFromInput(
+        mouseInputState,
+        keyboardInputState,
+        deltaTime
+    );
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
@@ -316,7 +361,7 @@ void PathNavigator::startPath() {
     _localYawAngle = 0.f;
     _localPitchAngle = 0.f;
     _localRollAngle = 0.f;
-    _mouseStates.resetVelocities();
+    _interaction.mouseStates.resetVelocities();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 }
@@ -432,52 +477,61 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
         return;
     }
 
-    glm::dvec2 velocity = _mouseStates.globalRotationVelocity();
-    float rollVelocity = 0.1f * _mouseStates.globalRollVelocity().x; // TODO: move this factor somewhere else?
+    if (!_interaction.enabled) {
+        return;
+    }
 
-    // TODO (emmbr, 2021-11-17) It's really ugly ot depend on the orbital navigator's 
+    glm::dvec2 velocity = _interaction.mouseStates.globalRotationVelocity();
+    float rollVelocity = 0.1f * _interaction.mouseStates.globalRollVelocity().x; // TODO: move this factor somewhere else?
+
+    // TODO (emmbr, 2021-11-17) It's really ugly ot depend on the orbital navigator's
     // joystickstates here, but we have to do so until we've figured out a nice way
-    // to break the axis binding logic out of the orbital navigator. 
-    JoystickCameraStates joystickStates = 
+    // to break the axis binding logic out of the orbital navigator.
+    JoystickCameraStates joystickStates =
         global::navigationHandler->orbitalNavigator().joystickStates();
 
     velocity += joystickStates.globalRotationVelocity() * deltaTime;
     rollVelocity += joystickStates.globalRollVelocity().x * deltaTime;
 
+    if (_interaction.invertedX) {
+        velocity.x *= -1.0;
+    }
+
+    if (_interaction.invertedY) {
+        velocity.y *= -1.0;
+    }
+
+    if (_interaction.invertedRoll) {
+        rollVelocity *= -1.0;
+    }
+
     _localYawAngle += velocity.x;
     _localYawAngle = std::clamp(_localYawAngle, -maxAngle, maxAngle);
     _localPitchAngle += velocity.y;
     _localPitchAngle = std::clamp(_localPitchAngle, -maxAngle, maxAngle);
-    
+
     _localRollAngle = rollVelocity; // Note: Not adding here on purpose. The roll will be preserved between frams if roll is removed
 
     //LINFO(fmt::format("Pan angle:  {}", _localYawAngle));
     //LINFO(fmt::format("Tilt angle: {}", _localPitchAngle));
     //LINFO(fmt::format("Roll angle: {}", _localRollAngle));
 
+    double yaw = static_cast<double>(_localYawAngle);
+    double pitch = static_cast<double>(_localPitchAngle);
+    double roll = static_cast<double>(_localRollAngle);
+
     const glm::dvec3 cameraForward = camera()->viewDirectionWorldSpace();
     const glm::dvec3 cameraUp = camera()->lookUpVectorWorldSpace();
     const glm::dvec3 cameraRight = glm::cross(cameraForward, cameraUp);
 
-    const glm::dquat yawDiffRotation = glm::angleAxis(
-        -static_cast<double>(_localYawAngle),
-        cameraUp
-    );
-
-    const glm::dquat pitchDiffRotation = glm::angleAxis(
-        -static_cast<double>(_localPitchAngle),
-        cameraRight
-    );
-
-    const glm::dquat rollDiffRotation = glm::angleAxis(
-        -static_cast<double>(_localRollAngle),
-        cameraForward
-    );
+    const glm::dquat yawDiffRotation = glm::angleAxis(yaw, cameraUp);
+    const glm::dquat pitchDiffRotation = glm::angleAxis(pitch, cameraRight);
+    const glm::dquat rollDiffRotation = glm::angleAxis(roll, cameraForward);
 
     pose.rotation = pitchDiffRotation * yawDiffRotation * rollDiffRotation * pose.rotation;
 
     // Reset velocities after every frame
-    _mouseStates.resetVelocities();
+    _interaction.mouseStates.resetVelocities();
     joystickStates.resetVelocities();
 }
 

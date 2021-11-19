@@ -108,10 +108,22 @@ private:
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;
 
-    properties::FloatProperty _mouseSensitivity;
-    properties::FloatProperty _joystickImpactFactor;
 
-    MouseCameraStates _mouseStates;
+    struct MidFlightInteraction : public properties::PropertyOwner {
+        MidFlightInteraction();
+
+        properties::BoolProperty enabled;
+        properties::BoolProperty invertedX;
+        properties::BoolProperty invertedY;
+        properties::BoolProperty invertedRoll;
+
+        properties::FloatProperty mouseSensitivity;
+        properties::FloatProperty joystickImpactFactor;
+
+        MouseCameraStates mouseStates;
+    };
+
+    MidFlightInteraction _interaction;
 
     float _localPitchAngle = 0.f;
     float _localYawAngle = 0.f;
