@@ -121,7 +121,7 @@ void HttpSynchronization::cancel() {
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpMemoryDownload fileListDownload(std::move(listUrl));
-    fileListDownload.onProgress([&c = _shouldCancel](bool, size_t, size_t) {
+    fileListDownload.onProgress([&c = _shouldCancel](int64_t, std::optional<int64_t>) {
         return !c;
     });
     fileListDownload.start();
@@ -139,9 +139,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
     struct SizeData {
-        bool isTotalKnown = false;
-        size_t totalBytes = 0;
-        size_t downloadedBytes = 0;
+        int64_t downloadedBytes = 0;
+        std::optional<int64_t> totalBytes;
     };
 
     std::unordered_map<std::string, SizeData> sizeData;
@@ -176,27 +175,26 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         downloads.push_back(std::move(download));
 
         ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
-        sizeData[line] = { false, 0, 0 };
+        sizeData[line] = SizeData();
 
         dl->onProgress(
-            [this, line, &sizeData, &mutex, &startedAllDownloads](bool totalBytesKnown,
-                                                                  size_t totalBytes,
-                                                                  size_t downloadedBytes)
+            [this, line, &sizeData, &mutex, &startedAllDownloads](int64_t downloadedBytes,
+                                                        std::optional<int64_t> totalBytes)
         {
-            if (!totalBytesKnown || !startedAllDownloads) {
+            if (!totalBytes.has_value() || !startedAllDownloads) {
                 return !_shouldCancel;
             }
 
             std::lock_guard guard(mutex);
 
-            sizeData[line] = { totalBytesKnown, totalBytes, downloadedBytes };
+            sizeData[line] = { downloadedBytes, totalBytes };
 
             _nTotalBytesKnown = true;
             _nTotalBytes = 0;
             _nSynchronizedBytes = 0;
             for (const std::pair<const std::string, SizeData>& sd : sizeData) {
-                _nTotalBytesKnown = _nTotalBytesKnown && sd.second.isTotalKnown;
-                _nTotalBytes += sd.second.totalBytes;
+                _nTotalBytesKnown = _nTotalBytesKnown && sd.second.totalBytes.has_value();
+                _nTotalBytes += sd.second.totalBytes.value_or(0);
                 _nSynchronizedBytes += sd.second.downloadedBytes;
             }
 

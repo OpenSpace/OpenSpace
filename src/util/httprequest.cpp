@@ -44,7 +44,6 @@
 #endif
 
 namespace {
-    constexpr const long StatusCodeOk = 200;
     constexpr const char* _loggerCat = "HttpRequest";
 } // namespace
 
@@ -122,15 +121,16 @@ bool HttpRequest::perform(int requestTimeoutSeconds) {
         {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
             
-            bool totalBytesKnown = nTotalDownloadBytes > 0;
-            size_t totalBytes = static_cast<size_t>(nTotalDownloadBytes);
-            size_t downloadedBytes = static_cast<size_t>(nDownloadedBytes);
+            std::optional<int64_t> totalBytes;
+            if (nTotalDownloadBytes > 0) {
+                totalBytes = nTotalDownloadBytes;
+            }
 
             if (r->_onProgress) {
-                return r->_onProgress(totalBytesKnown, totalBytes, downloadedBytes);
+                return r->_onProgress(nDownloadedBytes, totalBytes) == 0;
             }
             else {
-                return 0;
+                return true;
             }
         }
     );
@@ -145,6 +145,8 @@ bool HttpRequest::perform(int requestTimeoutSeconds) {
     if (res == CURLE_OK) {
         long responseCode;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+        
+        constexpr const long StatusCodeOk = 200;
         success = (responseCode == StatusCodeOk);
     }
     curl_easy_cleanup(curl);
@@ -163,18 +165,9 @@ HttpDownload::HttpDownload(std::string url)
     });
 
     _httpRequest.onProgress(
-        [this](bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes) {
-            // Return a non-zero value to cancel download
-            bool shouldContinue = _onProgress ?
-                _onProgress(totalBytesKnown, totalBytes, downloadedBytes) :
-                true;
-
-            if (!shouldContinue || _shouldCancel) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
+        [this](int64_t downloadedBytes, std::optional<int64_t> totalBytes) {
+            bool cont = _onProgress ? _onProgress(downloadedBytes, totalBytes) : true;
+            return cont && !_shouldCancel;
         }
     );
 }

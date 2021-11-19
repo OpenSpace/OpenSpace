@@ -169,16 +169,15 @@ void UrlSynchronization::start() {
 
             dl->onProgress(
                 [this, url, &fileSizes, &fileSizeMutex,
-                &startedAllDownloads, &nDownloads](bool totalBytesKnown,
-                                                   size_t totalBytes,
-                                                   size_t)
+                &startedAllDownloads, &nDownloads](int64_t,
+                                                   std::optional<int64_t> totalBytes)
             {
-                if (!totalBytesKnown) {
+                if (!totalBytes.has_value()) {
                     return !_shouldCancel;
                 }
 
                 std::lock_guard guard(fileSizeMutex);
-                fileSizes[url] = totalBytes;
+                fileSizes[url] = *totalBytes;
 
                 if (!_nTotalBytesKnown && startedAllDownloads &&
                     fileSizes.size() == nDownloads)

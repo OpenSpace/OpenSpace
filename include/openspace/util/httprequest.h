@@ -31,18 +31,30 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <optional>
 #include <string>
 #include <thread>
 #include <vector>
 
 namespace openspace {
 
-// Synchronous http request
+/**
+ * This class performs a synchronous HTTP request to the provided URL. Any result that is
+ * returned based on this request is returned through three callback functions that can be
+ * registered using the #onHeader, #onProgress, and #onData functions. Calling these
+ * functions will overwrite any previously registered handler.
+ * The ProgressCallback can be used to stop the download if the handler returns \c false
+ */
 class HttpRequest {
 public:
-    // ProgressCallback: Return non-zero value to cancel download
+    /**
+     * This callback is called every time there is progress in the download. It transmits
+     * whether the total number of bytes of the download is known, what that size is
+     * (or 0 if it is not known)
+     */
+    // ProgressCallback: Return false to cancel download
     using ProgressCallback = std::function<
-        int(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
+        bool(int64_t downloadedBytes, std::optional<int64_t> totalBytes)
     >;
 
     // DataCallback: Return number of bytes successfully stored. If this does not match
@@ -76,10 +88,10 @@ private:
 class HttpDownload {
 public:
     using ProgressCallback = std::function<
-        bool(bool totalBytesKnown, size_t totalBytes, size_t downloadedBytes)
+        bool(int64_t downloadedBytes, std::optional<int64_t> totalBytes)
     >;
 
-    HttpDownload(std::string url);
+    explicit HttpDownload(std::string url);
     virtual ~HttpDownload();
 
     void onProgress(ProgressCallback progressCallback);
@@ -138,7 +150,7 @@ private:
 
 class HttpMemoryDownload : public HttpDownload {
 public:
-    HttpMemoryDownload(std::string url);
+    explicit HttpMemoryDownload(std::string url);
 
     virtual ~HttpMemoryDownload() = default;
     const std::vector<char>& downloadedData() const;
