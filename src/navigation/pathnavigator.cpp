@@ -313,8 +313,8 @@ void PathNavigator::startPath() {
     _isPlaying = true;
 
     // TEST: interaction
-    _localPanAngle = 0.f;
-    _localTiltAngle = 0.f;
+    _localYawAngle = 0.f;
+    _localPitchAngle = 0.f;
     _localRollAngle = 0.f;
     _mouseStates.resetVelocities();
 
@@ -444,28 +444,28 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
     velocity += joystickStates.globalRotationVelocity() * deltaTime;
     rollVelocity += joystickStates.globalRollVelocity().x * deltaTime;
 
-    _localPanAngle += velocity.x;
-    _localPanAngle = std::clamp(_localPanAngle, -maxAngle, maxAngle);
-    _localTiltAngle += velocity.y;
-    _localTiltAngle = std::clamp(_localTiltAngle, -maxAngle, maxAngle);
+    _localYawAngle += velocity.x;
+    _localYawAngle = std::clamp(_localYawAngle, -maxAngle, maxAngle);
+    _localPitchAngle += velocity.y;
+    _localPitchAngle = std::clamp(_localPitchAngle, -maxAngle, maxAngle);
     
     _localRollAngle = rollVelocity; // Note: Not adding here on purpose. The roll will be preserved between frams if roll is removed
 
-    //LINFO(fmt::format("Pan angle:  {}", _localPanAngle));
-    //LINFO(fmt::format("Tilt angle: {}", _localTiltAngle));
+    //LINFO(fmt::format("Pan angle:  {}", _localYawAngle));
+    //LINFO(fmt::format("Tilt angle: {}", _localPitchAngle));
     //LINFO(fmt::format("Roll angle: {}", _localRollAngle));
 
     const glm::dvec3 cameraForward = camera()->viewDirectionWorldSpace();
     const glm::dvec3 cameraUp = camera()->lookUpVectorWorldSpace();
     const glm::dvec3 cameraRight = glm::cross(cameraForward, cameraUp);
 
-    const glm::dquat panDiffRotation = glm::angleAxis(
-        -static_cast<double>(_localPanAngle),
+    const glm::dquat yawDiffRotation = glm::angleAxis(
+        -static_cast<double>(_localYawAngle),
         cameraUp
     );
 
-    const glm::dquat tiltDiffRotation = glm::angleAxis(
-        -static_cast<double>(_localTiltAngle),
+    const glm::dquat pitchDiffRotation = glm::angleAxis(
+        -static_cast<double>(_localPitchAngle),
         cameraRight
     );
 
@@ -474,7 +474,7 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
         cameraForward
     );
 
-    pose.rotation = tiltDiffRotation * panDiffRotation * rollDiffRotation * pose.rotation;
+    pose.rotation = pitchDiffRotation * yawDiffRotation * rollDiffRotation * pose.rotation;
 
     // Reset velocities after every frame
     _mouseStates.resetVelocities();

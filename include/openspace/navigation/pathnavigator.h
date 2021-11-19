@@ -113,8 +113,8 @@ private:
 
     MouseCameraStates _mouseStates;
 
-    float _localPanAngle = 0.f;
-    float _localTiltAngle = 0.f;
+    float _localPitchAngle = 0.f;
+    float _localYawAngle = 0.f;
     float _localRollAngle = 0.f;
 };
 
