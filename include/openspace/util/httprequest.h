@@ -362,38 +362,106 @@ class HttpFileDownload : public HttpDownload {
 public:
     BooleanType(Overwrite);
 
+    /**
+     * Constructor that will create a HttpFileDownload which will download the contents of
+     * the provided \p url to the \p destinationPath. If the \p destinationPath already
+     * contains a file and \p overwrite is Overwrite::No, the download will fail; if it is
+     * Overwrite::Yes, the existing content at the \p destinationPath will be overwritten.
+     */
     HttpFileDownload(std::string url, std::filesystem::path destinationPath,
-        HttpFileDownload::Overwrite = Overwrite::No);
+        Overwrite overwrite = Overwrite::No);
+
+    /**
+     * This destructor will cancel any ongoing download and wait for its completion, so it
+     * might not block for a short amount of time.
+     */
     virtual ~HttpFileDownload() = default;
 
+    /**
+     * Returns the path where the contents of the URL provided in the constructor will be
+     * saved to.
+     * 
+     * \return The path where URL will be downloaded to
+     */
     std::filesystem::path destination() const;
 
 private:
+    /// Will create all directories that are necessary to reach _destination and then
+    /// fight with other HttpFileDownloads to get one of a limited number of file handles
+    /// to open _file
     bool setup() override;
+
+    /// Closes the _file and returns the handle back to the pool of available handles
     bool teardown() override;
+
+    /// Stores the chunk of data into the _file handle
     bool handleData(char* buffer, size_t size) override;
 
+    /// Mutex that will be prevent multiple HttpFileDownloads to simultaneously try to
+    /// create the necessary intermediate directories, which would cause issues
     static std::mutex _directoryCreationMutex;
+
+    /// A flag whether this HttpFileDownload got a handle from the limited supply of
+    /// handles. This limit is used to prevent all HttpFileDownloads from getting file
+    /// handles from the operating system as that resource is limited and downloads would
+    /// fail unrecoverably if no handles are available. So we limit the maximum number and
+    /// if that number is exceeded, the HttpFileDownload will wait until a handle is
+    /// available.
     std::atomic_bool _hasHandle = false;
 
+    /// The destination path where the contents of the URL provided in the constructor
+    /// will be saved to
     std::filesystem::path _destination;
+
+    /// The file handle to the _destination used to save incoming chunks
     std::ofstream _file;
 
-    static const int MaxFilehandles = 32;
-    static std::atomic_int nCurrentFilehandles;
+    /// The maximum number of file handles that all HttpFileDownloads combined can use up
+    static constexpr const int MaxFileHandles = 32;
+
+    /// Stores the number of currently open file handles across all HttpFileDownloads
+    static std::atomic_int nCurrentFileHandles;
 };
 
+/**
+ * This concerete HttpDownload subclass downloads the contents of the URL passed into the
+ * constructor into a buffer of memory that can be retrieve. Please note that that buffer
+ * should only be used accessed once the HttpDownload::hasFinished function returns
+ * \c true.
+ */
 class HttpMemoryDownload : public HttpDownload {
 public:
+    /**
+     * Creates an instance of a HttpMemoryDownload that will download the contents of the
+     * \p url into memory
+     * 
+     * \param url The URL whose contents should be downloaded
+     */
     explicit HttpMemoryDownload(std::string url);
 
+    /**
+     * This destructor will cancel any ongoing download and wait for its completion, so it
+     * might not block for a short amount of time.
+     */
     virtual ~HttpMemoryDownload() = default;
+
+    /**
+     * Returns a reference to the buffer that is used to store the contents of the URL
+     * passed in the constructor. Please observe that while the HttpDownload::hasFinished
+     * method returns \c false, this buffer will be changed by a different thread and
+     * access is not thread-safe. After that function returns \c true, it is safe to
+     * access the buffer.
+     * 
+     * \return A reference to the buffer used to hold the contents of the URL
+     */
     const std::vector<char>& downloadedData() const;
 
 private:
+    /// Stores each downloaded chunk into the stored buffer
     bool handleData(char* buffer, size_t size) override;
 
-    std::vector<char> _downloadedData;
+    /// The buffer where the downloaded chunks are accumulated
+    std::vector<char> _buffer;
 };
 
 } // namespace openspace

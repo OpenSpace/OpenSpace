@@ -28,24 +28,8 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <filesystem>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
-#endif // WIN32
-
 #include <curl/curl.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
-
-namespace {
-    constexpr const char* _loggerCat = "HttpRequest";
-} // namespace
+#include <filesystem>
 
 namespace openspace {
 
@@ -124,7 +108,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
             return r->_onProgress ? r->_onProgress(nDownloadedBytes, totalBytes) : true;
         }
     );
-    #endif
+    #endif // LIBCURL_VERSION_NUM >= 0x072000
 
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, static_cast<long>(timeout.count()));
 
@@ -190,6 +174,7 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
             const bool setupSuccess = setup();
             if (setupSuccess) {
                 _isSuccessful = _httpRequest.perform(timeout);
+
                 const bool teardownSuccess = teardown();
                 _isSuccessful = _isSuccessful && teardownSuccess;
             }
@@ -240,20 +225,7 @@ bool HttpDownload::teardown() {
     return true;
 }
 
-HttpMemoryDownload::HttpMemoryDownload(std::string url)
-    : HttpDownload(url)
-{}
-
-const std::vector<char>& HttpMemoryDownload::downloadedData() const {
-    return _downloadedData;
-}
-
-bool HttpMemoryDownload::handleData(char* buffer, size_t size) {
-    _downloadedData.insert(_downloadedData.end(), buffer, buffer + size);
-    return true;
-}
-
-std::atomic_int HttpFileDownload::nCurrentFilehandles = 0;
+std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
 
 HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destination,
@@ -275,11 +247,11 @@ bool HttpFileDownload::setup() {
         }
     }
 
-    while (nCurrentFilehandles >= MaxFilehandles) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    while (nCurrentFileHandles >= MaxFileHandles) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
-    ++nCurrentFilehandles;
+    nCurrentFileHandles++;
     _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
@@ -287,52 +259,56 @@ bool HttpFileDownload::setup() {
 #ifdef WIN32
         // GetLastError() gives more details than errno.
         DWORD errorId = GetLastError();
-        if (errorId != 0) {
-            char Buffer[256];
-            size_t size = FormatMessageA(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                    FORMAT_MESSAGE_IGNORE_INSERTS,
-                nullptr,
-                errorId,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                Buffer,
-                256,
-                nullptr
-            );
-
-            std::string message(Buffer, size);
-
-            LERROR(fmt::format(
-                "Cannot open file {}: {}", _destination, message)
-            );
-
+        if (errorId == 0) {
+            LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
             return false;
         }
-        else {
-            LERROR(fmt::format("Cannot open file {}", _destination));
-            return false;
-        }
-#else
-        if (errno) {
-#if defined(__unix__)
-            char buffer[255];
-            LERROR(fmt::format(
-                "Cannot open file '{}': {}",
-                _destination,
-                std::string(strerror_r(errno, buffer, sizeof(buffer)))
-            ));
-            return false;
-#else
-            LERROR(fmt::format(
-                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
-            ));
-            return false;
-#endif
-        }
+        std::array<char, 256> Buffer;
+        size_t size = FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+                FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr,
+            errorId,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            Buffer.data(),
+            Buffer.size(),
+            nullptr
+        );
 
-        LERROR(fmt::format("Cannot open file {}", _destination));
+        std::string message(Buffer.begin(), Buffer.end());
+        LERRORC(
+            "HttpFileDownload",
+            fmt::format("Cannot open file {}: {}", _destination, message)
+        );
         return false;
-#endif
+#else // ^^^ WIN32 / !WIN32 vvv
+        if (errno) {
+#ifdef __unix__
+            char buffer[256];
+            LERRORC(
+                "HttpFileDownload",
+                fmt::format(
+                    "Cannot open file '{}': {}",
+                    _destination,
+                    std::string(strerror_r(errno, buffer, sizeof(buffer)))
+                )
+            );
+            return false;
+#else // ^^^ __unix__ / !__unix__ vvv
+            LERRORC(
+                "HttpFileDownload",
+                fmt::format(
+                    "Cannot open file '{}': {}",
+                    _destination, std::string(strerror(errno))
+                )
+            );
+            return false;
+#endif // __unix__
+        }
+
+        LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+        return false;
+#endif // WIN32
     }
     return true;
 }
@@ -345,14 +321,31 @@ bool HttpFileDownload::teardown() {
     if (_hasHandle) {
         _hasHandle = false;
         _file.close();
-        --nCurrentFilehandles;
+        nCurrentFileHandles--;
+        ghoul_assert(nCurrentFileHandles >= 0, "More handles returned than taken out");
+        return _file.good();
     }
-    return _file.good();
+    else {
+        return true;
+    }
 }
 
 bool HttpFileDownload::handleData(char* buffer, size_t size) {
     _file.write(buffer, size);
     return _file.good();
+}
+
+HttpMemoryDownload::HttpMemoryDownload(std::string url)
+    : HttpDownload(std::move(url))
+{}
+
+const std::vector<char>& HttpMemoryDownload::downloadedData() const {
+    return _buffer;
+}
+
+bool HttpMemoryDownload::handleData(char* buffer, size_t size) {
+    _buffer.insert(_buffer.end(), buffer, buffer + size);
+    return true;
 }
 
 } // namespace openspace
