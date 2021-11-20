@@ -57,7 +57,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         return false;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str());
+    curl_easy_setopt(curl, CURLOPT_URL, _url.data());
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     // The leading + in all of the lambda expressions are to cause an implicit conversion
@@ -88,9 +88,6 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     );
 
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    #if LIBCURL_VERSION_NUM >= 0x072000
-    // xferinfo was introduced in 7.32.0, if a lower curl version is used the progress
-    // will not be shown for downloads on the splash screen
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
     curl_easy_setopt(
         curl,
@@ -111,7 +108,6 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
             return shouldContinue ? 0 : 1;
         }
     );
-    #endif // LIBCURL_VERSION_NUM >= 0x072000
 
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, static_cast<long>(timeout.count()));
 
@@ -131,6 +127,9 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
 const std::string& HttpRequest::url() const {
     return _url;
 }
+
+
+
 
 HttpDownload::HttpDownload(std::string url)
     : _httpRequest(std::move(url))
@@ -171,42 +170,34 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
     _isDownloading = true;
     _downloadThread = std::thread([this, timeout]() {
         _isFinished = false;
-        try {
+        LTRACEC("HttpDownload", fmt::format("Start download '{}'", _httpRequest.url()));
+
+        const bool setupSuccess = setup();
+        if (setupSuccess) {
+            _isSuccessful = _httpRequest.perform(timeout);
+
+            const bool teardownSuccess = teardown();
+            _isSuccessful = _isSuccessful && teardownSuccess;
+        }
+        else {
+            _isSuccessful = false;
+        }
+            
+        _isFinished = true;
+        if (_isSuccessful) {
             LTRACEC(
                 "HttpDownload",
-                fmt::format("Start async download '{}'", _httpRequest.url())
+                fmt::format("Finished async download '{}'", _httpRequest.url())
             );
-
-            const bool setupSuccess = setup();
-            if (setupSuccess) {
-                _isSuccessful = _httpRequest.perform(timeout);
-
-                const bool teardownSuccess = teardown();
-                _isSuccessful = _isSuccessful && teardownSuccess;
-            }
-            else {
-                _isSuccessful = false;
-            }
-            
-            _isFinished = true;
-            if (_isSuccessful) {
-                LTRACEC(
-                    "HttpDownload",
-                    fmt::format("Finished async download '{}'", _httpRequest.url())
-                );
-            }
-            else {
-                LTRACEC(
-                    "HttpDownload",
-                    fmt::format("Failed async download '{}'", _httpRequest.url())
-                );
-            }
-            
-            _downloadFinishCondition.notify_all();
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
+        else {
+            LTRACEC(
+                "HttpDownload",
+                fmt::format("Failed async download '{}'", _httpRequest.url())
+            );
         }
+            
+        _downloadFinishCondition.notify_all();
         _isDownloading = false;
     });
 }
@@ -236,6 +227,8 @@ bool HttpDownload::setup() {
 bool HttpDownload::teardown() {
     return true;
 }
+
+
 
 std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;
@@ -267,62 +260,62 @@ bool HttpFileDownload::setup() {
     _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
-    if (_file.fail()) {
+    if (_file.good()) {
+        return true;
+    }
+
+
 #ifdef WIN32
-        // GetLastError() gives more details than errno.
-        DWORD errorId = GetLastError();
-        if (errorId == 0) {
-            LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
-            return false;
-        }
-        std::array<char, 256> Buffer;
-        size_t size = FormatMessageA(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr,
-            errorId,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            Buffer.data(),
-            static_cast<DWORD>(Buffer.size()),
-            nullptr
-        );
-
-        std::string message(Buffer.data(), size);
-        LERRORC(
-            "HttpFileDownload",
-            fmt::format("Cannot open file {}: {}", _destination, message)
-        );
-        return false;
-#else // ^^^ WIN32 / !WIN32 vvv
-        if (errno) {
-#ifdef __unix__
-            char buffer[256];
-            LERRORC(
-                "HttpFileDownload",
-                fmt::format(
-                    "Cannot open file '{}': {}",
-                    _destination,
-                    std::string(strerror_r(errno, buffer, sizeof(buffer)))
-                )
-            );
-            return false;
-#else // ^^^ __unix__ / !__unix__ vvv
-            LERRORC(
-                "HttpFileDownload",
-                fmt::format(
-                    "Cannot open file '{}': {}",
-                    _destination, std::string(strerror(errno))
-                )
-            );
-            return false;
-#endif // __unix__
-        }
-
+    // GetLastError() gives more details than errno.
+    DWORD errorId = GetLastError();
+    if (errorId == 0) {
         LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
         return false;
-#endif // WIN32
     }
-    return true;
+    std::array<char, 256> Buffer;
+    size_t size = FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr,
+        errorId,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        Buffer.data(),
+        static_cast<DWORD>(Buffer.size()),
+        nullptr
+    );
+
+    std::string message(Buffer.data(), size);
+    LERRORC(
+        "HttpFileDownload",
+        fmt::format("Cannot open file {}: {}", _destination, message)
+    );
+    return false;
+#else // ^^^ WIN32 / !WIN32 vvv
+    if (errno) {
+#ifdef __unix__
+        char buffer[256];
+        LERRORC(
+            "HttpFileDownload",
+            fmt::format(
+                "Cannot open file '{}': {}",
+                _destination, std::string(strerror_r(errno, buffer, sizeof(buffer)))
+            )
+        );
+        return false;
+#else // ^^^ __unix__ / !__unix__ vvv
+        LERRORC(
+            "HttpFileDownload",
+            fmt::format(
+                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
+            )
+        );
+        return false;
+#endif // __unix__
+    }
+
+    LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+    return false;
+#endif // WIN32
 }
 
 std::filesystem::path HttpFileDownload::destination() const {
@@ -346,6 +339,8 @@ bool HttpFileDownload::handleData(char* buffer, size_t size) {
     _file.write(buffer, size);
     return _file.good();
 }
+
+
 
 HttpMemoryDownload::HttpMemoryDownload(std::string url)
     : HttpDownload(std::move(url))
