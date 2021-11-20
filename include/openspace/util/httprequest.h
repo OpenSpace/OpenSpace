@@ -397,10 +397,6 @@ private:
     /// Stores the chunk of data into the _file handle
     bool handleData(char* buffer, size_t size) override;
 
-    /// Mutex that will be prevent multiple HttpFileDownloads to simultaneously try to
-    /// create the necessary intermediate directories, which would cause issues
-    static std::mutex _directoryCreationMutex;
-
     /// A flag whether this HttpFileDownload got a handle from the limited supply of
     /// handles. This limit is used to prevent all HttpFileDownloads from getting file
     /// handles from the operating system as that resource is limited and downloads would
@@ -415,6 +411,10 @@ private:
 
     /// The file handle to the _destination used to save incoming chunks
     std::ofstream _file;
+
+    /// Mutex that will be prevent multiple HttpFileDownloads to simultaneously try to
+    /// create the necessary intermediate directories, which would cause issues
+    static std::mutex _directoryCreationMutex;
 
     /// The maximum number of file handles that all HttpFileDownloads combined can use up
     static constexpr const int MaxFileHandles = 32;

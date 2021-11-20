@@ -148,6 +148,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::atomic_bool startedAllDownloads = false;
 
+    // Yes, it should be possible to store this in a std::vector<HttpFileDownload> but
+    // C++ really doesn't like that even though all of the move constructors, move
+    // assignments and everything is automatically constructed
     std::vector<std::unique_ptr<HttpFileDownload>> downloads;
 
     std::string line;

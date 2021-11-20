@@ -70,8 +70,9 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl,
         CURLOPT_HEADERFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
-            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);            
-            return r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
+            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);      
+            bool shouldContinue = r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
+            return shouldContinue ? size * nmemb : 0;
         }
     );
 
@@ -81,7 +82,6 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         CURLOPT_WRITEFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-            
             bool shouldContinue = r->_onData ? r->_onData(ptr, size * nmemb) : true;
             return shouldContinue ? size * nmemb : 0;
         }
@@ -105,7 +105,10 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
                 totalBytes = nTotalDownloadBytes;
             }
 
-            return r->_onProgress ? r->_onProgress(nDownloadedBytes, totalBytes) : true;
+            bool shouldContinue = r->_onProgress ?
+                r->_onProgress(nDownloadedBytes, totalBytes) :
+                true;
+            return shouldContinue ? 0 : 1;
         }
     );
     #endif // LIBCURL_VERSION_NUM >= 0x072000
@@ -169,7 +172,10 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
     _downloadThread = std::thread([this, timeout]() {
         _isFinished = false;
         try {
-            LTRACE(fmt::format("Start async download '{}'", _httpRequest.url()));
+            LTRACEC(
+                "HttpDownload",
+                fmt::format("Start async download '{}'", _httpRequest.url())
+            );
 
             const bool setupSuccess = setup();
             if (setupSuccess) {
@@ -184,10 +190,16 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
             
             _isFinished = true;
             if (_isSuccessful) {
-                LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
+                LTRACEC(
+                    "HttpDownload",
+                    fmt::format("Finished async download '{}'", _httpRequest.url())
+                );
             }
             else {
-                LTRACE(fmt::format("Failed async download '{}'", _httpRequest.url()));
+                LTRACEC(
+                    "HttpDownload",
+                    fmt::format("Failed async download '{}'", _httpRequest.url())
+                );
             }
             
             _downloadFinishCondition.notify_all();
@@ -271,11 +283,11 @@ bool HttpFileDownload::setup() {
             errorId,
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             Buffer.data(),
-            Buffer.size(),
+            static_cast<DWORD>(Buffer.size()),
             nullptr
         );
 
-        std::string message(Buffer.begin(), Buffer.end());
+        std::string message(Buffer.data(), size);
         LERRORC(
             "HttpFileDownload",
             fmt::format("Cannot open file {}: {}", _destination, message)
