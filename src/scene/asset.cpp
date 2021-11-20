@@ -152,6 +152,11 @@ bool Asset::isSyncingOrResolved() const {
            _state == State::Initialized || _state == State::InitializationFailed;
 }
 
+bool Asset::isFailed() const {
+    return _state == State::LoadingFailed || _state == State::SyncRejected ||
+           _state == State::InitializationFailed;
+}
+
 bool Asset::hasLoadedParent() {
     return std::any_of(
         _parentAssets.begin(),
@@ -237,7 +242,9 @@ void Asset::unload() {
 
         child->_parentAssets.erase(parentIt);
 
-        child->deinitializeIfUnwanted();
+        if (!child->hasInitializedParent()) {
+            child->deinitialize();
+        }
         if (!child->hasLoadedParent()) {
             child->unload();
         }
@@ -276,11 +283,13 @@ void Asset::initialize() {
     setState(State::Initialized);
 }
 
+/*
 void Asset::deinitializeIfUnwanted() {
     if (!hasInitializedParent()) {
         deinitialize();
     }
 }
+*/
 
 void Asset::deinitialize() {
     if (!isInitialized()) {
@@ -305,7 +314,9 @@ void Asset::deinitialize() {
 
     // 1. Deinitialize unwanted requirements
     for (Asset* dependency : _requiredAssets) {
-        dependency->deinitializeIfUnwanted();
+        if (!dependency->hasInitializedParent()) {
+            dependency->deinitialize();
+        }
     }
 }
 

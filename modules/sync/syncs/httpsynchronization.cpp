@@ -125,9 +125,11 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         return !c;
     });
     fileListDownload.start();
-    fileListDownload.wait();
+    const bool success = fileListDownload.wait();
 
-    if (!fileListDownload.hasSucceeded()) {
+    const std::vector<char>& buffer = fileListDownload.downloadedData();
+    if (!success) {
+        LERRORC("HttpSynchronization", std::string(buffer.begin(), buffer.end()));
         return false;
     }
 
@@ -135,7 +137,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     _nTotalBytes = 0;
     _nTotalBytesKnown = false;
 
-    const std::vector<char>& buffer = fileListDownload.downloadedData();
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
     struct SizeData {

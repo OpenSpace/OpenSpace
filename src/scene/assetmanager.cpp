@@ -97,7 +97,9 @@ void AssetManager::deinitialize() {
     ZoneScoped
 
     for (Asset* asset : _rootAssets) {
-        asset->deinitializeIfUnwanted();
+        if (!asset->hasInitializedParent()) {
+            asset->deinitialize();
+        }
         asset->unload();
     }
     _toBeDeleted.clear();
@@ -196,7 +198,9 @@ void AssetManager::update() {
         // Even though we are removing a root asset, we might not be the only person that
         // is interested in the asset, so we can only deinitialize it if we were, in fact,
         // the only person, meaning that the asset never had any parents
-        a->deinitializeIfUnwanted();
+        if (!a->hasInitializedParent()) {
+            a->deinitialize();
+        }
         if (!a->hasLoadedParent()) {
             a->unload();
         }
@@ -505,6 +509,10 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                     "Cannot require child asset when already loaded"
                 );
 
+            }
+
+            if (dependency->isFailed()) {
+                return 0;
             }
             
             dependency->load(parent);

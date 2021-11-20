@@ -757,11 +757,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    //_assetManager->update();
-
-    //_loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
-    //_loadingScreen->postMessage("Synchronizing assets");
-
     bool loading = true;
     while (true) {
         _loadingScreen->render();
@@ -797,30 +792,15 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo
                 );
             }
+
+            if (sync->isRejected()) {
+                _loadingScreen->updateItem(
+                    sync->name(), sync->name(), LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
+                );
+            }
         }
 
-
-        //std::unordered_set<ResourceSynchronization*> resourceSyncs;
-        //for (const Asset* a : allAssets) {
-        //    std::vector<ResourceSynchronization*> syncs = a->synchronizations();
-
-        //    for (ResourceSynchronization* s : syncs) {
-        //        ZoneScopedN("Update resource synchronization")
-
-        //            if (s->state() == ResourceSynchronization::State::Syncing) {
-        //                LoadingScreen::ProgressInfo progressInfo;
-        //                progressInfo.progress = s->progress();
-
-        //                resourceSyncs.insert(s);
-        //                _loadingScreen->updateItem(
-        //                    s->name(),
-        //                    s->name(),
-        //                    LoadingScreen::ItemStatus::Started,
-        //                    progressInfo
-        //                );
-        //            }
-        //    }
-        //}
         _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
 
         if (_shouldAbortLoading) {
@@ -829,7 +809,9 @@ void OpenSpaceEngine::loadAssets() {
         }
 
         bool finishedLoading = std::all_of(
-            allAssets.begin(), allAssets.end(), std::mem_fn(&Asset::isInitialized)
+            allAssets.begin(),
+            allAssets.end(),
+            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
         );
         
         if (finishedLoading) {
@@ -865,6 +847,13 @@ void OpenSpaceEngine::loadAssets() {
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     progressInfo
+                );
+                ++it;
+            }
+            else if ((*it)->isRejected()) {
+                _loadingScreen->updateItem(
+                    (*it)->name(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
                 );
                 ++it;
             }

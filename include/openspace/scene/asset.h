@@ -189,13 +189,19 @@ public:
     bool isInitialized() const;
 
     /**
+     * Returns whether any of the parents of this Asset is currently in an initialized
+     * state, meaning that any parent is still interested in this Asset at all.
+     *
+     * \return \c true if there is at least one initialized parent, \c false otherwise
+     */
+    bool hasInitializedParent() const;
+
+    /**
      * Deinitializes this Asset and recursively deinitializes the required assets if this
      * Asset was their ownly initialized parent. If the Asset was already deinitialized,
      * calling this function does nothing.
      */
     void deinitialize();
-
-    void deinitializeIfUnwanted();
 
     /**
      * Marks the passed \p child as being required by \p this Asset. If the \p child is
@@ -205,6 +211,14 @@ public:
      * \pre \p child must not be nullptr
      */
     void require(Asset* child);
+
+    /**
+     * Returns if the loading of the Asset has failed in any way so that recovering from
+     * the error is impossible.
+     * 
+     * \return \c true if the Asset handling failed in any way, \c false otherwise
+     */
+    bool isFailed() const;
 
     /**
      * Sets the provided \p metaInformation as the meta information struct for this asset.
@@ -255,9 +269,13 @@ private:
      */
     void setState(State state);
 
+    /// Returns whether the Asset is synchronizing or has successfully synchronized
     bool isSyncingOrResolved() const;
+
+    /// Returns whether the Asset has been successfully synchronized, meaning that both
+    /// its own resource synchronizations are finished as well as all requiered assets are
+    /// finished synchronizing
     bool isSyncResolveReady() const;
-    bool hasInitializedParent() const;
 
     /// The state that this Asset is currently in
     std::atomic<State> _state = State::Unloaded;
