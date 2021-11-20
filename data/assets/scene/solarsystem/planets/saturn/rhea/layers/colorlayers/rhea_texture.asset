@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../rhea_textures").TexturesPath
 local globeIdentifier = asset.require("./../../rhea").Rhea.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Rhea textures",
+  Type = "HttpSynchronization",
+  Identifier = "rhea_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",

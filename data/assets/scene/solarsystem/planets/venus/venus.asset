@@ -2,7 +2,13 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.require('./trail')
-local labelsPath = asset.require('./venus_globelabels').LabelsPath
+
+local labelsPath = asset.syncedResource({
+  Name = "Venus Labels",
+  Type = "HttpSynchronization",
+  Identifier = "venus_labels",
+  Version = 1
+})
 
 local Venus = {
   Identifier = "Venus",

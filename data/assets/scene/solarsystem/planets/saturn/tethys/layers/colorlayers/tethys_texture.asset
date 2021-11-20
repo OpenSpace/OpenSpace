@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../tethys_textures").TexturesPath
 local globeIdentifier = asset.require("./../../tethys").Tethys.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Tethys textures",
+  Type = "HttpSynchronization",
+  Identifier = "tethys_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",

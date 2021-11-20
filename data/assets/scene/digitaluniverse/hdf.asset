@@ -1,5 +1,11 @@
 local assetHelper = asset.require('util/asset_helper')
-local circle = asset.require('util/circle').circle
+
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
 
 local HUDFSpeck = asset.syncedResource({
   Name = "HUDF Speck",

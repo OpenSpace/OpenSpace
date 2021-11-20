@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../venus_textures").TexturesPath
 local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Venus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "venus_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",

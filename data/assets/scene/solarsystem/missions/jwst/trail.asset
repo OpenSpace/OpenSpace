@@ -2,9 +2,21 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local horizons = asset.require('./horizons').horizons
-local kernels = asset.require('./kernels').kernels
 asset.require("spice/base")
+
+local horizons = asset.syncedResource({
+  Name = "JWST Horizons",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_horizons",
+  Version = 2
+})
+
+local kernels = asset.syncedResource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 1
+})
 
 -- (malej 2021-10-04) In general, there is no trajectery data of JWST for the scheduled
 -- launch in December 2021, no horizons and no SPICE. Instead data from the 2018 launch

@@ -3,7 +3,12 @@ local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.require('./trail')
 
-local texturesPath = asset.require("./saturn_textures").TexturesPath
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
+})
 
 local Saturn = {
   Identifier = "Saturn",

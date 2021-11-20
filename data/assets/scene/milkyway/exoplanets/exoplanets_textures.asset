@@ -1,7 +1,12 @@
 local habitableZoneTextures =
     asset.require('./../habitable_zones/habitable_zone_textures').TexturesPath
 
-local sunTextures = asset.require('scene/solarsystem/sun/sun_textures').TexturesPath
+local sunTextures = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
 
 local TexturesPath = asset.syncedResource({
   Name = "Exoplanet Textures",

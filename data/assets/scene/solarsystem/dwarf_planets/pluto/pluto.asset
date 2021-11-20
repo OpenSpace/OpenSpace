@@ -2,9 +2,14 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.require('./trail')
-local labelsPath = asset.require('./pluto_globelabels').LabelsPath
 
 
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Pluto = {
   Identifier = "Pluto",

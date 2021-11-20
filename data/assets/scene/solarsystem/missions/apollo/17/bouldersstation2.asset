@@ -1,7 +1,13 @@
 local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
 local asset_helper = asset.require('util/asset_helper')
 local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local models = asset.require('./boulder_models').models
+
+local models = asset.syncedResource({
+  Name = "Apollo Boulders Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_boulders",
+  Version = 2
+})
 
 local LightSources = {
   {

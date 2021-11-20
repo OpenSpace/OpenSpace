@@ -1,7 +1,0 @@
-local LabelsPath = asset.syncedResource({
-  Name = "Earth Labels",
-  Type = "HttpSynchronization",
-  Identifier = "earth_labels",
-  Version = 1
-})
-asset.export("LabelsPath", LabelsPath)

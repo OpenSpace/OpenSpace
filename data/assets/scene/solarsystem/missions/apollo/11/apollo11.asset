@@ -5,10 +5,21 @@ local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon
 local descentKeyframes = asset.require('./lem_descent.asset')
 local descentRotationKeyframes = asset.require('./lem_descent_rotation.asset')
 
-local lem_model = asset.require('scene/solarsystem/missions/apollo/lem_model')
 local kernels = asset.require('./kernels').kernels
 
-local models = asset.require('./models').models
+local models = asset.syncedResource({
+  Name = "Apollo Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_11_models",
+  Version = 1
+})
+
+local lem_model = asset.syncedResource({
+  Name = "Apollo Lem Models",
+  Type = "HttpSynchronization",
+  Identifier = "apollo_lem_model",
+  Version = 4
+})
 
 asset.require('spice/base')
 
@@ -171,7 +182,7 @@ local Apollo11LemDescentModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model.modelFolder .. "/lmremoved.obj",
+    GeometryFile = lem_model .. "/lmremoved.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
@@ -197,7 +208,7 @@ local Apollo11LemLandedModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model.modelFolder .. "/LM-2_ver2clean.obj",
+    GeometryFile = lem_model .. "/LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
