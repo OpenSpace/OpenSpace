@@ -51,7 +51,9 @@ namespace openspace {
 
 HttpRequest::HttpRequest(std::string url)
     : _url(std::move(url))
-{}
+{
+    ghoul_assert(!_url.empty(), "url must not be empty");
+}
 
 void HttpRequest::onProgress(ProgressCallback cb) {
     _onProgress = std::move(cb);
@@ -65,7 +67,7 @@ void HttpRequest::onHeader(HeaderCallback cb) {
     _onHeader = std::move(cb);
 }
 
-bool HttpRequest::perform(int requestTimeoutSeconds) {
+bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     CURL* curl = curl_easy_init();
     if (!curl) {
         return false;
@@ -85,10 +87,7 @@ bool HttpRequest::perform(int requestTimeoutSeconds) {
         CURLOPT_HEADERFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);            
-            size_t nBytes = r->_onHeader ?
-                r->_onHeader(ptr, size * nmemb) :
-                size * nmemb;
-            return nBytes;
+            return r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
         }
     );
 
@@ -99,12 +98,8 @@ bool HttpRequest::perform(int requestTimeoutSeconds) {
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
             
-            if (r->_onData) {
-                return r->_onData(ptr, size * nmemb);
-            }
-            else {
-                return size * nmemb;
-            }
+            bool shouldContinue = r->_onData ? r->_onData(ptr, size * nmemb) : true;
+            return shouldContinue ? size * nmemb : 0;
         }
     );
 
@@ -126,19 +121,12 @@ bool HttpRequest::perform(int requestTimeoutSeconds) {
                 totalBytes = nTotalDownloadBytes;
             }
 
-            if (r->_onProgress) {
-                return r->_onProgress(nDownloadedBytes, totalBytes) == 0;
-            }
-            else {
-                return true;
-            }
+            return r->_onProgress ? r->_onProgress(nDownloadedBytes, totalBytes) : true;
         }
     );
     #endif
 
-    if (requestTimeoutSeconds > 0) {
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, requestTimeoutSeconds);
-    }
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, static_cast<long>(timeout.count()));
 
     CURLcode res = curl_easy_perform(curl);
     bool success = false;
@@ -161,7 +149,7 @@ HttpDownload::HttpDownload(std::string url)
     : _httpRequest(std::move(url))
 {
     _httpRequest.onData([this](char* buffer, size_t size) {
-        return handleData(buffer, size);
+        return handleData(buffer, size) && !_shouldCancel;
     });
 
     _httpRequest.onProgress(
@@ -177,33 +165,40 @@ HttpDownload::~HttpDownload() {
     wait();
 }
 
-void HttpDownload::onProgress(ProgressCallback progressCallback) {
+void HttpDownload::onProgress(HttpRequest::ProgressCallback progressCallback) {
     _onProgress = std::move(progressCallback);
 }
 
 bool HttpDownload::hasFailed() const {
-    return _finished && !_successful;
+    return _isFinished && !_isSuccessful;
 }
 
 bool HttpDownload::hasSucceeded() const {
-    return _finished && _successful;
+    return _isFinished && _isSuccessful;
 }
 
-void HttpDownload::start(int requestTimeoutSeconds) {
-    if (_started) {
+void HttpDownload::start(std::chrono::milliseconds timeout) {
+    if (_isDownloading) {
         return;
     }
-    _started = true;
-    _downloadThread = std::thread([this, requestTimeoutSeconds] {
+    _isDownloading = true;
+    _downloadThread = std::thread([this, timeout]() {
+        _isFinished = false;
         try {
             LTRACE(fmt::format("Start async download '{}'", _httpRequest.url()));
 
-            setup();
-            _successful = _httpRequest.perform(requestTimeoutSeconds);
-            teardown();
-
-            _finished = true;
-            if (_successful) {
+            const bool setupSuccess = setup();
+            if (setupSuccess) {
+                _isSuccessful = _httpRequest.perform(timeout);
+                const bool teardownSuccess = teardown();
+                _isSuccessful = _isSuccessful && teardownSuccess;
+            }
+            else {
+                _isSuccessful = false;
+            }
+            
+            _isFinished = true;
+            if (_isSuccessful) {
                 LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
             }
             else {
@@ -215,6 +210,7 @@ void HttpDownload::start(int requestTimeoutSeconds) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
+        _isDownloading = false;
     });
 }
 
@@ -222,13 +218,14 @@ void HttpDownload::cancel() {
     _shouldCancel = true;
 }
 
-void HttpDownload::wait() {
+bool HttpDownload::wait() {
     std::mutex conditionMutex;
     std::unique_lock lock(conditionMutex);
-    _downloadFinishCondition.wait(lock, [this]() { return _finished; });
+    _downloadFinishCondition.wait(lock, [this]() { return _isFinished; });
     if (_downloadThread.joinable()) {
         _downloadThread.join();
     }
+    return _isSuccessful;
 }
 
 const std::string& HttpDownload::url() const {
@@ -251,9 +248,9 @@ const std::vector<char>& HttpMemoryDownload::downloadedData() const {
     return _downloadedData;
 }
 
-size_t HttpMemoryDownload::handleData(char* buffer, size_t size) {
+bool HttpMemoryDownload::handleData(char* buffer, size_t size) {
     _downloadedData.insert(_downloadedData.end(), buffer, buffer + size);
-    return size;
+    return true;
 }
 
 std::atomic_int HttpFileDownload::nCurrentFilehandles = 0;
@@ -353,9 +350,9 @@ bool HttpFileDownload::teardown() {
     return _file.good();
 }
 
-size_t HttpFileDownload::handleData(char* buffer, size_t size) {
+bool HttpFileDownload::handleData(char* buffer, size_t size) {
     _file.write(buffer, size);
-    return size;
+    return _file.good();
 }
 
 } // namespace openspace
