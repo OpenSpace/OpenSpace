@@ -132,6 +132,13 @@ public:
     bool nTotalBytesIsKnown() const;
 
     /**
+     * Returns the unique identifier of this ResourceSynchronization.
+     * 
+     * \return The unique identifier of this ResourceSynchronization
+     */
+    const std::string& identifier() const;
+
+    /**
      * Returns the name of this ResourceSynchronization.
      *
      * \return The name of this ResourceSynchronization

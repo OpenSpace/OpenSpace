@@ -102,6 +102,10 @@ bool ResourceSynchronization::nTotalBytesIsKnown() const {
     return _nTotalBytesKnown;
 }
 
+const std::string& ResourceSynchronization::identifier() const {
+    return _identifier;
+}
+
 const std::string& ResourceSynchronization::name() const {
     return _name;
 }

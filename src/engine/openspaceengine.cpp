@@ -786,7 +786,7 @@ void OpenSpaceEngine::loadAssets() {
                 }(sync);
                 
                 _loadingScreen->updateItem(
-                    sync->name(),
+                    sync->identifier(),
                     sync->name(),
                     LoadingScreen::ItemStatus::Started,
                     progressInfo
@@ -795,7 +795,7 @@ void OpenSpaceEngine::loadAssets() {
 
             if (sync->isRejected()) {
                 _loadingScreen->updateItem(
-                    sync->name(), sync->name(), LoadingScreen::ItemStatus::Failed,
+                    sync->identifier(), sync->name(), LoadingScreen::ItemStatus::Failed,
                     LoadingScreen::ProgressInfo()
                 );
             }
@@ -843,7 +843,7 @@ void OpenSpaceEngine::loadAssets() {
 
                 loading = true;
                 _loadingScreen->updateItem(
-                    (*it)->name(),
+                    (*it)->identifier(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     progressInfo
@@ -852,7 +852,7 @@ void OpenSpaceEngine::loadAssets() {
             }
             else if ((*it)->isRejected()) {
                 _loadingScreen->updateItem(
-                    (*it)->name(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
+                    (*it)->identifier(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
                     LoadingScreen::ProgressInfo()
                 );
                 ++it;
@@ -863,7 +863,7 @@ void OpenSpaceEngine::loadAssets() {
 
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
-                    (*it)->name(),
+                    (*it)->identifier(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     progressInfo
