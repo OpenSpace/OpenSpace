@@ -118,7 +118,24 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
         
         constexpr const long StatusCodeOk = 200;
-        success = (responseCode == StatusCodeOk);
+        if (responseCode >= 400) {
+            LERRORC(
+                "HttpRequest",
+                fmt::format("Failed download {} with code {}", _url, responseCode)
+            );
+            success = false;
+        }
+        else {
+            success = true;
+        }
+    }
+    else {
+        LERRORC(
+            "HttpRequest",
+            fmt::format(
+                "Failed download {} with error {}", _url, curl_easy_strerror(res)
+            )
+        );
     }
     curl_easy_cleanup(curl);
     return success;
