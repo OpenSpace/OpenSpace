@@ -1,0 +1,77 @@
+local globeIdentifier = asset.require("./../earth").Earth.Identifier
+
+
+local Name = "Paleoclimate Proxies"
+local Identifier = "noaa-sos-land-paleo_overlays"
+local Description = [[ Every year, particles eroding from the continents are transported to the oceans by the wind as dust and by rivers as sands and gravels. Once they get to the ocean, they mix with billions of tons of dead plankton shells, sink, and settle on the seafloor. There, they accumulate vertically in layers on top of previous years’ material. Similarly, this year’s snow accumulates on top of the previous years’ snow at the polar regions in places like Greenland and Antarctica. Over time, this process forms new layers of ice. Trees, much the same way, add yearly layers of new cells in concentric circles just below their bark – called tree rings. And, in many caves around the world, the strength of the seasonal cycle of a wet monsoon followed by a dry season is recorded in the chemistry of stalagmites rising up from the cave floor, formed by drips of mineral-rich water from the roof of the cave. ]]
+local URL = "https://sos.noaa.gov/catalog/datasets/paleoclimate-proxies/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local layer_base = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/4096.png",
+  Description = Description
+}
+
+local layer_corals = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/corals.png",
+  Description = Description
+}
+
+local layer_icerings = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/icerings.png",
+  Description = Description
+}
+
+local layer_ocean = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/ocean.png",
+  Description = Description
+}
+
+local layer_speleothem = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/speleothem.png",
+  Description = Description
+}
+
+local layer_tree_rings = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/tree_rings.png",
+  Description = Description
+}
+
+
+asset.onInitialize(function ()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_corals)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_icerings)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_ocean)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_speleothem)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tree_rings)
+end)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}
