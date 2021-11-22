@@ -8,7 +8,6 @@ local L5 = {
   Identifier = "L5",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderablePlaneImageLocal",
     RenderableType = "Opaque",
     Billboard = true,
@@ -20,7 +19,7 @@ local L5 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "395", -- L5
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels .. "/L5_de431.bsp"
     }
   },
@@ -35,7 +34,6 @@ local L5Label = {
   Identifier = "L5Label",
   Parent = L5.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabels",
     Text = "L5",
     FontSize = 20,

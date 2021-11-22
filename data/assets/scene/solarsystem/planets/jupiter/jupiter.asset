@@ -7,6 +7,11 @@ local Jupiter = {
   Identifier = "Jupiter",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER",
+      Observer = "JUPITER BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_JUPITER",

@@ -26,11 +26,11 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>
+#include <openspace/util/timemanager.h>
 
 #include <ghoul/fmt.h>
 

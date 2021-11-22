@@ -12,7 +12,7 @@ local EarthTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "EARTH",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.5, 0.8, 1.0 },
     Period = 365.242,

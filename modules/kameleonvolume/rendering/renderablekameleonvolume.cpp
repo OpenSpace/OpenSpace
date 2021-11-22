@@ -332,7 +332,7 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    std::string cachePath = FileSys.cacheManager()->cachedFilename(
+    std::filesystem::path cachePath = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_sourcePath.value()).stem(),
         cacheSuffix()
     );
@@ -360,7 +360,7 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
     }
 }
 
-void RenderableKameleonVolume::loadRaw(const std::string& path) {
+void RenderableKameleonVolume::loadRaw(const std::filesystem::path& path) {
     volume::RawVolumeReader<float> reader(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
@@ -433,7 +433,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
 }
 
-void RenderableKameleonVolume::storeRaw(const std::string& path) {
+void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }

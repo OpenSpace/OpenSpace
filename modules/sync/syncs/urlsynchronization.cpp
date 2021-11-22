@@ -49,22 +49,22 @@ namespace {
         // provided, all files will be downloaded to the same directory
         std::variant<std::string, std::vector<std::string>> url;
 
-        // This optional identifier will be part of the used folder structure and, if 
+        // This optional identifier will be part of the used folder structure and, if
         // provided, can be used to manually find the downloaded folder in the
         // synchronization folder. If this value is not specified, 'UseHash' has to be set
         // to 'true'
         std::optional<std::string> identifier;
 
         // If this value is set to 'true' and it is not overwritten by the global
-        // settings, the file(s) pointed to by this URLSynchronization will always be 
-        // downloaded, thus overwriting the local files. This is useful for files that are 
+        // settings, the file(s) pointed to by this URLSynchronization will always be
+        // downloaded, thus overwriting the local files. This is useful for files that are
         // updated regularly remotely and should be fetch at every startup
-        std::optional<bool> forceOverride [[codegen::key("override")]];
+        std::optional<bool> forceOverride [[codegen::key("Override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended
-        // to the directory name to produce a unique directory under all circumstances. If 
+        // to the directory name to produce a unique directory under all circumstances. If
         // this is not desired, the URLSynchronization use the bare directory name alone
-        // if this value is 'false'. If this value is 'false', the identifier has to be 
+        // if this value is 'false'. If this value is 'false', the identifier has to be
         // specified
         std::optional<bool> useHash;
 
@@ -192,7 +192,7 @@ void UrlSynchronization::start() {
                 &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
             {
                 if (p.totalBytesKnown) {
-                    std::lock_guard<std::mutex> guard(fileSizeMutex);
+                    std::lock_guard guard(fileSizeMutex);
                     fileSizes[url] = p.totalBytes;
 
                     if (!_nTotalBytesKnown && startedAllDownloads &&

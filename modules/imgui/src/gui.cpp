@@ -204,17 +204,17 @@ void GUI::deinitialize() {
 }
 
 void GUI::initializeGL() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+    std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
         ""
     );
 
     LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));
 
-    iniFileBuffer = new char[cachedFile.size() + 1];
+    iniFileBuffer = new char[cachedFile.string().size() + 1];
 
 #ifdef WIN32
-    strcpy_s(iniFileBuffer, cachedFile.size() + 1, cachedFile.c_str());
+    strcpy_s(iniFileBuffer, cachedFile.string().size() + 1, cachedFile.string().c_str());
 #else
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif

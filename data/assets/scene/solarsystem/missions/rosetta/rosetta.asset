@@ -94,7 +94,7 @@ local Rosetta = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "ROSETTA",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = RosettaKernels
     },  
     Rotation = {

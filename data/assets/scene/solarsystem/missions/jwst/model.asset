@@ -1,0 +1,8 @@
+local models = asset.syncedResource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 3
+})
+
+asset.export('models', models)

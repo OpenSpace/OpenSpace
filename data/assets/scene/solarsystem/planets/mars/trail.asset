@@ -11,8 +11,8 @@ local MarsTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS BARYCENTER",
-      Observer = "SUN"
+      Target = "MARS",
+      Observer = "SSB"
     },
     Color = { 0.814, 0.305, 0.220 },
     Period = 686.973,

@@ -149,9 +149,6 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath,
     const std::string& userAssetBasePath) {
     FileSystemAccess assets(
         ".asset",
-        // @TODO (abock, 2021-03-24) We need some better solution for this;  what is the
-        // problem of just including all subfolders instead?
-        { "scene", "global", "customization", "dashboard", "examples", "util" },
         true,
         true
     );

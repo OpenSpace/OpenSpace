@@ -9,6 +9,11 @@ local Mercury = {
   Identifier = "Mercury",
   Parent = transforms.MercuryBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MERCURY",
+      Observer = "MERCURY BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_MERCURY",

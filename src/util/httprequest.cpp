@@ -245,7 +245,7 @@ AsyncHttpDownload::AsyncHttpDownload(AsyncHttpDownload&& d)
 {}
 
 void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
-    std::lock_guard<std::mutex> guard(_stateChangeMutex);
+    std::lock_guard guard(_stateChangeMutex);
     if (hasStarted()) {
         return;
     }
@@ -286,7 +286,7 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onProgress([this](HttpRequest::Progress p) {
         // Return a non-zero value to cancel download
         // if onProgress returns false.
-        //std::lock_guard<std::mutex> guard(_mutex);
+        //std::lock_guard guard(_mutex);
         const bool shouldContinue = callOnProgress(p);
         if (!shouldContinue) {
             return 1;
@@ -406,21 +406,19 @@ bool HttpFileDownload::initDownload() {
             char buffer[255];
             LERROR(fmt::format(
                 "Cannot open file '{}': {}",
-                std::string(_destination),
+                _destination,
                 std::string(strerror_r(errno, buffer, sizeof(buffer)))
             ));
             return false;
 #else
             LERROR(fmt::format(
-                "Cannot open file '{}': {}",
-                std::string(_destination),
-                std::string(strerror(errno))
+                "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
             ));
             return false;
 #endif
         }
 
-        LERROR(fmt::format("Cannot open file {}", std::string(_destination)));
+        LERROR(fmt::format("Cannot open file {}", _destination));
         return false;
 #endif
     }

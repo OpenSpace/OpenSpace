@@ -50,7 +50,7 @@ namespace {
     };
 
     constexpr const std::array<const char*, 6> FboUniformNames = {
-        "projectionTexture", "ProjectorMatrix", "ModelTransform", 
+        "projectionTexture", "ProjectorMatrix", "ModelTransform",
         "boresight", "radius", "segments"
     };
 

@@ -28,7 +28,6 @@
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -201,13 +200,13 @@ std::string ExoplanetsModule::exoplanetsDataPath() const {
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
     ).string();
-};
+}
 
 std::string ExoplanetsModule::lookUpTablePath() const {
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
     ).string();
-};
+}
 
 std::string ExoplanetsModule::bvColormapPath() const {
     return _bvColorMapPath;
@@ -256,7 +255,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "addExoplanetSystem",
             &exoplanets::luascriptfunctions::addExoplanetSystem,
-            {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
@@ -264,14 +262,12 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "removeExoplanetSystem",
             &exoplanets::luascriptfunctions::removeExoplanetSystem,
-            {},
             "string",
             "Removes the nodes of the specified exoplanet system from the scene graph"
         },
         {
             "listAvailableExoplanetSystems",
             &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
-            {},
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
             "the scene graph to the OpenSpace Log"
@@ -279,7 +275,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "getListOfExoplanets",
             &exoplanets::luascriptfunctions::getListOfExoplanets,
-            {},
             "",
             "Gets a list with the names of all exoplanet systems"
         }

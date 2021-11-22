@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
+#include <openspace/scene/profile.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/profiling.h>
@@ -55,6 +56,7 @@ std::string SceneLicenseWriter::generateJson() const {
         global::openSpaceEngine->assetManager().rootAsset().subTreeAssets();
 
     int metaTotal = 0;
+    int metaCount = 0;
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
         if (!meta.has_value()) {
@@ -63,7 +65,42 @@ std::string SceneLicenseWriter::generateJson() const {
         metaTotal++;
     }
 
-    int metaCount = 0;
+    if (global::profile->meta.has_value()) {
+        metaTotal++;
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
+        json << "{";
+        json << fmt::format(
+            replStr,
+            "name", escapedJson(global::profile->meta->name.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "version", escapedJson(global::profile->meta->version.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "description", escapedJson(global::profile->meta->description.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "author", escapedJson(global::profile->meta->author.value_or(""))
+        );
+        json << fmt::format(
+            replStr,
+            "url", escapedJson(global::profile->meta->url.value_or(""))
+        );
+        json << fmt::format(
+            replStr2,
+            "license", escapedJson(global::profile->meta->license.value_or(""))
+        );
+        json << "}";
+
+        if (++metaCount != metaTotal) {
+            json << ",";
+        }
+    }
+
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 

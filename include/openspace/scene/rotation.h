@@ -51,7 +51,7 @@ public:
 
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
-    void update(const UpdateData& data);
+    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 

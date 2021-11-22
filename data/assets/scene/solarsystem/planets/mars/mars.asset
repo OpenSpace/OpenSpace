@@ -11,6 +11,11 @@ local Mars = {
   Identifier = "Mars",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MARS",
+      Observer = "MARS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_MARS",

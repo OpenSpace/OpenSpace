@@ -27,14 +27,12 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
-
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 class QPushButton;
 
-class MarkNodesDialog : public QDialog {
+class MarkNodesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -44,7 +42,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    MarkNodesDialog(openspace::Profile& profile, QWidget* parent);
+    MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -63,8 +61,8 @@ private:
     void createWidgets();
 
     std::vector<QListWidgetItem*> _markedNodesListItems;
-    openspace::Profile& _profile;
-    std::vector<std::string> _data;
+    std::vector<std::string>* _markedNodes;
+    std::vector<std::string> _markedNodesData;
 
     QListWidget* _list = nullptr;
     QPushButton* _removeButton = nullptr;

@@ -77,6 +77,7 @@ private:
     // properties
     properties::FloatProperty _lineWidth;
     properties::DoubleProperty _standOffDistance;
+    properties::BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,

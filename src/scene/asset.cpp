@@ -502,7 +502,7 @@ bool Asset::initialize() {
         LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
         return false;
     }
-    LDEBUG(fmt::format("Initializing asset {}", id()));
+    LDEBUG(fmt::format("Initializing asset '{}'", id()));
 
     // 1. Initialize requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
@@ -593,7 +593,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(fmt::format("Deintializing asset {}", id()));
+    LDEBUG(fmt::format("Deintializing asset '{}'", id()));
 
     // Perform inverse actions as in initialize, in reverse order (7 - 1)
 

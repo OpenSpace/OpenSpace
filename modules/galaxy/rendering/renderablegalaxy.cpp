@@ -182,14 +182,15 @@ namespace {
 #include "renderablegalaxy_codegen.cpp"
 
 
-    void saveCachedFile(const std::string& file, const std::vector<glm::vec3>& positions,
+    void saveCachedFile(const std::filesystem::path& file,
+                        const std::vector<glm::vec3>& positions,
                         const std::vector<glm::vec3>& colors, int64_t nPoints,
                         float pointsRatio)
     {
         std::ofstream fileStream(file, std::ofstream::binary);
 
         if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+            LERROR(fmt::format("Error opening file {} for save cache file", file));
             return;
         }
 
@@ -321,13 +322,13 @@ void RenderableGalaxy::initialize() {
     );
     _volume = reader.read();
 
-    std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
+    std::filesystem::path cachedPointsFile = FileSys.cacheManager()->cachedFilename(
         _pointsFilename
     );
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
-            cachedPointsFile, _pointsFilename
+        LINFO(fmt::format("Cached file {} used for galaxy point file {}",
+            cachedPointsFile, std::filesystem::path(_pointsFilename)
         ));
 
         Result res = loadCachedFile(cachedPointsFile);
@@ -730,17 +731,19 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
     return res;
 }
 
-RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(const std::string& file) {
+RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(
+                                                        const std::filesystem::path& file)
+{
     std::ifstream fileStream(file, std::ifstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        LERROR(fmt::format("Error opening file {} for loading cache file", file));
         return { false, {}, {} };
     }
 
     int8_t cacheVersion;
     fileStream.read(reinterpret_cast<char*>(&cacheVersion), sizeof(int8_t));
     if (cacheVersion != CurrentCacheVersion) {
-        LINFO(fmt::format("Removing cache file '{}' as the version changed"));
+        LINFO(fmt::format("Removing cache file {} as the version changed", file));
         return { false, {}, {} };
     }
 

@@ -30,8 +30,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/programobject.h>
-//#include <ostream>
-//#include <iostream>
 
 namespace {
     constexpr const char* _loggerCat = "DebugRenderer";

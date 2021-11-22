@@ -1,0 +1,55 @@
+local propertyHelper = asset.require('../property_helper')
+local joystickHelper = asset.require('./joystick_helper')
+
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+--       This version of the SpaceMouse IS Sticky.
+-- Sixth parameter is the sensitivity for the axis
+
+local SpaceMouse = {
+  Push = {0, 1, 2}, -- left/right, back/forth, up/down
+  Twist = {5}, -- left/right
+  Tilt = {4, 3}, -- left/right, back/forth
+  LeftButton = 0,
+  RightButton = 1
+}
+
+asset.onInitialize(function()
+  local controller = SpaceMouse;
+
+  openspace.navigation.bindJoystickAxis(controller.Push[1], "Orbit X", false, false, true, 40.0);
+  openspace.navigation.bindJoystickAxis(controller.Push[2], "Orbit Y", false, false, true, 40.0);
+  openspace.navigation.bindJoystickAxis(controller.Twist[1], "Pan X", true, false, true, 40.0);
+  openspace.navigation.bindJoystickAxis(controller.Tilt[2], "Pan Y", false, false, true, 35.0);
+  openspace.navigation.bindJoystickAxis(controller.Push[3], "Zoom", false, false, true, 40.0);
+  openspace.navigation.bindJoystickAxis(controller.Tilt[1], "LocalRoll X", false, false, true, 35.0);
+
+  openspace.navigation.bindJoystickButton(
+    controller.LeftButton,
+    joystickHelper.permaBindLocalRoll(controller.Tilt[1]),
+    "Switch to local roll mode"
+  )
+
+  openspace.navigation.bindJoystickButton(
+    controller.RightButton,
+    joystickHelper.permaBindGlobalRoll(controller.Tilt[1]),
+    "Switch to global roll mode"
+  )
+end)

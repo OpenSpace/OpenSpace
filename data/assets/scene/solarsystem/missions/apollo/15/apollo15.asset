@@ -50,6 +50,7 @@ local Apollo15 = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "/ApolloCSM.osmodel",
+    ModelScale = 0.0001,
     LightSources = {
       {
         Type = "SceneGraphLightSource",

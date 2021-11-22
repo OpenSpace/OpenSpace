@@ -30,7 +30,9 @@ in vec3 vs_normalViewSpace;
 in float vs_depth;
 in vec4 vs_positionCameraSpace;
 
+uniform bool has_texture_diffuse;
 uniform sampler2D baseTexture;
+uniform vec3 baseColor;
 uniform sampler2D projectionTexture;
 uniform bool performShading;
 uniform float projectionFading;
@@ -44,7 +46,13 @@ const float specularIntensity = 0.0;
 const float specularPower = 100.0;
 
 Fragment getFragment() {
-  vec4 textureColor = texture(baseTexture, vs_st);
+  vec4 textureColor;
+  if (has_texture_diffuse) {
+      textureColor = texture(baseTexture, vs_st);
+  }
+  else {
+      textureColor = vec4(baseColor, 1.0);
+  }
   vec4 projectionColor = texture(projectionTexture, vs_st);
   if (projectionColor.a > 0.0) {
     textureColor.rgb = mix(

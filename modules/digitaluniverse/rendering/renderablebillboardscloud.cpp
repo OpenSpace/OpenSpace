@@ -970,7 +970,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _spriteTexture = DigitalUniverseModule::TextureManager.request(
             std::to_string(hash),
             [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
+                LINFO(fmt::format("Loaded texture from {}", absPath(path)));
                 std::unique_ptr<ghoul::opengl::Texture> t =
                     ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
                 t->uploadTexture();

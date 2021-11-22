@@ -398,24 +398,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
-                                    RenderEngine::RendererImplementation::Framebuffer;
-
-    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
-                                RenderEngine::RendererImplementation::ABuffer;
-
-    if (usingABufferRenderer && _useAdditiveBlending) {
-        _shader->setUniform("additiveBlending", true);
-    }
-
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -452,7 +442,7 @@ void RenderableSphere::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

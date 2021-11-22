@@ -960,7 +960,7 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        const std::string xmlExt, bool haveCliSGCTConfig,
+                                        bool haveCliSGCTConfig,
                                         const std::string& sgctFunctionName)
 {
     configuration::Configuration& config = *global::configuration;
@@ -1046,8 +1046,9 @@ int main(int argc, char* argv[]) {
     //
     // Parse commandline arguments
     //
+    char* prgName = argv[0];
     ghoul::cmdparser::CommandlineParser parser(
-        std::string(argv[0]),
+        std::string(prgName),
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
@@ -1159,7 +1160,6 @@ int main(int argc, char* argv[]) {
     const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
-        xmlExt,
         hasSGCTConfig,
         sgctFunctionName
     );

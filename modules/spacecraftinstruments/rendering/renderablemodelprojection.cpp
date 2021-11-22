@@ -344,7 +344,7 @@ void RenderableModelProjection::imageProjectGPU(
             _transform
         );
 
-        _geometry->render(*_fboProgramObject, false);
+        _geometry->render(*_fboProgramObject, false, true);
 
         _depthFboProgramObject->deactivate();
         _projectionComponent.depthMapRenderEnd();
@@ -374,7 +374,7 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
-    _geometry->render(*_fboProgramObject, false);
+    _geometry->render(*_fboProgramObject, false, true);
 
     _fboProgramObject->deactivate();
     _projectionComponent.imageProjectEnd();

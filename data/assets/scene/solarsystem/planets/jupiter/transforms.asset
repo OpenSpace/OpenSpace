@@ -11,7 +11,7 @@ local JupiterBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUPITER BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -27,7 +27,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterBarycenter })
 asset.meta = {
   Name = "Jupiter Transforms",
   Version = "1.0",
-  Description = [[ Jupiter Barycenter transform]],
+  Description = [[ Jupiter Barycenter transform ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",

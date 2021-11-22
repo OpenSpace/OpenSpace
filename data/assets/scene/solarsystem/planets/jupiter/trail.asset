@@ -11,8 +11,8 @@ local JupiterTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER BARYCENTER",
-      Observer = "SUN"
+      Target = "JUPITER",
+      Observer = "SSB"
     },
     Color = { 0.8, 0.7, 0.7 },
     Period = 4330.595,

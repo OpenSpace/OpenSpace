@@ -61,8 +61,8 @@ public:
 private:
     void loadData();
     void readHorizonsTextFile();
-    bool loadCachedFile(const std::string& file);
-    void saveCachedFile(const std::string& file) const;
+    bool loadCachedFile(const std::filesystem::path& file);
+    void saveCachedFile(const std::filesystem::path& file) const;
 
     properties::StringProperty _horizonsTextFile;
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;

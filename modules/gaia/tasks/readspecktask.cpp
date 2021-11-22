@@ -39,7 +39,7 @@ namespace {
     struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
         // The path to the SPECK file that are to be read
         std::string inFilePath;
-        
+
         // The path to the file to export raw VBO data to
         std::string outFilePath;
     };

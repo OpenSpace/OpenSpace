@@ -87,9 +87,11 @@ function (set_openspace_compile_settings target)
       "/GL" # Whole program optimization
     )
   else ()
-    set(MSVC_WARNINGS ${MSVC_WARNINGS}
-      "/ZI"       # Edit and continue support
-    )
+    if (GHOUL_ENABLE_EDIT_CONTINUE)
+      set(MSVC_WARNINGS ${MSVC_WARNINGS}
+        "/ZI"       # Edit and continue support
+      )
+    endif ()
   endif ()
 
   set(CLANG_WARNINGS
@@ -172,7 +174,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-length-array"
     "-Wno-missing-braces"
-    "-Wno-unknown-attributes"
+    "-Wno-ignored-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
@@ -186,9 +188,6 @@ function (set_openspace_compile_settings target)
     "-Wpedantic"
     "-Wunused-parameter"
     "-Wuninitialized"
-    "-Wsuggest-attribute=const"
-    "-Wsuggest-final-types"
-    "-Wsuggest-final-methods"
     "-Wsuggest-override"
     "-Walloc-zero"
     "-Wduplicated-cond"

@@ -12,7 +12,7 @@ local UranusTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS BARYCENTER",
+      Target = "URANUS",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -40,5 +40,5 @@ asset.meta = {
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  Identifiers = {"UranusTrailEarth"}
 }

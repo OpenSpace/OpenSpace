@@ -79,10 +79,6 @@ openspace.rebindKey = function(oldKey, newKey)
     local t = openspace.getKeyBinding(oldKey)
     openspace.clearKey(oldKey)
     for _, v in pairs(t) do
-        if v["Remote"] then
-            openspace.bindKey(newKey, v["Command"])
-        else
-            openspace.bindKeyLocal(newKey, v["Command"])
-        end
+        openspace.bindKey(newKey, v)
     end
 end

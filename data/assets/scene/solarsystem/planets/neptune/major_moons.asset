@@ -2,7 +2,7 @@ asset.require('./triton')
 
 
 asset.meta = {
-  Name = "Neptune Minor Moons",
+  Name = "Neptune Major Moons",
   Version = "1.0",
   Description = [[ Meta asset containing Neptune's major moon: Triton]],
   Author = "OpenSpace Team",

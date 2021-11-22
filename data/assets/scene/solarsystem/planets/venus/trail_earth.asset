@@ -11,7 +11,7 @@ local VenusTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "VENUS BARYCENTER",
+      Target = "VENUS",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },

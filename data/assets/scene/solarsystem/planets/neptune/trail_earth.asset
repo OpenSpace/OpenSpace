@@ -12,7 +12,7 @@ local NeptuneTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE BARYCENTER",
+      Target = "NEPTUNE",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -40,5 +40,5 @@ asset.meta = {
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  Identifiers = {"NeptuneTrailEarth"}
 }

@@ -129,4 +129,4 @@ int main(int argc, char** argv) {
     LINFO("Server stopped");
 
     return 0;
-};
+}

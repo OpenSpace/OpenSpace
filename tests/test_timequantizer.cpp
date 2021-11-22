@@ -34,17 +34,6 @@
 using namespace openspace;
 
 namespace {
-    constexpr const int FILLEN = 128;
-    constexpr const int TYPLEN = 32;
-    constexpr const int SRCLEN = 128;
-
-    namespace spicemanager_constants {
-        const int nrMetaKernels = 9;
-        SpiceInt which, handle, count = 0;
-        char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
-        double abs_error = 0.00001;
-    } // namespace spicemanager_constants
-
     int loadLSKKernel() {
         int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()

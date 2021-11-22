@@ -9,7 +9,7 @@ local SaturnBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "SATURN BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {

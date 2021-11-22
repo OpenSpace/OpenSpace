@@ -20,7 +20,7 @@ local Gaia = {
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
       YAxis = "Sun",
-      YAxisInverted = true
+      YAxisInvert = true
     },
     Scale = {
       Type = "StaticScale",

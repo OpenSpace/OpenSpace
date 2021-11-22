@@ -134,8 +134,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasValue<bool>(ContiguousModeInfo.identifier)) {
-        _contiguousMode = static_cast<bool>(
-            dictionary.value<bool>(ContiguousModeInfo.identifier));
+        _contiguousMode = dictionary.value<bool>(ContiguousModeInfo.identifier);
     }
     else {
         _contiguousMode = false;

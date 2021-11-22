@@ -249,6 +249,14 @@ namespace {
 
         // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
         std::optional<bool> enableOpacityBlending;
+
+        // The path to the vertex shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> vertexShader;
+
+        // The path to the fragment shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> fragmentShader;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -335,7 +343,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     distanceUnit = DistanceUnit::Kilometer;
                     break;
 
-                // Weired units
+                // Weird units
                 case Parameters::ScaleUnit::Thou:
                     distanceUnit = DistanceUnit::Thou;
                     break;
@@ -472,6 +480,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
     _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
 
+    if (p.vertexShader.has_value()) {
+        _vertexShaderPath = p.vertexShader->string();
+    }
+    if (p.fragmentShader.has_value()) {
+        _fragmentShaderPath = p.fragmentShader->string();
+    }
+
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
@@ -560,15 +575,32 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/model_fs.glsl")
-            );
+        program,
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                _vertexShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
+                std::filesystem::path(_vertexShaderPath);
+            std::filesystem::path fs =
+                _fragmentShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
+                std::filesystem::path(_fragmentShaderPath);
+
+            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
         }
+    );
+    // We don't really know what kind of shader the user provides us with, so we can't
+    // make the assumption that we are going to use all uniforms
+    _program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
@@ -581,8 +613,15 @@ void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        program,
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -610,8 +649,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
             glm::scale(
                 glm::dmat4(_modelTransform.value()),
@@ -731,8 +770,9 @@ void RenderableModel::update(const UpdateData& data) {
         // be converted to the animation time range, so the animation knows which
         // keyframes it should interpolate between for each frame. The conversion is
         // done in different ways depending on the animation mode.
-        // Explanation: s indicates start time, / indicates animation is played once forwards,
-        // \ indicates animation is played once backwards, time moves to the right.
+        // Explanation: s indicates start time, / indicates animation is played once
+        // forwards, \ indicates animation is played once backwards, time moves to the
+        // right.
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time

@@ -7,6 +7,11 @@ local Uranus = {
   Identifier = "Uranus",
   Parent = transforms.UranusBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS",
+      Observer = "URANUS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_URANUS",

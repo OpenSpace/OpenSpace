@@ -42,6 +42,8 @@ public:
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
+    scripting::LuaLibrary luaLibrary() const override;
+
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;

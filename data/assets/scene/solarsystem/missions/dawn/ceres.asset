@@ -28,7 +28,7 @@ local Ceres = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = {
         kernels .. "/dawn_ceres_v01.tpc",
         kernels .. "/sb_ceres_140724.bsp",
@@ -65,7 +65,7 @@ local CeresTrail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "CERES",
-      Observer = "SUN"
+      Observer = "SSB"
     },
     Color = { 0.7, 0.8, 0.7 },
     StartTime = "2010 JAN 01 00:00:00.000",

@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/globerotation.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
@@ -37,8 +38,9 @@
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -273,6 +275,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fTranslation, "Translation factory was not created");
     fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
 
+    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul_assert(fRotation, "Rotation factory was not created");
+    fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
+
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
@@ -334,7 +340,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "addLayer",
             &globebrowsing::luascriptfunctions::addLayer,
-            {},
             "string, string, table",
             "Adds a layer to the specified globe. The first argument specifies the "
             "name of the scene graph node of which to add the layer. The renderable "
@@ -346,7 +351,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            {},
             "string, string",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
@@ -358,7 +362,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLayers",
             &globebrowsing::luascriptfunctions::getLayers,
-            {},
             "string, string",
             "Returns the list of layers for the scene graph node specified in the first "
             "parameter. The second parameter specifies which layer type should be "
@@ -367,7 +370,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
-            {},
             "string, string, number, number",
             "Rearranges the order of a single layer in a scene graph node. The first "
             "parameter specifies the scene graph node, the second parameter specifies "
@@ -379,14 +381,12 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
-            {},
             "void",
             "Go to chunk with given index x, y, level"
         },
         {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
-            {},
             "[string], number, number, [number]",
             "Go to geographic coordinates of a globe. The first (optional) argument is "
             "the identifier of a scene graph node that has a RenderableGlobe attached. "
@@ -398,26 +398,40 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "the surface of the specified globe."
         },
         {
-            "getGeoPosition",
-            &globebrowsing::luascriptfunctions::getGeoPosition,
-            {},
+            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
+            // paths work really well close to surfaces
+            "flyToGeo",
+            &globebrowsing::luascriptfunctions::flyToGeo,
+            "[string], number, number, number [, bool, number]",
+            "Fly the camera to geographic coordinates of a globe, using the path "
+            "navigation system. The first (optional) argument is the identifier of a "
+            "scene graph node with a RenderableGlobe. If no globe is passed in, the "
+            "current anchor will be used. The second and third argument is latitude and "
+            "longitude (degrees). The fourth argument is the altitude, in meters. The "
+            "last two optional arguments are: a bool specifying whether the up vector "
+            "at the target position should be set to the globe's North vector, and a "
+            "duration for the motion, in seconds. Either of the two can be left out."
+        },
+        {
+            "getLocalPositionFromGeo",
+            &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
             "string, number, number, number",
-            "Returns the specified surface position on the globe identified by the first "
-            "argument, as three floating point values - latitude, longitude and altitude "
-            "(degrees and meters)."
+            "Returns a position in the local Cartesian coordinate system of the globe "
+            "identified by the first argument, that corresponds to the given geographic "
+            "coordinates: latitude, longitude and altitude (in degrees and meters). In "
+            "the local coordinate system, the position (0,0,0) corresponds to the "
+            "globe's center."
         },
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            {},
             "void",
-            "Get geographic coordinates of the camera poosition in latitude, "
+            "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
         },
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            {},
             "string, string, string",
             "Loads and parses the WMS capabilities xml file from a remote server. "
             "The first argument is the name of the capabilities that can be used to "
@@ -428,7 +442,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "removeWMSServer",
             &globebrowsing::luascriptfunctions::removeWMSServer,
-            {},
             "string",
             "Removes the WMS server identified by the first argument from the list "
             "of available servers. The parameter corrsponds to the first argument in "
@@ -437,7 +450,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "capabilitiesWMS",
             &globebrowsing::luascriptfunctions::capabilities,
-            {},
             "string",
             "Returns an array of tables that describe the available layers that are "
             "supported by the WMS server identified by the provided name. The 'URL'"
@@ -597,7 +609,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
         Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
     );
 
-    interaction::NavigationHandler::NavigationState state;
+    interaction::NavigationState state;
     state.anchor = globe.owner()->identifier();
     state.referenceFrame = globe.owner()->identifier();
     state.position = positionModelSpace;

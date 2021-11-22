@@ -134,14 +134,12 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             {
                 "add",
                 &luascriptfunctions::asset::add,
-                { this },
                 "string",
                 ""
             },
             {
                 "remove",
                 &luascriptfunctions::asset::remove,
-                { this },
                 "string",
                 ""
             }

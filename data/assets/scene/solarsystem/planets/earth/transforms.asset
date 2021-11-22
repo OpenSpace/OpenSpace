@@ -11,7 +11,7 @@ local EarthBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "EARTH BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {

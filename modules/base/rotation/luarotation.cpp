@@ -79,7 +79,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "rotation");
@@ -87,7 +87,9 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            fmt::format("Script '{}' does nto have a function 'rotation'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'rotation'", _luaScriptFile.value()
+            )
         );
         return glm::dmat3(1.0);
     }

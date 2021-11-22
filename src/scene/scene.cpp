@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scene.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -34,10 +35,11 @@
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/camera.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
 #include <string>
 #include <stack>
@@ -72,6 +74,9 @@ namespace {
         }
     }
 #endif // TRACY_ENABLE
+
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
@@ -120,6 +125,7 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -139,6 +145,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -474,8 +481,17 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
+std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        return global::sessionRecording->currentPlaybackInterpolationTime();
+    }
+    else {
+        return std::chrono::steady_clock::now();
+    }
+}
+
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
-                             ghoul::EasingFunction easingFunction)
+                                     ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
@@ -496,11 +512,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    std::chrono::steady_clock::time_point now = (
-        global::sessionRecording->isSavingFramesDuringPlayback()     ?
-        global::sessionRecording->currentPlaybackInterpolationTime() :
-        std::chrono::steady_clock::now()
-    );
+    std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
             info.beginTime = now;
@@ -550,13 +562,7 @@ void Scene::updateInterpolations() {
 
     using namespace std::chrono;
 
-    steady_clock::time_point now;
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-        now = global::sessionRecording->currentPlaybackInterpolationTime();
-    }
-    else {
-        now = steady_clock::now();
-    }
+    steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(
@@ -581,6 +587,10 @@ void Scene::updateInterpolations() {
         i.prop->interpolateValue(t, i.easingFunction);
 
         i.isExpired = (t == 1.f);
+
+        if (i.isExpired) {
+            global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
+        }
     }
 
     _propertyInterpolationInfos.erase(
@@ -603,6 +613,184 @@ const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
     return _interestingTimes;
 }
 
+void Scene::setPropertiesFromProfile(const Profile& p) {
+    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+
+    for (const Profile::Property& prop : p.properties) {
+        std::string uriOrRegex = prop.name;
+        std::string groupName;
+        if (doesUriContainGroupTag(uriOrRegex, groupName)) {
+            // Remove group name from start of regex and replace with '*'
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
+        }
+        _profilePropertyName = uriOrRegex;
+        ghoul::lua::push(L, uriOrRegex);
+        ghoul::lua::push(L, 0.0);
+
+        std::string workingValue = prop.value;
+        ghoul::trimSurroundingCharacters(workingValue, ' ');
+        // Later functions expect the value to be at the last position on the stack
+        propertyPushProfileValueToLua(L, workingValue);
+
+        applyRegularExpression(
+            L,
+            uriOrRegex,
+            allProperties(),
+            0.0,
+            groupName,
+            ghoul::EasingFunction::Linear
+        );
+        //Clear lua state stack
+        lua_settop(L, 0);
+    }
+}
+
+void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
+                                                                 const std::string& value)
+{
+    _valueIsTable = false;
+    ProfilePropertyLua elem = propertyProcessValue(L, value);
+    if (!_valueIsTable) {
+        std::visit(overloaded{
+            [&L](const bool value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const float value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const std::string value) {
+                ghoul::lua::push(L, value);
+            },
+            [&L](const ghoul::lua::nil_t nilValue) {
+                ghoul::lua::push(L, nilValue);
+            }
+        }, elem);
+    }
+}
+
+ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
+                                                                 const std::string& value)
+{
+    ProfilePropertyLua result;
+    PropertyValueType pType = propertyValueType(value);
+
+    switch (pType) {
+        case PropertyValueType::Boolean:
+            result = (value == "true") ? true : false;
+            break;
+        case PropertyValueType::Float:
+            result = std::stof(value);
+            break;
+        case PropertyValueType::Nil:
+            result = ghoul::lua::nil_t();
+            break;
+        case PropertyValueType::Table:
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '{');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '}');
+            handlePropertyLuaTableEntry(L, value);
+            _valueIsTable = true;
+            break;
+        case PropertyValueType::String:
+        default:
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '\"');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '[');
+            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), ']');
+            result = value;
+            break;
+    }
+    return result;
+}
+
+void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
+{
+    PropertyValueType enclosedType;
+    size_t commaPos = value.find(',', 0);
+    if (commaPos != std::string::npos) {
+        enclosedType = propertyValueType(value.substr(0, commaPos));
+    }
+    else {
+        enclosedType = propertyValueType(value);
+    }
+
+    switch (enclosedType) {
+        case PropertyValueType::Boolean:
+            LERROR(fmt::format(
+                "A lua table of bool values is not supported. (processing property {})",
+                _profilePropertyName)
+            );
+            break;
+        case PropertyValueType::Float:
+            {
+                std::vector<float> valsF;
+                processPropertyValueTableEntries(L, value, valsF);
+                ghoul::lua::push(L, valsF);
+            }
+            break;
+        case PropertyValueType::String:
+            {
+                std::vector<std::string> valsS;
+                processPropertyValueTableEntries(L, value, valsS);
+                ghoul::lua::push(L, valsS);
+            }
+            break;
+        case PropertyValueType::Table:
+        default:
+            LERROR(fmt::format(
+                "Table-within-a-table values are not supported for profile a "
+                "property (processing property {})", _profilePropertyName
+            ));
+            break;
+    }
+}
+
+template <typename T>
+void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+    const std::string& value, std::vector<T>& table)
+{
+    size_t commaPos = 0;
+    size_t prevPos = 0;
+    std::string nextValue;
+    while (commaPos != std::string::npos) {
+        commaPos = value.find(',', prevPos);
+        if (commaPos != std::string::npos) {
+            nextValue = value.substr(prevPos, commaPos - prevPos);
+            prevPos = commaPos + 1;
+        }
+        else {
+            nextValue = value.substr(prevPos);
+        }
+        ghoul::trimSurroundingCharacters(nextValue, ' ');
+        ProfilePropertyLua tableElement = propertyProcessValue(L, nextValue);
+        try {
+            table.push_back(std::get<T>(tableElement));
+        }
+        catch (std::bad_variant_access&) {
+            LERROR(fmt::format(
+                "Error attempting to parse profile property setting for "
+                "{} using value = {}", _profilePropertyName, value
+            ));
+        }
+    }
+}
+
+PropertyValueType Scene::propertyValueType(const std::string& value) {
+    if (luascriptfunctions::isBoolValue(value)) {
+        return PropertyValueType::Boolean;
+    }
+    else if (luascriptfunctions::isFloatValue(value)) {
+        return PropertyValueType::Float;
+    }
+    else if (luascriptfunctions::isNilValue(value)) {
+        return PropertyValueType::Nil;
+    }
+    else if (luascriptfunctions::isTableValue(value)) {
+        return PropertyValueType::Table;
+    }
+    else {
+        return PropertyValueType::String;
+    }
+}
+
 scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
@@ -610,7 +798,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
-                {},
                 "name, value [, duration, easing, optimization]",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
@@ -635,7 +822,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
-                {},
                 "URI, value [, duration, easing]",
                 "Sets the property identified by the URI in the first argument. The "
                 "second argument can be any type, but it has to match the type that the "
@@ -651,21 +837,18 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "hasProperty",
                 &luascriptfunctions::property_hasProperty,
-                {},
                 "string",
                 "Returns whether a property with the given URI exists"
             },
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
-                {},
                 "string",
                 "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
                 &luascriptfunctions::property_getProperty,
-                {},
                 "string",
                 "Returns a list of property identifiers that match the passed regular "
                 "expression"
@@ -673,7 +856,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "loadScene",
                 &luascriptfunctions::loadScene,
-                {},
                 "string",
                 "Loads the scene found at the file passed as an "
                 "argument. If a scene is already loaded, it is unloaded first"
@@ -681,7 +863,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
-                {},
                 "table",
                 "Loads the SceneGraphNode described in the table and adds it to the "
                 "SceneGraph"
@@ -689,14 +870,12 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
-                {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
             },
             {
                 "removeSceneGraphNodesFromRegex",
                 &luascriptfunctions::removeSceneGraphNodesFromRegex,
-                {},
                 "string",
                 "Removes all SceneGraphNodes with identifiers matching the input regular "
                 "expression"
@@ -704,7 +883,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "hasSceneGraphNode",
                 &luascriptfunctions::hasSceneGraphNode,
-                {},
                 "string",
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
@@ -712,7 +890,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "addInterestingTime",
                 &luascriptfunctions::addInterestingTime,
-                {},
                 "string, string",
                 "Adds an interesting time to the current scene. The first argument is "
                 "the name of the time and the second argument is the time itself in the "
@@ -721,16 +898,23 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "worldPosition",
                 &luascriptfunctions::worldPosition,
-                {},
                 "string",
-                "Returns the world position of the scene graph node with the given string as identifier"
+                "Returns the world position of the scene graph node with the given "
+                "string as identifier"
             },
             {
                 "worldRotation",
                 & luascriptfunctions::worldRotation,
-                {},
                 "string",
-                "Returns the world rotation matrix of the scene graph node with the given string as identifier"
+                "Returns the world rotation matrix of the scene graph node with the "
+                "given string as identifier"
+            },
+            {
+                "setParent",
+                &luascriptfunctions::setParent,
+                "string, string",
+                "The scene graph node identified by the first string is reparented to be "
+                "a child of the scene graph node identified by the second string."
             }
         }
     };

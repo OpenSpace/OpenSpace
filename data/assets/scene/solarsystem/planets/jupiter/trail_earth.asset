@@ -12,7 +12,7 @@ local JupiterTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER BARYCENTER",
+      Target = "JUPITER",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -36,7 +36,7 @@ asset.meta = {
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  Identifiers = {"JupiterTrailEarth"}
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrailEarth })
