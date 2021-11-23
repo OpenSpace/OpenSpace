@@ -77,9 +77,6 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3 n2 = endTangentDir;
         const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
-        const glm::dvec3 startPosToEndPos = end.position() - start.position();
-        const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
-
         // Decide the step direction for the "overview point" based on the directions
         // at the start and end of the path, to try to get a nice curve shape
         glm::dvec3 goodStepDirection;
@@ -92,8 +89,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         }
 
         // OBS! This is a hack to avoid colliding with a close node. Should be done nicely in a
-        // rewrite of the path types. This has explicitly been added just to allow 
-        // collision free paths between two nodes on a planet surface but might work weird in 
+        // rewrite of the path types. This has explicitly been added just to allow
+        // collision free paths between two nodes on a planet surface but might work weird in
         // other cases
         const PathNavigator& pn = global::navigationHandler->pathNavigator();
         const SceneGraphNode* closeNode1 = pn.findNodeNearTarget(start.node());
