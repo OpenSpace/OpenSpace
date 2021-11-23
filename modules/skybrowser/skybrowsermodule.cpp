@@ -470,15 +470,15 @@ void SkyBrowserModule::setSelectedObject()
 
     // Find and save what mouse is currently hovering on
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-        [&] (Pair &pair) {      
-            bool onBrowser = pair.getBrowser()->coordIsInsideCornersScreenSpace(
+        [&] (const std::unique_ptr<Pair> &pair) {      
+            bool onBrowser = pair->getBrowser()->coordIsInsideCornersScreenSpace(
                 _mousePosition
             );
-            bool onTarget = pair.getTarget()->coordIsInsideCornersScreenSpace(
+            bool onTarget = pair->getTarget()->coordIsInsideCornersScreenSpace(
                 _mousePosition
             );
             if (onBrowser) {
-                _selectedBrowser = pair.getBrowser()->identifier();
+                _selectedBrowser = pair->getBrowser()->identifier();
             }
             _isBrowser = onBrowser;
 
@@ -489,7 +489,7 @@ void SkyBrowserModule::setSelectedObject()
         _mouseOnPair = nullptr;
     }
     else {
-        _mouseOnPair = &(*it);
+        _mouseOnPair = it->get();
     }
 
     // Selection has changed
@@ -518,8 +518,7 @@ void SkyBrowserModule::addTargetBrowserPair(std::string targetId, std::string br
     
     // Assert pair to have both target and browser
     if (browser && target) {
-        Pair newPair(browser, target);
-        _targetsBrowsers.push_back(newPair);
+        _targetsBrowsers.push_back(std::make_unique<Pair>(browser, target));
     }
 }
 
@@ -584,9 +583,11 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& id) {
     if (!found) {
         return;
     }
-    auto it = std::remove(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-                          *found);
-
+    auto it = std::remove_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+        [&](const std::unique_ptr<Pair>& pair) {
+            return *found == *(pair.get());
+        });
+                          
     std::string targetId = found->getTarget()->identifier();
     // Remove from engine
     openspace::global::scriptEngine->queueScript(
@@ -644,7 +645,7 @@ void SkyBrowserModule::selectImage3dBrowser(int i)
         _browser3dNode->renderable());
     if (renderable) {
         const ImageData& image = _dataHandler->getImage(i);
-        renderable->displayImage(image, i);
+        renderable->displayImage(image.imageUrl, i);
     }
     
 }
@@ -698,13 +699,11 @@ void SkyBrowserModule::add2dSelectedImagesTo3d(const std::string& pairId)
 
     if (pair && get3dBrowser()) {
 
-        // Empty 3D browser selection
-        get3dBrowser()->getSelectedImages().clear();
         // Copy 2D selection of images to 3D browser
         const std::deque<int> images = pair->getSelectedImages();
         std::for_each(std::begin(images), std::end(images), [&](const int i) {
             const ImageData& image = _dataHandler->getImage(i);
-            get3dBrowser()->displayImage(image, i);
+            get3dBrowser()->displayImage(image.imageUrl, i);
             });
     }
 }
@@ -713,7 +712,7 @@ const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWWTDataHandler() {
     return _dataHandler;
 }
 
-std::vector<Pair>& SkyBrowserModule::getPairs()
+std::vector<std::unique_ptr<Pair>>& SkyBrowserModule::getPairs()
 {
     return _targetsBrowsers;
 }
@@ -721,12 +720,17 @@ std::vector<Pair>& SkyBrowserModule::getPairs()
 Pair* SkyBrowserModule::getPair(const std::string& id)
 {
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-        [&](Pair& pair) {
-            bool foundBrowser = pair.browserId() == id;
-            bool foundTarget = pair.targetId() == id;
+        [&](const std::unique_ptr<Pair>& pair) {
+            bool foundBrowser = pair->browserId() == id;
+            bool foundTarget = pair->targetId() == id;
             return foundBrowser || foundTarget;
         });
-    return &(*it);
+    if (it == std::end(_targetsBrowsers)) {
+        return nullptr;
+    }
+    else {
+        return it->get();
+    }
 }
 
 SceneGraphNode* SkyBrowserModule::get3dBrowserNode() {
@@ -776,7 +780,7 @@ void SkyBrowserModule::place3dBrowser(const ImageData& image, const int i)
 {
     // If the image has a 3D position, add it to the scene graph
     if (image.has3dCoords && get3dBrowser()) {
-        get3dBrowser()->displayImage(image, i);
+        get3dBrowser()->displayImage(image.imageUrl, i);
         get3dBrowser()->placeAt3dPosition(image);
     }
     else {
@@ -829,14 +833,14 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
     }(goal);
     
      bool isAllFinished{ false };
-     for (Pair& pair : _targetsBrowsers) {
-         if (pair.isEnabled()) {
-             bool isPairFinished = pair.hasFinishedFading(transparency);
+     for (std::unique_ptr<Pair>& pair : _targetsBrowsers) {
+         if (pair->isEnabled()) {
+             bool isPairFinished = pair->hasFinishedFading(transparency);
              if (!isPairFinished) {
-                 pair.incrementallyFade(transparency, _fadingTime, deltaTime);
+                 pair->incrementallyFade(transparency, _fadingTime, deltaTime);
              }
              else if (isPairFinished && goal == Transparency::Transparent) {
-                 pair.disable();
+                 pair->disable();
              }
              isAllFinished &= isPairFinished;
          }
@@ -850,9 +854,9 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
 
 void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 {
-    for (Pair& pair : _targetsBrowsers) {
-        if (pair.isEnabled()) {
-            pair.incrementallyAnimateToCoordinate(deltaTime);
+    for (std::unique_ptr<Pair>& pair : _targetsBrowsers) {
+        if (pair->isEnabled()) {
+            pair->incrementallyAnimateToCoordinate(deltaTime);
         }
     }
 }

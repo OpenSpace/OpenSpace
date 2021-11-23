@@ -1,8 +1,6 @@
 #include <modules/skybrowser/include/renderableskybrowser.h>
 
 #include <modules/skybrowser/include/utility.h>
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/distanceconstants.h>
@@ -49,27 +47,11 @@ namespace {
 
 namespace openspace {
 
-    void RenderableSkyBrowser::ScreenSpaceRenderHandler::draw() {}
-
-    void RenderableSkyBrowser::ScreenSpaceRenderHandler::render() {}
-
-    void RenderableSkyBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
-        _texture = t;
-    }
-
 
     RenderableSkyBrowser::RenderableSkyBrowser(const ghoul::Dictionary& dictionary)
-        : RenderablePlane(dictionary)
-        , _url(UrlInfo)
-        , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
-        , _reload(ReloadInfo)
-        , _verticalFov(70.f)
-        , _isSyncedWithWwt(false)
+        : RenderablePlane(dictionary),
+        WwtCommunicator(dictionary)
     {
-        // Handle target dimension property
-        const Parameters p = codegen::bake<Parameters>(dictionary);
-        _url = p.url.value_or(_url);
-
         std::string identifier;
         if (dictionary.hasValue<std::string>(KeyIdentifier)) {
             identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -79,179 +61,51 @@ namespace openspace {
         }
         setIdentifier(identifier);
 
+        const Parameters p = codegen::bake<Parameters>(dictionary);
+        _url = p.url.value_or(_url);
+
         // Ensure the texture is a square for now
         // Maybe change later
         glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
         float maxDimension = std::max(windowDimensions.x, windowDimensions.y);
         _dimensions = { maxDimension, maxDimension };
 
-        // Create browser and render handler
-        _renderHandler = new ScreenSpaceRenderHandler();
-        _keyboardHandler = new WebKeyboardHandler();
-        _browserInstance = std::make_unique<BrowserInstance>(
-            _renderHandler,
-            _keyboardHandler
-            );
-
-        _url.onChange([this]() { _isUrlDirty = true; });
-        _dimensions.onChange([this]() { _isDimensionsDirty = true; });
-        _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
-
         addProperty(_url);
         addProperty(_dimensions);
         addProperty(_reload);
+        addProperty(_verticalFov);
+        addProperty(_borderColor);
+        addProperty(_equatorialAim);
+    }
 
-        WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
-        if (webBrowser) {
-            webBrowser->addBrowser(_browserInstance.get());
-        }
+    RenderableSkyBrowser::~RenderableSkyBrowser() {
+
     }
 
     void RenderableSkyBrowser::initializeGL() {
+        Browser::initializeGL();
         RenderablePlane::initializeGL();
-        _texture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(_dimensions.value(), 1.0f)
-            );
-        _texture->setDimensions(glm::ivec3(_dimensions.value(), 1));
-        
-        _renderHandler->setTexture(*_texture);
-        // The browser gets by default the size of the OpenSpace window, so it needs to 
-        // be resized
-        _browserInstance->initialize();
-        _browserInstance->loadUrl(_url);
-        _browserInstance->reshape(_dimensions.value());
     }
 
     void RenderableSkyBrowser::deinitializeGL() {
+       
         RenderablePlane::deinitializeGL();
-        _renderHandler->setTexture(0);
-        _texture = nullptr;
-
-        std::string urlString;
-        _url.getStringValue(urlString);
-        LDEBUG(fmt::format("Deinitializing RenderableSkyBrowser: {}", urlString));
-
-        _browserInstance->close(true);
-
-        WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
-        if (webBrowser) {
-            webBrowser->removeBrowser(_browserInstance.get());
-            _browserInstance.reset();
-        }
-        else {
-            LWARNING("Could not find WebBrowserModule");
-        }
-
-        RenderablePlane::deinitializeGL();
+        Browser::deinitializeGL();
     }
 
     void RenderableSkyBrowser::update(const UpdateData& data) {
+        Browser::update();
         RenderablePlane::update(data);
-        _renderHandler->updateTexture();
-
-        if (_isUrlDirty) {
-            _browserInstance->loadUrl(_url);
-            _isUrlDirty = false;
-        }
-
-        if (_isDimensionsDirty) {
-            _browserInstance->reshape(_dimensions.value());
-            _isDimensionsDirty = false;
-        }
     }
 
-    void RenderableSkyBrowser::bindTexture() {
-        if (_texture) {
-            _texture->bind();
-        }
-        else {
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
+    void RenderableSkyBrowser::stopSyncingWwtView()
+    {
+
     }
 
-    void RenderableSkyBrowser::executeJavascript(std::string script) const {
-        //LINFOC(_loggerCat, "Executing javascript " + script);
-        const bool isBrowserReady = _browserInstance && _browserInstance->getBrowser();
-        const bool isMainFrameReady = _browserInstance->getBrowser()->GetMainFrame();
-        if (isBrowserReady && isMainFrameReady) {
-            CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
-            frame->ExecuteJavaScript(script, frame->GetURL(), 0);
-        }
-    }
-
-    void RenderableSkyBrowser::sendMessageToWwt(const ghoul::Dictionary& msg) {
-        std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
-        executeJavascript(script);
-    }
-
-    void RenderableSkyBrowser::displayImage(const ImageData& image, const int i) {
-        ghoul::Dictionary msg = wwtmessage::moveCamera(
-            image.equatorialSpherical,
-            image.fov,
-            0.0
-        );
-        sendMessageToWwt(msg);
-        _verticalFov = image.fov;
-        // Add to selected images if there are no duplicates
-        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        if (it == std::end(_selectedImages)) {
-            // Push newly selected image to front
-            _selectedImages.push_front(i);
-            // Create image layer and center WWT app on the image
-            sendMessageToWwt(wwtmessage::addImage(std::to_string(i), image.imageUrl));
-            LINFO("Image has been loaded to " + identifier());
-        }
-    }
-
-    void RenderableSkyBrowser::removeSelectedImage(const ImageData& image, const int i) {
-        // Remove from selected list
-        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        if (it != std::end(_selectedImages)) {
-            _selectedImages.erase(it);
-            sendMessageToWwt(wwtmessage::removeImage(std::to_string(i)));
-        }
-    }
-
-    void RenderableSkyBrowser::setIdInBrowser(std::string id) {
-        // Send ID to it's browser
-        executeJavascript("setId('" + id + "')");
-    }
-
-    float RenderableSkyBrowser::verticalFov() const {
-        return _verticalFov;
-    }
-
-    void RenderableSkyBrowser::syncWwtView() {
-        // If the camera is already synced, the browser is already initialized
-        if (!_isSyncedWithWwt) {
-            _isSyncedWithWwt = true;
-            // Start a thread to enable user interaction while sending the calls to WWT
-            _threadWwtMessages = std::thread([&] {
-                while (_isSyncedWithWwt) {
-
-                    glm::dvec2 aim{ 0.0 };
-                    // Send a message just to establish contact
-                    ghoul::Dictionary msg = wwtmessage::moveCamera(
-                        aim, 
-                        _verticalFov, 
-                        0.0
-                    );
-                    sendMessageToWwt(msg);
-
-                    // Sleep so we don't bombard WWT with too many messages
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                }
-                });
-        }
-      
-    }
-
-    void RenderableSkyBrowser::stopSyncingWwtView() {
-        _isSyncedWithWwt = false;
-
-        if (_threadWwtMessages.joinable()) {
-            _threadWwtMessages.join();
-        }
+    void RenderableSkyBrowser::setIdInBrowser()
+    {
+        WwtCommunicator::setIdInBrowser(identifier());
     }
 
 	void RenderableSkyBrowser::placeAt3dPosition(const ImageData& image)
@@ -301,32 +155,4 @@ namespace openspace {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
 	}
-
-	std::deque<int>& RenderableSkyBrowser::getSelectedImages() {
-        return _selectedImages;
-    }
-
-    void RenderableSkyBrowser::setImageLayerOrder(int i, int order) {
-        // Remove from selected list
-        auto current = std::find(
-            std::begin(_selectedImages), 
-            std::end(_selectedImages), 
-            i
-        );
-        auto target = std::begin(_selectedImages) + order;
-
-        // Make sure the image was found in the list
-        if (current != std::end(_selectedImages) && target != std::end(_selectedImages)) {
-            // Swap the two images
-            std::iter_swap(current, target);
-        }
-
-        int reverseOrder = _selectedImages.size() - order - 1;
-        ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i),
-            reverseOrder);
-        sendMessageToWwt(message);
-    }
-
-    
-
 } // namespace

@@ -2,9 +2,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYBROWSER___H__
 
 #include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/webbrowser/include/webrenderhandler.h>
-#include <modules/webbrowser/include/browserinstance.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/skybrowser/include/wwtcommunicator.h>
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -35,72 +33,32 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace::documentation { struct Documentation; }
 
+#pragma optimize("", off)
+
 namespace openspace {
 
-    class RenderableSkyBrowser : public RenderablePlane
+    class RenderableSkyBrowser : public RenderablePlane, public WwtCommunicator
     {
     public:
         static constexpr const char* KeyIdentifier = "Identifier";
 
         RenderableSkyBrowser(const ghoul::Dictionary& dictionary);
-        virtual ~RenderableSkyBrowser() = default;
+        ~RenderableSkyBrowser();
 
         // Inherited from RenderablePlane
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
 
-        // Web page communication
-        void executeJavascript(std::string script) const;
-        void setIdInBrowser(std::string id);
-
-        // WorldWide Telescope communication
-        void displayImage(const ImageData& image, const int i);
-        void removeSelectedImage(const ImageData& image, const int i);
-        void sendMessageToWwt(const ghoul::Dictionary& msg);
-        void syncWwtView();
+        // Set up initialization with wwt
         void stopSyncingWwtView();
+        void setIdInBrowser();
 
         // Place
         void placeAt3dPosition(const ImageData& image);
 
-        // Getters
-        float verticalFov() const;
-        std::deque<int>& getSelectedImages();
-        
-        // Setters
-        void setImageLayerOrder(int i, int order);
-
     private:
-        // Properties
-        properties::Vec2Property _dimensions;
-        properties::StringProperty _url;
-        properties::TriggerProperty _reload;
 
-        class ScreenSpaceRenderHandler : public WebRenderHandler {
-        public:
-            void draw() override;
-            void render() override;
-
-            void setTexture(GLuint t);
-        };
-
-        void bindTexture() override;
-
-        // Browser variables       
-        std::unique_ptr<BrowserInstance> _browserInstance;
-        std::unique_ptr<ghoul::opengl::Texture> _texture;
-        CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-        CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-
-        // Flags
-        bool _isUrlDirty = false;
-        bool _isDimensionsDirty = false;
-        bool _isSyncedWithWwt;
-        
-        float _verticalFov;
-        std::thread _threadWwtMessages;
-        std::deque<int> _selectedImages;
     };
 }
 

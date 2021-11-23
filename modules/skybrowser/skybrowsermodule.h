@@ -56,7 +56,7 @@ public:
     virtual ~SkyBrowserModule();
 
     // Getters
-    std::vector<Pair>& getPairs();
+    std::vector<std::unique_ptr<Pair>>& getPairs();
     Pair* getPair(const std::string& id);
     SceneGraphNode* get3dBrowserNode();
     RenderableSkyBrowser* get3dBrowser();
@@ -108,7 +108,7 @@ private:
 
     void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     // The browsers and targets
-    std::vector<Pair> _targetsBrowsers;
+    std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
     Pair* _selectedPair{ nullptr };
     bool _isBrowser{ false };

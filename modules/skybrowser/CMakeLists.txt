@@ -30,11 +30,11 @@ set(HEADER_FILES
     include/screenspaceskytarget.h
     include/wwtdatahandler.h
     include/utility.h
-    include/renderableskybrowser.h
     include/pair.h
     include/wwtcommunicator.h
     include/browser.h
     include/screenspaceskybrowser.h
+    include/renderableskybrowser.h
     ext/tinyxml2/tinyxml2.h
     
 )

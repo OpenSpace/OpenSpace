@@ -39,12 +39,11 @@ local browser = {
 
 asset.onInitialize(function ()
    openspace.addSceneGraphNode(browser)
-   openspace.skybrowser.addToSkyBrowserModule(browserId)
+   openspace.skybrowser.add3dBrowserToSkyBrowserModule(browserId)
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeScreenSpaceRenderable(browserId)
-    openspace.removeScreenSpaceRenderable(targetId)
+    openspace.removeSceneGraphNode(browserId)
 end)
 
 asset.export("browser", {browser})
