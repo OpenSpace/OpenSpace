@@ -14,7 +14,7 @@ local registerSpiceKernels = function (spiceAsset, kernels)
   spiceAsset.onDeinitialize(function ()
     for i = #kernels, 1, -1 do
       local kernel = kernels[i]
-      openspace.spice.unloadKernel(kernel) 
+      openspace.spice.unloadKernel(kernel)
     end
   end)
 end
@@ -59,7 +59,7 @@ local registerScreenSpaceRenderables = function (sceneAsset, renderables, overri
   end)
   sceneAsset.onDeinitialize(function ()
     for i = #renderables, 1, -1 do
-      renderable = renderables[i]
+      local renderable = renderables[i]
       openspace.removeScreenSpaceRenderable(renderable.Identifier)
     end
   end)
@@ -168,7 +168,7 @@ local createModelPart = function (parent, sunLightSourceNode, models, geometry, 
       GeometryFile =  models .. "/" .. geometry .. ".obj",
       LightSources = lightSources,
       PerformShading = performShading,
-      DisableFaceCulling = true 
+      DisableFaceCulling = true
     },
     GUI = {
       Hidden = true
