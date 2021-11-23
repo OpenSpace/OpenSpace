@@ -69,6 +69,7 @@ public:
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
+    void setEnabled(bool isEnabled);
     float depth();
 
     // Added by skybrowser team

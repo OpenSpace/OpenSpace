@@ -447,7 +447,10 @@ void ScreenSpaceRenderable::update() {}
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
 }
-
+void ScreenSpaceRenderable::setEnabled(bool isEnabled)
+{
+    _enabled = isEnabled;
+}
 float ScreenSpaceRenderable::depth() {
     return _useRadiusAzimuthElevation ?
         _raePosition.value().x :
