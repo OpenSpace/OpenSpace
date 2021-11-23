@@ -1,0 +1,37 @@
+local globeIdentifier = asset.require("./../earth").Earth.Identifier
+
+
+local Name = "Biosphere: Marine Chlorophyll Concentration and Land Vegetation"
+local Identifier = "noaa-sos-oceans-seawifs-polar_holes"
+local Description = [[ The term biosphere refers to the regions of the surface, atmosphere, and hydrosphere of the earth occupied by living organisms.This dataset shows quantity of marine and land-based plant-life as it changes throughout the seasons of the year.]]
+local URL = "https://sos.noaa.gov/catalog/datasets/biosphere-marine-chlorophyll-concentration-and-land-vegetation/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
+  FilePath = syncedDirectory .. "/sibt1850_seaice_extent_18500115_sos.png",
+  Description = Description
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}
