@@ -1,6 +1,5 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 
-#include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -17,13 +16,6 @@ namespace {
     constexpr const std::array<const char*, 7> UniformNames = {
         "modelTransform", "viewProj", "showCrosshair", "showRectangle", "lineWidth", 
         "dimensions", "lineColor"
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
-    {
-        "BrowserId",
-        "Browser Identifier",
-        "The identifier of the corresponding sky browser."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo CrosshairThresholdInfo =
@@ -60,9 +52,6 @@ namespace {
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
 
-        // [[codegen::verbatim(BrowserIDInfo.description)]]
-        std::optional<std::string> browserId;
-
         // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
         std::optional<float> crosshairThreshold;
 
@@ -84,8 +73,6 @@ namespace {
 namespace openspace {
     ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
-        , _skyBrowserId(BrowserIDInfo)
-        , _skyBrowser(nullptr)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
         , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
         , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 1.0)
@@ -94,29 +81,15 @@ namespace openspace {
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
-        _skyBrowserId = p.browserId.value_or(_skyBrowserId);
         _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
         _showRectangleThreshold = p.rectangleThreshold.value_or(_showRectangleThreshold);
         _stopAnimationThreshold = p.crosshairThreshold.value_or(_stopAnimationThreshold);
         _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
          
-        addProperty(_skyBrowserId);
         addProperty(_showCrosshairThreshold);
         addProperty(_showRectangleThreshold);
         addProperty(_stopAnimationThreshold);
         addProperty(_animationSpeed);
-
-        // If the ID changes for the corresponding browser, update
-        _skyBrowserId.onChange([&]() {
-            connectoToSkyBrowser();
-            });
-
-        // Always make sure that the target and browser are visible together
-        _enabled.onChange([&]() {
-            if (_skyBrowser) {
-                _skyBrowser->property("Enabled")->set(_enabled.value());
-            }
-            });
 
         // Set a unique identifier
         std::string identifier;
@@ -137,29 +110,12 @@ namespace openspace {
     }
 
     ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
-        if (_lockTarget.joinable()) {
-            _lockTarget.join();
-        }
+
     }
 
     // Pure virtual in the screen space renderable class and hence must be defined 
     void ScreenSpaceSkyTarget::bindTexture() {
 
-    }
-
-    bool ScreenSpaceSkyTarget::connectoToSkyBrowser() {
-        _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(
-            global::renderEngine->screenSpaceRenderable(_skyBrowserId.value()));
-        matchAppearanceToSkyBrowser();
-        return _skyBrowser;
-    }
-
-    void ScreenSpaceSkyTarget::matchAppearanceToSkyBrowser() {
-        if (_skyBrowser) {
-            _color = _skyBrowser->borderColor();
-            _objectSize = _skyBrowser->browserPixelDimensions();
-            setScale(_skyBrowser->verticalFov());
-        }
     }
 
     bool ScreenSpaceSkyTarget::isReady() const {
@@ -177,9 +133,6 @@ namespace openspace {
 
     bool ScreenSpaceSkyTarget::deinitializeGL()
     {
-        if (isLocked()) {
-            unlock();
-         }
         return ScreenSpaceRenderable::deinitializeGL();
     }
 
@@ -219,18 +172,10 @@ namespace openspace {
         return _color;
     }
 
-    ScreenSpaceSkyBrowser* ScreenSpaceSkyTarget::getSkyBrowser() {
-        return _skyBrowser;
-    }
-
     void ScreenSpaceSkyTarget::render() {
 
-        bool showCrosshair = false;
-        bool showRectangle = true;
-        if (_skyBrowser) {
-            showCrosshair = _skyBrowser->verticalFov() < _showCrosshairThreshold;
-            showRectangle = _skyBrowser->verticalFov() > _showRectangleThreshold;
-        }
+        bool showCrosshair = _verticalFov < _showCrosshairThreshold;
+        bool showRectangle = _verticalFov > _showRectangleThreshold;
         
         glm::vec4 color = { glm::vec3(_color) / 255.f, _opacity.value() };
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
@@ -259,6 +204,15 @@ namespace openspace {
         _shader->deactivate();
     }
 
+    void ScreenSpaceSkyTarget::update()
+    {
+        if (_isLocked) {
+            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(
+                _lockedCoordinates
+            );
+        }
+    }
+
     void ScreenSpaceSkyTarget::setDimensions(glm::vec2 dimensions) {
         _objectSize = dimensions;
     }
@@ -275,8 +229,9 @@ namespace openspace {
 
     // Update the scale of the target (the height of the target in relation to the 
     // OpenSpace window)
-    void ScreenSpaceSkyTarget::setScale(float verticalFov) {
+    void ScreenSpaceSkyTarget::setScaleFromVfov(float verticalFov) {
 
+        _verticalFov = verticalFov;
         glm::dvec2 fovs = skybrowser::fovWindow();
         
         // Cap the scale at small scales so it is still visible
@@ -286,31 +241,7 @@ namespace openspace {
         _scale = std::max(heightRatio, smallestHeightRatio);
     }
 
-    void ScreenSpaceSkyTarget::unlock() {
-        _isLocked = false;
-        if (_lockTarget.joinable()) {
-            _lockTarget.join();
-        }
-    }
-
-    void ScreenSpaceSkyTarget::lock() {
-        if (_isLocked) {
-            unlock();
-        }
-        _isLocked = true;
-        _lockedCoordinates = directionEquatorial();
-
-        // Start a thread to enable user interactions while locking target
-        _lockTarget = std::thread([&] {
-            while (_isLocked) {
-                _cartesianPosition = skybrowser::equatorialToScreenSpace3d(
-                    _lockedCoordinates
-                );
-            }
-        });
-    }
-
-    bool ScreenSpaceSkyTarget::isLocked() {
+    bool ScreenSpaceSkyTarget::isLocked() const {
         return _isLocked;
     }
 
@@ -325,12 +256,14 @@ namespace openspace {
         _animationEnd = glm::normalize(end);
         _shouldLockAfterAnimation = shouldLockAfter;
         _isAnimated = true;
+        _isLocked = false;
     }
 
     void ScreenSpaceSkyTarget::incrementallyAnimateToCoordinate(float deltaTime)
     {
         // Find smallest angle between the two vectors
-        double smallestAngle = skybrowser::angleBetweenVectors(_animationStart, _animationEnd);
+        double smallestAngle = skybrowser::angleBetweenVectors(_animationStart, 
+            _animationEnd);
         const bool shouldAnimate = smallestAngle > _stopAnimationThreshold;
 
         // Only keep animating when target is not at goal position
@@ -357,8 +290,8 @@ namespace openspace {
             _isAnimated = false;
             
             // Lock target when it first arrives to the position
-            if (!isLocked() && _shouldLockAfterAnimation) {
-                lock();
+            if (!_isLocked && _shouldLockAfterAnimation) {
+                _isLocked = true;
             }
         }      
     }
@@ -386,5 +319,25 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::setOpacity(float opacity) {
         _opacity = opacity;
+    }
+    void ScreenSpaceSkyTarget::setLock(bool isLocked)
+    {
+        _isLocked = isLocked;
+        if (_isLocked) {
+            _lockedCoordinates = directionEquatorial();
+        }
+    }
+    void ScreenSpaceSkyTarget::setCallbackEnabled(std::function<void(bool)> function)
+    {
+        _enabled.onChange([this, f = std::move(function)]() {
+            f(_enabled);
+        });
+    }
+    void ScreenSpaceSkyTarget::setCallbackPosition(
+        std::function<void(const glm::vec3&)> function)
+    {
+        _cartesianPosition.onChange([this, f = std::move(function)]() {
+            f(_cartesianPosition);
+        });
     }
 }

@@ -25,28 +25,30 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___PAIR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___PAIR___H__
 
-#include <modules/skybrowser/include/wwtdatahandler.h>
-//#include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
 
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
+class ScreenSpaceSkyTarget;
+class ImageData;
 
 class Pair {
 public:
 
     constexpr static const float AcceptableDiff = 0.01f;
+    constexpr static const double epsilon = std::numeric_limits<double>::epsilon();
 
     Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
+    Pair(Pair const&) = default;
+    // user-defined copy assignment (copy-and-swap idiom)
+    Pair& operator=(Pair other);
+
 
     void lock();
     void unlock();
     void setImageOrder(int i, int order);
-    void connectPair();
-    void synchronizeWithWwt();
     void removeHighlight(glm::ivec3 color);
     void highlight(glm::ivec3 color);
     void enable();
@@ -61,26 +63,31 @@ public:
     bool isEnabled();
     bool isLocked();
 
+    void initialize();
     glm::ivec3 borderColor();
     glm::dvec3 targetDirectionEquatorial();
     glm::dvec3 targetDirectionGalactic();
     std::string browserGuiName();
-    std::string browserId();
-    std::string targetId();
+    const std::string& browserId() const;
+    const std::string& targetId() const;
     float verticalFov();
     const std::deque<int>& getSelectedImages();
     void selectImage(const ImageData& image, const int i);
     void removeSelectedImage(const int i);
-    void loadImages(std::string collection);
+    void loadImageCollection(std::string collection);
     void setImageOpacity(const int i, float opacity);
     void sendIdToBrowser();
     void updateBrowserSize();
+    void setIsSyncedWithWwt(bool isSynced);
+
 
     ScreenSpaceSkyTarget* getTarget();
     ScreenSpaceSkyBrowser* getBrowser();
-
-    friend bool operator==(const Pair& lhs, const Pair& rhs);
-    friend bool operator!=(const Pair& lhs, const Pair& rhs);
+    
+    friend bool operator==(const Pair& lhs, 
+                           const Pair& rhs);
+    friend bool operator!=(const Pair& lhs, 
+                           const Pair& rhs);
 
 private:
 

@@ -27,6 +27,7 @@
 
 #include <modules/skybrowser/include/browser.h>
 #include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
@@ -45,11 +46,12 @@ public:
     virtual ~WwtCommunicator();
 
     // WorldWide Telescope communication
-    void displayImage(const std::string& url, const int i);
+    void displayImage(const std::string& url, int i);
     void removeSelectedImage(const int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
-    void setImageOpacity(const int i, float opacity);
+    void setImageOpacity(int i, float opacity);
+    void update();
 
     // Getters
     const std::deque<int>& getSelectedImages();
@@ -57,29 +59,52 @@ public:
     float verticalFov() const;
     glm::dvec2 fieldsOfView();
     bool hasLoadedImages() const;
+    glm::dvec3 equatorialAimCartesian() const;
 
     // Setters
     void setHasLoadedImages(bool isLoaded);
     void setVerticalFov(float vfov);
-    void setWebpageBorderColor(glm::ivec3 color);
+    void setIsSyncedWithWwt(bool isSynced);
+    void setEquatorialAim(glm::dvec3 cartesian);
 
     // Display
     void highlight(glm::ivec3 addition);
     void removeHighlight(glm::ivec3 removal);
+    void updateBorderColor();
+    
 
 protected:
-    void sendMessageToWwt(const ghoul::Dictionary& msg);
     // Web page communication
     void setIdInBrowser(const std::string& id);
 
+    properties::DVec2Property _equatorialAim;
     properties::FloatProperty _verticalFov;
     properties::IVec3Property _borderColor;
+    
 
     std::deque<int> _selectedImages;
     bool _hasLoadedImages{ false };
 
 private:
-    void executeJavascript(const std::string& script) const;
+    bool _isSyncedWithWwt{ false };
+    const std::chrono::microseconds interval = std::chrono::microseconds(10000);
+    std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+
+    void setWebpageBorderColor(glm::ivec3 color);
+    void sendMessageToWwt(const ghoul::Dictionary& msg);
+
+    int messageCounter{ 0 };
+
+    ghoul::Dictionary moveCamera(const glm::dvec2& celestCoords, const double fov,
+        const double roll, const bool shouldMoveInstantly = true);
+    ghoul::Dictionary loadCollection(const std::string& url);
+    ghoul::Dictionary setForeground(const std::string& name);
+    ghoul::Dictionary addImage(const std::string& id, const std::string& url);
+    ghoul::Dictionary removeImage(const std::string& id);
+    ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
+    ghoul::Dictionary setForegroundOpacity(double val);
+    ghoul::Dictionary setLayerOrder(const std::string& id, int version);
+
 };
 
 } // namespace openspace

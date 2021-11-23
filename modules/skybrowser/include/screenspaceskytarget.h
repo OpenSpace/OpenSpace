@@ -25,37 +25,35 @@ namespace openspace {
         bool deinitializeGL() override;
         bool isReady() const override;
         void render() override;
+        void update() override;
         glm::mat4 scaleMatrix() override;
         void bindTexture() override; // Empty function but has to be defined
         void createShaders();
 
-        // Sky browser functionality
-        bool connectoToSkyBrowser();
-        void matchAppearanceToSkyBrowser();
-        
-        // Getters
-        ScreenSpaceSkyBrowser* getSkyBrowser();
         glm::ivec3 borderColor() const;
         float opacity() const;
 
         // Setters
-        void setScale(float verticalFov);
+        void setScaleFromVfov(float verticalFov);
         void setDimensions(glm::vec2 dimensions);
         void setColor(glm::ivec3 color);
         void setOpacity(float opacity);
+        void setLock(bool isLocked);
+
+        // Set callbacks
+        void setCallbackEnabled(std::function<void(bool)> function);
+        void setCallbackPosition(std::function<void(const glm::vec3&)> function);
 
         // Target directions
         glm::dvec3 directionGalactic() const;
         glm::dvec3 directionEquatorial() const;
 
         // Locking functionality
-        void lock();
-        void unlock();
-        bool isLocked();
+        bool isLocked() const;
 
         // Animation
         bool isAnimated();
-        void startAnimation(glm::dvec3 end, bool shouldLockAfter);
+        void startAnimation(glm::dvec3 end, bool shouldLockAfter = true);
         void incrementallyAnimateToCoordinate(float deltaTime);
         // Display
         void highlight(glm::ivec3 addition);
@@ -63,7 +61,6 @@ namespace openspace {
 
     private:
         // Properties
-        properties::StringProperty _skyBrowserId;
         properties::FloatProperty _showCrosshairThreshold;
         properties::FloatProperty _showRectangleThreshold;
         properties::DoubleProperty _stopAnimationThreshold;
@@ -87,15 +84,15 @@ namespace openspace {
         GLuint _vertexBuffer = 0;
         
         // Sky browser
-        ScreenSpaceSkyBrowser* _skyBrowser;
         glm::ivec3 _color;
+        float _verticalFov{ 0.f };
         
         // Lock target to a coordinate on the sky
-        glm::dvec3 _lockedCoordinates;              // Spherical celestial coordinates
-        std::thread _lockTarget;
+        glm::dvec3 _lockedCoordinates;   // Cartesian equatorial coordinates
 
-        glm::dvec3 _animationEnd;        // Cartesian celestial coordinates
-        glm::dvec3 _animationStart;      // Cartesian celestial coordinates
+        // Animation
+        glm::dvec3 _animationEnd;        // Cartesian equatorial coordinates
+        glm::dvec3 _animationStart;      // Cartesian equatorial coordinates
         
     };
 }

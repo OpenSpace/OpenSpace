@@ -25,8 +25,14 @@
 #include <modules/skybrowser/include/pair.h>
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/utility.h>
 #include <ghoul/misc/assert.h>
+#include <glm/gtc/constants.hpp>
+#include <functional>
+
+#pragma optimize("", off)
 
 namespace openspace {
 
@@ -37,29 +43,74 @@ namespace openspace {
     {
         ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
         ghoul_assert(target != nullptr, "Sky target is null pointer!");
+
+        // Set callback functions so that the target and the browser update each other
+        _browser->setCallbackEquatorialAim(
+            [&](const glm::dvec3& equatorialAim, bool) {
+                double diff = glm::length(equatorialAim - _target->directionEquatorial());
+                if ( diff > epsilon) {
+                    _target->startAnimation(equatorialAim, false);
+                }
+            }
+        );
+        _browser->setCallbackBorderColor(
+            [&](const glm::ivec3& color) {
+                _target->setColor(color);
+            }
+        );
+        _browser->setCallbackVerticalFov(
+            [&](float vfov) {
+                _target->setScaleFromVfov(vfov);
+            }
+        );
+        _browser->setCallbackDimensions(
+            [&](const glm::vec2& dimensions) {
+                _target->setDimensions(dimensions);
+            }
+        );
+        // Always make sure that the target and browser are visible together
+        _browser->setCallbackEnabled(
+            [&](bool enabled) {
+                _target->setEnabled(enabled);
+            }
+        ); 
+        _target->setCallbackEnabled(
+            [&](bool enabled) {
+                _browser->setEnabled(enabled);
+            }
+        );
+        _target->setCallbackPosition(
+            [&](glm::vec3 localCameraPosition) {
+                double diff = glm::length(
+                    _browser->equatorialAimCartesian() - _target->directionEquatorial()
+                );
+                if (diff > epsilon) {
+                    _browser->setEquatorialAim(
+                        skybrowser::localCameraToEquatorial(localCameraPosition)
+                    );
+                }
+            }
+        );
+    }
+
+    Pair& Pair::operator=(Pair other)
+    {
+        std::swap(_target, other._target);
+        std::swap(_browser, other._browser);
+        return *this;
+        
     }
     
     void Pair::lock() {
-        _target->lock();
+        _target->setLock(true);
     }
 
     void Pair::unlock() {
-        _target->unlock();
+        _target->setLock(false);
     }
 
     void Pair::setImageOrder(int i, int order) {
         _browser->setImageOrder(i, order);
-    }
-
-    void Pair::connectPair()
-    {
-        _browser->connectToSkyTarget();
-        _target->connectoToSkyBrowser();
-    }
-
-    void Pair::synchronizeWithWwt()
-    {
-        _browser->startSyncingWithWwt();
     }
 
     void Pair::removeHighlight(glm::ivec3 color)
@@ -84,7 +135,7 @@ namespace openspace {
 
     bool Pair::isBrowserFadeFinished(float goalState)
     {
-        float browserDiff = abs(_browser->getOpacity().value() - goalState);
+        float browserDiff = abs(_browser->opacity() - goalState);
         return browserDiff < AcceptableDiff;
     }
 
@@ -124,6 +175,14 @@ namespace openspace {
         return _target->isLocked();
     }
 
+    void Pair::initialize()
+    {
+        _target->setColor(_browser->borderColor());
+        _target->setDimensions(_browser->browserPixelDimensions());
+        _target->setScaleFromVfov(_browser->verticalFov());
+        _browser->updateBorderColor();
+    }
+
     glm::ivec3 Pair::borderColor()
     {
         return _browser->borderColor();
@@ -144,12 +203,12 @@ namespace openspace {
         return _browser->guiName();
     }
 
-    std::string Pair::browserId()
+    const std::string& Pair::browserId() const
     {
         return _browser->identifier();
     }
 
-    std::string Pair::targetId()
+    const std::string& Pair::targetId() const
     {
         return _target->identifier();
     }
@@ -183,7 +242,7 @@ namespace openspace {
         _browser->removeSelectedImage(i);
     }
 
-    void Pair::loadImages(std::string collection)
+    void Pair::loadImageCollection(std::string collection)
     {
         _browser->loadImageCollection(collection);
     }
@@ -200,6 +259,11 @@ namespace openspace {
 
     void Pair::updateBrowserSize() {
         _browser->updateBrowserSize();
+    }
+
+    void Pair::setIsSyncedWithWwt(bool isSynced)
+    {
+        _browser->setIsSyncedWithWwt(isSynced);
     }
 
     void Pair::incrementallyAnimateToCoordinate(double deltaTime) 
@@ -258,18 +322,19 @@ namespace openspace {
         }
         
         if (!isBrowserFadeFinished(goalState)) {
-            _browser->getOpacity() = _browser->getOpacity().value() + opacityDelta;
+            _browser->setOpacity(_browser->opacity() + opacityDelta);
         }
         else {
-            _browser->getOpacity() = goalState;
+            _browser->setOpacity(goalState);
         }
     }
-
+    
     bool operator==(const Pair& lhs, const Pair& rhs) {
         return lhs._target == rhs._target && lhs._browser == rhs._browser;
     }
-    bool operator!=(const Pair & lhs, const Pair & rhs) {
+    bool operator!=(const Pair& lhs, const Pair& rhs) {
         return !(lhs == rhs);
     }
+    
   
 } // namespace openspace

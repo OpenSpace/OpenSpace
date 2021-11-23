@@ -21,22 +21,22 @@ namespace openspace {
         // Galactic coordinates are projected onto the celestial sphere
         // Equatorial coordinates are unit length
         // Conversion spherical <-> Cartesian
-        glm::dvec2 cartesianToSpherical(glm::dvec3 coords);
-        glm::dvec3 sphericalToCartesian(glm::dvec2 coords);
+        glm::dvec2 cartesianToSpherical(const glm::dvec3& coords);
+        glm::dvec3 sphericalToCartesian(const glm::dvec2& coords);
 
         // Conversion J2000 equatorial <-> galactic
-        glm::dvec3 galacticToEquatorial(glm::dvec3 coords);
-        glm::dvec3 equatorialToGalactic(glm::dvec3 coords);
+        glm::dvec3 galacticToEquatorial(const glm::dvec3& coords);
+        glm::dvec3 equatorialToGalactic(const glm::dvec3& coords);
 
         // Conversion to screen space from J2000 equatorial / galactic / pixels
-        glm::dvec3 equatorialToScreenSpace3d(glm::dvec3 coords);
-        glm::dvec3 galacticToScreenSpace3d(glm::dvec3 coords);
-        glm::vec2 pixelToScreenSpace2d(glm::vec2& mouseCoordinate);
+        glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3& coords);
+        glm::dvec3 galacticToScreenSpace3d(const glm::dvec3& coords);
+        glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate);
 
         // Conversion local camera space <-> galactic / equatorial
-        glm::dvec3 galacticToLocalCamera(glm::dvec3 coords);
-        glm::dvec3 localCameraToGalactic(glm::dvec3 coords);
-        glm::dvec3 localCameraToEquatorial(glm::dvec3 coords);
+        glm::dvec3 galacticToLocalCamera(const glm::dvec3&  coords);
+        glm::dvec3 localCameraToGalactic(const glm::dvec3&  coords);
+        glm::dvec3 localCameraToEquatorial(const glm::dvec3&  coords);
 
         // Camera roll and direction
         double cameraRoll(); // Camera roll is with respect to the equatorial North Pole
@@ -46,25 +46,12 @@ namespace openspace {
         // Window and field of view
         float windowRatio();
         glm::dvec2 fovWindow();
-        bool isCoordinateInView(glm::dvec3 equatorial);
+        bool isCoordinateInView(const glm::dvec3&  equatorial);
 
         // Animation for target and camera 
-        double angleBetweenVectors(glm::dvec3 start, glm::dvec3 end);
-        glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start, glm::dvec3 end, 
+        double angleBetweenVectors(const glm::dvec3&  start, const glm::dvec3&  end);
+        glm::dmat4 incrementalAnimationMatrix(const glm::dvec3&  start, const glm::dvec3&  end, 
                                               double deltaTime, double speedFactor = 1.0);       
-    }
-    // WorldWide Telescope messages
-    namespace wwtmessage {
-        inline int messageCounter{ 0 };
-        ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, 
-                const double roll, const bool shouldMoveInstantly = true);
-        ghoul::Dictionary loadCollection(const std::string& url);
-        ghoul::Dictionary setForeground(const std::string& name);
-        ghoul::Dictionary addImage(const std::string& id, const std::string& url);
-        ghoul::Dictionary removeImage(const std::string& id);
-        ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
-        ghoul::Dictionary setForegroundOpacity(double val);
-        ghoul::Dictionary setLayerOrder(const std::string& id, int version);
     }
 }
 

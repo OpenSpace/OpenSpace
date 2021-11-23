@@ -186,14 +186,6 @@ namespace openspace {
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
             },  
-            {
-                "connectBrowserTarget",
-                &skybrowser::luascriptfunctions::connectBrowserTarget,
-                {},
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
-            },
            {
                 "add3dBrowserToSkyBrowserModule",
                 &skybrowser::luascriptfunctions::add3dBrowserToSkyBrowserModule,
@@ -429,9 +421,7 @@ SkyBrowserModule::SkyBrowserModule()
         if (_isCameraRotating) {
             incrementallyRotateCamera(deltaTime);
         }
-    });
-
-    
+    }); 
 } 
 
 SkyBrowserModule::~SkyBrowserModule() {
@@ -539,7 +529,6 @@ void SkyBrowserModule::createTargetBrowserPair() {
             "Name = '" + nameBrowser + "',"
             "Url = '"+ url +"',"
             "FaceCamera = false,"
-            "TargetId = '" + idTarget + "',"
             "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
         "}";
     const std::string target = "{"
@@ -547,7 +536,6 @@ void SkyBrowserModule::createTargetBrowserPair() {
             "Type = 'ScreenSpaceSkyTarget',"
             "Name = '" + nameTarget + "',"
             "FaceCamera = false,"
-            "BrowserId = '" + idBrowser + "',"
         "}";
 
     openspace::global::scriptEngine->queueScript(
@@ -563,11 +551,6 @@ void SkyBrowserModule::createTargetBrowserPair() {
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.skybrowser.connectBrowserTarget('" + idBrowser + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 

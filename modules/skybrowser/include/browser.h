@@ -55,13 +55,12 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-    class BrowserInstance;
-    class RenderHandler;
-    class WebKeyboardHandler;
+class BrowserInstance;
+class RenderHandler;
+class WebKeyboardHandler;
 
 class Browser {
 public:
-
     Browser(const ghoul::Dictionary& dictionary);
     Browser(Browser const&) = default;
     ~Browser();
@@ -73,17 +72,23 @@ public:
     void update();
     bool isReady() const;
 
-    glm::vec2 browserPixelDimensions() const;
+    void updateBrowserSize();
 
+    // Getters
+    glm::vec2 browserPixelDimensions() const;    
+    float browserRatio() const;
+    void setCallbackDimensions(const std::function<void(const glm::dvec2&)>& function);
 
 protected:
     properties::Vec2Property _dimensions;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
-    std::unique_ptr<BrowserInstance> _browserInstance;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+   
+    void executeJavascript(const std::string& script) const;
 
-
+private:
     class RenderHandler : public WebRenderHandler {
     public:
         void draw() override;
@@ -92,14 +97,13 @@ protected:
         void setTexture(GLuint t);
     };
 
-private:
-    void bindTexture();
-
+    std::unique_ptr<BrowserInstance> _browserInstance;
     CefRefPtr<RenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
+    bool _shouldReload = false;
 };
 
 } // namespace openspace

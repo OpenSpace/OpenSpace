@@ -81,7 +81,7 @@ namespace openspace {
 
         _url.onChange([this]() { _isUrlDirty = true; });
         _dimensions.onChange([this]() { _isDimensionsDirty = true; });
-        _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
+        _reload.onChange([this]() { _shouldReload = true; });
 
         // Create browser and render handler
         _renderHandler = new RenderHandler();
@@ -98,9 +98,7 @@ namespace openspace {
     }
 
     Browser::~Browser() {
-        // Delete
-        _browserInstance.reset();
-        _texture.reset();
+
     }
 
     bool Browser::initializeGL() {
@@ -118,11 +116,12 @@ namespace openspace {
 
     bool Browser::deinitializeGL() {
         _renderHandler->setTexture(0);
+
         _texture = nullptr;
 
         std::string urlString;
         _url.getStringValue(urlString);
-        LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", urlString));
+        LDEBUG(fmt::format("Deinitializing browser: {}", urlString));
 
         _browserInstance->close(true);
 
@@ -157,19 +156,53 @@ namespace openspace {
             _browserInstance->reshape(_dimensions.value());
             _isDimensionsDirty = false;
         }
+
+        if (_shouldReload) {
+            _browserInstance->reloadBrowser();
+            _shouldReload = false;
+        }
     }
 
     bool Browser::isReady() const {
         return _texture.get();
     }
 
-    void Browser::bindTexture() {
-        _texture->bind();
-    }
-
     glm::vec2 Browser::browserPixelDimensions() const {
         return _dimensions.value();
     }
 
+    // Updates the browser size to match the size of the texture
+    void Browser::updateBrowserSize() {
+        _dimensions = _texture->dimensions();
+    }
 
+    float Browser::browserRatio() const
+    {
+        return static_cast<float>(_texture->dimensions().x) /
+            static_cast<float>(_texture->dimensions().y);
+    }
+
+    void Browser::setCallbackDimensions(
+        const std::function<void(const glm::dvec2&)>& function)
+    {
+        _dimensions.onChange([&]() {
+            function(_dimensions.value());
+            });
+    }
+
+    void Browser::executeJavascript(const std::string& script) const {
+
+        // Make sure that the browser has a main frame
+        const bool browserExists = _browserInstance && _browserInstance->getBrowser();
+        const bool frameIsLoaded = browserExists &&
+            _browserInstance->getBrowser()->GetMainFrame();
+
+        if (frameIsLoaded) {
+            _browserInstance->getBrowser()->GetMainFrame()->ExecuteJavaScript(
+                script,
+                _browserInstance->getBrowser()->GetMainFrame()->GetURL(),
+                0
+            );
+        }
+    }
 } // namespace openspace

@@ -11,7 +11,7 @@
 
 namespace openspace::skybrowser {
 
-    glm::dvec3 sphericalToCartesian(glm::dvec2 coords) {
+    glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
 
         glm::dvec2 coordsRadians = glm::radians(coords);
 
@@ -24,7 +24,7 @@ namespace openspace::skybrowser {
         return cartesian;
     }
 
-    glm::dvec2 cartesianToSpherical(glm::dvec3 coord) {
+    glm::dvec2 cartesianToSpherical(const glm::dvec3&  coord) {
         // Equatorial coordinates RA = right ascension, Dec = declination
         double ra = atan2(coord.y, coord.x);
         double dec = atan2(coord.z, glm::sqrt((coord.x * coord.x) + (coord.y * coord.y)));
@@ -36,17 +36,17 @@ namespace openspace::skybrowser {
         return glm::degrees(celestialCoords);
     }
 
-    glm::dvec3 galacticToEquatorial(glm::dvec3 coords) {
+    glm::dvec3 galacticToEquatorial(const glm::dvec3&  coords) {
         return glm::transpose(conversionMatrix) * glm::normalize(coords);
     }
         
-    glm::dvec3 equatorialToGalactic(glm::dvec3 coords) {
+    glm::dvec3 equatorialToGalactic(const glm::dvec3&  coords) {
         // On the unit sphere
         glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); 
         return rGalactic * CelestialSphereRadius;
     }
         
-    glm::dvec3 galacticToScreenSpace3d(glm::dvec3 coords) {
+    glm::dvec3 galacticToScreenSpace3d(const glm::dvec3&  coords) {
 
         glm::dvec3 localCameraSpace = galacticToLocalCamera(coords);
         // Ensure that if the coord is behind the camera, 
@@ -62,7 +62,7 @@ namespace openspace::skybrowser {
         return screenSpace;
     }
 
-    glm::dvec3 localCameraToGalactic(glm::dvec3 coords) {
+    glm::dvec3 localCameraToGalactic(const glm::dvec3&  coords) {
         glm::dmat4 rotation = glm::inverse(
             global::navigationHandler->camera()->viewRotationMatrix());
         glm::dvec4 position = glm::dvec4(coords, 1.0);
@@ -70,7 +70,7 @@ namespace openspace::skybrowser {
         return glm::normalize(rotation * position) * skybrowser::CelestialSphereRadius;
     }
 
-    glm::dvec3 localCameraToEquatorial(glm::dvec3 coords) {
+    glm::dvec3 localCameraToEquatorial(const glm::dvec3&  coords) {
         // Calculate the galactic coordinate of the target direction 
         // projected onto the celestial sphere
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
@@ -79,7 +79,7 @@ namespace openspace::skybrowser {
         return skybrowser::galacticToEquatorial(galactic);
     }
     
-    glm::dvec3 galacticToLocalCamera(glm::dvec3 coords) {
+    glm::dvec3 galacticToLocalCamera(const glm::dvec3&  coords) {
         // Transform vector to camera's local coordinate system
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
         glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
@@ -89,7 +89,7 @@ namespace openspace::skybrowser {
         return glm::normalize(viewDirectionLocal);
     }
 
-    glm::dvec3 equatorialToScreenSpace3d(glm::dvec3 coords) {
+    glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3&  coords) {
         // Transform equatorial J2000 to galactic coord with infinite radius    
         glm::dvec3 galactic = equatorialToGalactic(coords);
         // Transform galactic coord to screen space
@@ -130,7 +130,7 @@ namespace openspace::skybrowser {
         return windowRatio.x / windowRatio.y;
     }
 
-    bool isCoordinateInView(glm::dvec3 equatorial) {
+    bool isCoordinateInView(const glm::dvec3&  equatorial) {
         // Check if image coordinate is within current FOV
         glm::dvec3 coordsScreen = equatorialToScreenSpace3d(equatorial);
         double r = static_cast<float>(windowRatio());
@@ -143,7 +143,7 @@ namespace openspace::skybrowser {
     }
 
     // Transforms a pixel coordinate to a screen space coordinate
-    glm::vec2 pixelToScreenSpace2d(glm::vec2& mouseCoordinate) {
+    glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate) {
         glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
         // Change origin to middle of the window
         glm::vec2 screenSpacePos = mouseCoordinate - (size / 2.0f);
@@ -164,15 +164,15 @@ namespace openspace::skybrowser {
         return OpenSpaceFOV;
     }
 
-    double angleBetweenVectors(glm::dvec3 start, glm::dvec3 end) {
+    double angleBetweenVectors(const glm::dvec3&  start, const glm::dvec3&  end) {
     
         // Find smallest angle between the two vectors
         double cos = glm::dot(start, end) / (glm::length(start) * glm::length(end));
         return std::acos(cos);
     }
 
-    glm::dmat4 incrementalAnimationMatrix(glm::dvec3 start,
-                                    glm::dvec3 end, double deltaTime, 
+    glm::dmat4 incrementalAnimationMatrix(const glm::dvec3&  start,
+                                    const glm::dvec3&  end, double deltaTime, 
                                     double speedFactor) {
         
         double smallestAngle = angleBetweenVectors(start, end);
@@ -186,101 +186,6 @@ namespace openspace::skybrowser {
 
 }
 
-// WWT messages
-namespace openspace::wwtmessage {
-    // WWT messages
-    ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, 
-                                 const double roll, const bool shouldMoveInstantly) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-
-        // Create message
-        msg.setValue("event", "center_on_coordinates"s);
-        msg.setValue("ra", celestCoords.x);
-        msg.setValue("dec", celestCoords.y);
-        msg.setValue("fov", fov);
-        msg.setValue("roll", roll);
-        msg.setValue("instant", shouldMoveInstantly);
-
-        return msg;
-    }
-
-    ghoul::Dictionary loadCollection(const std::string& url) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "load_image_collection"s);
-        msg.setValue("url", url);
-        msg.setValue("loadChildFolders", true);
-
-        return msg;
-    }
-
-    ghoul::Dictionary setForeground(const std::string& name) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_by_name"s);
-        msg.setValue("name", name);
-
-        return msg;
-    }
-
-    ghoul::Dictionary addImage(const std::string& id, const std::string& url) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_create"s);
-        msg.setValue("id", id);
-        msg.setValue("url", url);
-        msg.setValue("mode", "preloaded"s);
-        msg.setValue("goto", false);
-
-        return msg;
-    }
-
-    ghoul::Dictionary removeImage(const std::string& imageId) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_remove"s);
-        msg.setValue("id", imageId);
-
-        return msg;
-    }
-
-    ghoul::Dictionary setImageOpacity(const std::string& imageId, double opacity) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_set"s);
-        msg.setValue("id", imageId);
-        msg.setValue("setting", "opacity"s);
-        msg.setValue("value", opacity);
-
-        return msg;
-    }
-
-    ghoul::Dictionary setForegroundOpacity(double val) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_opacity"s);
-        msg.setValue("value", val);
-
-        return msg;
-    }
-
-    ghoul::Dictionary setLayerOrder(const std::string& id, int order) {
-        // The lower the layer order, the more towards the back the image is placed
-        // 0 is the background
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_order"s);
-        msg.setValue("id", id);
-        msg.setValue("order", order);
-        msg.setValue("version", messageCounter);
-        
-        messageCounter++;
-
-        return msg;
-    }
-}
-  
     
     
 
