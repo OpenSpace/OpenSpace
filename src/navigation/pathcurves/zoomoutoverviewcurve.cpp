@@ -66,10 +66,16 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
+    const glm::dvec3 startPosToEndPos = end.position() - start.position();
+    constexpr const double Epsilon = 1E-4;
+
     // Zoom out
-    if (start.nodeIdentifier() != end.nodeIdentifier()) {
+    if (start.nodeIdentifier() != end.nodeIdentifier() &&
+        glm::length(startPosToEndPos) > Epsilon)
+    {
         const glm::dvec3 n1 = startTangentDir;
         const glm::dvec3 n2 = endTangentDir;
+        const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
         const glm::dvec3 startPosToEndPos = end.position() - start.position();
         const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
