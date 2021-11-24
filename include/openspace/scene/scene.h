@@ -33,6 +33,8 @@
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
+#include <ip/UdpSocket.h>
+#include <osc/OscOutboundPacketStream.h>
 #include <functional>
 #include <mutex>
 #include <set>
@@ -255,6 +257,12 @@ public:
      */
     void setPropertiesFromProfile(const Profile& p);
 
+    UdpTransmitSocket* oscSocket();
+    const UdpTransmitSocket * oscSocket() const;
+
+    osc::OutboundPacketStream & oscStream();
+    const osc::OutboundPacketStream & oscStream() const;
+
 private:
     /**
      * Accepts string version of a property value from a profile, converts it to the
@@ -341,6 +349,10 @@ private:
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 
     ghoul::MemoryPool<4096> _memoryPool;
+
+    char* _buffer;
+    UdpTransmitSocket _socket;
+    osc::OutboundPacketStream _stream;
 };
 
 } // namespace openspace

@@ -33,6 +33,8 @@
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ip/UdpSocket.h>
+#include <osc/OscOutboundPacketStream.h>
 
 namespace openspace {
 
@@ -922,6 +924,30 @@ int setParent(lua_State* L) {
 
     node->setParent(*newParentNode);
     global::renderEngine->scene()->markNodeRegistryDirty();
+
+    return 0;
+}
+
+int sendOSCMessage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::sendOSCMessage");
+    auto [lable, value] = ghoul::lua::values<std::string, float>(L);
+
+    Scene * scene = global::renderEngine->scene();
+    if (!scene) {
+        return 0;
+    }
+
+    UdpTransmitSocket * socket = scene->oscSocket();
+    osc::OutboundPacketStream & stream = scene->oscStream();
+
+    if (!socket) {
+        return 0;
+    }
+
+    std::replace(lable.begin(), lable.end(), ' ', '_');
+    stream.Clear();
+    stream << osc::BeginMessage(lable.c_str()) << value << osc::EndMessage;
+    socket->Send(stream.Data(), stream.Size());
 
     return 0;
 }

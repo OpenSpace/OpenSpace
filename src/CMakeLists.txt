@@ -439,6 +439,8 @@ target_include_directories(openspace-core SYSTEM
     ${OPENSPACE_BASE_DIR}/ext/date/include
     # In order to use the nlohmann JSON library
     ${OPENSPACE_BASE_DIR}/ext
+    # In order to use the Open Sound Control library
+    ${OPENSPACE_BASE_DIR}/ext/osc
 )
 
 target_include_directories(openspace-core
@@ -490,7 +492,7 @@ if (APPLE)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
-target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
+target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl oscpack)
 
 # Just in case, create the bin directory
 add_custom_command(

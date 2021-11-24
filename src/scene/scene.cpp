@@ -46,6 +46,11 @@
 
 #include "scene_lua.inl"
 
+//Output to SuperCollider (SC)
+#define SC_IP_ADDRESS "127.0.0.1"
+#define SC_PORT 57120
+#define BUFFER_SIZE 1024
+
 namespace {
     constexpr const char* _loggerCat = "Scene";
     constexpr const char* KeyIdentifier = "Identifier";
@@ -88,9 +93,14 @@ Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
     , _initializer(std::move(initializer))
+    , _socket(IpEndpointName(SC_IP_ADDRESS, SC_PORT))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
+
+    // Create buffer and stream to send to SuperCollider
+    _buffer = new char[BUFFER_SIZE];
+    _stream = osc::OutboundPacketStream(_buffer, BUFFER_SIZE);
 }
 
 Scene::~Scene() {
@@ -645,6 +655,22 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
     }
 }
 
+UdpTransmitSocket* Scene::oscSocket() {
+    return &_socket;
+}
+
+const UdpTransmitSocket * Scene::oscSocket() const {
+    return &_socket;
+}
+
+osc::OutboundPacketStream & Scene::oscStream() {
+    return _stream;
+}
+
+const osc::OutboundPacketStream & Scene::oscStream() const {
+    return _stream;
+}
+
 void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
@@ -915,6 +941,12 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string, string",
                 "The scene graph node identified by the first string is reparented to be "
                 "a child of the scene graph node identified by the second string."
+            },
+            {
+                "sendOSCMessage",
+                &luascriptfunctions::sendOSCMessage,
+                "lable, message",
+                "Send the given 'message' on address 'lable' ove OSC to SuperColider."
             }
         }
     };

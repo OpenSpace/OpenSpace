@@ -64,6 +64,8 @@ void JoystickCameraStates::updateStateFromInput(
         }
 
         for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
+            std::string oscLable = joystickInputState.name;
+
             AxisInformation t = joystickCameraState->axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
@@ -111,43 +113,53 @@ void JoystickCameraStates::updateStateFromInput(
                 case AxisType::OrbitX:
                     globalRotation.first = true;
                     globalRotation.second.x += value;
+                    oscLable += "_OrbitX";
                     break;
                 case AxisType::OrbitY:
                     globalRotation.first = true;
                     globalRotation.second.y += value;
+                    oscLable += "_OrbitY";
                     break;
                 case AxisType::Zoom:
                 case AxisType::ZoomIn:
                     zoom.first = true;
                     zoom.second += value;
+                    oscLable += "_Zoom_ZoomIn";
                     break;
                 case AxisType::ZoomOut:
                     zoom.first = true;
                     zoom.second -= value;
+                    oscLable += "_ZoomOut";
                     break;
                 case AxisType::LocalRollX:
                     localRoll.first = true;
                     localRoll.second.x += value;
+                    oscLable += "_LocalRollX";
                     break;
                 case AxisType::LocalRollY:
                     localRoll.first = true;
                     localRoll.second.y += value;
+                    oscLable += "_LocalRollY";
                     break;
                 case AxisType::GlobalRollX:
                     globalRoll.first = true;
                     globalRoll.second.x += value;
+                    oscLable += "_GlobalRollX";
                     break;
                 case AxisType::GlobalRollY:
                     globalRoll.first = true;
                     globalRoll.second.y += value;
+                    oscLable += "_GlobalRollY";
                     break;
                 case AxisType::PanX:
                     localRotation.first = true;
                     localRotation.second.x += value;
+                    oscLable += "_PanX";
                     break;
                 case AxisType::PanY:
                     localRotation.first = true;
                     localRotation.second.y += value;
+                    oscLable += "_PanY";
                     break;
                 case AxisType::Property:
                     std::string script = "openspace.setPropertyValue(\"" +
@@ -157,11 +169,23 @@ void JoystickCameraStates::updateStateFromInput(
                         script,
                         scripting::ScriptEngine::RemoteScripting(t.isRemote)
                     );
+                    oscLable += "_Property";
                     break;
+            }
+
+            if (oscLable != joystickInputState.name) {
+                std::string oscScript = "openspace.sendOSCMessage(\"/" + oscLable +
+                    "\", " + std::to_string(value) + ")";
+                global::scriptEngine->queueScript(
+                    oscScript,
+                    scripting::ScriptEngine::RemoteScripting(true)
+                );
             }
         }
 
         for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
+            std::string oscLable =
+                joystickInputState.name + "_button_" + std::to_string(i + 1);
             auto itRange = joystickCameraState->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; ++it) {
                 bool active = global::joystickInputStates->button(
@@ -171,6 +195,13 @@ void JoystickCameraStates::updateStateFromInput(
                 );
 
                 if (active) {
+                    std::string oscScript = "openspace.sendOSCMessage(\"/" + oscLable +
+                        "\", " + std::to_string(1.f) + ")";
+                    global::scriptEngine->queueScript(
+                        oscScript,
+                        scripting::ScriptEngine::RemoteScripting(true)
+                    );
+
                     global::scriptEngine->queueScript(
                         it->second.command,
                         scripting::ScriptEngine::RemoteScripting(it->second.synchronization)

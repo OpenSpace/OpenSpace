@@ -59,6 +59,12 @@ add_subdirectory(spice)
 set_folder_location(spice "External")
 end_dependency()
 
+# Osc
+begin_dependency("oscpack")
+add_subdirectory(osc)
+set_folder_location(oscpack "External")
+end_dependency()
+
 # Curl
 begin_dependency("CURL")
 add_library(external-curl INTERFACE)
