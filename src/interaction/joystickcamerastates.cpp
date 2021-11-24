@@ -99,12 +99,13 @@ void JoystickCameraStates::updateStateFromInput(
             if (t.type == AxisType::Property) {
                 value = value * (t.maxValue - t.minValue)  + t.minValue;
             }
-
-            if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
-                value = static_cast<float>(value * t.sensitivity * _sensitivity);
-            }
             else {
-                value = static_cast<float>(value * _sensitivity);
+                if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
+                    value = static_cast<float>(value * t.sensitivity * _sensitivity);
+                }
+                else {
+                    value = static_cast<float>(value * _sensitivity);
+                }
             }
 
             switch (t.type) {
@@ -276,7 +277,6 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
                                                   const std::string& propertyUri,
                                                   float min, float max,
                                                   AxisInvert shouldInvert,
-                                                  bool isSticky, double sensitivity,
                                                   bool isRemote)
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
@@ -288,8 +288,6 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
 
     joystickCameraState->axisMapping[axis].type = AxisType::Property;
     joystickCameraState->axisMapping[axis].invert = shouldInvert;
-    joystickCameraState->axisMapping[axis].isSticky = isSticky;
-    joystickCameraState->axisMapping[axis].sensitivity = sensitivity;
     joystickCameraState->axisMapping[axis].propertyUri = propertyUri;
     joystickCameraState->axisMapping[axis].minValue = min;
     joystickCameraState->axisMapping[axis].maxValue = max;

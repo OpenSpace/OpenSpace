@@ -526,7 +526,6 @@ void NavigationHandler::setJoystickAxisMappingProperty(const std::string& joysti
                                                        const std::string& propertyUri,
                                                        float min, float max,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                                       bool isSticky, double sensitivity,
                                                        bool isRemote)
 {
     _orbitalNavigator.joystickStates().setAxisMappingProperty(
@@ -536,8 +535,6 @@ void NavigationHandler::setJoystickAxisMappingProperty(const std::string& joysti
         min,
         max,
         shouldInvert,
-        isSticky,
-        sensitivity,
         isRemote
     );
 }
@@ -677,12 +674,9 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "identified by the third argument. 'min' and 'max' is the minimum and "
                 "the maximum allowed value for the given property and the axis value is "
                 "rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' "
-                "is 'true', the axis value is inverted. If 'isSticky' is 'true', the "
-                "value is calculated relative to the previous value. If 'sensitivity' is "
-                "given then that value will affect the sensitivity of the axis together "
-                "with the global sensitivity. The last argument determines whether the "
-                "property change is going to be executed locally or remotely, where the "
-                "latter is the default."
+                "is 'true', the axis value is inverted. The last argument determines "
+                "whether the property change is going to be executed locally or "
+                "remotely, where the latter is the default."
             },
             {
                 "joystickAxis",
