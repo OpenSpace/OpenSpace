@@ -117,7 +117,6 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         long responseCode;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
         
-        constexpr const long StatusCodeOk = 200;
         if (responseCode >= 400) {
             LERRORC(
                 "HttpRequest",

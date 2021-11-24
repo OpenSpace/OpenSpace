@@ -178,7 +178,6 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         HttpFileDownload* dl = download.get();
         downloads.push_back(std::move(download));
 
-        ghoul_assert(sizeData.find(line) == sizeData.end(), "Duplicate entry");
         sizeData[line] = SizeData();
 
         dl->onProgress(
