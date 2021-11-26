@@ -68,7 +68,7 @@ public:
      * \return \c true if the download should continue or \c false if it should be aborted
      */
     using ProgressCallback = std::function<
-        bool(int64_t downloadedBytes, std::optional<int64_t> totalBytes)
+        bool(size_t downloadedBytes, std::optional<size_t> totalBytes)
     >;
 
     /**

@@ -213,8 +213,8 @@ public:
     void require(Asset* child);
 
     /**
-     * Returns if the loading of the Asset has failed in any way so that recovering from
-     * the error is impossible.
+     * Returns \c true if the loading of the Asset has failed in any way so that
+     * recovering from the error is impossible.
      * 
      * \return \c true if the Asset handling failed in any way, \c false otherwise
      */
