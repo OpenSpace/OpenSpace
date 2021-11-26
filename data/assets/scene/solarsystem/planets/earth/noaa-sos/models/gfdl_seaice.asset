@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Climate Model: Sea Ice Change (GFDL a1b) 1861 - 2100"

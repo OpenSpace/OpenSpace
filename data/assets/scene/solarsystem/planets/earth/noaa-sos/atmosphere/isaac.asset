@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Hurricane Isaac - 2012"
@@ -25,7 +25,7 @@ local layer_radar = {
   Identifier = Identifier,
   Name = Name,
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/122331900.png",
+  FilePath = syncedDirectory_radar .. "/122331900.png",
   Description = Description
 }
 
@@ -33,7 +33,7 @@ local layer_sat = {
   Identifier = Identifier,
   Name = Name,
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/linear_rgb_cyl_20120820_1900.jpg",
+  FilePath = syncedDirectory_sat .. "/linear_rgb_cyl_20120820_1900.jpg",
   Description = Description
 }
 

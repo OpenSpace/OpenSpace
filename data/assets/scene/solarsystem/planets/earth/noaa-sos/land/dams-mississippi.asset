@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Dams and Reservoirs: Mississippi River - 1800 - 2010"

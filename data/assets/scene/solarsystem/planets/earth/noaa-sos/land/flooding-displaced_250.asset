@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Flood Events: Displaced 250 or More People - 2000 - 2009"

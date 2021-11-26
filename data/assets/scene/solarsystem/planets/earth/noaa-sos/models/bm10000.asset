@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Blue Marble: Sea Level, Ice and Vegetation Changes - 19,000BC - 10,000AD"

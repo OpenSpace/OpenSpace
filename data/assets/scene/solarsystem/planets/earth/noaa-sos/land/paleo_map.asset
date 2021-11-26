@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../earth").Earth.Identifier
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "PALEOMAP PaleoAtlas 0 - 750 Million Years Ago"
@@ -16,7 +16,7 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local layers = [
+local layers = {
   "Map01a_PALEOMAP_PaleoAtlas_000",
   "Map02a_Last_Glacial_Maximum_001",
   "Map03a_Pliocene_004",
@@ -107,7 +107,7 @@ local layers = [
   "Map90a_Middle_Ediacaran_600",
   "Map92a_Late_Cryogenian_690",
   "Map93a_MIddle_Cryogenian_750"
-]
+}
 
 local layer = {
   Identifier = Identifier,
