@@ -192,9 +192,14 @@ asset.onInitialize(function()
     openspace.action.registerAction(action)
     openspace.bindKey(action.Key, action.Identifier)
   end
+
+  -- The take screenshot function is a bit special since we want to bind two keys to that action
+  openspace.bindKey("PRINT_SCREEN", take_screenshot.Identifier)
 end)
 
 asset.onDeinitialize(function ()
+  openspace.clearKey("PRINT_SCREEN")
+
   for _, action in ipairs(Actions) do
     openspace.action.removeAction(action.Identifier)
     openspace.clearKey(action.Key)
