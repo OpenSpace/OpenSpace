@@ -41,8 +41,6 @@ layout (std430) buffer ssbo_comb_data {
   float allData[];
 };
 
-in int gl_VertexID;
-
 out vec2 vs_brightness;
 out vec4 vs_gPosition;
 out float vs_starDistFromSun;
