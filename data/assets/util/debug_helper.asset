@@ -67,7 +67,7 @@ local addCartesianAxes = function (specification)
     Parent = parent,
     Transform = {
       Scale = {
-        Type = "StaticScale",
+        Type = "NonUniformStaticScale",
         Scale = scale
       },
       Translation = {

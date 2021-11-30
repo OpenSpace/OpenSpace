@@ -110,12 +110,11 @@ local eclipticLabels = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/eclip.label",
+    Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
     TextSize = 14.75,
-    TextMinSize = 1.3,
-    TextMaxSize = 50.0,
-    Unit = "pc",
+    TextMinMaxSize = { 1, 50 },
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661,    0.0,
       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
@@ -164,12 +163,11 @@ local equatorialLabels = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/radec.label",
+    Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
     TextSize = 14.5,
-    TextMinSize = 1.7,
-    TextMaxSize = 70.0,
-    Unit = "pc",
+    TextMinMaxSize = { 2, 70 },
     TransformationMatrix = {
       -0.05487554,  0.4941095, -0.8676661, 0.0,
       -0.8734371 , -0.4448296, -0.1980764, 0.0,
@@ -214,12 +212,11 @@ local galacticLabels = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/galac.label",
+    Unit = "pc",
     DrawLabels = true,
     TextColor = { 0.5, 0.5, 0.5 },
     TextSize = 15.8,
-    TextMinSize = 0.5,
-    TextMaxSize = 100.0,
-    Unit = "pc"
+    TextMinMaxSize = { 1, 100 }
   },
   GUI = {
     Name = "Galactic Sphere Labels",
@@ -245,8 +242,7 @@ local plane1ld = {
     LabelFile = speck .. "/1ld.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 10.3,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Km"
   },
   GUI = {
@@ -273,8 +269,7 @@ local plane1lm = {
     LabelFile = speck .. "/1lm.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 11.8,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -301,8 +296,7 @@ local plane1ly = {
     LabelFile = speck .. "/1ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 13.0,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -329,8 +323,7 @@ local plane10ly = {
     LabelFile = speck .. "/10ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 14.17,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -357,8 +350,7 @@ local plane100ly = {
     LabelFile = speck .. "/100ly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 15.0,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -385,8 +377,7 @@ local plane1kly = {
     LabelFile = speck .. "/1kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 16.0,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -413,8 +404,7 @@ local plane10kly = {
     LabelFile = speck .. "/10kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 17.25,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -434,8 +424,7 @@ local plane100kly = {
     LabelFile = speck .. "/100kly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 18.6,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Mpc"
   },
   GUI = {
@@ -455,8 +444,7 @@ local plane1Mly = {
     LabelFile = speck .. "/1Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 19.6,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Mpc"
   },
   GUI = {
@@ -476,8 +464,7 @@ local plane10Mly = {
     LabelFile = speck .. "/10Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 20.6,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Mpc"
   },
   GUI = {
@@ -497,8 +484,7 @@ local plane100Mly = {
     LabelFile = speck .. "/100Mly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 21.6,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Mpc"
   },
   GUI = {
@@ -518,8 +504,7 @@ local plane20Gly = {
     LabelFile = speck .. "/20Gly.label",
     TextColor = { 0.0, 0.2, 0.5 },
     TextSize = 23.6,
-    TextMinSize = 0.5,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 0, 30 },
     Unit = "Mpc"
   },
   GUI = {

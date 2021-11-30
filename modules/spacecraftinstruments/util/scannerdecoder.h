@@ -37,11 +37,9 @@ public:
 
     virtual const std::string& decoderType() const override;
     const std::vector<std::string>& spiceIDs() const;
-    const std::string& stopCommand() const;
     void setStopCommand(std::string stopCommand);
 
 private:
-    std::string _type;
     std::string _abort;
     std::vector<std::string> _spiceIDs;
 };

@@ -30,9 +30,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <filesystem>
 
 namespace {
     std::string assetStateToString(openspace::Asset::State state) {
@@ -90,10 +90,10 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
     using namespace ghoul::filesystem;
 
     std::string assetPath = asset.assetFilePath();
-    const std::string& assetDirectory = File(assetPath).directoryName();
+    std::string assetDirectory = std::filesystem::path(assetPath).parent_path().string();
 
     if (!relativeToPath.empty()) {
-        assetPath = FileSys.relativePath(assetPath, relativeToPath);
+        assetPath = std::filesystem::relative(assetPath, relativeToPath).string();
     }
 
     std::string assetText = assetPath + " " + assetStateToString(asset.state());

@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <cmath>
 #include <optional>
@@ -51,7 +52,7 @@ namespace {
     constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "resolution", "lineWidth"
+        "renderPhase", "viewport", "lineWidth"
     };
 #endif
 
@@ -181,9 +182,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrail::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletrail";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
 RenderableTrail::Appearance::Appearance()
@@ -339,13 +338,20 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
 
 #if !defined(__APPLE__)
-    glm::ivec2 resolution = global::renderEngine->renderingResolution();
-    _programObject->setUniform(_uniformCache.resolution, resolution);
+    GLint viewport[4];
+    global::renderEngine->openglStateCache().viewport(viewport);
+    _programObject->setUniform(
+        _uniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
     _programObject->setUniform(
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif
+#endif // !defined(__APPLE__)
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and
@@ -423,19 +429,13 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     /*glm::ivec2 resolution = global::renderEngine.renderingResolution();
     _programObject->setUniform(_uniformCache.resolution, resolution);*/
 
-    const bool usingFramebufferRenderer =
-        global::renderEngine->rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    glDepthMask(false);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    if (usingFramebufferRenderer) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-
-    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) |
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) ||
                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
-    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) |
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) ||
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
@@ -501,10 +501,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(0);
 
-    if (usingFramebufferRenderer) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(true);
 
     _programObject->deactivate();
 }

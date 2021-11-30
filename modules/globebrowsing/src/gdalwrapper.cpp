@@ -105,8 +105,11 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
-    CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
-    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").c_str());
+    CPLSetConfigOption(
+        "GDAL_DATA",
+        absPath("${MODULE_GLOBEBROWSING}/gdal_data").string().c_str()
+    );
+    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").string().c_str());
     CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
 
     CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds

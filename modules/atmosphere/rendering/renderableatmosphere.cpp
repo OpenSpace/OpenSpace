@@ -25,33 +25,10 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/deferredcastermanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
-#include <memory>
-#include <optional>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#endif // WIN32
 #include <math.h>
 
 namespace {
@@ -69,7 +46,7 @@ namespace {
         "phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
@@ -197,7 +174,7 @@ namespace {
         // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
         std::optional<float> mieScatteringExtinctionPropCoefficient;
 
-        // [[codegen::verbatim(GroundRadianceEmittioninfo.description)]]
+        // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
         float groundRadianceEmission;
 
         struct Rayleigh {
@@ -243,16 +220,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "atmosphere_renderable_atmosphere";
-    return doc;
+    return codegen::doc<Parameters>("atmosphere_renderable_atmosphere");
 }
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
-    , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
+    , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
     , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
@@ -269,7 +244,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         MieScatteringCoeffInfo,
         glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
     )
-    , _mieScatteringExtinctionPropCoefficient(
+    , _mieScatteringExtinctionPropCoeff(
         MieScatteringExtinctionPropCoeffInfo,
         0.9f, 0.01f, 1.f
     )
@@ -282,9 +257,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _deferredCasterNeedsUpdate = true;
         _deferredCasterNeedsCalculation = true;
     };
-    auto updateWithoutCalculation = [this]() {
-        _deferredCasterNeedsUpdate = true;
-    };
+    auto updateWithoutCalculation = [this]() { _deferredCasterNeedsUpdate = true; };
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -355,16 +328,15 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _miePhaseConstant.onChange(updateWithCalculation);
     addProperty(_miePhaseConstant);
 
-    _mieScatteringExtinctionPropCoefficient =
+    _mieScatteringExtinctionPropCoeff =
         _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
         _mieScatteringCoeff.value().x / _mieExtinctionCoeff.x;
 
-    _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
-    addProperty(_mieScatteringExtinctionPropCoefficient);
+    _mieScatteringExtinctionPropCoeff.onChange(updateWithCalculation);
+    addProperty(_mieScatteringExtinctionPropCoeff);
 
     if (p.debug.has_value()) {
-        _preCalculatedTexturesScale =
-            p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);
+        _textureScale = p.debug->preCalculatedTextureScale.value_or(_textureScale);
 
         _saveCalculationsToTexture =
             p.debug->saveCalculatedTextures.value_or(_saveCalculationsToTexture);
@@ -391,15 +363,13 @@ void RenderableAtmosphere::deinitializeGL() {
 }
 
 void RenderableAtmosphere::initializeGL() {
-    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
+    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>(
+        _textureScale,
+        _shadowEnabled ? std::move(_shadowConfArray) : std::vector<ShadowConfiguration>(),
+        _saveCalculationsToTexture
+    );
+    _shadowConfArray.clear();
     updateAtmosphereParameters();
-
-    if (_shadowEnabled) {
-        _deferredcaster->setShadowConfigArray(_shadowConfArray);
-        // We no longer need it
-        _shadowConfArray.clear();
-    }
-
     _deferredcaster->initialize();
 
     global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
@@ -409,13 +379,11 @@ bool RenderableAtmosphere::isReady() const {
     return true;
 }
 
-glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
-                                                       const TransformData& transformData)
-{
+glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(const TransformData& data) {
     // scale the planet to appropriate size since the planet is a unit sphere
-    return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
-        glm::dmat4(transformData.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
+    return glm::translate(glm::dmat4(1.0), data.translation) *
+        glm::dmat4(data.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale));
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {
@@ -431,11 +399,10 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         _deferredCasterNeedsUpdate = false;
     }
     if (_deferredCasterNeedsCalculation) {
-        _deferredcaster->preCalculateAtmosphereParam();
+        _deferredcaster->calculateAtmosphereParameters();
         _deferredCasterNeedsCalculation = false;
     }
 
-    _deferredcaster->setTime(data.time.j2000Seconds());
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
     _deferredcaster->setModelTransform(modelTransform);
     _deferredcaster->update(data);
@@ -443,34 +410,26 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
     _mieExtinctionCoeff =
-        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoefficient.value();
+        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoeff.value();
 
-    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
-    _deferredcaster->setPlanetRadius(_planetRadius);
-    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
-    _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-    _deferredcaster->enableOzone(_ozoneEnabled);
-    _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
-    _deferredcaster->setMieHeightScale(_mieHeightScale);
-    _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
-    _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
-    _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-    _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-    _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
-    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
-    //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-
-    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
-    if (_saveCalculationsToTexture) {
-        _deferredcaster->enablePrecalculationTexturesSaving();
-    }
-
-    if (_shadowEnabled) {
-        _deferredcaster->setHardShadows(_hardShadowsEnabled);
-    }
+    _deferredcaster->setParameters(
+        _planetRadius + _atmosphereHeight,
+        _planetRadius,
+        _groundAverageReflectance,
+        _groundRadianceEmission,
+        _rayleighHeightScale,
+        _ozoneEnabled,
+        _ozoneHeightScale,
+        _mieHeightScale,
+        _miePhaseConstant,
+        _sunIntensity,
+        _rayleighScatteringCoeff,
+        _ozoneCoeff,
+        _mieScatteringCoeff,
+        _mieExtinctionCoeff,
+        _sunFollowingCameraEnabled
+    );
+    _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }
 
 }  // namespace openspace

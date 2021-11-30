@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
 #define __OPENSPACE_MODULE_BASE___TIMELINETRANSLATION___H__
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -44,6 +45,7 @@ public:
 
 private:
     Timeline<ghoul::mm_unique_ptr<Translation>> _timeline;
+    properties::BoolProperty _shouldInterpolate;
 };
 
 } // namespace openspace

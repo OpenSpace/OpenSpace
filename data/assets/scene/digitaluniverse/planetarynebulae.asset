@@ -27,13 +27,12 @@ local object = {
     Texture = textures .. "/point4.png",
     PolygonSides = 3,
     LabelFile = speck .. "/pn.label",
+    Unit = "pc",
     TextColor = { 0.25, 0.25, 0.65 },
     ScaleFactor = 425.0,
     TextSize = 16.24,
-    TextMinSize = 4.5,
-    TextMaxSize = 25.0,
-    Unit = "pc",
-    BillboardMaxSize = 500,
+    TextMinMaxSize = { 4, 25 },
+    BillboardMinMaxSize = { 0.0, 500.0 },
     EnablePixelSizeControl = true
   },
   GUI = {

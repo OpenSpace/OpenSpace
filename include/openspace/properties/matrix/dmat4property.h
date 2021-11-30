@@ -28,10 +28,27 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DMat4Property, glm::dmat4x4)
+class DMat4Property : public NumericalProperty<glm::dmat4x4> {
+public:
+    DMat4Property(Property::PropertyInfo info, glm::dmat4x4 value = glm::dmat4x4(0.0),
+        glm::dmat4x4 minValue =
+            ghoul::createFillMat4x4<double>(std::numeric_limits<double>::lowest()),
+        glm::dmat4x4 maxValue =
+            ghoul::createFillMat4x4<double>(std::numeric_limits<double>::max()),
+        glm::dmat4x4 stepValue = ghoul::createFillMat4x4<double>(0.01));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::dmat4x4>::operator=;
+
+protected:
+    glm::dmat4x4 fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

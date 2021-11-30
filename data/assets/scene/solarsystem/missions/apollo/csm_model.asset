@@ -2,7 +2,7 @@ local models = asset.syncedResource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
-  Version = 2
+  Version = 4
 })
 
 asset.export('models', models)

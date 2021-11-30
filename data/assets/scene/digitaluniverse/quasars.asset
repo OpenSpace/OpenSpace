@@ -27,11 +27,8 @@ local object = {
     Texture = textures .. "/point3A.png",
     Unit = "Mpc",
     ScaleFactor = 540.9,
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = { 1000.0, 10000.0 },
-    BillboardMaxSize = 30.0,
-    BillboardMinSize = 0.0,
-    BillboardMaxSize = 11.1,
+    FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 11.1 },
     EnablePixelSizeControl = true
   },
   GUI = {

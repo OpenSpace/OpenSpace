@@ -50,11 +50,6 @@ local Apollo8Model = {
     End = "1968 DEC 28"
   },
   Transform = {
-    Scale = {
-      Type = "StaticScale",
-      -- The scale of the model is in cm; OpenSpace is in m
-      Scale = 0.01
-    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = {0.0, 0.0, -3.1415 / 2}
@@ -62,7 +57,8 @@ local Apollo8Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.fbx",
+    GeometryFile = models .. "/ApolloCSM.osmodel",
+    ModelScale = 0.0001,
     LightSources = {
       {
         Type = "SceneGraphLightSource",

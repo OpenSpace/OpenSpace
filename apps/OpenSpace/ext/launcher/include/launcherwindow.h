@@ -96,6 +96,7 @@ private:
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
     int _userConfigCount = 0;
+    const std::string _sgctConfigName;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;

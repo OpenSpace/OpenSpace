@@ -58,9 +58,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_image_online";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_image_online");
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -81,8 +79,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     setIdentifier(std::move(identifier));
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
-    addProperty(_texturePath);
     _texturePath = p.url.value_or(_texturePath);
+    addProperty(_texturePath);
 }
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT

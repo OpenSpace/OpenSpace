@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_lua");
 }
 
 LuaTranslation::LuaTranslation()
@@ -69,8 +67,8 @@ LuaTranslation::LuaTranslation()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() {
              requireUpdate();
              notifyObservers();
          });
@@ -79,11 +77,11 @@ LuaTranslation::LuaTranslation()
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "translation");
@@ -93,7 +91,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
             "LuaScale",
             fmt::format(
                 "Script '{}' does not have a function 'translation'",
-                _luaScriptFile
+                _luaScriptFile.value()
             )
         );
         return glm::dvec3(0.0);
@@ -121,7 +119,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
 
     double values[3];
     for (int i = 1; i <= 3; ++i) {
-        values[i] = ghoul::lua::value<double>(_state, i);
+        values[i - 1] = ghoul::lua::value<double>(_state, i);
     }
 
     return glm::make_vec3(values);

@@ -74,9 +74,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDistanceLabel::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "vislab_renderable_distance_label";
-    return doc;
+    return codegen::doc<Parameters>("vislab_renderable_distance_label");
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)

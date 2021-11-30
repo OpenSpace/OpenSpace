@@ -30,15 +30,16 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
-out vec4 vs_position;
+out float vs_depth;
 
 uniform mat4 modelViewProjectionTransform;
 
 void main() {
-    vs_st = in_st;
-    vs_position = z_normalization(
-        modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
-    );
+  vs_st = in_st;
+  vec4 pos = z_normalization(
+    modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
+  );
 
-    gl_Position = vs_position;
+  vs_depth = pos.w;
+  gl_Position = pos;
 }

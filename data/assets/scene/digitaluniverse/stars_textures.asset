@@ -1,0 +1,20 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local textures = asset.syncedResource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
+  Version = 1
+})
+
+asset.export("textures", textures)
+
+asset.meta = {
+  Name = "Star Textures",
+  Version = "1.0",
+  Description = [[Square textures used to represent stars when applied to camera-facing bil;board]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT License"
+}
+

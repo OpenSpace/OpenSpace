@@ -51,7 +51,7 @@ void GuiFilePathComponent::render() {
     for (const std::string& t : tokens) {
         ImGui::Text("%s", t.c_str());
         ImGui::NextColumn();
-        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::Text("%s", absPath(t).string().c_str());
         ImGui::NextColumn();
         ImGui::Separator();
     }

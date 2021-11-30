@@ -27,16 +27,30 @@
 #include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/misc.h>
 
-namespace {
+namespace openspace::properties {
 
-constexpr const char* _loggerCat = "DoubleListProperty";
+DoubleListProperty::DoubleListProperty(Property::PropertyInfo info,
+                                       std::vector<double> values)
+    : ListProperty(std::move(info), std::move(values))
+{}
 
-std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
+std::string DoubleListProperty::className() const {
+    return "DoubleListProperty";
+}
+
+int DoubleListProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+std::vector<double> DoubleListProperty::fromLuaConversion(lua_State* state,
+                                                          bool& success) const
+{
     if (!lua_istable(state, -1)) {
         success = false;
-        LERROR("Conversion from Lua failed. The input was not a table");
+        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
         return {};
     }
 
@@ -48,7 +62,8 @@ std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
         }
         else {
             success = false;
-            LERROR(
+            LERRORC(
+                className(),
                 "Conversion from Lua failed. The input table contains non-number values"
             );
             return {};
@@ -59,46 +74,21 @@ std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, std::vector<double> val) {
-    lua_createtable(state, static_cast<int>(val.size()), 0);
+void DoubleListProperty::toLuaConversion(lua_State* state) const {
+    lua_createtable(state, static_cast<int>(_value.size()), 0);
 
     int i = 1;
-    for (int v : val) {
-        lua_pushinteger(state, i);
-        lua_pushinteger(state, v);
+    for (double v : _value) {
+        ghoul::lua::push(state, i);
+        ghoul::lua::push(state, v);
         lua_settable(state, -3);
         ++i;
     }
-
-    return true;
 }
 
-bool toStringConversion(std::string& outValue, const std::vector<double>& inValue) {
-    nlohmann::json json(inValue);
-    outValue = json.dump();
-    return true;
+std::string DoubleListProperty::toStringConversion() const {
+    nlohmann::json json(_value);
+    return json.dump();
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info)
-    : ListProperty(std::move(info))
-{}
-
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info, std::vector<double> values)
-    : ListProperty(std::move(info), std::move(values))
-{}
-
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    DoubleListProperty,
-    std::vector<double>,
-    std::vector<double>(),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 } // namespace openspace::properties

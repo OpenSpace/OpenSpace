@@ -41,10 +41,25 @@
  */
 
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int)
+class UIntProperty : public NumericalProperty<unsigned int> {
+public:
+    UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
+        unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
+        unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
+        unsigned int stepValue = 1);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<unsigned int>::operator=;
+
+protected:
+    unsigned int fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

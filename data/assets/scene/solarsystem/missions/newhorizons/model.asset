@@ -16,7 +16,7 @@ local NewHorizons = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
     GeometryFile = models .. "/NewHorizonsCleanModel.obj",
-    AmbientIntensity = 0.0,
+    AmbientIntensity = 0.2,
     DiffuseIntensity = 1.0,
     SpecularIntensity = 1.0,
     LightSources = {
@@ -25,11 +25,6 @@ local NewHorizons = {
         Identifier = "Sun",
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
         Intensity = 1.0
-      },
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
       }
     }
   },

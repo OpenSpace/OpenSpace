@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -33,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,6 +43,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -75,17 +76,18 @@ namespace {
 
     constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
-    constexpr const std::array<const char*, 7> HDRUniformNames = {
+    constexpr const std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
-        "Hue", "Saturation", "Value"
+        "Hue", "Saturation", "Value", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> FXAAUniformNames = {
-        "renderedTexture", "inverseScreenSize"
+    constexpr const std::array<const char*, 4> FXAAUniformNames = {
+        "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
-        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth"
+    constexpr const std::array<const char*, 4> DownscaledVolumeUniformNames = {
+        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth", "viewport",
+        "resolution"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -447,7 +449,7 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor) {
+void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
     ZoneScoped
     TracyGpuZone("applyTMO")
 
@@ -468,6 +470,8 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -482,7 +486,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->deactivate();
 }
 
-void FramebufferRenderer::applyFXAA() {
+void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
@@ -497,8 +501,10 @@ void FramebufferRenderer::applyFXAA() {
         renderedTextureUnit
     );
 
-    glm::vec2 inverseScreenSize(1.f/_resolution.x, 1.f/_resolution.y);
+    glm::vec2 inverseScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
+    _fxaaProgram->setUniform(_fxaaUniformCache.Viewport, glm::vec4(viewport));
+    _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -532,8 +538,8 @@ void FramebufferRenderer::updateDownscaleTextures() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+    constexpr const float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -555,10 +561,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void FramebufferRenderer::writeDownscaledVolume() {
-    glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
+void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -585,9 +588,26 @@ void FramebufferRenderer::writeDownscaledVolume() {
         downscaledDepthUnit
     );
 
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.resolution,
+        glm::vec2(_resolution)
+    );
+
 
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // (abock, 2021-04-30) I changed the blend function as the front-to-back blending
+    // didn't work for the milkyway volume and was causing the edges of the milkyway to
+    // disappear
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     glDisable(GL_DEPTH_TEST);
 
@@ -718,6 +738,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (HasGLDebugInfo) {
@@ -736,6 +758,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (HasGLDebugInfo) {
@@ -754,6 +778,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (HasGLDebugInfo) {
@@ -772,6 +798,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (HasGLDebugInfo) {
@@ -790,6 +818,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -814,6 +844,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -833,6 +865,8 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_BYTE,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -856,9 +890,12 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+    float volumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
         glObjectLabel(
@@ -885,6 +922,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -909,6 +948,8 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_SHORT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -927,6 +968,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     if (glbinding::Binding::ObjectLabel.isResolved()) {
@@ -1022,18 +1065,17 @@ void FramebufferRenderer::updateDeferredcastData() {
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };
 
-        std::string vsPath = caster->deferredcastVSPath();
-        std::string fsPath = caster->deferredcastFSPath();
-        std::string deferredShaderPath = caster->deferredcastPath();
+        std::filesystem::path vsPath = caster->deferredcastVSPath();
+        std::filesystem::path fsPath = caster->deferredcastFSPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         //dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
-        std::string helperPath = caster->helperPath();
+        std::filesystem::path helperPath = caster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
-            helpersDict.setValue("0", helperPath);
+            helpersDict.setValue("0", helperPath.string());
         }
         dict.setValue("helperPaths", helpersDict);
 
@@ -1042,16 +1084,9 @@ void FramebufferRenderer::updateDeferredcastData() {
         try {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
-                absPath(vsPath),
-                absPath(deferredShaderPath),
+                vsPath,
+                fsPath,
                 dict
-            );
-
-            _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
@@ -1101,8 +1136,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
 
-    GLint viewport[4] = { 0 };
-    global::renderEngine->openglStateCache().viewport(viewport);
+    GLint vp[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, vp);
+    global::renderEngine->openglStateCache().setViewportState(vp);
+    glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
 
     // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
@@ -1117,9 +1154,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // deferred g-buffer
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
-
-        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine->openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1163,20 +1197,20 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     {
         TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
-        performRaycasterTasks(tasks.raycasterTasks);
+        performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
         TracyGpuZone("Deferred Caster Tasks")
         GLDebugGroup group("Deferred Caster Tasks");
 
-        // We use ping pong rendering in order to be able to
-        // render to the same final buffer, multiple
-        // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
+        // We use ping pong rendering in order to be able to render multiple deferred
+        // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
+        // buffer
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
-        performDeferredTasks(tasks.deferredcasterTasks);
+        performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
@@ -1220,18 +1254,20 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor);
+        applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {
         TracyGpuZone("Apply FXAA")
         GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-        applyFXAA();
+        applyFXAA(viewport);
     }
 }
 
-void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
+void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+                                                const glm::ivec4& viewport)
+{
     ZoneScoped
 
     for (const RaycasterTask& raycasterTask : tasks) {
@@ -1241,8 +1277,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4] = { 0 };
-        global::renderEngine->openglStateCache().viewport(viewport);
+        //global::renderEngine->openglStateCache().viewport(glm::value_ptr(viewport));
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1255,10 +1290,10 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
             GLint newVP[4] = {
-                viewport[0],
-                viewport[1],
-                static_cast<GLsizei>(viewport[2] * s),
-                static_cast<GLsizei>(viewport[3] * s)
+                static_cast<GLint>(viewport[0] * s),
+                static_cast<GLint>(viewport[1] * s),
+                static_cast<GLint>(viewport[2] * s),
+                static_cast<GLint>(viewport[3] * s)
             };
             global::renderEngine->openglStateCache().setViewportState(newVP);
 
@@ -1357,15 +1392,18 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine->openglStateCache().setViewportState(viewport);
+            global::renderEngine->openglStateCache().setViewportState(
+                glm::value_ptr(viewport)
+            );
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
-            writeDownscaledVolume();
+            writeDownscaledVolume(viewport);
         }
     }
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks)
+                                             const std::vector<DeferredcasterTask>& tasks,
+                                                               const glm::ivec4& viewport)
 {
     ZoneScoped
 
@@ -1397,6 +1435,16 @@ void FramebufferRenderer::performDeferredTasks(
                 "mainColorTexture",
                 mainDColorTextureUnit
             );
+
+            deferredcastProgram->setUniform(
+                "viewport",
+                static_cast<float>(viewport[0]),
+                static_cast<float>(viewport[1]),
+                static_cast<float>(viewport[2]),
+                static_cast<float>(viewport[3])
+            );
+            deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
+
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();

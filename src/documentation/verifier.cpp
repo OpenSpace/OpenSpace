@@ -462,7 +462,7 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
             o.offender = key;
             o.reason = TestResult::Offense::Reason::MissingKey;
             res.offenses.push_back(o);
-            return res;            
+            return res;
         }
     }
 }
@@ -498,7 +498,7 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                     o.offender = key;
                     o.reason = TestResult::Offense::Reason::WrongType;
                     res.offenses.push_back(o);
-                    return res;  
+                    return res;
                 }
             }
             else {
@@ -508,7 +508,7 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 res.offenses.push_back(o);
-                return res;  
+                return res;
             }
         }
         else {
@@ -565,7 +565,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
                 o.offender = key;
                 o.reason = TestResult::Offense::Reason::WrongType;
                 res.offenses.push_back(o);
-                return res;                
+                return res;
             }
         }
         else {
@@ -575,7 +575,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
             o.offender = key;
             o.reason = TestResult::Offense::Reason::MissingKey;
             res.offenses.push_back(o);
-            return res;                
+            return res;
         }
     }
 }
@@ -733,18 +733,18 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        TestResult res;
-        res.success = true;
-        return res;
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        TestResult res;
-        res.success = false;
+        TestResult r;
+        r.success = false;
         TestResult::Offense o;
         o.offender = key;
         o.reason = TestResult::Offense::Reason::Verification;
-        res.offenses.push_back(o);
-        return res;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 
@@ -810,18 +810,18 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        TestResult res;
-        res.success = true;
-        return res;
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        TestResult res;
-        res.success = false;
+        TestResult r;
+        r.success = false;
         TestResult::Offense o;
         o.offender = key;
         o.reason = TestResult::Offense::Reason::Verification;
-        res.offenses.push_back(o);
-        return res;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 

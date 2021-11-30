@@ -50,13 +50,11 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_time_frame_union";
-    return doc;
+    return codegen::doc<Parameters>("base_time_frame_union");
 }
 
 bool TimeFrameUnion::isActive(const Time& time) const {
-    for (const auto& tf : _timeFrames) {
+    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         if (tf->isActive(time)) {
             return true;
         }

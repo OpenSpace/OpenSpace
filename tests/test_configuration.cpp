@@ -300,10 +300,10 @@ TEST_CASE("Configuration: onScreenTextScaling", "[configuration]") {
     CHECK(c.onScreenTextScaling == "framebuffer");
 }
 
-TEST_CASE("Configuration: usePerSceneCache", "[configuration]") {
-    constexpr const char Extra[] = R"(PerSceneCache = true)";
-    const Configuration c = loadConfiguration("usePerSceneCache", Extra);
-    CHECK(c.usePerSceneCache == true);
+TEST_CASE("Configuration: usePerProfileCache", "[configuration]") {
+    constexpr const char Extra[] = R"(PerProfileCache = true)";
+    const Configuration c = loadConfiguration("usePerProfileCache", Extra);
+    CHECK(c.usePerProfileCache == true);
 }
 
 TEST_CASE("Configuration: isRenderingOnMasterDisabled", "[configuration]") {
@@ -315,19 +315,19 @@ TEST_CASE("Configuration: isRenderingOnMasterDisabled", "[configuration]") {
 TEST_CASE("Configuration: globalRotation", "[configuration]") {
     constexpr const char Extra[] = R"(GlobalRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("globalRotation", Extra);
-    CHECK(c.globalRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.globalRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: screenSpaceRotation", "[configuration]") {
     constexpr const char Extra[] = R"(ScreenSpaceRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("screenSpaceRotation", Extra);
-    CHECK(c.screenSpaceRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.screenSpaceRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: masterRotation", "[configuration]") {
     constexpr const char Extra[] = R"(MasterRotation = { 1.0, 2.0, 3.0 })";
     const Configuration c = loadConfiguration("masterRotation", Extra);
-    CHECK(c.masterRotation == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(c.masterRotation == glm::vec3(1.0, 2.0, 3.0));
 }
 
 TEST_CASE("Configuration: isConsoleDisabled", "[configuration]") {
@@ -381,12 +381,6 @@ ModuleConfigurations = {
     }
 }
 
-TEST_CASE("Configuration: renderingMethod", "[configuration]") {
-    constexpr const char Extra[] = R"(RenderingMethod = "ABuffer")";
-    const Configuration c = loadConfiguration("renderingMethod", Extra);
-    CHECK(c.renderingMethod == "ABuffer");
-}
-
 TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {
     Configuration defaultConf;
     {
@@ -394,6 +388,7 @@ TEST_CASE("Configuration: openGLDebugContext", "[configuration]") {
         constexpr const char Extra[] = R"(OpenGLDebugContext = { Activate = true })";
         const Configuration c = loadConfiguration("openGLDebugContext1", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == false);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous
@@ -457,6 +452,7 @@ OpenGLDebugContext = { Activate = true, Synchronous = true }
         constexpr const char Extra[] = R"(
 OpenGLDebugContext = {
     Activate = true,
+    PrintStacktrace = true,
     FilterIdentifier = {
         { Identifier = 1, Source = "API", Type = "Error" },
         { Identifier = 2, Source = "Window System", Type = "Deprecated" },
@@ -473,6 +469,7 @@ OpenGLDebugContext = {
 )";
         const Configuration c = loadConfiguration("openGLDebugContext3", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == true);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous
@@ -521,6 +518,7 @@ OpenGLDebugContext = { Activate = true, FilterSeverity = { "High", "Medium" } }
 )";
         const Configuration c = loadConfiguration("openGLDebugContext4", Extra);
         CHECK(c.openGLDebugContext.isActive == true);
+        CHECK(c.openGLDebugContext.printStacktrace == false);
         CHECK(
             c.openGLDebugContext.isSynchronous ==
             defaultConf.openGLDebugContext.isSynchronous

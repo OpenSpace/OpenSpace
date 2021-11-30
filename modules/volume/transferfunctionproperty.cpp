@@ -23,38 +23,37 @@
  ****************************************************************************************/
 
 #include <modules/volume/transferfunctionproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
 
-namespace {
+namespace openspace::properties {
 
-openspace::volume::TransferFunction fromLuaConversion(lua_State* state, bool& success) {
+TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
+                                                   volume::TransferFunction value)
+    : TemplateProperty<volume::TransferFunction>(std::move(info), value)
+{}
+
+std::string TransferFunctionProperty::className() const {
+    return "TransferFunctionProperty";
+}
+
+int TransferFunctionProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+openspace::volume::TransferFunction
+TransferFunctionProperty::fromLuaConversion(lua_State* state, bool& success) const
+{
     openspace::volume::TransferFunction tf;
     success = tf.setEnvelopesFromLua(state);
     return tf;
 }
 
-bool toLuaConversion(lua_State* state, openspace::volume::TransferFunction value) {
-    return value.envelopesToLua(state);
+void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
+    _value.envelopesToLua(state);
 }
 
-bool toStringConversion(std::string& outValue,
-                        openspace::volume::TransferFunction inValue)
-{
-    outValue = inValue.serializedToString();
-    return true;
+std::string TransferFunctionProperty::toStringConversion() const {
+    return _value.serializedToString();
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_TEMPLATEPROPERTY_SOURCE(TransferFunctionProperty, volume::TransferFunction,
-    volume::TransferFunction(),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 } // namespace openspace::properties

@@ -49,6 +49,14 @@ struct CameraKeyframe {
     CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
+    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
+        bool&& followNodeRot, float&& scale)
+        : _position(pos)
+        , _rotation(rot)
+        , _followNodeRotation(followNodeRot)
+        , _focusNode(focusNode)
+        , _scale(scale)
+    {}
 
     glm::dvec3 _position = glm::dvec3(0.0);
     glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
@@ -188,7 +196,9 @@ struct CameraKeyframe {
             << std::fixed << std::setprecision(7) << _rotation.y << ' '
             << std::fixed << std::setprecision(7) << _rotation.z << ' '
             << std::fixed << std::setprecision(7) << _rotation.w << ' ';
-        out << std::scientific << _scale << ' ';
+        out << std::fixed
+            << std::setprecision(std::numeric_limits<double>::max_digits10)
+            << _scale << ' ';
         if (_followNodeRotation) {
             out << "F ";
         }

@@ -20,6 +20,24 @@ local SolarSystemBarycenter = {
   }
 }
 
+local SunCenter = {
+  Identifier = "SunCenter",
+  Parent = SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SUN",
+      Observer = "SSB"
+    }
+  },
+  GUI = {
+    Name = "SUN Center",
+    Path = "/Solar System/Sun",
+    Description = [[Spice frame for the Sun]],
+    Hidden = true
+  }
+}
+
 -- Spice frame for the Sun
 local SunIAU = {
   Identifier = "SunIAU",
@@ -67,14 +85,14 @@ local SunECLIPJ2000 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000 })
+assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunCenter, SunIAU, SunECLIPJ2000 })
 
 
 asset.meta = {
   Name = "Sun Transforms",
   Version = "1.0",
   Description = [[ Sun transforms: Solar System Barycenter, SUN IAU and
-    SUN J2000]],
+   SUN J2000]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",

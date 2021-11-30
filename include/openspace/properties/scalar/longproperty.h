@@ -41,10 +41,25 @@
  */
 
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long)
+class LongProperty : public NumericalProperty<long> {
+public:
+    LongProperty(Property::PropertyInfo info, long value = long(0),
+        long minValue = std::numeric_limits<long>::lowest(),
+        long maxValue = std::numeric_limits<long>::max(),
+        long stepValue = long(1));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<long>::operator=;
+
+protected:
+    long fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

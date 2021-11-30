@@ -27,6 +27,7 @@
 
 #include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <iosfwd>
 #include <map>
 
@@ -42,8 +43,8 @@ public:
     bool buildHistograms(int numBins);
     const Histogram* histogram(unsigned int brickIndex) const;
 
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    bool loadFromFile(const std::filesystem::path& filename);
+    bool saveToFile(const std::filesystem::path& filename);
 
 private:
     TSP* _tsp;

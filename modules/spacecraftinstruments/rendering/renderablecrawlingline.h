@@ -54,7 +54,6 @@ private:
     std::string _instrumentName;
     std::string _source;
     std::string _target;
-    std::string _referenceFrame;
 
     glm::vec4 _lineColorBegin = glm::vec4(0.f);
     glm::vec4 _lineColorEnd = glm::vec4(0.f);
@@ -62,7 +61,6 @@ private:
     int _frameCounter = 0;
 
     bool _drawLine = false;
-    float _imageSequenceTime = -1.f;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

@@ -45,9 +45,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_static";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {

@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
 #include <functional>
 #include <future>
 #include <memory>
@@ -99,7 +100,7 @@ public:
     // finishedCallback - callback when download finished (happens on different thread)
     // progressCallback - callback for status during (happens on different thread)
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
-        const ghoul::filesystem::File& file,
+        const std::filesystem::path& file,
         OverrideFile overrideFile = OverrideFile::Yes,
         FailOnError failOnError = FailOnError::No, unsigned int timeout_secs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),

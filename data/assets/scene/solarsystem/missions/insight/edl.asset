@@ -60,33 +60,118 @@ local legDeployTime = "2018 NOV 26 19:43:06.68" -- entry + 243s
 local landerSeperationTime = "2018 NOV 26 19:44:51.68" -- entry + 348s
 local touchdownTime = "2018 NOV 26 19:45:32.68" -- entry + 389s
 local panelDeployTime = "2018 NOV 26 19:45:33.68" -- entry + 390s
-local foreverTime = "2018 NOV 26 20:17:50.68" -- entry + 2327s
 
 local kernelTouchdownTime = "2018 NOV 26 19:45:32.3"
 local spiceRotationEndTime = "2018 NOV 26 19:51:39"
 
-local InsightParent = {
-  Identifier = "InsightParent",
-  Parent = "MarsBarycenter",
-  Transform = {
-    Translation = {
+local TranslationKeyframes = {
+  ['1850 JAN 01 00:00:00'] = {
       Type = "SpiceTranslation",
       Target = "INSIGHT",
       Observer = "MARS",
-      Frame = "GALACTIC",
-      Kernels = iKernels
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = '2018 NOV 26 19:39:03'
+  },
+  ['2018 NOV 26 19:39:02'] = {
+      Type = "SpiceTranslation",
+      Target = "INSIGHT",
+      Observer = "MARS",
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = '2018 NOV 26 19:39:03'
+  },
+  ['2018 NOV 26 19:39:03'] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:39:04'] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+ ['2018 NOV 26 19:45:34'] = {
+    Type = "SpiceTranslation",
+    Target = "INSIGHT",
+    Observer = "MARS",
+    Frame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:45:35'] = {
+      Type = "SpiceTranslation",
+      Target = "INSIGHT",
+      Observer = "MARS",
+      Frame = "IAU_MARS",
+      Kernels = iKernels,
+      FixedDate = '2018 NOV 26 19:45:34'
+  },
+}
+
+local RotationKeyframes = {
+  ['1850 JAN 01 00:00:00'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = '2018 NOV 26 19:39:02',
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:39:02'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = '2018 NOV 26 19:39:02',
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:39:03'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:39:04'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+ ['2018 NOV 26 19:45:34'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    Kernels = iKernels
+  },
+  ['2018 NOV 26 19:45:35'] = {
+    Type = "SpiceRotation",
+    SourceFrame = "INSIGHT_LANDER_CRUISE",
+    DestinationFrame = "IAU_MARS",
+    FixedDate = '2018 NOV 26 19:45:34'
+  },
+}
+
+
+local InsightParent = {
+  Identifier = "InsightParent",
+  Parent = "Mars",
+  Transform = {
+    Translation ={
+      Type = "TimelineTranslation",
+      Keyframes = TranslationKeyframes,
     },
     Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "INSIGHT_LANDER_CRUISE",
-      DestinationFrame = "GALACTIC"
+      Type = "TimelineRotation",
+      Keyframes = RotationKeyframes,
     }
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = spiceRotationEndTime
-  },
+  -- TimeFrame = {
+  --   Type = "TimeFrameInterval",
+  --   Start = entryTimeStart,
+  --   End = spiceRotationEndTime
+  -- },
   GUI = {
     Hidden = true,
     Name = "InsightParent",
@@ -121,7 +206,6 @@ local Insight_Entry_CapsuleA = {
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -142,7 +226,6 @@ local Insight_Entry_Capsule_Ring = {
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -163,7 +246,6 @@ local Insight_Entry_Capsule_Plugs = {
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = landerSeperationTime
   },
   GUI = {
@@ -184,7 +266,6 @@ local Insight_Entry_Heatshield = {
   },
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = entryTimeStart,
     End = heatShieldSeperationTime
   },
   GUI = {
@@ -329,11 +410,6 @@ local Insight_Lander_A001 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander A001",
@@ -349,11 +425,6 @@ local Insight_Lander_A002 = {
     GeometryFile = models .. "/insight_lander_deck_AO02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -371,11 +442,6 @@ local Insight_Lander_A003 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander A003",
@@ -391,11 +457,6 @@ local Insight_Lander_A004 = {
     GeometryFile = models .. "/insight_lander_deck_AO04.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -413,11 +474,6 @@ local Insight_Lander_A005 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander A005",
@@ -433,11 +489,6 @@ local Insight_Lander_A006 = {
     GeometryFile = models .. "/insight_lander_deck_AO06.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -455,11 +506,6 @@ local Insight_Lander_A007 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander A007",
@@ -475,11 +521,6 @@ local Insight_Lander_A008 = {
     GeometryFile = models .. "/insight_lander_deck_AO08.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -497,11 +538,6 @@ local Insight_Lander_foil1 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander foil",
@@ -518,11 +554,6 @@ local Insight_Lander_Tex01 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight Lander Tex01",
@@ -538,11 +569,6 @@ local Insight_Lander_Tex02 = {
     GeometryFile = models .. "/insight_lander_deck_tex02.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources,
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -605,7 +631,6 @@ local Insight_Legs_Deployed_tex = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -626,7 +651,6 @@ local Insight_Legs_Deployed_AO06 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -644,11 +668,6 @@ local Insight_Panels_Stowed_tex = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight panels_stow_tex",
@@ -665,11 +684,6 @@ local Insight_Panels_Stowed_tex2 = {
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
-  },
   GUI = {
     Hidden = true,
     Name = "Insight panels_stow_tex2",
@@ -685,11 +699,6 @@ local Insight_Panels_Stowed_AO01 = {
     GeometryFile = models .. "/insight_lander_panels_stow_AO01.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = entryTimeStart,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -710,7 +719,6 @@ local Insight_Panels_Deployed_tex = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -731,7 +739,6 @@ local Insight_Panels_Deployed_tex2 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -752,7 +759,6 @@ local Insight_Panels_Deployed_AO06 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,

@@ -36,8 +36,9 @@ public:
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
+
 private:
-    void runScript(const std::string& script, bool returnValue);
+    void runScript(std::string script, bool returnValue);
 
     bool _waitingForReturnValue = true;
 };

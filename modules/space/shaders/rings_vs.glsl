@@ -31,16 +31,14 @@ layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
 out vec4 vs_position;
-//out vec4 vs_gPosition;
-//out vec3 vs_gNormal;
 
 uniform mat4 modelViewProjectionTransform;
 
 void main() {
-    vs_st = in_st;
+  vs_st = in_st;
 
-    vs_position = z_normalization(
-        modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
-    );
-    gl_Position = vs_position;
+  vs_position = z_normalization(
+    modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
+  );
+  gl_Position = vs_position;
 }

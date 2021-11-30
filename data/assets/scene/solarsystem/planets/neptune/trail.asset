@@ -11,8 +11,8 @@ local NeptuneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE BARYCENTER",
-      Observer = "SUN"
+      Target = "NEPTUNE",
+      Observer = "SSB"
     },
     Color = { 0.2, 0.5, 1.0 },
     -- Period  = 60200,

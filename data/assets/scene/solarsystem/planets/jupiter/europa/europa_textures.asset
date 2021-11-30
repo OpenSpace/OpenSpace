@@ -2,6 +2,6 @@ local TexturesPath = asset.syncedResource({
   Name = "Europa Textures",
   Type = "HttpSynchronization",
   Identifier = "europa_textures",
-  Version = 1
+  Version = 2
 })
 asset.export("TexturesPath", TexturesPath)

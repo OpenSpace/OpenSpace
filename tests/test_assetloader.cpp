@@ -57,7 +57,7 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     openspace::AssetLoader assetLoader(
         state,
         &syncWatcher,
-        FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
+        absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
     REQUIRE_NOTHROW(assetLoader.add("passassertion"));
@@ -71,7 +71,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
     openspace::AssetLoader assetLoader(
         state,
         &syncWatcher,
-        FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
+        absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
     REQUIRE_NOTHROW(assetLoader.add("require"));
@@ -84,7 +84,7 @@ TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
     openspace::AssetLoader assetLoader(
         state,
         &syncWatcher,
-        FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
+        absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
     REQUIRE_NOTHROW(assetLoader.add("assetfunctionsexist"));
@@ -97,7 +97,7 @@ TEST_CASE("AssetLoader: Asset Initialization", "[assetloader]") {
     openspace::AssetLoader assetLoader(
         state,
         &syncWatcher,
-        FileSys.absolutePath("${TESTDIR}/AssetLoaderTest/")
+        absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
     bool passed;

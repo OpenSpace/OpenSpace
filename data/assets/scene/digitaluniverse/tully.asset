@@ -33,21 +33,18 @@ local tullyPoints = {
     ColorRange = { { 1.0, 30.0 } },
     LabelFile = speck .. "/tully.label",
     DrawLabels = false,
+    Unit = "Mpc",
     TextColor = { 0.7, 0.7, 0.7 },
     TextSize = 19.36,
-    TextMinSize = 8.2,
+    TextMinMaxSize = { 8, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
       0.67314530211,    0.73127116582,  0.11008126223, 0.0,
       0.0,              0.0,            0.0,           1.0
     },
-    Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = { 0.001, 1.0 },
-    -- Max size in pixels
-    BillboardMaxSize = 7,
-    BillboardMinSize = 0,
+    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
     --CorrectionSizeEndDistance = 22.0,
     --CorrectionSizeFactor = 10.45
     EnablePixelSizeControl = true

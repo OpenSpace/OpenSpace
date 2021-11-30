@@ -1,5 +1,4 @@
 local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 local debugHelper = asset.require('util/debug_helper')
 
@@ -8,7 +7,6 @@ asset.require('spice/base')
 
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 local spheres = asset.require('examples/spheres')

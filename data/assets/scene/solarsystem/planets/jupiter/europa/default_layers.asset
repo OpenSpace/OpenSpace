@@ -1,7 +1,7 @@
 local colorLayersPath = "./layers/colorlayers"
 
 asset.require(colorLayersPath .. "/europa_texture")
-local colorLayer = asset.require(colorLayersPath .. "/voyager_global_mosaic")
+local colorLayer = asset.require(colorLayersPath .. "/voyager_global_mosaic_local")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 

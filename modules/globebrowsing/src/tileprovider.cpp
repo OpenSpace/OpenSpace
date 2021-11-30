@@ -34,8 +34,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -44,6 +45,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/textureunit.h>
+#include <filesystem>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -141,12 +144,28 @@ namespace temporal {
     constexpr const char* TimeEnd = "OpenSpaceTimeEnd";
     constexpr const char* TimeResolution = "OpenSpaceTimeResolution";
     constexpr const char* TimeFormat = "OpenSpaceTimeIdFormat";
-
+    constexpr const char* TimeInterpolation = "OpenSpaceTimeInterpolation";
+    constexpr const char* TransferFunction = "OpenSpaceTransferFunction";
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "This is the path to the XML configuration file that describes the temporal tile "
         "information."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
+        "UseFixedTime",
+        "Use Fixed Time",
+        "If this value is enabled, the time-varying timevarying dataset will always use "
+        "the time that is specified in the 'FixedTime' property, rather than using the "
+        "actual time from OpenSpace"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
+        "FixedTime",
+        "Fixed Time",
+        "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
+        "time taken from OpenSpace for the displayed tiles."
     };
 } // namespace temporal
 
@@ -212,9 +231,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
-        //GLint viewport[4];
         defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
-        //glGetIntegerv(GL_VIEWPORT, viewport);
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
@@ -236,7 +253,6 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         global::renderEngine->openglStateCache().resetViewportState();
-        //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         t.tileCache->put(key, t.initData.hashKey, tile);
@@ -278,9 +294,12 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
 //
 
 // Buffer needs at least 22 characters space
-int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char* buffer)
-{
+std::string_view timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
     ZoneScoped
+
+    char* buffer = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(22)
+    );
 
     std::memset(buffer, 0, 22);
     const double time = t.j2000Seconds();
@@ -291,32 +310,32 @@ int timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t, char
             constexpr const char Format[] = "YYYY-MM-DD";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
             constexpr const char Format[] = "YYYYMMDD_HRMNSC";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
             constexpr const char Format[] = "YYYYMMDD_HRMN";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
         {
             constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SCZ";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
             constexpr const char Format[] = "YYYY-MM-DDTHR_MN_SCZ";
             constexpr const int Size = sizeof(Format);
             SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-            return Size - 1;
+            return std::string_view(buffer, Size - 1);
         }
         default:
             throw ghoul::MissingCaseException();
@@ -344,12 +363,11 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     const size_t numChars = strlen(temporal::UrlTimePlaceholder);
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timekey);
-    std::string gdalDatasetXml = timeSpecifiedXml;
+    std::string xml = xmlTemplate.replace(pos, numChars, timekey);
 
-    FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
+    xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
 
-    t.initDict.setValue(KeyFilePath, gdalDatasetXml);
+    t.initDict.setValue(KeyFilePath, xml);
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
@@ -375,19 +393,137 @@ TileProvider* getTileProvider(TemporalTileProvider& t, std::string_view timekey)
 TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
     ZoneScoped
 
-    Time tCopy(time);
-    if (t.timeQuantizer.quantize(tCopy, true)) {
-        char Buffer[22];
-        const int size = timeStringify(t.timeFormat, tCopy, Buffer);
-        try {
-            return getTileProvider(t, std::string_view(Buffer, size));
+    if (!t.interpolation) {
+        if (t.useFixedTime && !t.fixedTime.value().empty()) {
+            try {
+                return getTileProvider(t, t.fixedTime.value());
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC("TemporalTileProvider", e.message);
+                return nullptr;
+            }
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC("TemporalTileProvider", e.message);
-            return nullptr;
+        else {
+            Time tCopy(time);
+            if (t.timeQuantizer.quantize(tCopy, true)) {
+                std::string_view timeStr = timeStringify(t.timeFormat, tCopy);
+                try {
+                    return getTileProvider(t, timeStr);
+                }
+                catch (const ghoul::RuntimeError& e) {
+                    LERRORC("TemporalTileProvider", e.message);
+                    return nullptr;
+                }
+            }
         }
     }
-    return nullptr;
+
+    Time tCopy(time);
+    if (!t.timeQuantizer.quantize(tCopy, true)) {
+        return nullptr;
+    }
+
+    Time simulationTime(time);
+    Time nextTile;
+    Time nextNextTile;
+    Time prevTile;
+    Time secondToLast;
+    Time secondToFirst;
+
+    std::string_view tCopyStr = timeStringify(t.timeFormat, tCopy);
+    try {
+        t.interpolateTileProvider->t1 = getTileProvider(t, tCopyStr);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("TemporalTileProvider", e.message);
+        return nullptr;
+    }
+    // if the images are for each hour
+    if (t.myResolution == "1h") {
+        // the second tile to interpolate between
+        nextTile.setTime(tCopy.j2000Seconds() + 60 * 60);
+        // the tile after the second tile
+        nextNextTile.setTime(tCopy.j2000Seconds() + 120 * 60);
+        // the tile before the first tile
+        prevTile.setTime(tCopy.j2000Seconds() - 60 * 60 + 1);
+        // to make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
+        secondToLast.setTime(t.endTimeJ2000 - 60 * 60);
+        secondToFirst.setTime(t.startTimeJ2000 + 60 * 60);
+    }
+    // if the images are for each month
+    if (t.myResolution == "1M") {
+        // the second tile to interpolate between
+        nextTile.setTime(tCopy.j2000Seconds() + 32 * 60 * 60 * 24);
+        // the tile after the second tile
+        nextNextTile.setTime(tCopy.j2000Seconds() + 64 * 60 * 60 * 24);
+        // the tile before the first tile
+        prevTile.setTime(tCopy.j2000Seconds() - 2 * 60 * 60 * 24);
+        // to make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
+        secondToLast.setTime(t.endTimeJ2000 - 2 * 60 * 60 * 24);
+        secondToFirst.setTime(t.startTimeJ2000 + 32 * 60 * 60 * 24);
+
+        // since months vary in length the time strings are set to the first of each month
+        auto setToFirstOfMonth = [](Time& time) {
+            std::string timeString = std::string(time.ISO8601());
+            timeString[8] = '0';
+            timeString[9] = '1';
+            time.setTime(timeString);
+        };
+
+        setToFirstOfMonth(nextTile);
+        setToFirstOfMonth(nextNextTile);
+        setToFirstOfMonth(prevTile);
+        setToFirstOfMonth(secondToLast);
+        setToFirstOfMonth(secondToFirst);
+    }
+
+    std::string_view nextTileStr = timeStringify(t.timeFormat, nextTile);
+    std::string_view nextNextTileStr = timeStringify(t.timeFormat, nextNextTile);
+    std::string_view prevTileStr = timeStringify(t.timeFormat, prevTile);
+    try {
+        // the necessary tile providers are loaded if they exist within the
+        // dataset's timespan 
+        if (secondToLast.j2000Seconds() > simulationTime.j2000Seconds() &&
+            secondToFirst.j2000Seconds() < simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, nextNextTileStr);
+            t.interpolateTileProvider->before = getTileProvider(t, prevTileStr);
+        }
+        else if (secondToLast.j2000Seconds() < simulationTime.j2000Seconds() &&
+                 t.endTimeJ2000 > simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->before = getTileProvider(t, prevTileStr);
+        }
+        else if (secondToFirst.j2000Seconds() > simulationTime.j2000Seconds() &&
+                 t.startTimeJ2000 < simulationTime.j2000Seconds())
+        {
+            t.interpolateTileProvider->t2 = getTileProvider(t, nextTileStr);
+            t.interpolateTileProvider->future = getTileProvider(t, nextNextTileStr);
+            t.interpolateTileProvider->before = getTileProvider(t, tCopyStr);
+        }
+        else {
+            t.interpolateTileProvider->t2 = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->future = getTileProvider(t, tCopyStr);
+            t.interpolateTileProvider->before = getTileProvider(t, tCopyStr);
+        }
+        t.interpolateTileProvider->factor =
+            (simulationTime.j2000Seconds() - tCopy.j2000Seconds()) /
+            (nextTile.j2000Seconds() - tCopy.j2000Seconds());
+
+        if (t.interpolateTileProvider->factor > 1) {
+            t.interpolateTileProvider->factor = 1;
+        }
+        return t.interpolateTileProvider.get();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("TemporalTileProvider", e.message);
+        return nullptr;
+    }
 }
 
 void ensureUpdated(TemporalTileProvider& t) {
@@ -399,10 +535,10 @@ void ensureUpdated(TemporalTileProvider& t) {
 }
 
 std::string xmlValue(TemporalTileProvider& t, CPLXMLNode* node, const std::string& key,
-                        const std::string& defaultVal)
+                     const std::string& defaultVal, bool isOptional = false)
 {
     CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
-    if (!n) {
+    if (!n && !isOptional) {
         throw ghoul::RuntimeError(
             fmt::format("Unable to parse file {}. {} missing", t.filePath.value(), key)
         );
@@ -426,10 +562,20 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
         temporal::TimeFormat,
         "YYYY-MM-DDThh:mm:ssZ"
     );
+    std::string timeInterpolation = xmlValue(
+        t,
+        node,
+        temporal::TimeInterpolation,
+        "none",
+        true
+    );
+    t.colormap = xmlValue(t, node, temporal::TransferFunction, "none", true);
 
-    Time start;
-    start.setTime(std::move(timeStart));
-    Time end(Time::now());
+    Time start = Time(timeStart);
+    Time end = Time::now();
+    Time endOfInterval = Time(timeEnd);
+    t.startTimeJ2000 = start.j2000Seconds();
+    t.endTimeJ2000 = endOfInterval.j2000Seconds();
     if (timeEnd == "Yesterday") {
         end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
     }
@@ -443,6 +589,7 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
             std::string(end.ISO8601())
         );
         t.timeQuantizer.setResolution(timeResolution);
+        t.myResolution = timeResolution;
     }
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::RuntimeError(fmt::format(
@@ -451,6 +598,7 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
         ));
     }
     t.timeFormat = ghoul::from_string<TemporalTileProvider::TimeFormatType>(timeIdFormat);
+    t.interpolation = (timeInterpolation == "linear");
 
     CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
     if (gdalNode) {
@@ -469,10 +617,10 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
 }
 
-bool readFilePath(TemporalTileProvider& t) {
+void readFilePath(TemporalTileProvider& t) {
     ZoneScoped
 
-    std::ifstream in(t.filePath.value().c_str());
+    std::ifstream in(t.filePath.value());
     std::string xml;
     if (in.is_open()) {
         // read file
@@ -487,13 +635,12 @@ bool readFilePath(TemporalTileProvider& t) {
     }
 
     // File path was not a path to a file but a GDAL config or empty
-    ghoul::filesystem::File f(t.filePath);
-    if (FileSys.fileExists(f)) {
-        t.initDict.setValue(temporal::KeyBasePath, f.directoryName());
+    std::filesystem::path f(t.filePath.value());
+    if (std::filesystem::is_regular_file(f)) {
+        t.initDict.setValue(temporal::KeyBasePath, f.parent_path().string());
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);
-    return true;
 }
 
 } // namespace
@@ -831,6 +978,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : initDict(dictionary)
     , filePath(temporal::FilePathInfo)
+    , useFixedTime(temporal::UseFixedTimeInfo, false)
+    , fixedTime(temporal::FixedTimeInfo)
 {
     ZoneScoped
 
@@ -839,10 +988,30 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     filePath = dictionary.value<std::string>(KeyFilePath);
     addProperty(filePath);
 
-    successfulInitialization = readFilePath(*this);
+    if (dictionary.hasValue<bool>(temporal::UseFixedTimeInfo.identifier)) {
+        useFixedTime = dictionary.value<bool>(temporal::UseFixedTimeInfo.identifier);
+    }
+    addProperty(useFixedTime);
+
+    if (dictionary.hasValue<std::string>(temporal::FixedTimeInfo.identifier)) {
+        fixedTime = dictionary.value<std::string>(temporal::FixedTimeInfo.identifier);
+    }
+    addProperty(fixedTime);
+
+    readFilePath(*this);
+    successfulInitialization = true;
 
     if (!successfulInitialization) {
         LERRORC("TemporalTileProvider", "Unable to read file " + filePath.value());
+    }
+    if (interpolation) {
+        interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
+        interpolateTileProvider->colormap = colormap;
+        initialize(*interpolateTileProvider);
+        ghoul::Dictionary dict;
+        dict.setValue("FilePath", colormap);
+        interpolateTileProvider->singleImageProvider =
+            std::make_unique<SingleImageProvider>(dict);
     }
 }
 
@@ -856,7 +1025,9 @@ bool initialize(TileProvider& tp) {
 
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
-    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max() - 1) {
+    if (TileProvider::NumTileProviders >
+        static_cast<unsigned int>(std::numeric_limits<uint16_t>::max()) - 1)
+    {
         LERRORC(
             "TileProvider",
             "Number of tile providers exceeds 65535. Something will break soon"
@@ -896,6 +1067,8 @@ bool initialize(TileProvider& tp) {
             }
             return success;
         }
+        case Type::InterpolateTileProvider:
+            break;
         case Type::TemporalTileProvider:
             break;
         default:
@@ -938,6 +1111,8 @@ bool deinitialize(TileProvider& tp) {
             }
             return success;
         }
+        case Type::InterpolateTileProvider:
+            break;
         case Type::TemporalTileProvider:
             break;
         default:
@@ -947,8 +1122,175 @@ bool deinitialize(TileProvider& tp) {
 }
 
 
+//
+// InterpolateTileProvider
+//
+InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&) {
+    ZoneScoped
+    
+    type = Type::InterpolateTileProvider;
+    glGenFramebuffers(1, &fbo);
+    glGenVertexArrays(1, &vaoQuad);
+    glGenBuffers(1, &vboQuad);
+    glBindVertexArray(vaoQuad);
+    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+    // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
+    const GLfloat vertexData[] = {
+        // x    y    u    v
+        -1.f, -1.f, 0.f, 0.f,
+         1.f,  1.f, 1.f, 1.f,
+        -1.f,  1.f, 0.f, 1.f,
+        -1.f, -1.f, 0.f, 0.f,
+         1.f, -1.f, 1.f, 0.f,
+         1.f,  1.f, 1.f, 1.f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    // vertex coordinates at location 0
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);
+    // texture coords at location 1
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(GLfloat),
+        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
+    );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    shaderProgram = global::renderEngine->buildRenderProgram(
+        "InterpolatingProgram",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_fs.glsl")
+    );
+}
 
+InterpolateTileProvider::~InterpolateTileProvider() {
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteBuffers(1, &vboQuad);
+    glDeleteVertexArrays(1, &vaoQuad);
+}
 
+Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
+    ZoneScoped
+    TracyGpuZone("tile");
+    
+    // prev and next are the two tiles to interpolate between
+    Tile prev = tile(*t1, tileIndex);
+    Tile next = tile(*t2, tileIndex);
+    // the tile before and the tile after the interpolation interval are loaded so the
+    // interpolation goes smoother
+    Tile prevprev = tile(*before, tileIndex);
+    Tile nextnext = tile(*future, tileIndex);
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    
+    if (!prev.texture || !next.texture) {
+        return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+    }
+
+    // There is a previous and next texture to interpolate between so do the interpolation
+
+    // The texture that will give the color for the interpolated texture
+    ghoul::opengl::Texture* colormapTexture = singleImageProvider->tile.texture;
+    long long hkey = cache::ProviderTileHasher()(key);
+    // The data for initializing the texture
+    TileTextureInitData initData(
+        prev.texture->dimensions().x,
+        prev.texture->dimensions().y,
+        prev.texture->dataType(),
+        prev.texture->format(),
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::No
+    );
+
+    // Check if a tile exists for the given key in the tileCache
+    // Initializing the tile that will contian the interpolated texture
+    Tile ourTile;
+    // The texture that will contain the interpolated image
+    ghoul::opengl::Texture* writeTexture;
+    if (tileCache->exist(key)) {
+        // Get the tile from the tilecache
+        ourTile = tileCache->get(key);
+        // Use the texture from the tileCache
+        writeTexture = ourTile.texture;
+    }
+    else {
+        // Create a texture with the initialization data 
+        writeTexture = tileCache->texture(initData);
+        // Create a tile with the texture
+        ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
+        // Add it to the tilecache
+        tileCache->put(key, initData.hashKey, ourTile);
+    }
+
+    // Saves current state
+    GLint currentFBO;
+    GLint viewport[4];
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
+    global::renderEngine->openglStateCache().viewport(viewport);
+    // Bind render texture to FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        *writeTexture,
+        0
+    );
+    glDisable(GL_BLEND);
+    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, textureBuffers);
+    // Check that our framebuffer is ok
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LERRORC("TileProvider", "Incomplete framebuffer");
+    }
+    // Setup our own viewport settings
+    GLsizei w = static_cast<GLsizei>(writeTexture->width());
+    GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    glViewport(0, 0, w, h);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    GLint id;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &id);
+    // Activate shader and bind uniforms
+    shaderProgram->activate();
+    shaderProgram->setUniform("blendFactor", factor);
+    
+    ghoul::opengl::TextureUnit colormapUnit;
+    colormapUnit.activate();
+    colormapTexture->bind();
+    shaderProgram->setUniform("colormapTexture", colormapUnit);
+
+    ghoul::opengl::TextureUnit prevUnit;
+    prevUnit.activate();
+    prev.texture->bind();
+    shaderProgram->setUniform("prevTexture", prevUnit);
+
+    ghoul::opengl::TextureUnit nextUnit;
+    nextUnit.activate();
+    next.texture->bind();
+    shaderProgram->setUniform("nextTexture", nextUnit);
+
+    // Render to the texture
+    glBindVertexArray(vaoQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
+    // Deactivate shader program (when rendering is completed)
+    shaderProgram->deactivate();
+    glUseProgram(id);
+    // Restores system state
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetColorState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
+    global::renderEngine->openglStateCache().resetViewportState();
+
+    return ourTile;
+}
 
 
 Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
@@ -1054,6 +1396,13 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return Tile();
             }
         }
+        case Type::InterpolateTileProvider: {
+
+            ZoneScopedN("Type::InterpolateTileProvider")
+                InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            return t.calculateTile(tileIndex);
+            break;
+        }
         case Type::TemporalTileProvider: {
             ZoneScopedN("Type::TemporalTileProvider")
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
@@ -1115,6 +1464,17 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
             TileProvider* provider = levelProvider(t, index.level);
             return provider ? tileStatus(*provider, index) : Tile::Status::Unavailable;
         }
+        case Type::InterpolateTileProvider: {
+            InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            Tile::Status t1Stat = tileStatus(*t.t1, index);
+            Tile::Status t2Stat = tileStatus(*t.t2, index);
+            if (t1Stat <= t2Stat) {
+                return t1Stat;
+            }
+            else {
+                return t2Stat;
+            }
+        }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
@@ -1160,6 +1520,10 @@ TileDepthTransform depthTransform(TileProvider& tp) {
         }
         case Type::ByLevelTileProvider:
             return { 0.f, 1.f };
+        case Type::InterpolateTileProvider: {
+            InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            return depthTransform(*t.t1);
+        }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
@@ -1226,6 +1590,14 @@ int update(TileProvider& tp) {
             for (const std::unique_ptr<TileProvider>& provider : t.levelTileProviders) {
                 update(*provider);
             }
+            break;
+        }
+        case Type::InterpolateTileProvider: {
+            InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            update(*t.t1);
+            update(*t.t2);
+            update(*t.before);
+            update(*t.future);
             break;
         }
         case Type::TemporalTileProvider: {
@@ -1319,6 +1691,14 @@ void reset(TileProvider& tp) {
             }
             break;
         }
+        case Type::InterpolateTileProvider: {
+            InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            reset(*t.t1);
+            reset(*t.t2);
+            reset(*t.before);
+            reset(*t.future);
+            break;
+        }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
@@ -1365,6 +1745,10 @@ int maxLevel(TileProvider& tp) {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             return static_cast<int>(t.providerIndices.size() - 1);
         }
+        case Type::InterpolateTileProvider: {
+            InterpolateTileProvider& t = static_cast<InterpolateTileProvider&>(tp);
+            return glm::min(maxLevel(*t.t1), maxLevel(*t.t2));
+        }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
@@ -1405,6 +1789,8 @@ float noDataValueAsFloat(TileProvider& tp) {
         case Type::ByIndexTileProvider:
             return std::numeric_limits<float>::min();
         case Type::ByLevelTileProvider:
+            return std::numeric_limits<float>::min();
+        case Type::InterpolateTileProvider:
             return std::numeric_limits<float>::min();
         case Type::TemporalTileProvider:
             return std::numeric_limits<float>::min();

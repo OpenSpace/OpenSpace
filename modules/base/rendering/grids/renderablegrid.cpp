@@ -82,9 +82,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_grid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_grid");
 }
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
@@ -92,7 +90,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _size(SizeInfo, glm::vec2(1e10f), glm::vec2(1.f), glm::vec2(1e20f))
+    , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -110,7 +108,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(10.f);
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);

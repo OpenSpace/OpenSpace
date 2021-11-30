@@ -81,6 +81,7 @@ private:
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     double _modelScale = 1.0;
+    bool _invertModelScale = false;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
     std::string _animationStart;
@@ -88,7 +89,6 @@ private:
     properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
-
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
 
@@ -101,6 +101,8 @@ private:
     properties::BoolProperty _enableOpacityBlending;
     properties::OptionProperty _blendingFuncOption;
 
+    std::string _vertexShaderPath;
+    std::string _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,

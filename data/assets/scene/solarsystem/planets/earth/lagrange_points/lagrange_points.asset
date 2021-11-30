@@ -1,0 +1,4 @@
+asset.require('scene/solarsystem/planets/earth/lagrange_points/L1')
+asset.require('scene/solarsystem/planets/earth/lagrange_points/L2')
+asset.require('scene/solarsystem/planets/earth/lagrange_points/L4')
+asset.require('scene/solarsystem/planets/earth/lagrange_points/L5')

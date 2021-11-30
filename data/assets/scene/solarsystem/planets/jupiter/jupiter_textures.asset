@@ -2,6 +2,6 @@ local TexturesPath = asset.syncedResource({
   Name = "Jupiter Textures",
   Type = "HttpSynchronization",
   Identifier = "jupiter_textures",
-  Version = 1
+  Version = 2
 })
 asset.export("TexturesPath", TexturesPath)

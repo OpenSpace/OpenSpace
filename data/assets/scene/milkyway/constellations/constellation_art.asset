@@ -78,6 +78,60 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
 end
 
 
+local show_art = {
+  Identifier = "constellation_art.show_art",
+  Name = "Show Constellation Art",
+  Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0);" ..
+  "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Enabled', true);" ..
+  "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0.2, 2);", 
+  Documentation = "Enables and fades up constellation art work",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+asset.export("ShowArtAction", show_art)
+
+local hide_art = {
+  Identifier = "constellation_art.hide_art",
+  Name = "Hide Constellation Art",
+  Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0, 2);", 
+  Documentation = "Fades out constellation artwork",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+asset.export("HideArtAction", hide_art)
+
+local disable_art = {
+  Identifier = "constellation_art.disable_art",
+  Name = "Disable Constellation Art",
+  Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Enabled', false);", 
+  Documentation = "Disable constellation artwork",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+asset.export("DisableArtAction", disable_art)
+
+local show_zodiac_art = {
+  Identifier = "constellation_art.show_zodiac_art",
+  Name = "Show Zodiac Art",
+  Command = "openspace.setPropertyValue('Scene.ConstellationArt*.Renderable.Opacity', 0);" ..
+  "openspace.setPropertyValue('{zodiac}.Renderable.Enabled',true);" ..
+  "openspace.setPropertyValue('{zodiac}.Renderable.Opacity', 1, 2);",
+  Documentation = "Enables and fades up zodiac art work",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+asset.export("ShowZodiacArt", show_zodiac_art)
+
+local hide_zodiac_art = {
+  Identifier = "constellation_art.hide_zodiac_art",
+  Name = "Hide Zodiac Art",
+  Command =  "openspace.setPropertyValue('{zodiac}.Renderable.Opacity', 0, 2);",
+  Documentation = "fades down zodiac art work",
+  GuiPath = "/Rendering",
+  IsLocal = false
+}
+asset.export("HideZodiacArt", hide_zodiac_art)
+
 local nodes = {}
 
 asset.onInitialize(function ()
@@ -87,12 +141,20 @@ asset.onInitialize(function ()
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
   end
+
+  openspace.action.registerAction(show_art)
+  openspace.action.registerAction(hide_art)
+  openspace.action.registerAction(disable_art)
 end)
 
 asset.onDeinitialize(function ()
   for _, n in ipairs(nodes) do
     openspace.removeSceneGraphNode(n.Identifier);
   end
+
+  openspace.action.removeAction(show_art.Identifier)
+  openspace.action.removeAction(hide_art.Identifier)
+  openspace.action.removeAction(disable_art.Identifier)
 end)
 
 

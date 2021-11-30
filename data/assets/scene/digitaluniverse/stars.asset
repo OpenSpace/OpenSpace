@@ -1,13 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 
-local colorLUT = asset.require('./stars_colormap').BvColorLUT
-
-local textures = asset.syncedResource({
-  Name = "Stars Textures",
-  Type = "HttpSynchronization",
-  Identifier = "stars_textures",
-  Version = 1
-})
+local colormaps = asset.require('./stars_colormap').ColorMaps
+local textures = asset.require('./stars_textures').textures
 
 local speck = asset.syncedResource({
   Name = "Stars Speck Files",
@@ -30,10 +24,21 @@ local stars = {
     File = speck .. "/stars.speck",
     Texture = textures .. "/halo.png",
     --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colorLUT .. "/colorbv.cmap",
+    ColorMap = colormaps .. "/colorbv.cmap",
+    OtherDataColorMap = colormaps .. "/viridis.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based" -- or PSF
+    RenderMethod = "Texture Based", -- or PSF
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Name = "Stars",
@@ -55,15 +60,25 @@ local sunstar = {
     File = sunspeck .. "/sunstar.speck",
     Texture = textures .. "/halo.png",
     --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colorLUT .. "/colorbv.cmap",
+    ColorMap = colormaps .. "/colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based", -- or PSF
     FadeInDistances = { 0.0001, 0.1 },
-    RenderableType = "PostDeferredTransparent"
+    RenderableType = "PostDeferredTransparent",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed",
+    }
   },
   GUI = {
-    Name = "Sun",
+    Name = "Sun Star",
     Path = "/Milky Way/Stars",
     Description = [[Individual star to represent the sun when outside of the solar
       system]]

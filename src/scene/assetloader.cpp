@@ -265,7 +265,7 @@ bool AssetLoader::loadAsset(Asset* asset) {
         setCurrentAsset(parentAsset);
     };
 
-    if (!FileSys.fileExists(asset->assetFilePath())) {
+    if (!std::filesystem::is_regular_file(asset->assetFilePath())) {
         LERROR(fmt::format(
             "Could not load asset '{}': File does not exist", asset->assetFilePath())
         );
@@ -387,10 +387,10 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     PathType pathType = classifyPath(assetPath);
     std::string prefix;
     if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = baseDirectory + '/';
     }
     else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = _assetRootDirectory + '/';
     }
 
     // Construct the full path including the .asset extension
@@ -400,12 +400,12 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
     std::string fullAssetPath =
         (pathType == PathType::Tokenized) ?
-        absPath(assetPath) :
+        absPath(assetPath).string() :
         prefix + assetPath;
     if (!hasAssetSuffix) {
         fullAssetPath += assetSuffix;
     }
-    bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
+    bool fullAssetPathExists = std::filesystem::is_regular_file(absPath(fullAssetPath));
 
     // Construct the full path including the .scene extension
     const std::string sceneSuffix = std::string(".") + SceneFileSuffix;
@@ -416,7 +416,8 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         hasSceneSuffix ?
         prefix + assetPath :
         prefix + assetPath + sceneSuffix;
-    const bool fullScenePathExists = FileSys.fileExists(FileSys.absPath(fullScenePath));
+    const bool fullScenePathExists =
+        std::filesystem::is_regular_file(absPath(fullScenePath));
 
     if (fullAssetPathExists && fullScenePathExists) {
         LWARNING(fmt::format(
@@ -425,21 +426,21 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
             fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
         ));
 
-        return FileSys.absPath(fullAssetPath);
+        return absPath(fullAssetPath).string();
     }
 
     if (fullScenePathExists) {
-        return FileSys.absPath(fullScenePath);
+        return absPath(fullScenePath).string();
     }
 
     // We don't check whether the file exists here as the error will be more
     // comprehensively logged by Lua either way
-    return FileSys.absPath(fullAssetPath);
+    return absPath(fullAssetPath).string();
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory, name);
+    std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
@@ -452,7 +453,7 @@ std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
 
     std::shared_ptr<Asset> asset = std::make_shared<Asset>(
         this,
-       _synchronizationWatcher,
+        _synchronizationWatcher,
         path
     );
 
@@ -507,7 +508,7 @@ void AssetLoader::unrequest(const std::string& identifier) {
     assetUnrequested(parent, asset);
 }
 
-ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
+std::filesystem::path AssetLoader::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
     }
@@ -535,8 +536,8 @@ void AssetLoader::remove(const std::string& identifier) {
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, identifier);
+    std::filesystem::path directory = currentDirectory();
+    std::string path = generateAssetPath(directory.string(), identifier);
 
     const auto it = _trackedAssets.find(path);
     if (it == _trackedAssets.end()) {
@@ -641,8 +642,7 @@ int AssetLoader::localResourceLua(Asset* asset) {
         ghoul::lua::PopValue::Yes
     );
 
-    const std::string resolvedName =
-        asset->assetDirectory() + ghoul::filesystem::FileSystem::PathSeparator + name;
+    const std::string resolvedName = fmt::format("{}/{}", asset->assetDirectory(), name);
 
     lua_pushstring(*_luaState, resolvedName.c_str());
 
@@ -742,11 +742,11 @@ int AssetLoader::existsLua(Asset*) {
 
     const std::string assetName = luaL_checkstring(*_luaState, 1);
 
-    const ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory, assetName);
+    const std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), assetName);
 
     lua_settop(*_luaState, 0);
-    lua_pushboolean(*_luaState, FileSys.fileExists(path));
+    lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
     return 1;
 }

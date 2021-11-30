@@ -40,7 +40,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderableHabitableZone";
+    constexpr const char* _loggerCat = "RenderableHabitableZone";
 
     constexpr const std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
@@ -96,8 +96,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablehabitablezone";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablehabitablezone"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
@@ -135,6 +136,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     // The user should not be able to change this property. It's just used to communicate
     // the different rendering that happens outside of this interval
     addProperty(_kopparapuTeffInterval);
+    _kopparapuTeffInterval.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _kopparapuTeffInterval.setReadOnly(true);
 
     // Make parent's size related properties read only. We want to set them based on the

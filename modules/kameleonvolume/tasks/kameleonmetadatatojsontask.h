@@ -27,6 +27,7 @@
 
 #include <openspace/util/task.h>
 
+#include <filesystem>
 #include <string>
 
 namespace openspace::kameleonvolume {
@@ -41,8 +42,8 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inputPath;
-    std::string _outputPath;
+    std::filesystem::path _inputPath;
+    std::filesystem::path _outputPath;
 };
 
 } // namespace openspace::kameleonvolume

@@ -5,16 +5,12 @@ local modelFolder = asset.syncedResource({
   Name = "Pioneer 10/11 Models",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_11_model",
-  Version = 2
+  Version = 3
 })
 
 local ModelRenderable = {
   Type = "RenderableModel",
-  Geometry = {{
-    Type = "MultiModelGeometry",
-    GeometryFile = modelFolder .. "/Pioneer.obj",
-    ColorTexture = modelFolder .. "/gray.png"
-  }},
+  GeometryFile = modelFolder .. "/pioneer.fbx",
   LightSources = assetHelper.getDefaultLightSources(
     sunTransforms.SolarSystemBarycenter.Identifier
   )

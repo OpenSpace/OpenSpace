@@ -62,9 +62,9 @@ public:
 private:
     void load();
     void loadFromPath(const std::string& path);
-    void loadRaw(const std::string& path);
+    void loadRaw(const std::filesystem::path& path);
     void loadCdf(const std::string& path);
-    void storeRaw(const std::string& path);
+    void storeRaw(const std::filesystem::path& path);
 
     std::string cacheSuffix() const;
     void updateTextureFromVolume();

@@ -55,9 +55,7 @@ namespace {
 namespace openspace::planetgeometry {
 
 documentation::Documentation SimpleSphereGeometry::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_geometry_simplesphere";
-    return doc;
+    return codegen::doc<Parameters>("space_geometry_simplesphere");
 }
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)

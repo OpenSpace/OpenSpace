@@ -32,7 +32,6 @@
 #include <ghoul/io/texture/texturereaderdevil.h>
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/filesystem/file.h>
@@ -117,18 +116,21 @@ int main(int argc, char** argv) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::string configFile = configuration::findConfiguration();
+    std::filesystem::path configFile = configuration::findConfiguration();
 
     // Register the base path as the directory where the configuration file lives
-    std::string base = ghoul::filesystem::File(configFile).directoryName();
+    std::filesystem::path base = configFile.parent_path();
     constexpr const char* BasePathToken = "${BASE}";
     FileSys.registerPathToken(BasePathToken, base);
 
-    *global::configuration = configuration::loadConfigurationFromFile(configFile, "");
+    *global::configuration = configuration::loadConfigurationFromFile(
+        configFile.string(),
+        ""
+    );
     openspace::global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
 
@@ -160,7 +162,7 @@ int main(int argc, char** argv) {
     // If no task file was specified in as argument, run in CLI mode.
 
     LINFO(fmt::format("Task root: {}", absPath("${TASKS}")));
-    FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath("${TASKS}")));
+    std::filesystem::current_path(absPath("${TASKS}"));
 
     std::cout << "TASK > ";
     while (std::cin >> tasksPath) {

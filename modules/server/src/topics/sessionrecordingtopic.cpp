@@ -124,6 +124,9 @@ void SessionRecordingTopic::sendJsonData() {
             case SessionRecording::SessionState::Playback:
                 stateString = "playing";
                 break;
+            case SessionRecording::SessionState::PlaybackPaused:
+                stateString = "playing-paused";
+                break;
             default:
                 stateString = "idle";
                 break;

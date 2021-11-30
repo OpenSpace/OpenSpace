@@ -35,7 +35,7 @@ local PerseveranceNode = {
     Translation = {
       Type = "SpiceTranslation",
       Target = perseverance_id,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = m2020_kernels
     }
   },
@@ -54,16 +54,17 @@ local PerseveranceTrailSun = {
     Translation = { 
       Type = "SpiceTranslation",
       Target = perseverance_id,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = m2020_kernels
     },
     Color = { 0.2, 0.7, 0.1 },
     StartTime = startTime,
     EndTime = endTime,
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = false
   },
   GUI = {
-    Name = "Perseverance Trail",
+    Name = "Perseverance Trail (Sun)",
     Path = "/Solar System/Missions/Perseverance"
   }
 }
@@ -82,7 +83,8 @@ local PerseveranceTrailMars = {
     Color = { 0.7, 0.9, 0.6 },
     StartTime = approachMars,
     EndTime = endTime,
-    SampleInterval = 100
+    SampleInterval = 100,
+    Enabled = false
   },
   GUI = {
     Name = "Perseverance Trail (Mars)",

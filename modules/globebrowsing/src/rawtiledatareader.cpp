@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -187,7 +188,8 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     }
     const int sizeLevel0 = maxOverview->GetXSize();
     const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    return static_cast<int>(diff);
+    const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
+    return static_cast<int>(intdiff);
 }
 
 /**
@@ -450,7 +452,7 @@ void RawTileDataReader::initialize() {
     if (module.isWMSCachingEnabled()) {
         ZoneScopedN("WMS Caching")
         std::string c;
-        if (FileSys.fileExists(_datasetFilePath)) {
+        if (std::filesystem::is_regular_file(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
             // caching
             std::ifstream t(_datasetFilePath);
@@ -486,7 +488,7 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.wmsCacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).string().c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years

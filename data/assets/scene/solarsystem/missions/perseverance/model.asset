@@ -1,6 +1,6 @@
 --perseverance/model.asset
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local trail = asset.require('./trail')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 -- asset.require('./fov')
@@ -29,7 +29,7 @@ local models = asset.syncedResource({
 -- Perseverance Model --
 local Perseverance = {
   Identifier = "Perseverance",
-  Parent = transforms.MSL_Body.Identifier,
+  Parent = trail.PerseveranceNode.Identifier,
   GUI = {
     Name = "Perseverance",
     Path = "/Solar System/Missions/Perseverance"
@@ -56,7 +56,8 @@ local Body = {
     Body = "MARS SCIENCE LABORATORY",
     GeometryFile = models .. "/Perseverance.obj",
     LightSources = LightSources,
-    PerformShading = false
+    PerformShading = false,
+    RotationVector = {65.940000,201.389999,263.980011}
   },
   GUI = {
     Name = "Perseverance Model Body",

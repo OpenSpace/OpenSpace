@@ -12,7 +12,7 @@ local SaturnTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN BARYCENTER",
+      Target = "SATURN",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },
@@ -37,8 +37,8 @@ asset.meta = {
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"VenusTrailEarth"}
+  Identifiers = {"SaturnTrailEarth"}
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrailEarth })
+assetHelper.registerSceneGraphNodesAndExport(asset, { SaturnTrailEarth })

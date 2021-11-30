@@ -40,10 +40,11 @@ namespace {
     const Profile::Module Blank = { "", "", "" };
 } // namespace
 
-ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
+ModulesDialog::ModulesDialog(QWidget* parent,
+                             std::vector<openspace::Profile::Module>* modules)
     : QDialog(parent)
-    , _profile(profile)
-    , _data(_profile.modules())
+    , _modules(modules)
+    , _moduleData(*_modules)
 {
     setWindowTitle("Modules");
     createWidgets();
@@ -63,7 +64,7 @@ void ModulesDialog::createWidgets() {
         _list->setMovement(QListView::Free);
         _list->setResizeMode(QListView::Adjust);
 
-        for (const Profile::Module& m : _data) {
+        for (const Profile::Module& m : _moduleData) {
             _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
         }
         layout->addWidget(_list);
@@ -176,8 +177,8 @@ void ModulesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (!_data.empty()) {
-        const Profile::Module& m = _data[index];
+    if (!_moduleData.empty()) {
+        const Profile::Module& m = _moduleData[index];
         _moduleEdit->setText(QString::fromStdString(m.name));
         if (m.loadedInstruction.has_value()) {
             _loadedEdit->setText(QString::fromStdString(*m.loadedInstruction));
@@ -200,7 +201,7 @@ bool ModulesDialog::isLineEmpty(int index) const {
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if (!_data.empty() && !_data.at(0).name.empty()) {
+    if (!_moduleData.empty() && !_moduleData.at(0).name.empty()) {
         isEmpty = false;
     }
     return isEmpty;
@@ -213,13 +214,13 @@ void ModulesDialog::listItemAdded() {
         // Special case where list is "empty" but really has one line that is blank.
         // This is done because QListWidget does not seem to like having its sole
         // remaining item being removed.
-        _data.at(0) = Blank;
+        _moduleData.at(0) = Blank;
         _list->item(0)->setText("  (Enter details below & click 'Save')");
         _list->setCurrentRow(0);
         transitionToEditMode();
     }
     else {
-        _data.push_back(Blank);
+        _moduleData.push_back(Blank);
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
@@ -227,16 +228,18 @@ void ModulesDialog::listItemAdded() {
     }
 
     // Blank-out the 2 text fields, set combo box to index 0
-    _moduleEdit->setText(QString::fromStdString(_data.back().name));
-    if (_data.back().loadedInstruction.has_value()) {
-        _loadedEdit->setText(QString::fromStdString(*_data.back().loadedInstruction));
+    _moduleEdit->setText(QString::fromStdString(_moduleData.back().name));
+    if (_moduleData.back().loadedInstruction.has_value()) {
+        _loadedEdit->setText(QString::fromStdString(
+            *_moduleData.back().loadedInstruction
+        ));
     }
     else {
         _loadedEdit->clear();
     }
-    if (_data.back().notLoadedInstruction.has_value()) {
+    if (_moduleData.back().notLoadedInstruction.has_value()) {
         _notLoadedEdit->setText(
-            QString::fromStdString(*_data.back().notLoadedInstruction)
+            QString::fromStdString(*_moduleData.back().notLoadedInstruction)
         );
     }
     else {
@@ -255,11 +258,11 @@ void ModulesDialog::listItemSave() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if ( _data.size() > 0) {
-        _data[index].name = _moduleEdit->text().toStdString();
-        _data[index].loadedInstruction = _loadedEdit->text().toStdString();
-        _data[index].notLoadedInstruction = _notLoadedEdit->text().toStdString();
-        _list->item(index)->setText(createOneLineSummary(_data[index]));
+    if (_moduleData.size() > 0) {
+        _moduleData[index].name = _moduleEdit->text().toStdString();
+        _moduleData[index].loadedInstruction = _loadedEdit->text().toStdString();
+        _moduleData[index].notLoadedInstruction = _notLoadedEdit->text().toStdString();
+        _list->item(index)->setText(createOneLineSummary(_moduleData[index]));
     }
     transitionFromEditMode();
     _editModeNewItem = false;
@@ -267,7 +270,7 @@ void ModulesDialog::listItemSave() {
 
 void ModulesDialog::listItemCancelSave() {
     transitionFromEditMode();
-    if (_editModeNewItem && !_data.empty() && _data.back().name.empty()) {
+    if (_editModeNewItem && !_moduleData.empty() && _moduleData.back().name.empty()) {
         listItemRemove();
     }
     _editModeNewItem = false;
@@ -279,15 +282,15 @@ void ModulesDialog::listItemRemove() {
             if (_list->count() == 1) {
                 // Special case where last remaining item is being removed (QListWidget
                 // doesn't like the final item being removed so instead clear it)
-                _data.at(0) = Blank;
+                _moduleData.at(0) = Blank;
                 _list->item(0)->setText("");
             }
             else {
                 int index = _list->currentRow();
                 if (index >= 0 && index < _list->count()) {
                     delete _list->takeItem(index);
-                    if (!_data.empty()) {
-                        _data.erase(_data.begin() + index);
+                    if (!_moduleData.empty()) {
+                        _moduleData.erase(_moduleData.begin() + index);
                     }
                 }
             }
@@ -297,9 +300,6 @@ void ModulesDialog::listItemRemove() {
 }
 
 void ModulesDialog::transitionToEditMode() {
-    _list->setDisabled(true);
-    _buttonAdd->setDisabled(true);
-    _buttonRemove->setDisabled(true);
     _buttonSave->setDisabled(true);
     _buttonCancel->setDisabled(true);
     _buttonBox->setDisabled(true);
@@ -339,10 +339,10 @@ void ModulesDialog::editBoxDisabled(bool disabled) {
 
 void ModulesDialog::parseSelections() {
     // Handle case with only one remaining but empty line
-    if ((_data.size() == 1) && (_data.at(0).name.empty())) {
-        _data.clear();
+    if ((_moduleData.size() == 1) && (_moduleData.at(0).name.empty())) {
+        _moduleData.clear();
     }
-    _profile.setModules(_data);
+    *_modules = std::move(_moduleData);
     accept();
 }
 

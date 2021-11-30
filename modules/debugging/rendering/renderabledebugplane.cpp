@@ -100,9 +100,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDebugPlane::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "debugging_renderable_debugplane";
-    return doc;
+    return codegen::doc<Parameters>("debugging_renderable_debugplane");
 }
 
 RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
@@ -117,7 +115,7 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     _texture = p.texture.value_or(_texture);
     addProperty(_texture);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size.onChange([this](){ _planeIsDirty = true; });
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);

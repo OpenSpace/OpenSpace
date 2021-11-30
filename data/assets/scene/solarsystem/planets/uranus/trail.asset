@@ -10,8 +10,8 @@ local UranusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "URANUS BARYCENTER",
-      Observer = "SUN"
+      Target = "URANUS",
+      Observer = "SSB"
     },
     Color = { 0.60, 0.95, 1.00 },
     Period = 30588.740,

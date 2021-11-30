@@ -17,11 +17,11 @@ local object = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/stars-altlbl.label",
+    Unit = "pc",
     TextColor = { 0.4, 0.4, 0.4 },
     DrawLabels = true,
     TextSize = 14.7,
-    TextMinSize = 6.0,
-    Unit = "pc"
+    TextMinMaxSize = { 6, 20 }
   },
   GUI = {
     Name = "Stars Labels - Alternate",

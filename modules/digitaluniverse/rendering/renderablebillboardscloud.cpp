@@ -33,22 +33,23 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
-#include <fstream>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <locale>
 #include <optional>
 #include <string>
@@ -66,7 +67,6 @@ namespace {
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
     constexpr const int RenderOptionViewDirection = 0;
@@ -116,18 +116,11 @@ namespace {
         "The text size for the astronomical object labels."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
+        "TextMinMaxSize",
+        "Text Min/Max Size",
+        "The minimal and maximal size (in pixels) of the text for the labels for the "
+        "astronomical objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
@@ -178,48 +171,43 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
-        "Disable Fade-in effect",
+        "Disable Fade-in Effect",
         "Enables/Disables the Fade-in effect."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardMaxSizeInfo = {
-        "BillboardMaxSize",
-        "Billboard Max Size in Pixels",
-        "The max size (in pixels) for the billboard representing the astronomical "
-        "object."
+    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
+        "EnablePixelSizeControl",
+        "Enable Pixel Size Control",
+        "Enable pixel size control for rectangular projections. If set to true, the "
+        "billboard size is restricted by the min/max size in pixels property."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardMinSizeInfo = {
-        "BillboardMinSize",
-        "Billboard Min Size in Pixels",
-        "The min size (in pixels) for the billboard representing the astronomical "
-        "object."
+    constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
+        "BillboardMinMaxSize",
+        "Billboard Min/Max Size in Pixels",
+        "The minimum and maximum size (in pixels) for the billboard representing the "
+        "astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-    CorrectionSizeEndDistanceInfo = {
+        CorrectionSizeEndDistanceInfo =
+    {
         "CorrectionSizeEndDistance",
-        "Distance in 10^X meters where correction size stops acting.",
+        "Distance in 10^X meters where correction size stops acting",
         "Distance in 10^X meters where correction size stops acting."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
-        "Control variable for distance size.",
+        "Control variable for distance size",
         ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
-        "EnablePixelSizeControl",
-        "Enable pixel size control.",
-        "Enable pixel size control for rectangular projections."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
         "UseLinearFiltering",
         "Use Linear Filtering",
         "Determines whether the provided color map should be sampled nearest neighbor "
-        "(=off) or linearly (=on"
+        "(=off) or linearly (=on)"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
@@ -258,6 +246,8 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             GigalightYears [[codegen::key("Gly")]]
         };
+        // The unit used for all distances. Must match the unit of any
+        // distances/positions in the data files
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
@@ -289,11 +279,8 @@ namespace {
         // objects being rendered
         std::optional<std::string> labelFile;
 
-        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
-        std::optional<float> textMinSize;
-
-        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
-        std::optional<float> textMaxSize;
+        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -314,11 +301,8 @@ namespace {
         // [[codegen::verbatim(DisableFadeInInfo.description)]]
         std::optional<bool> disableFadeIn;
 
-        // [[codegen::verbatim(BillboardMaxSizeInfo.description)]]
-        std::optional<float> billboardMaxSize;
-
-        // [[codegen::verbatim(BillboardMinSizeInfo.description)]]
-        std::optional<float> billboardMinSize;
+        // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
+        std::optional<glm::vec2> billboardMinMaxSize;
 
         // [[codegen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
         std::optional<float> correctionSizeEndDistance;
@@ -338,9 +322,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableBillboardsCloud::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_RenderableBillboardsCloud";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_RenderableBillboardsCloud");
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
@@ -351,27 +333,34 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
-    , _textMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
+    , _textMinMaxSize(
+        LabelMinMaxSizeInfo,
+        glm::ivec2(8, 20),
+        glm::ivec2(0),
+        glm::ivec2(100)
+    )
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
-
     , _datavarSizeOption(
         SizeOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _fadeInDistance(
+    , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
     , _disableFadeInDistance(DisableFadeInInfo, true)
-    , _billboardMaxSize(BillboardMaxSizeInfo, 400.f, 0.f, 1000.f)
-    , _billboardMinSize(BillboardMinSizeInfo, 0.f, 0.f, 100.f)
+    , _billboardMinMaxSize(
+        BillboardMinMaxSizeInfo,
+        glm::vec2(0.f, 400.f),
+        glm::vec2(0.f),
+        glm::vec2(1000.f)
+    )
     , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
     , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
     , _useLinearFiltering(UseLinearFiltering, false)
@@ -381,7 +370,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.file.has_value()) {
-        _speckFile = absPath(*p.file);
+        _speckFile = absPath(*p.file).string();
     }
     _hasSpeckFile = p.file.has_value();
 
@@ -433,24 +422,23 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
     }
     else {
-        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
+        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units");
         _unit = Meter;
     }
 
     if (p.texture.has_value()) {
-        _spriteTexturePath = absPath(*p.texture);
+        _spriteTexturePath = absPath(*p.texture).string();
         _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
 
         // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
         // texture is given, but I think it's a bug
+        // @TODO (emmbr, 2021-05-24) This goes for several properties in this renderable
         addProperty(_spriteTexturePath);
-
     }
     _hasSpriteTexture = p.texture.has_value();
 
-
     if (p.colorMap.has_value()) {
-        _colorMapFile = absPath(*p.colorMap);
+        _colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
 
         if (p.colorOption.has_value()) {
@@ -517,7 +505,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -532,28 +520,28 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        _textMinSize = p.textMinSize.value_or(_textMinSize);
-        addProperty(_textMinSize);
-
-        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
-        addProperty(_textMaxSize);
+        _textMinMaxSize = p.textMinMaxSize.value_or(_textMinMaxSize);
+        _textMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_textMinMaxSize);
     }
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     if (p.fadeInDistances.has_value()) {
-        _fadeInDistance = *p.fadeInDistances;
-        addProperty(_fadeInDistance);
+        _fadeInDistances = *p.fadeInDistances;
+        _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_fadeInDistances);
 
         _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
 
-    _billboardMaxSize = p.billboardMaxSize.value_or(_billboardMaxSize);
-    addProperty(_billboardMaxSize);
+    _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
+    addProperty(_pixelSizeControl);
 
-    _billboardMinSize = p.billboardMinSize.value_or(_billboardMinSize);
-    addProperty(_billboardMinSize);
+    _billboardMinMaxSize = p.billboardMinMaxSize.value_or(_billboardMinMaxSize);
+    _billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(_billboardMinMaxSize);
 
     _correctionSizeEndDistance =
         p.correctionSizeEndDistance.value_or(_correctionSizeEndDistance);
@@ -564,21 +552,16 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_correctionSizeFactor);
     }
 
-    _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
-    if (p.enablePixelSizeControl.has_value()) {
-        addProperty(_pixelSizeControl);
-    }
-
     _setRangeFromData.onChange([this]() {
         const int colorMapInUse =
-            _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+            _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
         float minValue = std::numeric_limits<float>::max();
-        float maxValue = std::numeric_limits<float>::min();
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-            float colorIdx = _fullData[i + 3 + colorMapInUse];
-            maxValue = colorIdx >= maxValue ? colorIdx : maxValue;
-            minValue = colorIdx < minValue ? colorIdx : minValue;
+        float maxValue = -std::numeric_limits<float>::max();
+        for (const speck::Dataset::Entry& e : _dataset.entries) {
+            float color = e.data[colorMapInUse];
+            minValue = std::min(minValue, color);
+            maxValue = std::max(maxValue, color);
         }
 
         _optionColorRangeData = glm::vec2(minValue, maxValue);
@@ -591,15 +574,25 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return ((_program != nullptr) && (!_fullData.empty())) || (!_labelData.empty());
+    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
 }
 
 void RenderableBillboardsCloud::initialize() {
     ZoneScoped
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+    if (_hasSpeckFile) {
+        _dataset = speck::data::loadFileWithCache(_speckFile);
+    }
+
+    if (_hasColorMapFile) {
+        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
+    }
+
+    if (!_labelFile.empty()) {
+        _labelset = speck::label::loadFileWithCache(_labelFile);
+        for (speck::Labelset::Entry& e : _labelset.entries) {
+            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
+        }
     }
 
     if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
@@ -645,7 +638,7 @@ void RenderableBillboardsCloud::initializeGL() {
     }
 
     if (_hasLabel) {
-        if (_font == nullptr) {
+        if (!_font) {
             size_t _fontSize = 50;
             _font = global::fontManager->font(
                 "Mono",
@@ -714,8 +707,11 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
         )
     );
-    _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
-    _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
+
+    const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
+    const float maxBillboardSize = _billboardMinMaxSize.value().y; // in pixels
+    _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
+    _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
     _program->setUniform(_uniformCache.color, _pointColor);
     _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
@@ -749,11 +745,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
     glBindVertexArray(_vao);
-    const GLsizei nAstronomicalObjects = static_cast<GLsizei>(
-        _fullData.size() / _nValuesPerAstronomicalObject
-    );
-    glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
-
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -767,16 +759,13 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
                                              const glm::dvec3& orthoUp,
                                              float fadeInVariable)
 {
-    glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor),
-        _textOpacity * fadeInVariable
-    );
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinMaxSize.value().x;
+    labelInfo.maxSize = _textMinMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -785,14 +774,13 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
-        glm::vec3 scaledPos(pair.first);
+    for (const speck::Labelset::Entry& e : _labelset.entries) {
+        glm::vec3 scaledPos(e.position);
         scaledPos *= unitToMeter(_unit);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
-            pair.second,
+            e.text,
             textColor,
             labelInfo
         );
@@ -800,14 +788,16 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
-    float fadeInVariable = 1.f;
+    float fadeInVar = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit));
+        const glm::vec2 fadeRange = _fadeInDistances;
+        const float a = static_cast<float>(
+            1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit))
+        );
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = a * distCamera + b;
-        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
+        fadeInVar *= funcValue > 1.f ? 1.f : funcValue;
 
         if (funcValue < 0.01f) {
             return;
@@ -840,23 +830,11 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
     if (_hasSpeckFile && _drawElements) {
-        renderBillboards(
-            data,
-            modelMatrix,
-            orthoRight,
-            orthoUp,
-            fadeInVariable
-        );
+        renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
     if (_drawLabels && _hasLabel) {
-        renderLabels(
-            data,
-            modelViewProjectionMatrix,
-            orthoRight,
-            orthoUp,
-            fadeInVariable
-        );
+        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, fadeInVar);
     }
 }
 
@@ -868,9 +846,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         TracyGpuZone("Data dirty")
         LDEBUG("Regenerating data");
 
-        createDataSlice();
+        std::vector<float> slice = createDataSlice();
 
-        int size = static_cast<int>(_slicedData.size());
+        int size = static_cast<int>(slice.size());
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
@@ -883,12 +861,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            size * sizeof(float),
-            &_slicedData[0],
-            GL_STATIC_DRAW
-        );
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
         GLint positionAttrib = _program->attributeLocation("in_position");
 
         if (_hasColorMapFile && _hasDatavarSize) {
@@ -898,7 +871,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
+                9 * sizeof(float),
                 nullptr
             );
 
@@ -909,8 +882,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                9 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
 
             GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
@@ -920,8 +893,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 1,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
-                reinterpret_cast<void*>(sizeof(float) * 8)
+                9 * sizeof(float),
+                reinterpret_cast<void*>(8 * sizeof(float))
             );
         }
         else if (_hasColorMapFile) {
@@ -931,7 +904,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
+                8 * sizeof(float),
                 nullptr
             );
 
@@ -942,8 +915,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                8 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
         }
         else if (_hasDatavarSize) {
@@ -953,7 +926,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
+                8 * sizeof(float),
                 nullptr
             );
 
@@ -964,8 +937,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 1,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 5,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                5 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
         }
         else {
@@ -997,9 +970,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _spriteTexture = DigitalUniverseModule::TextureManager.request(
             std::to_string(hash),
             [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-                LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
+                LINFO(fmt::format("Loaded texture from {}", absPath(path)));
                 std::unique_ptr<ghoul::opengl::Texture> t =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 t->purgeFromRAM();
@@ -1012,434 +985,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 }
 
-bool RenderableBillboardsCloud::loadData() {
-    bool success = true;
-
-    success &= loadSpeckData();
-
-    if (_hasColorMapFile) {
-        if (!_hasSpeckFile) {
-            success = true;
-        }
-        success &= readColorMapFile();
-    }
-
-    success &= loadLabelData();
-
-    return success;
-}
-
-bool RenderableBillboardsCloud::loadSpeckData() {
-    if (!_hasSpeckFile) {
-        return true;
-    }
-    bool success = true;
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_speckFile),
-        "RenderableDUMeshes|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Speck file '{}'",
-            cachedFile, _speckFile
-        ));
-
-        success = loadCachedFile(cachedFile);
-        if (success) {
-            return true;
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(_speckFile);
-            // Intentional fall-through to the 'else' to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
-    }
-    LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
-    success = readSpeckFile();
-    if (!success) {
-        return false;
-    }
-
-    success &= saveCachedFile(cachedFile);
-    return success;
-}
-
-bool RenderableBillboardsCloud::loadLabelData() {
-    if (_labelFile.empty()) {
-        return true;
-    }
-    bool success = true;
-    // I disabled the cache as it didn't work on Mac --- abock
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_labelFile),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    if (!_hasSpeckFile && !_hasColorMapFile) {
-        success = true;
-    }
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Label file '{}'",
-            cachedFile, _labelFile
-        ));
-
-        success &= loadCachedFile(cachedFile);
-        if (!success) {
-            FileSys.cacheManager()->removeCacheFile(_labelFile);
-            // Intentional fall-through to the 'else' to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Label file '{}' not found", _labelFile));
-        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
-
-        success &= readLabelFile();
-        if (!success) {
-            return false;
-        }
-    }
-
-    return success;
-}
-
-bool RenderableBillboardsCloud::readSpeckFile() {
-    std::ifstream file(_speckFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
-        return false;
-    }
-
-    _nValuesPerAstronomicalObject = 0;
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 7) != "datavar" &&
-            line.substr(0, 10) != "texturevar" &&
-            line.substr(0, 7) != "texture" &&
-            line.substr(0, 10) != "polyorivar" &&
-            line.substr(0, 10) != "maxcomment")
-        {
-            // Started reading data
-            break;
-        }
-
-        if (line.substr(0, 7) == "datavar") {
-            // datavar lines are structured as follows:
-            // datavar # description
-            // where # is the index of the data variable; so if we repeatedly overwrite
-            // the 'nValues' variable with the latest index, we will end up with the total
-            // number of values (+3 since X Y Z are not counted in the Speck file index)
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy; // command
-            str >> _nValuesPerAstronomicalObject; // variable index
-            dummy.clear();
-            str >> dummy; // variable name
-
-            _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject });
-
-            // We want the number, but the index is 0 based
-            _nValuesPerAstronomicalObject += 1;
-        }
-    }
-
-    _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
-
-
-
-    do {
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty()) {
-            std::getline(file, line);
-            continue;
-        }
-        else if (line[0] == '#') {
-            std::getline(file, line);
-            continue;
-        }
-
-        std::stringstream str(line);
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-            str >> values[i];
-        }
-
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
-
-        // reads new line
-        std::getline(file, line);
-    } while (!file.eof());
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::readColorMapFile() {
-    std::string _file = _colorMapFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Color Map file '{}'", _file));
-        return false;
-    }
-
-    std::size_t numberOfColors = 0;
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        // std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
-
-        // Initial number of colors
-        std::locale loc;
-        if (std::isdigit(line[0], loc)) {
-            std::string::size_type sz;
-            numberOfColors = std::stoi(line, &sz);
-            break;
-        }
-        else if (file.eof()) {
-            return false;
-        }
-    }
-
-    for (size_t i = 0; i < numberOfColors; ++i) {
-        std::getline(file, line);
-        std::stringstream str(line);
-
-        glm::vec4 color;
-        // Each color in the colormap must be defined as (R,G,B,A)
-        for (int j = 0; j < 4; ++j) {
-            str >> color[j];
-        }
-
-        _colorMapData.push_back(color);
-    }
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::readLabelFile() {
-    std::string _file = _labelFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Label file '{}'", _file));
-        return false;
-    }
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 9) != "textcolor") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            continue;
-        }
-
-        if (line.substr(0, 9) == "textcolor") {
-            // textcolor lines are structured as follows:
-            // textcolor # description
-            // where # is color text defined in configuration file
-            std::stringstream str(line);
-
-            // TODO: handle cases of labels with different colors
-            break;
-        }
-    }
-
-
-    do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty()) {
-            continue;
-        }
-
-        std::stringstream str(line);
-
-        glm::vec3 position = glm::vec3(0.f);
-        for (int j = 0; j < 3; ++j) {
-            str >> position[j];
-        }
-
-        std::string dummy;
-        str >> dummy; // text keyword
-
-        std::string label;
-        str >> label;
-        dummy.clear();
-
-        while (str >> dummy) {
-            if (dummy == "#") {
-                break;
-            }
-
-            label += " " + dummy;
-            dummy.clear();
-        }
-
-        glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(position, 1.0)
-        );
-        _labelData.emplace_back(std::make_pair(transformedPos, label));
-    } while (!file.eof());
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
-    }
-    int8_t version = 0;
-    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-    if (version != CurrentCacheVersion) {
-        LINFO("The format of the cached file has changed: deleting old cache");
-        fileStream.close();
-        FileSys.deleteFile(file);
-        return false;
-    }
-
-    int32_t nValues = 0;
-    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-    fileStream.read(
-        reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    _fullData.resize(nValues);
-    fileStream.read(
-        reinterpret_cast<char*>(&_fullData[0]),
-        nValues * sizeof(_fullData[0])
-    );
-
-    if (_hasColorMapFile) {
-        int32_t nItems = 0;
-        fileStream.read(reinterpret_cast<char*>(&nItems), sizeof(int32_t));
-
-        for (int i = 0; i < nItems; ++i) {
-            int32_t keySize = 0;
-            fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
-            std::vector<char> buffer(keySize);
-            fileStream.read(buffer.data(), keySize);
-
-            std::string key(buffer.begin(), buffer.end());
-            int32_t value = 0;
-            fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
-
-            _variableDataPositionMap.insert({ key, value });
-        }
-    }
-
-    bool success = fileStream.good();
-    return success;
-}
-
-bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return false;
-    }
-    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
-
-    int32_t nValues = static_cast<int32_t>(_fullData.size());
-    if (nValues == 0) {
-        LERROR("Error writing cache: No values were loaded");
-        return false;
-    }
-    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-    int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-        _nValuesPerAstronomicalObject
-    );
-    fileStream.write(
-        reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-    if (_hasColorMapFile) {
-        int32_t nItems = static_cast<int32_t>(_variableDataPositionMap.size());
-        fileStream.write(reinterpret_cast<const char*>(&nItems), sizeof(int32_t));
-
-        for (const std::pair<const std::string, int>& pair : _variableDataPositionMap) {
-            int32_t keySize = static_cast<int32_t>(pair.first.size());
-            fileStream.write(reinterpret_cast<const char*>(&keySize), sizeof(int32_t));
-            fileStream.write(pair.first.data(), keySize);
-            int32_t value = static_cast<int32_t>(pair.second);
-            fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
-        }
-    }
-
-    return fileStream.good();
-}
-
 double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
-    switch (_unit) {
+    // @TODO (abock, 2021-05-10)  This should be moved to a centralized conversion code
+    switch (unit) {
         case Meter:          return 1.0;
         case Kilometer:      return 1e3;
         case Parsec:         return PARSEC;
@@ -1451,76 +999,63 @@ double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
     }
 }
 
-void RenderableBillboardsCloud::createDataSlice() {
+std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
-    _slicedData.clear();
-
-    if (_fullData.empty() || _nValuesPerAstronomicalObject == 0) {
-        return;
+    if (_dataset.entries.empty()) {
+        return std::vector<float>();
     }
 
+    std::vector<float> result;
     if (_hasColorMapFile) {
-        _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
+        result.reserve(8 * _dataset.entries.size());
     }
     else {
-        _slicedData.reserve(4 * (_fullData.size() / _nValuesPerAstronomicalObject));
+        result.reserve(4 * _dataset.entries.size());
     }
 
     // what datavar in use for the index color
-    int colorMapInUse =
-        _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+    int colorMapInUse = _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
     // what datavar in use for the size scaling (if present)
-    int sizeScalingInUse = _hasDatavarSize ?
-        _variableDataPositionMap[_datavarSizeOptionString] : -1;
-
-    auto addDatavarSizeScalling = [&](size_t i, int datavarInUse) {
-        _slicedData.push_back(_fullData[i + 3 + datavarInUse]);
-    };
-
-    auto addPosition = [&](const glm::vec4& pos) {
-        for (int j = 0; j < 4; ++j) {
-            _slicedData.push_back(pos[j]);
-        }
-    };
+    int sizeScalingInUse =
+        _hasDatavarSize ? _dataset.index(_datavarSizeOptionString) : -1;
 
     float minColorIdx = std::numeric_limits<float>::max();
-    float maxColorIdx = std::numeric_limits<float>::min();
-
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-        float colorIdx = _fullData[i + 3 + colorMapInUse];
-        maxColorIdx = colorIdx >= maxColorIdx ? colorIdx : maxColorIdx;
-        minColorIdx = colorIdx < minColorIdx ? colorIdx : minColorIdx;
+    float maxColorIdx = -std::numeric_limits<float>::max();
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
+        if (e.data.size() > 0) {
+            float color = e.data[colorMapInUse];
+            minColorIdx = std::min(color, minColorIdx);
+            maxColorIdx = std::max(color, maxColorIdx);
+        } else {
+            minColorIdx = 0;
+            maxColorIdx = 0;
+        }
     }
 
     double maxRadius = 0.0;
 
     float biggestCoord = -1.f;
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
-            _fullData[i + 0],
-            _fullData[i + 1],
-            _fullData[i + 2],
-            1.0
+            e.position, 1.0
         ));
         glm::vec4 position(transformedPos, static_cast<float>(_unit));
 
         const double unitMeter = unitToMeter(_unit);
         glm::dvec3 p = glm::dvec3(position) * unitMeter;
         const double r = glm::length(p);
-        if (r > maxRadius) {
-            maxRadius = r;
-        }
+        maxRadius = std::max(maxRadius, r);
 
         if (_hasColorMapFile) {
             for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(position[j]);
-                biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
+                result.push_back(position[j]);
             }
+            biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            float variableColor = _fullData[i + 3 + colorMapInUse];
+            float variableColor = e.data[colorMapInUse];
 
             float cmax, cmin;
             if (_colorRangeData.empty()) {
@@ -1536,39 +1071,37 @@ void RenderableBillboardsCloud::createDataSlice() {
             if (_isColorMapExact) {
                 int colorIndex = variableColor + cmin;
                 for (int j = 0; j < 4; ++j) {
-                    _slicedData.push_back(_colorMapData[colorIndex][j]);
+                    result.push_back(_colorMap.entries[colorIndex][j]);
                 }
             }
             else {
                 if (_useLinearFiltering) {
-                    const float value = variableColor;
-
-                    float valueT = (value - cmin) / (cmax - cmin); // in [0, 1)
+                    float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
                     valueT = std::clamp(valueT, 0.f, 1.f);
 
-                    const float idx = valueT * (_colorMapData.size() - 1);
+                    const float idx = valueT * (_colorMap.entries.size() - 1);
                     const int floorIdx = static_cast<int>(std::floor(idx));
                     const int ceilIdx = static_cast<int>(std::ceil(idx));
 
-                    const glm::vec4 floorColor = _colorMapData[floorIdx];
-                    const glm::vec4 ceilColor = _colorMapData[ceilIdx];
+                    const glm::vec4 floorColor = _colorMap.entries[floorIdx];
+                    const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
 
                     if (floorColor != ceilColor) {
                         const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
-                        _slicedData.push_back(c.r);
-                        _slicedData.push_back(c.g);
-                        _slicedData.push_back(c.b);
-                        _slicedData.push_back(c.a);
+                        result.push_back(c.r);
+                        result.push_back(c.g);
+                        result.push_back(c.b);
+                        result.push_back(c.a);
                     }
                     else {
-                        _slicedData.push_back(floorColor.r);
-                        _slicedData.push_back(floorColor.g);
-                        _slicedData.push_back(floorColor.b);
-                        _slicedData.push_back(floorColor.a);
+                        result.push_back(floorColor.r);
+                        result.push_back(floorColor.g);
+                        result.push_back(floorColor.b);
+                        result.push_back(floorColor.a);
                     }
                 }
                 else {
-                    float ncmap = static_cast<float>(_colorMapData.size());
+                    float ncmap = static_cast<float>(_colorMap.entries.size());
                     float normalization = ((cmax != cmin) && (ncmap > 2)) ?
                         (ncmap - 2) / (cmax - cmin) : 0;
                     int colorIndex = (variableColor - cmin) * normalization + 1;
@@ -1576,25 +1109,30 @@ void RenderableBillboardsCloud::createDataSlice() {
                     colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
 
                     for (int j = 0; j < 4; ++j) {
-                        _slicedData.push_back(_colorMapData[colorIndex][j]);
+                        result.push_back(_colorMap.entries[colorIndex][j]);
                     }
                 }
             }
 
             if (_hasDatavarSize) {
-                addDatavarSizeScalling(i, sizeScalingInUse);
+                result.push_back(e.data[sizeScalingInUse]);
             }
         }
         else if (_hasDatavarSize) {
-            addDatavarSizeScalling(i, sizeScalingInUse);
-            addPosition(position);
+            result.push_back(e.data[sizeScalingInUse]);
+            for (int j = 0; j < 4; ++j) {
+                result.push_back(position[j]);
+            }
         }
         else {
-            addPosition(position);
+            for (int j = 0; j < 4; ++j) {
+                result.push_back(position[j]);
+            }
         }
     }
     setBoundingSphere(maxRadius);
-    _fadeInDistance.setMaxValue(glm::vec2(10.f * biggestCoord));
+    _fadeInDistances.setMaxValue(glm::vec2(10.f * biggestCoord));
+    return result;
 }
 
 void RenderableBillboardsCloud::createPolygonTexture() {
@@ -1654,20 +1192,13 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     glBindVertexArray(_polygonVao);
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
-    const GLfloat vertex_data[] = {
+    constexpr const std::array<GLfloat, 4> VertexData = {
         //      x      y     z     w
         0.f, 0.f, 0.f, 1.f,
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -1682,8 +1213,8 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    static const float black[] = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, black);
+    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);
     program->setUniform("polygonColor", _pointColor);

@@ -28,8 +28,8 @@ namespace openspace::assetloader {
  * Adds a Lua function to be called upon asset initialization
  * Usage: void asset.onInitialize(function<void()> initFun)
  */
-int onInitialize(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int onInitialize(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->onInitializeLua(asset);
 }
 
@@ -37,36 +37,28 @@ int onInitialize(lua_State* state) {
  * Adds a Lua function to be called upon asset deinitialization
  * Usage: void asset.onDeinitialize(function<void()> initFun)
  */
-int onDeinitialize(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int onDeinitialize(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->onDeinitializeLua(asset);
 }
 
 /**
-* Adds a Lua function to be called when a dependency link is initialized
-* Usage: void asset.onInitialize(function<void()> initFun)
-*/
-int onInitializeDependency(lua_State* state) {
-    Asset* dependant = reinterpret_cast<Asset*>(
-        lua_touserdata(state, lua_upvalueindex(1))
-    );
-    Asset* dependency = reinterpret_cast<Asset*>(
-        lua_touserdata(state, lua_upvalueindex(2))
-    );
+ * Adds a Lua function to be called when a dependency link is initialized
+ * Usage: void asset.onInitialize(function<void()> initFun)
+ */
+int onInitializeDependency(lua_State* L) {
+    Asset* dependant = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
+    Asset* dependency = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(2)));
     return dependant->loader()->onInitializeDependencyLua(dependant, dependency);
 }
 
 /**
-* Adds a Lua function to be called upon asset deinitialization
-* Usage: void asset.onDeinitialize(function<void()> initFun)
-*/
-int onDeinitializeDependency(lua_State* state) {
-    Asset* dependant = reinterpret_cast<Asset*>(
-        lua_touserdata(state, lua_upvalueindex(1))
-    );
-    Asset* dependency = reinterpret_cast<Asset*>(
-        lua_touserdata(state, lua_upvalueindex(2))
-    );
+ * Adds a Lua function to be called upon asset deinitialization
+ * Usage: void asset.onDeinitialize(function<void()> initFun)
+ */
+int onDeinitializeDependency(lua_State* L) {
+    Asset* dependant = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
+    Asset* dependency = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(2)));
     return dependant->loader()->onDeinitializeDependencyLua(dependant, dependency);
 }
 
@@ -77,28 +69,28 @@ int onDeinitializeDependency(lua_State* state) {
  *   Dependency: ...
  * Usage: {AssetTable, Dependency} = asset.import(string assetIdentifier)
  */
-int require(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int require(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->requireLua(asset);
 }
 
-int exists(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int exists(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->existsLua(asset);
 }
 
-int localResource(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int localResource(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->localResourceLua(asset);
 }
 
-int syncedResource(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int syncedResource(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->syncedResourceLua(asset);
 }
 
-int exportAsset(lua_State* state) {
-    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(state, lua_upvalueindex(1)));
+int exportAsset(lua_State* L) {
+    Asset* asset = reinterpret_cast<Asset*>(lua_touserdata(L, lua_upvalueindex(1)));
     return asset->loader()->exportAssetLua(asset);
 }
 

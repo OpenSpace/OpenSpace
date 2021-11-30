@@ -162,16 +162,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_sphere";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_sphere");
 }
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _size(SizeInfo, 1.f, 0.f, 1e35f)
+    , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
@@ -215,7 +213,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     addProperty(_orientation);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;
@@ -400,24 +398,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
-                                    RenderEngine::RendererImplementation::Framebuffer;
-
-    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
-                                RenderEngine::RendererImplementation::ABuffer;
-
-    if (usingABufferRenderer && _useAdditiveBlending) {
-        _shader->setUniform("additiveBlending", true);
-    }
-
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -454,7 +442,7 @@ void RenderableSphere::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

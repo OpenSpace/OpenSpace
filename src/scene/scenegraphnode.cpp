@@ -111,6 +111,20 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ApproachFactorInfo = {
+        "ApproachFactor",
+        "Approach Factor",
+        "This value is a multiplication factor for the interaction sphere that "
+        "determines when the camera is 'approaching' the scene graph node"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ReachFactorInfo = {
+        "ReachFactor",
+        "Reach Factor",
+        "This value is a multiplication factor for the interaction sphere that "
+        "determines when the camera has 'reached' the scene graph node"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
@@ -174,13 +188,10 @@ namespace {
         // children
         std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
 
-        // A hard-coded bounding sphere to be used for the cases where the Renderable is
-        // not able to provide a reasonable bounding sphere or the calculated bounding
-        // sphere needs to be overwritten for some reason
+        // [[codegen::verbatim(BoundingSphereInfo.description)]]
         std::optional<double> boundingSphere;
 
-        // A hard-coded radius for limiting the interaction radius, meaning the minimal
-        // distance that the camera can approach this scene graph node
+        // [[codegen::verbatim(InteractionSphereInfo.description)]]
         std::optional<double> interactionSphere;
 
         struct Transform {
@@ -208,6 +219,36 @@ namespace {
         // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
         std::optional<Transform> transform;
 
+        // This value is a multiplication factor for the interaction sphere that
+        // determines when the camera is 'approaching' the scene graph node. If this value
+        // is not specified, a default value of 5 is used instead. This value must be
+        // larger than the reachFactor or unexpected things might happen
+        std::optional<double> approachFactor [[codegen::greaterequal(0.0)]];
+
+        // This value is a multiplication factor for the interaction sphere that
+        // determines when the camera has 'reached' the scene graph node. If this value is
+        // not specified, a default value of 1.25 is used instead. This value must be
+        // smaller than the approachFactor or unexpected things might happen
+        std::optional<double> reachFactor [[codegen::greaterequal(0.0)]];
+
+        // One or multiple actions that are executed whenever the camera is focused on
+        // this scene graph node and if it enters the interaction sphere of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onApproach;
+
+        // One or multiple actions that are executed whenever the camera is focused on
+        // this scene graph node and if it transitions from the approach distance to the
+        // reach distance of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onReach;
+
+        // One or multiple actions that are executed whenever the camera is focused on
+        // this scene graph node and if it transitions from the reach distance to the
+        // approach distance of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onRecede;
+
+        // One or multiple actions that are executed whenever the camera is focused on
+        // this scene graph node and if it exits the interaction sphere of the node
+        std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
+
         // Specifies the time frame for when this node should be active
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
@@ -229,7 +270,7 @@ namespace {
             // A user-facing description about this scene graph node
             std::optional<std::string> description;
 
-            // If this value is specified, GUI applications are incouraged to ignore this 
+            // If this value is specified, GUI applications are incouraged to ignore this
             // scenegraph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
@@ -287,6 +328,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     result->_overrideBoundingSphere = p.boundingSphere;
     result->_overrideInteractionSphere = p.interactionSphere;
+    result->_approachFactor = p.approachFactor.value_or(result->_approachFactor);
+    result->_reachFactor = p.reachFactor.value_or(result->_reachFactor);
 
     if (p.transform.has_value()) {
         if (p.transform->translation.has_value()) {
@@ -306,7 +349,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.translation.get());
         }
 
         if (p.transform->rotation.has_value()) {
@@ -326,7 +368,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.rotation.get());
         }
 
         if (p.transform->scale.has_value()) {
@@ -344,9 +385,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.scale.get());
         }
     }
+    result->addPropertySubOwner(result->_transform.translation.get());
+    result->addPropertySubOwner(result->_transform.rotation.get());
+    result->addPropertySubOwner(result->_transform.scale.get());
+
 
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
@@ -377,6 +421,43 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ));
     }
 
+    // Extracting the actions from the dictionary
+    if (p.onApproach.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onApproach)) {
+            result->_onApproachAction = { std::get<std::string>(*p.onApproach) };
+        }
+        else {
+            result->_onApproachAction = std::get<std::vector<std::string>>(*p.onApproach);
+        }
+    }
+
+    if (p.onReach.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onReach)) {
+            result->_onReachAction = { std::get<std::string>(*p.onReach) };
+        }
+        else {
+            result->_onReachAction = std::get<std::vector<std::string>>(*p.onReach);
+        }
+    }
+
+    if (p.onRecede.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onRecede)) {
+            result->_onRecedeAction = { std::get<std::string>(*p.onRecede) };
+        }
+        else {
+            result->_onRecedeAction = std::get<std::vector<std::string>>(*p.onRecede);
+        }
+    }
+
+    if (p.onExit.has_value()) {
+        if (std::holds_alternative<std::string>(*p.onExit)) {
+            result->_onExitAction = { std::get<std::string>(*p.onExit) };
+        }
+        else {
+            result->_onExitAction = std::get<std::vector<std::string>>(*p.onExit);
+        }
+    }
+
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
             result->addTag(std::get<std::string>(*p.tag));
@@ -400,9 +481,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 }
 
 documentation::Documentation SceneGraphNode::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_scene_node";
-    return doc;
+    return codegen::doc<Parameters>("core_scene_node");
 }
 
 ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
@@ -425,7 +504,9 @@ SceneGraphNode::SceneGraphNode()
         )
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
-    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
+    , _approachFactor(ApproachFactorInfo, 5.0)
+    , _reachFactor(ReachFactorInfo, 1.25)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
@@ -448,6 +529,9 @@ SceneGraphNode::SceneGraphNode()
             _overrideBoundingSphere = std::nullopt;
         }
     });
+    // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
+    // negative values
+    //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
@@ -456,8 +540,13 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideInteractionSphere = std::nullopt;
         }
-        });
+    });
+    // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
+    // negative values
+    //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
+    addProperty(_reachFactor);
+    addProperty(_approachFactor);
     addProperty(_showDebugSphere);
 }
 
@@ -1061,6 +1150,22 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
+const std::vector<std::string>& SceneGraphNode::onApproachAction() const {
+    return _onApproachAction;
+}
+
+const std::vector<std::string>& SceneGraphNode::onReachAction() const {
+    return _onReachAction;
+}
+
+const std::vector<std::string>& SceneGraphNode::onRecedeAction() const {
+    return _onRecedeAction;
+}
+
+const std::vector<std::string>& SceneGraphNode::onExitAction() const {
+    return _onExitAction;
+}
+
 double SceneGraphNode::boundingSphere() const {
     if (_overrideBoundingSphere.has_value()) {
         return glm::compMax(scale() * *_overrideBoundingSphere);
@@ -1085,6 +1190,14 @@ double SceneGraphNode::interactionSphere() const {
     else {
         return 0.0;
     }
+}
+
+double SceneGraphNode::reachFactor() const {
+    return _reachFactor;
+}
+
+double SceneGraphNode::approachFactor() const {
+    return _approachFactor;
 }
 
 const Renderable* SceneGraphNode::renderable() const {

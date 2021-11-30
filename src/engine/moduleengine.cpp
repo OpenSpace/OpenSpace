@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -170,7 +171,6 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
             {
                 "isLoaded",
                 &luascriptfunctions::isLoaded,
-                {},
                 "string",
                 "Checks whether a specific module is loaded"
             }

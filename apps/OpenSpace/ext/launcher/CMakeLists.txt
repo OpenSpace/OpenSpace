@@ -27,13 +27,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 set(HEADER_FILES
   include/filesystemaccess.h
   include/launcherwindow.h
+  include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
   include/profile/assettreeitem.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
-  include/profile/keybindingsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
@@ -47,13 +47,13 @@ set(HEADER_FILES
 set(SOURCE_FILES
   src/launcherwindow.cpp
   src/filesystemaccess.cpp
+  src/profile/actiondialog.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
   src/profile/assettreeitem.cpp
   src/profile/assettreemodel.cpp
   src/profile/cameradialog.cpp
   src/profile/deltatimesdialog.cpp
-  src/profile/keybindingsdialog.cpp
   src/profile/scriptlogdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
@@ -64,18 +64,14 @@ set(SOURCE_FILES
   src/profile/propertiesdialog.cpp
 )
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
-set(MOC_FILES "")
-qt5_wrap_cpp(
-  MOC_FILES
+set(HEADER_SOURCE
   include/launcherwindow.h
+  include/profile/actiondialog.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
-  include/profile/keybindingsdialog.h
   include/profile/scriptlogdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
@@ -85,13 +81,42 @@ qt5_wrap_cpp(
   include/profile/propertiesdialog.h
 )
 
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets REQUIRED)
+set(MOC_FILES "")
 set(RESOURCE_FILES "")
-qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
+set(LIBRARIES "")
+
+if (${QT_VERSION_MAJOR} EQUAL 5)
+  find_package(Qt5 COMPONENTS Widgets)
+  qt5_wrap_cpp(
+    MOC_FILES
+    ${HEADER_SOURCE}
+  )
+  qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
+  set(LIBRARIES )
+elseif (${QT_VERSION_MAJOR} EQUAL 6)
+  find_package(Qt6 COMPONENTS Widgets REQUIRED)
+
+  qt6_wrap_cpp(
+    MOC_FILES
+    ${HEADER_SOURCE}
+  )
+  qt6_add_resources(RESOURCE_FILES resources/resources.qrc)
+elseif (NOT DEFINED QT_VERSION_MAJOR)
+  message(FATAL_ERROR "Unable to find Qt version")
+else ()
+  message(FATAL_ERROR "Unsupported Qt version")
+endif()
 
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
 target_include_directories(openspace-ui-launcher PUBLIC include)
-target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets openspace-core)
+target_link_libraries(
+  openspace-ui-launcher
+  PUBLIC
+    openspace-core
+    Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets
+)
 
 if (MSVC)
 set(MSVC_WARNINGS

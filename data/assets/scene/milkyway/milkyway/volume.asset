@@ -32,16 +32,16 @@ local MilkyWayVolumeGalaxy = {
     Rotation = { 3.1415926, 3.1248, 4.45741 },
     Volume = {
       Type = "Volume",
-      Filename = data .. "/MilkyWayRGBAVolume1024x1024x128.raw",
+      Filename = openspace.absPath(data .. "/MilkyWayRGBAVolume1024x1024x128.raw"),
       Dimensions = { 1024, 1024, 128 },
       Size = { 1.2E21, 1.2E21, 0.15E21 },
       Downscale = 0.4,
     },
     Points = {
       Type = "Points",
-      Filename = data .. "/MilkyWayPoints.off",
+      Filename = openspace.absPath(data .. "/MilkyWayPoints.off"),
       EnabledPointsRatio = 0.3,
-      Texture = data .. "/halo.png"
+      Texture = openspace.absPath(data .. "/halo.png")
     }
   },
   GUI = {

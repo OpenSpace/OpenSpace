@@ -179,9 +179,7 @@ namespace {
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_layer";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,

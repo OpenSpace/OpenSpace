@@ -28,70 +28,45 @@
 namespace openspace::luascriptfunctions {
 
 /**
-* \ingroup LuaScripts
-* addDashboardItem(table):
-*/
+ * \ingroup LuaScripts
+ * addDashboardItem(table):
+ */
 int addDashboardItem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
+    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-    const int type = lua_type(L, -1);
-    if (type == LUA_TTABLE) {
-        ghoul::Dictionary d;
-        try {
-            ghoul::lua::luaDictionaryFromState(L, d);
-        }
-        catch (const ghoul::lua::LuaFormatException& e) {
-            LERRORC("addDashboardItem", e.what());
-            lua_settop(L, 0);
-            return 0;
-        }
-        lua_settop(L, 0);
-
-        try {
-            global::dashboard->addDashboardItem(DashboardItem::createFromDictionary(d));
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC("addDashboardItem", e.what());
-            return ghoul::lua::luaError(L, "Error adding dashboard item");
-        }
-
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+    try {
+        global::dashboard->addDashboardItem(
+            DashboardItem::createFromDictionary(std::move(d))
+        );
     }
-    else {
-        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("addDashboardItem", e.what());
+        return ghoul::lua::luaError(L, "Error adding dashboard item");
     }
-}
 
-/**
-* \ingroup LuaScripts
-* removeDashboardItem(string):
-*/
-int removeDashboardItem(lua_State* L) {
-    using ghoul::lua::errorLocation;
-
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
-
-    std::string identifier = luaL_checkstring(L, -1);
-
-    global::dashboard->removeDashboardItem(identifier);
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * removeDashboardItem(string):
+ */
+int removeDashboardItem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
+    const std::string identifier = ghoul::lua::value<std::string>(L);
+
+    global::dashboard->removeDashboardItem(identifier);
+    return 0;
+}
 
 /**
-* \ingroup LuaScripts
-* removeDashboardItems():
-*/
+ * \ingroup LuaScripts
+ * removeDashboardItems():
+ */
 int clearDashboardItems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
-
     global::dashboard->clearDashboardItems();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -24,75 +24,33 @@
 
 #include <openspace/properties/vector/uvec3property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
-
-namespace {
-
-glm::uvec3 fromLuaConversion(lua_State* state, bool& success) {
-    glm::uvec3 result = glm::uvec3(0);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::uvec3(0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::uvec3(0);
-        }
-        else {
-            result[i] = static_cast<glm::uvec3::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::uvec3 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, glm::uvec3 inValue) {
-    outValue = "{";
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec3>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
-    }
-    outValue.pop_back();
-    outValue += "}";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    UVec3Property,
-    glm::uvec3,
-    glm::uvec3(0),
-    glm::uvec3(std::numeric_limits<unsigned int>::lowest()),
-    glm::uvec3(std::numeric_limits<unsigned int>::max()),
-    glm::uvec3(1),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+UVec3Property::UVec3Property(Property::PropertyInfo info, glm::uvec3 value,
+                             glm::uvec3 minValue, glm::uvec3 maxValue,
+                             glm::uvec3 stepValue)
+    : NumericalProperty<glm::uvec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+std::string UVec3Property::className() const {
+    return "UVec3Property";
+}
+
+int UVec3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::uvec3 UVec3Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::uvec3>(state, success);
+}
 
 } // namespace openspace::properties

@@ -16,7 +16,7 @@ local circle = {
     LineWidth = 3.0,
     GridSegments = { 1, 1 },
     CircleSegments = 64,
-    OuterRadius = 1.0
+    Radii = { 0.0, 1.0 }
   },
   GUI = {
     Name = "Example Circle",
@@ -29,7 +29,7 @@ local ellipse = {
   Transform = {
     Scale = {
       Type = "NonUniformStaticScale",
-      Scale = {1.5, 1.0, 1.0}
+      Scale = { 1.5, 1.0, 1.0 }
     }
   },
   Renderable = {
@@ -38,7 +38,7 @@ local ellipse = {
     LineWidth = 3.0,
     GridSegments = { 1, 1 },
     CircleSegments = 64,
-    OuterRadius = scale
+    Radii = { 0.0, scale }
   },
   GUI = {
     Name = "Example Ellipse",

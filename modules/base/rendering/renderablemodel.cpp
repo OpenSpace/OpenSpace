@@ -157,12 +157,26 @@ namespace {
             Centimeter,
             Decimeter,
             Meter,
-            Kilometer
+            Kilometer,
+
+            // Weird units
+            Thou,
+            Inch,
+            Foot,
+            Yard,
+            Chain,
+            Furlong,
+            Mile
         };
 
         // The scale of the model. For example if the model is in centimeters
         // then ModelScale = Centimeter or ModelScale = 0.01
         std::optional<std::variant<ScaleUnit, double>> modelScale;
+
+        // By default the given ModelScale is used to scale the model down,
+        // by setting this setting to true the model is instead scaled up with the
+        // given ModelScale
+        std::optional<bool> invertModelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
@@ -203,13 +217,13 @@ namespace {
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<double> ambientIntensity;
+        std::optional<float> ambientIntensity;
 
         // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<double> diffuseIntensity;
+        std::optional<float> diffuseIntensity;
 
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<double> specularIntensity;
+        std::optional<float> specularIntensity;
 
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -235,6 +249,14 @@ namespace {
 
         // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
         std::optional<bool> enableOpacityBlending;
+
+        // The path to the vertex shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> vertexShader;
+
+        // The path to the fragment shader program that is used instead of the default
+        // shader.
+        std::optional<std::filesystem::path> fragmentShader;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -242,9 +264,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_model";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_model");
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
@@ -262,8 +282,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _disableDepthTest(DisableDepthTestInfo, false)
+    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -285,12 +305,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    std::string file = absPath(p.geometryFile.string());
+    std::string file = absPath(p.geometryFile.string()).string();
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
         ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
     );
+
+    _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
     if (p.modelScale.has_value()) {
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
@@ -320,16 +342,43 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 case Parameters::ScaleUnit::Kilometer:
                     distanceUnit = DistanceUnit::Kilometer;
                     break;
+
+                // Weird units
+                case Parameters::ScaleUnit::Thou:
+                    distanceUnit = DistanceUnit::Thou;
+                    break;
+                case Parameters::ScaleUnit::Inch:
+                    distanceUnit = DistanceUnit::Inch;
+                    break;
+                case Parameters::ScaleUnit::Foot:
+                    distanceUnit = DistanceUnit::Foot;
+                    break;
+                case Parameters::ScaleUnit::Yard:
+                    distanceUnit = DistanceUnit::Yard;
+                    break;
+                case Parameters::ScaleUnit::Chain:
+                    distanceUnit = DistanceUnit::Chain;
+                    break;
+                case Parameters::ScaleUnit::Furlong:
+                    distanceUnit = DistanceUnit::Furlong;
+                    break;
+                case Parameters::ScaleUnit::Mile:
+                    distanceUnit = DistanceUnit::Mile;
+                    break;
                 default:
                     throw ghoul::MissingCaseException();
             }
-            _modelScale = convertUnit(distanceUnit, DistanceUnit::Meter);
+            _modelScale = toMeter(distanceUnit);
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
         }
         else {
             throw ghoul::MissingCaseException();
+        }
+
+        if (_invertModelScale) {
+            _modelScale = 1.0 / _modelScale;
         }
     }
 
@@ -385,7 +434,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     throw ghoul::MissingCaseException();
             }
 
-            _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
+            _geometry->setTimeScale(static_cast<float>(
+                convertTime(1.0, timeUnit, TimeUnit::Second))
+            );
         }
         else {
             throw ghoul::MissingCaseException();
@@ -428,6 +479,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _performShading = p.performShading.value_or(_performShading);
     _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
     _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
+
+    if (p.vertexShader.has_value()) {
+        _vertexShaderPath = p.vertexShader->string();
+    }
+    if (p.fragmentShader.has_value()) {
+        _fragmentShaderPath = p.fragmentShader->string();
+    }
 
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -517,30 +575,53 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     _program = BaseModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/model_fs.glsl")
-            );
+        program,
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                _vertexShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
+                std::filesystem::path(_vertexShaderPath);
+            std::filesystem::path fs =
+                _fragmentShaderPath.empty() ?
+                absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
+                std::filesystem::path(_fragmentShaderPath);
+
+            return global::renderEngine->buildRenderProgram(ProgramName, vs, fs);
         }
+    );
+    // We don't really know what kind of shader the user provides us with, so we can't
+    // make the assumption that we are going to use all uniforms
+    _program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 }
 
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
+    std::string program = ProgramName;
+    if (!_vertexShaderPath.empty()) {
+        program += "|vs=" + _vertexShaderPath;
+    }
+    if (!_fragmentShaderPath.empty()) {
+        program += "|fs=" + _fragmentShaderPath;
+    }
     BaseModule::ProgramObjectManager.release(
-        ProgramName,
+        program,
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
@@ -568,8 +649,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Model transform and view transform needs to be in double precision
         const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
             glm::scale(
                 glm::dmat4(_modelTransform.value()),
@@ -674,6 +755,10 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+        glm::compMax(data.modelTransform.scale)
+    );
+
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
         double now = data.time.j2000Seconds();
@@ -685,8 +770,9 @@ void RenderableModel::update(const UpdateData& data) {
         // be converted to the animation time range, so the animation knows which
         // keyframes it should interpolate between for each frame. The conversion is
         // done in different ways depending on the animation mode.
-        // Explanation: s indicates start time, / indicates animation is played once forwards,
-        // \ indicates animation is played once backwards, time moves to the right.
+        // Explanation: s indicates start time, / indicates animation is played once
+        // forwards, \ indicates animation is played once backwards, time moves to the
+        // right.
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time

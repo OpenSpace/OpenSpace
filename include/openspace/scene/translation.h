@@ -50,8 +50,8 @@ public:
     virtual ~Translation() = default;
     virtual bool initialize();
 
+    virtual void update(const UpdateData& data);
     glm::dvec3 position() const;
-    void update(const UpdateData& data);
 
     virtual glm::dvec3 position(const UpdateData& data) const = 0;
 

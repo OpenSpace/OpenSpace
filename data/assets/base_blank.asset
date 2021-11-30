@@ -1,7 +1,6 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
 local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
 -- Specifying which other assets should be loaded in this scene
@@ -10,41 +9,51 @@ asset.require('spice/base')
 -- Load default key bindings applicable to most scenes
 asset.require('dashboard/default_dashboard')
 asset.require('util/default_keybindings')
-asset.require('util/default_joystick')
 
 -- Load web gui
 local webGui = asset.require('util/webgui')
 
--- Keybindings that are specific for this scene
-local Keybindings = {
-  {
-    Key = "h",
-    Name="Toggle Trails",
-    Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
-      "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-    Documentation = "Toggles the visibility of planet and moon trails",
-    GuiPath = "/Rendering",
-    Local = false
-  },
-  {
-    Key = "l",
-    Name = "Toggle planet labels",
-    Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-    Documentation = "Turns on visibility for all solar system labels",
-    GuiPath = "/Rendering",
-    Local = false
-  }
+local toggle_trails = {
+  Identifier = "os_default.toggle_trails",
+  Name = "Toggle Trails",
+  Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
+    "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+  Documentation = "Toggles the visibility of planet and moon trails",
+  GuiPath = "/Rendering",
+  IsLocal = false,
+
+  Key = "h"
+}
+
+local toggle_planet_labels = {
+  Identifier = "os_default.toggle_planet_labels",
+  Name = "Toggle planet labels",
+  Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+  Documentation = "Turns on visibility for all solar system labels",
+  GuiPath = "/Rendering",
+  IsLocal = false,
+
+  Key = "l"
 }
 
 asset.onInitialize(function ()
   webGui.setCefRoute("onscreen")
 
-  sceneHelper.bindKeys(Keybindings)
+  openspace.action.registerAction(toggle_trails)
+  openspace.bindKey(toggle_trails.Key, toggle_trails.Identifier)
+
+  openspace.action.registerAction(toggle_planet_labels)
+  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
+
   openspace.setDefaultGuiSorting()
 
   openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
 end)
 
 asset.onDeinitialize(function ()
-  sceneHelper.unbindKeys(Keybindings)
+  openspace.action.removeAction(toggle_trails.Identifier)
+  openspace.clearKey(toggle_trails.Key)
+
+  openspace.action.removeAction(toggle_planet_labels.Identifier)
+  openspace.clearKey(toggle_planet_labels.Key)
 end)

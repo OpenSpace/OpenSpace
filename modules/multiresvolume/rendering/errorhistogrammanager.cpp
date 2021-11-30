@@ -179,7 +179,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
     return true;
 }
 
-bool ErrorHistogramManager::loadFromFile(const std::string& filename) {
+bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
@@ -210,7 +210,7 @@ bool ErrorHistogramManager::loadFromFile(const std::string& filename) {
 }
 
 
-bool ErrorHistogramManager::saveToFile(const std::string& filename) {
+bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;

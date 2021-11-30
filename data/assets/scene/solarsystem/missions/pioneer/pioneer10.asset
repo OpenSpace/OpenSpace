@@ -21,7 +21,7 @@ local Pioneer10 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer10NAIF,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernelsList
     }
   },
@@ -41,7 +41,7 @@ local Pioneer10Trail = {
     Translation = {
       Type = "SpiceTranslation",
       Target = Pioneer10NAIF,
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernelsList
     },
     Color = { 0.70, 0.50, 0.20 },

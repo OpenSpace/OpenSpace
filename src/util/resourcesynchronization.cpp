@@ -33,7 +33,7 @@ namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
         // This key specifies the type of ResourceSyncrhonization that gets created. It
         // has to be one of the valid ResourceSyncrhonizations that are available for
-        // creation (see the FactoryDocumentation for a list of possible 
+        // creation (see the FactoryDocumentation for a list of possible
         // ResourceSyncrhonizations), which depends on the configration of the application
         std::string type
             [[codegen::annotation("A ResourceSynchronization created by a factory")]];
@@ -47,9 +47,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ResourceSynchronization::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "resourceSynchronization";
-    return doc;
+    return codegen::doc<Parameters>("resourceSynchronization");
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(

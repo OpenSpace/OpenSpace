@@ -31,7 +31,7 @@
 #include "openspace/scene/profile.h"
 #include <memory>
 
-class AssetTreeModel : public QAbstractItemModel {
+class AssetTreeModel final : public QAbstractItemModel {
 Q_OBJECT
 
 public:
@@ -45,7 +45,7 @@ public:
       *             function (can be multiple times)
       * \return QVariant data object
       */
-    QVariant data(const QModelIndex& index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const final;
 
     /**
       * Returns the header data of the tree view
@@ -57,7 +57,7 @@ public:
       * \return QVariant data object in the header
       */
     QVariant headerData(int section, Qt::Orientation orientation,
-        int role = Qt::DisplayRole) const override;
+        int role = Qt::DisplayRole) const final;
 
     /**
       * Returns the index of item in #QModelIndex object form
@@ -68,7 +68,7 @@ public:
       * \return #QModelIndex index of the item at specified position
       */
     QModelIndex index(int row, int column,
-        const QModelIndex& parent = QModelIndex()) const override;
+        const QModelIndex& parent = QModelIndex()) const final;
 
     /**
       * Returns the index of the parent of the item specified by input param
@@ -76,7 +76,7 @@ public:
       * \param index of item that is a child of the parent
       * \return #QModelIndex index of the parent
       */
-    QModelIndex parent(const QModelIndex& index) const override;
+    QModelIndex parent(const QModelIndex& index) const final;
 
     /**
       * Returns the index of the parent of the item specified by the input params
@@ -103,7 +103,7 @@ public:
       * \param parent #QModelIndex of the parent item
       * \return number of children/rows of this parent
       */
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const final;
 
     /**
       * Returns the number of columns of data in each item of the tree
@@ -111,7 +111,7 @@ public:
       * \param parent specified by the #QModelIndex index
       * \return the number of data columns
       */
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const final;
 
     /**
       * Return the Qt flags of the item specified by index, which can include
@@ -120,7 +120,7 @@ public:
       * \param index specified by the #QModelIndex index
       * \return the Qt flags
       */
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const final;
 
     /**
       * Set data at index \p index
@@ -131,7 +131,7 @@ public:
       * \return true if the data set was successful
       */
     bool setData(const QModelIndex& index, const QVariant& value,
-        int role = Qt::EditRole) override;
+        int role = Qt::EditRole) final;
 
     /**
       * Returns a vector of all #Assets selected in the tree view

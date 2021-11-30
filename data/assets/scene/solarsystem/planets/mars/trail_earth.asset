@@ -12,7 +12,7 @@ local MarsTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS BARYCENTER",
+      Target = "MARS",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },

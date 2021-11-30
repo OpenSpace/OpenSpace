@@ -20,8 +20,7 @@ local constellationsExtragalactic = {
     TextColor = { 0.8, 0.8, 0.8 },
     TextOpacity = 0.4,
     TextSize = 20.0,
-    TextMinSize = 20.0,
-    TextMaxSize = 30.0,
+    TextMinMaxSize = { 20, 30 },
     MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
     Unit = "Mpc"
   },
@@ -42,8 +41,7 @@ local constellations = {
     TextColor = { 0.8, 0.8, 0.8 },
     TextOpacity = 0.3,
     TextSize = 14.5,
-    TextMaxSize = 170.0,
-    TextMinSize = 8.0,
+    TextMinMaxSize = { 8, 170 },
     MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
     Unit = "pc"
   },

@@ -24,15 +24,15 @@ local object = {
     Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
     File = speck .. "/2MASS.speck",
+    Unit = "Mpc",
     Texture = textures .. "/point3A.png",
     ColorMap = speck .. "/lss.cmap",
     ColorOption = { "redshift", "prox5Mpc" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-    Unit = "Mpc",
     CorrectionSizeEndDistance = 20.6,
     CorrectionSizeFactor = 15.0,
     ScaleFactor = 510.78,
-    BillboardMaxSize = 11.15,
+    BillboardMinMaxSize = { 0.0, 11.15 },
     EnablePixelSizeControl = true
   },
   GUI = {

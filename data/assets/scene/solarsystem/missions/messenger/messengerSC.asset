@@ -67,7 +67,7 @@ local Messenger = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "MESSENGER",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = LocalKernels
     },
     Rotation = {

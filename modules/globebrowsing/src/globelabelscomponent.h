@@ -31,6 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
@@ -60,15 +62,14 @@ public:
     void draw(const RenderData& data);
 
 private:
-    bool loadLabelsData(const std::string& file);
-    bool readLabelsFile(const std::string& file);
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    bool loadLabelsData(const std::filesystem::path& file);
+    bool readLabelsFile(const std::filesystem::path& file);
+    bool loadCachedFile(const std::filesystem::path& file);
+    bool saveCachedFile(const std::filesystem::path& file) const;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         float distToCamera, float fadeInVariable);
     bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
-private:
     // Labels Structures
     struct LabelEntry {
         char feature[256];
@@ -83,30 +84,29 @@ private:
         std::vector<LabelEntry> labelsArray;
     };
 
-    properties::BoolProperty _labelsEnabled;
-    properties::FloatProperty _labelsFontSize;
-    properties::IntProperty _labelsMaxSize;
-    properties::IntProperty _labelsMinSize;
-    properties::FloatProperty _labelsSize;
-    properties::FloatProperty _labelsMinHeight;
-    properties::Vec3Property _labelsColor;
-    properties::FloatProperty _labelsOpacity;
-    properties::FloatProperty _labelsFadeInDist;
-    properties::FloatProperty _labelsFadeOutDist;
-    properties::BoolProperty _labelsFadeInEnabled;
-    properties::BoolProperty _labelsFadeOutEnabled;
-    properties::BoolProperty _labelsDisableCullingEnabled;
-    properties::FloatProperty _labelsDistanceEPS;
-    properties::OptionProperty _labelAlignmentOption;
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _fontSize;
+    properties::FloatProperty _size;
+    properties::IVec2Property _minMaxSize;
+    properties::FloatProperty _heightOffset;
 
-private:
+    properties::Vec3Property _color;
+    properties::FloatProperty _opacity;
+
+    properties::Vec2Property _fadeDistances;
+    properties::BoolProperty _fadeInEnabled;
+    properties::BoolProperty _fadeOutEnabled;
+    properties::BoolProperty _disableCulling;
+    properties::FloatProperty _distanceEPS;
+    properties::OptionProperty _alignmentOption;
+
     Labels _labels;
 
     // Font
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     // Globe
-    globebrowsing::RenderableGlobe* _globe;
+    globebrowsing::RenderableGlobe* _globe = nullptr;
 };
 
 } // namespace openspace

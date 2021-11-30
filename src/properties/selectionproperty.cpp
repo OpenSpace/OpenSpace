@@ -43,6 +43,14 @@ SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
 {}
 
+std::string SelectionProperty::className() const {
+    return "SelectionProperty";
+}
+
+int SelectionProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
 void SelectionProperty::setValue(std::set<std::string> val) {
     ghoul_assert(!_options.empty(), "Cannot set selection before options have been set");
 
@@ -76,18 +84,18 @@ const std::vector<std::string>& SelectionProperty::options() const {
 }
 
 void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
-    std::vector<std::string> options;
-    options.reserve(keys.size());
+    _options.clear();
+    _options.reserve(keys.size());
 
     for (const std::string& key : keys) {
         if (!hasOption(key)) {
-            options.push_back(key);
+            _options.push_back(key);
         }
         else {
             LWARNING(fmt::format("Ignoring duplicated key '{}'", key));
         }
     }
-    _options = std::move(options);
+    _options.shrink_to_fit();
     sortOptions();
 
     // In case we have a selection, remove non-existing options
@@ -121,44 +129,8 @@ void SelectionProperty::clearOptions() {
     clearSelection();
 }
 
-void SelectionProperty::sortOptions() {
-    std::sort(_options.begin(), _options.end());
-}
-
-bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
-    bool changed = false;
-    std::set<std::string>::iterator it = keys.begin();
-    while (it != keys.end()) {
-        if (!hasOption(*it)) {
-            LWARNING(fmt::format(
-                "Key '{}' is not a valid option and is removed from selection", *it
-            ));
-            keys.erase(it);
-            changed = true;
-        }
-        it++;
-    }
-    return changed;
-}
-
-std::string SelectionProperty::generateAdditionalJsonDescription() const {
-    nlohmann::json optionsJson(_options);
-    std::string result = "{ ";
-    result += fmt::format("\"{}\": {}", OptionsKey, optionsJson.dump());
-    result += " }";
-    return result;
-}
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className() {
-    return "SelectionProperty";
-}
-
-template <>
-template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(
-                                                         lua_State* state, bool& success)
+std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state,
+                                                           bool& success) const
 {
     static const int KEY = -2;
     static const int VAL = -1;
@@ -186,35 +158,50 @@ PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(
     return result;
 }
 
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toLuaValue(
-                              lua_State* state, const std::set<std::string>& value)
-{
+void SelectionProperty::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int i = 1;
-    for (const std::string& v : value) {
+    for (const std::string& v : _value) {
         lua_pushinteger(state, i);
         lua_pushstring(state, v.c_str());
         lua_settable(state, -3);
         ++i;
     }
-    return true;
 }
 
-template <>
-int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua() {
-    return LUA_TTABLE;
+std::string SelectionProperty::toStringConversion() const {
+    nlohmann::json json(_value);
+    return json.dump();
 }
 
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
-                       std::string& outValue, const std::set<std::string>& inValue)
-{
-    nlohmann::json json(inValue);
-    outValue = json.dump();
-    return true;
+void SelectionProperty::sortOptions() {
+    std::sort(_options.begin(), _options.end());
+}
+
+bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
+    bool changed = false;
+    std::set<std::string>::iterator it = keys.begin();
+    while (it != keys.end()) {
+        if (!hasOption(*it)) {
+            LWARNING(fmt::format(
+                "Key '{}' is not a valid option and is removed from selection", *it
+            ));
+            it = keys.erase(it);
+            changed = true;
+        }
+        else {
+            it++;
+        }
+    }
+    return changed;
+}
+
+std::string SelectionProperty::generateAdditionalJsonDescription() const {
+    nlohmann::json optionsJson(_options);
+    std::string result = "{ ";
+    result += fmt::format("\"{}\": {}", OptionsKey, optionsJson.dump());
+    result += " }";
+    return result;
 }
 
 } // namespace openspace::properties

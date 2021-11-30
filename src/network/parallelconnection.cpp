@@ -61,7 +61,7 @@ ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
 {}
 
 bool ParallelConnection::isConnectedOrConnecting() const {
-    return _socket->isConnected() || _socket->isConnecting();
+    return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
 }
 
 void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {

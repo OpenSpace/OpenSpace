@@ -28,20 +28,14 @@
 
 namespace openspace::luascriptfunctions::asset {
 
-int add(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::add");
+int add(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::add");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    const std::string& assetName = ghoul::lua::value<std::string>(
-        state,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
+    const std::string assetName = ghoul::lua::value<std::string>(L);
 
     if (global::renderEngine->scene()) {
-        assetManager->add(assetName);
+        assetManager.add(assetName);
     }
     else {
         // The scene might not exist yet if OpenSpace was started without specifying an
@@ -49,36 +43,24 @@ int add(lua_State* state) {
         global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
     }
 
-
-    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
-int remove(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
+int remove(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::remove");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
+    const std::string assetName = ghoul::lua::value<std::string>(L);
 
-    const std::string& assetName = ghoul::lua::value<std::string>(
-        state,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    assetManager->remove(assetName);
-
-    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
+    assetManager.remove(assetName);
     return 0;
 }
 
-int removeAll(lua_State* state) {
-    ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
+int removeAll(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAll");
 
-    AssetManager* assetManager =
-        reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    assetManager->removeAll();
-
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
+    assetManager.removeAll();
     return 0;
 }
 

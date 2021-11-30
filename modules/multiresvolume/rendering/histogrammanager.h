@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
 
 #include <openspace/util/histogram.h>
+#include <filesystem>
 #include <string>
 
 namespace openspace {
@@ -36,8 +37,8 @@ class HistogramManager {
 public:
     bool buildHistograms(TSP* tsp, int numBins);
     Histogram* histogram(unsigned int brickIndex);
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    bool loadFromFile(const std::filesystem::path& filename);
+    bool saveToFile(const std::filesystem::path& filename);
 
 private:
     bool buildHistogram(TSP* tsp, unsigned int brickIndex);

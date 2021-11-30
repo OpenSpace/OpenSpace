@@ -93,9 +93,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableOrbitDisc::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "exoplanets_renderableorbitdisc";
-    return doc;
+    return codegen::doc<Parameters>("exoplanets_renderableorbitdisc");
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
@@ -118,7 +116,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     setBoundingSphere(_size + _offset.value().y * _size);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
+    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _eccentricity = p.eccentricity;
@@ -148,7 +146,7 @@ void RenderableOrbitDisc::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
-    _texture->loadFromFile(_texturePath);
+    _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
 
     _plane->initialize();

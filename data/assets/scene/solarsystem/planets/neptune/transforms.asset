@@ -9,7 +9,7 @@ local NeptuneBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "NEPTUNE BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {
@@ -26,7 +26,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneBarycenter })
 asset.meta = {
   Name = "Neptune Transforms",
   Version = "1.0",
-  Description = [[ Neptune Barycenter transform]],
+  Description = [[ Neptune Barycenter transform ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",

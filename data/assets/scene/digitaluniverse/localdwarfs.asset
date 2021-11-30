@@ -29,12 +29,12 @@ local object = {
     Texture = textures .. "/point4.png",
     PolygonSides = 12,
     LabelFile = speck .. "/localgroup.label",
+    Unit = "Mpc",
     TextColor = { 0.3, 0.3, 1.0 },
     ScaleFactor = 465,
     TextSize = 18.3,
-    TextMinSize = 7.3,
-    Unit = "Mpc",
-    BillboardMaxSize = 20.0,
+    TextMinMaxSize = { 7, 20 },
+    BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },
   GUI = {

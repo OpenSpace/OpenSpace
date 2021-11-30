@@ -24,12 +24,11 @@
 
 #version __CONTEXT__
 
-in vec2 Texcoord;
-
+in vec2 vs_st;
 out vec4 outputColor;
 
 uniform sampler2D tex;
 
 void main() {
-  outputColor = texture(tex, Texcoord);
+  outputColor = texture(tex, vs_st);
 }

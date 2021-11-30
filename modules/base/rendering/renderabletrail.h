@@ -178,8 +178,8 @@ private:
                  pointSize, renderPhase) _uniformCache;
 #else
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
-        resolution, lineWidth) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, viewport,
+        lineWidth) _uniformCache;
 #endif
 };
 

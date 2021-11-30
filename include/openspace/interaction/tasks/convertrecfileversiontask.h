@@ -29,10 +29,8 @@
 #include <openspace/interaction/sessionrecording.h>
 
 #include <ghoul/glm.h>
-
+#include <filesystem>
 #include <string>
-
-
 
 namespace openspace::interaction {
 
@@ -48,7 +46,7 @@ public:
 
 private:
     std::string _inFilename;
-    std::string _inFilePath;
+    std::filesystem::path _inFilePath;
     std::string _valueFunctionLua;
 };
 

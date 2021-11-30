@@ -414,9 +414,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableGaiaStars::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_renderablegaiastars";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
@@ -462,11 +460,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = absPath(p.file);
-    _dataFile = std::make_unique<File>(_filePath);
-    _dataFile->setCallback([&](const File&) { _dataIsDirty = true; });
+    _filePath = absPath(p.file).string();
+    _dataFile = std::make_unique<File>(_filePath.value());
+    _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([&]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() { _dataIsDirty = true; });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
@@ -519,7 +517,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderOption.onChange([&]() { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
-#ifndef __APPLE__
     _shaderOption.addOptions({
         { gaia::ShaderOption::Point_SSBO, "Point_SSBO" },
         { gaia::ShaderOption::Point_VBO, "Point_VBO" },
@@ -527,35 +524,35 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
         { gaia::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
     });
-#else // __APPLE__
-    _shaderOption.addOptions({
-        { gaia::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-    });
-#endif // __APPLE__
 
     if (p.shaderOption.has_value()) {
         switch (*p.shaderOption) {
             case Parameters::ShaderOption::PointSSBO:
                 _shaderOption = gaia::ShaderOption::Point_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::PointVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Point_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::BillboardVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Billboard_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBONoFBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO_noFBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -567,19 +564,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
     addProperty(_shaderOption);
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture);
+    _pointSpreadFunctionTexturePath = absPath(p.texture).string();
     _pointSpreadFunctionTexturePath.onChange(
-        [&](){ _pointSpreadFunctionTextureIsDirty = true; }
+        [this](){ _pointSpreadFunctionTextureIsDirty = true; }
     );
-    _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
+    _pointSpreadFunctionFile = std::make_unique<File>(
+        _pointSpreadFunctionTexturePath.value()
+    );
     _pointSpreadFunctionFile->setCallback(
-        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+        [this]() { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
-    _colorTexturePath = absPath(p.colorMap);
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
-    _colorTexturePath.onChange([&]() { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
+    _colorTexturePath = absPath(p.colorMap).string();
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
 
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     _magnitudeBoost = p.magnitudeBoost.value_or(_magnitudeBoost);
@@ -1701,10 +1700,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             case gaia::ShaderOption::Billboard_SSBO:
             case gaia::ShaderOption::Billboard_VBO: {
-                std::string vs = absPath(
+                std::filesystem::path vs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
-                std::string fs = absPath(
+                std::filesystem::path fs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
@@ -2101,12 +2100,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _pointSpreadFunctionTexture = nullptr;
         if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
+                absPath(_pointSpreadFunctionTexturePath).string()
             );
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2115,12 +2114,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
+                _pointSpreadFunctionTexturePath.value()
             );
             _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
+                [this]() { _pointSpreadFunctionTextureIsDirty = true; }
             );
         }
         _pointSpreadFunctionTextureIsDirty = false;
@@ -2131,21 +2128,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
-                ));
+                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _colorTexturePath
+                _colorTexturePath.value()
             );
-            _colorTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
-            );
+            _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
         }
         _colorTextureIsDirty = false;
     }
@@ -2193,28 +2186,29 @@ bool RenderableGaiaStars::readDataFile() {
 
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
-    LINFO("Loading data file: " + _filePath.value());
+    std::filesystem::path file = absPath(_filePath.value());
+    LINFO(fmt::format("Loading data file: {}", file));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:
             // Read raw fits file and construct Octree.
-            nReadStars = readFitsFile(_filePath);
+            nReadStars = readFitsFile(file);
             break;
         case gaia::FileReaderOption::Speck:
             // Read raw speck file and construct Octree.
-            nReadStars = readSpeckFile(_filePath);
+            nReadStars = readSpeckFile(file);
             break;
         case gaia::FileReaderOption::BinaryRaw:
             // Stars are stored in an ordered binary file.
-            nReadStars = readBinaryRawFile(_filePath);
+            nReadStars = readBinaryRawFile(file);
             break;
         case gaia::FileReaderOption::BinaryOctree:
             // Octree already constructed and stored as a binary file.
-            nReadStars = readBinaryOctreeFile(_filePath);
+            nReadStars = readBinaryOctreeFile(file);
             break;
         case gaia::FileReaderOption::StreamOctree:
             // Read Octree structure from file, without data.
-            nReadStars = readBinaryOctreeStructureFile(_filePath);
+            nReadStars = readBinaryOctreeStructureFile(file.string());
             break;
         default:
             LERROR("Wrong FileReaderOption - no data file loaded!");
@@ -2223,13 +2217,13 @@ bool RenderableGaiaStars::readDataFile() {
 
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
-    LINFO("Dataset contains a total of " + std::to_string(nReadStars) + " stars.");
+    LINFO(fmt::format("Dataset contains a total of {} stars", nReadStars));
     _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
 
     return nReadStars > 0;
 }
 
-int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
+int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
@@ -2253,7 +2247,7 @@ int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
+int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
@@ -2271,7 +2265,7 @@ int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath) {
     std::vector<float> fullData;
     int nReadStars = 0;
 
@@ -2304,14 +2298,14 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading raw binary file!", filePath
+            "Error opening file '{}' for loading raw binary file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& filePath) {
     int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
@@ -2322,26 +2316,28 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", filePath
+            "Error opening file '{}' for loading binary Octree file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeStructureFile(const std::string& folderPath) {
+int RenderableGaiaStars::readBinaryOctreeStructureFile(
+                                                  const std::filesystem::path& folderPath)
+{
     int nReadStars = 0;
-    std::string indexFile = folderPath + "index.bin";
+    std::string indexFile = folderPath.string() + "index.bin";
 
     std::ifstream fileStream(indexFile, std::ifstream::binary);
     if (fileStream.good()) {
-        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath);
+        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath.string());
 
         fileStream.close();
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", indexFile
+            "Error opening file '{}' for loading binary Octree file", indexFile
         ));
         return nReadStars;
     }

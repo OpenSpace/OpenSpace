@@ -26,7 +26,6 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
 

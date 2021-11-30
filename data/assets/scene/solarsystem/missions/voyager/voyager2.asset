@@ -37,7 +37,7 @@ local LightSources = {
     Node = sunTransforms.SolarSystemBarycenter.Identifier,
     Intensity = 1.0
   },
-{
+  {
     Identifier = "Camera",
     Type = "CameraLightSource",
     Intensity = 0.5
@@ -51,7 +51,7 @@ local Voyager2 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Rotation = {
@@ -87,7 +87,7 @@ local Voyager2Main = {
 }
 
 local Voyager2Antenna = {
-  Identifier = "Voyager_2_Antanna",
+  Identifier = "Voyager_2_Antenna",
   Parent = Voyager2.Identifier,
   Renderable = {
     Type = "RenderableModel",
@@ -96,7 +96,7 @@ local Voyager2Antenna = {
     LightSources = LightSources
   },
   GUI = {
-    Name = "Voyager 2 Antanna",
+    Name = "Voyager 2 Antenna",
     Path = "/Solar System/Missions/Voyager 2"
   }
 }
@@ -112,11 +112,11 @@ local VoyagerTrailCruiseEarthJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
-    StartTime = "1977 SEP 05",
+    StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
     SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
   },
@@ -134,7 +134,7 @@ local VoyagerTrailEncounterJupiter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
@@ -157,7 +157,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -180,7 +180,7 @@ local VoyagerTrailEncounterSaturn = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -203,7 +203,7 @@ local VoyagerTrailCruiseSaturnUranus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -226,7 +226,7 @@ local VoyagerTrailEncounterUranus = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -249,7 +249,7 @@ local VoyagerTrailCruiseUranusNeptune = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -272,7 +272,7 @@ local VoyagerTrailEncounterNeptune = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,
@@ -295,7 +295,7 @@ local VoyagerTrailCruiseNeptuneInf = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VOYAGER 2",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = Kernels
     },
     EnableFade = false,

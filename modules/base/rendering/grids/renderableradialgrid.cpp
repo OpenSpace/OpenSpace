@@ -65,17 +65,12 @@ namespace {
         "This value specifies the line width of the spherical grid."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OuterRadiusInfo = {
-        "OuterRadius",
-        "Outer Radius",
-        "The outer radius of the circular grid, i.e. its size."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo InnerRadiusInfo = {
-        "InnerRadius",
-        "Inner Radius",
-        "The inner radius of the circular grid, that is the radius of the inmost ring. "
-        "Must be smaller than the outer radius."
+    constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
+        "Radii",
+        "Inner and Outer Radius",
+        "The radii values that determine the size of the circular grid. The first value "
+        "is the radius of the inmost ring and the second is the radius of the outmost "
+        "ring."
     };
 
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
@@ -91,11 +86,8 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
-        // [[codegen::verbatim(OuterRadiusInfo.description)]]
-        std::optional<float> outerRadius;
-
-        // [[codegen::verbatim(InnerRadiusInfo.description)]]
-        std::optional<float> innerRadius;
+        // [[codegen::verbatim(RadiiInfo.description)]]
+        std::optional<glm::vec2> radii;
     };
 #include "renderableradialgrid_codegen.cpp"
 } // namespace
@@ -103,9 +95,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableRadialGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_radialgrid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_radialgrid");
 }
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
@@ -114,8 +104,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
-    , _minRadius(InnerRadiusInfo, 0.f, 0.f, 20.f)
+    , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -142,24 +131,11 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _minRadius = p.innerRadius.value_or(_minRadius);
-    _maxRadius = p.outerRadius.value_or(_maxRadius);
+    _radii = p.radii.value_or(_radii);
+    _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _radii.onChange([&]() { _gridIsDirty = true; });
 
-    _maxRadius.setMinValue(_minRadius);
-    _minRadius.setMaxValue(_maxRadius);
-
-    _maxRadius.onChange([&]() {
-        _gridIsDirty = true;
-        _minRadius.setMaxValue(_maxRadius);
-    });
-
-    _minRadius.onChange([&]() {
-        _gridIsDirty = true;
-        _maxRadius.setMinValue(_minRadius);
-    });
-
-    addProperty(_maxRadius);
-    addProperty(_minRadius);
+    addProperty(_radii);
 }
 
 bool RenderableRadialGrid::isReady() const {
@@ -238,12 +214,15 @@ void RenderableRadialGrid::update(const UpdateData&) {
         return;
     }
 
+    const float innerRadius = _radii.value().x;
+    const float outerRadius = _radii.value().y;
+
     // Circles
     const int nRadialSegments = _gridSegments.value()[0];
     const float fnCircles = static_cast<float>(nRadialSegments);
-    const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
+    const float deltaRadius = (outerRadius - innerRadius) / fnCircles;
 
-    const bool hasInnerRadius = _minRadius > 0;
+    const bool hasInnerRadius = innerRadius > 0.f;
     const int nCircles = hasInnerRadius ? nRadialSegments : nRadialSegments + 1;
 
     _circles.clear();
@@ -260,11 +239,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
 
     // add an extra inmost circle
     if (hasInnerRadius) {
-        addRing(_circleSegments, _minRadius);
+        addRing(_circleSegments, innerRadius);
     }
 
     for (int i = 0; i < nRadialSegments; ++i) {
-        const float ri = static_cast<float>(i + 1) * deltaRadius + _minRadius;
+        const float ri = static_cast<float>(i + 1) * deltaRadius + innerRadius;
         addRing(_circleSegments, ri);
     }
 
@@ -277,10 +256,10 @@ void RenderableRadialGrid::update(const UpdateData&) {
 
     if (nLines > 1) {
         std::vector<rendering::helper::Vertex> outerVertices =
-            rendering::helper::createRing(nLines, _maxRadius);
+            rendering::helper::createRing(nLines, outerRadius);
 
         std::vector<rendering::helper::Vertex> innerVertices =
-            rendering::helper::createRing(nLines, _minRadius);
+            rendering::helper::createRing(nLines, innerRadius);
 
         for (int i = 0; i < nLines; ++i) {
             const rendering::helper::VertexXYZ vOut =

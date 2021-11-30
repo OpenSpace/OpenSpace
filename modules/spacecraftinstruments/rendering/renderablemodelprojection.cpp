@@ -24,44 +24,32 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreader.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-#include <filesystem>
-#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableModelProjection";
 
-    constexpr const char* KeyGeomModelFile = "GeometryFile";
-    constexpr const char* keyProjection = "Projection";
-    constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
-
     constexpr const char* DestinationFrame = "GALACTIC";
 
     constexpr const std::array<const char*, 7> MainUniformNames = {
-        "_performShading", "directionToSunViewSpace", "modelViewTransform",
-        "projectionTransform", "_projectionFading", "baseTexture", "projectionTexture"
+        "performShading", "directionToSunViewSpace", "modelViewTransform",
+        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
     };
 
-    constexpr const std::array<const char*, 5> FboUniformNames = {
-        "projectionTexture", "needShadowMap", "ProjectorMatrix", "ModelTransform",
-        "boresight"
+    constexpr const std::array<const char*, 6> FboUniformNames = {
+        "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
+        "ModelTransform", "boresight"
     };
 
     constexpr const std::array<const char*, 2> DepthFboUniformNames = {
@@ -84,7 +72,8 @@ namespace {
         std::filesystem::path geometryFile;
 
         // Contains information about projecting onto this planet.
-        ghoul::Dictionary projection [[codegen::reference("newhorizons_projectioncomponent")]];
+        ghoul::Dictionary projection
+            [[codegen::reference("newhorizons_projectioncomponent")]];
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -101,9 +90,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_modelprojection";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_renderable_modelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
@@ -112,25 +99,20 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string file = absPath(p.geometryFile.string());
+    std::filesystem::path file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file,
+        file.string(),
         ghoul::io::ModelReader::ForceRenderInvisible::No,
         ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
 
     addPropertySubOwner(_projectionComponent);
-
-    _projectionComponent.initialize(
-        identifier(),
-        p.projection
-    );
+    _projectionComponent.initialize(identifier(), p.projection);
 
     double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
     setBoundingSphere(boundingSphereRadius);
 
     _performShading = p.performShading.value_or(_performShading);
-
     addProperty(_performShading);
 }
 
@@ -183,7 +165,7 @@ void RenderableModelProjection::initializeGL() {
 
     _projectionComponent.initializeGL();
 
-    float bs = boundingSphere();
+    double bs = boundingSphere();
     _geometry->initialize();
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }
@@ -210,33 +192,46 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.clearAllProjections();
     }
 
-    _up = data.camera.lookUpVectorCameraSpace();
+    glm::vec3 up = data.camera.lookUpVectorCameraSpace();
 
     if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
-        project();
+        for (const Image& i : _imageTimes) {
+            try {
+                glm::mat4 projectorMatrix = attitudeParameters(i.timeRange.start, up);
+                std::shared_ptr<ghoul::opengl::Texture> t =
+                    _projectionComponent.loadProjectionTexture(i.path, i.isPlaceholder);
+                imageProjectGPU(*t, projectorMatrix);
+            }
+            catch (const SpiceManager::SpiceException& e) {
+                LERRORC(e.component, e.what());
+            }
+        }
+        _shouldCapture = false;
     }
 
     _programObject->activate();
 
-    attitudeParameters(_time);
+    try {
+        attitudeParameters(data.time.j2000Seconds(), up);
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        LERRORC(e.component, e.what());
+    }
     _imageTimes.clear();
 
     // Calculate variables to be used as uniform variables in shader
-    const glm::dvec3 bodyPosition = data.modelTransform.translation;
+    const glm::vec3 bodyPos = data.modelTransform.translation;
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) * // Rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)); // Scale
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
-    const glm::vec3 directionToSun = glm::normalize(
-        _sunPosition - glm::vec3(bodyPosition)
+    const glm::dmat4 transform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * transform;
+    const glm::vec3 directionToSun = glm::normalize(_sunPosition - bodyPos);
+    const glm::vec3 directionToSunViewSpace = glm::normalize(
+        glm::mat3(data.camera.combinedViewMatrix()) * directionToSun
     );
-    const glm::vec3 directionToSunViewSpace = glm::normalize(glm::mat3(
-        data.camera.combinedViewMatrix()
-    ) * directionToSun);
 
     _programObject->setUniform(_mainUniformCache.performShading, _performShading);
     _programObject->setUniform(
@@ -307,18 +302,16 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
-    if (time > integrateFromTime) {
-        if (ImageSequencer::ref().isReady()) {
-            if (_projectionComponent.doesPerformProjection()) {
-                _shouldCapture = ImageSequencer::ref().imagePaths(
-                    _imageTimes,
-                    _projectionComponent.projecteeId(),
-                    _projectionComponent.instrumentId(),
-                    time,
-                    integrateFromTime
-                );
-            }
-        }
+    if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
+        _projectionComponent.doesPerformProjection())
+    {
+        _imageTimes = ImageSequencer::ref().imagePaths(
+            _projectionComponent.projecteeId(),
+            _projectionComponent.instrumentId(),
+            time,
+            integrateFromTime
+        );
+        _shouldCapture = !_imageTimes.empty();
     }
 
     glm::dmat3 stateMatrix = data.modelTransform.rotation;
@@ -336,21 +329,22 @@ void RenderableModelProjection::update(const UpdateData& data) {
 }
 
 void RenderableModelProjection::imageProjectGPU(
-                                          const ghoul::opengl::Texture& projectionTexture)
+                                          const ghoul::opengl::Texture& projectionTexture,
+                                                         const glm::mat4& projectorMatrix)
 {
     if (_projectionComponent.needsShadowMap()) {
         _projectionComponent.depthMapRenderBegin();
         _depthFboProgramObject->activate();
         _depthFboProgramObject->setUniform(
             _depthFboUniformCache.ProjectorMatrix,
-            _projectorMatrix
+            projectorMatrix
         );
         _depthFboProgramObject->setUniform(
             _depthFboUniformCache.ModelTransform,
             _transform
         );
 
-        _geometry->render(*_fboProgramObject, false);
+        _geometry->render(*_fboProgramObject, false, true);
 
         _depthFboProgramObject->deactivate();
         _projectionComponent.depthMapRenderEnd();
@@ -373,36 +367,31 @@ void RenderableModelProjection::imageProjectGPU(
     if (_projectionComponent.needsShadowMap()) {
         unitDepthFbo.activate();
         _projectionComponent.depthTexture().bind();
-        _fboProgramObject->setUniform("depthTexture", unitDepthFbo);
+        _fboProgramObject->setUniform(_fboUniformCache.depthTexture, unitDepthFbo);
     }
 
-    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, _projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
     _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
-    _geometry->render(*_fboProgramObject, false);
+    _geometry->render(*_fboProgramObject, false, true);
 
     _fboProgramObject->deactivate();
-
     _projectionComponent.imageProjectEnd();
 }
 
-void RenderableModelProjection::attitudeParameters(double time) {
-    try {
-        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
-            _projectionComponent.instrumentId(),
-            DestinationFrame,
-            time
-        );
+glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::vec3& up)
+{
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
+        _projectionComponent.instrumentId(),
+        DestinationFrame,
+        time
+    );
 
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
-            _projectionComponent.instrumentId()
-        );
-        _boresight = std::move(res.boresightVector);
-    }
-    catch (const SpiceManager::SpiceException&) {
-        return;
-    }
+    SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
+        _projectionComponent.instrumentId()
+    );
+    _boresight = std::move(res.boresightVector);
 
     double lightTime;
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
@@ -418,11 +407,10 @@ void RenderableModelProjection::attitudeParameters(double time) {
 
     const float distance = glm::length(cpos);
     const double radius = boundingSphere();
-
-    _projectorMatrix = _projectionComponent.computeProjectorMatrix(
+    return _projectionComponent.computeProjectorMatrix(
         cpos,
         _boresight,
-        _up,
+        up,
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
@@ -430,16 +418,6 @@ void RenderableModelProjection::attitudeParameters(double time) {
         static_cast<float>(distance + radius),
         _boresight
     );
-}
-
-void RenderableModelProjection::project() {
-    for (const Image& img : _imageTimes) {
-        attitudeParameters(img.timeRange.start);
-        std::shared_ptr<ghoul::opengl::Texture> projTexture =
-            _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
-        imageProjectGPU(*projTexture);
-    }
-    _shouldCapture = false;
 }
 
 }  // namespace openspace

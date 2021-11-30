@@ -78,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Renderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "renderable";
-    return doc;
+    return codegen::doc<Parameters>("renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
@@ -94,9 +92,6 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-    // Now we no longer need the type variable
-    dictionary.removeValue(KeyType);
-
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(

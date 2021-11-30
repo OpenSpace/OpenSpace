@@ -45,20 +45,15 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_static";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_static");
 }
 
 StaticTranslation::StaticTranslation()
-    : _position(
-        PositionInfo,
-        glm::dvec3(0.0),
-        glm::dvec3(-std::numeric_limits<double>::max()),
-        glm::dvec3(std::numeric_limits<double>::max())
-    )
+    : _position(PositionInfo, glm::dvec3(0.0), glm::dvec3(-1e35), glm::dvec3(1e35))
 {
-    _position.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    // @TODO (2021-06-24, emmbr) The exponential sliders do not handle ranges with
+    // negative values very well. When they do, this line can be uncommented
+    //_position.setExponent(20.f);
     addProperty(_position);
 
     _position.onChange([this]() {

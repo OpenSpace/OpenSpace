@@ -33,7 +33,6 @@ namespace openspace::properties {
 template <typename T>
 class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    ListProperty(Property::PropertyInfo info);
     ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
     virtual ~ListProperty() = 0;

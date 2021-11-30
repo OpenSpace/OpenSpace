@@ -1,20 +1,20 @@
 local assetHelper = asset.require('util/asset_helper')
 
-local BvColorLUT = asset.syncedResource({
+local colormaps = asset.syncedResource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 2
 })
 
-asset.export("BvColorLUT", BvColorLUT)
+asset.export("ColorMaps", colormaps)
 
 asset.meta = {
-  Name = "Stars B-V Colormap",
+  Name = "Star Colormaps",
   Version = "2.0",
-  Description = [[A lookup table that maps a B-V color index to an RGB color. 
-    The B-V values are in the range (-0.4, 2.0) and each line maps a value 
-    in that range to a color]],
+  Description = [[Lookup tables used for star datasets, one of the tables map a B-V color
+    index to an RGB color. The B-V values are in the range (-0.4, 2.0) and each line maps
+    a value in that range to a color. The other table is the commonly used viridis map]],
   Author = "OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

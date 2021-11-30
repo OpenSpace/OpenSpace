@@ -26,20 +26,16 @@ local Hyperion = {
     SegmentsPerPatch = 64,
     Layers = {},
     Labels = {
-      Enable = false,
+      -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
+      Enabled = false,
       FileName = labelsPath .. "/hyperion.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
-      LabelsFadeInEnabled = true,
-      FadeInStartingDistance = 500000.0,
-      FadeOutStartingDistance = 1000000.0,
-      LabelsForceDomeRendering = true,
-      LabelsDistanceEPS = 1350000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 20.0,
+      Size = 8.6,
+      FadeInEnabled = true,
+      FadeDistances = { 500000.0, 1000000.0 },
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

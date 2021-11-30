@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("./../../jupiter").Jupiter.Identifier
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/jupiter.jpg",
+  FilePath = texturesPath .. "/jupiter_os.tif",
 }
 
 asset.onInitialize(function () 
@@ -15,8 +15,8 @@ asset.export("layer", layer)
 
 asset.meta = {
   Name = "Jupiter Texutre",
-  Version = "1.0",
-  Description = [[ Default jpg texture for Jupiter]],
+  Version = "2.0",
+  Description = [[ Default texture for Jupiter]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

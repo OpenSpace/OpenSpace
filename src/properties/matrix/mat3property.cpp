@@ -24,97 +24,33 @@
 
 #include <openspace/properties/matrix/mat3property.h>
 
-#include <ghoul/misc/misc.h>
-
-#include <limits>
-#include <sstream>
-#include <vector>
-
-namespace {
-
-glm::mat3x3 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat3x3 result = glm::mat3x3(1.f);
-    lua_pushnil(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat3x3::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat3x3::col_type::length(); ++j) {
-            int hasNext = lua_next(state, -2);
-            if (hasNext != 1) {
-                success = false;
-                return glm::mat3x3(1.f);
-            }
-            if (lua_isnumber(state, -1) != 1) {
-                success = false;
-                return glm::mat3x3(1.f);
-            }
-            else {
-                result[i][j]
-                        = static_cast<glm::mat3x3::value_type>(lua_tonumber(state, -1));
-                lua_pop(state, 1);
-                ++number;
-            }
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::mat3x3 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat3x3::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat3x3::col_type::length(); ++j) {
-            lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));
-            lua_rawseti(state, -2, number);
-            ++number;
-        }
-    }
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, glm::mat3x3 inValue) {
-    outValue = "[";
-    for (glm::length_t i = 0; i < glm::mat3x3::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat3x3::col_type::length(); ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
-        }
-    }
-    outValue.pop_back();
-    outValue += "]";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<float>;
+Mat3Property::Mat3Property(Property::PropertyInfo info, glm::mat3x3 value,
+                           glm::mat3x3 minValue, glm::mat3x3 maxValue,
+                           glm::mat3x3 stepValue)
+    : NumericalProperty<glm::mat3x3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    Mat3Property,
-    glm::mat3x3,
-    glm::mat3x3(1.f),
-    glm::mat3x3(
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest()
-    ),
-    glm::mat3x3(
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max()
-    ),
-    glm::mat3x3(
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f
-    ),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string Mat3Property::className() const {
+    return "Mat3Property";
+}
+
+int Mat3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::mat3x3 Mat3Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::mat3x3>(state, success);
+}
 
 }  // namespace openspace::properties
