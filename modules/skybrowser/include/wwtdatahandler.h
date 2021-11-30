@@ -2,6 +2,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
 #include <modules/skybrowser/ext/tinyxml2/tinyxml2.h>
+#include <modules/space/speckloader.h>
 #include <openspace/documentation/documentation.h>
 #include <unordered_map>
 
@@ -12,43 +13,6 @@
 #include <optional>
 
 namespace openspace::documentation { struct Documentation; }
-
-// Copied from the branch feature/speck-loader
-// Should be changed to a more general way of loading
-// Speck files one that has been created
-namespace openspace::speck {
-
-	BooleanType(SkipAllZeroLines);
-
-	struct Dataset {
-		struct Variable {
-			int index;
-			std::string name;
-		};
-		std::vector<Variable> variables;
-
-		struct Texture {
-			int index;
-			std::string file;
-		};
-		std::vector<Texture> textures;
-
-		int textureDataIndex = -1;
-		int orientationDataIndex = -1;
-
-		struct Entry {
-			glm::dvec3 position;
-			std::vector<float> data;
-			std::optional<std::string> comment;
-		};
-		std::vector<Entry> entries;
-	};
-
-	// In-out methods
-	Dataset loadSpeckFile(std::filesystem::path path,
-		SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
-
-} // namespace openspace::speck\
 
 namespace openspace::wwt {
     const std::string Thumbnail = "Thumbnail";

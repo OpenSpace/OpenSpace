@@ -74,8 +74,8 @@ int unlockTarget(lua_State* L) {
 int setImageLayerOrder(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setImageLayerOrder");
     const std::string id = ghoul::lua::value<std::string>(L, 1);
-    const int i = ghoul::lua::value<int>(L, 2);
-    int order = ghoul::lua::value<int>(L, 3);
+    const int i = ghoul::lua::value<int>(L, 1);
+    int order = ghoul::lua::value<int>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->getPair(id)) {
@@ -169,7 +169,7 @@ int add3dBrowserToSkyBrowserModule(lua_State* L) {
 int addPairToSkyBrowserModule(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addPairToSkyBrowserModule");
     const std::string targetId = ghoul::lua::value<std::string>(L, 1);
-    const std::string browserId = ghoul::lua::value<std::string>(L, 2);
+    const std::string browserId = ghoul::lua::value<std::string>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     LINFO("Add browser " + browserId + " to sky browser module.");
@@ -192,7 +192,7 @@ int getListOfImages(lua_State* L) {
                             "wwt-web-client/master/assets/webclient-explore-root.wtml";
         //std::string hubble = "http://www.worldwidetelescope.org/wwtweb/"
         //"catalog.aspx?W=hubble";
-        std::string directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/");
+        std::string directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/").string();
 
         // 3D images
         std::string http = "${BASE}/sync/http/";
@@ -201,10 +201,10 @@ int getListOfImages(lua_State* L) {
         // Load speck files for 3D positions
         std::filesystem::path globularClusters = absPath(http + globular);
         std::filesystem::path openClusters = absPath(http + open);
-        std::vector<std::filesystem::path> specks = {
-            openClusters, 
-            globularClusters
-        };
+        std::vector<std::filesystem::path> specks; // = {
+            //openClusters, 
+            //globularClusters
+        //};
 
         module->loadImages(root, directory, specks);
 	}
@@ -361,8 +361,8 @@ int getTargetData(lua_State* L) {
             cartesian.z 
         };
         // Convert color to vector so ghoul can read it
-        //glm::ivec3 color = browser->_borderColor.value();
-        std::vector<int> colorVec = { 200, 200, 200 };
+        glm::ivec3 color = module->get3dBrowser()->borderColor();
+        std::vector<int> colorVec = { color.x, color.y, color.z };
 
         ghoul::lua::push(L, module->get3dBrowser()->identifier());
         lua_newtable(L);
@@ -418,8 +418,8 @@ int set3dSelectedImagesAs2dSelection(lua_State* L) {
 int setOpacityOfImageLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setOpacityOfImageLayer");
     const std::string id = ghoul::lua::value<std::string>(L, 1);
-    const int i = ghoul::lua::value<int>(L, 2);
-    double opacity = ghoul::lua::value<double>(L, 3);
+    const int i = ghoul::lua::value<int>(L, 1);
+    double opacity = ghoul::lua::value<double>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->getPair(id)) {
@@ -488,7 +488,7 @@ int removeSelectedImageInBrowser(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::removeSelectedImageInBrowser");
     // Image index
     const int i = ghoul::lua::value<int>(L, 1);
-    const std::string id = ghoul::lua::value<std::string>(L, 2);
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
     // Get browser
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const ImageData& image = module->getWWTDataHandler()->getImage(i);

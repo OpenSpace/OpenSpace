@@ -2,8 +2,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/util/camera.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/camera/camera.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath> // For atan2
 #define _USE_MATH_DEFINES

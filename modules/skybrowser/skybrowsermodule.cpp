@@ -30,9 +30,9 @@
 #include "skybrowsermodule_lua.inl"
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 #include <openspace/util/factorymanager.h>
 
 namespace {
@@ -53,7 +53,6 @@ namespace openspace {
             {
                 "getListOfImages",
                 &skybrowser::luascriptfunctions::getListOfImages,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -61,7 +60,6 @@ namespace openspace {
             {
                 "moveCircleToHoverImage",
                 &skybrowser::luascriptfunctions::moveCircleToHoverImage,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -69,7 +67,6 @@ namespace openspace {
             {
                 "disableHoverCircle",
                 &skybrowser::luascriptfunctions::disableHoverCircle,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -77,7 +74,6 @@ namespace openspace {
             {
                 "loadImagesToWWT",
                 &skybrowser::luascriptfunctions::loadImagesToWWT,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -85,7 +81,6 @@ namespace openspace {
             {
                 "selectImage",
                 &skybrowser::luascriptfunctions::selectImage,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -93,7 +88,6 @@ namespace openspace {
             {
                 "removeSelectedImageInBrowser",
                 &skybrowser::luascriptfunctions::removeSelectedImageInBrowser,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -101,7 +95,6 @@ namespace openspace {
             {
                 "adjustCamera",
                 & skybrowser::luascriptfunctions::adjustCamera,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -109,7 +102,6 @@ namespace openspace {
             {
                 "setSelectedBrowser",
                 & skybrowser::luascriptfunctions::setSelectedBrowser,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -117,7 +109,6 @@ namespace openspace {
             {
                 "getTargetData",
                 &skybrowser::luascriptfunctions::getTargetData,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -125,7 +116,6 @@ namespace openspace {
             {
                 "lockTarget",
                 &skybrowser::luascriptfunctions::lockTarget,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -133,7 +123,6 @@ namespace openspace {
             {
                 "unlockTarget",
                 &skybrowser::luascriptfunctions::unlockTarget,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -141,7 +130,6 @@ namespace openspace {
             {
                 "createTargetBrowserPair",
                 &skybrowser::luascriptfunctions::createTargetBrowserPair,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -149,7 +137,6 @@ namespace openspace {
              {
                 "removeTargetBrowserPair",
                 &skybrowser::luascriptfunctions::removeTargetBrowserPair,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -157,7 +144,6 @@ namespace openspace {
             {
                 "place3dSkyBrowser",
                 &skybrowser::luascriptfunctions::place3dSkyBrowser,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -165,7 +151,6 @@ namespace openspace {
             {
                 "setOpacityOfImageLayer",
                 &skybrowser::luascriptfunctions::setOpacityOfImageLayer,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -173,7 +158,6 @@ namespace openspace {
             {
                 "sendOutIdsToBrowsers",
                 &skybrowser::luascriptfunctions::sendOutIdsToBrowsers,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -181,7 +165,6 @@ namespace openspace {
             {
                 "initializeBrowser",
                 &skybrowser::luascriptfunctions::initializeBrowser,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -189,7 +172,6 @@ namespace openspace {
            {
                 "add3dBrowserToSkyBrowserModule",
                 &skybrowser::luascriptfunctions::add3dBrowserToSkyBrowserModule,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -197,7 +179,6 @@ namespace openspace {
             {
                 "set3dSelectedImagesAs2dSelection",
                 &skybrowser::luascriptfunctions::set3dSelectedImagesAs2dSelection,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -205,7 +186,6 @@ namespace openspace {
             {
                 "centerTargetOnScreen",
                 &skybrowser::luascriptfunctions::centerTargetOnScreen,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -213,7 +193,6 @@ namespace openspace {
             {
                 "setImageLayerOrder",
                 &skybrowser::luascriptfunctions::setImageLayerOrder,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
@@ -221,7 +200,6 @@ namespace openspace {
             {
                 "addPairToSkyBrowserModule",
                 &skybrowser::luascriptfunctions::addPairToSkyBrowserModule,
-                {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"

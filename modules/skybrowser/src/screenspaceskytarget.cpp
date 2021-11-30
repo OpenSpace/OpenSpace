@@ -2,11 +2,11 @@
 
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 

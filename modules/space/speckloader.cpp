@@ -130,6 +130,7 @@ namespace {
     }
 } // namespace
 
+#pragma optimize("", off)
 namespace openspace::speck {
 
 namespace data {
@@ -332,7 +333,8 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             strip(rest);
             entry.comment = rest;
         }
-
+        int i = 0;
+        i += 1;
         res.entries.push_back(std::move(entry));
     }
 
