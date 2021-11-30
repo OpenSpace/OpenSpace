@@ -15,29 +15,29 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_precip_2020 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2020",
+  Name = Name .. " (2020)",
   FilePath = syncedDirectory .. "/temp-precip-2020-current-4096.png",
   Description = Description
 }
 
 local layer_precip_2070 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2070",
+  Name = Name .. " (2070)",
   FilePath = syncedDirectory .. "/temp-precip-2070-current-4096.png",
   Description = Description
 }
 
 local layer_mat_2020 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-mat2020",
+  Name = Name .. " (MAT 2020)",
   FilePath = syncedDirectory .. "/MAT-29-2020-4096.png",
   Description = Description
 }
 
 local layer_mat_2070 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-mat2070",
+  Name = Name .. " (MAT 2070)",
   FilePath = syncedDirectory .. "/MAT-29-2070-4096.png",
   Description = Description
 }

@@ -15,15 +15,15 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_1992 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-1992",
+  Name = Name .. " (1992)",
   FilePath = syncedDirectory .. "/Nightlights_1992.jpg",
   Description = Description
 }
 
 local layer_2002 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2002",
+  Name = Name .. " (2002)",
   FilePath = syncedDirectory .. "/Nightlights_2002.jpg",
   Description = Description
 }

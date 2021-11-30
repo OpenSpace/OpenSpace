@@ -15,22 +15,22 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_combined = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-combined",
+  Name = Name .. " (Combined)",
   FilePath = syncedDirectory .. "/combined.png",
   Description = Description
 }
 
 local layer_currents = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-currents",
+  Name = Name .. " (Currents)",
   FilePath = syncedDirectory .. "/currents.png",
   Description = Description
 }
 
 local layer_labels = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-labels",
+  Name = Name .. " (Labels)",
   FilePath = syncedDirectory .. "/labels.png",
   Description = Description
 }

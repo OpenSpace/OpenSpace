@@ -14,31 +14,23 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local layer_4096 = {
-  Identifier = Identifier,
-  Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
-  Description = Description
-}
-
-local layer_with_background = {
-  Identifier = Identifier,
-  Name = Name,
-  FilePath = syncedDirectory .. "/4096-background.png",
-  Description = Description
-}
-
 local layer_8192 = {
-  Identifier = Identifier,
+  Identifier = Identifier ,
   Name = Name,
   FilePath = syncedDirectory .. "/8192.png",
   Description = Description
 }
 
+local layer_with_background = {
+  Identifier = Identifier .. "-background",
+  Name = Name .. " (Background)",
+  FilePath = syncedDirectory .. "/4096-background.png",
+  Description = Description
+}
+
 asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4096)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_8192)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
 end)
 
 

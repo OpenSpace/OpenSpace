@@ -15,50 +15,50 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_0m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-0m",
+  Name = Name .. " (0m)",
   FilePath = syncedDirectory .. "/0m-new.png",
   Description = Description
 }
 
 local layer_1m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-1m",
+  Name = Name .. " (1m)",
   FilePath = syncedDirectory .. "/1m-new.png",
   Description = Description
 }
 
 local layer_2m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2m",
+  Name = Name .. " (2m)",
   FilePath = syncedDirectory .. "/2m-new.png",
   Description = Description
 }
 
 local layer_3m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-3m",
+  Name = Name .. " (3m)",
   FilePath = syncedDirectory .. "/3m-new.png",
   Description = Description
 }
 
 local layer_4m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-4m",
+  Name = Name .. " (4m)",
   FilePath = syncedDirectory .. "/4m-new.png",
   Description = Description
 }
 
 local layer_5m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-5m",
+  Name = Name .. " (5m)",
   FilePath = syncedDirectory .. "/5m-new.png",
   Description = Description
 }
 
 local layer_6m = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-6m",
+  Name = Name .. " (6m)",
   FilePath = syncedDirectory .. "/6m-new.png",
   Description = Description
 }

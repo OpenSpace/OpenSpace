@@ -22,7 +22,7 @@ local layer_4096 = {
 }
 
 local layer_with_background = {
-  Identifier = Identifier,
+  Identifier = Identifier .. "-background",
   Name = Name,
   FilePath = syncedDirectory .. "/4096-background.png",
   Description = Description

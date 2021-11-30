@@ -15,29 +15,29 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_coastal = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-coastal",
+  Name = Name .. " (Coastal)",
   FilePath = syncedDirectory .. "/Tsunami_Coastal_Map_Lisbon_1755_4k.jpg",
   Description = Description
 }
 
 local layer_energy_coastal = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-energy_coastal",
+  Name = Name .. " (Energy Coastal)",
   FilePath = syncedDirectory .. "/Tsunami_Energy+Coastal_Map_Lisbon_1755_4k.jpg",
   Description = Description
 }
 
 local layer_energy = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-energy",
+  Name = Name .. " (Energy)",
   FilePath = syncedDirectory .. "/Tsunami_Energy_Map_Lisbon_1755_4k.jpg",
   Description = Description
 }
 
 local layer_null = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-null",
+  Name = Name .. " (Null)",
   FilePath = syncedDirectory .. "/Tsunami_Null_Coastal_Map_Lisbon_1755_4k.jpg",
   Description = Description
 }

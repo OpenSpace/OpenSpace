@@ -22,36 +22,36 @@ local layer_base = {
 }
 
 local layer_corals = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-corals",
+  Name = Name .. " (Corals)",
   FilePath = syncedDirectory .. "/corals.png",
   Description = Description
 }
 
 local layer_icerings = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-icerings",
+  Name = Name .. " (Icerings)",
   FilePath = syncedDirectory .. "/icerings.png",
   Description = Description
 }
 
 local layer_ocean = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-ocean",
+  Name = Name .. " (Ocean)",
   FilePath = syncedDirectory .. "/ocean.png",
   Description = Description
 }
 
 local layer_speleothem = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-speleothem",
+  Name = Name .. " (Speleothem)",
   FilePath = syncedDirectory .. "/speleothem.png",
   Description = Description
 }
 
 local layer_tree_rings = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-tree_rings",
+  Name = Name .. " (Tree Rings)",
   FilePath = syncedDirectory .. "/tree_rings.png",
   Description = Description
 }

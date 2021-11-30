@@ -22,22 +22,22 @@ local layer_base = {
 }
 
 local layer_aol = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-aol",
+  Name = Name .. " (AOL)",
   FilePath = syncedDirectory .. "/4096_aol.png",
   Description = Description
 }
 
 local layer_no_labels = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-no_labels",
+  Name = Name .. " (No Labels)",
   FilePath = syncedDirectory .. "/4096_nolabels.png",
   Description = Description
 }
 
 local layer_trans = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-trans",
+  Name = Name .. " (Trans)",
   FilePath = syncedDirectory .. "/4096_trans.png",
   Description = Description
 }

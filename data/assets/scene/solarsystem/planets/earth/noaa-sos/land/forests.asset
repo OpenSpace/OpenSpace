@@ -22,29 +22,29 @@ local layer_combined = {
 }
 
 local layer_extent = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-extent",
+  Name = Name .. " (Extent)",
   FilePath = syncedDirectory .. "/extent.png",
   Description = Description
 }
 
 local layer_gain = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-gain",
+  Name = Name .. " (Gain)",
   FilePath = syncedDirectory .. "/gain.png",
   Description = Description
 }
 
 local layer_loss = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-loss",
+  Name = Name .. " (Loss)",
   FilePath = syncedDirectory .. "/loss.png",
   Description = Description
 }
 
 local layer_map = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-map",
+  Name = Name .. " (Map)",
   FilePath = syncedDirectory .. "/map.png",
   Description = Description
 }

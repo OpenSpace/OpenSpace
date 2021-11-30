@@ -22,16 +22,16 @@ local syncedDirectory_sat = asset.syncedResource({
 })
 
 local layer_radar = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-radar",
+  Name = Name .. " (Radar)",
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
   FilePath = syncedDirectory_radar .. "/122331900.png",
   Description = Description
 }
 
 local layer_sat = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-sat",
+  Name = Name .. " (Sat)",
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
   FilePath = syncedDirectory_sat .. "/linear_rgb_cyl_20120820_1900.jpg",
   Description = Description

@@ -36,15 +36,15 @@ local layer_base = {
 }
 
 local layer_stations = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-stations",
+  Name = Name .. " (Stations)",
   FilePath = syncedDirectory .. "/station_names.png",
   Description = Description
 }
 
 local layer_images = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-images",
+  Name = Name .. " (Images)",
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
   FilePath = syncedDirectory .. "/000011.png",
   Description = Description

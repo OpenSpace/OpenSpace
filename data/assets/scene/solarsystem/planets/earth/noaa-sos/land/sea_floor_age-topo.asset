@@ -22,15 +22,15 @@ local layer_base = {
 }
 
 local layer_aol = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-aol",
+  Name = Name .. " (AOL)",
   FilePath = syncedDirectory .. "/4096_aol.png",
   Description = Description
 }
 
 local layer_orig = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-orig",
+  Name = Name .. " (Original)",
   FilePath = syncedDirectory .. "/4096_orig.png",
   Description = Description
 }

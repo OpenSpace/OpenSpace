@@ -22,8 +22,8 @@ local layer = {
 }
 
 local layer_night = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-night",
+  Name = Name .. " (Night)",
   FilePath = syncedDirectory .. "/4096_night.jpg",
   Description = Description
 }

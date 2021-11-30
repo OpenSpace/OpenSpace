@@ -22,36 +22,39 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_base = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-base",
+  Name = Name .. " (Base)",
   FilePath = syncedDirectory .. "/2048.jpg",
   Description = Description
 }
 
-local layer_base = {
-  Identifier = Identifier,
-  Name = Name,
+local layer_all = {
+  Identifier = Identifier .. "-all",
+  Name = Name .. "(All)",
   FilePath = syncedDirectory .. "/all_earthquakes.jpg",
   Description = Description
 }
 
-local layer_base = {
-  Identifier = Identifier,
-  Name = Name,
+local layer_new = {
+  Identifier = Identifier .. "-new",
+  Name = Name .. " (New)",
   FilePath = syncedDirectory .. "/new.jpg",
   Description = Description
 }
 
-local layer_base = {
-  Identifier = Identifier,
-  Name = Name,
+local layer_nuclear = {
+  Identifier = Identifier .. "-nuclear",
+  Name = Name .. " (Nuclear)",
   FilePath = syncedDirectory .. "/nuclear_plants.png",
   Description = Description
 }
 
 
 asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_all)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_new)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_nuclear)
 end)
 
 

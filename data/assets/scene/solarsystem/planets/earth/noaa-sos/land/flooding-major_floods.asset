@@ -22,8 +22,8 @@ local layer = {
 }
 
 local layer_floods = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-floods",
+  Name = Name .. " (Floods)",
   FilePath = syncedDirectory .. "/flood_3600.png",
   Description = Description
 }

@@ -22,22 +22,22 @@ local layer_base = {
 }
 
 local layer_gray = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-gray",
+  Name = Name .. " (Gray)",
   FilePath = syncedDirectory .. "/gray_earth_with_countries_4096.png",
   Description = Description
 }
 
 local layer_neutral = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-neutral",
+  Name = Name .. " (Neutral)",
   FilePath = syncedDirectory .. "/neutral_earth_with_countries_4096.png",
   Description = Description
 }
 
 local layer_events = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-events",
+  Name = Name .. " (Events)",
   FilePath = syncedDirectory .. "/tsunami_events.png",
   Description = Description
 }

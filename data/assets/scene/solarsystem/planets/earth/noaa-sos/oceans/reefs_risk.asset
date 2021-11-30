@@ -22,22 +22,22 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layer_2012 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2012",
+  Name = Name .. " (2012)",
   FilePath = syncedDirectory .. "/2012_2048.jpg",
   Description = Description
 }
 
 local layer_2030 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2030",
+  Name = Name .. " (2030)",
   FilePath = syncedDirectory .. "/2030_2048.jpg",
   Description = Description
 }
 
 local layer_2050 = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-2050",
+  Name = Name .. " (2050)",
   FilePath = syncedDirectory .. "/2050_2048.jpg",
   Description = Description
 }

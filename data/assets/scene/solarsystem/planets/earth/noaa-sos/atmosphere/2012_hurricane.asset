@@ -22,16 +22,16 @@ local syncedDirectory_sat = asset.syncedResource({
 })
 
 local layer_names = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-names",
+  Name = Name .. "(Names)",
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
   FilePath = syncedDirectory_names .. "/SOSnamesalpha.000000.png",
   Description = Description
 }
 
 local layer_sat = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-sat",
+  Name = Name .. "(Sat)",
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
   FilePath = syncedDirectory_sat .. "/linear_rgb_cyl_20120515_0000.jpg",
   Description = Description

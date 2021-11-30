@@ -22,8 +22,8 @@ local layer_fraction = {
 }
 
 local layer_solar = {
-  Identifier = Identifier,
-  Name = Name,
+  Identifier = Identifier .. "-solar",
+  Name = Name .. " (Solar)",
   FilePath = syncedDirectory .. "/solar.png",
   Description = Description
 }

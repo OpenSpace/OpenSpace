@@ -14,8 +14,6 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local Description = [[..]]
-
 local layer = {
   Identifier = Identifier,
   Name = Name,
