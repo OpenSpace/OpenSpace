@@ -176,7 +176,7 @@ int bindJoystickAxis(lua_State* L) {
 }
 
 int bindJoystickAxisProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 9 }, "lua::bindJoystickAxisProperty");
+    ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxisProperty");
     auto [joystickName, axis, propertyUri, min, max, shouldInvert, isRemote] =
         ghoul::lua::values<
             std::string, int, std::string, std::optional<float>, std::optional<float>,
