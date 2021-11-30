@@ -53,10 +53,16 @@ local XBoxController = {
   }
 }
 
-isPropertyBound = true;
-
 local freezeValue = function(name, axis, min, max)
   return [[
+  local joystickType = openspace.navigation.joystickAxis(']] .. name .. "', " .. axis .. [[);
+  local isPropertyBound = true;
+  if joystickType == "None" then
+    isPropertyBound = false;
+  else
+    isPropertyBound = true;
+  end
+
   if isPropertyBound then
     openspace.navigation.bindJoystickAxis(']] .. name .. "', " .. axis .. [[, "None");
     isPropertyBound = false;
