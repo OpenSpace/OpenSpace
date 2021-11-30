@@ -36,7 +36,7 @@ namespace openspace::interaction {
 float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-    if(joystickName.empty()) {
+    if (joystickName.empty()) {
         float res = std::accumulate(
             begin(),
             end(),
@@ -63,7 +63,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
     }
 
     if (!state) {
-        return 0.0f;
+        return 0.f;
     }
 
     return state->axes[axis];
@@ -72,7 +72,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
 bool JoystickInputStates::button(const std::string& joystickName, int button, JoystickAction action) const {
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-    if(joystickName.empty()) {
+    if (joystickName.empty()) {
         bool res = std::any_of(
             begin(),
             end(),

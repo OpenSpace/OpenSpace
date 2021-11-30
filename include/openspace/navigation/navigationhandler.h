@@ -98,7 +98,7 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickAxisMapping(const std::string& joystickName,
+    void setJoystickAxisMapping(std::string joystickName,
         int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
@@ -107,8 +107,8 @@ public:
         bool isSticky = false, double sensitivity = 0.0
     );
 
-    void setJoystickAxisMappingProperty(const std::string& joystickName,
-        int axis, const std::string& propertyUri,
+    void setJoystickAxisMappingProperty(std::string joystickName,
+        int axis, std::string propertyUri,
         float min = 0.f, float max = 1.f,
         JoystickCameraStates::AxisInvert shouldInvert =
         JoystickCameraStates::AxisInvert::No, bool isRemote = true

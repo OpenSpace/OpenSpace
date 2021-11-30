@@ -54,7 +54,7 @@ public:
     };
 
     enum class JoystickType {
-        JoystickLike = 0,
+        JoystickLike,
         TriggerLike
     };
 
@@ -88,14 +88,14 @@ public:
     void updateStateFromInput(
         const JoystickInputStates& joystickInputStates, double deltaTime);
 
-    void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,
+    void setAxisMapping(std::string joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         JoystickType joystickType = JoystickType::JoystickLike,
         bool isSticky = false, double sensitivity = 0.0
     );
 
-    void setAxisMappingProperty(const std::string& joystickName, int axis,
-        const std::string& propertyUri, float min = 0.f, float max = 1.f,
+    void setAxisMappingProperty(std::string joystickName, int axis,
+        std::string propertyUri, float min = 0.f, float max = 1.f,
         AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
     );
 
@@ -119,7 +119,6 @@ private:
         // be accessed much more often and thus have to be more efficient. And storing a few
         // extra AxisInformation that are not used will not matter that much; finding an axis
         // location in a potential map each frame, however, would
-
         std::array<AxisInformation, JoystickInputState::MaxAxes> axisMapping;
 
         // This array is used to store the old axis values from the previous frame,
@@ -127,9 +126,16 @@ private:
         std::array<float, JoystickInputState::MaxAxes> prevAxisValues;
 
         struct ButtonInformation {
+            // The script that is run when the button is activated
             std::string command;
+
+            // When is the button considered activated
             JoystickAction action;
+
+            // If the script should be syncronised to other remote sessions or not
             ButtonCommandRemote synchronization;
+
+            // Short documentation on what the script of this button does
             std::string documentation;
         };
 
@@ -140,8 +146,8 @@ private:
 
     // Find the item in _joystickCameraStates that corresponds to the given joystickName
     // return a pointer to the item, if not found then return nullptr
-    JoystickCameraState* getJoystickCameraState(const std::string& joystickName);
-    const JoystickCameraState* getJoystickCameraState(const std::string& joystickName) const;
+    JoystickCameraState* joystickCameraState(const std::string& joystickName);
+    const JoystickCameraState* joystickCameraState(const std::string& joystickName) const;
 
     // Ues getJoystickCameraState(name) to find the joystickCameraState that
     // corresponds to the given joystickName. If not found then add a new item if possible
@@ -204,9 +210,9 @@ inline std::string to_string(
 {
     using T = openspace::interaction::JoystickCameraStates::JoystickType;
     switch (value) {
-    case T::JoystickLike: return "JoystickLike";
-    case T::TriggerLike:  return "TriggerLike";
-    default:              return "";
+        case T::JoystickLike: return "JoystickLike";
+        case T::TriggerLike:  return "TriggerLike";
+        default:              return "";
     }
 }
 
