@@ -95,7 +95,6 @@ NavigationState::NavigationState(std::string anchor_, std::string aim_,
 CameraPose NavigationState::cameraPose() const {
     const SceneGraphNode* referenceFrameNode = sceneGraphNode(referenceFrame);
     const SceneGraphNode* anchorNode = sceneGraphNode(anchor);
-    const SceneGraphNode* aimNode = sceneGraphNode(aim);
 
     if (!anchorNode) {
         LERROR(fmt::format(
@@ -103,12 +102,7 @@ CameraPose NavigationState::cameraPose() const {
         ));
         return CameraPose();
     }
-    if (!aim.empty() && !aimNode) {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as aim.", aim
-        ));
-        return CameraPose();
-    }
+
     if (!referenceFrameNode) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as reference frame.",
@@ -117,23 +111,20 @@ CameraPose NavigationState::cameraPose() const {
         return CameraPose();
     }
 
-    // @TODO (2021-12-01, emmbr) The aim is not used at all below, so this code does
-    // not work if the navigation state has a defined aim node. This should be fixed
-
     CameraPose resultingPose;
 
-    const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
-    const glm::dmat3 referenceFrameTransform = referenceFrameNode->worldRotationMatrix();
+    const glm::dmat3 referenceFrameTransform = referenceFrameNode->modelTransform();
 
-    resultingPose.position = anchorWorldPosition + referenceFrameTransform * position;
+    resultingPose.position = anchorNode->worldPosition() +
+        referenceFrameTransform * glm::dvec3(position);
 
     glm::dvec3 upVector = up.has_value() ?
-        glm::normalize(referenceFrameTransform * up.value()) :
+        glm::normalize(referenceFrameTransform * *up) :
         glm::dvec3(0.0, 1.0, 0.0);
 
-    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    // Construct vectors of a "neutral" view, i.e. when the anchor is centered in view
     glm::dvec3 neutralView =
-        glm::normalize(anchorWorldPosition - resultingPose.position);
+        glm::normalize(anchorNode->worldPosition() - resultingPose.position);
 
     glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0),
@@ -141,8 +132,8 @@ CameraPose NavigationState::cameraPose() const {
         upVector
     )));
 
-    glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.f, 0.f, 0.f));
-    glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.f, -1.f, 0.f));
+    glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.0, -1.0, 0.0));
 
     resultingPose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
