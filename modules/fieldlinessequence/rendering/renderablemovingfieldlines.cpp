@@ -33,7 +33,6 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 
-
 #include <fstream>
 #pragma optimize("", off)
 namespace {
