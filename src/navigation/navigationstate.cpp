@@ -95,16 +95,17 @@ NavigationState::NavigationState(std::string anchor_, std::string aim_,
 CameraPose NavigationState::cameraPose() const {
     const SceneGraphNode* referenceFrameNode = sceneGraphNode(referenceFrame);
     const SceneGraphNode* anchorNode = sceneGraphNode(anchor);
+    const SceneGraphNode* aimNode = sceneGraphNode(aim);
 
     if (!anchorNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as anchor.", referenceFrame
+            "Could not find scene graph node '{}' used as anchor.", anchor
         ));
         return CameraPose();
     }
-    if (!aim.empty() && !sceneGraphNode(aim)) {
+    if (!aim.empty() && !aimNode) {
         LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as aim.", referenceFrame
+            "Could not find scene graph node '{}' used as aim.", aim
         ));
         return CameraPose();
     }
@@ -115,6 +116,9 @@ CameraPose NavigationState::cameraPose() const {
         );
         return CameraPose();
     }
+
+    // @TODO (2021-12-01, emmbr) The aim is not used at all below, so this code does
+    // not work if the navigation state has a defined aim node. This should be fixed
 
     CameraPose resultingPose;
 

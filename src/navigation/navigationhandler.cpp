@@ -131,8 +131,7 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(NavigationState state)
-{
+void NavigationHandler::setNavigationStateNextFrame(NavigationState state) {
     _pendingNavigationState = std::move(state);
 }
 

@@ -37,6 +37,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
+using namespace std::string_literals;
+
 namespace {
     constexpr const double Epsilon = 1e-5;
 } // namespace
@@ -87,7 +89,7 @@ int goTo(lua_State* L) {
     }
 
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("TargetType", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
     if (useUpFromTargetOrDuration.has_value()) {
         if (std::holds_alternative<bool>(*useUpFromTargetOrDuration)) {
@@ -134,7 +136,7 @@ int goToHeight(lua_State* L) {
     }
 
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", std::string("Node"));
+    insDict.setValue("TargetType", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
     if (useUpFromTargetOrDuration.has_value()) {
@@ -189,7 +191,7 @@ int goToNavigationState(lua_State* L) {
     }
 
     ghoul::Dictionary instruction;
-    instruction.setValue("TargetType", std::string("NavigationState"));
+    instruction.setValue("TargetType", "NavigationState"s);
     instruction.setValue("NavigationState", navigationState);
 
     if (duration.has_value()) {
