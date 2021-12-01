@@ -130,7 +130,7 @@ namespace openspace {
         _target->highlight(color);
     }
 
-    bool Pair::isTargetFadeFinished(float goalState)
+    bool Pair::isTargetFadeFinished(float goalState) const
     {
         // Is fading finished?
         float targetDiff = abs(_target->opacity() - goalState);
@@ -138,13 +138,13 @@ namespace openspace {
         return targetDiff < FadeThreshold;
     }
 
-    bool Pair::isBrowserFadeFinished(float goalState)
+    bool Pair::isBrowserFadeFinished(float goalState) const
     {
         float browserDiff = abs(_browser->opacity() - goalState);
         return browserDiff < FadeThreshold;
     }
 
-    bool Pair::isCoordOnPair(glm::vec2 mousePosition)
+    bool Pair::isCoordOnPair(glm::vec2 mousePosition) const
     {
         const bool onBrowser = _browser->coordIsInsideCornersScreenSpace(mousePosition);
         const bool onTarget = _target->coordIsInsideCornersScreenSpace(mousePosition);
@@ -164,12 +164,12 @@ namespace openspace {
         _target->setEnabled(enable);
     }
 
-    bool Pair::isEnabled()
+    bool Pair::isEnabled() const
     {
         return _target->isEnabled() && _browser->isEnabled();
     }
 
-    bool Pair::isLocked()
+    bool Pair::isLocked() const
     {
         return _target->isLocked();
     }
@@ -182,42 +182,42 @@ namespace openspace {
         _browser->updateBorderColor();
     }
 
-    glm::ivec3 Pair::borderColor()
+    glm::ivec3 Pair::borderColor() const
     {
         return _browser->borderColor();
     }
 
-    glm::dvec3 Pair::targetDirectionEquatorial()
+    glm::dvec3 Pair::targetDirectionEquatorial() const
     {
         return _target->equatorialAim();
     }
 
-    glm::dvec3 Pair::targetDirectionGalactic()
+    glm::dvec3 Pair::targetDirectionGalactic() const
     {
         return _target->directionGalactic();
     }
 
-    std::string Pair::browserGuiName()
+    std::string Pair::browserGuiName() const
     {
         return _browser->guiName();
     }
 
-    const std::string& Pair::browserId() const
+    std::string Pair::browserId() const
     {
         return _browser->identifier();
     }
 
-    const std::string& Pair::targetId() const
+    std::string Pair::targetId() const
     {
         return _target->identifier();
     }
 
-    float Pair::verticalFov()
+    float Pair::verticalFov() const
     {
         return _browser->verticalFov();
     }
 
-    const std::deque<int>& Pair::getSelectedImages()
+    const std::deque<int>& Pair::getSelectedImages() const
     {
         return _browser->getSelectedImages();
     }
@@ -236,17 +236,17 @@ namespace openspace {
         }
     }
 
-    void Pair::removeSelectedImage(const int i)
+    void Pair::removeSelectedImage(int i)
     {
         _browser->removeSelectedImage(i);
     }
 
-    void Pair::loadImageCollection(std::string collection)
+    void Pair::loadImageCollection(const std::string& collection)
     {
         _browser->loadImageCollection(collection);
     }
 
-    void Pair::setImageOpacity(const int i, float opacity)
+    void Pair::setImageOpacity(int i, float opacity)
     {
         _browser->setImageOpacity(i, opacity);
     }
@@ -293,7 +293,7 @@ namespace openspace {
         startAnimation(viewDirection, currentFov, false);
     }
 
-    bool Pair::hasFinishedFading(float goalState)
+    bool Pair::hasFinishedFading(float goalState) const
     {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
     }

@@ -45,55 +45,66 @@ public:
     // user-defined copy assignment (copy-and-swap idiom)
     Pair& operator=(Pair other);
 
-
-    void lock();
-    void unlock();
-    void setImageOrder(int i, int order);
-    void removeHighlight(glm::ivec3 color);
+    // Target & Browser
+    void initialize();
+    // Highlighting
+    void removeHighlight(glm::ivec3 color); 
     void highlight(glm::ivec3 color);
-    void setEnabled(bool enable);
-    void disable();
-    
+    // Animation
     void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);
-    void centerTargetOnScreen();
     void incrementallyAnimateToCoordinate(double deltaTime);
     void incrementallyFade(float goalState, float fadeTime, float deltaTime);
-    bool hasFinishedFading(float goalState);
-    bool isCoordOnPair(glm::vec2 mousePosition);    
-    bool isEnabled();
-    bool isLocked();
 
-    void initialize();
-    glm::ivec3 borderColor();
-    glm::dvec3 targetDirectionEquatorial();
-    glm::dvec3 targetDirectionGalactic();
-    std::string browserGuiName();
-    const std::string& browserId() const;
-    const std::string& targetId() const;
-    float verticalFov();
-    const std::deque<int>& getSelectedImages();
-    void selectImage(const ImageData& image, const int i);
-    void removeSelectedImage(const int i);
-    void loadImageCollection(std::string collection);
-    void setImageOpacity(const int i, float opacity);
+    // Browser
     void sendIdToBrowser();
     void updateBrowserSize();
+
+    // Target
+    void centerTargetOnScreen();
+    void lock();
+    void unlock();
+
+    // Boolean functions
+    bool hasFinishedFading(float goalState) const;
+    bool isCoordOnPair(glm::vec2 mousePosition) const;
+    bool isEnabled() const;
+    bool isLocked() const;
+
+    // Setters
+    void setEnabled(bool enable);
     void setIsSyncedWithWwt(bool isSynced);
 
+    // Getters by value 
+    float verticalFov() const;
+    glm::ivec3 borderColor() const;
+    glm::dvec3 targetDirectionEquatorial() const;
+    glm::dvec3 targetDirectionGalactic() const;
+    std::string browserGuiName() const;
+    std::string browserId() const;
+    std::string targetId() const;
 
+    // Getters by reference
     ScreenSpaceSkyTarget* getTarget();
     ScreenSpaceSkyBrowser* getBrowser();
+    const std::deque<int>& getSelectedImages() const;
     
+    // WorldWide Telescope image handling
+    void setImageOrder(int i, int order);
+    void selectImage(const ImageData& image, int i);
+    void removeSelectedImage(int i);
+    void loadImageCollection(const std::string& collection);
+    void setImageOpacity(int i, float opacity);
+
+    // Comparision operators
     friend bool operator==(const Pair& lhs, 
                            const Pair& rhs);
     friend bool operator!=(const Pair& lhs, 
                            const Pair& rhs);
 
 private:
-
     static std::string _selected;
-    bool isTargetFadeFinished(float goalState);
-    bool isBrowserFadeFinished(float goalState);
+    bool isTargetFadeFinished(float goalState) const;
+    bool isBrowserFadeFinished(float goalState) const;
 
     ScreenSpaceSkyTarget* _target{ nullptr };
     ScreenSpaceSkyBrowser* _browser{ nullptr };
