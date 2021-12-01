@@ -25,13 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-
-#include <modules/skybrowser/include/pair.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
-#include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/distanceconstants.h>
 #include <fstream>
@@ -39,6 +33,11 @@
 namespace openspace {
 
 class RenderableSkyBrowser;
+class ScreenSpaceImageLocal;
+class WwtDataHandler;
+class Pair;
+class SceneGraphNode;
+class ImageData;
 
 enum class Transparency {
     Transparent,
@@ -105,8 +104,6 @@ protected:
     void internalDeinitialize() override;
 
 private:
-
-    
     // The browsers and targets
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };

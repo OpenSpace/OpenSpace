@@ -1,7 +1,7 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 
 #include <modules/skybrowser/include/utility.h>
-
+#include <modules/space/speckloader.h>
 #include <openspace/util/httprequest.h> // For downloading files from url
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>

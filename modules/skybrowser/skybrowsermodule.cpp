@@ -27,7 +27,13 @@
 
 #include <modules/skybrowser/include/renderableskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/pair.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
 #include "skybrowsermodule_lua.inl"
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -710,9 +716,9 @@ void SkyBrowserModule::lookAt3dBrowser() {
 void SkyBrowserModule::place3dBrowser(const ImageData& image, const int i)
 {
     // If the image has a 3D position, add it to the scene graph
-    if (image.has3dCoords && get3dBrowser()) {
-        get3dBrowser()->displayImage(image.imageUrl, i);
-        get3dBrowser()->placeAt3dPosition(image.position3d, image.fov);
+    if (image.has3dCoords && _browser3d) {
+        _browser3d->displayImage(image.imageUrl, i);
+        _browser3d->placeAt3dPosition(image.position3d, image.fov);
     }
     else {
         LINFO("Image has no 3D coordinate!");

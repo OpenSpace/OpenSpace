@@ -31,16 +31,12 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/documentation/documentation.h>
 #include <deque>
-#include <thread>
 
 namespace openspace {
-
-class ImageData;
 
 class WwtCommunicator : public Browser {
 
 public:
-
     WwtCommunicator(const ghoul::Dictionary& dictionary);
     WwtCommunicator(WwtCommunicator const&) = default;
     virtual ~WwtCommunicator();
@@ -80,7 +76,6 @@ protected:
     properties::DVec2Property _equatorialAim;
     properties::FloatProperty _verticalFov;
     properties::IVec3Property _borderColor;
-    
 
     std::deque<int> _selectedImages;
     bool _hasLoadedImages{ false };

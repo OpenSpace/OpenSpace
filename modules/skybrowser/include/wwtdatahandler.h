@@ -6,12 +6,6 @@
 #include <openspace/documentation/documentation.h>
 #include <unordered_map>
 
-// For speck loading
-#include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <filesystem>
-#include <optional>
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::wwt {
@@ -52,7 +46,6 @@ namespace openspace {
 	class WwtDataHandler {
 	
 	public:
-        // Constructor and destructor
 		WwtDataHandler() = default;
 		~WwtDataHandler();
 
@@ -62,7 +55,6 @@ namespace openspace {
         const ImageData& getImage(int i) const;
 
 	private:
-
         void saveImageFromNode(tinyxml2::XMLElement* node, std::string collection);
         void saveImagesFromXml(tinyxml2::XMLElement* root, std::string collection);
 
@@ -73,7 +65,6 @@ namespace openspace {
 
 		// 3D position data loaded from speck files
 		std::unordered_map<std::string, glm::dvec3> _3dPositions;
-        
 	};
 }
 
