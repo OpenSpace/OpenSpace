@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../phobos").Phobos.Identifier
+local globeIdentifier = asset.require("./../../phobos_globe").Phobos_Globe.Identifier
 
 local layer = {
   Identifier = "Phobos_Global_Shaded_Relief_USGS",

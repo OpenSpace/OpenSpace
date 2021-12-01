@@ -1,0 +1,48 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../mar097').Kernels
+
+
+local PhobosGlobe = {
+  Identifier = "Phobos_Globe",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_PHOBOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PHOBOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 27000, 22000, 18000 },
+    SegmentsPerPatch = 90,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Phobos_Globe",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[One of two moons of Mars.]]
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { PhobosGlobe })
+
+
+asset.meta = {
+  Name = "Phobos Globe",
+  Version = "1.0",
+  Description = [[ RenderableGlobe for Phobos.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Phobos"}
+}
