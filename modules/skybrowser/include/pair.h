@@ -37,8 +37,8 @@ class ImageData;
 class Pair {
 public:
 
-    constexpr static const float AcceptableDiff = 0.01f;
-    constexpr static const double epsilon = std::numeric_limits<double>::epsilon();
+    constexpr static const float FadeThreshold = 0.01f;
+    constexpr static const double AnimationThreshold = 0.0001f;;
 
     Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
     Pair(Pair const&) = default;
@@ -51,7 +51,7 @@ public:
     void setImageOrder(int i, int order);
     void removeHighlight(glm::ivec3 color);
     void highlight(glm::ivec3 color);
-    void enable();
+    void setEnabled(bool enable);
     void disable();
     
     void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);

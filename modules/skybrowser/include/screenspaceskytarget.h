@@ -46,7 +46,7 @@ namespace openspace {
 
         // Target directions
         glm::dvec3 directionGalactic() const;
-        glm::dvec3 directionEquatorial() const;
+        glm::dvec3 equatorialAim() const;
 
         // Locking functionality
         bool isLocked() const;

@@ -801,7 +801,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
                  pair->incrementallyFade(transparency, _fadingTime, deltaTime);
              }
              else if (isPairFinished && goal == Transparency::Transparent) {
-                 pair->disable();
+                 pair->setEnabled(false);
              }
              isAllFinished &= isPairFinished;
          }

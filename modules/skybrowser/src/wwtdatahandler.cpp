@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 
 namespace {
-    constexpr const char* _loggerCat = "WWTDataHandler";
+    constexpr const char* _loggerCat = "WwtDataHandler";
 } //namespace
 
 namespace openspace {

@@ -195,16 +195,16 @@ int getListOfImages(lua_State* L) {
         std::string directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/").string();
 
         // 3D images
-        std::string http = "${BASE}/sync/http/";
+        std::string http = "${SYNC}/http/";
         std::string globular = "digitaluniverse_globularclusters_speck/2/gc.speck";
         std::string open = "digitaluniverse_openclusters_speck/2/oc.speck";
         // Load speck files for 3D positions
         std::filesystem::path globularClusters = absPath(http + globular);
         std::filesystem::path openClusters = absPath(http + open);
-        std::vector<std::filesystem::path> specks; // = {
-            //openClusters, 
-            //globularClusters
-        //};
+        std::vector<std::filesystem::path> specks = {
+            openClusters, 
+            globularClusters
+        };
 
         module->loadImages(root, directory, specks);
 	}

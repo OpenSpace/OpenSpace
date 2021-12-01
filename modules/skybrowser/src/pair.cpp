@@ -43,13 +43,16 @@ namespace openspace {
     {
         ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
         ghoul_assert(target != nullptr, "Sky target is null pointer!");
-
+        
+        // Set browser callback functions
         // Set callback functions so that the target and the browser update each other
         _browser->setCallbackEquatorialAim(
             [&](const glm::dvec3& equatorialAim, bool) {
-                double diff = glm::length(equatorialAim - _target->directionEquatorial());
-                if ( diff > epsilon) {
-                    _target->startAnimation(equatorialAim, false);
+                double diff = glm::length(equatorialAim - _target->equatorialAim());
+                if ( diff > AnimationThreshold) {
+                    _target->setCartesianPosition(
+                        skybrowser::equatorialToScreenSpace3d(equatorialAim)
+                    );
                 }
             }
         );
@@ -74,6 +77,8 @@ namespace openspace {
                 _target->setEnabled(enabled);
             }
         ); 
+
+        // Set target callback functions
         _target->setCallbackEnabled(
             [&](bool enabled) {
                 _browser->setEnabled(enabled);
@@ -82,9 +87,9 @@ namespace openspace {
         _target->setCallbackPosition(
             [&](glm::vec3 localCameraPosition) {
                 double diff = glm::length(
-                    _browser->equatorialAimCartesian() - _target->directionEquatorial()
+                    _browser->equatorialAim() - _target->equatorialAim()
                 );
-                if (diff > epsilon) {
+                if (diff > AnimationThreshold) {
                     _browser->setEquatorialAim(
                         skybrowser::localCameraToEquatorial(localCameraPosition)
                     );
@@ -130,13 +135,13 @@ namespace openspace {
         // Is fading finished?
         float targetDiff = abs(_target->opacity() - goalState);
         
-        return targetDiff < AcceptableDiff;
+        return targetDiff < FadeThreshold;
     }
 
     bool Pair::isBrowserFadeFinished(float goalState)
     {
         float browserDiff = abs(_browser->opacity() - goalState);
-        return browserDiff < AcceptableDiff;
+        return browserDiff < FadeThreshold;
     }
 
     bool Pair::isCoordOnPair(glm::vec2 mousePosition)
@@ -153,16 +158,10 @@ namespace openspace {
         return onBrowser || onTarget;
     }
 
-    void Pair::enable()
+    void Pair::setEnabled(bool enable)
     {
-        _browser->property("Enabled")->set(true);
-        _target->property("Enabled")->set(true);
-    }
-
-    void Pair::disable()
-    {
-        _browser->property("Enabled")->set(false);
-        _target->property("Enabled")->set(false);
+        _browser->setEnabled(enable);
+        _target->setEnabled(enable);
     }
 
     bool Pair::isEnabled()
@@ -190,7 +189,7 @@ namespace openspace {
 
     glm::dvec3 Pair::targetDirectionEquatorial()
     {
-        return _target->directionEquatorial();
+        return _target->equatorialAim();
     }
 
     glm::dvec3 Pair::targetDirectionGalactic()
@@ -233,7 +232,7 @@ namespace openspace {
 
             // Animate the target to the image coordinate position
             unlock();
-            startAnimation(image.equatorialCartesian, image.fov);
+            startAnimation(image.equatorialCartesian, image.fov, true);
         }
     }
 
@@ -277,9 +276,9 @@ namespace openspace {
         }
     }
 
-    void Pair::startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter)
+    void Pair::startAnimation(glm::dvec3 equatorialCoords, float fovEnd, bool shouldLockAfter)
     {
-        _target->startAnimation(coordsEnd, shouldLockAfter);
+        _target->startAnimation(equatorialCoords, shouldLockAfter);
         _browser->startFovAnimation(fovEnd);
     }
 

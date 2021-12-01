@@ -59,7 +59,7 @@ public:
     float verticalFov() const;
     glm::dvec2 fieldsOfView();
     bool hasLoadedImages() const;
-    glm::dvec3 equatorialAimCartesian() const;
+    glm::dvec3 equatorialAim() const;
 
     // Setters
     void setHasLoadedImages(bool isLoaded);

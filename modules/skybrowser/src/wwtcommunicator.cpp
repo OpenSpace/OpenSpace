@@ -156,7 +156,7 @@ namespace openspace {
         return _hasLoadedImages;
     }
 
-    glm::dvec3 WwtCommunicator::equatorialAimCartesian() const
+    glm::dvec3 WwtCommunicator::equatorialAim() const
     {
         return skybrowser::sphericalToCartesian(_equatorialAim);
     }

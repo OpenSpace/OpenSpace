@@ -75,7 +75,7 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.0f, 0.1f, 70.f)
         , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
-        , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 1.0)
+        , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 0.005)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
         , _color(220, 220, 220)  
     {
@@ -250,10 +250,10 @@ namespace openspace {
         return _isAnimated;
     }
 
-    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 end, bool shouldLockAfter)
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 equatorialCoordsEnd, bool shouldLockAfter)
     {
-        _animationStart = glm::normalize(directionEquatorial());
-        _animationEnd = glm::normalize(end);
+        _animationStart = glm::normalize(equatorialAim());
+        _animationEnd = glm::normalize(equatorialCoordsEnd);
         _shouldLockAfterAnimation = shouldLockAfter;
         _isAnimated = true;
         _isLocked = false;
@@ -282,21 +282,18 @@ namespace openspace {
             _cartesianPosition = skybrowser::equatorialToScreenSpace3d(newDir);
             
             // Update position
-            _animationStart = glm::normalize(newDir);
+            _animationStart = glm::normalize(equatorialAim());
         }
         else {
             // Set the exact target position 
-            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(_animationEnd);
+            _cartesianPosition = glm::vec3(skybrowser::equatorialToScreenSpace3d(_animationEnd));
             _isAnimated = false;
-            
             // Lock target when it first arrives to the position
-            if (!_isLocked && _shouldLockAfterAnimation) {
-                _isLocked = true;
-            }
+            setLock(_shouldLockAfterAnimation);
         }      
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::directionEquatorial() const {
+    glm::dvec3 ScreenSpaceSkyTarget::equatorialAim() const {
         // Calculate the galactic coordinate of the target direction 
         // projected onto the celestial sphere
         return skybrowser::localCameraToEquatorial(_cartesianPosition.value());
@@ -324,7 +321,7 @@ namespace openspace {
     {
         _isLocked = isLocked;
         if (_isLocked) {
-            _lockedCoordinates = directionEquatorial();
+            _lockedCoordinates = equatorialAim();
         }
     }
     void ScreenSpaceSkyTarget::setCallbackEnabled(std::function<void(bool)> function)
