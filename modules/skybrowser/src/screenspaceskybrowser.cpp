@@ -11,6 +11,8 @@
 #include <optional>
 #include <random>
 
+
+#pragma optimize("", off)
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
@@ -74,13 +76,16 @@ namespace openspace {
         glm::vec2 screenPosition = _cartesianPosition.value();
         _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));
 
-        // Generate a random border color
+        // Generate a random border color with sufficient lightness and a n
         std::random_device rd;
-        std::uniform_int_distribution<int> hue(0, 255);
-        int value = 220;
-        int saturation = 128;
-        glm::ivec3 hsvColor = glm::ivec3(hue(rd), saturation , value);
-        _borderColor = glm::rgbColor(hsvColor);
+        // Hue is in the unit degrees [0, 360]
+        std::uniform_real_distribution<float> hue(0.f, 360.f); 
+        // Value in saturation are in the unit percent [0,1]
+        float value = 0.95f; // Brightness
+        float saturation = 0.5f;
+        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation , value);
+        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor)*255.f);
+        _borderColor = rgbColor;
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
