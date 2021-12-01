@@ -712,7 +712,7 @@ void SkyBrowserModule::place3dBrowser(const ImageData& image, const int i)
     // If the image has a 3D position, add it to the scene graph
     if (image.has3dCoords && get3dBrowser()) {
         get3dBrowser()->displayImage(image.imageUrl, i);
-        get3dBrowser()->placeAt3dPosition(image);
+        get3dBrowser()->placeAt3dPosition(image.position3d, image.fov);
     }
     else {
         LINFO("Image has no 3D coordinate!");

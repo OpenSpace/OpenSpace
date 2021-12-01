@@ -1,13 +1,9 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYBROWSER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___RENDERABLESKYBROWSER___H__
 
-#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/wwtcommunicator.h>
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/triggerproperty.h>
-#include <deque>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -33,8 +29,6 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace::documentation { struct Documentation; }
 
-#pragma optimize("", off)
-
 namespace openspace {
 
     class RenderableSkyBrowser : public RenderablePlane, public WwtCommunicator
@@ -51,11 +45,10 @@ namespace openspace {
         void update(const UpdateData& data) override;
 
         // Set up initialization with wwt
-        void stopSyncingWwtView();
         void setIdInBrowser();
 
         // Place
-        void placeAt3dPosition(const ImageData& image);
+        void placeAt3dPosition(const glm::dvec3& positionSpeck, float verticalFov);
 
     private:
 

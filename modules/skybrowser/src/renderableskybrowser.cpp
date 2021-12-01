@@ -1,6 +1,7 @@
 #include <modules/skybrowser/include/renderableskybrowser.h>
 
 #include <modules/skybrowser/include/utility.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/distanceconstants.h>
@@ -98,17 +99,13 @@ namespace openspace {
         RenderablePlane::update(data);
     }
 
-    void RenderableSkyBrowser::stopSyncingWwtView()
-    {
-
-    }
-
     void RenderableSkyBrowser::setIdInBrowser()
     {
         WwtCommunicator::setIdInBrowser(identifier());
     }
 
-	void RenderableSkyBrowser::placeAt3dPosition(const ImageData& image)
+	void RenderableSkyBrowser::placeAt3dPosition(
+        const glm::dvec3& positionSpeck, float verticalFov)
 	{
         std::string renderableId = dynamic_cast<SceneGraphNode*>(
             this)->renderable()->identifier();
@@ -117,7 +114,7 @@ namespace openspace {
         std::string positionUri = "Scene." + _identifier + ".Translation.Position";
         std::string rotationUri = "Scene." + _identifier + ".Rotation.Rotation";
         std::string cameraAim = "NavigationHandler.OrbitalNavigator.Aim";
-        glm::dvec3 position = image.position3d * distanceconstants::Parsec;
+        glm::dvec3 position = positionSpeck * distanceconstants::Parsec;
         // Calculate the size of the plane with trigonometry
         // Calculate in equatorial coordinate system since the FOV is from Earth
         //  /|
@@ -126,7 +123,7 @@ namespace openspace {
         //  \|
         glm::dvec3 j2000 = skybrowser::galacticToEquatorial(position);
         double adjacent = glm::length(j2000);
-        double opposite = 2 * adjacent * glm::tan(glm::radians(image.fov * 0.5));
+        double opposite = 2 * adjacent * glm::tan(glm::radians(verticalFov * 0.5));
 
         // Calculate rotation to make the plane face the solar system barycenter
         glm::dvec3 normal = glm::normalize(-position);
