@@ -108,6 +108,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+std::vector<glm::vec3> extractSeedPointsFromFile(std::filesystem::path);
 std::vector<std::string> 
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
 
@@ -142,15 +143,15 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceFolder = p.sourceFolder;
-    if (!std::filesystem::is_directory(_sourceFolder)) {
+    std::filesystem::path sourceFolder = p.sourceFolder;
+    if (!std::filesystem::is_directory(sourceFolder)) {
         LERROR(fmt::format(
             "MovingFieldlines {} is not a valid directory",
-            _sourceFolder.string()
+            sourceFolder.string()
         ));
     }
     namespace fs = std::filesystem;
-    for (const fs::directory_entry& e : fs::directory_iterator(_sourceFolder)) {
+    for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
         if (e.is_regular_file() && e.path().extension() == ".cdf") {
             std::string eStr = e.path().string();
             _sourceFiles.push_back(eStr);
@@ -159,39 +160,12 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     if (_sourceFiles.empty()) {
         throw ghoul::RuntimeError(fmt::format(
             "{} contains no .cdf files",
-            _sourceFolder.string()
+            sourceFolder.string()
         ));
     }
     std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
     _seedFilePath = p.seedPointFile;
-    if (!std::filesystem::is_regular_file(_seedFilePath) || 
-        _seedFilePath.extension() != ".txt") 
-    {
-        // TODO: add support for whatever actual seepoint files are being used
-        throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .txt file"));
-    }
-    std::string seedFile = _seedFilePath.string();
-    std::ifstream seedFileStream(seedFile);
-    if (!seedFileStream.good()) {
-        throw ghoul::RuntimeError(fmt::format("Could not read from {}", seedFile));
-    }
-    std::string line;
-    while (std::getline(seedFileStream, line)) {
-        std::stringstream ss(line);
-        glm::vec3 point;
-        ss >> point.x;
-        ss >> point.y;
-        ss >> point.z;
-        _seedPoints.push_back(std::move(point));
-    }
-    if (_seedPoints.empty()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Found no seed points in: {}",
-            _seedFilePath
-        ));
-    }
-
     _extraVars = p.extraVariables.value_or(_extraVars);
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _tracingVariable = p.tracingVariable.value_or(_tracingVariable);
@@ -330,17 +304,17 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
     std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
     
     // TODO remove placeholder, fix map vs vector
-    std::unordered_map<std::string, std::vector<glm::vec3>> seedpointsPlaceholder;
-    seedpointsPlaceholder["20000101080000"] = _seedPoints;
+    std::vector<glm::vec3> seedPoints = extractSeedPointsFromFile(_seedFilePath);
+    //std::unordered_map<std::string, std::vector<glm::vec3>> seedpointsPlaceholder;
+    //seedpointsPlaceholder["20000101080000"] = _seedPoints;
     
-    namespace fs = std::filesystem;
     bool isSuccessful = false;
     for (const std::filesystem::path entry : _sourceFiles) {
         const std::string& cdfPath = entry.string();
         isSuccessful = fls::convertCdfToMovingFieldlinesState(
             _fieldlineState,
             cdfPath,
-            seedpointsPlaceholder,
+            seedPoints,
             _manualTimeOffset,
             _tracingVariable,
             _extraVars,
@@ -379,6 +353,38 @@ void RenderableMovingFieldlines::deinitializeGL() {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
+}
+
+std::vector<glm::vec3> extractSeedPointsFromFile(std::filesystem::path filePath) {
+    std::vector<glm::vec3> outputSeedPoints;
+
+    if (!std::filesystem::is_regular_file(filePath) ||
+        filePath.extension() != ".txt")
+    {
+        // TODO: add support for whatever actual seepoint files are being used
+        throw ghoul::RuntimeError(fmt::format("SeedPointFile needs to be a .txt file"));
+    }
+    std::string seedFile = filePath.string();
+    std::ifstream seedFileStream(seedFile);
+    if (!seedFileStream.good()) {
+        throw ghoul::RuntimeError(fmt::format("Could not read from {}", seedFile));
+    }
+    std::string line;
+    while (std::getline(seedFileStream, line)) {
+        std::stringstream ss(line);
+        glm::vec3 point;
+        ss >> point.x;
+        ss >> point.y;
+        ss >> point.z;
+        outputSeedPoints.push_back(std::move(point));
+    }
+    if (outputSeedPoints.empty()) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Found no seed points in: {}",
+            filePath
+        ));
+    }
+    return outputSeedPoints;
 }
 
 bool RenderableMovingFieldlines::isReady() const {
@@ -456,14 +462,8 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
 {
     if (LerpLine) {
         float normalizedTime = 0.f;
-        if (traverser.forward) {
-            normalizedTime = traverser.timeSinceInterpolation /
-                traverser.currentFieldline->timeToNextFieldline;
-        }
-        else {
-            normalizedTime = traverser.timeSinceInterpolation /
-                traverser.nextFieldline()->timeToNextFieldline;
-        }
+        normalizedTime = traverser.timeSinceInterpolation /
+            traverser.currentFieldline->timeToNextFieldline;
 
         for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
             glm::vec3 currentPosition = 
@@ -494,31 +494,27 @@ void RenderableMovingFieldlines::moveLine(const double dt,
     traverser.timeSinceInterpolation += dt;
     
     // if passing next or previous fieldline
-    bool passNext = false;
-    if (forward) {
-        passNext = traverser.timeSinceInterpolation > 
-            traverser.currentFieldline->timeToNextFieldline;
-    }
-    else {
-        passNext = traverser.timeSinceInterpolation > 
-            traverser.nextFieldline()->timeToNextFieldline;
-    }
+    bool passNext = forward ? 
+        traverser.timeSinceInterpolation > 
+            traverser.currentFieldline->timeToNextFieldline :
+        traverser.timeSinceInterpolation < 0;
 
     if (passNext) {
         if (!traverser.isAtEnd()) {
             traverser.advanceCurrent();
         }
         if (traverser.isAtEnd()) {
-            setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
-            return;
+            traverser.timeSinceInterpolation = forward ?
+                traverser.currentFieldline->timeToNextFieldline :
+                0;
         }
         else {
             if (traverser.currentFieldline->topology != 
                 traverser.nextFieldline()->topology) 
             {
-                // Elon: 17 nov 2021. This advance call makes the transition between the
-                // two fieldlines not accurate time wise since we are advancing its 
-                // position prematurely
+                // Elon: 17 nov 2021. This advance call (plus set position call)makes 
+                // the transition between the two fieldlines not accurate time wise 
+                // since we are advancing its position prematurely
                 traverser.advanceCurrent();
                 setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
             }
@@ -531,9 +527,11 @@ void RenderableMovingFieldlines::moveLine(const double dt,
         if (!traverser.isAtEnd()) {
             setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
         }
-        else
-        {
-            setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
+        else {
+            setNewRenderedLinePosition<true>(traverser, lineStart, nVertices);
+            traverser.timeSinceInterpolation = forward ?
+                traverser.currentFieldline->timeToNextFieldline :
+                0;
         }
     }
 }
@@ -548,145 +546,6 @@ void RenderableMovingFieldlines::moveLines(const double dt) {
         moveLine(dt, allPathLineData[i], _traversers[i], lineStart, nVertices);
     }
 }
-
-//void RenderableMovingFieldlines::moveLines(const double dt) {
-//    bool forward = std::signbit(dt) ? false : true;
-//
-//    std::vector<FieldlinesState::PathLine> allPathLines = _fieldlineState.allPathLines();
-//    size_t nDrawnLines = _fieldlineState.lineCount().size();
-//    
-//    // for each path line
-//    for (size_t i = 0; i < nDrawnLines; ++i) {
-//        bool atStart = false;
-//        bool atEnd = false;
-//        _timeSinceLastInterpolation[i] += float(dt);
-//        GLint lineStart = _fieldlineState.lineStart()[i];
-//        GLsizei nVertices = _fieldlineState.lineCount()[i];
-//
-//        if (forward) {
-//            std::vector<FieldlinesState::Fieldline>::iterator fieldlineIt = 
-//                allPathLines[i].fieldlines.begin();
-//            std::advance(fieldlineIt, _pathsVertexIndex[i]);
-//            FieldlinesState::Fieldline& currentFieldline = *fieldlineIt;
-//            FieldlinesState::Fieldline& nextFieldline = *(fieldlineIt + 1);
-//
-//            // if we past the next vertex on pathline, advance paths vertex index 
-//            // and reset this paths time since last interpolation
-//            if (_timeSinceLastInterpolation[i] > currentFieldline.timeToNextFieldline) {
-//                // -2 is becaue: -1 because size = index+1, -1 for second to last line
-//                if (_pathsVertexIndex[i] != allPathLines[i].fieldlines.size()-2) {
-//                    _timeSinceLastInterpolation[i] -= 
-//                        currentFieldline.timeToNextFieldline;
-//                    ++(_pathsVertexIndex[i]);
-//                    ++fieldlineIt;
-//                    currentFieldline = *fieldlineIt;
-//                    nextFieldline = *(fieldlineIt + 1);
-//                }
-//                // if we reach end of path line. 
-//                else {
-//                    // TAODO: see why/if this is needed: set to previous timeSince?
-//                    //FieldlinesState::Fieldline& previousFieldline = *(fieldlineIt - 1);
-//                    //_timeSinceLastInterpolation[i] =
-//                    //    previousFieldline.timeToNextFieldline;
-//                    for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
-//                        // set the rendered lines vertex positions
-//                        _renderedLines[fieldlineVertex + lineStart] =
-//                            // to be = to current fieldlines vertex
-//                            currentFieldline.vertecies[fieldlineVertex].position;
-//                    }
-//                    atEnd = true;
-//                    break;
-//                }
-//            }
-//
-//            if (atEnd) continue;
-//
-//            // if there is a topology change to the next fieldline: no lerping
-//            if (nextFieldline.topology != currentFieldline.topology) {
-//                ++_pathsVertexIndex[i];
-//                ++fieldlineIt;
-//                currentFieldline = *fieldlineIt;
-//                nextFieldline = *(fieldlineIt + 1);
-//                _timeSinceLastInterpolation[i] = 0.f;
-//
-//                // j = rendered line vertex index
-//                for (int fieldlineVertex = 0; fieldlineVertex < nVertices; ++fieldlineVertex) {
-//                    _renderedLines[fieldlineVertex + lineStart] =
-//                        currentFieldline.vertecies[fieldlineVertex].position;
-//                }
-//            }
-//            else {
-//                float timeDifference = _timeSinceLastInterpolation[i] /
-//                    currentFieldline.timeToNextFieldline;
-//                // j = rendered line vertex index
-//                for (int j = 0; j < nVertices; ++j) {
-//                    glm::vec3 currentPosition = 
-//                        currentFieldline.vertecies[j].position;
-//                    glm::vec3 nextPosition =
-//                        nextFieldline.vertecies[j].position;
-//                    _renderedLines[j + lineStart] =
-//                        lerp(currentPosition, nextPosition, timeDifference);
-//                }
-//            }
-//        }
-//        //backwards
-//        else {
-//            std::vector<FieldlinesState::Fieldline>::iterator fieldlineIt =
-//                allPathLines[i].fieldlines.begin();
-//            std::advance(fieldlineIt, _pathsVertexIndex[i]);
-//            FieldlinesState::Fieldline& currentFieldline = *fieldlineIt;
-//            // if backing past prev fieldline
-//            if (_timeSinceLastInterpolation[i] < FLT_EPSILON) {
-//
-//                //if we're back to start
-//                if (_pathsVertexIndex[i] > 1) {
-//                    _timeSinceLastInterpolation[i] +=
-//                        currentFieldline.timeToNextFieldline;
-//                    --_pathsVertexIndex[i];
-//                    --fieldlineIt;
-//                    currentFieldline = *fieldlineIt;
-//                }
-//                else {
-//                    for (int j = 0; j < nVertices; ++j) {
-//                        _renderedLines[j + lineStart] =
-//                            currentFieldline.vertecies[j].position;
-//                    }
-//                    atStart = true;
-//                }
-//            }
-//
-//            if (atStart) continue;
-//            FieldlinesState::Fieldline& nextFieldline = *(fieldlineIt - 1);
-//
-//            //if different topology
-//            if (nextFieldline.topology != currentFieldline.topology) {
-//                --_pathsVertexIndex[i];
-//                _timeSinceLastInterpolation[i] = currentFieldline.timeToNextFieldline;
-//                // j = rendered line vertex index
-//                // for (int j = lineStart; j < lineCount + lineStart; ++j) {
-//                for (int j = 0; j < nVertices; ++j) {
-//                    _renderedLines[lineStart + j] =
-//                        currentFieldline.vertecies[j].position;
-//                }
-//            }
-//            else {
-//                float timeDifference = _timeSinceLastInterpolation[i] /
-//                    nextFieldline.timeToNextFieldline;
-//                int fieldlineVertex = 0;
-//                // j = rendered line vertex index
-//                for (int j = lineStart; j < nVertices + lineStart; ++j) {
-//                    glm::vec3 currentPosition =
-//                        currentFieldline.vertecies[fieldlineVertex].position;
-//                    glm::vec3 nextPosition =
-//                        nextFieldline.vertecies[fieldlineVertex].position;
-//                    _renderedLines[j] =
-//                        lerp(nextPosition, currentPosition, timeDifference);
-//                    ++fieldlineVertex;
-//                }
-//            }
-//        }
-//    }
-//}
 
 void RenderableMovingFieldlines::updateVertexPositionBuffer() {
     glBindVertexArray(_vertexArrayObject);

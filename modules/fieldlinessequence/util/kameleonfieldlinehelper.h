@@ -40,7 +40,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
 bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-    const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap,
+    const std::vector<glm::vec3>& seedMap,
     double manualTimeOffset, const std::string& tracingVar,
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars,
     const size_t nPointsOnPathLine, const size_t nPointsOnFieldLines);

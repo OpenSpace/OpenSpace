@@ -39,7 +39,6 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-
 class RenderableMovingFieldlines : public Renderable {
 public:
     struct PathLineTraverser {
@@ -55,12 +54,7 @@ public:
         std::vector<FieldlinesState::Fieldline>::const_iterator currentFieldline;
         
         std::vector<FieldlinesState::Fieldline>::const_iterator nextFieldline() {
-            if (forward) {
-                return (currentFieldline + 1);
-            }
-            else {
-                return (currentFieldline - 1);
-            }
+            return (currentFieldline + 1);
         };
 
         void advanceCurrent() {
@@ -69,14 +63,14 @@ public:
                 currentFieldline++;
             }
             else {
-                timeSinceInterpolation -= nextFieldline()->timeToNextFieldline;
                 currentFieldline--;
+                timeSinceInterpolation += currentFieldline->timeToNextFieldline;
             }
         };
 
         bool isAtEnd() const {
             return forward ?
-                (currentFieldline == fieldlines.end() - 1) :
+                (currentFieldline == fieldlines.end() - 2) :
                 (currentFieldline == fieldlines.begin());
         };
     };
@@ -149,7 +143,6 @@ private:
 
     FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
-    std::filesystem::path _sourceFolder;
     std::vector<std::filesystem::path> _sourceFiles;
     std::filesystem::path _seedFilePath;
     std::vector<glm::vec3> _seedPoints;

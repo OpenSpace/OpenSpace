@@ -454,8 +454,8 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
 
     f.timeToNextFieldline = time;
 
-    // TAODO: check if even correct. Probably will need both front and back to be < x.yf
-    // to be considered closed
+    // Elon: check if even correct. Probably will need both front and back to be < 3.5f
+    // to be considered closed. 3.5 is just a number from thin air
     if (glm::length(fieldline.front()) < 3.5f) {
         f.topology = Fieldline::Topology::Closed;
     }

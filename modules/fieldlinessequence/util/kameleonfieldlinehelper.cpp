@@ -102,37 +102,6 @@ float computeVelocity(glm::vec3 point, ccmc::Kameleon* kameleon) {
     return glm::length(u_perp_b);
 }
 
-//std::vector<float> 
-//computeVelocities(std::vector<glm::vec3> path, ccmc::Kameleon* kameleon) {
-//    std::vector<float> velocities;
-//    std::unique_ptr<ccmc::Interpolator> interpolator =
-//        std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-//
-//    for (const glm::vec3 p : path) {
-//        //compute u_perp_b with variables u and b
-//        //normalized b vector
-//        const glm::vec3 normBVec = glm::normalize(glm::vec3(
-//            interpolator->interpolate("bx", p.x, p.y, p.z),
-//            interpolator->interpolate("by", p.x, p.y, p.z),
-//            interpolator->interpolate("bz", p.x, p.y, p.z)));
-//
-//        const glm::vec3 uVec = glm::vec3(
-//            interpolator->interpolate("ux", p.x, p.y, p.z),
-//            interpolator->interpolate("uy", p.x, p.y, p.z),
-//            interpolator->interpolate("uz", p.x, p.y, p.z));
-//
-//        float u_dot_b = glm::dot(normBVec, uVec);
-//
-//        //multiply by 1000 since the data is in km/s and openspace uses m/s
-//        glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b)) * 1000.0f;
-//
-//        float magnitude = glm::length(u_perp_b);
-//
-//        velocities.push_back(magnitude);
-//    }
-//    return velocities;
-//}
-
 float computeTime(glm::vec3 vertex, glm::vec3 nextVertex, ccmc::Kameleon* kameleon) {
     float velocity = computeVelocity(vertex, kameleon);
     //distance to next interpolation
@@ -140,19 +109,6 @@ float computeTime(glm::vec3 vertex, glm::vec3 nextVertex, ccmc::Kameleon* kamele
     //time to next interpolation = distance / velocity = (m / (m/s)) = s
     return distance / velocity;
 }
-
-//std::vector<float>
-//computeTimes(std::vector<glm::vec3> path, std::vector<float> velocities) {
-//    std::vector<float> times;
-//    for (int i = 0; i < path.size() - 1; ++i) {
-//        //distance to next interpolation
-//        float d = glm::length(path[i + 1] * fls::ReToMeter - path[i] * fls::ReToMeter);
-//        //time to next interpolation = distance / velocity
-//        float time = d / velocities[i];
-//        times.push_back(time);
-//    }
-//    return times;
-//}
 
 /** Traces field lines from the provided cdf file using kameleon and stores the data in
 * the provided FieldlinesState.
@@ -170,11 +126,13 @@ float computeTime(glm::vec3 vertex, glm::vec3 nextVertex, ccmc::Kameleon* kamele
 *        vector at each line vertex
 */
 bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                   const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap,
-                   double manualTimeOffset, const std::string& tracingVar,
-                   std::vector<std::string>& extraVars, 
-                   std::vector<std::string>& extraMagVars, const size_t nPointsOnPathLine,
-                   const size_t nPointsOnFieldLines)
+                                       const std::vector<glm::vec3>& seedPoints,
+                                       double manualTimeOffset, 
+                                       const std::string& tracingVar,
+                                       std::vector<std::string>& extraVars, 
+                                       std::vector<std::string>& extraMagVars,
+                                       const size_t nPointsOnPathLine,
+                                       const size_t nPointsOnFieldLines)
 {
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
     LERROR("CDF inputs provided but Kameleon module is deactivated");
@@ -187,11 +145,11 @@ bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string
     // get time as string.
     double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
     state.setTriggerTime(cdfDoubleTime);
-    std::string cdfStringTime = 
-        SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime, "YYYYMMDDHRMNSC::RND");
+    //std::string cdfStringTime = 
+    //    SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime, "YYYYMMDDHRMNSC::RND");
 
-    // use time as string for picking seedpoints from seedm
-    std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
+    // use time as string for picking seedpoints from seedMap
+    //std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
     bool success = traceAndAddLinesToState(kameleon.get(), seedPoints, tracingVar, state,
         nPointsOnPathLine, nPointsOnFieldLines);
 
@@ -315,7 +273,7 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
 
         //std::vector<float> velocities = computeVelocities(pathLine, kameleon);
         //std::vector<float> times = computeTimes(pathLine, velocities);
-        // TAODO: optimizing trimming goes here
+        // Elon: optimizing trimming goes here
         // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
         // Here all points on the pathLine will be used at seedpoints for 
@@ -352,7 +310,7 @@ std::vector<glm::vec3> traceAndCreateFieldline(const glm::vec3& seedPoint,
     ccmc::Tracer tracer2(kameleon, newInterpolator.get());
     tracer2.setInnerBoundary(innerBoundaryLimit);
 
-    //TAODO replace "secondary trace var"
+    //Elon: replace "secondary trace var"
     std::string secondaryTraceVar = "b";
     ccmc::Fieldline fieldline = tracer2.bidirectionalTrace(
         secondaryTraceVar,

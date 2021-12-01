@@ -15,7 +15,8 @@ local movingLines = {
     SeedPointFile = seedPointFile,
     TracingVariable = "u_perp_b",
     NumberOfPointsOnPathLine = 200,
-    NumberOfPointsOnFieldlines = 100
+    NumberOfPointsOnFieldlines = 100,
+    LineWidth = 3
   },
   GUI = {
     Path = "/Solar System/Planets/Earth",
