@@ -540,6 +540,11 @@ void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position)
     _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
 }
 
+void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position)
+{
+    _cartesianPosition = position;
+}
+
 bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs) {
     // Sort on depth coordinate, larger values are closer to camera
     return lhs._cartesianPosition.value().z > rhs._cartesianPosition.value().z; 
