@@ -37,7 +37,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
     {
         "AnimationSpeed",
-        "Animation Speed",
+        "TrAnimation Speed",
         "The factor which is multiplied with the animation speed of the target."
     };
 
@@ -58,10 +58,10 @@ namespace {
         // [[codegen::verbatim(RectangleThresholdInfo.description)]]
         std::optional<float> rectangleThreshold;
 
-        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
+        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<double> animationSpeed;
 
-        // [[codegen::verbatim(RectangleThresholdInfo.description)]]
+        // [[codegen::verbatim(AnimationThresholdInfo.description)]]
         std::optional<float> animationThreshold;
 
     };

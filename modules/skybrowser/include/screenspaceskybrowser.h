@@ -1,21 +1,18 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER2___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER2___H__
 
-#include <modules/skybrowser/include/wwtcommunicator.h>
-#include <modules/skybrowser/include/utility.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <modules/skybrowser/include/wwtcommunicator.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/ivec3property.h>
-#include <deque>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
-    //class ScreenSpaceSkyTarget;
+
     class ScreenSpaceSkyBrowser : public ScreenSpaceRenderable, public WwtCommunicator
     {
     public:
+        constexpr static const double FovThreshold = 0.001f;
+        
         // Constructor and destructor
         ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
         ~ScreenSpaceSkyBrowser();
@@ -60,6 +57,8 @@ namespace openspace {
         void setIdInBrowser();
 
     private:
+        properties::DoubleProperty _animationSpeed;
+        
         void bindTexture() override;
 
         // Flags
@@ -68,7 +67,6 @@ namespace openspace {
 
         // Animation of browser
         float _endVfov{ 0.f };
-        float _fovDiff{ 0.01f };
 
         // Resizing of browser
         glm::vec2 _originalDimensions;

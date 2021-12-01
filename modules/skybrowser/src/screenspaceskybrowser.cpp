@@ -28,6 +28,12 @@ namespace {
         "Vertical Field Of View",
         "The vertical field of view in degrees."
     };
+    constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
+    {
+        "AnimationSpeed",
+        "Field Of View Animation Speed",
+        "The factor which is multiplied with the animation of the field of view."
+    };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
@@ -36,6 +42,9 @@ namespace {
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
         std::optional<glm::ivec3> borderColor;
+
+        // [[codegen::verbatim(AnimationSpeedInfo.description)]]
+        std::optional<double> animationSpeed;
     };
 
 #include "ScreenSpaceSkyBrowser_codegen.cpp"
@@ -43,9 +52,23 @@ namespace {
 
 namespace openspace {
 
+    glm::ivec3 randomBorderColor() {
+        // Generate a random border color with sufficient lightness and a n
+        std::random_device rd;
+        // Hue is in the unit degrees [0, 360]
+        std::uniform_real_distribution<float> hue(0.f, 360.f);
+        // Value in saturation are in the unit percent [0,1]
+        float value = 0.95f; // Brightness
+        float saturation = 0.5f;
+        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+        return rgbColor;
+    }
+
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
-        : ScreenSpaceRenderable(dictionary),
-        WwtCommunicator(dictionary)
+        : ScreenSpaceRenderable(dictionary)
+        , WwtCommunicator(dictionary)
+        , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
     {
         // Set a unique identifier
         std::string identifier;
@@ -64,7 +87,7 @@ namespace openspace {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _verticalFov = p.verticalFov.value_or(_verticalFov);
-        _borderColor = p.borderColor.value_or(_borderColor);
+        _borderColor = p.borderColor.value_or(randomBorderColor());
 
         addProperty(_url);
         addProperty(_dimensions);
@@ -73,19 +96,9 @@ namespace openspace {
         addProperty(_borderColor);
         addProperty(_equatorialAim);
 
+        // Ensure that the browser is placed at the z-coordinate of the screen space plane
         glm::vec2 screenPosition = _cartesianPosition.value();
         _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));
-
-        // Generate a random border color with sufficient lightness and a n
-        std::random_device rd;
-        // Hue is in the unit degrees [0, 360]
-        std::uniform_real_distribution<float> hue(0.f, 360.f); 
-        // Value in saturation are in the unit percent [0,1]
-        float value = 0.95f; // Brightness
-        float saturation = 0.5f;
-        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation , value);
-        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor)*255.f);
-        _borderColor = rgbColor;
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
@@ -138,11 +151,12 @@ namespace openspace {
     void ScreenSpaceSkyBrowser::incrementallyAnimateToFov(float deltaTime)
     {
         // If distance too large, keep animating. Else, stop animation
-        float diff = verticalFov() - _endVfov;
-        const bool shouldAnimate = abs(diff) > _fovDiff;
+        float diff = _endVfov - verticalFov();
+        bool shouldAnimate = abs(diff) > FovThreshold;
 
         if (shouldAnimate) {
-            setVerticalFovWithScroll(diff);
+            float delta = _animationSpeed * (diff * deltaTime);
+            _verticalFov = std::clamp(_verticalFov + delta, 0.0001f, 70.0f);
         }
         else {
             _isFovAnimated = false;

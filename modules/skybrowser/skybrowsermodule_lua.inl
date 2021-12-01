@@ -140,7 +140,7 @@ int loadImagesToWWT(lua_State* L) {
     else if (module->get3dBrowser(id)) {
            
         // Load Image collections
-        module->get3dBrowser(id)->stopSyncingWwtView();
+        module->get3dBrowser(id)->setIsSyncedWithWwt(false);
         LINFO("Load images to " + module->get3dBrowser(id)->identifier());
         module->get3dBrowser(id)->loadImageCollection(root);
         LINFO("Image collection loaded in " + module->get3dBrowser(id)->identifier());

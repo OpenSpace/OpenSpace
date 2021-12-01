@@ -38,7 +38,7 @@ class Pair {
 public:
 
     constexpr static const float FadeThreshold = 0.01f;
-    constexpr static const double AnimationThreshold = 0.0001f;;
+    constexpr static const double AnimationThreshold = 0.0001f;
 
     Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target);
     Pair(Pair const&) = default;
