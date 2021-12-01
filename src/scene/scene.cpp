@@ -947,6 +947,20 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 &luascriptfunctions::sendOSCMessage,
                 "lable, message",
                 "Send the given 'message' on address 'lable' ove OSC to SuperColider."
+            },
+            {
+                "boundingSphere",
+                &luascriptfunctions::boundingSphere,
+                "string",
+                "Returns the bounding sphere of the scene graph node with the given "
+                "string as identifier"
+            },
+            {
+                "interactionSphere",
+                &luascriptfunctions::interactionSphere,
+                "string",
+                "Returns the interaction sphere of the scene graph node with the given "
+                "string as identifier"
             }
         }
     };
