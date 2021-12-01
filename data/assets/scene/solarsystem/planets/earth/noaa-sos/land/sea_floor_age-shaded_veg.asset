@@ -31,7 +31,7 @@ local layer_aol = {
 local layer_no_labels = {
   Identifier = Identifier .. "-no_labels",
   Name = Name .. " (No Labels)",
-  FilePath = syncedDirectory .. "/4096_nolabels.png",
+  FilePath = syncedDirectory .. "/4096_nolabels.jpg",
   Description = Description
 }
 

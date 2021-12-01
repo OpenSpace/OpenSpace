@@ -18,7 +18,7 @@ local layer = {
   Identifier = Identifier,
   Name = Name,
   -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/sibt1850_seaice_extent_18500115_sos.png",
+  FilePath = syncedDirectory .. "/movie000.jpg",
   Description = Description
 }
 

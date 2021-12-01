@@ -29,7 +29,7 @@ local layer_elnino_winter = {
 }
 
 local layer_lanina_summer = {
-  Identifier = Identifier . "-lanina_summer",
+  Identifier = Identifier .. "-lanina_summer",
   Name = Name .. " (La Nina, summer)",
   FilePath = syncedDirectory .. "/lanina-summer-no-map-transparent-shapes.png",
   Description = Description

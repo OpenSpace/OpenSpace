@@ -17,28 +17,28 @@ local syncedDirectory = asset.syncedResource({
 local layer_coastal = {
   Identifier = Identifier .. "-coastal",
   Name = Name .. " (Coastal)",
-  FilePath = syncedDirectory .. "/Tsunami_Coastal_Map_Chile_2010_4k.jpg",
+  FilePath = syncedDirectory .. "/Tsunami_Coastal_Map_Chile_2010_2k.jpg",
   Description = Description
 }
 
 local layer_energy_coastal = {
   Identifier = Identifier .. "-energy_coastal",
   Name = Name .. " (Energy Coastal)",
-  FilePath = syncedDirectory .. "/Tsunami_Energy+Coastal_Map_Chile_2010_4k.jpg",
+  FilePath = syncedDirectory .. "/Tsunami_Energy+Coastal_Map_Chile_2010_2k.jpg",
   Description = Description
 }
 
 local layer_energy = {
   Identifier = Identifier .. "-energy",
   Name = Name .. " (Energy)",
-  FilePath = syncedDirectory .. "/Tsunami_Energy_Map_Chile_2010_4k.jpg",
+  FilePath = syncedDirectory .. "/Tsunami_Energy_Map_Chile_2010_2k.jpg",
   Description = Description
 }
 
 local layer_null = {
   Identifier = Identifier .. "-null",
   Name = Name .. " (Null)",
-  FilePath = syncedDirectory .. "/Tsunami_Null_Coastal_Map_Chile_2010_4k.jpg",
+  FilePath = syncedDirectory .. "/Tsunami_Null_Coastal_Map_Chile_2010_2k.jpg",
   Description = Description
 }
 

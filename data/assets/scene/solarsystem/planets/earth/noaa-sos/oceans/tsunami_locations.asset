@@ -31,7 +31,7 @@ local layer_gray = {
 local layer_neutral = {
   Identifier = Identifier .. "-neutral",
   Name = Name .. " (Neutral)",
-  FilePath = syncedDirectory .. "/neutral_earth_with_countries_4096.png",
+  FilePath = syncedDirectory .. "/natural_earth_with_countries_4096.png",
   Description = Description
 }
 

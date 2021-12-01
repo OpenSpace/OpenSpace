@@ -24,7 +24,7 @@ local layer_precip_2020 = {
 local layer_precip_2070 = {
   Identifier = Identifier .. "-2070",
   Name = Name .. " (2070)",
-  FilePath = syncedDirectory .. "/temp-precip-2070-current-4096.png",
+  FilePath = syncedDirectory .. "/temp-precip-2070-rcp85-4096.png",
   Description = Description
 }
 

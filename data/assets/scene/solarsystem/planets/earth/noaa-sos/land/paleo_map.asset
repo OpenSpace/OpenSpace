@@ -112,7 +112,7 @@ local layers = {
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/" .. layers[0] .. ".jpg",
+  FilePath = syncedDirectory .. "/" .. layers[1] .. ".jpg",
   Description = Description
 }
 
