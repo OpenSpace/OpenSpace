@@ -25,6 +25,14 @@
       "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     }
   ],
+  "additional_scripts": [
+    "openspace.setPropertyValueSingle('Dashboard.IsEnabled', false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowLog\", false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowVersion\", false);",
+    "openspace.setPropertyValueSingle(\"RenderEngine.ShowCamera\", false)",
+    "openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', false);",
+    "openspace.time.setPause(true);"
+  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",
@@ -99,8 +107,8 @@
     }
   ],
   "time": {
-    "type": "relative",
-    "value": "-1d"
+    "type": "absolute",
+    "value": "2021-08-26T03:20:55.505"
   },
   "version": {
     "major": 1,
