@@ -1,15 +1,27 @@
 local assetHelper = asset.require('util/asset_helper')
 
-  local spec = {
-      Identifier = "HoverCircle",
-      Type = "ScreenSpaceImageLocal",
-      Name = "HoverCircle",
-      FaceCamera = false,
-      UseRadiusAzimuthElevation = false,
-      RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
-      Scale= 0.015,
-      Enabled = false,
-      TexturePath = "${ASSETS}/circle.png",
-      CartesianPosition =  { 0, 0, -2.1 },
-  };
-assetHelper.registerScreenSpaceRenderables(asset, { spec })
+local id = "HoverCircle"
+
+local circle = {
+    Identifier = id,
+    Type = "ScreenSpaceImageLocal",
+    Name = "HoverCircle",
+    FaceCamera = false,
+    UseRadiusAzimuthElevation = false,
+    RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+    Scale= 0.015,
+    Enabled = false,
+    TexturePath = "${ASSETS}/circle.png",
+    CartesianPosition =  { 0, 0, -2.1 },
+};
+
+asset.onInitialize(function ()
+ openspace.addScreenSpaceRenderable(circle)
+ openspace.skybrowser.setHoverCircle(id)
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeScreenSpaceRenderable(circle)
+end)
+
+asset.export("circle", {circle})

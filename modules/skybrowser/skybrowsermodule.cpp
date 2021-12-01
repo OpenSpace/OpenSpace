@@ -58,6 +58,13 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             }, 
             {
+                "setHoverCircle",
+                &skybrowser::luascriptfunctions::setHoverCircle,
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
                 "moveCircleToHoverImage",
                 &skybrowser::luascriptfunctions::moveCircleToHoverImage,
                 "string or list of strings",
@@ -209,15 +216,9 @@ namespace openspace {
         return res;
     }
 
-
-
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
 {
-    // Find the hover circle
-    _hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(
-        global::renderEngine->screenSpaceRenderable("HoverCircle"));
-
     // Set callback functions
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
@@ -499,7 +500,7 @@ void SkyBrowserModule::createTargetBrowserPair() {
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
     std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    //std::string localHostUrl = "http://localhost:8000";
+    //std::string url = "http://localhost:8000";
 
     const std::string browser = "{"
             "Identifier = '" + idBrowser + "',"
@@ -575,42 +576,6 @@ void SkyBrowserModule::set3dBrowser(const std::string& id)
     }
 }
 
-void SkyBrowserModule::selectImage2dBrowser(int i)
-{
-    Pair* selected = getPair(_selectedBrowser);
-    if (selected) {
-
-        const ImageData& image = _dataHandler->getImage(i);
-        // Load image into browser
-        LINFO("Loading image " + image.name);
-        selected->selectImage(image, i);
-        
-        bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
-        // If the coordinate is not in view, rotate camera
-        if (image.hasCelestialCoords) {
-            if(!isInView) {
-                startRotatingCamera(
-                    skybrowser::equatorialToGalactic(image.equatorialCartesian)
-                );
-            }
-        }
-    }
-}
-
-void SkyBrowserModule::selectImage3dBrowser(int i)
-{
-    if (!_browser3dNode) {
-        return;
-    }
-    RenderableSkyBrowser* renderable = dynamic_cast<RenderableSkyBrowser*>(
-        _browser3dNode->renderable());
-    if (renderable) {
-        const ImageData& image = _dataHandler->getImage(i);
-        renderable->displayImage(image.imageUrl, i);
-    }
-    
-}
-
 void SkyBrowserModule::lookAtTarget(std::string id)
 {
     Pair* pair = getPair(id);
@@ -619,6 +584,11 @@ void SkyBrowserModule::lookAtTarget(std::string id)
     }
 }
     
+void SkyBrowserModule::setHoverCircle(ScreenSpaceImageLocal* circle)
+{
+    _hoverCircle = circle;
+}
+
 void SkyBrowserModule::moveHoverCircle(int i)
 {
     const ImageData& image = _dataHandler->getImage(i);
@@ -626,20 +596,20 @@ void SkyBrowserModule::moveHoverCircle(int i)
     // Only move and show circle if the image has coordinates
     if (_hoverCircle && image.hasCelestialCoords && _isCameraInSolarSystem) {
         // Make circle visible
-        _hoverCircle->property("Enabled")->set(true);
+        _hoverCircle->setEnabled(true);
 
         // Calculate coords for the circle and translate
         glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace3d(
             image.equatorialCartesian
         );
-        _hoverCircle->property("CartesianPosition")->set(coordsScreen);
+        _hoverCircle->setCartesianPosition(coordsScreen);
     }
 }
 
 void SkyBrowserModule::disableHoverCircle()
 {
     if (_hoverCircle && _hoverCircle->isEnabled()) {
-        _hoverCircle->property("Enabled")->set(false);
+        _hoverCircle->setEnabled(false);
     }
 }
 
@@ -669,7 +639,7 @@ void SkyBrowserModule::add2dSelectedImagesTo3d(const std::string& pairId)
     }
 }
 
-const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWWTDataHandler() {
+const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() {
     return _dataHandler;
 }
 

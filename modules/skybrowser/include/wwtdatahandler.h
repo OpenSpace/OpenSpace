@@ -59,7 +59,7 @@ namespace openspace {
         void loadImages(const std::string& root, const std::string& directory, 
                        std::vector<std::filesystem::path>& speckFiles);
         int nLoadedImages() const;
-        const ImageData& getImage(const int i) const;
+        const ImageData& getImage(int i) const;
 
 	private:
 

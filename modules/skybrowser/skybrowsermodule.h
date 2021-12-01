@@ -61,18 +61,18 @@ public:
     SceneGraphNode* get3dBrowserNode();
     RenderableSkyBrowser* get3dBrowser();
     RenderableSkyBrowser* get3dBrowser(const std::string& id);
-    const std::unique_ptr<WwtDataHandler>& getWWTDataHandler();
+    const std::unique_ptr<WwtDataHandler>& getWwtDataHandler();
     std::string selectedBrowserId();
 
     // Setters
     void set3dBrowser(const std::string& id);
     void setSelectedBrowser(const std::string& id);
-    void selectImage2dBrowser(int i);
-    void selectImage3dBrowser(int i);
     void setSelectedObject(); // Manage mouse interactions
+    void setHoverCircle(ScreenSpaceImageLocal* circle);
    
     // Rotation, animation, placement
     void lookAtTarget(std::string id);
+    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
     void incrementallyRotateCamera(double deltaTime);
     void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
     void incrementallyAnimateTargets(double deltaTime);
@@ -106,7 +106,7 @@ protected:
 
 private:
 
-    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
+    
     // The browsers and targets
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };

@@ -23,13 +23,45 @@ int selectImage(lua_State* L) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->isCameraInSolarSystem()) {
-        module->selectImage2dBrowser(i);
+        Pair* selected = module->getPair(module->selectedBrowserId());
+        if (selected) {
+
+            const ImageData& image = module->getWwtDataHandler()->getImage(i);
+            // Load image into browser
+            LINFO("Loading image " + image.name);
+            selected->selectImage(image, i);
+
+            bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
+            // If the coordinate is not in view, rotate camera
+            if (image.hasCelestialCoords && !isInView) {
+                module->startRotatingCamera(
+                    skybrowser::equatorialToGalactic(image.equatorialCartesian)
+                );
+            }
+        }
     }
-    else {
-        module->selectImage3dBrowser(i);
+    else if (module->get3dBrowser()) {
+        RenderableSkyBrowser* renderable = dynamic_cast<RenderableSkyBrowser*>(
+            module->get3dBrowser());
+        if (renderable) {
+            const ImageData& image = module->getWwtDataHandler()->getImage(i);
+            renderable->displayImage(image.imageUrl, i);
+        }
     }
         
 	return 0;
+}
+
+int setHoverCircle(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setHoverCircle");
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+    std::string id = ghoul::lua::value<std::string>(L, 1);
+
+    ScreenSpaceImageLocal* circle = dynamic_cast<ScreenSpaceImageLocal*>(
+        global::renderEngine->screenSpaceRenderable(id));
+    module->setHoverCircle(circle);     
+
+    return 0;
 }
 
 int moveCircleToHoverImage(lua_State* L) {
@@ -213,7 +245,7 @@ int getListOfImages(lua_State* L) {
     lua_newtable(L);
 
 	for (int i = 0; i < module->nLoadedImages(); i++) {
-        const ImageData& img = module->getWWTDataHandler()->getImage(i);
+        const ImageData& img = module->getWwtDataHandler()->getImage(i);
         glm::dvec3 coords = img.equatorialCartesian;
         glm::dvec3 position = img.position3d;
 
@@ -477,7 +509,7 @@ int place3dSkyBrowser(lua_State* L) {
     // Image index to place in 3D
     const int i = ghoul::lua::value<int>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    const ImageData image = module->getWWTDataHandler()->getImage(i);
+    const ImageData image = module->getWwtDataHandler()->getImage(i);
 
     module->place3dBrowser(image, i);
 
@@ -491,7 +523,7 @@ int removeSelectedImageInBrowser(lua_State* L) {
     const std::string id = ghoul::lua::value<std::string>(L, 1);
     // Get browser
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    const ImageData& image = module->getWWTDataHandler()->getImage(i);
+    const ImageData& image = module->getWwtDataHandler()->getImage(i);
         
     Pair* pair = module->getPair(id);
     if (pair) {
