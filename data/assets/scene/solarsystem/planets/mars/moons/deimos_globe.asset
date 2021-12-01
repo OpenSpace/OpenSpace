@@ -1,0 +1,48 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../mar097').Kernels
+
+
+local DeimosGlobe = {
+  Identifier = "Deimos_Globe",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_DEIMOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DEIMOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 15000, 12200, 11000 },
+    SegmentsPerPatch = 90,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Deimos_Globe",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[One of two moons of Mars.]]
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { DeimosGlobe })
+
+
+asset.meta = {
+  Name = "Deimos Globe",
+  Version = "1.0",
+  Description = [[ RenderableGlobe for Deimos.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Deimos"}
+}

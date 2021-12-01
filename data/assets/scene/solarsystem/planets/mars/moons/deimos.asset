@@ -1,7 +1,14 @@
-local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('../mar097').Kernels
 
+local model = asset.syncedResource({
+  Name = "Deimos Model",
+  Type = "HttpSynchronization",
+  Identifier = "deimos_model",
+  Version = 1
+})
 
 local Deimos = {
   Identifier = "Deimos",
@@ -21,10 +28,21 @@ local Deimos = {
     }
   },
   Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 15000, 12200, 11000 },
-    SegmentsPerPatch = 90,
-    Layers = {}
+    Type = "RenderableModel",
+    GeometryFile = model .. "/Deimos_1_1000.glb",
+    ModelScale = 2000,
+    AmbientIntensity = 0.02,
+    SpecularIntensity = 0.0,
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      }
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
@@ -62,7 +80,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
 asset.meta = {
   Name = "Deimos",
   Version = "1.0",
-  Description = [[ RenderableGlobe and Trail for Deimos.]],
+  Description = [[ RenderableModel and Trail for Deimos.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
