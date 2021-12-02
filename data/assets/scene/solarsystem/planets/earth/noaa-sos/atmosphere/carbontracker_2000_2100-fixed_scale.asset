@@ -14,6 +14,21 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local syncedDirectory_colorbar = asset.syncedResource({
+	Name = Name .. " (Colorbar)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-colorbar",
+	Version = 1
+})
+
+local syncedDirectory_obs = asset.syncedResource({
+	Name = Name .. " (OBS)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-obs",
+	Version = 1
+})
+
+
 local layer = {
   Identifier = Identifier,
   Name = Name,

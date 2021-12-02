@@ -14,6 +14,20 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local syncedDirectory_addons = asset.syncedResource({
+	Name = Name .. " (Addons)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-addons",
+	Version = 1
+})
+
+local layer_background = {
+  Identifier = Identifier .. "-background",
+  Name = Name .. " (Background)",
+  FilePath = syncedDirectory_addons .. "/background.jpg",
+  Description = Description
+}
+
 local layer = {
   Identifier = Identifier,
   Name = Name,
@@ -23,6 +37,7 @@ local layer = {
 }
 
 asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_background)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

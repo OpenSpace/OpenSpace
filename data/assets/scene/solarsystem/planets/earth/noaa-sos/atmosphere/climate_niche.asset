@@ -14,6 +14,20 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local syncedDirectory_mat = asset.syncedResource({
+	Name = Name .. " (MAT)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-mat",
+	Version = 1
+})
+
+local syncedDirectory_addons = asset.syncedResource({
+	Name = Name .. " (Addons)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-addons",
+	Version = 1
+})
+
 local layer_precip_2020 = {
   Identifier = Identifier .. "-2020",
   Name = Name .. " (2020)",
@@ -31,14 +45,14 @@ local layer_precip_2070 = {
 local layer_mat_2020 = {
   Identifier = Identifier .. "-mat2020",
   Name = Name .. " (MAT 2020)",
-  FilePath = syncedDirectory .. "/MAT-29-2020-4096.png",
+  FilePath = syncedDirectory_mat .. "/MAT-29-2020-4096.png",
   Description = Description
 }
 
 local layer_mat_2070 = {
   Identifier = Identifier .. "-mat2070",
   Name = Name .. " (MAT 2070)",
-  FilePath = syncedDirectory .. "/MAT-29-2070-4096.png",
+  FilePath = syncedDirectory_mat .. "/MAT-29-2070-4096.png",
   Description = Description
 }
 
