@@ -26,6 +26,7 @@
 
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/include/utility.h>
 #include <ghoul/misc/assert.h>
@@ -35,8 +36,6 @@
 #pragma optimize("", off)
 
 namespace openspace {
-
-    std::string Pair::_selected = ""; // Define the static variable in the global scope
 
     Pair::Pair(ScreenSpaceSkyBrowser* browser, ScreenSpaceSkyTarget* target)
        : _target(target), _browser(browser)
@@ -144,18 +143,33 @@ namespace openspace {
         return browserDiff < FadeThreshold;
     }
 
-    bool Pair::isCoordOnPair(glm::vec2 mousePosition) const
+    bool Pair::checkMouseIntersection(glm::vec2 mousePosition)
     {
-        const bool onBrowser = _browser->coordIsInsideCornersScreenSpace(mousePosition);
-        const bool onTarget = _target->coordIsInsideCornersScreenSpace(mousePosition);
+        bool onBrowser = _browser->intersection(mousePosition);
+        bool onTarget = _target->intersection(mousePosition);
         if (onBrowser) {
-            _selected = _browser->identifier();
+            _selected = _browser;
+            _isSelectedBrowser = true;
         }
         else if (onTarget) {
-            _selected = _target->identifier();
+            _selected = _target;
+            _isSelectedBrowser = false;
         }
-
+        else {
+            _selected = nullptr;
+            _isSelectedBrowser = false;
+        }
         return onBrowser || onTarget;
+    }
+
+    glm::vec2 Pair::selectedScreenSpacePosition()
+    {
+        return _selected->screenSpacePosition();
+    }
+
+    bool Pair::isSelectedBrowser()
+    {
+        return _isSelectedBrowser;
     }
 
     void Pair::setEnabled(bool enable)

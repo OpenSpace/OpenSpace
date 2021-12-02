@@ -89,7 +89,7 @@ namespace openspace {
             identifier = dictionary.value<std::string>(KeyIdentifier);
         }
         else {
-            identifier = "ScreenSpaceSkyBrowser22";
+            identifier = "ScreenSpaceSkyBrowser";
         }
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
@@ -245,7 +245,7 @@ namespace openspace {
     glm::ivec2 ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 coord) {
         glm::ivec2 resizePosition = glm::ivec2{ 0 };
         // Make sure coordinate is on browser
-        if (!coordIsInsideCornersScreenSpace(coord)) return resizePosition;
+        if (!intersection(coord)) return resizePosition;
 
         // TO DO: turn this into a vector and use prettier vector arithmetic
         float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;

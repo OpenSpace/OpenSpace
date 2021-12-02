@@ -232,22 +232,15 @@ SkyBrowserModule::SkyBrowserModule()
             if (_mouseOnPair && action == MouseAction::Press) {
 
                 // Get the currently selected browser
-                setSelectedBrowser(_mouseOnPair->getBrowser()->identifier());
+                setSelectedBrowser(_mouseOnPair->browserId());
 
                 if (button == MouseButton::Left) {
                     _isCameraRotating = false;
                     _startMousePosition = _mousePosition;
-                    if (_isBrowser) {
-                        _startDragPosition = _mouseOnPair->getBrowser()->
-                                             screenSpacePosition();
-                    }
-                    else {
-                        _startDragPosition = _mouseOnPair->getTarget()->
-                                             screenSpacePosition();
-                    }
+                    _startDragPosition = _mouseOnPair->selectedScreenSpacePosition();
 
                     // If current object is browser, check for resizing
-                    if (_isBrowser) {
+                    if (_mouseOnPair->isSelectedBrowser()) {
                         // Resize browser if mouse is over resize button
                         _resizeDirection = _mouseOnPair->getBrowser()->isOnResizeArea(
                             _mousePosition
@@ -268,7 +261,8 @@ SkyBrowserModule::SkyBrowserModule()
 
                     return true;
                 }
-                else if (_isBrowser && button == MouseButton::Right) {
+                // Fine tuning mode of target
+                else if (_mouseOnPair->isSelectedBrowser() && button == MouseButton::Right) {
                     // If you start dragging around on the browser, the target unlocks
                     _mouseOnPair->unlock();
                     // Change view (by moving target) within browser if right mouse 
@@ -309,26 +303,27 @@ SkyBrowserModule::SkyBrowserModule()
                 _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
                 glm::vec2 translation = _mousePosition - _startMousePosition;
 
+                if (_isResizing) {
+                    // Calculate scaling factor
+                    glm::vec2 mouseDragVector = (_mousePosition - _startMousePosition);
+                    glm::vec2 scaling = mouseDragVector * glm::vec2(_resizeDirection);
+                    glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) /
+                        _startBrowserSize;
+                    // Scale the browser
+                    _mouseOnPair->getBrowser()->setScale(newSizeRelToOld);
+
+                    // For dragging functionality, translate so it looks like the 
+                    // browser isn't moving. Make sure the browser doesn't move in 
+                    // directions it's not supposed to 
+                    translation = 0.5f * mouseDragVector * abs(
+                        glm::vec2(_resizeDirection)
+                    );
+
+                }
                 if (_isDragging || _isResizing) {
-                    if (_isResizing) {
-                        // Calculate scaling factor
-                        glm::vec2 mouseDragVector = (_mousePosition-_startMousePosition);
-                        glm::vec2 scaling = mouseDragVector * glm::vec2(_resizeDirection);
-                        glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) / 
-                                                     _startBrowserSize;
-                        // Scale the browser
-                        _mouseOnPair->getBrowser()->setScale(newSizeRelToOld);
-
-                        // For dragging functionality, translate so it looks like the 
-                        // browser isn't moving. Make sure the browser doesn't move in 
-                        // directions it's not supposed to 
-                        translation = 0.5f * mouseDragVector * abs(
-                            glm::vec2(_resizeDirection)
-                        );
-
-                    }
+                    
                     // Translate
-                    if (_isBrowser) {
+                    if (_mouseOnPair->isSelectedBrowser()) {
                         _mouseOnPair->getBrowser()->translate(
                             translation, 
                             _startDragPosition
@@ -375,9 +370,8 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::preSync->emplace_back([this]() {
 
         // Disable browser and targets when camera is outside of solar system
-        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
-        double deltaTime = global::windowDelegate->deltaTime();
         bool camWasInSolarSystem = _isCameraInSolarSystem;
+        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
 
         // Fading flags
@@ -389,7 +383,7 @@ SkyBrowserModule::SkyBrowserModule()
                 _selectedBrowser = _browser3dNode->renderable()->identifier();
             }
         }
-
+        double deltaTime = global::windowDelegate->deltaTime();
         // Fade pairs if the camera moved in or out the solar system
         if (_isTransitioningVizMode) {
             if (_isCameraInSolarSystem) {
@@ -441,23 +435,12 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
 void SkyBrowserModule::setSelectedObject()
 {
     // Save old selection for removing highlight
-    Pair* lastObj = _mouseOnPair;
+    Pair* previousPair = _mouseOnPair;
 
     // Find and save what mouse is currently hovering on
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&] (const std::unique_ptr<Pair> &pair) {      
-            bool onBrowser = pair->getBrowser()->coordIsInsideCornersScreenSpace(
-                _mousePosition
-            );
-            bool onTarget = pair->getTarget()->coordIsInsideCornersScreenSpace(
-                _mousePosition
-            );
-            if (onBrowser) {
-                _selectedBrowser = pair->getBrowser()->identifier();
-            }
-            _isBrowser = onBrowser;
-
-            return onBrowser || onTarget;
+            return pair->checkMouseIntersection(_mousePosition);
         });
 
     if (it == std::end(_targetsBrowsers)) {
@@ -468,17 +451,16 @@ void SkyBrowserModule::setSelectedObject()
     }
 
     // Selection has changed
-    if (lastObj != _mouseOnPair) {
+    if (previousPair != _mouseOnPair) {
        
         // Remove highlight
-        if (lastObj) {
-            lastObj->removeHighlight(_highlightAddition);
+        if (previousPair) {
+            previousPair->removeHighlight(_highlightAddition);
         }
         // Add highlight to new selection
         if (_mouseOnPair) {
             _mouseOnPair->highlight(_highlightAddition);
         }
-        
     }
 }
 

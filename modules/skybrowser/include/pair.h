@@ -32,6 +32,7 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
+class ScreenSpaceRenderable;
 class ImageData;
 
 class Pair {
@@ -54,6 +55,10 @@ public:
     void startAnimation(glm::dvec3 coordsEnd, float fovEnd, bool shouldLockAfter = true);
     void incrementallyAnimateToCoordinate(double deltaTime);
     void incrementallyFade(float goalState, float fadeTime, float deltaTime);
+    // Mouse interaction
+    bool checkMouseIntersection(glm::vec2 mousePosition);
+    glm::vec2 selectedScreenSpacePosition();
+    bool isSelectedBrowser();
 
     // Browser
     void sendIdToBrowser();
@@ -66,7 +71,7 @@ public:
 
     // Boolean functions
     bool hasFinishedFading(float goalState) const;
-    bool isCoordOnPair(glm::vec2 mousePosition) const;
+    
     bool isEnabled() const;
     bool isLocked() const;
 
@@ -102,7 +107,9 @@ public:
                            const Pair& rhs);
 
 private:
-    static std::string _selected;
+    ScreenSpaceRenderable* _selected;
+    bool _isSelectedBrowser;
+
     bool isTargetFadeFinished(float goalState) const;
     bool isBrowserFadeFinished(float goalState) const;
 

@@ -530,7 +530,7 @@ glm::vec2 ScreenSpaceRenderable::lowerLeftCornerScreenSpace() {
     return screenSpacePosition() - (screenSpaceDimensions() / 2.0f);
 }
 
-bool ScreenSpaceRenderable::coordIsInsideCornersScreenSpace(glm::vec2 coord) {
+bool ScreenSpaceRenderable::intersection(glm::vec2 coord) {
     bool lessThanUpperRight = coord.x < upperRightCornerScreenSpace().x && coord.y < upperRightCornerScreenSpace().y;
     bool moreThanLowerLeft = coord.x > lowerLeftCornerScreenSpace().x && coord.y > lowerLeftCornerScreenSpace().y;
     return  lessThanUpperRight && moreThanLowerLeft;

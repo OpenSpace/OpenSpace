@@ -107,8 +107,6 @@ private:
     // The browsers and targets
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
-    Pair* _selectedPair{ nullptr };
-    bool _isBrowser{ false };
     ScreenSpaceImageLocal* _hoverCircle{ nullptr };
     SceneGraphNode* _browser3dNode{ nullptr };
     RenderableSkyBrowser* _browser3d{ nullptr };

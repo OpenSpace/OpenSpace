@@ -78,7 +78,7 @@ public:
     glm::vec2 screenSpaceDimensions();
     glm::vec2 upperRightCornerScreenSpace();
     glm::vec2 lowerLeftCornerScreenSpace();
-    bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
+    bool intersection(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     friend bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs);
     void setCartesianPosition(const glm::vec3& position);
