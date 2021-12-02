@@ -80,7 +80,7 @@ namespace openspace {
         // Time variables
         // For capping the calls onchange properties from scrolling
         constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
-        std::chrono::system_clock::time_point _lastUpdateTime;       
+        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 

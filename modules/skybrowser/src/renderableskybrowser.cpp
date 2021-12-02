@@ -127,8 +127,7 @@ namespace openspace {
         // /_|    Adjacent is the horizontal line, opposite the vertical 
         // \ |    Calculate for half the triangle first, then multiply with 2
         //  \|
-        glm::dvec3 j2000 = skybrowser::galacticToEquatorial(position);
-        double adjacent = glm::length(j2000);
+        double adjacent = glm::length(position);
         double opposite = 2 * adjacent * glm::tan(glm::radians(verticalFov * 0.5));
 
         // Calculate rotation to make the plane face the solar system barycenter
@@ -137,7 +136,7 @@ namespace openspace {
             glm::cross(glm::dvec3(0.0, 0.0, 1.0), normal)
         );
         glm::dvec3 newUp = glm::cross(normal, newRight);
-        // Face the Solar System Barycenter
+        // Face the Solar System Barycenter as an approximation of Earth
         glm::dmat3 rotation = glm::dmat3(1.0);
         rotation[0] = newRight;
         rotation[1] = newUp;

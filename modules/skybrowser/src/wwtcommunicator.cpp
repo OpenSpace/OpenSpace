@@ -111,6 +111,7 @@ namespace openspace {
 
     void WwtCommunicator::setVerticalFov(float vfov) {
         _verticalFov = vfov;
+        updateAim();
     }
 
     void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) {
@@ -129,6 +130,7 @@ namespace openspace {
     void WwtCommunicator::setEquatorialAim(glm::dvec3 cartesian)
     {
         _equatorialAim = skybrowser::cartesianToSpherical(cartesian);
+        updateAim();
     }
 
     void WwtCommunicator::highlight(glm::ivec3 addition)
@@ -144,6 +146,18 @@ namespace openspace {
     void WwtCommunicator::updateBorderColor()
     {
         setWebpageBorderColor(_borderColor);
+    }
+
+    void WwtCommunicator::updateAim()
+    {
+        double roll = _isSyncedWithWwt ? skybrowser::cameraRoll() : 0.0;
+        // Message WorldWide Telescope current view
+        ghoul::Dictionary message = moveCamera(
+            _equatorialAim,
+            _verticalFov,
+            roll
+        );
+        sendMessageToWwt(message);
     }
 
     glm::dvec2 WwtCommunicator::fieldsOfView() {
@@ -194,29 +208,22 @@ namespace openspace {
 
     void WwtCommunicator::update()
     {
-        if (_isSyncedWithWwt) {
-            const std::chrono::time_point<std::chrono::high_resolution_clock> 
-                timeBefore = std::chrono::high_resolution_clock::now();
-
-            std::chrono::microseconds duration =
-                std::chrono::duration_cast<std::chrono::microseconds>(
-                    timeBefore - latestCall
-                    );
-
-            if (duration > interval) {
-                // Message WorldWide Telescope current view
-                ghoul::Dictionary message = moveCamera(
-                    _equatorialAim,
-                    _verticalFov,
-                    skybrowser::cameraRoll()
-                );
-                sendMessageToWwt(message);
-
-                latestCall = std::chrono::high_resolution_clock::now();
-            }
-        }
-
         Browser::update();        
+    }
+
+    void WwtCommunicator::render()
+    {
+        Browser::render();
+    }
+
+    void WwtCommunicator::initializeGL()
+    {
+        Browser::initializeGL();
+    }
+
+    void WwtCommunicator::deinitializeGL()
+    {
+        Browser::deinitializeGL();
     }
 
     void WwtCommunicator::setHasLoadedImages(bool isLoaded) {

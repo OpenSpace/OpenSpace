@@ -126,7 +126,7 @@ namespace openspace {
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
 
-        Browser::initializeGL();
+        WwtCommunicator::initializeGL();
         ScreenSpaceRenderable::initializeGL();
         updateTextureResolution();
         return true;
@@ -168,7 +168,7 @@ namespace openspace {
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         ScreenSpaceRenderable::deinitializeGL();
-        Browser::deinitializeGL();
+        WwtCommunicator::deinitializeGL();
         return true;
     }
 
@@ -199,7 +199,7 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::render() {
-        Browser::render();
+        WwtCommunicator::render();
 
         draw(
             globalRotationMatrix() *

@@ -43,15 +43,18 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
 
         // Set up initialization with wwt
         void setIdInBrowser();
 
         // Place
-        void placeAt3dPosition(const glm::dvec3& positionSpeck, float verticalFov);
+        void placeAt3dPosition(const glm::dvec3& positionSpeck, float verticalFov, 
+                               const std::string& sceneGraphNodeId);
 
     private:
-
+        void bindTexture() override;
+        void unbindTexture() override;
     };
 }
 

@@ -40,12 +40,10 @@ int selectImage(lua_State* L) {
         }
     }
     else if (module->get3dBrowser()) {
-        RenderableSkyBrowser* renderable = dynamic_cast<RenderableSkyBrowser*>(
-            module->get3dBrowser());
-        if (renderable) {
-            const ImageData& image = module->getWwtDataHandler()->getImage(i);
-            renderable->displayImage(image.imageUrl, i);
-        }
+        const ImageData& image = module->getWwtDataHandler()->getImage(i);
+        module->get3dBrowser()->displayImage(image.imageUrl, i);
+        module->get3dBrowser()->setEquatorialAim(image.equatorialCartesian);
+        module->get3dBrowser()->setVerticalFov(image.fov);
     }
         
 	return 0;

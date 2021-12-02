@@ -41,13 +41,17 @@ public:
     WwtCommunicator(WwtCommunicator const&) = default;
     virtual ~WwtCommunicator();
 
+    void update();
+    void render();
+    void initializeGL();
+    void deinitializeGL();
+
     // WorldWide Telescope communication
     void displayImage(const std::string& url, int i);
     void removeSelectedImage(const int i);
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
-    void update();
 
     // Getters
     const std::deque<int>& getSelectedImages();
@@ -67,6 +71,7 @@ public:
     void highlight(glm::ivec3 addition);
     void removeHighlight(glm::ivec3 removal);
     void updateBorderColor();
+    void updateAim();
     
 
 protected:
@@ -82,16 +87,14 @@ protected:
 
 private:
     bool _isSyncedWithWwt{ false };
-    const std::chrono::microseconds interval = std::chrono::microseconds(10000);
-    std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 
     void setWebpageBorderColor(glm::ivec3 color);
     void sendMessageToWwt(const ghoul::Dictionary& msg);
 
     int messageCounter{ 0 };
 
-    ghoul::Dictionary moveCamera(const glm::dvec2& celestCoords, const double fov,
-        const double roll, const bool shouldMoveInstantly = true);
+    ghoul::Dictionary moveCamera(const glm::dvec2& celestCoords, double fov,
+        double roll, bool shouldMoveInstantly = true);
     ghoul::Dictionary loadCollection(const std::string& url);
     ghoul::Dictionary setForeground(const std::string& name);
     ghoul::Dictionary addImage(const std::string& id, const std::string& url);

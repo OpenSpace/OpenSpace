@@ -42,6 +42,7 @@ namespace openspace {
         // Set callbacks
         void setCallbackEnabled(std::function<void(bool)> function);
         void setCallbackPosition(std::function<void(const glm::vec3&)> function);
+        void setSkyBrowser(ScreenSpaceSkyBrowser* browser);
 
         // Target directions
         glm::dvec3 directionGalactic() const;
@@ -84,6 +85,7 @@ namespace openspace {
         
         // Sky browser
         glm::ivec3 _color;
+        ScreenSpaceSkyBrowser* _browser{ nullptr };
         float _verticalFov{ 0.f };
         
         // Lock target to a coordinate on the sky
@@ -93,6 +95,12 @@ namespace openspace {
         glm::dvec3 _animationEnd;        // Cartesian equatorial coordinates
         glm::dvec3 _animationStart;      // Cartesian equatorial coordinates
         
+        // Time variables
+        // For capping the set equatorial coordinates to sky browser
+        const std::chrono::microseconds interval = std::chrono::microseconds(10000);
+        std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+        constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
+        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 

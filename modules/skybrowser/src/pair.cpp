@@ -77,24 +77,8 @@ namespace openspace {
             }
         ); 
 
-        // Set target callback functions
-        _target->setCallbackEnabled(
-            [&](bool enabled) {
-                _browser->setEnabled(enabled);
-            }
-        );
-        _target->setCallbackPosition(
-            [&](glm::vec3 localCameraPosition) {
-                double diff = glm::length(
-                    _browser->equatorialAim() - _target->equatorialAim()
-                );
-                if (diff > AnimationThreshold) {
-                    _browser->setEquatorialAim(
-                        skybrowser::localCameraToEquatorial(localCameraPosition)
-                    );
-                }
-            }
-        );
+        _target->setSkyBrowser(_browser);
+        
     }
 
     Pair& Pair::operator=(Pair other)

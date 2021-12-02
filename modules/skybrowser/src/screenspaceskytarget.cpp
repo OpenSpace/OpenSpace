@@ -1,5 +1,6 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -211,6 +212,22 @@ namespace openspace {
                 _lockedCoordinates
             );
         }
+        if (_browser) {
+            const std::chrono::time_point<std::chrono::high_resolution_clock>
+                timeBefore = std::chrono::high_resolution_clock::now();
+
+            std::chrono::microseconds duration =
+                std::chrono::duration_cast<std::chrono::microseconds>(
+                    timeBefore - latestCall
+                    );
+
+            if (duration > interval) {
+                // Message WorldWide Telescope current view
+                _browser->setEquatorialAim(equatorialAim()); // Use camera roll
+
+                latestCall = std::chrono::high_resolution_clock::now();
+            }
+        }
     }
 
     void ScreenSpaceSkyTarget::setDimensions(glm::vec2 dimensions) {
@@ -230,7 +247,6 @@ namespace openspace {
     // Update the scale of the target (the height of the target in relation to the 
     // OpenSpace window)
     void ScreenSpaceSkyTarget::setScaleFromVfov(float verticalFov) {
-
         _verticalFov = verticalFov;
         glm::dvec2 fovs = skybrowser::fovWindow();
         
@@ -337,6 +353,13 @@ namespace openspace {
     {
         _cartesianPosition.onChange([this, f = std::move(function)]() {
             f(_cartesianPosition);
+        });
+    }
+    void ScreenSpaceSkyTarget::setSkyBrowser(ScreenSpaceSkyBrowser* browser)
+    {
+        _browser = browser;
+        _enabled.onChange([this]() {
+            _browser->setEnabled(_enabled);
         });
     }
 }
