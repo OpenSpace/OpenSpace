@@ -250,7 +250,8 @@ namespace openspace {
         return _isAnimated;
     }
 
-    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 equatorialCoordsEnd, bool shouldLockAfter)
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 equatorialCoordsEnd, 
+                                              bool shouldLockAfter)
     {
         _animationStart = glm::normalize(equatorialAim());
         _animationEnd = glm::normalize(equatorialCoordsEnd);
@@ -285,8 +286,9 @@ namespace openspace {
             _animationStart = glm::normalize(equatorialAim());
         }
         else {
+            glm::dvec3 screenSpace = skybrowser::equatorialToScreenSpace3d(_animationEnd);
             // Set the exact target position 
-            _cartesianPosition = glm::vec3(skybrowser::equatorialToScreenSpace3d(_animationEnd));
+            _cartesianPosition = glm::vec3(screenSpace);
             _isAnimated = false;
             // Lock target when it first arrives to the position
             setLock(_shouldLockAfterAnimation);

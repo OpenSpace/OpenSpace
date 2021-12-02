@@ -46,12 +46,14 @@ namespace openspace {
         // Window and field of view
         float windowRatio();
         glm::dvec2 fovWindow();
-        bool isCoordinateInView(const glm::dvec3&  equatorial);
+        bool isCoordinateInView(const glm::dvec3& equatorial);
 
         // Animation for target and camera 
-        double angleBetweenVectors(const glm::dvec3&  start, const glm::dvec3&  end);
-        glm::dmat4 incrementalAnimationMatrix(const glm::dvec3&  start, const glm::dvec3&  end, 
-                                              double deltaTime, double speedFactor = 1.0);       
+        double angleBetweenVectors(const glm::dvec3& start, const glm::dvec3& end);
+        glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, 
+                                              const glm::dvec3& end, 
+                                              double deltaTime, 
+                                              double speedFactor = 1.0);       
     }
 }
 

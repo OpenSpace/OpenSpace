@@ -80,7 +80,6 @@ public:
     glm::vec2 lowerLeftCornerScreenSpace();
     bool intersection(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
-    friend bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs);
     void setCartesianPosition(const glm::vec3& position);
 
     // End of addition by skybrowser team

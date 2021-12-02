@@ -519,7 +519,8 @@ glm::vec2  ScreenSpaceRenderable::screenSpacePosition() {
 }
 
 glm::vec2  ScreenSpaceRenderable::screenSpaceDimensions() {
-    return glm::vec2(2.f * _scale * static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y), 2.f * _scale);
+    float ratio = static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
+    return glm::vec2(2.f * _scale * ratio, 2.f * _scale);
 }
 
 glm::vec2 ScreenSpaceRenderable::upperRightCornerScreenSpace() {
@@ -531,23 +532,27 @@ glm::vec2 ScreenSpaceRenderable::lowerLeftCornerScreenSpace() {
 }
 
 bool ScreenSpaceRenderable::intersection(glm::vec2 coord) {
-    bool lessThanUpperRight = coord.x < upperRightCornerScreenSpace().x && coord.y < upperRightCornerScreenSpace().y;
-    bool moreThanLowerLeft = coord.x > lowerLeftCornerScreenSpace().x && coord.y > lowerLeftCornerScreenSpace().y;
-    return  lessThanUpperRight && moreThanLowerLeft;
+    bool isUnderTopBorder = coord.x < upperRightCornerScreenSpace().x;
+    bool isLeftToRightBorder = coord.y < upperRightCornerScreenSpace().y;
+    bool isRightToLeftBorder = coord.x > lowerLeftCornerScreenSpace().x;
+    bool isOverBottomBorder = coord.y > lowerLeftCornerScreenSpace().y;
+
+    return  isUnderTopBorder && isLeftToRightBorder && 
+            isRightToLeftBorder && isOverBottomBorder;
 }
 
 void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position) {
-    _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
+    glm::mat4 translationMatrix = glm::translate(
+        glm::mat4(1.f),
+        glm::vec3(translation, 0.0f)
+    );
+    glm::vec4 origin = glm::vec4(position, _cartesianPosition.value().z, 1.0f);
+    _cartesianPosition = translationMatrix * origin;
 }
 
 void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position)
 {
     _cartesianPosition = position;
-}
-
-bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs) {
-    // Sort on depth coordinate, larger values are closer to camera
-    return lhs._cartesianPosition.value().z > rhs._cartesianPosition.value().z; 
 }
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {

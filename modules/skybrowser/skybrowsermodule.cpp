@@ -262,7 +262,8 @@ SkyBrowserModule::SkyBrowserModule()
                     return true;
                 }
                 // Fine tuning mode of target
-                else if (_mouseOnPair->isSelectedBrowser() && button == MouseButton::Right) {
+                else if (_mouseOnPair->isSelectedBrowser() && 
+                         button == MouseButton::Right) {
                     // If you start dragging around on the browser, the target unlocks
                     _mouseOnPair->unlock();
                     // Change view (by moving target) within browser if right mouse 
@@ -717,9 +718,9 @@ void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
 void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
 
     // Find smallest angle between the two vectors
-    double smallestAngle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
+    double angle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
 
-    if(smallestAngle > _stopAnimationThreshold) {
+    if(angle > _stopAnimationThreshold) {
         
         glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
             _startAnimation, 

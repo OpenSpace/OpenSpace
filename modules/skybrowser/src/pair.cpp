@@ -290,7 +290,8 @@ namespace openspace {
         }
     }
 
-    void Pair::startAnimation(glm::dvec3 equatorialCoords, float fovEnd, bool shouldLockAfter)
+    void Pair::startAnimation(glm::dvec3 equatorialCoords, float fovEnd, 
+                              bool shouldLockAfter)
     {
         _target->startAnimation(equatorialCoords, shouldLockAfter);
         _browser->startFovAnimation(fovEnd);
