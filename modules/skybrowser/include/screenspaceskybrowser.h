@@ -5,6 +5,7 @@
 #include <modules/skybrowser/include/wwtcommunicator.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -56,9 +57,12 @@ namespace openspace {
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         void setIdInBrowser();
 
+        void updateTextureResolution();
+
     private:
         properties::DoubleProperty _animationSpeed;
-        
+        properties::FloatProperty _textureQuality;
+
         void bindTexture() override;
 
         // Flags

@@ -7,11 +7,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <ghoul/opengl/texture.h>
-#include <glm/gtx/color_space.hpp>
+#include <glm/gtx/color_space.hpp> // For hsv color
 #include <optional>
 #include <random>
 
 
+#include <glm/gtx/string_cast.hpp>
 #pragma optimize("", off)
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
@@ -34,6 +35,14 @@ namespace {
         "Field Of View Animation Speed",
         "The factor which is multiplied with the animation of the field of view."
     };
+    constexpr const openspace::properties::Property::PropertyInfo TextureQualityInfo =
+    {
+        "TextureQuality",
+        "Quality of Texture",
+        "A parameter to set the resolution of the texture. 1 is full resolution and "
+        "slower framerate. Lower value means lower resolution of texture and faster "
+        "frame rate."
+    };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
@@ -45,6 +54,9 @@ namespace {
 
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<double> animationSpeed;
+
+        // [[codegen::verbatim(TextureQualityInfo.description)]]
+        std::optional<double> textureQuality;
     };
 
 #include "ScreenSpaceSkyBrowser_codegen.cpp"
@@ -69,6 +81,7 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , WwtCommunicator(dictionary)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
+        , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     {
         // Set a unique identifier
         std::string identifier;
@@ -88,6 +101,7 @@ namespace openspace {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _verticalFov = p.verticalFov.value_or(_verticalFov);
         _borderColor = p.borderColor.value_or(randomBorderColor());
+        _textureQuality = p.textureQuality.value_or(_textureQuality);
 
         addProperty(_url);
         addProperty(_dimensions);
@@ -95,6 +109,11 @@ namespace openspace {
         addProperty(_verticalFov);
         addProperty(_borderColor);
         addProperty(_equatorialAim);
+        addProperty(_textureQuality);
+
+        _textureQuality.onChange([this]() {
+            updateTextureResolution();
+            });
 
         // Ensure that the browser is placed at the z-coordinate of the screen space plane
         glm::vec2 screenPosition = _cartesianPosition.value();
@@ -109,6 +128,7 @@ namespace openspace {
 
         Browser::initializeGL();
         ScreenSpaceRenderable::initializeGL();
+        updateTextureResolution();
         return true;
     }
 
@@ -129,6 +149,21 @@ namespace openspace {
     
     void ScreenSpaceSkyBrowser::setIdInBrowser() {
         WwtCommunicator::setIdInBrowser(identifier());
+    }
+
+    void ScreenSpaceSkyBrowser::updateTextureResolution()
+    {
+        
+        // Scale texture depending on the height of the window
+        // Set texture size to the actual pixel size it covers
+        glm::vec2 pixels = glm::vec2(global::windowDelegate->currentSubwindowSize());
+        glm::vec2 browserDim = screenSpaceDimensions();
+        float newResY = pixels.y * browserDim.y;
+        float newResX = newResY * (_dimensions.value().x / _dimensions.value().y);
+        glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
+
+        _dimensions = glm::ivec2(newSize);
+        _texture->setDimensions(glm::ivec3(newSize, 1));
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -176,11 +211,12 @@ namespace openspace {
 
     void ScreenSpaceSkyBrowser::update() {
         
-        _objectSize = _texture->dimensions();
-
         if (global::windowDelegate->windowHasResized()) {
-            // change the resolution of the texture
+            // Change the resolution of the texture
+            updateTextureResolution();
         }
+
+        _objectSize = _texture->dimensions();
         
         WwtCommunicator::update();
         ScreenSpaceRenderable::update();
@@ -225,6 +261,11 @@ namespace openspace {
 
         return  resizePosition;
     }
+
+    void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
+        _scale = _originalScale * scalingFactor;
+    }
+
     // Scales the ScreenSpaceBrowser to a new ratio
     void ScreenSpaceSkyBrowser::setScale(glm::vec2 scalingFactor) {
 
@@ -251,8 +292,8 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::saveResizeStartSize() {
-        _originalDimensions = _dimensions.value();
-        _originalScale = _scale.value();
+        _originalDimensions = _dimensions;
+        _originalScale = _scale;
     }
 
     void ScreenSpaceSkyBrowser::setCallbackEquatorialAim(
@@ -291,9 +332,7 @@ namespace openspace {
             f(_enabled);
         });
     }
-    void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
-        _scale = _originalScale * scalingFactor;
-    }
+
 
     void ScreenSpaceSkyBrowser::setOpacity(float opacity)
     {
