@@ -84,19 +84,26 @@ namespace openspace {
     }
 
     void RenderableSkyBrowser::initializeGL() {
-        Browser::initializeGL();
+        WwtCommunicator::initializeGL();
         RenderablePlane::initializeGL();
     }
 
     void RenderableSkyBrowser::deinitializeGL() {
        
         RenderablePlane::deinitializeGL();
-        Browser::deinitializeGL();
+        WwtCommunicator::deinitializeGL();
     }
 
     void RenderableSkyBrowser::update(const UpdateData& data) {
-        Browser::update();
+        WwtCommunicator::update();
         RenderablePlane::update(data);
+    }
+
+    void RenderableSkyBrowser::render(const RenderData& data, RendererTasks& rendererTask)
+    {
+        glDisable(GL_CULL_FACE);
+        WwtCommunicator::render();
+        RenderablePlane::render(data, rendererTask);
     }
 
     void RenderableSkyBrowser::setIdInBrowser()
@@ -105,14 +112,13 @@ namespace openspace {
     }
 
 	void RenderableSkyBrowser::placeAt3dPosition(
-        const glm::dvec3& positionSpeck, float verticalFov)
+        const glm::dvec3& positionSpeck, float verticalFov, 
+        const std::string& sceneGraphNodeId)
 	{
-        std::string renderableId = dynamic_cast<SceneGraphNode*>(
-            this)->renderable()->identifier();
         // Uris for properties
-        std::string sizeUri = "Scene." + _identifier + "." + renderableId + ".Size";
-        std::string positionUri = "Scene." + _identifier + ".Translation.Position";
-        std::string rotationUri = "Scene." + _identifier + ".Rotation.Rotation";
+        std::string sizeUri = "Scene." + sceneGraphNodeId + "." + _identifier + ".Size";
+        std::string positionUri = "Scene." + sceneGraphNodeId + ".Translation.Position";
+        std::string rotationUri = "Scene." + sceneGraphNodeId + ".Rotation.Rotation";
         std::string cameraAim = "NavigationHandler.OrbitalNavigator.Aim";
         glm::dvec3 position = positionSpeck * distanceconstants::Parsec;
         // Calculate the size of the plane with trigonometry
@@ -152,4 +158,12 @@ namespace openspace {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
 	}
+    void RenderableSkyBrowser::bindTexture()
+    {
+        _texture->bind();
+    }
+    void RenderableSkyBrowser::unbindTexture()
+    {
+
+    }
 } // namespace

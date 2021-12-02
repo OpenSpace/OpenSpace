@@ -355,6 +355,7 @@ namespace openspace {
             position3d = it->second;
             has3dCoords = true;
             _nMatched3dPositions++;
+            LINFO("3d position was found for " + name);
         }
 
         ImageData image = {

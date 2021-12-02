@@ -108,7 +108,7 @@ private:
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
     ScreenSpaceImageLocal* _hoverCircle{ nullptr };
-    SceneGraphNode* _browser3dNode{ nullptr };
+    SceneGraphNode* _browser3dNode{ nullptr }; // Scene graph node is used for positioning
     RenderableSkyBrowser* _browser3d{ nullptr };
     std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
 
