@@ -219,6 +219,7 @@ void NavigationHandler::applyNavigationState(const NavigationState& ns) {
     _camera->setPositionVec3(pose.position);
     _camera->setRotation(pose.rotation);
     _orbitalNavigator.clearPreviousState();
+    _orbitalNavigator.resetNodeMovements();
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -408,15 +409,15 @@ NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
     const SceneGraphNode* anchor = _orbitalNavigator.anchorNode();
-    const SceneGraphNode* aim = _orbitalNavigator.aimNode();
 
-    if (!aim) {
-        aim = anchor;
+    if (!anchor) {
+        LERROR("No anchor node could be found");
+        return NavigationState();
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0),
-        aim->worldPosition() - _camera->positionVec3(),
+        anchor->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
@@ -432,15 +433,14 @@ NavigationState NavigationHandler::navigationState(
         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 
     const glm::dmat3 invReferenceFrameTransform =
-        glm::inverse(referenceFrame.worldRotationMatrix());
+        glm::inverse(referenceFrame.modelTransform());
 
     const glm::dvec3 position = invReferenceFrameTransform *
         (glm::dvec4(_camera->positionVec3() - anchor->worldPosition(), 1.0));
 
     return NavigationState(
         _orbitalNavigator.anchorNode()->identifier(),
-        _orbitalNavigator.aimNode() ?
-        _orbitalNavigator.aimNode()->identifier() : "",
+        _orbitalNavigator.aimNode() ? _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
         invReferenceFrameTransform * neutralUp, yaw, pitch
