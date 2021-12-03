@@ -212,7 +212,8 @@ namespace openspace {
                 _lockedCoordinates
             );
         }
-        if (_browser) {
+        // Optimization: Only pass messages to the browser when the target is not moving 
+        if (_browser && !_isAnimated) {
             const std::chrono::time_point<std::chrono::high_resolution_clock>
                 timeBefore = std::chrono::high_resolution_clock::now();
 
@@ -278,13 +279,15 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::incrementallyAnimateToCoordinate(float deltaTime)
     {
+        // At fps that are too low, the animation stops working. Just place target instead
+        bool fpsTooLow = deltaTime > DeltaTimeThreshold;
         // Find smallest angle between the two vectors
         double smallestAngle = skybrowser::angleBetweenVectors(_animationStart, 
             _animationEnd);
-        const bool shouldAnimate = smallestAngle > _stopAnimationThreshold;
+        bool hasArrived = smallestAngle < _stopAnimationThreshold;
 
         // Only keep animating when target is not at goal position
-        if (shouldAnimate) {
+        if (!hasArrived && !fpsTooLow) {
             glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
                 _animationStart,
                 _animationEnd,

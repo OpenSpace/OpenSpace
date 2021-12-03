@@ -15,6 +15,8 @@ namespace openspace {
     class ScreenSpaceSkyTarget : public ScreenSpaceRenderable {
     
     public:
+        constexpr static const float DeltaTimeThreshold = 0.03f; 
+
         // Constructor & destructor
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyTarget();
