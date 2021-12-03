@@ -98,9 +98,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePointsCloud::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "softwareintegration_renderable_pointscloud";
-    return doc;
+    return codegen::doc<Parameters>("softwareintegration_renderable_pointscloud");
 }
 
 RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary)
