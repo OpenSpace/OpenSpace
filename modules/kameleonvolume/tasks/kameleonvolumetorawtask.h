@@ -28,6 +28,7 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <string>
 
 namespace openspace::kameleonvolume {
@@ -42,9 +43,9 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inputPath;
-    std::string _rawVolumeOutputPath;
-    std::string _dictionaryOutputPath;
+    std::filesystem::path _inputPath;
+    std::filesystem::path _rawVolumeOutputPath;
+    std::filesystem::path _dictionaryOutputPath;
 
     std::string _variable;
     std::string _units;

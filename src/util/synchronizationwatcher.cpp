@@ -41,7 +41,7 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
         [this, synchronization, watchHandle, cb = std::move(callback)]
         (ResourceSynchronization::State state)
         {
-            std::lock_guard<std::mutex> g(_mutex);
+            std::lock_guard g(_mutex);
             _pendingNotifications.push_back({ synchronization, state, watchHandle, cb });
         }
     );

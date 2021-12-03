@@ -24,15 +24,15 @@
 
 #include <modules/base/dashboard/dashboarditemdistance.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
@@ -140,9 +140,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDistance::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_distance";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_distance");
 }
 
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
@@ -368,7 +366,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertDistance(d, unit);
+        const double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
@@ -399,7 +397,7 @@ glm::vec2 DashboardItemDistance::size() const {
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 

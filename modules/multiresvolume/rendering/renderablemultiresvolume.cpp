@@ -54,6 +54,7 @@
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 
@@ -170,7 +171,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
     }
     else {
         LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
@@ -222,7 +223,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
-        );
+        ).string();
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
@@ -230,8 +231,8 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         return;
     }
 
-    //_pscOffset = psc(glm::vec4(0.0));
-    //_boxScaling = glm::vec3(1.0);
+    //_pscOffset = psc(glm::vec4(0.f));
+    //_boxScaling = glm::vec3(1.f);
 
 
     /*if (dictionary.hasKey(KeyBoxScaling)) {
@@ -454,38 +455,38 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
         case Selector::TF:
             if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                     fmt::format(
+                         "{}_{}_errorHistograms",
+                         std::filesystem::path(_filename).stem().string(), nHistograms
+                     ),
+                     ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache: {}", cacheFilename)
+                        fmt::format("Loading histograms from cache: {}", cached)
                     );
-                    success &= _errorHistogramManager->loadFromFile(cacheFilename);
+                    success &= _errorHistogramManager->loadFromFile(cached);
                 }
-                else if (_errorHistogramsPath != "") {
+                else if (!_errorHistogramsPath.empty()) {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
+                    success &= _errorHistogramManager->loadFromFile(
+                        _errorHistogramsPath.string()
+                    );
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cacheFilename));
+                    LWARNING(fmt::format("Failed to open {}", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _errorHistogramManager->saveToFile(cacheFilename);
+                        LINFO(fmt::format("Writing cache to {}", cached));
+                        _errorHistogramManager->saveToFile(cached);
                     }
                 }
                 success &= _tfBrickSelector && _tfBrickSelector->initialize();
@@ -494,32 +495,29 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::SIMPLE:
             if (_histogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                    fmt::format("{}_{}_histogram",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cacheFilename));
-                    success &= _histogramManager->loadFromFile(cacheFilename);
+                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    success &= _histogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open '{}'", cacheFilename));
+                    LWARNING(fmt::format("Failed to open {}", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _histogramManager->saveToFile(cacheFilename);
+                        LINFO(fmt::format("Writing cache to {}", cached));
+                        _histogramManager->saveToFile(cached);
                     }
                 }
                 success &= _simpleTfBrickSelector && _simpleTfBrickSelector->initialize();
@@ -528,27 +526,27 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                ghoul::filesystem::File f = _filename;
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+                    fmt::format(
+                        "{}_{}_localErrorHistograms",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cacheFilename));
-                    success &= _localErrorHistogramManager->loadFromFile(cacheFilename);
+                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    success &= _localErrorHistogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cacheFilename));
+                    LWARNING(fmt::format("Failed to open {}", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                        _localErrorHistogramManager->saveToFile(cacheFilename);
+                        LINFO(fmt::format("Writing cache to {}", cached));
+                        _localErrorHistogramManager->saveToFile(cached);
                     }
                 }
                 success &= _localTfBrickSelector && _localTfBrickSelector->initialize();
@@ -628,8 +626,9 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
-        ghoul::filesystem::Directory directory(file.directoryName());
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::path directory =
+            std::filesystem::path(_statsFileName).parent_path();
+        std::filesystem::create_directories(directory);
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 

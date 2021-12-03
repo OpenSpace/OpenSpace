@@ -278,7 +278,9 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.75f);
+    ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
@@ -475,7 +477,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     >;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
-        { "DoubleProperty", &renderDoubleProperty},
+        { "DoubleProperty", &renderDoubleProperty },
         { "IntProperty", &renderIntProperty },
         { "IVec2Property", &renderIVec2Property },
         { "IVec3Property", &renderIVec3Property },
@@ -491,6 +493,8 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
         { "DMat3Property", &renderDMat3Property },
         { "DMat4Property", &renderDMat4Property },
         { "StringProperty", &renderStringProperty },
+        { "DoubleListProperty", &renderDoubleListProperty },
+        { "IntListProperty", &renderIntListProperty },
         { "StringListProperty", &renderStringListProperty },
         { "OptionProperty", &renderOptionProperty },
         { "TriggerProperty", &renderTriggerProperty },

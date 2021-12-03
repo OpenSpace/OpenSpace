@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "floatoperations.glsl"
 
 in float vs_depth;
 in vec4 vs_positionViewSpace;

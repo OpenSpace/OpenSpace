@@ -5,31 +5,32 @@ asset.require("spice/base")
 
 
 local UranusBarycenter = {
-    Identifier = "UranusBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "URANUS BARYCENTER",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Uranus Barycenter",
-        Path = "/Solar System/Planets/Uranus",
-        Hidden = true,
-        Description = [[ Uranus Barycenter position]],
+  Identifier = "UranusBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS BARYCENTER",
+      Observer = "SSB"
     }
+  },
+  GUI = {
+    Name = "Uranus Barycenter",
+    Path = "/Solar System/Planets/Uranus",
+    Hidden = true,
+    Description = [[ Uranus Barycenter position]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { UranusBarycenter })
 
 
 asset.meta = {
-    Name = "Uranus Transforms",
-    Version = "1.0",
-    Description = [[ Uranus Barycenter transform]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Uranus Transforms",
+  Version = "1.0",
+  Description = [[ Uranus Barycenter transform]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"UranusBarycenter"}
 }

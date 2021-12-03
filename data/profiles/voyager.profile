@@ -1,4 +1,62 @@
 {
+  "actions": [
+    {
+      "documentation": "Set camera focus to Voyager 1",
+      "gui_path": "/Missions/Voyager",
+      "identifier": "profile.focus.voyager1",
+      "is_local": false,
+      "name": "Focus on Voyager",
+      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
+    },
+    {
+      "documentation": "Sets the camera focus on Voyager 2",
+      "gui_path": "/Missions/Voyager",
+      "identifier": "profile.focus.voyager2",
+      "is_local": false,
+      "name": "Focus on Voyager2",
+      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+    },
+    {
+      "documentation": "Sets the time for Voyager's approach to Jupiter",
+      "gui_path": "/",
+      "identifier": "profile.setup.jupiter_approach",
+      "is_local": false,
+      "name": "Set Jupiter Approach",
+      "script": "openspace.time.setTime(\"1979-01-20T01:32:07.914\")"
+    },
+    {
+      "documentation": "Sets the time for Voyager's approach to Saturn",
+      "gui_path": "/Missions/Voyager",
+      "identifier": "profile.setup.saturn_approach",
+      "is_local": false,
+      "name": "Set Saturn Approach",
+      "script": "openspace.time.setTime(\"1980-10-20T07:43:42.645\");"
+    },
+    {
+      "documentation": "Set the camera focus to Jupiter",
+      "gui_path": "/Missions/Voyager",
+      "identifier": "profile.focus.jupiter",
+      "is_local": false,
+      "name": "Focus on Jupiter",
+      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Jupiter');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+    },
+    {
+      "documentation": "Sets the camera focus on Saturn",
+      "gui_path": "/Missions/Voyager",
+      "identifier": "profile.focus.saturn",
+      "is_local": false,
+      "name": "Focus on Saturn",
+      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Saturn');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+    },
+    {
+      "documentation": "Toggles the trails of the minor moons",
+      "gui_path": "/Solar System",
+      "identifier": "profile.toggle.minor_trails",
+      "is_local": false,
+      "name": "Toggle minor trails",
+      "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/missions/voyager/dashboard",
@@ -37,60 +95,32 @@
   ],
   "keybindings": [
     {
-      "documentation": "Set camera focus to Voyager 1",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "V",
-      "name": "Focvus on Voyager",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_1');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')"
+      "action": "profile.focus.voyager1",
+      "key": "V"
     },
     {
-      "documentation": "Sets the camera focus on Voyager 2",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "SHIFT+V",
-      "name": "Focus on Voyager2",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Voyager_2');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "profile.focus.voyager2",
+      "key": "SHIFT+V"
     },
     {
-      "documentation": "Sets the time for Voyager's approach to Jupiter",
-      "gui_path": "/",
-      "is_local": false,
-      "key": "SHIFT+J",
-      "name": "Set Jupiter Approach",
-      "script": "openspace.time.setTime(\"1979-01-20T01:32:07.914\")"
+      "action": "profile.setup.jupiter_approach",
+      "key": "SHIFT+J"
     },
     {
-      "documentation": "Sets the time for Voyager's approach to Saturn",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "SHIFT+S",
-      "name": "Set Saturn Approach",
-      "script": "openspace.time.setTime(\"1980-10-20T07:43:42.645\");"
+      "action": "profile.setup.saturn_approach",
+      "key": "SHIFT+S"
     },
     {
-      "documentation": "Set the camera focus to Jupiter",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "J",
-      "name": "Focus on Jupiter",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Jupiter');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "profile.focus.jupiter",
+      "key": "J"
     },
     {
-      "documentation": "Sets the camera focus on Saturn",
-      "gui_path": "/Missions/Voyager",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Saturn",
-      "script": "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil);openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", 'Saturn');openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '');"
+      "action": "profile.focus.saturn",
+      "key": "S"
     },
     {
-      "documentation": "Toggles the trails of the minor moons",
-      "gui_path": "/Solar System",
-      "is_local": false,
-      "key": "SHIFT+H",
-      "name": "Toggle minor trails",
-      "script": "local list = openspace.getProperty('{moonTrail_minor}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.minor_trails",
+      "key": "SHIFT+H"
     }
   ],
   "mark_nodes": [
@@ -123,6 +153,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

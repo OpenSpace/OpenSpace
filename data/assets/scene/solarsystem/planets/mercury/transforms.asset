@@ -3,32 +3,32 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local MercuryBarycenter = {
-    Identifier = "MercuryBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MERCURY",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "Mercury Barycenter",
-        Path = "/Solar System/Planets/Mercury",
-        Hidden = true,
-        Description = [[ Mercury Barycenter position]],
+  Identifier = "MercuryBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MERCURY BARYCENTER",
+      Observer = "SSB"
     }
+  },
+  GUI = {
+    Name = "Mercury Barycenter",
+    Path = "/Solar System/Planets/Mercury",
+    Hidden = true,
+    Description = [[ Mercury Barycenter position]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter })
 
 
 asset.meta = {
-    Name = "Mercury Transforms",
-    Version = "1.0",
-    Description = [[ Mercury Barycenter transform]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"MercuryBarycenter"}
+  Name = "Mercury Transforms",
+  Version = "1.0",
+  Description = [[ Mercury Barycenter transform]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"MercuryBarycenter"}
 }

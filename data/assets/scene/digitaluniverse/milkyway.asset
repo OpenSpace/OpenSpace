@@ -6,30 +6,30 @@ local plane = {
     Identifier = "MilkyWayGalaxyImage",
     Parent = "Root",
     Renderable = {
-        Type = "RenderablePlanesCloud",
-        Enabled = true,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.99,
-        ScaleFactor = 2.8,
-        File = dataPaths.SpeckPath .. "/galaxy.speck",
-        TexturePath = dataPaths.TexturesPath,
-        Luminosity = "size",
-        ScaleLuminosity = 1.0,
-        FadeInDistances = { 3000.0, 50000.0 },
-        PlaneMinSize = 5.0,
-        Unit = "pc"
+      Type = "RenderablePlanesCloud",
+      Enabled = true,
+      Color = { 1.0, 1.0, 1.0 },
+      Opacity = 0.99,
+      ScaleFactor = 2.8,
+      File = dataPaths.SpeckPath .. "/galaxy.speck",
+      TexturePath = dataPaths.TexturesPath,
+      Luminosity = "size",
+      ScaleLuminosity = 1.0,
+      FadeInDistances = { 3000.0, 50000.0 },
+      PlaneMinSize = 5.0,
+      Unit = "pc"
     },
     GUI = {
-        Name = "Milky Way Galaxy Image",
-        Path = "/Universe/Galaxies",
-        Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
-            Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
-            galaxy thought to resemble our Milky Way. The image has been properly sized
-            and approximately oriented to function as a placeholder, allowing one to see
-            the context of the Galaxy relative to other data in the atlas. The features
-            you see in the image, of course, do not represent our Galaxy, per se, but
-            resemble similar features found in our Galaxy.(Description from URL)
-            <br><br> Data Reference: European Southern Observatory]]
+      Name = "Milky Way Galaxy Image",
+      Path = "/Universe/Galaxies",
+      Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
+        Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
+        galaxy thought to resemble our Milky Way. The image has been properly sized
+        and approximately oriented to function as a placeholder, allowing one to see
+        the context of the Galaxy relative to other data in the atlas. The features
+        you see in the image, of course, do not represent our Galaxy, per se, but
+        resemble similar features found in our Galaxy.(Description from URL)
+        <br><br> Data Reference: European Southern Observatory]]
     }
 }
 
@@ -37,12 +37,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
 
 
 asset.meta = {
-    Name = "MilkyWay Galaxy",
-    Version = "2.0",
-    Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
-        extragalactic viewing]],
-    Author = "Brian Abbott, Carter Emmart (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"MilkyWayGalaxyImage"}
+  Name = "MilkyWay Galaxy",
+  Version = "2.0",
+  Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
+    extragalactic viewing]],
+  Author = "Brian Abbott, Carter Emmart (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"MilkyWayGalaxyImage"}
 }

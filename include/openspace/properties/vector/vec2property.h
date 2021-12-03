@@ -28,10 +28,25 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Vec2Property, glm::vec2)
+class Vec2Property : public NumericalProperty<glm::vec2> {
+public:
+    Vec2Property(Property::PropertyInfo info, glm::vec2 value = glm::vec2(0.f),
+        glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::lowest()),
+        glm::vec2 maxValue = glm::vec2(std::numeric_limits<float>::max()),
+        glm::vec2 stepValue = glm::vec2(0.01f));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::vec2>::operator=;
+
+protected:
+    glm::vec2 fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

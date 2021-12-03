@@ -34,9 +34,10 @@
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
-
+#include <ghoul/opengl/programobject.h>
 struct CPLXMLNode;
 
 namespace ghoul::fontrendering {
@@ -62,7 +63,8 @@ enum class Type {
     TemporalTileProvider,
     TileIndexTileProvider,
     ByIndexTileProvider,
-    ByLevelTileProvider
+    ByLevelTileProvider,
+    InterpolateTileProvider
 };
 
 
@@ -101,6 +103,25 @@ struct SingleImageProvider : public TileProvider {
     Tile tile;
 
     properties::StringProperty filePath;
+};
+
+struct InterpolateTileProvider : public TileProvider {
+    InterpolateTileProvider(const ghoul::Dictionary&);
+    virtual ~InterpolateTileProvider();
+
+    Tile calculateTile(const TileIndex&);
+    TileProvider* before = nullptr;
+    TileProvider* t1 = nullptr;
+    TileProvider* t2 = nullptr;
+    TileProvider* future = nullptr;
+    float factor = 1.f;
+    GLuint vaoQuad = 0;
+    GLuint vboQuad = 0;
+    GLuint fbo = 0;
+    std::string colormap;
+    std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
+    std::unique_ptr<SingleImageProvider> singleImageProvider;
+    cache::MemoryAwareTileCache* tileCache = nullptr;
 };
 
 struct TextTileProvider : public TileProvider {
@@ -174,16 +195,24 @@ struct TemporalTileProvider : public TileProvider {
 
     ghoul::Dictionary initDict;
     properties::StringProperty filePath;
+    properties::BoolProperty useFixedTime;
+    properties::StringProperty fixedTime;
     std::string gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> tileProviderMap;
 
-    TileProvider* currentTileProvider = nullptr;
+    bool interpolation = false;
 
+    TileProvider* currentTileProvider = nullptr;
+    double startTimeJ2000;
+    double endTimeJ2000;
     TimeFormatType timeFormat;
     TimeQuantizer timeQuantizer;
+    std::string colormap;
 
+    std::string myResolution;
     bool successfulInitialization = false;
+    std::unique_ptr<InterpolateTileProvider> interpolateTileProvider;
 };
 
 

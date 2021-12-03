@@ -4,68 +4,72 @@ asset.require("spice/base")
 asset.require('./trail')
 
 local Jupiter = {
-    Identifier = "Jupiter",
-    Parent = transforms.JupiterBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_JUPITER",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Jupiter",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER",
+      Observer = "JUPITER BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 71492000.0, 71492000.0, 66854000.0 },
-        SegmentsPerPatch = 64,
-        Layers = {},
-        ShadowGroup = {
-            Sources = {
-                { Name = "Sun", Radius = 696.3E6 },
-            },
-            Casters = {
-                { Name = "Ganymede", Radius = 2631000 },
-                { Name = "Io", Radius = 1821600 },
-                { Name = "Europa", Radius = 1560800 },
-                { Name = "Callisto", Radius = 2410000 }
-            }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Path = "/Solar System/Planets/Jupiter"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_JUPITER",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 71492000.0, 71492000.0, 66854000.0 },
+    SegmentsPerPatch = 64,
+    Layers = {},
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696.3E6 },
+      },
+      Casters = {
+        { Name = "Ganymede", Radius = 2631000 },
+        { Name = "Io", Radius = 1821600 },
+        { Name = "Europa", Radius = 1560800 },
+        { Name = "Callisto", Radius = 2410000 }
+      }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Path = "/Solar System/Planets/Jupiter"
+  }
 }
 
 local JupiterLabel = {
-    Identifier = "JupiterLabel",
-    Parent = Jupiter.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Jupiter",
-        FontSize = 100.0,
-        LabelSize = 8.6,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Jupiter Label",
-        Path = "/Solar System/Planets/Jupiter"
-    }
+  Identifier = "JupiterLabel",
+  Parent = Jupiter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Jupiter",
+    FontSize = 70.0,
+    Size = 8.77,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Jupiter Label",
+    Path = "/Solar System/Planets/Jupiter"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })
 
 
 asset.meta = {
-    Name = "Jupiter",
-    Version = "1.0",
-    Description = [[ Jupiter globe, and main planet label.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Jupiter", "JupiterLabel"}
+  Name = "Jupiter",
+  Version = "1.0",
+  Description = [[ Jupiter globe, and main planet label.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Jupiter", "JupiterLabel"}
 }

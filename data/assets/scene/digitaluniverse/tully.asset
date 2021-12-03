@@ -3,126 +3,123 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Tully Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_tully_textures",
-    Version = 3
+  Name = "Tully Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_tully_textures",
+  Version = 3
 })
 
 local speck = asset.syncedResource({
-    Name = "Tully Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_tully_speck",
-    Version = 2
+  Name = "Tully Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_tully_speck",
+  Version = 2
 })
 
 local tullyPoints = {
-    Identifier = "TullyGalaxies",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = true,
-        Color = { 1.0, 0.4, 0.2 },
-        Opacity = 0.99,
-        ScaleFactor = 504.0,
-        File = speck .. "/tully.speck",
-        Texture = textures .. "/point3A.png",
-        --ColorMap = speck .. "/tully.cmap",
-        ColorMap = speck .. "/lss.cmap",
-        --ColorOption = { "proximity" },
-        ColorOption = { "prox5Mpc" },
-        ColorRange = { { 1.0, 30.0 } },
-        LabelFile = speck .. "/tully.label",
-        DrawLabels = false,
-        TextColor = { 0.7, 0.7, 0.7 },
-        TextSize = 19.36,
-        TextMinSize = 8.2,
-        TransformationMatrix = {
-            -0.7357425748,    0.67726129641,  0.0,           0.0,
-            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-            0.0,              0.0,            0.0,           1.0
-        },
-        Unit = "Mpc",
-        -- Fade in value in the same unit as "Unit"
-        FadeInDistances = { 0.001, 1.0 },
-        -- Max size in pixels
-        BillboardMaxSize = 7,
-        BillboardMinSize = 0,
-        --CorrectionSizeEndDistance = 22.0,
-        --CorrectionSizeFactor = 10.45
-        EnablePixelSizeControl = true
+  Identifier = "TullyGalaxies",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = true,
+    Color = { 1.0, 0.4, 0.2 },
+    Opacity = 0.99,
+    ScaleFactor = 504.0,
+    File = speck .. "/tully.speck",
+    Texture = textures .. "/point3A.png",
+    --ColorMap = speck .. "/tully.cmap",
+    ColorMap = speck .. "/lss.cmap",
+    --ColorOption = { "proximity" },
+    ColorOption = { "prox5Mpc" },
+    ColorRange = { { 1.0, 30.0 } },
+    LabelFile = speck .. "/tully.label",
+    DrawLabels = false,
+    Unit = "Mpc",
+    TextColor = { 0.7, 0.7, 0.7 },
+    TextSize = 19.36,
+    TextMinMaxSize = { 8, 20 },
+    TransformationMatrix = {
+      -0.7357425748,    0.67726129641,  0.0,           0.0,
+      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+      0.0,              0.0,            0.0,           1.0
     },
-    GUI = {
-        Name = "Tully Galaxies",
-        Path = "/Universe/Galaxies",
-        Description = [[Census: 30,059 galaxies. DU Version 1.5.<br> The Tully Catalog is
-        the most polished, accurate catalog of nearby galaxies. It includes over 30,000
-        galaxies in the local universe that surround the Milky Way. This catalog
-        demonstrates the large-scale structure of the universe exceptionally well. And,
-        each galaxy has a representative image reflecting its morphological type, and is
-        properly sized and inclined. Size and shape. The data form a cube, which is an
-        arbitrary cutoff based on the completeness of these data. Beyond this, data from
-        these sources are not as reliable, so effort is made to show a complete picture,
-        albeit limited by observations (for example, we cannot see dwarf galaxies much
-        beyond the Local Group). The size of the cube is roughly 1 billion light years on
-        a diagonal (so the farthest galaxies in the dataset are about 1 billion light
-        years from the Milky Way), or about 700 million light years per side.
-        <br><br>Colors. Orange denotes more dense regions of the local universe, aqua is
-        given to galaxies in an intermediate-density area, and green is given to lower
-        density regions.(Description from URL) <br><br> Data Reference: Tully Galaxy
-        Catalog: Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
-    }
+    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
+    --CorrectionSizeEndDistance = 22.0,
+    --CorrectionSizeFactor = 10.45
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Tully Galaxies",
+    Path = "/Universe/Galaxies",
+    Description = [[Census: 30,059 galaxies. DU Version 1.5.<br> The Tully Catalog is
+      the most polished, accurate catalog of nearby galaxies. It includes over 30,000
+      galaxies in the local universe that surround the Milky Way. This catalog
+      demonstrates the large-scale structure of the universe exceptionally well. And,
+      each galaxy has a representative image reflecting its morphological type, and is
+      properly sized and inclined. Size and shape. The data form a cube, which is an
+      arbitrary cutoff based on the completeness of these data. Beyond this, data from
+      these sources are not as reliable, so effort is made to show a complete picture,
+      albeit limited by observations (for example, we cannot see dwarf galaxies much
+      beyond the Local Group). The size of the cube is roughly 1 billion light years on
+      a diagonal (so the farthest galaxies in the dataset are about 1 billion light
+      years from the Milky Way), or about 700 million light years per side.
+      <br><br>Colors. Orange denotes more dense regions of the local universe, aqua is
+      given to galaxies in an intermediate-density area, and green is given to lower
+      density regions.(Description from URL) <br><br> Data Reference: Tully Galaxy
+      Catalog: Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+  }
 }
 
 local tullyImages = {
-    Identifier = "TullyGalaxiesImages",
-    Renderable = {
-        Type = "RenderablePlanesCloud",
-        Enabled = true,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.99,
-        ScaleFactor = 1.0,
-        File = speck .. "/tully.speck",
-        TexturePath = textures,
-        Luminosity = "diamkpc",
-        ScaleLuminosity = 0.001,
-        TransformationMatrix = {
-            -0.7357425748,    0.67726129641,  0.0,           0.0,
-            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-            0.0,              0.0,            0.0,           1.0
-        },
-        Unit = "Mpc",
-        -- Fade in value in the same unit as "Unit"
-        FadeInDistances = {0.0005, 0.003},
-        PlaneMinSize = 1.0
+  Identifier = "TullyGalaxiesImages",
+  Renderable = {
+    Type = "RenderablePlanesCloud",
+    Enabled = true,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.99,
+    ScaleFactor = 1.0,
+    File = speck .. "/tully.speck",
+    TexturePath = textures,
+    Luminosity = "diamkpc",
+    ScaleLuminosity = 0.001,
+    TransformationMatrix = {
+      -0.7357425748,    0.67726129641,  0.0,           0.0,
+      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+      0.0,              0.0,            0.0,           1.0
     },
-    GUI = {
-        Name = "Tully Galaxies Images",
-        Path = "/Universe/Galaxies",
-        Description = [[Each galaxy is represented by an image
-        that represents its morphological type (spiral, elliptical, etc.). Most of these
-        come from The Galaxy Catalog. A handful of nearby galaxies are represented by
-        their actual images, which come mostly from the National Optical Astronomy
-        Observatory (NOAO). Each of these images has been altered from its original state.
-        These images were taken from Earth on some of the world’s largest telescopes, so
-        foreground stars from our own Galaxy appear in each image. We are representing
-        galaxies in extragalactic space, so we have removed the stars from each image.
-        (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
-        (U Hawaii), Stuart Levy (NCSA/UIUC)]]
-    }
+    Unit = "Mpc",
+    -- Fade in value in the same unit as "Unit"
+    FadeInDistances = {0.0005, 0.003},
+    PlaneMinSize = 1.0
+  },
+  GUI = {
+    Name = "Tully Galaxies Images",
+    Path = "/Universe/Galaxies",
+    Description = [[Each galaxy is represented by an image
+      that represents its morphological type (spiral, elliptical, etc.). Most of these
+      come from The Galaxy Catalog. A handful of nearby galaxies are represented by
+      their actual images, which come mostly from the National Optical Astronomy
+      Observatory (NOAO). Each of these images has been altered from its original state.
+      These images were taken from Earth on some of the world’s largest telescopes, so
+      foreground stars from our own Galaxy appear in each image. We are representing
+      galaxies in extragalactic space, so we have removed the stars from each image.
+      (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
+      (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { tullyPoints, tullyImages })
 
 
 asset.meta = {
-    Name = "Tully Galaxies",
-    Version = "3.0",
-    Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
-        images.]],
-    Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"TullyGalaxies" , "TullyGalaxiesImages"}
+  Name = "Tully Galaxies",
+  Version = "3.0",
+  Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
+    images.]],
+  Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"TullyGalaxies" , "TullyGalaxiesImages"}
 }

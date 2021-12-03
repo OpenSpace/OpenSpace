@@ -38,6 +38,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
@@ -51,10 +53,16 @@ private:
     void skipSingleLineInFile(std::ifstream& file);
 
     std::vector<std::string> _sbNames;
+    std::function<void()> _updateContiguousModeSelect;
+    std::function<void()> _updateRenderUpperLimitSelect;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
+    properties::BoolProperty _contiguousMode;
+    properties::UIntProperty _upperLimit;
+    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
+    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
 };
 
 } // namespace openspace

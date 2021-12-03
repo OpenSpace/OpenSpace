@@ -4,36 +4,36 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local UranusTrail = {
-    Identifier = "UranusTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "URANUS BARYCENTER",
-            Observer = "SUN"
-        },
-        Color = { 0.60, 0.95, 1.00 },
-        Period = 30588.740,
-        Resolution = 1000
+  Identifier = "UranusTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS",
+      Observer = "SSB"
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    GUI = {
-        Name = "Uranus Trail",
-        Path = "/Solar System/Planets/Uranus",
-        Description = [[ Trail of Uranus as observed by the Sun.]],
-    }
+    Color = { 0.60, 0.95, 1.00 },
+    Period = 30588.740,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+  GUI = {
+    Name = "Uranus Trail",
+    Path = "/Solar System/Planets/Uranus",
+    Description = [[ Trail of Uranus as observed by the Sun.]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrail })
 
 
 asset.meta = {
-    Name = "Uranus Trail",
-    Version = "1.0",
-    Description = [[ Main trail of Uranus. Data from NASA Spice (see base spice asset)]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"UranusTrail"}
+  Name = "Uranus Trail",
+  Version = "1.0",
+  Description = [[ Main trail of Uranus. Data from NASA Spice (see base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"UranusTrail"}
 }

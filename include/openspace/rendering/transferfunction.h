@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
@@ -58,7 +59,7 @@ private:
     void setTextureFromImage();
     void uploadTexture();
 
-    std::string _filepath;
+    std::filesystem::path _filepath;
     std::unique_ptr<ghoul::filesystem::File> _file;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
     bool _needsUpdate = false;

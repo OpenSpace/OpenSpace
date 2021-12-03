@@ -7,7 +7,7 @@ return {{
 	StartTime = "2019-07-27T10:00:00",
 	TimeStep = "2",
 	EndTime = "2019-07-27T12:00:00",
-    GridType = "Cartesian",
+  GridType = "Cartesian",
 	RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generatedCartesian/singleDebris.rawvolume",
 	DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generatedCartesian/singleDebris.dictionary"
 }}

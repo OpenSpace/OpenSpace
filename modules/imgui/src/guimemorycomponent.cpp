@@ -59,7 +59,9 @@ void GuiMemoryComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin("Memory Information", &v, Size, 0.5f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("Memory Information", &v);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 

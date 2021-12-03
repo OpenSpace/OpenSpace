@@ -2,9 +2,9 @@ local assetHelper = asset.require('util/asset_helper')
 local shared = asset.require('util/tle_helper')
 
 local group = {
-    Title = "100 Brightest",
-    Url = "http://www.celestrak.com/NORAD/elements/visual.txt",
-    TrailColor = { 0.55, 0.25, 0.65 }
+  Title = "100 Brightest",
+  Url = "http://www.celestrak.com/NORAD/elements/visual.txt",
+  TrailColor = { 0.55, 0.25, 0.65 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)

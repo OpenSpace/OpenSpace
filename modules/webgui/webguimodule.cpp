@@ -25,17 +25,23 @@
 #include <modules/webgui/webguimodule.h>
 
 #include <modules/server/servermodule.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
+    constexpr const char* DefaultAddress = "localhost";
+    constexpr const int DefaultPort = 4680;
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
@@ -68,9 +74,7 @@ namespace {
         "The node js command to invoke."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DirectoriesInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo DirectoriesInfo = {
         "Directories",
         "Directories",
         "Directories from which to to serve static content, as a string list "
@@ -78,9 +82,7 @@ namespace {
         "even is the directory.",
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultEndpointInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
         "Default Endpoint",
         "The 'default' endpoint. "
@@ -88,9 +90,7 @@ namespace {
     };
 
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ServedDirectoriesInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
         "ServedDirectories",
         "ServedDirectories",
         "Directories that are currently served. This value is set by the server process, "
@@ -99,9 +99,18 @@ namespace {
         "Manual changes to this property have no effect."
     };
 
-    constexpr const char* DefaultAddress = "localhost";
-    constexpr const int DefaultPort = 4680;
-}
+    struct [[codegen::Dictionary(WebGuiModule)]] Parameters {
+        // [[codegen::verbatim(PortInfo.description)]]
+        std::optional<int> port;
+
+        // [[codegen::verbatim(AddressInfo.description)]]
+        std::optional<std::string> address;
+
+        // [[codegen::verbatim(WebSocketInterfaceInfo.description)]]
+        std::optional<std::string> webSocketInterface;
+    };
+#include "webguimodule_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
@@ -114,7 +123,7 @@ WebGuiModule::WebGuiModule()
     , _defaultEndpoint(DefaultEndpointInfo)
     , _port(PortInfo, DefaultPort)
     , _address(AddressInfo, DefaultAddress)
-    , _webSocketInterface(WebSocketInterfaceInfo, "")
+    , _webSocketInterface(WebSocketInterfaceInfo)
 {
     addProperty(_enabled);
     addProperty(_entryPoint);
@@ -142,34 +151,28 @@ WebGuiModule::CallbackHandle WebGuiModule::addEndpointChangeCallback(EndpointCal
 
 void WebGuiModule::removeEndpointChangeCallback(CallbackHandle handle) {
     const auto it = std::find_if(
-        _endpointChangeCallbacks.begin(),
-        _endpointChangeCallbacks.end(),
+        _endpointChangeCallbacks.cbegin(),
+        _endpointChangeCallbacks.cend(),
         [handle](const std::pair<CallbackHandle, EndpointCallback>& cb) {
             return cb.first == handle;
         }
     );
 
-    ghoul_assert(
-        it != _endpointChangeCallbacks.end(),
-        "handle must be a valid callback handle"
-    );
-
+    ghoul_assert(it != _endpointChangeCallbacks.cend(), "Must be valid callback handle");
     _endpointChangeCallbacks.erase(it);
 }
 
 void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    if (configuration.hasValue<int>(PortInfo.identifier)) {
-        _port = configuration.value<int>(PortInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(configuration);
 
-    if (configuration.hasValue<std::string>(AddressInfo.identifier)) {
-        _address = configuration.value<std::string>(AddressInfo.identifier);
+    _port = p.port.value_or(_port);
+    if (p.address.has_value()) {
+        _address = p.address.value();
     }
-
-    if (configuration.hasValue<std::string>(WebSocketInterfaceInfo.identifier)) {
-        _webSocketInterface =
-            configuration.value<std::string>(WebSocketInterfaceInfo.identifier);
+    else {
+        _address = "192.168.1.8"; //global::windowDelegate
     }
+    _webSocketInterface = p.webSocketInterface.value_or(_webSocketInterface);
 
     auto startOrStop = [this]() {
         if (_enabled && !_entryPoint.value().empty()) {
@@ -193,7 +196,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _defaultEndpoint.onChange(restartIfEnabled);
     _servedDirectories.onChange([this]() {
         std::unordered_map<std::string, std::string> newEndpoints;
-        std::vector<std::string> list = _servedDirectories.value();
+        std::vector<std::string> list = _servedDirectories;
         if (!list.empty()) {
             for (size_t i = 0; i < list.size() - 1; i += 2) {
                 newEndpoints[list[i]] = newEndpoints[list[i + 1]];
@@ -234,28 +237,28 @@ void WebGuiModule::startProcess() {
     _endpoints.clear();
 
     ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
-    const ServerInterface* serverInterface =
-        serverModule->serverInterfaceByIdentifier(_webSocketInterface);
+    const ServerInterface* serverInterface = serverModule->serverInterfaceByIdentifier(
+        _webSocketInterface
+    );
     if (!serverInterface) {
-        LERROR("Missing server interface. Server process could not start.");
+        LERROR("Missing server interface. Server process could not start");
         return;
     }
     const int webSocketPort = serverInterface->port();
 
-
 #ifdef _MSC_VER
-    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
+    const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
 #else
-    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
+    const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
 #endif
 
     std::string formattedDirectories = "[";
 
-    std::vector<std::string> directories = _directories.value();
+    std::vector<std::string> directories = _directories;
     for (size_t i = 0; i < directories.size(); ++i) {
         std::string arg = directories[i];
-        if (i & 1) {
-            arg = absPath(arg);
+        if (i % 2 == 1) {
+            arg = absPath(arg).string();
         }
         formattedDirectories += "\\\"" + escapedJson(escapedJson(arg)) + "\\\"";
         if (i != directories.size() - 1) {
@@ -264,22 +267,21 @@ void WebGuiModule::startProcess() {
     }
     formattedDirectories += "]";
 
-    const std::string defaultEndpoint = _defaultEndpoint.value().empty() ?
-        "" :
-        " --redirect \"" + _defaultEndpoint.value() + "\"";
+    std::string defaultEndpoint;
+    if (!_defaultEndpoint.value().empty()) {
+        defaultEndpoint = fmt::format("--redirect \"{}\"", _defaultEndpoint.value());
+    }
 
-    const std::string command = "\"" + nodePath + "\" "
-        + "\"" + absPath(_entryPoint.value()) + "\"" +
-        " --directories \"" + formattedDirectories + "\"" +
-        defaultEndpoint +
-        " --http-port \"" + std::to_string(_port.value()) + "\" " +
-        " --ws-address \"" + _address.value() + "\"" +
-        " --ws-port " + std::to_string(webSocketPort) +
-        " --auto-close --local";
+    const std::string command = fmt::format(
+        "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
+        "--ws-port {} --auto-close --local",
+        node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
+        defaultEndpoint, _port.value(), _address.value(), webSocketPort
+    );
 
     _process = std::make_unique<ghoul::Process>(
         command,
-        absPath("${BIN}"),
+        absPath("${BIN}").string(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
             LDEBUG(fmt::format("Web GUI server output: {}", str));
@@ -292,7 +294,7 @@ void WebGuiModule::startProcess() {
 }
 
 void WebGuiModule::stopProcess() {
-    for (const auto& e : _endpoints) {
+    for (const std::pair<const std::string, std::string>& e : _endpoints) {
         notifyEndpointListeners(e.first, false);
     }
     _endpoints.clear();

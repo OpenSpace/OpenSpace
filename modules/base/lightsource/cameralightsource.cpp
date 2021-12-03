@@ -46,9 +46,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation CameraLightSource::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_camera_light_source";
-    return doc;
+    return codegen::doc<Parameters>("base_camera_light_source");
 }
 
 CameraLightSource::CameraLightSource()

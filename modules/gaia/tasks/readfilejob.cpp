@@ -68,8 +68,10 @@ void ReadFileJob::execute() {
     int nNullArr = 0;
     size_t nColumnsRead = _allColumns.size();
     if (nColumnsRead != _nDefaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for "
-            "significant speedup!");
+        LINFO(
+            "Additional columns will be read! Consider add column in code for "
+            "significant speedup"
+        );
     }
 
     // Copy columns to local variables.

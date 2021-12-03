@@ -32,6 +32,7 @@ Thumbs.db
 /logs/
 /screenshots/
 /recordings/
+/user/
 /sync/
 /temp/
 # Customization is not supposed to be committed

@@ -33,11 +33,11 @@ uniform mat4 ModelTransform;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    vec4 tmp = vec4(in_position, 0.0);
-    vs_position = tmp;
+  vec4 tmp = vec4(in_position, 0.0);
+  vs_position = tmp;
 
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+  vec4 position = pscTransform(tmp, ModelTransform);
+  vs_position = tmp;
+  position = ViewProjection * position;
+  gl_Position =  z_normalization(position);
 }

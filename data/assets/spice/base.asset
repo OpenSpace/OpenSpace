@@ -3,28 +3,28 @@ local assetHelper = asset.require("util/asset_helper")
 
 
 local syncedDirectory = asset.syncedResource({
-    Name = "General SPK Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "general_spk",
-    Version = 1
+  Name = "General SPK Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "general_spk",
+  Version = 1
 })
 
 local kernels = {
-    asset.localResource("naif0012.tls"),
-    -- Leapseconds:
-    asset.localResource("pck00010.tpc"),
-    syncedDirectory .. "/de430_1850-2150.bsp"
+  asset.localResource("naif0012.tls"),
+  -- Leapseconds:
+  asset.localResource("pck00010.tpc"),
+  syncedDirectory .. "/de430_1850-2150.bsp"
 }
 
 assetHelper.registerSpiceKernels(asset, kernels)
 
 
 asset.meta = {
-    Name = "SPICE Base",
-    Version = "1.0",
-    Description = [[ This asset contains the spice base kernels. With positions
+  Name = "SPICE Base",
+  Version = "1.0",
+  Description = [[ This asset contains the spice base kernels. With positions
     for Solar System bodies from 1850 to 2150]],
-    Author = "OpenSpace Team",
-    URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
-    License = "NASA"
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
+  License = "NASA"
 }

@@ -4,35 +4,37 @@ asset.require("spice/base")
 
 
 local PlutoTrailBarycentric = {
-    Identifier = "PlutoBarycentricTrail",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 0.00, 0.62, 1.00 },
-        Period = 6.38723,
-        Resolution = 1000
+  Identifier = "PlutoBarycentricTrail",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "PLUTO",
+      Observer = "PLUTO BARYCENTER"
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
-    GUI = {
-        Name = "Pluto Barycentric Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
+    Color = { 0.00, 0.62, 1.00 },
+    Period = 6.38723,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
+  GUI = {
+    Name = "Pluto Barycentric Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = [[Orbit of Pluto around it's Barycenter.]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoTrailBarycentric })
 
 
 asset.meta = {
-    Name = "Pluto Barycentric Trail",
-    Version = "1.0",
-    Description = [[ Trail of Pluto as observed by it's Barrycenter. Data from
+  Name = "Pluto Barycentric Trail",
+  Version = "1.0",
+  Description = [[ Trail of Pluto as observed by it's Barrycenter. Data from
     NASA Spice (see base spice asset)]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"PlutoBarycentricTrail"}
 }

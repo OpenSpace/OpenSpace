@@ -104,11 +104,12 @@ protected:
     properties::Vec3Property _localRotation;
 
     properties::FloatProperty _scale;
+    properties::Vec3Property _multiplyColor;
     properties::FloatProperty _opacity;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(alpha, modelTransform, viewProj, texture) _uniformCache;
+    UniformCache(color, opacity, mvp, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

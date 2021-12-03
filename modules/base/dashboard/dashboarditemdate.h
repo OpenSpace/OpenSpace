@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__
 #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMDATE___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/properties/stringproperty.h>
 

@@ -99,7 +99,7 @@ bool isValidPosition(const glm::vec3& pos);
 bool hasSufficientData(const ExoplanetDataEntry& p);
 
 // Compute star color in RGB from b-v color index
-glm::vec3 starColor(float bv);
+glm::vec3 computeStarColor(float bv);
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
     float omega = 90.f);

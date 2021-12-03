@@ -5,11 +5,11 @@ asset.require('./misc/other')
 
 
 asset.meta = {
-    Name = "Satellites Misc",
-    Version = "1.0",
-    Description = [[ Meta asset for misc satellites of Earth. Containing groups:
-        military, radar, cubesats, and other.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Satellites Misc",
+  Version = "1.0",
+  Description = [[ Meta asset for misc satellites of Earth. Containing groups:
+    military, radar, cubesats, and other.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

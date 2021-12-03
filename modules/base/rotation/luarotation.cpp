@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_lua");
 }
 
 LuaRotation::LuaRotation()
@@ -69,21 +67,19 @@ LuaRotation::LuaRotation()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
-            requireUpdate();
-        });
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "rotation");
@@ -91,7 +87,9 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            fmt::format("Script '{}' does nto have a function 'rotation'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'rotation'", _luaScriptFile.value()
+            )
         );
         return glm::dmat3(1.0);
     }

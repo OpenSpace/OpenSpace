@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "atmosphere_common.glsl"
-
 out vec4 renderTableColor;
 
 void main() {   

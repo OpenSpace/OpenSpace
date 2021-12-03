@@ -112,7 +112,7 @@ KameleonPlane::~KameleonPlane() {}
 
 void KameleonPlane::deinitializeGL() {
     IswaCygnet::deinitialize();
-    _fieldlines = std::vector<int>();
+    _fieldlines = std::set<std::string>();
 }
 
 void KameleonPlane::initializeGL() {
@@ -131,7 +131,7 @@ void KameleonPlane::initializeGL() {
     initializeTime();
     createGeometry();
 
-    readFieldlinePaths(absPath(_fieldlineIndexFile));
+    readFieldlinePaths(absPath(_fieldlineIndexFile).string());
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();
@@ -268,16 +268,16 @@ void KameleonPlane::setUniforms() {
 }
 
 void KameleonPlane::updateFieldlineSeeds() {
-    std::vector<int> selectedOptions = _fieldlines.value();
+    std::set<std::string> selectedOptions = _fieldlines;
+    std::vector<std::string> opts = _fieldlines.options();
 
     // seedPath == map<int selectionValue, tuple<string name, string path, bool active>>
-    for (auto& seedPath : _fieldlineState) {
+    using K = int;
+    using V = std::tuple<std::string, std::string, bool>;
+    for (std::pair<const K, V>& seedPath : _fieldlineState) {
         // if this option was turned off
-        const auto it = std::find(
-            selectedOptions.begin(),
-            selectedOptions.end(),
-            seedPath.first
-        );
+        std::string o = opts[seedPath.first];
+        const auto it = std::find(selectedOptions.begin(), selectedOptions.end(), o);
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
             SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
@@ -336,7 +336,7 @@ void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
             const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({i, it.key()});
+                _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),
                     it.value(),

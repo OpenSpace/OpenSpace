@@ -61,6 +61,7 @@
 #include <Tracy.hpp>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include <memory>
 
 #ifdef WIN32
@@ -218,6 +219,15 @@ void mainInitFunc(GLFWwindow*) {
 
     LTRACE("main::mainInitFunc(begin)");
 
+    //
+    //  Screenshots
+    //
+    // We save the startup value of the screenshots just in case we want to add a date
+    // to them later in the RenderEngine
+    std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
+    FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
+    Settings::instance().setCapturePath(screenshotPath.string());
+
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
@@ -225,11 +235,11 @@ void mainInitFunc(GLFWwindow*) {
 #ifndef __APPLE__
     // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
-        std::string path = absPath("${DATA}/openspace-icon.png");
+        std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
         int x;
         int y;
         int n;
-        unsigned char* data = stbi_load(path.c_str(), &x, &y, &n, 0);
+        unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
 
         GLFWimage icons[1];
         icons[0].pixels = data;
@@ -320,27 +330,6 @@ void mainInitFunc(GLFWwindow*) {
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
-
-
-    //
-    //  Screenshots
-    //
-    std::string screenshotPath = "${SCREENSHOTS}";
-    if (global::configuration->shouldUseScreenshotDate) {
-        std::time_t now = std::time(nullptr);
-        std::tm* nowTime = std::localtime(&now);
-        char mbstr[128];
-        strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-
-        FileSys.registerPathToken(
-            "${SCREENSHOTS}",
-            absPath(screenshotPath + '/' + std::string(mbstr)),
-            ghoul::filesystem::FileSystem::Override::Yes
-        );
-    }
-
-    Settings::instance().setCapturePath(absPath(screenshotPath));
-
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -971,7 +960,7 @@ void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& ha
 }
 
 std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
-                                        const std::string xmlExt, bool haveCliSGCTConfig,
+                                        bool haveCliSGCTConfig,
                                         const std::string& sgctFunctionName)
 {
     configuration::Configuration& config = *global::configuration;
@@ -987,14 +976,6 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
     }
     else {
         preset = config.windowConfiguration;
-        if (preset.find('/') != std::string::npos) {
-            preset.erase(0, preset.find_last_of('/') + 1);
-        }
-        if (preset.length() >= xmlExt.length()) {
-            if (preset.substr(preset.length() - xmlExt.length()) == xmlExt) {
-                preset = preset.substr(0, preset.length() - xmlExt.length());
-            }
-        }
     }
     return preset;
 }
@@ -1016,7 +997,14 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            config = "${CONFIG}/" + config + xmlExt;
+            if ( (config.length() >= xmlExt.length())
+                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
+                //user customzied sgct config
+            }
+            else {
+                config += xmlExt;
+            }
+
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1036,7 +1024,6 @@ int main(int argc, char* argv[]) {
     {
         using namespace ghoul::logging;
         LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
 #ifdef WIN32
         if (IsDebuggerPresent()) {
             LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
@@ -1052,15 +1039,16 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
     //
     // Parse commandline arguments
     //
+    char* prgName = argv[0];
     ghoul::cmdparser::CommandlineParser parser(
-        std::string(argv[0]),
+        std::string(prgName),
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
@@ -1090,7 +1078,7 @@ int main(int argc, char* argv[]) {
 
     bool showHelp = parser.execute();
     if (showHelp) {
-        parser.displayHelp(std::cout);
+        std::cout << parser.helpText();
         exit(EXIT_SUCCESS);
     }
     // Take an actual copy of the arguments
@@ -1105,35 +1093,34 @@ int main(int argc, char* argv[]) {
     std::string windowConfiguration;
     try {
         // Find configuration
-        std::string configurationFilePath = commandlineArguments.configurationName;
-        if (commandlineArguments.configurationName.empty()) {
+        std::filesystem::path configurationFilePath;
+        if (!commandlineArguments.configurationName.empty()) {
+            configurationFilePath = absPath(commandlineArguments.configurationName);
+        }
+        else {
             LDEBUG("Finding configuration");
             configurationFilePath = configuration::findConfiguration();
         }
-        configurationFilePath = absPath(configurationFilePath);
 
-        if (!FileSys.fileExists(configurationFilePath)) {
-            LFATALC("main", "Could not find configuration: " + configurationFilePath);
+        if (!std::filesystem::is_regular_file(configurationFilePath)) {
+            LFATALC(
+                "main",
+                fmt::format("Could not find configuration {}", configurationFilePath)
+            );
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(fmt::format("Configuration Path: {}", configurationFilePath));
+
+        // Register the base path as the directory where the configuration file lives
+        std::filesystem::path base = configurationFilePath.parent_path();
+        FileSys.registerPathToken("${BASE}", base);
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
-            configurationFilePath
+            configurationFilePath.string(),
+            commandlineArguments.configurationOverride
         );
-        // If the user requested a commandline-based configuration script that should
-        // overwrite some of the values, this is the time to do it
-        if (!commandlineArguments.configurationOverride.empty()) {
-            LDEBUG("Executing Lua script passed through the commandline:");
-            LDEBUG(commandlineArguments.configurationOverride);
-            ghoul::lua::runScript(
-                global::configuration->state,
-                commandlineArguments.configurationOverride
-            );
-            parseLuaState(*global::configuration);
-        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
@@ -1163,7 +1150,6 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-
     bool hasSGCTConfig = false;
     bool hasProfile = false;
     std::string sgctFunctionName;
@@ -1174,10 +1160,12 @@ int main(int argc, char* argv[]) {
     const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
-        xmlExt,
         hasSGCTConfig,
         sgctFunctionName
     );
+
+    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
+    global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
     // the Qt one even if the QApplication was destroyed, leading to invalid memory
@@ -1233,7 +1221,7 @@ int main(int argc, char* argv[]) {
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
     arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
+    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
 
     // Need to set this before the creation of the sgct::Engine
 
@@ -1249,7 +1237,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;

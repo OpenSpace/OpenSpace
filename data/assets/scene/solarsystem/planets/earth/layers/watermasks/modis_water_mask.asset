@@ -2,13 +2,13 @@ local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 local layer = {
-    Identifier = "MODIS_Water_Mask",
-    Name = "MODIS Water Mask",
-    FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
+  Identifier = "MODIS_Water_Mask",
+  Name = "MODIS Water Mask",
+  FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
 end)
 
 asset.export("layer", layer)

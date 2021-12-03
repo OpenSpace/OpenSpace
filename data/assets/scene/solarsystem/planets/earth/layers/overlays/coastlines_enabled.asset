@@ -4,7 +4,7 @@ local layer = asset.require("./coastlines").layer
 layer.Enabled = true
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export("layer", layer)

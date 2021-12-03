@@ -126,7 +126,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     else {
         _vectorFieldInfo = dictionary.value<ghoul::Dictionary>(KeyVectorField);
     }
-    
+
     if (!dictionary.hasValue<ghoul::Dictionary>(KeyFieldlines)) {
         LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyFieldlines));
     }
@@ -192,7 +192,7 @@ void RenderableFieldlines::initializeDefaultPropertyValues() {
                 std::string seedPointSourceFile = _seedPointsInfo.value<std::string>(
                     KeySeedPointsFile
                 );
-                _seedPointSourceFile = absPath(seedPointSourceFile);
+                _seedPointSourceFile = absPath(seedPointSourceFile).string();
             }
         }
         else if (sourceType == SeedPointsSourceTable) {
@@ -435,7 +435,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         return {};
     }
     std::string fileName = _vectorFieldInfo.value<std::string>(KeyVectorFieldFile);
-    fileName = absPath(fileName);
+    fileName = absPath(fileName).string();
 
     //KameleonWrapper::Model modelType;
     if (model != VectorFieldKameleonModelBATSRUS) {

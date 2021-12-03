@@ -36,7 +36,7 @@ template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
     threadPool.enqueue([this, job]() {
         job->execute();
-        std::lock_guard<std::mutex> lock(_finishedJobsMutex);
+        std::lock_guard lock(_finishedJobsMutex);
         _finishedJobs.push(job);
     });
 }
@@ -50,7 +50,7 @@ template<typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
     ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
 
-    std::lock_guard<std::mutex> lock(_finishedJobsMutex);
+    std::lock_guard lock(_finishedJobsMutex);
     return _finishedJobs.pop();
 }
 

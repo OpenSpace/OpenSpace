@@ -335,8 +335,8 @@ TimeQuantizer::TimeQuantizer(std::string start, std::string end,
     : _start(start)
     , _timerange(std::move(start), std::move(end))
 {
-    verifyStartTimeRestrictions();
     _resolution = parseTimeResolutionStr(resolution);
+    verifyStartTimeRestrictions();
 }
 
 double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
@@ -366,18 +366,36 @@ void TimeQuantizer::setStartEndRange(const std::string& start, const std::string
 
 void TimeQuantizer::setResolution(const std::string& resolutionString) {
     _resolution = parseTimeResolutionStr(resolutionString);
+    verifyStartTimeRestrictions();
 }
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
-    if (_start.day() < 1 || _start.day() > 28) {
+    // If monthly time resolution then restrict to 28 days so every month is consistent
+    int dayUpperLimit;
+    std::string helpfulDescription = "the selected month";
+    if (_resolutionUnit == 'M') {
+        dayUpperLimit = 28;
+        helpfulDescription = "monthly increment";
+    }
+    else if (_resolutionUnit == 'y') {
+        //Get month sizes using a fixed non-leap year
+        dayUpperLimit = monthSize(_start.month(), 2001);
+        helpfulDescription += " on a yearly increment";
+    }
+    else {
+        dayUpperLimit = 31;
+    }
+    if (_start.day() < 1 || _start.day() > dayUpperLimit) {
         throw ghoul::RuntimeError(fmt::format(
-            "Invalid start day value of {} for day of month. Valid days are 1 - 28",
-            _start.day()
+            "Invalid start day value of {} for {}, valid days are 1 - {}",
+            _start.day(),
+            helpfulDescription,
+            dayUpperLimit
         ));
     }
     if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {
         throw ghoul::RuntimeError(fmt::format(
-            "Invalid start time value of {}:{}:{}. Time must be 00:00:00",
+            "Invalid start time value of {}:{}:{}, time must be 00:00:00",
             _start.hour(), _start.minute(), _start.second()
         ));
     }
@@ -613,7 +631,6 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     const double startSeconds = s.J2000();
     const double endSeconds = e.J2000();
     const double delta = endSeconds - startSeconds;
-
     ghoul_assert(
         static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
         "Quantization error"

@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -65,7 +66,7 @@ private:
     struct ConstellationBound {
         std::string constellationAbbreviation; ///< The abbreviation of the constellation
         std::string constellationFullName;
-        bool isEnabled;
+        bool isEnabled = false;
         GLsizei startIndex; ///< The index of the first vertex describing the bounds
         GLsizei nVertices; ///< The number of vertices describing the bounds
     };

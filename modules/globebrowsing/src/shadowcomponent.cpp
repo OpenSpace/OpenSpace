@@ -26,17 +26,14 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -141,30 +138,21 @@ namespace {
             }
         }
     }
+
+    struct [[codegen::Dictionary(ShadowComponent)]] Parameters {
+        // [[codegen::verbatim(DistanceFractionInfo.description)]]
+        std::optional<int> distanceFraction;
+
+        // [[codegen::verbatim(DepthMapSizeInfo.description)]]
+        std::optional<glm::ivec2> depthMapSize;
+    };
+#include "shadowcomponent_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ShadowComponent::Documentation() {
-    using namespace documentation;
-    return {
-        "ShadowsRing Component",
-        "globebrowsing_shadows_component",
-        {
-            {
-                DistanceFractionInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                DistanceFractionInfo.description
-            },
-            {
-                DepthMapSizeInfo.identifier,
-                new Vector2ListVerifier<double>,
-                Optional::Yes,
-                DepthMapSizeInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("globebrowsing_shadows_component");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
@@ -172,37 +160,30 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
-    , _shadowMapDictionary(dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
-        // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
-        // term and rather extract the values directly here.  This would require a bit of
-        // a rewrite in the RenderableGlobe class to not create the ShadowComponent in the
-        // class-initializer list though
-        _shadowMapDictionary = dictionary.value<ghoul::Dictionary>("Shadows");
+    // @TODO (abock, 2021-03-25)  This is not really a nice solution as this key name is
+    // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary
+    // and pass the unpacked dictionary in here;  Or maybe we don't want a dictionary at
+    // this state anyway?
+    if (!dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
+        return;
     }
+    ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        _shadowMapDictionary,
-        "ShadowComponent"
-    );
+    const Parameters p = codegen::bake<Parameters>(d);
 
-    if (_shadowMapDictionary.hasKey(DistanceFractionInfo.identifier)) {
-        _distanceFraction = static_cast<int>(
-            _shadowMapDictionary.value<double>(DistanceFractionInfo.identifier)
-        );
-    }
+    addProperty(_enabled);
+
+    _distanceFraction = p.distanceFraction.value_or(_distanceFraction);
+    addProperty(_distanceFraction);
+
     _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
 
-
-    if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::dvec2 depthMapSize =
-            _shadowMapDictionary.value<glm::dvec2>(DepthMapSizeInfo.identifier);
-        _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
-        _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
+    if (p.depthMapSize.has_value()) {
+        _shadowDepthTextureWidth = p.depthMapSize->x;
+        _shadowDepthTextureHeight = p.depthMapSize->y;
         _dynamicDepthTextureRes = false;
     }
     else {
@@ -212,13 +193,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         _dynamicDepthTextureRes = true;
     }
 
-    _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
-
-    _viewDepthMap = false;
-
-    addProperty(_enabled);
     addProperty(_saveDepthTexture);
-    addProperty(_distanceFraction);
 }
 
 void ShadowComponent::initialize() {
@@ -323,7 +298,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
     global::renderEngine->openglStateCache().viewport(_mViewport);
-    
+
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
@@ -375,33 +350,6 @@ void ShadowComponent::end() {
 
     if (_blendIsEnabled) {
         glEnable(GL_BLEND);
-    }
-
-    if (_viewDepthMap) {
-        if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine->buildRenderProgram(
-                "ShadowMappingDebuggingProgram",
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
-            );
-        }
-
-        if (!_quadVAO) {
-            glGenVertexArrays(1, &_quadVAO);
-        }
-
-        _renderDMProgram->activate();
-
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
-        _renderDMProgram->setUniform("shadowMapTexture", shadowMapUnit);
-
-        glBindVertexArray(_quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        _renderDMProgram->deactivate();
     }
 }
 
@@ -637,10 +585,6 @@ bool ShadowComponent::isEnabled() const {
 
 ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
     return _shadowData;
-}
-
-void ShadowComponent::setViewDepthMap(bool enable) {
-    _viewDepthMap = enable;
 }
 
 GLuint ShadowComponent::dDepthTexture() const {

@@ -141,9 +141,7 @@ KeplerTranslation::RangeError::RangeError(std::string off)
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_transform_kepler";
-    return doc;
+    return codegen::doc<Parameters>("space_transform_kepler");
 }
 
 KeplerTranslation::KeplerTranslation()
@@ -254,7 +252,7 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
         _orbitPlaneDirty = false;
     }
 
-    const double t = data.time.j2000Seconds() -_epoch;
+    const double t = data.time.j2000Seconds() - _epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     const double e = eccentricAnomaly(meanAnomaly);

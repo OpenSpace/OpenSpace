@@ -2,22 +2,22 @@ local texturesPath = asset.require("./../../dione_textures").TexturesPath
 local globeIdentifier = asset.require("./../../dione").Dione.Identifier
 
 local layer = {
-    Identifier = "Texture",
-    FilePath = texturesPath .. "/dione.jpg",
+  Identifier = "Texture",
+  FilePath = texturesPath .. "/dione.jpg",
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Dione Texutre",
-    Version = "1.0",
-    Description = [[ Default jpg texture for Dione]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Dione Texutre",
+  Version = "1.0",
+  Description = [[ Default jpg texture for Dione]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

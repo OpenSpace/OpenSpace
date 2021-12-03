@@ -73,11 +73,10 @@ void DataProcessorJson::addDataValues(const std::string& data,
 
         std::vector<float> sum(numOptions, 0.f);
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
-        const std::vector<properties::SelectionProperty::Option>& options =
-            dataOptions.options();
+        const std::vector<std::string>& options = dataOptions.options();
 
         for (int i = 0; i < numOptions; ++i) {
-            const json& row = variables[options[i].description];
+            const json& row = variables[options[i]];
 //            int rowsize = row.size();
 
             for (size_t y = 0; y < row.size(); ++y) {
@@ -108,18 +107,23 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
     const json& j = json::parse(data);
     json variables = j["variables"];
 
-    const std::vector<int>& selectedOptions = optionProp;
-
-    const std::vector<properties::SelectionProperty::Option>& options =
-                                                                     optionProp.options();
+    const std::set<std::string>& selectedOptions = optionProp;
+    const std::vector<std::string>& options = optionProp.options();
+    std::vector<int> selectedOptionsIndices;
+    for (const std::string& option : selectedOptions) {
+        auto it = std::find(options.begin(), options.end(), option);
+        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        int idx = static_cast<int>(std::distance(options.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+    }
 
     std::vector<float*> dataOptions(options.size(), nullptr);
-    for (int option : selectedOptions) {
+    for (int option : selectedOptionsIndices) {
         // @CLEANUP: This memory is very easy to lose and should be replaced by some
         //           other mechanism (std::vector<float> most likely)
         dataOptions[option] = new float[dimensions.x * dimensions.y] { 0.f };
 
-        json row = variables[options[option].description];
+        json row = variables[options[option]];
         const int rowsize = static_cast<int>(row.size());
 
         for (int y = 0; y < rowsize; ++y) {
@@ -135,7 +139,7 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
         }
     }
 
-    calculateFilterValues(selectedOptions);
+    calculateFilterValues(selectedOptionsIndices);
     return dataOptions;
 }
 

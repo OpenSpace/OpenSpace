@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
 #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
 namespace openspace {
 

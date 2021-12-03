@@ -66,6 +66,8 @@ struct TestResult {
         std::string offender;
         /// The Reason that caused this offense
         Reason reason;
+        /// An optional explanation for when a verification fails
+        std::string explanation;
     };
 
     /**
@@ -79,7 +81,7 @@ struct TestResult {
          * The reason for the warning
          */
         enum class Reason {
-            Deprecated          ///< The value is marked as deprecated and should not used
+            Deprecated ///< The value is marked as deprecated and should not used
         };
 
         /// The offending key that caused the Warning. In the case of a nested table,
@@ -91,7 +93,7 @@ struct TestResult {
 
 
     /// Is \c true if the TestResult is positive, \c false otherwise
-    bool success;
+    bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
     /// TestResult::Success is \c true
     std::vector<Offense> offenses;

@@ -4,31 +4,31 @@ local transforms = asset.require('./transforms')
 
 
 local TrailAtPluto = {
-    Identifier = "NewHorizonsTrailPluto",
-    Parent = transforms.PlutoBarycenterAccurate.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NEW HORIZONS",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 1.0, 0.8, 0.4 },
-        ShowFullTrail = true,
-        StartTime = "2015 JUL 07 12:00:00",
-        EndTime = "2015 JUL 17 12:00:00",
-        PointSize = 5,
-        SampleInterval = 3600,
-        TimeStampSubsampleFactor = 4,
-        EnableFade = false,
-        Rendering = "Lines+Points"
+  Identifier = "NewHorizonsTrailPluto",
+  Parent = transforms.PlutoBarycenterAccurate.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEW HORIZONS",
+      Observer = "PLUTO BARYCENTER"
     },
-    GUI = {
-        Name = "New Horizons Trail Pluto",
-        Path = "/Solar System/Missions/New Horizons"
-    }
+    Color = { 1.0, 0.8, 0.4 },
+    ShowFullTrail = true,
+    StartTime = "2015 JUL 07 12:00:00",
+    EndTime = "2015 JUL 17 12:00:00",
+    PointSize = 5,
+    SampleInterval = 3600,
+    TimeStampSubsampleFactor = 4,
+    EnableFade = false,
+    Rendering = "Lines+Points"
+  },
+  GUI = {
+    Name = "New Horizons Trail Pluto",
+    Path = "/Solar System/Missions/New Horizons"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    TrailAtPluto
+  TrailAtPluto
 })

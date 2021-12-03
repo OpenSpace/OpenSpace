@@ -25,19 +25,15 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___DASHBOARDITEMINSTRUMENTS___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___DASHBOARDITEMINSTRUMENTS___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
-namespace ghoul::fontrendering { class Font; }
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class DashboardItemInstruments : public DashboardItem {
+class DashboardItemInstruments : public DashboardTextItem {
 public:
     DashboardItemInstruments(const ghoul::Dictionary& dictionary);
     ~DashboardItemInstruments() = default;
@@ -49,13 +45,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
     properties::Vec3Property _activeColor;
     properties::Vec3Property _activeFlash;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace

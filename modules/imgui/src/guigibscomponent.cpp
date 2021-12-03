@@ -42,7 +42,9 @@ GuiGIBSComponent::GuiGIBSComponent()
 void GuiGIBSComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool e = _isEnabled;
-    ImGui::Begin("GIBS", &e, WindowSize, 0.5f);
+    ImGui::SetNextWindowSize(WindowSize, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("GIBS", &e);
     _isEnabled = e;
     _isCollapsed = ImGui::IsWindowCollapsed();
 

@@ -24,14 +24,13 @@
 
 #version __CONTEXT__
 
-#include "atmosphere_common.glsl"
-
 out vec4 renderTableColor;
 
+uniform ivec2 OTHER_TEXTURES;
 uniform sampler2D deltaETexture;
 
 void main() {   
-  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H);
+  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES);
 
   // Update texture E with E plus deltaE textures.
   renderTableColor = texture(deltaETexture, uv);   

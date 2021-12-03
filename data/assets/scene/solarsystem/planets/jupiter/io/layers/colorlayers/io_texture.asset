@@ -2,22 +2,22 @@ local texturesPath = asset.require("./../../io_textures").TexturesPath
 local globeIdentifier = asset.require("./../../io").Io.Identifier
 
 local layer = {
-    Identifier = "Texture",
-    FilePath = texturesPath .. "/io.jpg",
+  Identifier = "Texture",
+  FilePath = texturesPath .. "/io.jpg",
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Io Texutre",
-    Version = "1.0",
-    Description = [[ Default jpg texture for Io]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Io Texutre",
+  Version = "1.0",
+  Description = [[ Default jpg texture for Io]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

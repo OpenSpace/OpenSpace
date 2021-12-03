@@ -34,6 +34,7 @@ set(HEADER_FILES
   src/geodeticpatch.h
   src/globelabelscomponent.h
   src/globetranslation.h
+  src/globerotation.h
   src/gpulayergroup.h
   src/layer.h
   src/layeradjustment.h
@@ -71,6 +72,7 @@ set(SOURCE_FILES
   src/geodeticpatch.cpp
   src/globelabelscomponent.cpp
   src/globetranslation.cpp
+  src/globerotation.cpp
   src/gpulayergroup.cpp
   src/layer.cpp
   src/layeradjustment.cpp
@@ -92,7 +94,9 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/blending.hglsl
+  shaders/advanced_rings_vs.glsl
+  shaders/advanced_rings_fs.glsl
+  shaders/blending.glsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
@@ -100,10 +104,10 @@ set(SHADER_FILES
   shaders/rings_fs.glsl
   shaders/rings_geom_vs.glsl
   shaders/rings_geom_fs.glsl
-  shaders/texturetilemapping.hglsl
-  shaders/tile.hglsl
-  shaders/tileheight.hglsl
-  shaders/tilevertexskirt.hglsl
+  shaders/texturetilemapping.glsl
+  shaders/tile.glsl
+  shaders/tileheight.glsl
+  shaders/tilevertexskirt.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})

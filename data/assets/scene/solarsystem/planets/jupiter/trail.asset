@@ -5,36 +5,36 @@ asset.require("spice/base")
 
 
 local JupiterTrail = {
-    Identifier = "JupiterTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "JUPITER BARYCENTER",
-            Observer = "SUN"
-        },
-        Color = { 0.8, 0.7, 0.7 },
-        Period = 4330.595,
-        Resolution = 1000
+  Identifier = "JupiterTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER",
+      Observer = "SSB"
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    GUI = {
-        Name = "Jupiter Trail",
-        Path = "/Solar System/Planets/Jupiter"
-    }
+    Color = { 0.8, 0.7, 0.7 },
+    Period = 4330.595,
+    Resolution = 1000
+  },
+  Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+  GUI = {
+    Name = "Jupiter Trail",
+    Path = "/Solar System/Planets/Jupiter"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrail })
 
 
 asset.meta = {
-    Name = "Jupiter Trail",
-    Version = "1.0",
-    Description = [[ Trail of Jupiter as observed by the Sun. Data from NASA Spice (see
-        base spice asset)]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"JupiterTrail"}
+  Name = "Jupiter Trail",
+  Version = "1.0",
+  Description = [[ Trail of Jupiter as observed by the Sun. Data from NASA Spice (see
+      base spice asset)]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"JupiterTrail"}
 }

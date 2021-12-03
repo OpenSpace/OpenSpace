@@ -4,17 +4,17 @@ Emil Axelsson
 Kalle Bladin
 Jonathas Costa
 Gene Payne
-Jonas Strandstedt
-Michal Marcinkowski
-Elon Olsson
 Emma Broman
+Jonas Strandstedt
 Micah Acinapura
+Michal Marcinkowski
+Malin Ejdbo
+Elon Olsson
 Joakim Kilby
 Lovisa Hassler
 Mikael Petterson 
 Erik Sundén
 Stefan Lindblad
-Malin Ejdbo
 Corrie Roe
 Eric Myers
 

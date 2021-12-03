@@ -67,7 +67,7 @@ void IswaKameleonGroup::clearGroup() {
     clearFieldlines();
 }
 
-std::vector<int> IswaKameleonGroup::fieldlineValue() const {
+std::set<std::string> IswaKameleonGroup::fieldlineValue() const {
     return _fieldlines;
 }
 
@@ -118,7 +118,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
             int i = 0;
 
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({ i, it.key() });
+                _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),
                     it.value(),
@@ -137,14 +137,16 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
 }
 
 void IswaKameleonGroup::updateFieldlineSeeds() {
-    const std::vector<int>& options = _fieldlines.value();
+    const std::set<std::string>& options = _fieldlines;
+    std::vector<std::string> opts = _fieldlines.options();
 
     // SeedPath == map<int selectionValue, tuple<string name, string path, bool active>>
     using K = int;
     using V = std::tuple<std::string, std::string, bool>;
     for (std::pair<const K, V>& seedPath : _fieldlineState) {
         // if this option was turned off
-        const auto it = std::find(options.begin(), options.end(), seedPath.first);
+        std::string o = opts[seedPath.first];
+        const auto it = std::find(options.begin(), options.end(), o);
         if (it == options.end() && std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 

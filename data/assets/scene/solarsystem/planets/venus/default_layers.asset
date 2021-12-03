@@ -11,17 +11,17 @@ local heightLayer = asset.require(heightLayersPath .. "/magellan")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
 end)
 
 
 asset.meta = {
-    Name = "Default Venus Layers",
-    Version = "1.0",
-    Description = [[ Default Venus layers are: Venus Magellan Mosaic and Venus Magellan
-        DEM]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Default Venus Layers",
+  Version = "1.0",
+  Description = [[ Default Venus layers are: Venus Magellan Mosaic and Venus Magellan
+    DEM]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/timeframe.h>
+#include <optional>
 
 namespace openspace {
 
@@ -46,7 +47,10 @@ public:
 private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
+    properties::StringProperty _fixedDate;
+
     ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
+    std::optional<double> _fixedEphemerisTime;
 };
 
 } // namespace openspace

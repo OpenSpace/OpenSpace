@@ -68,7 +68,7 @@ private:
     properties::FloatProperty _size;
     properties::OptionProperty _origin;
 
-    bool _planeIsDirty;
+    bool _planeIsDirty = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 

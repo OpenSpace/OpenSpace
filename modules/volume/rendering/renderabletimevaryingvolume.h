@@ -33,15 +33,16 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;
     struct RenderData;
-    class TransferFunction;
 } // namespace openspace
 
 namespace openspace::volume {
 
+//class TransferFunction;
 class BasicVolumeRaycaster;
 template <typename T> class RawVolume;
 class VolumeClipPlanes;
@@ -81,6 +82,7 @@ private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _opacity;
     properties::FloatProperty _rNormalization;
     properties::FloatProperty _rUpperBound;
     properties::FloatProperty _secondsBefore;
@@ -90,10 +92,10 @@ private:
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
-    properties::IntProperty _currentTimestep;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
+    bool _invertDataAtZ;
 
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };

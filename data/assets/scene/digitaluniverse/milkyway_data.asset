@@ -1,15 +1,15 @@
 local planeTextures = asset.syncedResource({
-    Name = "Milky Way Plane Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_textures",
-    Version = 2
+  Name = "Milky Way Plane Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_textures",
+  Version = 2
 })
 
 local planeSpeck = asset.syncedResource({
-    Name = "Milky Way Plane Speck",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_speck",
-    Version = 1
+  Name = "Milky Way Plane Speck",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_milkyway_speck",
+  Version = 1
 })
 
 asset.export("TexturesPath", planeTextures)

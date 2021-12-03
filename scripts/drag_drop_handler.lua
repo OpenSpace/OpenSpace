@@ -29,15 +29,18 @@ is_image_file = function(extension)
          extension == ".pic" or extension == ".pnm"
 end
 
+local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
+
 if is_image_file(extension) then
   identifier = basename_without_extension:gsub(" ", "_")
   return [[openspace.addScreenSpaceRenderable({
     Identifier = "]] .. identifier .. [[",
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
-  });]]
+  });]] .. ReloadUIScript
 elseif extension == ".asset" then
-  return [[openspace.asset.add("]] .. filename .. [[")]]
+  return [[openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
+    openspace.asset.add("]] .. filename .. [[");]] .. ReloadUIScript
 elseif extension == ".osrec" or extension == ".osrectxt" then
-  return [[openspace.sessionRecording.startPlayback("]] .. basename .. [[")]]
+  return [[openspace.sessionRecording.startPlayback("]] .. filename .. [[")]]
 end

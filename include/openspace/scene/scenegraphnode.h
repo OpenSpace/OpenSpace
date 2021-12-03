@@ -36,14 +36,16 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
-#include <chrono>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -126,7 +128,16 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
+    const std::vector<std::string>& onApproachAction() const;
+    const std::vector<std::string>& onReachAction() const;
+    const std::vector<std::string>& onRecedeAction() const;
+    const std::vector<std::string>& onExitAction() const;
+
     double boundingSphere() const;
+    double interactionSphere() const;
+
+    double reachFactor() const;
+    double approachFactor() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -143,6 +154,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
+    void renderDebugSphere(const Camera& camera, double size, glm::vec4 color);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
@@ -150,6 +162,11 @@ private:
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene = nullptr;
+
+    std::vector<std::string> _onApproachAction;
+    std::vector<std::string> _onReachAction;
+    std::vector<std::string> _onRecedeAction;
+    std::vector<std::string> _onExitAction;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
@@ -178,6 +195,9 @@ private:
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
     properties::DoubleProperty _boundingSphere;
+    properties::DoubleProperty _interactionSphere;
+    properties::DoubleProperty _approachFactor;
+    properties::DoubleProperty _reachFactor;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
@@ -188,6 +208,12 @@ private:
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
+
+    properties::BoolProperty _showDebugSphere;
+    static ghoul::opengl::ProgramObject* _debugSphereProgram;
+
+    std::optional<double> _overrideBoundingSphere;
+    std::optional<double> _overrideInteractionSphere;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;

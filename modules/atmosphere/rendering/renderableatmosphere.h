@@ -33,9 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/opengl/textureunit.h>
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -57,16 +55,6 @@ struct ShadowConfiguration {
     std::pair<std::string, double> caster;
 };
 
-struct ShadowRenderingStruct {
-    double xu = 0.0;
-    double xp = 0.0;
-    double rs = 0.0;
-    double rc = 0.0;
-    glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
-    glm::dvec3 casterPositionVec = glm::dvec3(0.0);
-    bool isShadowing = false;
-};
-
 namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
 
@@ -84,7 +72,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
+    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
     void updateAtmosphereParameters();
 
     properties::FloatProperty _atmosphereHeight;
@@ -97,7 +85,7 @@ private:
     properties::Vec3Property _ozoneCoeff;
     properties::FloatProperty _mieHeightScale;
     properties::Vec3Property _mieScatteringCoeff;
-    properties::FloatProperty _mieScatteringExtinctionPropCoefficient;
+    properties::FloatProperty _mieScatteringExtinctionPropCoeff;
     properties::FloatProperty _miePhaseConstant;
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
@@ -110,7 +98,7 @@ private:
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture = false;
-    float _preCalculatedTexturesScale = 1.f;
+    float _textureScale = 1.f;
 
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 

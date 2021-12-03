@@ -39,14 +39,14 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace ghoul::modelgeometry { class ModelGeometry; }
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
-
-namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModelProjection : public Renderable {
 public:
@@ -66,10 +66,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void attitudeParameters(double time);
-    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture);
-
-    void project();
+    glm::mat4 attitudeParameters(double time, const glm::vec3& up);
+    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture,
+        const glm::mat4& projectorMatrix);
 
     ProjectionComponent _projectionComponent;
 
@@ -79,23 +78,20 @@ private:
         projectionTexture) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
-    UniformCache(projectionTexture, needShadowMap, ProjectorMatrix, ModelTransform,
-        boresight) _fboUniformCache;
+    UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
+        ModelTransform, boresight) _fboUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
-    ghoul::mm_unique_ptr<modelgeometry::ModelGeometry> _geometry;
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
     // uniforms
-    glm::vec3 _up = glm::vec3(0.f);
     glm::mat4 _transform = glm::mat4(1.f);
-    glm::mat4 _projectorMatrix = glm::mat4(1.f);
     glm::vec3 _boresight = glm::vec3(0.f);
 
     std::vector<Image> _imageTimes;
-    double _time = -std::numeric_limits<double>::max();
 
     bool _shouldCapture = false;
 

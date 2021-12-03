@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
 #define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
 
-#include <openspace/util/camera.h>
+#include <openspace/camera/camera.h>
 #include <openspace/util/time.h>
 
 namespace openspace {
@@ -50,7 +50,7 @@ struct UpdateData {
 struct RenderData {
     const Camera& camera;
     const Time time;
-    int renderBinMask = -1;
+    int8_t renderBinMask = -1;
     TransformData modelTransform;
 };
 

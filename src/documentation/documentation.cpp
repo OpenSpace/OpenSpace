@@ -71,14 +71,18 @@ std::string to_string(const openspace::documentation::TestResult& value) {
     }
     else {
         std::stringstream stream;
-        stream << "Failure." << '\n';
+        stream << "Specification Failure. ";
 
         for (const TestResult::Offense& offense : value.offenses) {
-            stream << "  " << ghoul::to_string(offense) << '\n';
+            stream << fmt::format(" {}", ghoul::to_string(offense));
+            if (!offense.explanation.empty()) {
+                stream << fmt::format(" ({})", offense.explanation);
+            }
+            stream << '\n';
         }
 
         for (const TestResult::Warning& warning : value.warnings) {
-            stream << "  " << ghoul::to_string(warning) << '\n';
+            stream << fmt::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -87,7 +91,14 @@ std::string to_string(const openspace::documentation::TestResult& value) {
 
 template <>
 std::string to_string(const openspace::documentation::TestResult::Offense& value) {
-    return value.offender + ": " + ghoul::to_string(value.reason);
+    std::stringstream stream;
+    stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << fmt::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
 }
 
 template <>
@@ -129,17 +140,8 @@ namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
-std::string concatenate(const std::vector<TestResult::Offense>& offenses) {
-    std::string result = "Error in specification (";
-    for (const TestResult::Offense& o : offenses) {
-        result += o.offender + ',';
-    }
-    result.back() = ')';
-    return result;
-}
-
 SpecificationError::SpecificationError(TestResult res, std::string comp)
-    : ghoul::RuntimeError(concatenate(res.offenses), std::move(comp))
+    : ghoul::RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");

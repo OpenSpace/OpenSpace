@@ -55,9 +55,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_lua";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_lua");
 }
 
 LuaScale::LuaScale()
@@ -68,20 +66,18 @@ LuaScale::LuaScale()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
-            requireUpdate();
-        });
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
-    ghoul::lua::runScriptFile(_state, _luaScriptFile);
+    ghoul::lua::runScriptFile(_state, _luaScriptFile.value());
 
     // Get the scaling function
     lua_getglobal(_state, "scale");
@@ -89,7 +85,9 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
+            fmt::format(
+                "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
+            )
         );
         return glm::dvec3(1.0);
     }

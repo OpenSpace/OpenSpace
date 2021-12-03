@@ -28,6 +28,7 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <string>
 
 namespace openspace::volume {
@@ -40,8 +41,8 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _rawVolumeOutputPath;
-    std::string  _dictionaryOutputPath;
+    std::filesystem::path _rawVolumeOutputPath;
+    std::filesystem::path  _dictionaryOutputPath;
     std::string _time;
 
     glm::uvec3 _dimensions = glm::uvec3(0);

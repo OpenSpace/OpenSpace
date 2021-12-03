@@ -26,21 +26,20 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec2 vs_st;
-in vec4 vs_position;
+in float vs_depth;
 
-uniform sampler2D texture1;
-uniform float Alpha;
+uniform sampler2D tex;
+uniform vec3 color = vec3(1.0, 1.0, 1.0);
+uniform float opacity = 1.0;
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    frag.color = texture(texture1, vs_st);
-    frag.color.a = Alpha * frag.color.a;
-    if (frag.color.a == 0.0) {
-        discard;
-    }
+  frag.color = texture(tex, vs_st) * vec4(color, opacity);
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    frag.depth = vs_position.z;
-
-    return frag;
+  frag.depth = vs_depth;
+  return frag;
 }

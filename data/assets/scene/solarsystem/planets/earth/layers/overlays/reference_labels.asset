@@ -2,13 +2,13 @@ local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 local layer = {
-    Identifier = "Reference_Labels",
-    Name = "Reference Labels",
-    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
+  Identifier = "Reference_Labels",
+  Name = "Reference Labels",
+  FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export("layer", layer)

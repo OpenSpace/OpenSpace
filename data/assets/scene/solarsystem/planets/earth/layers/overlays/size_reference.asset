@@ -2,14 +2,14 @@ local earthAsset = asset.require("./../../earth").Earth
 local globeIdentifier = earthAsset.Identifier
 
 local layer ={
-    Identifier = "Size_Reference",
-    Name = "Size Reference",
-    Type = "SizeReferenceTileLayer",
-    Radii = earthAsset.Renderable.Radii
+  Identifier = "Size_Reference",
+  Name = "Size Reference",
+  Type = "SizeReferenceTileLayer",
+  Radii = earthAsset.Renderable.Radii
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export("layer", layer)

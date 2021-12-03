@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -75,7 +76,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(path)) {
-    if (!FileSys.fileExists(_path)) {
+    if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
 

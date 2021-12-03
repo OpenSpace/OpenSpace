@@ -24,8 +24,8 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 
 namespace {
     // Used in the LM algorithm
@@ -146,7 +146,7 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
     FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
     double f0 = distToMinimize(par, x, fdata, lmstat);
     // scale value to find minimum step size h, dependant on planet size
-    double scale = log10(ptr->node->boundingSphere());
+    double scale = log10(ptr->node->interactionSphere());
     std::vector<double> dPar(ptr->nDOF, 0.0);
     dPar.assign(par, par + ptr->nDOF);
 

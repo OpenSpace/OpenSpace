@@ -132,7 +132,8 @@ namespace {
             DtAvg [[codegen::key("Average Deltatime")]],
             DtExtremes [[codegen::key("Deltatime extremes")]],
             DtStandardDeviation [[codegen::key("Deltatime standard deviation")]],
-            DtCoefficientOfVariation [[codegen::key("Deltatime coefficient of variation")]],
+            DtCoefficientOfVariation
+                [[codegen::key("Deltatime coefficient of variation")]],
             FPS [[codegen::key("Frames per second")]],
             FPSAvg [[codegen::key("Average frames per second")]]
         };
@@ -147,9 +148,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_framerate";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_framerate");
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
@@ -187,7 +186,8 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
                 _frametimeType = static_cast<int>(FrametimeType::DtStandardDeviation);
                 break;
             case Parameters::Type::DtCoefficientOfVariation:
-                _frametimeType = static_cast<int>(FrametimeType::DtCoefficientOfVariation);
+                _frametimeType =
+                    static_cast<int>(FrametimeType::DtCoefficientOfVariation);
                 break;
             case Parameters::Type::FPS:
                 _frametimeType = static_cast<int>(FrametimeType::FPS);

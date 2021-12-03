@@ -1,0 +1,39 @@
+local globeIdentifier = asset.require("scene/solarsystem/planets/earth/earth.asset").Earth.Identifier
+
+local path = asset.syncedResource({
+  Name = "Earth Textures Climate",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures_climate",
+  Version = 1
+})
+
+local layer = {
+  Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal",
+  Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal)",
+  Type = "TemporalTileLayer",
+  FilePath = 
+  "<OpenSpaceTemporalGDALDataset>" ..
+    "<OpenSpaceTimeStart>1981-01-01</OpenSpaceTimeStart>" ..
+    "<OpenSpaceTimeEnd>1990-10-01</OpenSpaceTimeEnd>" ..
+    "<OpenSpaceTimeResolution>1M</OpenSpaceTimeResolution>" ..
+    "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
+	"<OpenSpaceTransferFunction>" .. path .. "/rainbow.png</OpenSpaceTransferFunction>" ..
+	"<OpenSpaceTimeInterpolation>linear</OpenSpaceTimeInterpolation>" ..
+	"<FilePath>" .. path .. "/${OpenSpaceTimeId}-land.png</FilePath>" ..
+  "</OpenSpaceTemporalGDALDataset>",
+  Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+asset.meta = {
+  Name = "Climate Earth Layers",
+  Version = "1.0",
+  Description = [[ ERA5 data ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -3,7 +3,7 @@
 """
 OpenSpace
 
-Copyright (c) 2014-2020
+Copyright (c) 2014-2021
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -59,7 +59,7 @@ import os
 import re
 import sys
 
-current_year = '2020'
+current_year = '2021'
 is_strict_mode = False
 is_silent_mode = False
 
@@ -659,19 +659,23 @@ if not is_silent_mode:
 
 check_files(
     [basePath + 'src/**/*.cpp'],
-    [],
+    [basePath + 'src/**/*_codegen.cpp'],
     'openspace_core',
     check_source_file
 )
 check_files(
     [basePath + 'apps/**/*.cpp'],
-    [basePath + 'apps/**/ext/**/*.cpp'],
+    [basePath + 'apps/**/ext/**/*.cpp', basePath + 'apps/**/*_codegen.cpp'],
     'openspace_app',
     check_source_file
 )
 check_files(
     [basePath + 'modules/**/*.cpp'],
-    [basePath + 'modules/**/ext/**/*.cpp', basePath + 'modules/**/node_modules/**/*.cpp'],
+    [
+        basePath + 'modules/**/ext/**/*.cpp',
+        basePath + 'modules/**/node_modules/**/*.cpp',
+        basePath + 'modules/**/*_codegen.cpp'
+    ],
     'openspace_module',
     check_source_file
 )

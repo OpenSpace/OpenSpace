@@ -1,24 +1,24 @@
 local assetHelper = asset.require('util/asset_helper')
 
 assetHelper.registerDashboardItems(asset, {
-    {
-        Type = "DashboardItemSpacing",
-        Identifier = "RosettaSpacing",
-        GuiName = "Rosetta Spacing",
-        Spacing = 25
-    },
-    {
-        Type = "DashboardItemDistance",
-        Identifier = "Rosetta67PDistance",
-        GuiName = "Rosetta 67P Distance",
-        SourceType = "Node",
-        SourceNodeName = "Rosetta",
-        DestinationType = "Node",
-        DestinationNodeName = "67P"
-    },
-    {
-        Type = "DashboardItemInstruments",
-        Identifier = "RosettaInstruments",
-        GuiName = "Rosetta Instruments",
-    }
+  {
+    Type = "DashboardItemSpacing",
+    Identifier = "RosettaSpacing",
+    GuiName = "Rosetta Spacing",
+    Spacing = 25
+  },
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "Rosetta67PDistance",
+    GuiName = "Rosetta 67P Distance",
+    SourceType = "Node",
+    SourceNodeName = "Rosetta",
+    DestinationType = "Node",
+    DestinationNodeName = "67P"
+  },
+  {
+    Type = "DashboardItemInstruments",
+    Identifier = "RosettaInstruments",
+    GuiName = "Rosetta Instruments",
+  }
 })

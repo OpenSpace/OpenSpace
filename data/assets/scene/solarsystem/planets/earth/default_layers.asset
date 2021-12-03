@@ -40,28 +40,28 @@ local watermask = asset.require(waterMasksPath .. "/modis_water_mask")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers." ..
-        colorLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers." ..
-        heightLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers." ..
-        nightLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks." ..
-        watermask.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers." ..
+    colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.HeightLayers." ..
+    heightLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers." ..
+    nightLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.WaterMasks." ..
+    watermask.layer.Identifier .. ".Enabled", true)
 end)
 
 
 asset.meta = {
-    Name = "Default Earth Layers",
-    Version = "1.0",
-    Description = [[ Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
-        SNPP (Temporal), Aqua Modis (Temporal), Terra Modis (Temporal), BMNG, AMSR2 GCOM
-        W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal), GHRSST,
-        L4 G1SST Sea Surface Temperature (Temporal), GHRSST L4 MUR Sea Surface Temperature
-        (Temporal), World Elevation (3D), Earth at Night 2012, Coastlines, Reference
-        Features, Reference Labels, Tile Indicies, Size Reference, Gebco, and Modis Water
-        Mask.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Default Earth Layers",
+  Version = "1.0",
+  Description = [[ Default Earth layers are: ESRI VIIRS Combo, ESRI World Imagery, VIIRS
+    SNPP (Temporal), Aqua Modis (Temporal), Terra Modis (Temporal), BMNG, AMSR2 GCOM
+    W1 Sea Ice Concentration (Temporal), MODIS Terra Chlorophyll A (Temporal), GHRSST,
+    L4 G1SST Sea Surface Temperature (Temporal), GHRSST L4 MUR Sea Surface Temperature
+    (Temporal), World Elevation (3D), Earth at Night 2012, Coastlines, Reference
+    Features, Reference Labels, Tile Indicies, Size Reference, Gebco, and Modis Water
+    Mask.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

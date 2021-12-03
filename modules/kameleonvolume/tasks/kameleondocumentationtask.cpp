@@ -29,30 +29,37 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInput = "Input";
-    constexpr const char* KeyOutput = "Output";
     constexpr const char* MainTemplateFilename = "${WEB}/kameleondocumentation/main.hbs";
     constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
     constexpr const char* JsFilename = "${WEB}/kameleondocumentation/script.js";
     constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
     constexpr const char* CssFilename = "${WEB}/common/style.css";
+
+    struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
+        // The CDF file to extract data from
+        std::filesystem::path input;
+
+        // The HTML file to write documentation to
+        std::string output [[codegen::annotation("A valid filepath")]];
+    };
+#include "kameleondocumentationtask_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
 
+documentation::Documentation KameleonDocumentationTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_documentation_task");
+}
+
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "KameleonDocumentationTask"
-    );
-
-    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
-    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inputPath = absPath(p.input.string());
+    _outputPath = absPath(p.output);
 }
 
 std::string KameleonDocumentationTask::description() {
@@ -63,14 +70,14 @@ std::string KameleonDocumentationTask::description() {
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
     ghoul::Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
     dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
-    dictionary.setValue("input", _inputPath);
+    dictionary.setValue("input", _inputPath.string());
 
     std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);
@@ -144,28 +151,6 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     file << html.str();
 
     progressCallback(1.0f);
-}
-
-documentation::Documentation KameleonDocumentationTask::documentation() {
-    using namespace documentation;
-    return {
-        "KameleonDocumentationTask",
-        "kameleon_documentation_task",
-        {
-            {
-                KeyInput,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "The cdf file to extract data from"
-            },
-            {
-                KeyOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The html file to write documentation to"
-            }
-        }
-    };
 }
 
 } // namespace openspace::kameleonvolume

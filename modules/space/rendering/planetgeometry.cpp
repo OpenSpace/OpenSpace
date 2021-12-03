@@ -40,9 +40,7 @@ namespace {
 namespace openspace::planetgeometry {
 
 documentation::Documentation PlanetGeometry::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_geometry_planet";
-    return doc;
+    return codegen::doc<Parameters>("space_geometry_planet");
 }
 
 std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(

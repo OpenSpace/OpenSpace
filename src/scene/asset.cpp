@@ -32,6 +32,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 #include <unordered_set>
 
 namespace openspace {
@@ -501,7 +502,7 @@ bool Asset::initialize() {
         LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
         return false;
     }
-    LDEBUG(fmt::format("Initializing asset {}", id()));
+    LDEBUG(fmt::format("Initializing asset '{}'", id()));
 
     // 1. Initialize requirements
     for (const std::shared_ptr<Asset>& child : _requiredAssets) {
@@ -520,9 +521,8 @@ bool Asset::initialize() {
         loader()->callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format(
-            "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
-        ));
+        LERROR(fmt::format("Failed to initialize asset {}", id()));
+        LERROR(fmt::format("{}: {}", e.component, e.message));
         // TODO: rollback;
         setState(State::InitializationFailed);
         return false;
@@ -593,7 +593,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(fmt::format("Deintializing asset {}", id()));
+    LDEBUG(fmt::format("Deintializing asset '{}'", id()));
 
     // Perform inverse actions as in initialize, in reverse order (7 - 1)
 
@@ -674,7 +674,7 @@ bool Asset::hasAssetFile() const {
 }
 
 std::string Asset::assetDirectory() const {
-    return ghoul::filesystem::File(_assetPath).directoryName();
+    return std::filesystem::path(_assetPath).parent_path().string();
 }
 
 const std::string& Asset::assetName() const {

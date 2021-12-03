@@ -123,9 +123,6 @@ private:
 
     struct {
         properties::BoolProperty showChunkEdges;
-        properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showHeightResolution;
-        properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
@@ -138,11 +135,11 @@ private:
         properties::BoolProperty  eclipseShadowsEnabled;
         properties::BoolProperty  eclipseHardShadows;
         properties::BoolProperty  shadowMapping;
+        properties::BoolProperty  renderAtDistance;
         properties::FloatProperty zFightingPercentage;
         properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;

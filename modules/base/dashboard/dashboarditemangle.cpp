@@ -24,15 +24,15 @@
 
 #include <modules/base/dashboard/dashboarditemangle.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -112,9 +112,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_angle";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_angle");
 }
 
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)

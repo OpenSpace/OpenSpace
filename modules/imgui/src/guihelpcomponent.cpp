@@ -38,7 +38,9 @@ void GuiHelpComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin("Help", &v, Size, 0.5f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("Help", &v);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
     ImGui::ShowUserGuide();

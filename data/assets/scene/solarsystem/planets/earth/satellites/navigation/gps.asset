@@ -2,9 +2,9 @@ local assetHelper = asset.require('util/asset_helper')
 local shared = asset.require('util/tle_helper')
 
 local group = {
-    Title = "GPS",
-    Url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
-    TrailColor = { 0.9, 0.5, 0.0 }
+  Title = "GPS",
+  Url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
+  TrailColor = { 0.9, 0.5, 0.0 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)

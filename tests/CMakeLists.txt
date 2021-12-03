@@ -28,13 +28,14 @@ add_executable(
   test_assetloader.cpp
   test_concurrentjobmanager.cpp
   test_concurrentqueue.cpp
+  test_distanceconversion.cpp
+  test_configuration.cpp
   test_documentation.cpp
   test_iswamanager.cpp
+  test_jsonformatting.cpp
   test_latlonpatch.cpp
   test_lrucache.cpp
-  test_luaconversions.cpp
   test_lua_createsinglecolorimage.cpp
-  test_optionproperty.cpp
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
@@ -42,6 +43,10 @@ add_executable(
   test_temporaltileprovider.cpp
   test_timequantizer.cpp
   test_timeline.cpp
+
+  property/test_property_optionproperty.cpp
+  property/test_property_listproperties.cpp
+  property/test_property_selectionproperty.cpp
 
   regression/517.cpp
 )

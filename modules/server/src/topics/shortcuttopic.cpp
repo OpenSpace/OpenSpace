@@ -26,7 +26,7 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/shortcutmanager.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 
 namespace {
@@ -44,32 +44,29 @@ bool ShortcutTopic::isDone() const {
 }
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
-    using ShortcutInformation = interaction::ShortcutManager::ShortcutInformation;
-
-    const std::vector<ShortcutInformation>& shortcuts =
-        global::shortcutManager->shortcuts();
-
     std::vector<nlohmann::json> json;
-    for (const ShortcutInformation& shortcut : shortcuts) {
+    for (const interaction::Action& action : global::actionManager->actions()) {
         nlohmann::json shortcutJson = {
-            { "name", shortcut.name },
-            { "script", shortcut.script },
-            { "synchronization", static_cast<bool>(shortcut.synchronization) },
-            { "documentation", shortcut.documentation },
-            { "guiPath", shortcut.guiPath },
+            { "identifier", action.identifier },
+            { "name", action.name },
+            { "script", action.command },
+            { "synchronization", static_cast<bool>(action.synchronization) },
+            { "documentation", action.documentation },
+            { "guiPath", action.guiPath },
         };
         json.push_back(shortcutJson);
     }
 
-    using KeyInformation = interaction::KeybindingManager::KeyInformation;
-
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings =
+    const std::multimap<KeyWithModifier, std::string>& keyBindings =
         global::keybindingManager->keyBindings();
 
-    for (const std::pair<const KeyWithModifier, KeyInformation>& keyBinding : keyBindings)
-    {
+    for (const std::pair<const KeyWithModifier, std::string>& keyBinding : keyBindings) {
         const KeyWithModifier& k = keyBinding.first;
-        const KeyInformation& info = keyBinding.second;
+        // @TODO (abock, 2021-08-05) Probably this should be rewritten to better account
+        // for the new action mechanism
+        const interaction::Action& action = global::actionManager->action(
+            keyBinding.second
+        );
 
         nlohmann::json shortcutJson = {
             { "key", ghoul::to_string(k.key) },
@@ -81,11 +78,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
                     { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
-            { "name", info.name },
-            { "script", info.command },
-            { "synchronization", static_cast<bool>(info.synchronization) },
-            { "documentation", info.documentation },
-            { "guiPath", info.guiPath },
+            { "action", action.identifier },
         };
         json.push_back(shortcutJson);
     }

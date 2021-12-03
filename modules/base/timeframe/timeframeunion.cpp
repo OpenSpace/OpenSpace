@@ -41,7 +41,8 @@ namespace {
 
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
         // [[codegen::verbatim(TimeFramesInfo.description)]]
-        std::vector<std::monostate> timeFrames [[codegen::reference("core_time_frame")]];
+        std::vector<ghoul::Dictionary> timeFrames
+            [[codegen::reference("core_time_frame")]];
     };
 #include "timeframeunion_codegen.cpp"
 } // namespace
@@ -49,13 +50,11 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_time_frame_union";
-    return doc;
+    return codegen::doc<Parameters>("base_time_frame_union");
 }
 
 bool TimeFrameUnion::isActive(const Time& time) const {
-    for (const auto& tf : _timeFrames) {
+    for (const ghoul::mm_unique_ptr<TimeFrame>& tf : _timeFrames) {
         if (tf->isActive(time)) {
             return true;
         }

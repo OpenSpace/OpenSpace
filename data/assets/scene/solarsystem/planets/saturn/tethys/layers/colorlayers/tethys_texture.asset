@@ -2,22 +2,22 @@ local texturesPath = asset.require("./../../tethys_textures").TexturesPath
 local globeIdentifier = asset.require("./../../tethys").Tethys.Identifier
 
 local layer = {
-    Identifier = "Texture",
-    FilePath = texturesPath .. "/tethys.jpg",
+  Identifier = "Texture",
+  FilePath = texturesPath .. "/tethys.jpg",
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Tethys Texutre",
-    Version = "1.0",
-    Description = [[ Default jpg texture for Tethys]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Tethys Texutre",
+  Version = "1.0",
+  Description = [[ Default jpg texture for Tethys]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

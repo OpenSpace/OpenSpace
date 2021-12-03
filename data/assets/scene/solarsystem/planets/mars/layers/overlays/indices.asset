@@ -1,12 +1,12 @@
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
 local layer = {
-    Identifier = "Indices",
-    Type = "TileIndexTileLayer"
+  Identifier = "Indices",
+  Type = "TileIndexTileLayer"
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export("layer", layer)

@@ -1,0 +1,14 @@
+[ 
+    { "type": "pause", 
+      "value": "true"},
+    { "type": "keys", 
+      "value": "F11"},
+    { "type": "time", 
+      "value": "1969-07-20T20:15:50.00"}, 
+    { "type": "navigationstate", 
+      "value": "{Anchor='Apollo11LemPosition',Pitch=0.979095E-1,Position={-2.457687E0,2.504798E1,3.804939E0},ReferenceFrame='Root',Up={-0.682505E0,0.438584E-1,-0.729564E0},Yaw=0.435056E-1}"},
+    { "type": "wait", 
+      "value": "30"}, 
+    { "type": "screenshot", 
+      "value": ""}
+] 

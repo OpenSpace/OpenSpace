@@ -8,71 +8,71 @@ local earthTransforms = asset.require('scene/solarsystem/planets/earth/transform
 local BENNU_BODY = "2101955"
 
 local OsirisRexTrailEarth = {
-    Identifier = "OsirisRexTrailEarth",
-    Parent = earthTransforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "OSIRIS-REX",
-            Frame = "IAU_EARTH",
-            Observer = "EARTH"
-        },
-        Color = { 0.9, 0.9, 0.0 },
-        StartTime = "2016 SEP 8 23:05:00.50",
-        EndTime = "2016 SEP 9 00:05:00",
-        SampleInterval = 60
+  Identifier = "OsirisRexTrailEarth",
+  Parent = earthTransforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "OSIRIS-REX",
+      Frame = "IAU_EARTH",
+      Observer = "EARTH"
     },
-    GUI = {
-        Name = "OSIRIS REx Trail Earth",
-        Path = "/Solar System/Missions/OSIRIS REx"
-    }
+    Color = { 0.9, 0.9, 0.0 },
+    StartTime = "2016 SEP 8 23:05:00.50",
+    EndTime = "2016 SEP 9 00:05:00",
+    SampleInterval = 60
+  },
+  GUI = {
+    Name = "OSIRIS REx Trail Earth",
+    Path = "/Solar System/Missions/OSIRIS REx"
+  }
 }
 
 local OsirisRexTrailSolarSystem = {
-    Identifier = "OsirisRexTrailSolarSystem",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "OSIRIS-REX",
-            Observer = "SUN"
-        },
-        Color = { 0.2, 0.9, 0.2 },
-        StartTime = "2016 SEP 8 23:05:00.50",
-        EndTime = "2023 SEP 24 12:00:00",
-        SampleInterval = 3600
+  Identifier = "OsirisRexTrailSolarSystem",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "OSIRIS-REX",
+      Observer = "SSB"
     },
-    GUI = {
-        Name = "OSIRIS REx Trail Solar System",
-        Path = "/Solar System/Missions/OSIRIS REx"
-    }
+    Color = { 0.2, 0.9, 0.2 },
+    StartTime = "2016 SEP 8 23:05:00.50",
+    EndTime = "2023 SEP 24 12:00:00",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "OSIRIS REx Trail Solar System",
+    Path = "/Solar System/Missions/OSIRIS REx"
+  }
 }
 
 local OsirisRexTrailBennu = {
-    Identifier = "OsirisRexTrailBennu",
-    Parent = transforms.BennuBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "OSIRIS-REX",
-            Observer = BENNU_BODY
-        },
-        Color = { 0.9, 0.2, 0.9 },
-        StartTime = "2018 SEP 4 00:00:00",
-        EndTime = "2023 SEP 24 12:00:00",
-        SampleInterval = 3600
+  Identifier = "OsirisRexTrailBennu",
+  Parent = transforms.BennuBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "OSIRIS-REX",
+      Observer = BENNU_BODY
     },
-    GUI = {
-        Name = "OSIRIS REx Trail Bennu",
-        Path = "/Solar System/Missions/OSIRIS REx"
-    }
+    Color = { 0.9, 0.2, 0.9 },
+    StartTime = "2018 SEP 4 00:00:00",
+    EndTime = "2023 SEP 24 12:00:00",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "OSIRIS REx Trail Bennu",
+    Path = "/Solar System/Missions/OSIRIS REx"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    OsirisRexTrailEarth,
-    OsirisRexTrailSolarSystem,
-    OsirisRexTrailBennu
+  OsirisRexTrailEarth,
+  OsirisRexTrailSolarSystem,
+  OsirisRexTrailBennu
 })

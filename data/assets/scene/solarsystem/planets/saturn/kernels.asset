@@ -1,8 +1,8 @@
 local Kernels = asset.syncedResource({
-    Name = "Saturn Spice Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "saturn_kernels",
-    Version = 1
+  Name = "Saturn Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_kernels",
+  Version = 1
 })
 
 asset.export("sat319", Kernels .. '/sat319.bsp')
@@ -12,10 +12,10 @@ asset.export("sat393", Kernels .. '/sat393.bsp')
 
 
 asset.meta = {
-    Name = "Saturn Spice Kernels",
-    Version = "1.0",
-    Description = [[ Generic SPICE kernels for Saturn.]],
-    Author = "OpenSpace Team",
-    URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
-    License = "NASA"
+  Name = "Saturn Spice Kernels",
+  Version = "1.0",
+  Description = [[ Generic SPICE kernels for Saturn.]],
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
 }

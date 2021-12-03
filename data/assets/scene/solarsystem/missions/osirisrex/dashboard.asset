@@ -1,24 +1,24 @@
 local assetHelper = asset.require('util/asset_helper')
 
 assetHelper.registerDashboardItems(asset, {
-    {
-        Type = "DashboardItemSpacing",
-        Identifier = "OsirisRexSpacing",
-        GuiName = "OSIRIS-REx Spacing",
-        Spacing = 25
-    },
-    {
-        Type = "DashboardItemDistance",
-        Identifier = "OsirisRexBennuDistance",
-        GuiName = "OSIRIS-REx Bennu Distance",
-        SourceType = "Node",
-        SourceNodeName = "OsirisRex",
-        DestinationType = "Node",
-        DestinationNodeName = "BennuBarycenter"
-    },
-    {
-        Type = "DashboardItemInstruments",
-        Identifier = "OsirisRexInstruments",
-        GuiName = "OSIRIS-REx Instruments",
-    }
+  {
+    Type = "DashboardItemSpacing",
+    Identifier = "OsirisRexSpacing",
+    GuiName = "OSIRIS-REx Spacing",
+    Spacing = 25
+  },
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "OsirisRexBennuDistance",
+    GuiName = "OSIRIS-REx Bennu Distance",
+    SourceType = "Node",
+    SourceNodeName = "OsirisRex",
+    DestinationType = "Node",
+    DestinationNodeName = "BennuBarycenter"
+  },
+  {
+    Type = "DashboardItemInstruments",
+    Identifier = "OsirisRexInstruments",
+    GuiName = "OSIRIS-REx Instruments",
+  }
 })

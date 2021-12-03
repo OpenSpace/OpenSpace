@@ -6,69 +6,85 @@ asset.require('./trail')
 local texturesPath = asset.require("./saturn_textures").TexturesPath
 
 local Saturn = {
-    Identifier = "Saturn",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_SATURN",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Saturn",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SATURN",
+      Observer = "SATURN BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 60268000, 60268000, 54364000 },
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Rings = {
-            Texture = texturesPath .. "/saturn_rings.png",
-            Size = 140445000,
-            Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
-        },
-        Shadows = {
-            Enabled = true,
-            DistanceFraction = 40.0
-        } 
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Name = "Saturn",
-        Path = "/Solar System/Planets/Saturn",
-        Description = [[Saturn globe.]]
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_SATURN",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 60268000, 60268000, 54364000 },
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Rings = {
+      -- Single Texture Values:
+      --Texture = texturesPath .. "/saturn_rings.png",
+      --ColorFilter = 0.15,
+
+      -- MultiTexture Valeus:
+      TextureFwrd = texturesPath .. "/forward_original_single.png",
+      TextureBckwrd = texturesPath .. "/back_original_single.png",
+      TextureUnlit = texturesPath .. "/unlit_original_single.png",
+      TextureColor = texturesPath .. "/color_original_single.png",
+      TextureTransparency = texturesPath .. "/trans_original_single.png",
+      ColorFilter = 0.8,
+      
+      NightFactor = 1.0,
+      Size = 140445000,
+      Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
+    },
+    Shadows = {
+      Enabled = true,
+      DistanceFraction = 40.0
+    } 
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Saturn",
+    Path = "/Solar System/Planets/Saturn",
+    Description = [[Saturn globe.]]
+  }
 }
 
 local SaturnLabel = {
-    Identifier = "SaturnLabel",
-    Parent = Saturn.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Saturn",
-        FontSize = 100.0,
-        LabelSize = 8.7,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        BlendMode = "Additive",
-        LabelOrientationOption = "Camera View Direction"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Saturn Label",
-        Path = "/Solar System/Planets/Saturn",
-        Description = [[ Main planet label for Saturn.]],
-    }
+  Identifier = "SaturnLabel",
+  Parent = Saturn.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Saturn",
+    FontSize = 70.0,
+    Size = 8.85,
+    MinMaxSize = { 1, 100 },
+    BlendMode = "Additive",
+    OrientationOption = "Camera View Direction"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Saturn Label",
+    Path = "/Solar System/Planets/Saturn",
+    Description = [[ Main planet label for Saturn.]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
 
 
 asset.meta = {
-    Name = "Saturn",
-    Version = "1.0",
-    Description = [[ Saturn globe, and main planet label.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Saturn", "SaturnLabel"}
+  Name = "Saturn",
+  Version = "1.0",
+  Description = [[ Saturn globe, and main planet label.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Saturn", "SaturnLabel"}
 }

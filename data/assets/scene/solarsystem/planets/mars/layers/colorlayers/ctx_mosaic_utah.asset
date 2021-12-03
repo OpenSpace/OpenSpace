@@ -2,14 +2,14 @@ local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
 local layer = {
-    Identifier = "CTX_Mosaic_Utah",
-    Name = "CTX Mosaic [Utah]",
-    FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
-    BlendMode = "Color"
+  Identifier = "CTX_Mosaic_Utah",
+  Name = "CTX Mosaic [Utah]",
+  FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+  BlendMode = "Color"
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)

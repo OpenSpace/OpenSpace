@@ -1,0 +1,8 @@
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
+
+asset.export('kernels', kernels)

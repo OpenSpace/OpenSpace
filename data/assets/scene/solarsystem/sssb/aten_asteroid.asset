@@ -2,29 +2,29 @@ local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'aten_asteroid',
-    'sssb_data_aten_asteroid')
+  'sssb_data_aten_asteroid')
 local object = sharedSssb.createSssbGroupObject('sssb_data_aten_asteroid.csv',
-    "Aten Asteroids", filepath, { 0.15, 0.15, 1.0 })
+  "Aten Asteroids", filepath, { 0.15, 0.15, 1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 2
 object.Renderable.TrailFade = 18
 
 object.GUI.Description = [[ Earth-crossing Near-Earth-Asteroids with semi-major axes
-    smaller than Earth's. ]]
+  smaller than Earth's. ]]
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Aten Asteroids",
-    Version = "1.0",
-    Description = [[ RenderableSmallBody asset with data from from JPL Horizons
-        contiaining the Aten group.]],
-    Author = "JPL Small-Body Database hosted by California Institute of Technology",
-    URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-    License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
-        All documents available from this server may be protected under the U.S. and
-        Foreign Copyright Laws.]],
-    Identifiers = {"sssb_sssb_data_aten_asteroid"}
+  Name = "Aten Asteroids",
+  Version = "1.0",
+  Description = [[ RenderableSmallBody asset with data from from JPL Horizons
+    contiaining the Aten group.]],
+  Author = "JPL Small-Body Database hosted by California Institute of Technology",
+  URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
+  License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+    All documents available from this server may be protected under the U.S. and
+    Foreign Copyright Laws.]],
+  Identifiers = {"sssb_sssb_data_aten_asteroid"}
 }
