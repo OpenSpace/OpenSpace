@@ -242,10 +242,15 @@ namespace openspace {
         _texture->bind();
     }
 
-    glm::ivec2 ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 coord) {
+    // Mouse interaction with the browser. Returns 1 or -1 at the coordinate in
+       // image if the mouse is on a side of the browser
+       //            __1__
+       //   y|   -1 |_____|1
+       //    |__x     -1
+    bool ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 coord) {
         glm::ivec2 resizePosition = glm::ivec2{ 0 };
         // Make sure coordinate is on browser
-        if (!intersection(coord)) return resizePosition;
+        if (!intersection(coord)) return false;
 
         // TO DO: turn this into a vector and use prettier vector arithmetic
         float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
@@ -259,7 +264,26 @@ namespace openspace {
         resizePosition.x = isOnRight ? 1 : isOnLeft ? -1 : 0;
         resizePosition.y = isOnTop ? 1 : isOnBottom ? -1 : 0;
 
-        return  resizePosition;
+        _resizeDirection = resizePosition;
+
+        return  isOnRight || isOnLeft || isOnTop || isOnBottom;
+    }
+
+    void ScreenSpaceSkyBrowser::resize(const glm::vec2& start, const glm::vec2& mouseDrag)
+    {
+        glm::vec2 scaling = mouseDrag * glm::vec2(_resizeDirection);
+        glm::vec2 newSizeRelToOld = (_originalScreenSpaceSize + (scaling)) /
+            _originalScreenSpaceSize;
+        // Scale the browser
+        setScale(newSizeRelToOld);
+
+        // For dragging functionality, translate so it looks like the 
+        // browser isn't moving. Make sure the browser doesn't move in 
+        // directions it's not supposed to 
+        glm::vec2 translation = 0.5f * mouseDrag * abs(
+            glm::vec2(_resizeDirection)
+        );
+        translate(translation, start);
     }
 
     void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
@@ -292,6 +316,7 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::saveResizeStartSize() {
+        _originalScreenSpaceSize = screenSpaceDimensions();
         _originalDimensions = _dimensions;
         _originalScale = _scale;
     }

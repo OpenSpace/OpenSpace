@@ -151,9 +151,30 @@ namespace openspace {
         return _selected->screenSpacePosition();
     }
 
-    bool Pair::isSelectedBrowser()
+    bool Pair::isBrowserSelected()
     {
         return _isSelectedBrowser;
+    }
+
+    bool Pair::isTargetSelected()
+    {
+        return _selected && !_isSelectedBrowser;
+    }
+
+    void Pair::fineTuneTarget(const glm::vec2& start, const glm::vec2& translation)
+    {
+        glm::vec2 fineTune = _browser->fineTuneVector(translation);
+        _target->translate(fineTune, start);
+    }
+
+    void Pair::translateSelected(const glm::vec2& start, const glm::vec2& translation)
+    {
+        _selected->translate(translation, start);
+    }
+
+    void Pair::resizeBrowser(const glm::vec2& start, const glm::vec2& translation)
+    {
+        _browser->resize(start, translation);
     }
 
     void Pair::setEnabled(bool enable)
@@ -295,6 +316,11 @@ namespace openspace {
     bool Pair::hasFinishedFading(float goalState) const
     {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
+    }
+
+    bool Pair::isOnResizeArea(glm::vec2 mouseScreenSpaceCoords)
+    {
+        return _browser->isOnResizeArea(mouseScreenSpaceCoords);
     }
 
     ScreenSpaceSkyTarget* Pair::getTarget() {

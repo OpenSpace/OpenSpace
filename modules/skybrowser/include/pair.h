@@ -58,7 +58,11 @@ public:
     // Mouse interaction
     bool checkMouseIntersection(glm::vec2 mousePosition);
     glm::vec2 selectedScreenSpacePosition();
-    bool isSelectedBrowser();
+    bool isBrowserSelected();
+    bool isTargetSelected();
+    void fineTuneTarget(const glm::vec2& start, const glm::vec2& translation);
+    void translateSelected(const glm::vec2& start, const glm::vec2& translation);
+    void resizeBrowser(const glm::vec2& start, const glm::vec2& translation);
 
     // Browser
     void sendIdToBrowser();
@@ -71,6 +75,7 @@ public:
 
     // Boolean functions
     bool hasFinishedFading(float goalState) const;
+    bool isOnResizeArea(glm::vec2 mouseScreenSpaceCoords);
     
     bool isEnabled() const;
     bool isLocked() const;

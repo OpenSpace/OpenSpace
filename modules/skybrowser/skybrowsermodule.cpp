@@ -50,7 +50,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-  
+    
     scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
 
         scripting::LuaLibrary res;
@@ -229,141 +229,77 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
 
-            if (_mouseOnPair && action == MouseAction::Press) {
-
-                // Get the currently selected browser
-                setSelectedBrowser(_mouseOnPair->browserId());
-
-                if (button == MouseButton::Left) {
-                    _isCameraRotating = false;
-                    _startMousePosition = _mousePosition;
-                    _startDragPosition = _mouseOnPair->selectedScreenSpacePosition();
-
-                    // If current object is browser, check for resizing
-                    if (_mouseOnPair->isSelectedBrowser()) {
-                        // Resize browser if mouse is over resize button
-                        _resizeDirection = _mouseOnPair->getBrowser()->isOnResizeArea(
-                            _mousePosition
-                        );
-                        if (_resizeDirection != glm::ivec2{ 0 }) {
-                            _mouseOnPair->getBrowser()->saveResizeStartSize();
-                            _startBrowserSize = _mouseOnPair->getBrowser()->
-                                                screenSpaceDimensions();
-                            _isResizing = true;
-                            return true;
-                        }
-                    }
-                    // If you start dragging around the target, it should unlock
-                    else {
-                        _mouseOnPair->unlock();
-                    }
-                    _isDragging = true;
-
-                    return true;
-                }
-                // Fine tuning mode of target
-                else if (_mouseOnPair->isSelectedBrowser() && 
-                         button == MouseButton::Right) {
-                    // If you start dragging around on the browser, the target unlocks
-                    _mouseOnPair->unlock();
-                    // Change view (by moving target) within browser if right mouse 
-                    // click on browser
-                    _startMousePosition = _mousePosition;
-                    _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
-                    _isFineTuneMode = true;
-
-                    return true;
-                }
+            if (!_isCameraInSolarSystem) {
+                return false;
             }
-            else if (action == MouseAction::Release) {
-                if (_isDragging) {
-                    _isDragging = false;
 
-                    return true;
-                }
-                if (_isFineTuneMode) {
-                    _isFineTuneMode = false;
-                    return true;
-                }
-                if (_isResizing) {
-                    _isResizing = false;
+            if (action == MouseAction::Press && _mouseOnPair) {
+                handleMouseClick(button);
+                return true;
+            }
+            else if (_interactionMode != MouseInteraction::Hover && 
+                     action == MouseAction::Release) {
+                // Update browser size if it has been resized
+                if (_interactionMode == MouseInteraction::Resize) {
                     _mouseOnPair->updateBrowserSize();
-                    return true;
                 }
-            }
 
-            return false;
+                _interactionMode = MouseInteraction::Hover;
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     );
 
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
             
-            if (_isCameraInSolarSystem) {
-                glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
-                _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
-                glm::vec2 translation = _mousePosition - _startMousePosition;
-
-                if (_isResizing) {
-                    // Calculate scaling factor
-                    glm::vec2 mouseDragVector = (_mousePosition - _startMousePosition);
-                    glm::vec2 scaling = mouseDragVector * glm::vec2(_resizeDirection);
-                    glm::vec2 newSizeRelToOld = (_startBrowserSize + (scaling)) /
-                        _startBrowserSize;
-                    // Scale the browser
-                    _mouseOnPair->getBrowser()->setScale(newSizeRelToOld);
-
-                    // For dragging functionality, translate so it looks like the 
-                    // browser isn't moving. Make sure the browser doesn't move in 
-                    // directions it's not supposed to 
-                    translation = 0.5f * mouseDragVector * abs(
-                        glm::vec2(_resizeDirection)
-                    );
-
-                }
-                if (_isDragging || _isResizing) {
-                    
-                    // Translate
-                    if (_mouseOnPair->isSelectedBrowser()) {
-                        _mouseOnPair->getBrowser()->translate(
-                            translation, 
-                            _startDragPosition
-                        );
-                    }
-                    else {
-                        _mouseOnPair->getTarget()->translate(
-                            translation, 
-                            _startDragPosition
-                        );
-                    }
-                }
-                else if (_isFineTuneMode) {
-                    glm::vec2 fineTune = _mouseOnPair->getBrowser()->fineTuneVector(
-                        translation
-                    );
-                    _mouseOnPair->getTarget()->translate(fineTune, _startDragPosition);
-                }
-                // If there is no dragging or resizing, look for new objects
-                else {
-                    setSelectedObject();
-                }
+            if (!_isCameraInSolarSystem) {
+                return false;
             }
-           
+
+            glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
+            _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
+            glm::vec2 translation = _mousePosition - _startMousePosition;
+
+            switch (_interactionMode) {
+            case MouseInteraction::Hover:
+                setSelectedObject();
+                break;
+
+            case MouseInteraction::Resize:
+                _mouseOnPair->resizeBrowser(_startDragPosition, translation);
+                break;
+
+            case MouseInteraction::Drag:
+                _mouseOnPair->translateSelected(_startDragPosition, translation);
+                break;
+
+            case MouseInteraction::FineTune:
+                _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
+                break;
+
+            default:
+                setSelectedObject();
+                break;
+            }
+            return false;
         }
     );
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
             
-            // If mouse is on browser or target, apply zoom
-            if (_mouseOnPair) {
-                _mouseOnPair->getBrowser()->setVerticalFovWithScroll(
-                    static_cast<float>(scroll)
-                );
-                return true;
+            if (!_isCameraInSolarSystem || !_mouseOnPair) {
+                return false;
             }
-            
-            return false;
+            // If mouse is on browser or target, apply zoom
+            _mouseOnPair->getBrowser()->setVerticalFovWithScroll(
+                static_cast<float>(scroll)
+            );
+            return true;
         }
     );
 
@@ -374,27 +310,28 @@ SkyBrowserModule::SkyBrowserModule()
         bool camWasInSolarSystem = _isCameraInSolarSystem;
         glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
+        bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
-        // Fading flags
-        if (_isCameraInSolarSystem != camWasInSolarSystem) {
-            _isTransitioningVizMode = true;
-
-            // Select the 3D browser when moving out of the solar system
-            if (!_isCameraInSolarSystem && _browser3dNode) {
-                _selectedBrowser = _browser3dNode->renderable()->identifier();
+        // Visualization mode changed. Start fading
+        if (vizModeChanged) {
+            _isFading = true;
+            // Camera moved into the solar system
+            if (!_isCameraInSolarSystem) {
+                _goal = Transparency::Transparent;
+                // Select the 3D browser when moving out of the solar system
+                if (_browser3dNode) {
+                    _selectedBrowser = _browser3dNode->renderable()->identifier();
+                }
+            }
+            else {
+                _goal = Transparency::Opaque;
             }
         }
         double deltaTime = global::windowDelegate->deltaTime();
         // Fade pairs if the camera moved in or out the solar system
-        if (_isTransitioningVizMode) {
-            if (_isCameraInSolarSystem) {
-                incrementallyFadeBrowserTargets(Transparency::Opaque, deltaTime);
-            }
-            else {
-                incrementallyFadeBrowserTargets(Transparency::Transparent, deltaTime);
-            }
+        if (_isFading) {
+            incrementallyFadeBrowserTargets(_goal, deltaTime);
         }
-
         if (_isCameraInSolarSystem) {
             incrementallyAnimateTargets(deltaTime);
         }
@@ -435,6 +372,9 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 void SkyBrowserModule::setSelectedObject()
 {
+    if (_interactionMode != MouseInteraction::Hover) {
+        return;
+    }
     // Save old selection for removing highlight
     Pair* previousPair = _mouseOnPair;
 
@@ -488,8 +428,8 @@ void SkyBrowserModule::createTargetBrowserPair() {
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
-    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    //std::string url = "http://localhost:8000";
+    //std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    std::string url = "http://localhost:8000";
 
     const std::string browser = "{"
             "Identifier = '" + idBrowser + "',"
@@ -625,6 +565,45 @@ void SkyBrowserModule::add2dSelectedImagesTo3d(const std::string& pairId)
             const ImageData& image = _dataHandler->getImage(i);
             get3dBrowser()->displayImage(image.imageUrl, i);
             });
+    }
+}
+
+void SkyBrowserModule::handleMouseClick(const MouseButton& button)
+{
+    setSelectedBrowser(_mouseOnPair->browserId());
+
+    if (button == MouseButton::Left) {
+        _startMousePosition = _mousePosition;
+        _startDragPosition = _mouseOnPair->selectedScreenSpacePosition();
+
+        // If current object is browser, check for resizing
+        bool shouldResize = _mouseOnPair->isBrowserSelected() &&
+                            _mouseOnPair->isOnResizeArea(_mousePosition);
+        
+        if (shouldResize) {
+            _mouseOnPair->getBrowser()->saveResizeStartSize();
+            _interactionMode = MouseInteraction::Resize;
+            return;
+        }
+        else {
+            // If it's not resize mode, it's drag mode
+            _interactionMode = MouseInteraction::Drag;
+        }
+        
+        // If target is clicked, it should unlock
+        if (_mouseOnPair->isTargetSelected()) {
+            _mouseOnPair->unlock();
+        }
+    }
+    // Fine tuning mode of target
+    else if (button == MouseButton::Right && _mouseOnPair->isBrowserSelected()) {
+        // If you start dragging around on the browser, the target unlocks
+        _mouseOnPair->unlock();
+        // Change view (by moving target) within browser if right mouse 
+        // click on browser
+        _startMousePosition = _mousePosition;
+        _startDragPosition = _mouseOnPair->getTarget()->screenSpacePosition();
+        _interactionMode = MouseInteraction::FineTune;
     }
 }
 
@@ -769,7 +748,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
 
      // The transition is over when the fade is finished
      if (isAllFinished) {
-         _isTransitioningVizMode = false;
+         _isFading = false;
      }
 }
 

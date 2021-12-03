@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/mouse.h>
 #include <fstream>
 
 namespace openspace {
@@ -42,6 +43,13 @@ class ImageData;
 enum class Transparency {
     Transparent,
     Opaque
+};
+
+enum class MouseInteraction {
+    Hover,
+    Resize,
+    Drag,
+    FineTune,
 };
 
 class SkyBrowserModule : public OpenSpaceModule {
@@ -96,6 +104,9 @@ public:
     int nLoadedImages();
     void add2dSelectedImagesTo3d(const std::string& pairId);
 
+    // Mouse interaction
+    void handleMouseClick(const MouseButton& button);
+
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
@@ -114,24 +125,21 @@ private:
 
     // Fading
     double _fadingTime = 2.0;
+    Transparency _goal;
     
     // Flags
-    bool _isFineTuneMode{ false };
-    bool _isResizing{ false };
-    bool _isDragging{ false };
-    bool _isCameraInSolarSystem{ true };
+    bool _isCameraInSolarSystem{ true }; // Visualization modes
+    bool _isFading{ false };
     bool _isCameraRotating = false;
-    bool _isTransitioningVizMode{ false };
 
-    // Mouse interaction - dragging and resizing
-    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
+    // Mouse interaction
+    MouseInteraction _interactionMode;
     glm::vec2 _mousePosition; // Current mouse position in screen space coordinates
     glm::vec2 _startMousePosition;
     glm::vec2 _startDragPosition;
-    glm::vec2 _startBrowserSize;
-    glm::ivec2 _resizeDirection{ 0 };
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
+    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
     double _stopAnimationThreshold{ 0.05 };

@@ -47,12 +47,8 @@ namespace openspace {
 
         // Interaction. Resize
         void saveResizeStartSize();       
-        // Mouse interaction with the browser. Returns 1 or -1 at the coordinate in
-        // image if the mouse is on a side of the browser
-        //            __1__
-        //   y|   -1 |_____|1
-        //    |__x     -1
-        glm::ivec2 isOnResizeArea(glm::vec2 screenSpaceCoord);
+        bool isOnResizeArea(glm::vec2 screenSpaceCoord);
+        void resize(const glm::vec2& start, const glm::vec2& mouseDrag);
 
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         void setIdInBrowser();
@@ -69,13 +65,15 @@ namespace openspace {
         bool _isSyncedWithWwt{ false };
         bool _isFovAnimated{ false };
 
-        // Animation of browser
+        // Animation of fieldOfView
         float _endVfov{ 0.f };
 
-        // Resizing of browser
-        glm::vec2 _originalDimensions;
+        // Resizing
         float _originalScale;
         float _resizeAreaPercentage{ 0.1f };
+        glm::vec2 _originalDimensions;
+        glm::vec2 _originalScreenSpaceSize;
+        glm::ivec2 _resizeDirection;
 
         // Time variables
         // For capping the calls onchange properties from scrolling
