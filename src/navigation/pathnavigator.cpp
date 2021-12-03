@@ -34,7 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/quaternion.hpp>
@@ -419,41 +418,6 @@ const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
     }
 
     return _relevantNodes;
-}
-
-SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) const {
-    const std::vector<SceneGraphNode*>& relevantNodes =
-        global::navigationHandler->pathNavigator().relevantNodes();
-
-    for (SceneGraphNode* n : relevantNodes) {
-        bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
-        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < Epsilon;
-
-        if (isSame) {
-            continue;
-        }
-
-        constexpr const float proximityRadiusFactor = 3.f;
-
-        const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dvec3 posInModelCoords =
-            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
-
-        bool isClose = collision::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
 }
 
 void PathNavigator::findRelevantNodes() {
