@@ -206,6 +206,12 @@ namespace openspace {
         sendMessageToWwt(msg);
     }
 
+    void WwtCommunicator::hideChromeInterface(bool shouldHide)
+    {
+        ghoul::Dictionary msg = hideChromeGui(shouldHide);
+        sendMessageToWwt(msg);
+    }
+
     void WwtCommunicator::update()
     {
         Browser::update();        
@@ -335,6 +341,17 @@ namespace openspace {
         msg.setValue("version", messageCounter);
 
         messageCounter++;
+
+        return msg;
+    }
+
+    ghoul::Dictionary WwtCommunicator::hideChromeGui(bool isHidden)
+    {
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "modify_settings"s);
+        msg.setValue("settings", "[[\"hideAllChrome\", true]]"s);
+        msg.setValue("target", "app"s);
 
         return msg;
     }

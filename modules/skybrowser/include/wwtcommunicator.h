@@ -52,6 +52,7 @@ public:
     void setImageOrder(int i, int order);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(int i, float opacity);
+    void hideChromeInterface(bool shouldHide);
 
     // Getters
     const std::deque<int>& getSelectedImages();
@@ -102,6 +103,7 @@ private:
     ghoul::Dictionary setImageOpacity(const std::string& id, double opacity);
     ghoul::Dictionary setForegroundOpacity(double val);
     ghoul::Dictionary setLayerOrder(const std::string& id, int version);
+    ghoul::Dictionary hideChromeGui(bool isHidden);
 
 };
 

@@ -132,11 +132,13 @@ int loadImagesToWWT(lua_State* L) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->getPair(id)) {
+        //module->getPair(id)->hideChromeInterface(true);
         module->getPair(id)->loadImageCollection(root);
     }
     else if (module->get3dBrowser(id)) {
            
         // Load Image collections
+        module->get3dBrowser(id)->hideChromeInterface(true);
         module->get3dBrowser(id)->setIsSyncedWithWwt(false);
         LINFO("Load images to " + module->get3dBrowser(id)->identifier());
         module->get3dBrowser(id)->loadImageCollection(root);

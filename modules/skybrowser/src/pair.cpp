@@ -270,6 +270,11 @@ namespace openspace {
         _browser->setImageOpacity(i, opacity);
     }
 
+    void Pair::hideChromeInterface(bool shouldHide)
+    {
+        _browser->hideChromeInterface(shouldHide);
+    }
+
     void Pair::sendIdToBrowser()
     {
         _browser->setIdInBrowser();
