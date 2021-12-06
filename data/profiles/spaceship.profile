@@ -44,6 +44,7 @@
   ],
   "assets": [
     "base",
+    "events/toggle_globe_trails",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "util/joysticks/T.A320 Pilot",

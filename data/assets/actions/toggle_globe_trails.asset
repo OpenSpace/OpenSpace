@@ -1,0 +1,57 @@
+local hide_trails = {
+  Identifier = "os.hide_all_globe_trails",
+  Name = "Hide All Trails (Planets and Moons)",
+  Command = [[
+    openspace.printInfo('Hide all trails')
+
+    local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled');
+    for _,v in pairs(list) do 
+      -- openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+      openspace.setPropertyValueSingle(v, false) 
+    end
+
+    local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); 
+    for _,v in pairs(moonlist) do 
+      openspace.setPropertyValueSingle(v, false) 
+    end
+  ]],
+  Documentation = [[Set the visiblility of the trials of all the moons and planets in 
+  our solar system to false.]],
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("hide_trails", hide_trails.Identifier)
+
+local show_trails = {
+  Identifier = "os.show_all_globe_trails",
+  Name = "Show All Trails (Planets and Moons)",
+  Command = [[
+    openspace.printInfo('Show all trails')
+
+    local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled');
+    for _,v in pairs(list) do 
+      -- openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) 
+      openspace.setPropertyValueSingle(v, true) 
+    end
+
+    local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); 
+    for _,v in pairs(moonlist) do 
+      openspace.setPropertyValueSingle(v, true) 
+    end
+  ]],
+  Documentation = [[Set the visiblility of the trials of all the moons and planets in 
+    our solar system to true.]],
+  GuiPath = "/Trails",
+  IsLocal = true
+}
+asset.export("show_trails", show_trails.Identifier)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(show_trails)
+  openspace.action.registerAction(hide_trails)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(show_trails.Identifier)
+  openspace.action.removeAction(hide_trails.Identifier)
+end)
