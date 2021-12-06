@@ -233,9 +233,13 @@ SkyBrowserModule::SkyBrowserModule()
                 return false;
             }
 
-            if (action == MouseAction::Press && _mouseOnPair) {
-                handleMouseClick(button);
-                return true;
+            if (action == MouseAction::Press) {      
+                _isCameraRotating = false;
+                if (_mouseOnPair) {
+                    handleMouseClick(button);
+                    return true;
+                }
+                return false; 
             }
             else if (_interactionMode != MouseInteraction::Hover && 
                      action == MouseAction::Release) {
