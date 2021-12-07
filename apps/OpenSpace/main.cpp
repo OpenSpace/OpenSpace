@@ -378,7 +378,6 @@ void mainPreSyncFunc() {
                     "All excess axes are ignored",
                     state.name, state.nAxes, JoystickInputState::MaxAxes
                 ));
-                state.nAxes = JoystickInputState::MaxAxes;
             }
             glfwGetJoystickButtons(i, &state.nButtons);
             if (state.nButtons > JoystickInputState::MaxButtons) {
@@ -387,14 +386,19 @@ void mainPreSyncFunc() {
                     "supported. All excess buttons are ignored",
                     state.name, state.nButtons, JoystickInputState::MaxButtons
                 ));
-                state.nButtons = JoystickInputState::MaxButtons;
             }
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
+        if (state.nAxes > JoystickInputState::MaxAxes) {
+            state.nAxes = JoystickInputState::MaxAxes;
+        }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
+        if (state.nButtons > JoystickInputState::MaxButtons) {
+            state.nButtons = JoystickInputState::MaxButtons;
+        }
 
         for (int j = 0; j < state.nButtons; ++j) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
