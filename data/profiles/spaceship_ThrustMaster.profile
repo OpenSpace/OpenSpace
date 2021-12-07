@@ -47,8 +47,8 @@
     "events/toggle_globe_trails",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "util/joysticks/T.A320 Pilot",
-    "util/joysticks/TCA Q-Eng 1&2"
+    "util/joysticks/TA320_Pilot",
+    "util/joysticks/TCA_Q-Eng_1&2"
   ],
   "camera": {
     "altitude": 17000000.0,
