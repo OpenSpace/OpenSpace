@@ -48,12 +48,13 @@ local X52HOTAS = {
     Mode1 = 23,
     Mode2 = 24,
     Mode3 = 25,
-    ButtomMiniJoystick = {
-      Up = 34,
-      Right = 35,
-      Down = 36,
-      Left = 37
-    }
+    -- Only 32 buttons are supported
+    -- ButtomMiniJoystick = {
+      -- Up = 34,
+      -- Right = 35,
+      -- Down = 36,
+      -- Left = 37
+    -- }
   },
   Thruster = {
     Thrust = { 2 }, -- up/down

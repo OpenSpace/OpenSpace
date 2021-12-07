@@ -175,7 +175,7 @@ void JoystickCameraStates::updateStateFromInput(
 
             if (oscLable != joystickInputState.name) {
                 std::string oscScript = "openspace.sendOSCMessage(\"/" + oscLable +
-                    "\", " + std::to_string(value) + ")";
+                    "\", " + std::to_string(rawValue) + ")";
                 global::scriptEngine->queueScript(
                     oscScript,
                     scripting::ScriptEngine::RemoteScripting(true)
