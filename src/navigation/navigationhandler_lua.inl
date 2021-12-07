@@ -164,7 +164,7 @@ int bindJoystickAxis(lua_State* L) {
     joystickType = joystickType.value_or("JoystickLike");
 
     global::navigationHandler->setJoystickAxisMapping(
-        joystickName,
+        std::move(joystickName),
         axis,
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
@@ -176,7 +176,7 @@ int bindJoystickAxis(lua_State* L) {
 }
 
 int bindJoystickAxisProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 3, 9 }, "lua::bindJoystickAxisProperty");
+    ghoul::lua::checkArgumentsAndThrow(L, { 3, 7 }, "lua::bindJoystickAxisProperty");
     auto [joystickName, axis, propertyUri, min, max, shouldInvert, isRemote] =
         ghoul::lua::values<
             std::string, int, std::string, std::optional<float>, std::optional<float>,
@@ -188,9 +188,9 @@ int bindJoystickAxisProperty(lua_State* L) {
     isRemote = isRemote.value_or(true);
 
     global::navigationHandler->setJoystickAxisMappingProperty(
-        joystickName,
+        std::move(joystickName),
         axis,
-        propertyUri,
+        std::move(propertyUri),
         *min,
         *max,
         interaction::JoystickCameraStates::AxisInvert(*shouldInvert),
