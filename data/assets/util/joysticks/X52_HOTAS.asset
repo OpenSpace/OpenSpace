@@ -1,0 +1,104 @@
+local propertyHelper = asset.require('../property_helper')
+local joystickHelper = asset.require('./joystick_helper')
+
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom" -- both in and out
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+-- Fifth parameters determins if the axis should be "Sticky" or not.
+--       The axis values can either go back to 0 when the joystick is released or it can
+--       stay at the value it was before the joystick was released.
+--       The latter is called a sticky axis, when the values don't go back to 0.
+-- Sixth parameter is the sensitivity for the axis
+
+local X52HOTAS = {
+  Joystick = {
+    Tilt = { 0, 1 }, -- left/right, back/forth
+    Twist = { 5 }, -- left/right
+    HalfTrigger = 0,
+    FullTrigger = 14,
+    BottomTrigger = 5,
+    Fire = 1,
+    A = 2,
+    B = 3,
+    C = 4,
+    T1 = 8,
+    T2 = 9,
+    T3 = 10,
+    T4 = 11,
+    T5 = 12,
+    T6 = 13,
+    leftMiniJoystick = {
+      Up = 15,
+      Right = 16,
+      Down = 17,
+      Left = 18
+    },
+    Mode1 = 23,
+    Mode2 = 24,
+    Mode3 = 25,
+    ButtomMiniJoystick = {
+      Up = 34,
+      Right = 35,
+      Down = 36,
+      Left = 37
+    }
+  },
+  Thruster = {
+    Thrust = { 2 }, -- up/down
+    infoRing = { 3 }, -- screw
+    ERing = { 4 }, -- screw
+    Slider = { 6 }, -- up/down
+    D = 6,
+    E = 7,
+    BackMiniJoystick = {
+      Up = 19,
+      Right = 20,
+      Down = 21,
+      Left = 22
+    },
+    Function = 26,
+    StartStop = 27,
+    Reset = 28,
+    Info = 29,
+    Mouse = 30,
+    ScrollButton = 31
+  }
+}
+
+asset.onInitialize(function()
+  local controller = X52HOTAS;
+  local name = "X52 H.O.T.A.S.";
+
+  -- Deadzones
+  openspace.navigation.setAxisDeadZone(name, controller.Joystick.Tilt[1], 0.05);
+  openspace.navigation.setAxisDeadZone(name, controller.Joystick.Tilt[2], 0.05);
+  openspace.navigation.setAxisDeadZone(name, controller.Joystick.Twist[1], 0.05);
+  openspace.navigation.setAxisDeadZone(name, controller.Thruster.Thrust[1], 0.05)
+
+  -- Bind axis
+  openspace.navigation.bindJoystickAxis(name, controller.Joystick.Tilt[1], "Orbit X");
+  openspace.navigation.bindJoystickAxis(name, controller.Joystick.Tilt[2], "Orbit Y");
+  openspace.navigation.bindJoystickAxis(name, controller.Joystick.Twist[1], "GlobalRoll X", true);
+  openspace.navigation.bindJoystickAxisProperty(
+    name,
+    controller.Thruster.Thrust[1],
+    "NavigationHandler.PathNavigator.SpeedScale",
+    0.1,
+    5,
+    true
+  );
+
+  -- Bind buttons
+end)
