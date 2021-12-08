@@ -89,6 +89,8 @@ void JoystickCameraStates::updateStateFromInput(
                 value *= -1.f;
             }
 
+            float oscValue = value;
+
             if (t.joystickType == JoystickType::TriggerLike ||
                 t.type == AxisType::Property)
             {
@@ -174,8 +176,8 @@ void JoystickCameraStates::updateStateFromInput(
             }
 
             if (oscLable != joystickInputState.name) {
-                std::string oscScript = "openspace.sendOSCMessage(\"/" + oscLable +
-                    "\", " + std::to_string(rawValue) + ")";
+                std::string oscScript = fmt::format("openspace.sendOSCMessage('/{}', {});",
+                    oscLable, std::to_string(oscValue));
                 global::scriptEngine->queueScript(
                     oscScript,
                     scripting::ScriptEngine::RemoteScripting(true)
@@ -185,7 +187,7 @@ void JoystickCameraStates::updateStateFromInput(
 
         for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
             std::string oscLable =
-                joystickInputState.name + "_button_" + std::to_string(i + 1);
+                joystickInputState.name + "_button_" + std::to_string(i);
             auto itRange = joystick->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; ++it) {
                 bool active = global::joystickInputStates->button(
@@ -195,8 +197,8 @@ void JoystickCameraStates::updateStateFromInput(
                 );
 
                 if (active) {
-                    std::string oscScript = "openspace.sendOSCMessage(\"/" + oscLable +
-                        "\", " + std::to_string(1.f) + ")";
+                    std::string oscScript = fmt::format("openspace.sendOSCMessage('/{}', {});",
+                        oscLable, std::to_string(1.f));
                     global::scriptEngine->queueScript(
                         oscScript,
                         scripting::ScriptEngine::RemoteScripting(true)
