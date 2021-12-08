@@ -95,8 +95,8 @@ asset.onInitialize(function()
     name,
     controller.Thruster.Thrust[1],
     "NavigationHandler.PathNavigator.SpeedScale",
-    0.1,
-    5,
+    0.4,
+    2.8,
     true
   );
 
