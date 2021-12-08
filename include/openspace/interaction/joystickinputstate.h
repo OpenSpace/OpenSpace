@@ -54,10 +54,11 @@ enum class JoystickAction : uint8_t {
  * The input state of a single joystick.
  */
 struct JoystickInputState {
+    /// These two are just randomly selected numbers that can be increased if needed
     /// The maximum number of supported axes
     static constexpr const int MaxAxes = 8;
     /// The maximum number of supported buttons
-    static constexpr const int MaxButtons = 32;
+    static constexpr const int MaxButtons = 48;
 
     /// Marks whether this joystick is connected. If this value is \c false, all other
     /// members of this struct are undefined
