@@ -40,14 +40,38 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/camera/camera.h>
 #include <openspace/util/factorymanager.h>
+#include <glm/gtx/color_space.hpp> // For hsv color
+#include <random> // For random color
 
 namespace {
-    struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
+    constexpr const openspace::properties::Property::PropertyInfo AllowInteractionInfo =
+    {
+        "AllowMouseInteraction",
+        "Allow Mouse Interaction",
+        "Toggles if it is possible to interact with the sky browser and sky targets with "
+        "the mouse or not."
+    };
+    
+    constexpr const openspace::properties::Property::PropertyInfo AllowRotationInfo =
+    {
+        "AllowCameraRotation",
+        "Allow Camera Rotation",
+        "Toggles if the camera should rotate to look at the sky target if it is going "
+        "outside of the current field of view."
+    };
+
+    struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
+        // [[codegen::verbatim(AllowInteractionInfo.description)]]
+        std::optional<bool> allowMouseInteraction;
+
+        // [[codegen::verbatim(AllowRotationInfo.description)]]
+        std::optional<bool> allowCameraRotation;
     };
     
     #include "skybrowsermodule_codegen.cpp"
 } // namespace
+
 
 namespace openspace {
     
@@ -222,14 +246,32 @@ namespace openspace {
         return res;
     }
 
+glm::ivec3 randomBorderColor() {
+    // Generate a random border color with sufficient lightness and a n
+    std::random_device rd;
+    // Hue is in the unit degrees [0, 360]
+    std::uniform_real_distribution<float> hue(0.f, 360.f);
+    // Value in saturation are in the unit percent [0,1]
+    float value = 0.95f; // Brightness
+    float saturation = 0.5f;
+    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+    return rgbColor;
+}
+
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
+    , _allowMouseInteraction(AllowInteractionInfo, true)
+    , _allowCameraRotation(AllowRotationInfo, true)
 {
+    addProperty(_allowMouseInteraction);
+    addProperty(_allowCameraRotation);
+
     // Set callback functions
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
 
-            if (!_isCameraInSolarSystem) {
+            if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                 return false;
             }
 
@@ -260,7 +302,7 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
             
-            if (!_isCameraInSolarSystem) {
+            if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
                 return false;
             }
 
@@ -296,7 +338,7 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
             
-            if (!_isCameraInSolarSystem || !_mouseOnPair) {
+            if (!_isCameraInSolarSystem || !_mouseOnPair || !_allowMouseInteraction) {
                 return false;
             }
             // If mouse is on browser or target, apply zoom
@@ -339,7 +381,7 @@ SkyBrowserModule::SkyBrowserModule()
         if (_isCameraInSolarSystem) {
             incrementallyAnimateTargets(deltaTime);
         }
-        if (_isCameraRotating) {
+        if (_isCameraRotating && _allowCameraRotation) {
             incrementallyRotateCamera(deltaTime);
         }
     }); 
@@ -432,8 +474,10 @@ void SkyBrowserModule::createTargetBrowserPair() {
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
-    //std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    std::string url = "http://localhost:8000";
+    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    //std::string url = "http://localhost:8000"; // check webgl version
+    //std::string url = "https://get.webgl.org";
+    glm::ivec3 color = randomBorderColor();
 
     const std::string browser = "{"
             "Identifier = '" + idBrowser + "',"
@@ -442,6 +486,7 @@ void SkyBrowserModule::createTargetBrowserPair() {
             "Url = '"+ url +"',"
             "FaceCamera = false,"
             "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
+            "BorderColor = " + ghoul::to_string(color) + ","
         "}";
     const std::string target = "{"
             "Identifier = '" + idTarget + "',"
@@ -452,23 +497,23 @@ void SkyBrowserModule::createTargetBrowserPair() {
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 }
 

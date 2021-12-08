@@ -29,6 +29,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/mouse.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <fstream>
 
 namespace openspace {
@@ -115,6 +116,8 @@ protected:
     void internalDeinitialize() override;
 
 private:
+    properties::BoolProperty _allowMouseInteraction;
+    properties::BoolProperty _allowCameraRotation;
     // The browsers and targets
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
