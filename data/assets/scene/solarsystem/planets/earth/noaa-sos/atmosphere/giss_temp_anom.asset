@@ -14,7 +14,7 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory_addons = asset.syncedResource({
 	Name = Name .. " (Addons)",
 	Type = "HttpSynchronization",
 	Identifier = Identifier .. "-addons",

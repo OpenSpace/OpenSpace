@@ -14,6 +14,20 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local syncedDirectory_by_depth = asset.syncedResource({
+	Name = Name .. " (By Depth)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-by_depth",
+	Version = 1
+})
+
+local syncedDirectory_addons = asset.syncedResource({
+	Name = Name .. " (Addons)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-addons",
+	Version = 1
+})
+
 local layer = {
   Identifier = Identifier,
   Name = Name,

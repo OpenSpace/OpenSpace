@@ -7,9 +7,9 @@ local URL = "https://sos.noaa.gov/catalog/datasets/bird-migration-patterns-weste
 
 
 local syncedDirectory_addon = asset.syncedResource({
-	Name = Name .. " (Addons)"
+	Name = Name .. " (Addons)",
 	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons"
+	Identifier = Identifier .. "-addons",
 	Version = 1
 })
 
