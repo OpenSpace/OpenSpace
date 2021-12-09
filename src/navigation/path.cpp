@@ -285,7 +285,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     constexpr const double buffer = 0.04;
 
     if (traveledDistance < dampeningDistance) {
-        speed *= ghoul::sineEaseOut(traveledDistance / dampeningDistance) + buffer;
+        speed *= traveledDistance / dampeningDistance + buffer;
     }
     else if (traveledDistance > (pathLength() - dampeningDistance)) {
         double remainingDistance = pathLength() - traveledDistance;
@@ -294,7 +294,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         if (remainingDistance < 0.0) {
             remainingDistance = 0.1;
         }
-        speed *= ghoul::sineEaseOut(remainingDistance / dampeningDistance) + buffer;
+        speed *= remainingDistance / dampeningDistance + buffer;
     }
 
     // TODO: also dampen speed based on curvature, or make sure the curve has a rounder
