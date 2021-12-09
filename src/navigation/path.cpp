@@ -37,6 +37,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/universalhelpers.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
@@ -233,50 +234,69 @@ glm::dquat Path::lookAtTargetsRotation(double t) const {
 double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
-
     const CameraPose prevPose = interpolatedPose(traveledDistance);
     const double distanceToEndNode = glm::distance(prevPose.position, endNodePos);
     const double distanceToStartNode = glm::distance(prevPose.position, startNodePos);
 
     // Decide which is the closest node
-    SceneGraphNode* closestNode = _start.node();
-    glm::dvec3 closestPos = startNodePos;
-
-    if (distanceToEndNode < distanceToStartNode) {
-        closestPos = endNodePos;
-        closestNode = _end.node();
+    bool endNodeIsClosest = (distanceToEndNode < distanceToStartNode);
+    if (_start.nodeIdentifier() == _end.nodeIdentifier()) {
+        endNodeIsClosest = traveledDistance > (0.5 * pathLength());
     }
 
+    const SceneGraphNode* closestNode = endNodeIsClosest ? _end.node() : _start.node();
+    const glm::dvec3 closestPos = closestNode->worldPosition();
+    const glm::dvec3 closestEdgePos =
+        endNodeIsClosest ? _end.position() : _start.position();
+
+    // Distance to the surface at the target position
+    const glm::dvec3 edgePosModelSpace = glm::dvec3(
+        glm::inverse(closestNode->modelTransform()) * glm::dvec4(closestEdgePos, 1.0)
+    );
+    const SurfacePositionHandle posHandle =
+        closestNode->calculateSurfacePositionHandle(edgePosModelSpace);
+
+    const glm::dvec3 centerToActualSurfaceModelSpace =
+        posHandle.centerToReferenceSurface +
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+
+    const glm::dvec3 centerToActualSurface =
+        glm::dmat3(closestNode->modelTransform()) * centerToActualSurfaceModelSpace;
+
+    // Compute speed based on distance to object surface
     const double distanceToClosestNode = glm::distance(closestPos, prevPose.position);
-    double speed = distanceToClosestNode;
+    double distanceToSurface = distanceToClosestNode - glm::length(centerToActualSurface);
+    double speed = distanceToSurface;
 
-    // Dampen speed in beginning of path
-    double startUpDistance = 2.0 * _start.node()->boundingSphere();
-    if (startUpDistance < Epsilon) { // zero bounding sphere
-        startUpDistance = glm::distance(_start.position(), startNodePos);
+    const double edgePosToSurfaceDistance =
+        glm::distance(closestEdgePos, closestPos) - glm::length(centerToActualSurface);
+
+    // Dampen speed in beginning and end of path
+    double dampeningDistance = 2.0 * edgePosToSurfaceDistance;
+
+    // If the path is short, use another dampening approach, based on the boudningsphere
+    if (pathLength() < dampeningDistance) {
+        dampeningDistance = closestNode->boundingSphere();
     }
 
-    if (traveledDistance < startUpDistance) {
-        speed *= traveledDistance / startUpDistance + 0.01;
-    }
+    // Buffer to prevent zero speed
+    constexpr const double buffer = 0.04;
 
-    // Dampen speed in end of path
-    // Note: this leads to problems when the full length of the path is really big
-    double closeUpDistance = 2.0 * _end.node()->boundingSphere();
-    if (closeUpDistance < Epsilon) { // zero bounding sphere
-        closeUpDistance = glm::distance(_end.position(), endNodePos);
+    if (traveledDistance < dampeningDistance) {
+        speed *= ghoul::sineEaseOut(traveledDistance / dampeningDistance) + buffer;
     }
-
-    if (traveledDistance > (pathLength() - closeUpDistance)) {
-        const double remainingDistance = pathLength() - traveledDistance;
-        speed *= remainingDistance / closeUpDistance + 0.01;
+    else if (traveledDistance > (pathLength() - dampeningDistance)) {
+        double remainingDistance = pathLength() - traveledDistance;
+        // If the path length estimate is not completely correct, the remaining distance
+        // might be negative. Prevent that from causing problems with the speed.
+        if (remainingDistance < 0.0) {
+            remainingDistance = 0.1;
+        }
+        speed *= ghoul::sineEaseOut(remainingDistance / dampeningDistance) + buffer;
     }
 
     // TODO: also dampen speed based on curvature, or make sure the curve has a rounder
     //       shape
-
-    // TODO: check for when path is shorter than the starUpDistance or closeUpDistance
-    //       variables
 
     return _speedFactorFromDuration * speed;
 }
