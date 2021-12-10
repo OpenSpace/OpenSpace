@@ -103,7 +103,7 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
     }
 
     if (invertZ) {
-        std::unique_ptr<RawVolume<VoxelType>> newVolume = 
+        std::unique_ptr<RawVolume<VoxelType>> newVolume =
             std::make_unique<RawVolume<VoxelType>>(dims);
 
         for (int i = 0; i < volume->nCells(); ++i) {

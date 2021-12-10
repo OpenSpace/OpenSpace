@@ -484,7 +484,7 @@ TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
     std::string_view prevTileStr = timeStringify(t.timeFormat, prevTile);
     try {
         // the necessary tile providers are loaded if they exist within the
-        // dataset's timespan 
+        // dataset's timespan
         if (secondToLast.j2000Seconds() > simulationTime.j2000Seconds() &&
             secondToFirst.j2000Seconds() < simulationTime.j2000Seconds())
         {
@@ -1127,7 +1127,7 @@ bool deinitialize(TileProvider& tp) {
 //
 InterpolateTileProvider::InterpolateTileProvider(const ghoul::Dictionary&) {
     ZoneScoped
-    
+
     type = Type::InterpolateTileProvider;
     glGenFramebuffers(1, &fbo);
     glGenVertexArrays(1, &vaoQuad);
@@ -1177,7 +1177,7 @@ InterpolateTileProvider::~InterpolateTileProvider() {
 Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
     ZoneScoped
     TracyGpuZone("tile");
-    
+
     // prev and next are the two tiles to interpolate between
     Tile prev = tile(*t1, tileIndex);
     Tile next = tile(*t2, tileIndex);
@@ -1186,7 +1186,7 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
     Tile prevprev = tile(*before, tileIndex);
     Tile nextnext = tile(*future, tileIndex);
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
-    
+
     if (!prev.texture || !next.texture) {
         return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
     }
@@ -1218,7 +1218,7 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
         writeTexture = ourTile.texture;
     }
     else {
-        // Create a texture with the initialization data 
+        // Create a texture with the initialization data
         writeTexture = tileCache->texture(initData);
         // Create a tile with the texture
         ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
@@ -1257,7 +1257,7 @@ Tile InterpolateTileProvider::calculateTile(const TileIndex& tileIndex) {
     // Activate shader and bind uniforms
     shaderProgram->activate();
     shaderProgram->setUniform("blendFactor", factor);
-    
+
     ghoul::opengl::TextureUnit colormapUnit;
     colormapUnit.activate();
     colormapTexture->bind();

@@ -409,7 +409,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
+        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
+                    *p.animationTimeScale)
+                )
+        {
             Parameters::AnimationTimeUnit animationTimeUnit =
                 std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
             TimeUnit timeUnit;

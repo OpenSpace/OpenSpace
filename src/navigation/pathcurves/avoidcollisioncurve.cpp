@@ -82,7 +82,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     if (glm::length(startToEnd) > 0.0) {
         // Add point for moving out if the end state is in opposite direction
-        double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
+        double cosAngleToTarget =
+            glm::dot(normalize(-startViewDir), normalize(startToEnd));
         bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
         if (targetInOppositeDirection) {
