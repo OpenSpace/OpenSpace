@@ -273,6 +273,12 @@ namespace {
         "The time to interpolate to/from full speed when an idle behavior is triggered "
         "or canceled, in seconds."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ZoomOffsetFactorInfo = {
+        "ZoomOffsetFactor",
+        "Zoom Offset Factor",
+        "How much the zoom should deviate from normal zoom value, relative to radius of planet"
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -351,6 +357,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
+    , _zoomOffsetFactor(ZoomOffsetFactorInfo, 0.f, -2.f, 2.f)
 {
     _anchor.onChange([this]() {
         if (_anchor.value().empty()) {
@@ -518,6 +525,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
     addProperty(_websocketSensitivity);
+    addProperty(_zoomOffsetFactor);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -1509,8 +1517,13 @@ glm::dquat OrbitalNavigator::rotateHorizontally(double deltaTime,
 glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
                                            const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
-                                        const SurfacePositionHandle& positionHandle) const
+                                        const SurfacePositionHandle& positionHandle)
 {
+    double nodeRadius = _anchorNode->interactionSphere();
+    double newOffset = _zoomOffsetFactor * nodeRadius;
+    double oldOffset = _prevOffset;
+    _prevOffset = newOffset;
+
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
 
     const glm::dvec3 posDiff = cameraPosition - objectPosition;
@@ -1528,7 +1541,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
     return cameraPosition + referenceSurfaceOutDirection *
-        glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+        (glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0) + (newOffset - oldOffset));
 }
 
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,

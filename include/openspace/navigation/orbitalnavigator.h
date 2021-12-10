@@ -165,6 +165,9 @@ private:
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
 
+    properties::FloatProperty _zoomOffsetFactor;
+    double _prevOffset = 0.0;
+
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
@@ -344,7 +347,7 @@ private:
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
         const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
-        const SurfacePositionHandle& positionHandle) const;
+        const SurfacePositionHandle& positionHandle);
 
     /**
      * Interpolates between rotationDiff and a 0 rotation.
