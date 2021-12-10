@@ -40,7 +40,8 @@
     "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.ColorLayers.WAC_Sweden.Enabled\", true);",
     "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Sweden.Enabled\", true);",
     "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Utah.Enabled\", false);",
-    "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.MinimumAllowedDistance\", 300);"
+    "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.MinimumAllowedDistance\", 300);",
+    "openspace.setPropertyValue(\"Scene.*.ApproachFactor\", 10);"
   ],
   "assets": [
     "base",
