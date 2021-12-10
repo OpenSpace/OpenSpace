@@ -39,7 +39,7 @@ local X52HOTAS = {
     T4 = 11,
     T5 = 12,
     T6 = 13,
-    leftMiniJoystick = {
+    LeftMiniJoystick = {
       Up = 15,
       Right = 16,
       Down = 17,
@@ -101,4 +101,140 @@ asset.onInitialize(function()
   );
 
   -- Bind buttons
+  -- Bomb
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.Fire,
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.Scale', 0.3)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.CartesianPosition', {0.0, 1.5, -2.000000}, 2.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.Scale', 0.0, 1.25)",
+    "Print Fire"
+  );
+
+  -- Small fire
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.FullTrigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, -1.8, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.3)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, 1.8, -2.000000}, 1.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.0, 0.5)",
+    "Print Fire"
+  );
+
+
+  -- Crosshair
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.HalfTrigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.crosshair.Enabled', true);",
+    "Print Fire",
+    "Press"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.HalfTrigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.crosshair.Enabled', false);",
+    "Print Fire",
+    "Release"
+  );
+
+
+  -- Space cow
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.ButtomMiniJoystick.Up,
+    "openspace.printInfo('Up')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)",
+    "Cow Up"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.ButtomMiniJoystick.Right,
+    "openspace.printInfo('Right')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)",
+    "Cow Right"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.ButtomMiniJoystick.Down,
+    "openspace.printInfo('Down')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)",
+    "Cow Down"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.ButtomMiniJoystick.Left,
+    "openspace.printInfo('Left');" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)",
+    "Cow Left"
+  );
+
+
+  -- Wrench
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.LeftMiniJoystick.Up,
+    "openspace.printInfo('Up')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.0)",
+    "Cow Up"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.LeftMiniJoystick.Right,
+    "openspace.printInfo('Right')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.5)",
+    "Cow Right"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.LeftMiniJoystick.Down,
+    "openspace.printInfo('Down')" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, 1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.0)",
+    "Cow Down"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.LeftMiniJoystick.Left,
+    "openspace.printInfo('Left');" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.5)",
+    "Cow Left"
+  );
+
+
+  -- UFO
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.B,
+    "openspace.setPropertyValueSingle('ScreenSpace.ufo.CartesianPosition', {3.0, 0.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.ufo.CartesianPosition', {-3.0, 0.5, -2.000000}, 4.0)",
+    "Cow Left"
+  );
+
+
+  -- Sputnik
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Thruster.E,
+    "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {-3.0, -1.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {3.0, 1.0, -2.000000}, 6.0)",
+    "Cow Left"
+  );
 end)

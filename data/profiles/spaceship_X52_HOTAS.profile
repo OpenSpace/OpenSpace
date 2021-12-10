@@ -47,6 +47,7 @@
     "events/toggle_globe_trails",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "spaceship/spaceship",
     "util/joysticks/X52_HOTAS"
   ],
   "camera": {

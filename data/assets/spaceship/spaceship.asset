@@ -1,0 +1,103 @@
+local spaceCow = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "space-cow",
+  Enabled = true,
+  Name = "Space Cow",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { 3.0, 0.0, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/Daco_5571950.png",
+  Tag = { "installation_random" }
+}
+
+local wrench = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "wrench",
+  Enabled = true,
+  Name = "Wrench",
+  FaceCamera = false,
+  Scale = 0.05,
+  CartesianPosition = { 3.0, 0.0, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/wrench.png",
+  Tag = { "installation_random" }
+}
+
+local crosshair = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "crosshair",
+  Enabled = false,
+  Name = "Crosshair",
+  FaceCamera = false,
+  Scale = 0.1,
+  CartesianPosition = { 0.0, 0.0, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/crosshair.png",
+  Tag = { "installation_random" }
+}
+
+local shot = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "shot",
+  Enabled = true,
+  Name = "Shot",
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 0.0, -1.8, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/SpaceInvadersLaser-trans.png",
+  Tag = { "installation_random" }
+}
+
+local bomb = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "bomb",
+  Enabled = true,
+  Name = "Bomb",
+  FaceCamera = false,
+  Scale = 0.3,
+  CartesianPosition = { 0.0, -1.8, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/bomb.png",
+  Tag = { "installation_random" }
+}
+
+local ufo = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "ufo",
+  Enabled = true,
+  Name = "UFO",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { 3.0, 0.5, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/ufo.png",
+  Tag = { "installation_random" }
+}
+
+local sputnik = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "sputnik",
+  Enabled = true,
+  Name = "Sputnik",
+  FaceCamera = false,
+  Scale = 0.2,
+  CartesianPosition = { -3.0, -1.0, -2.0 },
+  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/sputnik.png",
+  Tag = { "installation_random" }
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(spaceCow)
+  openspace.addScreenSpaceRenderable(wrench)
+  openspace.addScreenSpaceRenderable(crosshair)
+  openspace.addScreenSpaceRenderable(shot)
+  openspace.addScreenSpaceRenderable(bomb)
+  openspace.addScreenSpaceRenderable(ufo)
+  openspace.addScreenSpaceRenderable(sputnik)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(spaceCow.Identifier)
+  openspace.removeScreenSpaceRenderable(wrench.Identifier)
+  openspace.removeScreenSpaceRenderable(crosshair.Identifier)
+  openspace.removeScreenSpaceRenderable(shot.Identifier)
+  openspace.removeScreenSpaceRenderable(bomb.Identifier)
+  openspace.removeScreenSpaceRenderable(ufo.Identifier)
+  openspace.removeScreenSpaceRenderable(sputnik.Identifier)
+end)
