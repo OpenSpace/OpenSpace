@@ -41,9 +41,10 @@ namespace {
     constexpr const char* AssetTableName = "_asset";
 
     enum class PathType {
-        RelativeToAsset,
-        RelativeToAssetRoot,
-        Absolute
+        RelativeToAsset, ///< Specified as a path relative to the requiring asset
+        RelativeToAssetRoot, ///< Specified as a path relative to the root folder
+        Absolute,  ///< Specified as an absolute path
+        Tokenized ///< Specified as a path that starts with a token 
     };
 
     PathType classifyPath(const std::string& path) {
@@ -58,6 +59,9 @@ namespace {
         }
         if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
             return PathType::Absolute;
+        }
+        if (FileSys.containsToken(path)) {
+            return PathType::Tokenized;
         }
         return PathType::RelativeToAssetRoot;
     }
@@ -759,6 +763,8 @@ std::filesystem::path AssetManager::generateAssetPath(
     else if (pathType == PathType::RelativeToAssetRoot) {
         prefix = _assetRootDirectory.string() + '/';
     }
+    // We treat the Absolute and the Tokenized paths the same here since they will
+    // behave the same when passed into the `absPath` function
 
     // Construct the full path including the .asset extension
     std::string fullAssetPath = prefix + assetPath;
