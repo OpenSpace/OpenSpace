@@ -58,7 +58,7 @@ public:
         /// The name of the asset
         std::string name;
         /// The version number of the asset. This is only a string representation and does
-        /// not have to follow SemVar (even though it is advised)
+        /// not have to follow SemVer (even though it is advised)
         std::string version;
         /// A user-facing description of the asset contents
         std::string description;
