@@ -60,10 +60,9 @@ asset.onInitialize(function()
   local name = "T.A320 Pilot";
 
   -- Deadzones
-  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], 0.15);
-  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], 0.15);
-  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], 0.15);
-  openspace.navigation.setAxisDeadZone(name, controller.Thrust[1], 0.15);
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], 0.1);
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], 0.1);
+  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], 0.1);
 
   -- Bind axis
   openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "Orbit X");
@@ -71,4 +70,87 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "GlobalRoll X", true);
 
   -- Bind buttons
+  -- Bomb
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.TriggerButton,
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.Scale', 0.3)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.CartesianPosition', {0.0, 1.5, -2.000000}, 2.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.bomb.Scale', 0.0, 1.25)",
+    "Bomb"
+  );
+
+  -- Small fire
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Trigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, -1.8, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.3)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, 1.8, -2.000000}, 1.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.0, 0.5)",
+    "Pew Pew"
+  );
+
+
+  -- Crosshair
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Trigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.crosshair.Enabled', true);",
+    "Crosshair on",
+    "Press"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Trigger,
+    "openspace.setPropertyValueSingle('ScreenSpace.crosshair.Enabled', false);",
+    "Crosshair off",
+    "Release"
+  );
+
+
+  -- Space cow
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.MiniJoystick.Up,
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)",
+    "Cow Up"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.MiniJoystick.Right,
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)",
+    "Cow Right"
+  );
+  -- Wrench
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.MiniJoystick.Down,
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, 1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.0)",
+    "Wrench Down"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.MiniJoystick.Left,
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.5)",
+    "Wrench Left"
+  );
+
+  -- UFO
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.RightButton,
+    "openspace.setPropertyValueSingle('ScreenSpace.ufo.CartesianPosition', {3.0, 0.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.ufo.CartesianPosition', {-3.0, 0.5, -2.000000}, 4.0)",
+    "UFO"
+  );
 end)

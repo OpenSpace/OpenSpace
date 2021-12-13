@@ -50,19 +50,23 @@ asset.onInitialize(function()
   local controller = TCAQEng1and2;
   local name = "TCA Q-Eng 1&2";
 
-  -- Deadzones
-  openspace.navigation.setAxisDeadZone(name, controller.Sticks[1], 0.15)
-  openspace.navigation.setAxisDeadZone(name, controller.Sticks[2], 0.15)
-
   -- Bind axis
   openspace.navigation.bindJoystickAxisProperty(
     name,
     controller.Sticks[1],
     "NavigationHandler.PathNavigator.SpeedScale",
-    0.1,
-    5,
+    0.4,
+    2.8,
     true
   ); -- Assume they are bound together
 
   -- Bind buttons
+  -- Sputnik
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.RightStickButton,
+    "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {-3.0, -1.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {3.0, 1.0, -2.000000}, 6.0)",
+    "Sputnik"
+  );
 end)

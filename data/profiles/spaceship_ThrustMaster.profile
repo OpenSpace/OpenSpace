@@ -48,6 +48,7 @@
     "events/toggle_globe_trails",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "spaceship/spaceship",
     "util/joysticks/TA320_Pilot",
     "util/joysticks/TCA_Q-Eng_1&2"
   ],
