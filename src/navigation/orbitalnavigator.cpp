@@ -1519,7 +1519,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(double minHeightAboveGround,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle)
 {
-    double nodeRadius = _anchorNode->interactionSphere();
+    double nodeRadius = _anchorNode->boundingSphere();
     double newOffset = _zoomOffsetFactor * nodeRadius;
     double oldOffset = _prevOffset;
     _prevOffset = newOffset;

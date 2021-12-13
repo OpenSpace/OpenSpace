@@ -165,7 +165,7 @@ private:
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
 
-    properties::FloatProperty _zoomOffsetFactor;
+    properties::DoubleProperty _zoomOffsetFactor;
     double _prevOffset = 0.0;
 
     properties::BoolProperty _useAdaptiveStereoscopicDepth;

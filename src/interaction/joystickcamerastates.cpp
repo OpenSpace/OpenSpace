@@ -165,7 +165,7 @@ void JoystickCameraStates::updateStateFromInput(
                     break;
                 case AxisType::Property:
                     std::string script = fmt::format("openspace.setPropertyValue('{}', {});",
-                        t.propertyUri, value);
+                        t.propertyUri, value, 0.5);
 
                     global::scriptEngine->queueScript(
                         script,
