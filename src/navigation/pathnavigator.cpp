@@ -267,7 +267,9 @@ void PathNavigator::updateCamera(double deltaTime) {
         removeRollRotation(newPose, deltaTime);
     }
 
-    applyLocalRotationFromInput(newPose, deltaTime);
+    if (_interaction.enabled) {
+        applyLocalRotationFromInput(newPose, deltaTime);
+    }
 
     camera()->setPositionVec3(newPose.position);
     camera()->setRotation(newPose.rotation);
@@ -528,7 +530,9 @@ void PathNavigator::applyLocalRotationFromInput(CameraPose& pose, double deltaTi
     const glm::dquat pitchDiffRotation = glm::angleAxis(pitch, cameraRight);
     const glm::dquat rollDiffRotation = glm::angleAxis(roll, cameraForward);
 
-    pose.rotation = pitchDiffRotation * yawDiffRotation * rollDiffRotation * pose.rotation;
+    pose.rotation = glm::normalize(
+        pitchDiffRotation * yawDiffRotation * rollDiffRotation * pose.rotation
+    );
 
     // Reset velocities after every frame
     _interaction.mouseStates.resetVelocities();
