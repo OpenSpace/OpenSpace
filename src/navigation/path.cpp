@@ -156,7 +156,7 @@ std::string Path::currentAnchor() const {
 }
 
 bool Path::hasReachedEnd() const {
-    return (_traveledDistance / pathLength()) >= 1.0;
+    return remainingDistance() < 100; // Allow a 100 meter difference
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
