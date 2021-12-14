@@ -108,6 +108,7 @@ namespace openspace {
             skybrowser::ScreenSpaceZ };
 
         _cartesianPosition.setValue(startPos);
+
     }
 
     ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
@@ -258,6 +259,12 @@ namespace openspace {
         _scale = std::max(heightRatio, smallestHeightRatio);
     }
 
+    void ScreenSpaceSkyTarget::setFovFromScale()
+    {
+        glm::dvec2 fovs = skybrowser::fovWindow();
+        _verticalFov = _scale * fovs.y;
+    }
+
     bool ScreenSpaceSkyTarget::isLocked() const {
         return _isLocked;
     }
@@ -357,5 +364,9 @@ namespace openspace {
         _enabled.onChange([this]() {
             _browser->setEnabled(_enabled);
         });
+        _scale.onChange([&]() {
+            setFovFromScale();
+            _browser->setVerticalFov(_verticalFov);
+            });
     }
 }

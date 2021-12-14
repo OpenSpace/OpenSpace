@@ -36,6 +36,7 @@ namespace openspace {
 
         // Setters
         void setScaleFromVfov(float verticalFov);
+        void setFovFromScale();
         void setDimensions(glm::vec2 dimensions);
         void setColor(glm::ivec3 color);
         void setOpacity(float opacity);
