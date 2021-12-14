@@ -65,6 +65,14 @@ Waypoint::Waypoint(const NavigationState& ns) {
     _pose = ns.cameraPose();
 }
 
+void Waypoint::setPosition(glm::dvec3 position) {
+    _pose.position = std::move(position);
+}
+
+void Waypoint::setRotation(glm::dquat position) {
+    _pose.rotation = std::move(position);
+}
+
 CameraPose Waypoint::pose() const {
     return _pose;
 }

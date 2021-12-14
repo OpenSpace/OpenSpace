@@ -135,7 +135,9 @@ CameraPose NavigationState::cameraPose() const {
     glm::dquat pitchRotation = glm::angleAxis(pitch, glm::dvec3(1.0, 0.0, 0.0));
     glm::dquat yawRotation = glm::angleAxis(yaw, glm::dvec3(0.0, -1.0, 0.0));
 
-    resultingPose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
+    resultingPose.rotation = glm::normalize(
+        neutralCameraRotation * yawRotation * pitchRotation
+    );
 
     return resultingPose;
 }

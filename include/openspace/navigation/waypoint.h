@@ -43,6 +43,9 @@ public:
 
     static double findValidBoundingSphere(const SceneGraphNode* node);
 
+    void setPosition(glm::dvec3 position);
+    void setRotation(glm::dquat rotation);
+
     CameraPose pose() const;
     glm::dvec3 position() const;
     glm::dquat rotation() const;
