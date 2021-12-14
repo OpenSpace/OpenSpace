@@ -34,6 +34,8 @@
     "openspace.time.setPause(true);",
     "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled\", false);",
     "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled\", true);",
+    "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled\", false);",
+    "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.HeightLayers.Mola_Europe.Enabled\", true);",
     "openspace.setPropertyValueSingle(\"Scene.MarsAtmosphere.Renderable.SunFollowingCamera\", true);",
     "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.SunFollowingCamera\", true);",
     "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.ColorLayers.WAC_Utah.Enabled\", false);",

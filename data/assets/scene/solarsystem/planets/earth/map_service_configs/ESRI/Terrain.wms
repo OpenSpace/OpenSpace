@@ -14,4 +14,9 @@
   <DataValues NoData="0" Min="-11000" Max="8500"/>
   <MaxConnections>5</MaxConnections>
   <ZeroBlockHttpCodes>404,400</ZeroBlockHttpCodes>
+  <Cache>
+    <Path>C:/Development/OpenSpace/cache_gdal</Path>
+    <Depth>4</Depth>
+    <MaxSize>4294967296</MaxSize>
+  </Cache>
 </GDAL_WMS>

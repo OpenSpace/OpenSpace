@@ -17,4 +17,9 @@
   <BlockSizeY>256</BlockSizeY>
   <BandsCount>1</BandsCount>
   <MaxConnections>10</MaxConnections>
+  <Cache>
+    <Path>C:/Development/OpenSpace/cache_gdal</Path>
+    <Depth>4</Depth>
+    <MaxSize>4294967296</MaxSize>
+  </Cache>
 </GDAL_WMS>
