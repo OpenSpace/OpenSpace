@@ -337,8 +337,9 @@ int getTargetData(lua_State* L) {
                 selectedImagesVector.push_back(i);
                 });
                 
-            glm::dvec3 cartesian = pair->targetDirectionEquatorial();
-            glm::dvec2 spherical = skybrowser::cartesianToSpherical(cartesian);
+            glm::dvec2 spherical = pair->targetDirectionEquatorial();
+            glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+            
                    
             std::vector<double> cartesianVec = { 
                 cartesian.x, 

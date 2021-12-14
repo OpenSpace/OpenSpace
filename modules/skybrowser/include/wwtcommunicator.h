@@ -60,13 +60,13 @@ public:
     float verticalFov() const;
     glm::dvec2 fieldsOfView();
     bool hasLoadedImages() const;
-    glm::dvec3 equatorialAim() const;
+    glm::dvec2 equatorialAim() const;
 
     // Setters
     void setHasLoadedImages(bool isLoaded);
     void setVerticalFov(float vfov);
     void setIsSyncedWithWwt(bool isSynced);
-    void setEquatorialAim(glm::dvec3 cartesian);
+    void setEquatorialAim(const glm::dvec2& equatorial);
 
     // Display
     void highlight(glm::ivec3 addition);

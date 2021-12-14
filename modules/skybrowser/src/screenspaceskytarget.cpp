@@ -270,7 +270,9 @@ namespace openspace {
     void ScreenSpaceSkyTarget::startAnimation(glm::dvec3 equatorialCoordsEnd, 
                                               bool shouldLockAfter)
     {
-        _animationStart = glm::normalize(equatorialAim());
+        _animationStart = glm::normalize(
+            skybrowser::sphericalToCartesian(equatorialAim())
+        );
         _animationEnd = glm::normalize(equatorialCoordsEnd);
         _shouldLockAfterAnimation = shouldLockAfter;
         _isAnimated = true;
@@ -302,7 +304,8 @@ namespace openspace {
             _cartesianPosition = skybrowser::equatorialToScreenSpace3d(newDir);
             
             // Update position
-            _animationStart = glm::normalize(equatorialAim());
+            glm::dvec3 cartesian = skybrowser::sphericalToCartesian(equatorialAim());
+            _animationStart = glm::normalize(cartesian);
         }
         else {
             glm::dvec3 screenSpace = skybrowser::equatorialToScreenSpace3d(_animationEnd);
@@ -314,10 +317,13 @@ namespace openspace {
         }      
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::equatorialAim() const {
+    glm::dvec2 ScreenSpaceSkyTarget::equatorialAim() const {
         // Calculate the galactic coordinate of the target direction 
         // projected onto the celestial sphere
-        return skybrowser::localCameraToEquatorial(_cartesianPosition.value());
+        glm::dvec3 cartesian = skybrowser::localCameraToEquatorial(
+            _cartesianPosition.value()
+        );
+        return skybrowser::cartesianToSpherical(cartesian);
     }
 
 
@@ -342,21 +348,8 @@ namespace openspace {
     {
         _isLocked = isLocked;
         if (_isLocked) {
-            _lockedCoordinates = equatorialAim();
+            _lockedCoordinates = skybrowser::sphericalToCartesian(equatorialAim());
         }
-    }
-    void ScreenSpaceSkyTarget::setCallbackEnabled(std::function<void(bool)> function)
-    {
-        _enabled.onChange([this, f = std::move(function)]() {
-            f(_enabled);
-        });
-    }
-    void ScreenSpaceSkyTarget::setCallbackPosition(
-        std::function<void(const glm::vec3&)> function)
-    {
-        _cartesianPosition.onChange([this, f = std::move(function)]() {
-            f(_cartesianPosition);
-        });
     }
     void ScreenSpaceSkyTarget::setSkyBrowser(ScreenSpaceSkyBrowser* browser)
     {

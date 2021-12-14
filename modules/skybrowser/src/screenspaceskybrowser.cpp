@@ -40,6 +40,16 @@ namespace {
         "slower framerate. Lower value means lower resolution of texture and faster "
         "frame rate."
     };
+    constexpr const openspace::properties::Property::PropertyInfo SizeInfo =
+    {
+        "Size",
+        "Screen space size of the sky browser",
+        "The size of the sky browser determines how large is on screen. The y parameter "
+        "determines the percentage of the screen the browser will cover in the "
+        "y-direction. The x parameter determines how large the sky browser will be in "
+        "the x direction."
+    };
+
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
@@ -66,6 +76,7 @@ namespace openspace {
         , WwtCommunicator(dictionary)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
         , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
+        , _size(SizeInfo, glm::vec2(0.5f), glm::vec2(0.f), glm::vec2(2.f))
     {
         // Set a unique identifier
         std::string identifier;
@@ -88,20 +99,25 @@ namespace openspace {
         _textureQuality = p.textureQuality.value_or(_textureQuality);
 
         addProperty(_url);
-        addProperty(_dimensions);
+        addProperty(_browserPixeldimensions);
         addProperty(_reload);
         addProperty(_verticalFov);
         addProperty(_borderColor);
         addProperty(_equatorialAim);
         addProperty(_textureQuality);
+        addProperty(_size);
 
         _textureQuality.onChange([this]() {
-            updateTextureResolution();
+            _textureDimensionsIsDirty = true;
+            });        
+        _size.onChange([this]() {
+            setScreenSpaceSize(_size);
             });
 
         // Ensure that the browser is placed at the z-coordinate of the screen space plane
         glm::vec2 screenPosition = _cartesianPosition.value();
-        _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));    
+        _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));
+        
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
@@ -137,16 +153,16 @@ namespace openspace {
 
     void ScreenSpaceSkyBrowser::updateTextureResolution()
     {
-        
         // Scale texture depending on the height of the window
         // Set texture size to the actual pixel size it covers
         glm::vec2 pixels = glm::vec2(global::windowDelegate->currentSubwindowSize());
-        glm::vec2 browserDim = screenSpaceDimensions();
-        float newResY = pixels.y * browserDim.y;
-        float newResX = newResY * (_dimensions.value().x / _dimensions.value().y);
+           
+        // If the scale is 1, it covers half the window. Hence multiplication with 2
+        float newResY = pixels.y * 2.f * _scale; 
+        float newResX = newResY * (_browserPixeldimensions.value().x / _browserPixeldimensions.value().y);
         glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
-        _dimensions = glm::ivec2(newSize);
+        _browserPixeldimensions = glm::ivec2(newSize);
         _texture->setDimensions(glm::ivec3(newSize, 1));
     }
 
@@ -194,14 +210,16 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::update() {
-        
-        if (global::windowDelegate->windowHasResized()) {
-            // Change the resolution of the texture
+        // Texture of window is 1x1 when minimized
+        bool isWindow = global::windowDelegate->currentSubwindowSize() != glm::ivec2(1);
+        bool isWindowResized = global::windowDelegate->windowHasResized();
+        if ((isWindowResized && isWindow) || _textureDimensionsIsDirty) {
             updateTextureResolution();
+            _textureDimensionsIsDirty = false;
         }
-
-        _objectSize = _texture->dimensions();
         
+        _objectSize = _texture->dimensions();
+
         WwtCommunicator::update();
         ScreenSpaceRenderable::update();
     }
@@ -258,8 +276,15 @@ namespace openspace {
         glm::vec2 scaling = mouseDrag * glm::vec2(_resizeDirection);
         glm::vec2 newSizeRelToOld = (_originalScreenSpaceSize + (scaling)) /
             _originalScreenSpaceSize;
+        
+        _scale = _originalScale * abs(newSizeRelToOld.y);
+        // Resize the dimensions of the texture on the x axis
+        glm::vec2 newDimensions = abs(newSizeRelToOld) * _originalDimensions;
         // Scale the browser
-        setScale(newSizeRelToOld);
+        // Scale on the y axis, this is to ensure that _scale = 1 is
+        // equal to the height of the window
+        _texture->setDimensions(glm::ivec3(newDimensions, 1));
+        _objectSize = _texture->dimensions();
 
         // For dragging functionality, translate so it looks like the 
         // browser isn't moving. Make sure the browser doesn't move in 
@@ -268,22 +293,6 @@ namespace openspace {
             glm::vec2(_resizeDirection)
         );
         translate(translation, start);
-    }
-
-    void ScreenSpaceSkyBrowser::setScale(float scalingFactor) {
-        _scale = _originalScale * scalingFactor;
-    }
-
-    // Scales the ScreenSpaceBrowser to a new ratio
-    void ScreenSpaceSkyBrowser::setScale(glm::vec2 scalingFactor) {
-
-        // Scale on the y axis, this is to ensure that _scale = 1 is
-        // equal to the height of the window
-        setScale(abs(scalingFactor.y));
-        // Resize the dimensions of the texture on the x axis
-        glm::vec2 newSize = abs(scalingFactor) * _originalDimensions;
-        _texture->setDimensions(glm::ivec3(newSize, 1));
-        _objectSize = _texture->dimensions();
     }
 
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
@@ -301,15 +310,15 @@ namespace openspace {
 
     void ScreenSpaceSkyBrowser::saveResizeStartSize() {
         _originalScreenSpaceSize = screenSpaceDimensions();
-        _originalDimensions = _dimensions;
+        _originalDimensions = _browserPixeldimensions;
         _originalScale = _scale;
     }
 
     void ScreenSpaceSkyBrowser::setCallbackEquatorialAim(
-        std::function<void(glm::dvec3, bool)> function)
+        std::function<void(const glm::dvec2&)> function)
     {
         _equatorialAim.onChange([this, f = std::move(function)]() {
-            f(skybrowser::sphericalToCartesian(_equatorialAim), false);
+            f(_equatorialAim);
         });
 
     }
@@ -324,8 +333,8 @@ namespace openspace {
     void ScreenSpaceSkyBrowser::setCallbackDimensions(
         std::function<void(const glm::vec2&)> function)
     {
-        _dimensions.onChange([this, f = std::move(function)]() {
-            f(_dimensions);
+        _browserPixeldimensions.onChange([this, f = std::move(function)]() {
+            f(_browserPixeldimensions);
         });
 
     }
@@ -342,10 +351,25 @@ namespace openspace {
         });
     }
 
-
     void ScreenSpaceSkyBrowser::setOpacity(float opacity)
     {
         _opacity = opacity;
+    }
+
+    void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize)
+    {
+        _scale = abs(newSize.y) * 0.5f;
+        glm::vec2 newSizeRelToOld = abs((screenSpaceDimensions() + newSize) /
+            screenSpaceDimensions());
+        glm::vec2 newDimensions = newSizeRelToOld * glm::vec2(_texture->dimensions());
+        // Scale the browser
+        // Scale on the y axis, this is to ensure that _scale = 1 is
+        // equal to the height of the window
+        _browserPixeldimensions = glm::ivec2(newDimensions);
+        _texture->setDimensions(glm::ivec3(newDimensions, 1));
+        _objectSize = _texture->dimensions();
+
+        updateTextureResolution();
     }
 
     float ScreenSpaceSkyBrowser::opacity() const {

@@ -87,7 +87,7 @@ public:
     // Getters by value 
     float verticalFov() const;
     glm::ivec3 borderColor() const;
-    glm::dvec3 targetDirectionEquatorial() const;
+    glm::dvec2 targetDirectionEquatorial() const;
     glm::dvec3 targetDirectionGalactic() const;
     std::string browserGuiName() const;
     std::string browserId() const;

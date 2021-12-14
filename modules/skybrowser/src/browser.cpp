@@ -69,7 +69,7 @@ namespace openspace {
 
     Browser::Browser(const ghoul::Dictionary& dictionary)
         : _url(UrlInfo)
-        , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+        , _browserPixeldimensions(DimensionsInfo, glm::vec2(500.f), glm::vec2(10.f), glm::vec2(3000.f))
         , _reload(ReloadInfo)
     { 
         if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
@@ -77,10 +77,10 @@ namespace openspace {
         }
 
         glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-        _dimensions = windowDimensions;
+        _browserPixeldimensions = windowDimensions;
 
         _url.onChange([this]() { _isUrlDirty = true; });
-        _dimensions.onChange([this]() { _isDimensionsDirty = true; });
+        _browserPixeldimensions.onChange([this]() { _isDimensionsDirty = true; });
         _reload.onChange([this]() { _shouldReload = true; });
 
         // Create browser and render handler
@@ -103,7 +103,7 @@ namespace openspace {
 
     bool Browser::initializeGL() {
         _texture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(_dimensions.value(), 1.0f)
+            glm::uvec3(_browserPixeldimensions.value(), 1.0f)
             );
 
         _renderHandler->setTexture(*_texture);
@@ -153,7 +153,10 @@ namespace openspace {
         }
 
         if (_isDimensionsDirty) {
-            _browserInstance->reshape(_dimensions.value());
+            ghoul_assert(_browserPixeldimensions.value().x > 0 &&
+                _browserPixeldimensions.value().y > 0);
+
+            _browserInstance->reshape(_browserPixeldimensions.value());
             _isDimensionsDirty = false;
         }
 
@@ -168,12 +171,12 @@ namespace openspace {
     }
 
     glm::vec2 Browser::browserPixelDimensions() const {
-        return _dimensions.value();
+        return _browserPixeldimensions.value();
     }
 
     // Updates the browser size to match the size of the texture
     void Browser::updateBrowserSize() {
-        _dimensions = _texture->dimensions();
+        _browserPixeldimensions = _texture->dimensions();
     }
 
     float Browser::browserRatio() const
@@ -185,8 +188,8 @@ namespace openspace {
     void Browser::setCallbackDimensions(
         const std::function<void(const glm::dvec2&)>& function)
     {
-        _dimensions.onChange([&]() {
-            function(_dimensions.value());
+        _browserPixeldimensions.onChange([&]() {
+            function(_browserPixeldimensions.value());
             });
     }
 

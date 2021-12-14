@@ -69,10 +69,10 @@ namespace openspace {
         // Maybe change later
         glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
         float maxDimension = std::max(windowDimensions.x, windowDimensions.y);
-        _dimensions = { maxDimension, maxDimension };
+        _browserPixeldimensions = { maxDimension, maxDimension };
 
         addProperty(_url);
-        addProperty(_dimensions);
+        addProperty(_browserPixeldimensions);
         addProperty(_reload);
         addProperty(_verticalFov);
         addProperty(_borderColor);

@@ -46,13 +46,14 @@ namespace openspace {
         // Set browser callback functions
         // Set callback functions so that the target and the browser update each other
         _browser->setCallbackEquatorialAim(
-            [&](const glm::dvec3& equatorialAim, bool) {
-                double diff = glm::length(equatorialAim - _target->equatorialAim());
-                if ( diff > AnimationThreshold) {
-                    _target->setCartesianPosition(
-                        skybrowser::equatorialToScreenSpace3d(equatorialAim)
-                    );
-                }
+            [&](const glm::dvec2& equatorialAim) {
+                glm::dvec3 cartesian = skybrowser::sphericalToCartesian(
+                    equatorialAim
+                );
+                _target->setCartesianPosition(
+                    skybrowser::equatorialToScreenSpace3d(cartesian)
+                );
+                
             }
         );
         _browser->setCallbackBorderColor(
@@ -75,10 +76,9 @@ namespace openspace {
             [&](bool enabled) {
                 _target->setEnabled(enabled);
             }
-        ); 
+        );  
 
         _target->setSkyBrowser(_browser);
-        
     }
 
     Pair& Pair::operator=(Pair other)
@@ -206,7 +206,7 @@ namespace openspace {
         return _browser->borderColor();
     }
 
-    glm::dvec3 Pair::targetDirectionEquatorial() const
+    glm::dvec2 Pair::targetDirectionEquatorial() const
     {
         return _target->equatorialAim();
     }

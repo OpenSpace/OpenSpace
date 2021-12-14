@@ -127,9 +127,9 @@ namespace openspace {
         _isSyncedWithWwt = isSynced;
     }
 
-    void WwtCommunicator::setEquatorialAim(glm::dvec3 cartesian)
+    void WwtCommunicator::setEquatorialAim(const glm::dvec2& equatorial)
     {
-        _equatorialAim = skybrowser::cartesianToSpherical(cartesian);
+        _equatorialAim = equatorial;
         updateAim();
     }
 
@@ -170,9 +170,9 @@ namespace openspace {
         return _hasLoadedImages;
     }
 
-    glm::dvec3 WwtCommunicator::equatorialAim() const
+    glm::dvec2 WwtCommunicator::equatorialAim() const
     {
-        return skybrowser::sphericalToCartesian(_equatorialAim);
+        return _equatorialAim;
     }
 
     void WwtCommunicator::setImageOrder(int i, int order) {

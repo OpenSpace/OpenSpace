@@ -42,13 +42,11 @@ namespace openspace {
         void setLock(bool isLocked);
 
         // Set callbacks
-        void setCallbackEnabled(std::function<void(bool)> function);
-        void setCallbackPosition(std::function<void(const glm::vec3&)> function);
         void setSkyBrowser(ScreenSpaceSkyBrowser* browser);
 
         // Target directions
         glm::dvec3 directionGalactic() const;
-        glm::dvec3 equatorialAim() const;
+        glm::dvec2 equatorialAim() const;
 
         // Locking functionality
         bool isLocked() const;

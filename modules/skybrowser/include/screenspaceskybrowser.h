@@ -6,6 +6,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {
 
@@ -35,11 +36,11 @@ namespace openspace {
 
         // Setters
         void setVerticalFovWithScroll(float scroll);
-        void setScale(glm::vec2 scalingFactor);
-        void setScale(float scalingFactor);
         void setOpacity(float opacity);
+        void setScreenSpaceSize(const glm::vec2& newSize);
+
         // Set callback functions
-        void setCallbackEquatorialAim(std::function<void(glm::dvec3, bool)> function);
+        void setCallbackEquatorialAim(std::function<void(const glm::dvec2&)> function);
         void setCallbackVerticalFov(std::function<void(float)> function);
         void setCallbackDimensions(std::function<void(const glm::vec2&)> function);
         void setCallbackBorderColor(std::function<void(const glm::ivec3&)> function);
@@ -58,12 +59,14 @@ namespace openspace {
     private:
         properties::DoubleProperty _animationSpeed;
         properties::FloatProperty _textureQuality;
+        properties::Vec2Property _size;
 
         void bindTexture() override;
 
         // Flags
         bool _isSyncedWithWwt{ false };
         bool _isFovAnimated{ false };
+        bool _textureDimensionsIsDirty{ false };
 
         // Animation of fieldOfView
         float _endVfov{ 0.f };
