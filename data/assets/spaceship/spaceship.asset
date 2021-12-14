@@ -6,7 +6,7 @@ local spaceCow = {
   FaceCamera = false,
   Scale = 0.2,
   CartesianPosition = { 3.0, 0.0, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/Daco_5571950.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/cow.png"),
   Tag = { "installation_random" }
 }
 
@@ -18,7 +18,7 @@ local wrench = {
   FaceCamera = false,
   Scale = 0.05,
   CartesianPosition = { 3.0, 0.0, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/wrench.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/wrench.png"),
   Tag = { "installation_random" }
 }
 
@@ -30,7 +30,7 @@ local crosshair = {
   FaceCamera = false,
   Scale = 0.1,
   CartesianPosition = { 0.0, 0.0, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/crosshair.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/crosshair.png"),
   Tag = { "installation_random" }
 }
 
@@ -42,7 +42,7 @@ local shot = {
   FaceCamera = false,
   Scale = 0.3,
   CartesianPosition = { 0.0, -1.8, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/SpaceInvadersLaser-trans.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/laser.png"),
   Tag = { "installation_random" }
 }
 
@@ -54,7 +54,7 @@ local bomb = {
   FaceCamera = false,
   Scale = 0.3,
   CartesianPosition = { 0.0, -1.8, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/bomb.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/bomb.png"),
   Tag = { "installation_random" }
 }
 
@@ -66,7 +66,7 @@ local ufo = {
   FaceCamera = false,
   Scale = 0.2,
   CartesianPosition = { 3.0, 0.5, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/ufo.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/ufo.png"),
   Tag = { "installation_random" }
 }
 
@@ -78,7 +78,7 @@ local sputnik = {
   FaceCamera = false,
   Scale = 0.2,
   CartesianPosition = { -3.0, -1.0, -2.0 },
-  TexturePath = "C:/Users/malej60/Pictures/Spaceship.2021/random/sputnik.png",
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/sputnik.png"),
   Tag = { "installation_random" }
 }
 
