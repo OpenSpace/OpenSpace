@@ -499,10 +499,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
     // Ugly hack to make sure we don't use the exact same position: (just for spaceship installation!)
     // @TODO (emmbr) actually handle this case nicely
     constexpr const double diff = 10.0; // meters
-    LINFO(fmt::format("Distance: {}", glm::distance(waypointToAdd.position(), startPoint.position())));
     if (glm::distance(waypointToAdd.position(), startPoint.position()) < diff) {
-        LINFO("Adapting for same position");
-
         glm::dvec3 forward = ghoul::viewDirection(waypointToAdd.rotation());
         waypointToAdd.setPosition(waypointToAdd.position() + 1.1 * diff * forward);
     }
