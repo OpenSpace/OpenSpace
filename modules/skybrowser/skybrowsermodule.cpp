@@ -285,11 +285,7 @@ SkyBrowserModule::SkyBrowserModule()
             }
             else if (_interactionMode != MouseInteraction::Hover && 
                      action == MouseAction::Release) {
-                // Update browser size if it has been resized
-                if (_interactionMode == MouseInteraction::Resize) {
-                    _mouseOnPair->updateBrowserSize();
-                }
-
+             
                 _interactionMode = MouseInteraction::Hover;
                 return true;
             }
@@ -313,10 +309,6 @@ SkyBrowserModule::SkyBrowserModule()
             switch (_interactionMode) {
             case MouseInteraction::Hover:
                 setSelectedObject();
-                break;
-
-            case MouseInteraction::Resize:
-                _mouseOnPair->resizeBrowser(_startDragPosition, translation);
                 break;
 
             case MouseInteraction::Drag:
@@ -625,19 +617,8 @@ void SkyBrowserModule::handleMouseClick(const MouseButton& button)
         _startMousePosition = _mousePosition;
         _startDragPosition = _mouseOnPair->selectedScreenSpacePosition();
 
-        // If current object is browser, check for resizing
-        bool shouldResize = _mouseOnPair->isBrowserSelected() &&
-                            _mouseOnPair->isOnResizeArea(_mousePosition);
-        
-        if (shouldResize) {
-            _mouseOnPair->getBrowser()->saveResizeStartSize();
-            _interactionMode = MouseInteraction::Resize;
-            return;
-        }
-        else {
-            // If it's not resize mode, it's drag mode
-            _interactionMode = MouseInteraction::Drag;
-        }
+        // If it's not resize mode, it's drag mode
+        _interactionMode = MouseInteraction::Drag;
         
         // If target is clicked, it should unlock
         if (_mouseOnPair->isTargetSelected()) {

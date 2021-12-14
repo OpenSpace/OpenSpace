@@ -46,11 +46,6 @@ namespace openspace {
         void setCallbackBorderColor(std::function<void(const glm::ivec3&)> function);
         void setCallbackEnabled(std::function<void(bool)> function);
 
-        // Interaction. Resize
-        void saveResizeStartSize();       
-        bool isOnResizeArea(glm::vec2 screenSpaceCoord);
-        void resize(const glm::vec2& start, const glm::vec2& mouseDrag);
-
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         void setIdInBrowser();
 
@@ -70,13 +65,6 @@ namespace openspace {
 
         // Animation of fieldOfView
         float _endVfov{ 0.f };
-
-        // Resizing
-        float _originalScale;
-        float _resizeAreaPercentage{ 0.1f };
-        glm::vec2 _originalDimensions;
-        glm::vec2 _originalScreenSpaceSize;
-        glm::ivec2 _resizeDirection;
 
         // Time variables
         // For capping the calls onchange properties from scrolling

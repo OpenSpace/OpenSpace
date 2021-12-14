@@ -172,11 +172,6 @@ namespace openspace {
         _selected->translate(translation, start);
     }
 
-    void Pair::resizeBrowser(const glm::vec2& start, const glm::vec2& translation)
-    {
-        _browser->resize(start, translation);
-    }
-
     void Pair::setEnabled(bool enable)
     {
         _browser->setEnabled(enable);
@@ -321,11 +316,6 @@ namespace openspace {
     bool Pair::hasFinishedFading(float goalState) const
     {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
-    }
-
-    bool Pair::isOnResizeArea(glm::vec2 mouseScreenSpaceCoords)
-    {
-        return _browser->isOnResizeArea(mouseScreenSpaceCoords);
     }
 
     ScreenSpaceSkyTarget* Pair::getTarget() {

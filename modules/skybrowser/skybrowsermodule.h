@@ -48,7 +48,6 @@ enum class Transparency {
 
 enum class MouseInteraction {
     Hover,
-    Resize,
     Drag,
     FineTune,
 };

@@ -244,57 +244,6 @@ namespace openspace {
         _texture->bind();
     }
 
-    // Mouse interaction with the browser. Returns 1 or -1 at the coordinate in
-       // image if the mouse is on a side of the browser
-       //            __1__
-       //   y|   -1 |_____|1
-       //    |__x     -1
-    bool ScreenSpaceSkyBrowser::isOnResizeArea(glm::vec2 coord) {
-        glm::ivec2 resizePosition = glm::ivec2{ 0 };
-        // Make sure coordinate is on browser
-        if (!intersection(coord)) return false;
-
-        // TO DO: turn this into a vector and use prettier vector arithmetic
-        float resizeAreaY = screenSpaceDimensions().y * _resizeAreaPercentage;
-        float resizeAreaX = screenSpaceDimensions().x * _resizeAreaPercentage;
-
-        const bool isOnTop = coord.y > upperRightCornerScreenSpace().y - resizeAreaY;
-        const bool isOnBottom = coord.y < lowerLeftCornerScreenSpace().y + resizeAreaY;
-        const bool isOnRight = coord.x > upperRightCornerScreenSpace().x - resizeAreaX;
-        const bool isOnLeft = coord.x < lowerLeftCornerScreenSpace().x + resizeAreaX;
-
-        resizePosition.x = isOnRight ? 1 : isOnLeft ? -1 : 0;
-        resizePosition.y = isOnTop ? 1 : isOnBottom ? -1 : 0;
-
-        _resizeDirection = resizePosition;
-
-        return  isOnRight || isOnLeft || isOnTop || isOnBottom;
-    }
-
-    void ScreenSpaceSkyBrowser::resize(const glm::vec2& start, const glm::vec2& mouseDrag)
-    {
-        glm::vec2 scaling = mouseDrag * glm::vec2(_resizeDirection);
-        glm::vec2 newSizeRelToOld = (_originalScreenSpaceSize + (scaling)) /
-            _originalScreenSpaceSize;
-        
-        _scale = _originalScale * abs(newSizeRelToOld.y);
-        // Resize the dimensions of the texture on the x axis
-        glm::vec2 newDimensions = abs(newSizeRelToOld) * _originalDimensions;
-        // Scale the browser
-        // Scale on the y axis, this is to ensure that _scale = 1 is
-        // equal to the height of the window
-        _texture->setDimensions(glm::ivec3(newDimensions, 1));
-        _objectSize = _texture->dimensions();
-
-        // For dragging functionality, translate so it looks like the 
-        // browser isn't moving. Make sure the browser doesn't move in 
-        // directions it's not supposed to 
-        glm::vec2 translation = 0.5f * mouseDrag * abs(
-            glm::vec2(_resizeDirection)
-        );
-        translate(translation, start);
-    }
-
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
         // To ensure the plane has the right ratio
         // The _scale tells us how much of the windows height the
@@ -306,12 +255,6 @@ namespace openspace {
             glm::vec3(browserRatio() * _scale, _scale, 1.f)
         );
         return scale;
-    }
-
-    void ScreenSpaceSkyBrowser::saveResizeStartSize() {
-        _originalScreenSpaceSize = screenSpaceDimensions();
-        _originalDimensions = _browserPixeldimensions;
-        _originalScale = _scale;
     }
 
     void ScreenSpaceSkyBrowser::setCallbackEquatorialAim(
