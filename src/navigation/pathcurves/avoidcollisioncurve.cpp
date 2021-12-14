@@ -80,8 +80,11 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     const glm::dvec3 startToEnd = end.position() - start.position();
 
-    if (glm::length(startToEnd) > 0.0) {
-        // Add point for moving out if the end state is in opposite direction
+    // Add point for moving out if the end state is far away and in opposite direction.
+    // This helps with avoiding fast rotation in the center of the path
+    const double maxRadius = std::max(startNodeRadius, endNodeRadius);
+    bool nodesAreDifferent = start.nodeIdentifier() != end.nodeIdentifier();
+    if (glm::length(startToEnd) >  0.5 * maxRadius && nodesAreDifferent) {
         double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
         bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
