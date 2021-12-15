@@ -82,6 +82,18 @@ local sputnik = {
   Tag = { "installation_random" }
 }
 
+local tardis = {
+  Type = "ScreenSpaceImageLocal",
+  Identifier = "tardis",
+  Enabled = true,
+  Name = "Tardis",
+  FaceCamera = false,
+  Scale = 0.1,
+  CartesianPosition = { 3.0, 0.0, -2.0 },
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/tardis.png"),
+  Tag = { "installation_random" }
+}
+
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(spaceCow)
   openspace.addScreenSpaceRenderable(wrench)
@@ -90,6 +102,7 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(bomb)
   openspace.addScreenSpaceRenderable(ufo)
   openspace.addScreenSpaceRenderable(sputnik)
+  openspace.addScreenSpaceRenderable(tardis)
 end)
 
 asset.onDeinitialize(function()
@@ -100,4 +113,5 @@ asset.onDeinitialize(function()
   openspace.removeScreenSpaceRenderable(bomb.Identifier)
   openspace.removeScreenSpaceRenderable(ufo.Identifier)
   openspace.removeScreenSpaceRenderable(sputnik.Identifier)
+  openspace.removeScreenSpaceRenderable(tardis.Identifier)
 end)

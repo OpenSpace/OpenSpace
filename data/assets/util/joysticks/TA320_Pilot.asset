@@ -139,14 +139,13 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.0)",
     "Wrench Down"
   );
+  -- Tardis
   openspace.navigation.bindJoystickButton(
     name,
     controller.MiniJoystick.Left,
-    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {3.0, 0.0, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {-3.000000, 0.000000, 0.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.wrench.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.wrench.Rotation', {3.000000, 0.000000, 0.000000}, 5.5)",
-    "Wrench Left"
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)",
+    "Tardis Left"
   );
 
   -- UFO

@@ -219,6 +219,37 @@ asset.onInitialize(function()
   );
 
 
+  -- Tardis
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Thruster.BackMiniJoystick.Up,
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {0.0, -1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)",
+    "Tardis Up"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Thruster.BackMiniJoystick.Right,
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)",
+    "Tardis Right"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Thruster.BackMiniJoystick.Down,
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {0.0, 1.5, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)",
+    "Tardis Down"
+  );
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Thruster.BackMiniJoystick.Left,
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {3.0, 0.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.tardis.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)",
+    "Tardis Left"
+  );
+
+
   -- UFO
   openspace.navigation.bindJoystickButton(
     name,
