@@ -113,8 +113,7 @@ bool convertCdfToMovingFieldlinesState(FieldlinesState& state, const std::string
     state.setModel(fls::stringToModel(kameleon->getModelName()));
 
     // get time as string.
-    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
-    state.setTriggerTime(cdfDoubleTime);
+    state.setTriggerTime(kameleonHelper::getTime(kameleon.get(), manualTimeOffset));
     //std::string cdfStringTime = 
     //    SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime, "YYYYMMDDHRMNSC::RND");
 
@@ -139,7 +138,7 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
     float innerBoundaryLimit;
     switch (state.model()) {
     case fls::Model::Batsrus:
-        innerBoundaryLimit = 2.5f;// TODO specify in Lua?
+        innerBoundaryLimit = 0.5f;// TODO specify in Lua?
         break;
     default:
         LERROR(
@@ -149,6 +148,11 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
         return success;
     }
 
+    // For each seedpoint, one line gets created, tracked with u perpendicular b.
+    // then for each, and at each, vertex on that pathline, fieldlines are tracked
+    if (tracingVar != "u_perp_b") {
+        return success;
+    }
     if (!kameleon->loadVariable("b")) {
         LERROR("Failed to load tracing variable: b");
         return success;
@@ -158,12 +162,6 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
         return success;
     }
 
-    // For each seedpoint, one line gets created, tracked with u perpendicular b.
-    // then for each, and at each, vertex on that pathline, fieldlines are tracked
-    if (tracingVar != "u_perp_b") {
-        return success;
-    }
-    //else
     int i = 0;
     for (const glm::vec3& seed : seedPoints) {
         std::unique_ptr<ccmc::Interpolator> interpolator =
@@ -194,12 +192,12 @@ bool traceAndAddLinesToState(ccmc::Kameleon* kameleon,
 
         //std::vector<float> velocities = computeVelocities(pathLine, kameleon);
         //std::vector<float> times = computeTimes(pathLine, velocities);
-        // Elon: optimizing trimming goes here
+        // Elon: optimizing trimming could go here
         // seed? - trimPathFindLastVertex(pathLine, times, velocities, cdfLength);
 
         // Here all points on the pathLine will be used at seedpoints for 
         // the actual fieldlines (traced with "b" by default)
-        state.addPathLine(i);
+        state.addPathLine(pathLine, i);
         for (std::vector<glm::vec3>::iterator it = pathLine.begin();
             it != pathLine.end() - 1;
             std::advance(it, 1))

@@ -32,12 +32,13 @@ uniform int colorMethod;
 uniform sampler1D colorTable;
 uniform vec2 colorTableRange;
 // Inputs
-layout(location = 0) in vec3 in_position;        // Should be provided in meters
+layout(location = 0) in vec4 in_position;        // Should be provided in meters
 layout(location = 1) in float in_color_scalar;   // The extra value used to color lines
 
 // outs
 out vec4 vs_color;
 out float vs_depth;
+out float debugTopologyColor;
 
 const int colorByQuantity = 1;
 
@@ -50,12 +51,13 @@ vec4 getTransferFunctionColor() {
 
 void main() {
     vs_color = lineColor;
+    debugTopologyColor = in_position.w;
     if (colorMethod == colorByQuantity) {
         vec4 quantityColor = getTransferFunctionColor();
         vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
     }
 
-    vec4 position_in_meters = vec4(in_position, 1);
+    vec4 position_in_meters = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
     vs_depth = gl_Position.w;

@@ -50,7 +50,7 @@ public:
     };
     struct PathLine {
         std::vector<Fieldline> fieldlines;
-        //std::vector<glm::vec3> line;
+        std::vector<glm::vec3> line;
         //float lifetime; // for when multiple cdf-files come into play ?
     };
 
@@ -86,7 +86,7 @@ public:
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
 
-    void addPathLine(const int i);
+    void addPathLine(const std::vector<glm::vec3>, const int i);
     void addFieldLine(const std::vector<glm::vec3> fieldLines, const float time, const int i);
 
 private:

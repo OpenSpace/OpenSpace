@@ -108,7 +108,8 @@ private:
 
     // Line width for the line rendering part
     properties::FloatProperty _lineWidth;
-
+    // Renders flow line/ pathline if true
+    properties::BoolProperty _renderFlowLine;
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
     // Uniform or transfer function
@@ -140,6 +141,8 @@ private:
     // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
     // the lines
     GLuint _vertexColorBuffer = 0;
+    GLuint _vertexArrayObjectFlow = 0;
+    GLuint _vertexPositionBufferFlow = 0;
 
     FieldlinesState _fieldlineState;
     double _manualTimeOffset = 0.0;
@@ -154,6 +157,7 @@ private:
     std::string _tracingVariable = "u_perp_b";
 
     std::vector<glm::vec3> _renderedLines;
+    std::vector<float> _debugTopologyColor;
     std::vector<PathLineTraverser> _traversers;
 };
 }

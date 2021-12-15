@@ -411,25 +411,21 @@ void FieldlinesState::addLine(std::vector<glm::vec3>& line) {
         std::make_move_iterator(line.begin()),
         std::make_move_iterator(line.end())
     );
+    
     line.clear();
 }
 
 void FieldlinesState::addLinesToBeRendered() {
-    //for (int i = 0; i < _fieldLinesPerPath.size(); ++i) {
-    //    addLine(_fieldLinesPerPath[i][0]);
-    //}
-
     // i for each originally given seed point
     // the 0 is for only the first fieldline on that pathline
+    // because at startup we only want to render one line at the position of the first
+    // fieldlines position.
     for (int i = 0; i < _allPathLines.size(); ++i) {
         std::vector<glm::vec3> line;
-        //size_t nLinesPerPath = _allPathLines[i].fieldlines.size();
-        //for (size_t n = 0; n < nLinesPerPath; ++n) {
-            for (Vertex v : _allPathLines[i].fieldlines[0].vertecies) {
-                line.push_back(v.position);
-            }
-            addLine(line);
-        //}
+        for (Vertex v : _allPathLines[i].fieldlines[0].vertecies) {
+            line.push_back(v.position);
+        }
+        addLine(line);
     }
 }
 
@@ -437,8 +433,9 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
     _extraQuantities[idx].push_back(val);
 }
 
-void FieldlinesState::addPathLine(const int i) {
+void FieldlinesState::addPathLine(const std::vector<glm::vec3> line, const int i) {
     PathLine pl;
+    pl.line = line;
     _allPathLines.push_back(pl);
 }
 
@@ -454,12 +451,12 @@ void FieldlinesState::addFieldLine(const std::vector<glm::vec3> fieldline,
 
     f.timeToNextFieldline = time;
 
-    // Elon: check if even correct. Probably will need both front and back to be < 3.5f
-    // to be considered closed. 3.5 is just a number from thin air
-    if (glm::length(fieldline.front()) < 3.5f) {
+    // Elon: check if even correct. Probably will need both front and back to be < 1.5f
+    // to be considered closed. 1.5 is just a number from thin air
+    if (glm::length(fieldline.front()) < 1.5f && glm::length(fieldline.back()) < 1.5f) {
         f.topology = Fieldline::Topology::Closed;
     }
-    else if (glm::length(fieldline.back()) < 3.5f) {
+    else if (glm::length(fieldline.back()) < 1.5f || glm::length(fieldline.front()) < 1.5f) {
         f.topology = Fieldline::Topology::Open;
     }
     else {

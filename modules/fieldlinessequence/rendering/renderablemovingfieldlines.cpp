@@ -43,6 +43,11 @@ namespace {
     "Line Width",
     "This value specifies the line width of the fieldlines"
     };
+    constexpr openspace::properties::Property::PropertyInfo RenderFlowLineInfo = {
+    "RenderFlowLine",
+    "Render Flow Line",
+    "Checked means flow line will be rendered"
+    };
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
     "ColorMethod",
     "Color Method",
@@ -77,7 +82,8 @@ namespace {
         std::filesystem::path seedPointFile;
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
-        // Which variable in CDF file to trace. 'b' is default. b is for magnetic field
+        // Which variable in CDF file to trace. 'u_perp_b' is default. 
+        // u is for flow, b is for magnetic field. perp meaning perpendicular
         std::optional<std::string> tracingVariable;
         // The number of points on the 'path line' which fieldlines will be moving
         std::optional<int> numberOfPointsOnPathLine;
@@ -86,6 +92,8 @@ namespace {
         std::optional<int> numberOfPointsOnFieldlines;
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+        // [[codegen::verbatim(RenderFlowLineInfo.description)]]
+        std::optional<bool> renderFlowLine;
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<std::string> colorMethod;
         // List of ranges for which their corresponding parameters values will be 
@@ -124,6 +132,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     :Renderable(dictionary)
     , _colorGroup({ "Color" })
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _renderFlowLine(RenderFlowLineInfo, false)
     , _colorMethod(ColorMethodInfo, properties::OptionProperty::DisplayType::Radio)
     , _colorUniform(
         ColorUniformInfo,
@@ -196,6 +205,7 @@ RenderableMovingFieldlines::RenderableMovingFieldlines(
     }
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
+    _renderFlowLine = p.renderFlowLine.value_or(_renderFlowLine);
     _colorTablePaths = p.colorTablePaths.value_or(_colorTablePaths);
 
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -242,8 +252,11 @@ void RenderableMovingFieldlines::initialize() {
         _traversers.push_back(plt);
     }
     _renderedLines = _fieldlineState.vertexPositions();
+    _debugTopologyColor = std::vector<float>(_renderedLines.size(), -1.f);
     size_t nExtraQuantities = _fieldlineState.nExtraQuantities();
         
+    addProperty(_lineWidth);
+    addProperty(_renderFlowLine);
     addPropertySubOwner(_colorGroup);
     _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
@@ -290,7 +303,8 @@ void RenderableMovingFieldlines::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/movingfieldlines_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/movingfieldlines_fs.glsl")
     );
-
+    glGenVertexArrays(1, &_vertexArrayObjectFlow);
+    glGenBuffers(1, &_vertexPositionBufferFlow);
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
@@ -331,7 +345,7 @@ bool RenderableMovingFieldlines::getStateFromCdfFiles() {
             _fieldlineState.scalePositions(fls::ReToMeter);
             break;
         default:
-            break;
+            throw ghoul::MissingCaseException();
         }
     }
 
@@ -421,11 +435,34 @@ void RenderableMovingFieldlines::render(const RenderData& data, RendererTasks&) 
     glLineWidth(1.f);
 #endif
 
+    std::vector<int> lineLengths = _fieldlineState.lineCount();
+    std::vector<int> lineStarts = _fieldlineState.lineStart();
+    
+    if (_renderFlowLine) {
+        std::vector<int> flowLengths;
+        std::vector<int> flowStarts;
+        int start = lineStarts.back() + _nPointsOnFieldlines;
+        const std::vector<FieldlinesState::PathLine> allPaths =
+            _fieldlineState.allPathLines();
+        for (int i = 0; i < allPaths.size(); i++) {
+            flowLengths.push_back(_nPointsOnPathLine);
+            flowStarts.push_back(start);
+            start += _nPointsOnPathLine;
+        }
+
+        for (int flowLen : flowLengths) {
+            lineLengths.push_back(flowLen);
+        }
+        for (int flowStart : flowStarts) {
+            lineStarts.push_back(flowStart);
+        }
+    }
+
     glMultiDrawArrays(
         GL_LINE_STRIP,
-        _fieldlineState.lineStart().data(),
-        _fieldlineState.lineCount().data(),
-        static_cast<GLsizei>(_fieldlineState.lineStart().size())
+        lineStarts.data(),
+        lineLengths.data(),
+        static_cast<GLsizei>(lineStarts.size())
     );
 
     glBindVertexArray(0);
@@ -459,6 +496,18 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
                                                             GLint lineStart,
                                                             GLsizei nVertices)
 {
+    auto debugColor = [](FieldlinesState::Fieldline::Topology topology) {
+        switch (topology)
+        {
+        case FieldlinesState::Fieldline::Topology::Closed:
+            return 0.f;
+        case FieldlinesState::Fieldline::Topology::Open:
+            return 1.f;
+        case FieldlinesState::Fieldline::Topology::Imf:
+            return -0.5f;
+        }
+    };
+
     if (LerpLine) {
         float normalizedTime = 0.f;
         normalizedTime = traverser.timeSinceInterpolation /
@@ -471,6 +520,15 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
                 traverser.nextFieldline()->vertecies[fieldlineVertex].position;
             _renderedLines[fieldlineVertex + lineStart] =
                 lerp(currentPosition, nextPosition, normalizedTime);
+
+            bool diff = traverser.currentFieldline->topology != 
+                traverser.nextFieldline()->topology;
+            if (diff) {
+                diff = diff;
+            }
+            _debugTopologyColor[fieldlineVertex + lineStart] =
+                glm::mix(debugColor(traverser.currentFieldline->topology),
+                    debugColor(traverser.nextFieldline()->topology), normalizedTime);
         }
     }
     else {
@@ -479,6 +537,8 @@ void RenderableMovingFieldlines::setNewRenderedLinePosition(PathLineTraverser tr
             // to current fieldlines vertex
             _renderedLines[fieldlineVertex + lineStart] = 
                 traverser.currentFieldline->vertecies[fieldlineVertex].position;
+            _debugTopologyColor[fieldlineVertex + lineStart] =
+                debugColor(traverser.currentFieldline->topology);
         }
     }
 }
@@ -496,7 +556,7 @@ void RenderableMovingFieldlines::moveLine(const double dt,
     bool passNext = forward ? 
         traverser.timeSinceInterpolation > 
             traverser.currentFieldline->timeToNextFieldline :
-        traverser.timeSinceInterpolation < 0;
+            traverser.timeSinceInterpolation < 0;
 
     if (passNext) {
         if (!traverser.isAtEnd()) {
@@ -508,11 +568,11 @@ void RenderableMovingFieldlines::moveLine(const double dt,
                 0;
         }
         else {
-            if (traverser.currentFieldline->topology != 
-                traverser.nextFieldline()->topology) 
+            if (traverser.currentFieldline->topology !=
+                traverser.nextFieldline()->topology)
             {
-                // Elon: 17 nov 2021. This advance call (plus set position call)makes 
-                // the transition between the two fieldlines not accurate time wise 
+                // Elon: 17 nov 2021. This advance call (plus set position call) makes
+                // the transition between the two fieldlines not accurate time wise
                 // since we are advancing its position prematurely
                 traverser.advanceCurrent();
                 setNewRenderedLinePosition<false>(traverser, lineStart, nVertices);
@@ -552,15 +612,34 @@ void RenderableMovingFieldlines::updateVertexPositionBuffer() {
 
     const std::vector<glm::vec3>& vertPos = _renderedLines;
 
+    std::vector<glm::vec4> data;
+    for (glm::vec3 pos : vertPos) {
+        data.push_back({ pos, -1.f });
+    }
+    for (int i = 0; i < data.size(); ++i) {
+        data[i].w = _debugTopologyColor[i];
+    }
+    /// ////////////////////////////////////////
+    if (_renderFlowLine) {
+        const std::vector<FieldlinesState::PathLine>& allPaths =
+            _fieldlineState.allPathLines();
+        for (int i = 0; i < allPaths.size(); ++i) {
+            for (int j = 0; j < allPaths[i].line.size(); ++j) {
+                data.push_back({ allPaths[i].line[j] * fls::ReToMeter, -1.f });
+            }
+        }
+    }
+    /// ////////////////////////////////////////
+
     glBufferData(
         GL_ARRAY_BUFFER,
-        vertPos.size() * sizeof(glm::vec3),
-        vertPos.data(),
+        data.size() * sizeof(glm::vec4),
+        data.data(),
         GL_STATIC_DRAW
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -591,5 +670,4 @@ void RenderableMovingFieldlines::updateVertexColorBuffer() {
         glBindVertexArray(0);
     }
 }
-
 } // namespace openspace

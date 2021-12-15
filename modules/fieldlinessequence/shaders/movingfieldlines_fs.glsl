@@ -26,6 +26,7 @@
 
 in vec4 vs_color;
 in float vs_depth;
+in float debugTopologyColor;
 
 Fragment getFragment() {
     if (vs_color.a == 0) {
@@ -35,6 +36,11 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = vs_color;
+    frag.color = vec4(max(debugTopologyColor, 0), max(1-debugTopologyColor, 0), abs(debugTopologyColor), 1);
+    if (debugTopologyColor < -0.99) {
+        frag.color = vec4(0.7, 0.0, 0.2, 1.0);
+    }
+
 
     frag.gPosition = vec4(0.0);
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
