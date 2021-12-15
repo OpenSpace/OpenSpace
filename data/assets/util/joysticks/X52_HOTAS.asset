@@ -146,28 +146,36 @@ asset.onInitialize(function()
     name,
     controller.Joystick.ButtomMiniJoystick.Up,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Up"
   );
   openspace.navigation.bindJoystickButton(
     name,
     controller.Joystick.ButtomMiniJoystick.Right,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Right"
   );
   openspace.navigation.bindJoystickButton(
     name,
     controller.Joystick.ButtomMiniJoystick.Down,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Down"
   );
   openspace.navigation.bindJoystickButton(
     name,
     controller.Joystick.ButtomMiniJoystick.Left,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Left"
   );
 

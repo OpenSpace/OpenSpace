@@ -115,14 +115,18 @@ asset.onInitialize(function()
     name,
     controller.MiniJoystick.Up,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, -1.5, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {0.0, 1.5, -2.000000}, 5.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Up"
   );
   openspace.navigation.bindJoystickButton(
     name,
     controller.MiniJoystick.Right,
     "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {-3.0, 0.0, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)",
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {1.000000, 0.000000, 0.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.CartesianPosition', {3.0, 0.0, -2.000000}, 5.5)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.space-cow.Rotation', {-1.000000, 0.000000, 0.000000}, 5.0)",
     "Cow Right"
   );
   -- Wrench

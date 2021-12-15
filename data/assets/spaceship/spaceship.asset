@@ -6,7 +6,7 @@ local spaceCow = {
   FaceCamera = false,
   Scale = 0.2,
   CartesianPosition = { 3.0, 0.0, -2.0 },
-  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/cow.png"),
+  TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/Cow_finished_actually.png"),
   Tag = { "installation_random" }
 }
 
