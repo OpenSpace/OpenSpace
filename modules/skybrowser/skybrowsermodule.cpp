@@ -37,11 +37,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/camera/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <glm/gtx/color_space.hpp> // For hsv color
-#include <random> // For random color
+
 
 namespace {
 
@@ -246,18 +244,7 @@ namespace openspace {
         return res;
     }
 
-glm::ivec3 randomBorderColor() {
-    // Generate a random border color with sufficient lightness and a n
-    std::random_device rd;
-    // Hue is in the unit degrees [0, 360]
-    std::uniform_real_distribution<float> hue(0.f, 360.f);
-    // Value in saturation are in the unit percent [0,1]
-    float value = 0.95f; // Brightness
-    float saturation = 0.5f;
-    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-    return rgbColor;
-}
+
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
@@ -458,57 +445,6 @@ void SkyBrowserModule::addTargetBrowserPair(std::string targetId, std::string br
     }
 }
 
-void SkyBrowserModule::createTargetBrowserPair() {
-    int noOfPairs = static_cast<int>(_targetsBrowsers.size()) + 1;
-    std::string nameBrowser = "Sky Browser " + std::to_string(noOfPairs);
-    std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
-    std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
-    std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
-    glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
-    std::string guiPath = "/SkyBrowser";
-    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    //std::string url = "http://localhost:8000"; // check webgl version
-    //std::string url = "https://get.webgl.org";
-    glm::ivec3 color = randomBorderColor();
-
-    const std::string browser = "{"
-            "Identifier = '" + idBrowser + "',"
-            "Type = 'ScreenSpaceSkyBrowser',"
-            "Name = '" + nameBrowser + "',"
-            "Url = '"+ url +"',"
-            "FaceCamera = false,"
-            "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
-            "BorderColor = " + ghoul::to_string(color) + ","
-        "}";
-    const std::string target = "{"
-            "Identifier = '" + idTarget + "',"
-            "Type = 'ScreenSpaceSkyTarget',"
-            "Name = '" + nameTarget + "',"
-            "FaceCamera = false,"
-        "}";
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::No
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::No
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
-        + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::No
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::No
-    );
-}
-
 void SkyBrowserModule::removeTargetBrowserPair(std::string& id) {
 
     Pair* found = getPair(id);
@@ -519,18 +455,6 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& id) {
         [&](const std::unique_ptr<Pair>& pair) {
             return *found == *(pair.get());
         });
-                          
-    std::string targetId = found->getTarget()->identifier();
-    // Remove from engine
-    openspace::global::scriptEngine->queueScript(
-        "openspace.removeScreenSpaceRenderable('" + found->browserId() + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.removeScreenSpaceRenderable('" + targetId + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
 
     _targetsBrowsers.erase(it, std::end(_targetsBrowsers));
     _mouseOnPair = nullptr;
@@ -644,6 +568,11 @@ const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() {
 std::vector<std::unique_ptr<Pair>>& SkyBrowserModule::getPairs()
 {
     return _targetsBrowsers;
+}
+
+int SkyBrowserModule::nPairs()
+{
+    return static_cast<int>(_targetsBrowsers.size());
 }
 
 Pair* SkyBrowserModule::getPair(const std::string& id)

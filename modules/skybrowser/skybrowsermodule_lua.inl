@@ -4,14 +4,29 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <glm/gtx/color_space.hpp> // For hsv color
+#include <random> // For random color
 
 namespace {
 	constexpr const char _loggerCat[] = "SkyBrowserModule";
 } // namespace
 
+glm::ivec3 randomBorderColor() {
+    // Generate a random border color with sufficient lightness and a n
+    std::random_device rd;
+    // Hue is in the unit degrees [0, 360]
+    std::uniform_real_distribution<float> hue(0.f, 360.f);
+    // Value in saturation are in the unit percent [0,1]
+    float value = 0.95f; // Brightness
+    float saturation = 0.5f;
+    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+    return rgbColor;
+}
 
 namespace openspace::skybrowser::luascriptfunctions {
 
@@ -490,7 +505,55 @@ int setSelectedBrowser(lua_State* L) {
 int createTargetBrowserPair(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createTargetBrowserPair");
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    module->createTargetBrowserPair();
+
+    int noOfPairs = module->nPairs();
+    std::string nameBrowser = "Sky Browser " + std::to_string(noOfPairs);
+    std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
+    std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
+    std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
+    glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
+    std::string guiPath = "/SkyBrowser";
+    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    //std::string url = "http://localhost:8000"; // check webgl version
+    //std::string url = "https://get.webgl.org";
+    glm::ivec3 color = randomBorderColor();
+
+    const std::string browser = "{"
+        "Identifier = '" + idBrowser + "',"
+        "Type = 'ScreenSpaceSkyBrowser',"
+        "Name = '" + nameBrowser + "',"
+        "Url = '" + url + "',"
+        "FaceCamera = false,"
+        "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
+        "BorderColor = " + ghoul::to_string(color) + ","
+        "}";
+    const std::string target = "{"
+        "Identifier = '" + idTarget + "',"
+        "Type = 'ScreenSpaceSkyTarget',"
+        "Name = '" + nameTarget + "',"
+        "FaceCamera = false,"
+        "}";
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + browser + ");",
+        scripting::ScriptEngine::RemoteScripting::No
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + target + ");",
+        scripting::ScriptEngine::RemoteScripting::No
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
+        + idBrowser + "');",
+        scripting::ScriptEngine::RemoteScripting::No
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
+        scripting::ScriptEngine::RemoteScripting::No
+    );
 
     return 0;
 }
@@ -499,7 +562,26 @@ int removeTargetBrowserPair(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeTargetBrowserPair");
     std::string id = ghoul::lua::value<std::string>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    module->removeTargetBrowserPair(id);
+    Pair* found = module->getPair(id);
+    if (found) {
+        std::string browser = found->browserId();
+        std::string target = found->targetId();
+        found = nullptr;
+
+        module->removeTargetBrowserPair(id);
+
+        // Remove from engine
+        openspace::global::scriptEngine->queueScript(
+            "openspace.removeScreenSpaceRenderable('" + browser + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+        openspace::global::scriptEngine->queueScript(
+            "openspace.removeScreenSpaceRenderable('" + target + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    
 
     return 0;
 }

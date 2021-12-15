@@ -64,6 +64,7 @@ public:
 
     // Getters
     std::vector<std::unique_ptr<Pair>>& getPairs();
+    int nPairs();
     Pair* getPair(const std::string& id);
     SceneGraphNode* get3dBrowserNode();
     RenderableSkyBrowser* get3dBrowser();
@@ -90,7 +91,6 @@ public:
     bool isCameraInSolarSystem();
 
     // Managing the target browser pairs 
-    void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
     void addTargetBrowserPair(std::string targetId, std::string browserId);
 
