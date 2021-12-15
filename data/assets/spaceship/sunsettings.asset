@@ -1,0 +1,6 @@
+asset.onInitialize(function()
+  openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers.Texture.Settings.Gamma", 0.100000)
+  openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", true)
+  openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.MultiplyColor", {1.000000,0.992000,0.980000})
+  openspace.setPropertyValueSingle("Scene.Sun.BoundingSphere", 1.1 * 6963400000.000000)
+end)

@@ -51,6 +51,7 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "spaceship/spaceship",
+    "spaceship/sunsettings",
     "util/joysticks/X52_HOTAS"
   ],
   "camera": {
