@@ -44,6 +44,7 @@
 namespace {
     constexpr const char _loggerCat[] = "Path";
     constexpr const float Epsilon = 1e-5f;
+    constexpr const double DefaultHeightRadiusFactor = 2.8;
 
     constexpr const char SunIdentifier[] = "Sun";
 
@@ -415,7 +416,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     }
     else {
         const double radius = Waypoint::findValidBoundingSphere(targetNode);
-        const double defaultHeight = 2.0 * radius;
+        const double defaultHeight = DefaultHeightRadiusFactor * radius;
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
