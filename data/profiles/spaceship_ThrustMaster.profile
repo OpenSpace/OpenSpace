@@ -26,32 +26,15 @@
     }
   ],
   "additional_scripts": [
-    "openspace.setPropertyValueSingle('Dashboard.IsEnabled', false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowLog\", false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowVersion\", false);",
-    "openspace.setPropertyValueSingle(\"RenderEngine.ShowCamera\", false)",
-    "openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', false);",
-    "openspace.time.setPause(true);",
-    "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled\", false);",
-    "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled\", false);",
-    "openspace.setPropertyValueSingle(\"Scene.Mars.Renderable.Layers.HeightLayers.Mola_Europe.Enabled\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.MarsAtmosphere.Renderable.SunFollowingCamera\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.SunFollowingCamera\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.ColorLayers.WAC_Utah.Enabled\", false);",
-    "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.ColorLayers.WAC_Sweden.Enabled\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Sweden.Enabled\", true);",
-    "openspace.setPropertyValueSingle(\"Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Utah.Enabled\", false);",
-    "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.MinimumAllowedDistance\", 300);",
-    "openspace.setPropertyValue(\"Scene.*.ApproachFactor\", 10);"
+    "openspace.time.setPause(true);"
   ],
   "assets": [
     "base",
     "events/toggle_globe_trails",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "spaceship/rendersettings",
     "spaceship/spaceship",
-    "spaceship/sunsettings",
     "util/joysticks/TA320_Pilot",
     "util/joysticks/TCA_Q-Eng_1&2"
   ],
