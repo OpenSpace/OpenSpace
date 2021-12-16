@@ -550,7 +550,7 @@ void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position)
     _cartesianPosition = translationMatrix * origin;
 }
 
-void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position)
+void ScreenSpaceRenderable::setPosition(const glm::vec3& position)
 {
     _cartesianPosition = position;
 }
@@ -587,6 +587,16 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     float pitch = _localRotation.value().y;
     float yaw = _localRotation.value().z;
     return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
+}
+
+glm::vec3 ScreenSpaceRenderable::raeToCartesian(const glm::vec3& rae) const
+{
+    return sphericalToCartesian(raeToSpherical(rae));
+}
+
+glm::vec3 ScreenSpaceRenderable::cartesianToRae(const glm::vec3& cartesian) const
+{
+    return sphericalToRae(cartesianToSpherical(cartesian));
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {

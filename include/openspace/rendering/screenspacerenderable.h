@@ -80,7 +80,7 @@ public:
     glm::vec2 lowerLeftCornerScreenSpace();
     bool intersection(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
-    void setCartesianPosition(const glm::vec3& position);
+    void setPosition(const glm::vec3& position);
 
     // End of addition by skybrowser team
 
@@ -94,6 +94,9 @@ protected:
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();
+
+    glm::vec3 raeToCartesian(const glm::vec3& rae) const;
+    glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
     void draw(glm::mat4 modelTransform);
 

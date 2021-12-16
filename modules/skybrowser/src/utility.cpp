@@ -9,8 +9,10 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // For M_PI
 
+
 namespace openspace::skybrowser {
 
+    // Converts from spherical coordinates in the unit of degrees to cartesian coordianates
     glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
 
         glm::dvec2 coordsRadians = glm::radians(coords);
@@ -24,7 +26,8 @@ namespace openspace::skybrowser {
         return cartesian;
     }
 
-    glm::dvec2 cartesianToSpherical(const glm::dvec3&  coord) {
+    // Converts from cartesian coordianates to spherical in the unit of degrees
+    glm::dvec2 cartesianToSpherical(const glm::dvec3& coord) {
         // Equatorial coordinates RA = right ascension, Dec = declination
         double ra = atan2(coord.y, coord.x);
         double dec = atan2(coord.z, glm::sqrt((coord.x * coord.x) + (coord.y * coord.y)));
@@ -36,26 +39,25 @@ namespace openspace::skybrowser {
         return glm::degrees(celestialCoords);
     }
 
-    glm::dvec3 galacticToEquatorial(const glm::dvec3&  coords) {
+    glm::dvec3 galacticToEquatorial(const glm::dvec3& coords) {
         return glm::transpose(conversionMatrix) * glm::normalize(coords);
     }
         
-    glm::dvec3 equatorialToGalactic(const glm::dvec3&  coords) {
+    glm::dvec3 equatorialToGalactic(const glm::dvec3& coords) {
         // On the unit sphere
         glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); 
         return rGalactic * CelestialSphereRadius;
     }
         
-    glm::dvec3 galacticToScreenSpace3d(const glm::dvec3&  coords) {
+    glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords) {
 
-        glm::dvec3 localCameraSpace = galacticToLocalCamera(coords);
         // Ensure that if the coord is behind the camera, 
         // the converted coordinate will be there too
-        double zCoord = localCameraSpace.z > 0 ? -ScreenSpaceZ : ScreenSpaceZ;
+        double zCoord = coords.z > 0 ? -ScreenSpaceZ : ScreenSpaceZ;
 
         // Calculate screen space coords x and y
-        double tan_x = localCameraSpace.x / localCameraSpace.z;
-        double tan_y = localCameraSpace.y / localCameraSpace.z;
+        double tan_x = coords.x / coords.z;
+        double tan_y = coords.y / coords.z;
 
         glm::dvec3 screenSpace = glm::dvec3(zCoord * tan_x, zCoord * tan_y, zCoord);
             
@@ -79,6 +81,14 @@ namespace openspace::skybrowser {
         return skybrowser::galacticToEquatorial(galactic);
     }
     
+    glm::dvec3 equatorialToLocalCamera(const glm::dvec3& coords)
+    {
+        // Transform equatorial J2000 to galactic coord with infinite radius    
+        glm::dvec3 galactic = equatorialToGalactic(coords);
+        glm::dvec3 localCamera = galacticToLocalCamera(galactic);
+        return localCamera;
+    }
+
     glm::dvec3 galacticToLocalCamera(const glm::dvec3&  coords) {
         // Transform vector to camera's local coordinate system
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
@@ -89,11 +99,12 @@ namespace openspace::skybrowser {
         return glm::normalize(viewDirectionLocal);
     }
 
-    glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3&  coords) {
+    glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3& coords) {
         // Transform equatorial J2000 to galactic coord with infinite radius    
         glm::dvec3 galactic = equatorialToGalactic(coords);
+        glm::dvec3 localCameraSpace = galacticToLocalCamera(coords);
         // Transform galactic coord to screen space
-        return galacticToScreenSpace3d(galactic);
+        return localCameraToScreenSpace3d(localCameraSpace);
     }
 
     double cameraRoll() {
@@ -186,6 +197,6 @@ namespace openspace::skybrowser {
 
 }
 
-    
+
     
 

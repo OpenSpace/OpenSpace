@@ -496,7 +496,7 @@ void SkyBrowserModule::moveHoverCircle(int i)
         glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace3d(
             image.equatorialCartesian
         );
-        _hoverCircle->setCartesianPosition(coordsScreen);
+        _hoverCircle->setPosition(coordsScreen);
     }
 }
 

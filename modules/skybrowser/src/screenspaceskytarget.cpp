@@ -209,9 +209,21 @@ namespace openspace {
     void ScreenSpaceSkyTarget::update()
     {
         if (_isLocked) {
-            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(
+            glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(
                 _lockedCoordinates
             );
+
+            if (_useRadiusAzimuthElevation) {
+                // Keep the set radius
+                glm::vec3 position = _raePosition.value().x * glm::vec3(localCamera);
+                _raePosition = cartesianToRae(position);
+            }
+            else {
+                _cartesianPosition = skybrowser::localCameraToScreenSpace3d(
+                    localCamera
+                );
+            }
+           
         }
         // Optimization: Only pass messages to the browser when the target is not moving 
         if (_browser && !_isAnimated) {
@@ -238,10 +250,18 @@ namespace openspace {
 
     glm::dvec3 ScreenSpaceSkyTarget::directionGalactic() const {
 
+
+        glm::vec3 localCamera = _cartesianPosition.value();
+
+        if (_useRadiusAzimuthElevation) {
+
+            localCamera = raeToCartesian(_raePosition.value());
+        }
+
         glm::dmat4 rotation = glm::inverse(
             global::navigationHandler->camera()->viewRotationMatrix()
         );
-        glm::dvec4 position = glm::dvec4(_cartesianPosition.value(), 1.0);
+        glm::dvec4 position = glm::dvec4(localCamera, 1.0);
 
         return glm::normalize(rotation * position);
     }
@@ -305,19 +325,34 @@ namespace openspace {
             );
 
             // Rotate target direction
-            glm::dvec3 newDir = rotMat * glm::dvec4(_animationStart, 1.0);
-            
+            glm::dvec3 equatorial = glm::dvec3(rotMat * glm::dvec4(_animationStart, 1.0));
+            glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(equatorial);
             // Convert to screen space
-            _cartesianPosition = skybrowser::equatorialToScreenSpace3d(newDir);
+            if (_useRadiusAzimuthElevation) {
+                // Keep the radius
+                glm::vec3 position = _raePosition.value().x * glm::vec3(localCamera);
+                _raePosition = cartesianToRae(position);
+            }
+            else {
+                _cartesianPosition = skybrowser::localCameraToScreenSpace3d(localCamera);
+            }
             
             // Update position
             glm::dvec3 cartesian = skybrowser::sphericalToCartesian(equatorialAim());
             _animationStart = glm::normalize(cartesian);
         }
         else {
-            glm::dvec3 screenSpace = skybrowser::equatorialToScreenSpace3d(_animationEnd);
             // Set the exact target position 
-            _cartesianPosition = glm::vec3(screenSpace);
+            glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(_animationEnd);
+          
+            if (_useRadiusAzimuthElevation) {
+                glm::vec3 position = _raePosition.value().x * glm::vec3(localCamera);
+                _raePosition = cartesianToRae(position);
+            }
+            else {
+                _cartesianPosition = skybrowser::localCameraToScreenSpace3d(localCamera);
+            }
+            
             _isAnimated = false;
             // Lock target when it first arrives to the position
             setLock(_shouldLockAfterAnimation);
@@ -325,12 +360,18 @@ namespace openspace {
     }
 
     glm::dvec2 ScreenSpaceSkyTarget::equatorialAim() const {
-        // Calculate the galactic coordinate of the target direction 
-        // projected onto the celestial sphere
-        glm::dvec3 cartesian = skybrowser::localCameraToEquatorial(
-            _cartesianPosition.value()
-        );
-        return skybrowser::cartesianToSpherical(cartesian);
+
+        // Get the local camera coordinates of the target
+        if (_useRadiusAzimuthElevation) {
+            glm::vec3 cartesian = raeToCartesian(_raePosition.value());
+            glm::dvec3 equatorial = skybrowser::localCameraToEquatorial(cartesian);
+            return skybrowser::cartesianToSpherical(equatorial);
+            
+        }
+        else {
+            glm::dvec3 cartesian = skybrowser::localCameraToEquatorial(_cartesianPosition.value());
+            return skybrowser::cartesianToSpherical(cartesian);
+        }
     }
 
 
@@ -358,15 +399,29 @@ namespace openspace {
             _lockedCoordinates = skybrowser::sphericalToCartesian(equatorialAim());
         }
     }
+    void ScreenSpaceSkyTarget::setEquatorialAim(const glm::dvec2& aim)
+    {
+        glm::dvec3 cartesianAim = skybrowser::sphericalToCartesian(aim);
+        glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(cartesianAim);
+        if (_useRadiusAzimuthElevation) {
+            // Keep the set radius
+            glm::vec3 position = _raePosition.value().x * glm::vec3(localCamera);
+            _raePosition = cartesianToRae(position);
+        }
+        else {
+            _cartesianPosition = skybrowser::localCameraToScreenSpace3d(localCamera);
+        }
+    }
     void ScreenSpaceSkyTarget::setSkyBrowser(ScreenSpaceSkyBrowser* browser)
     {
         _browser = browser;
         _enabled.onChange([this]() {
             _browser->setEnabled(_enabled);
         });
-        _scale.onChange([&]() {
+       /* _scale.onChange([&]() {
+
             setFovFromScale();
             _browser->setVerticalFov(_verticalFov);
-            });
+            }); */
     }
 }

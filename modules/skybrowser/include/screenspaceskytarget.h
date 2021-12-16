@@ -41,6 +41,7 @@ namespace openspace {
         void setColor(glm::ivec3 color);
         void setOpacity(float opacity);
         void setLock(bool isLocked);
+        void setEquatorialAim(const glm::dvec2& aim);
 
         // Set callbacks
         void setSkyBrowser(ScreenSpaceSkyBrowser* browser);
