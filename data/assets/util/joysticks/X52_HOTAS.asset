@@ -268,4 +268,20 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {3.0, 1.0, -2.000000}, 6.0)",
     "Sputnik"
   );
+
+  -- Houston
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.C,
+    "openspace.printInfo('Houston button pressed')",
+    "Houston"
+  );
+
+  -- Red Alert
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.Joystick.Mode3,
+    "openspace.printInfo('Red Alert pressed')",
+    "Red Alert"
+  );
 end)

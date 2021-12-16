@@ -69,4 +69,12 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('ScreenSpace.sputnik.CartesianPosition', {3.0, 1.0, -2.000000}, 6.0)",
     "Sputnik"
   );
+
+  -- Red Alert
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.LeftStickButton,
+    "openspace.printInfo('Red Alert pressed')",
+    "Red Alert"
+  );
 end)

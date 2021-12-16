@@ -156,4 +156,12 @@ asset.onInitialize(function()
     "openspace.setPropertyValueSingle('ScreenSpace.ufo.CartesianPosition', {-3.0, 0.5, -2.000000}, 4.0)",
     "UFO"
   );
+
+  -- Houston
+  openspace.navigation.bindJoystickButton(
+    name,
+    controller.LeftButton,
+    "openspace.printInfo('Houston button pressed')",
+    "Houston"
+  );
 end)
