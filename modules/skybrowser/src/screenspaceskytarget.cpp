@@ -1,8 +1,10 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/helper.h>
@@ -112,7 +114,11 @@ namespace openspace {
     }
 
     ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
+        if (module->getPair(identifier())) {
+            module->removeTargetBrowserPair(identifier());
+        }
     }
 
     // Pure virtual in the screen space renderable class and hence must be defined 

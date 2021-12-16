@@ -430,7 +430,7 @@ void SkyBrowserModule::setSelectedObject()
     }
 }
 
-void SkyBrowserModule::addTargetBrowserPair(std::string targetId, std::string browserId) {
+void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const std::string& browserId) {
     
     ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(
         global::renderEngine->screenSpaceRenderable(targetId)
@@ -445,12 +445,14 @@ void SkyBrowserModule::addTargetBrowserPair(std::string targetId, std::string br
     }
 }
 
-void SkyBrowserModule::removeTargetBrowserPair(std::string& id) {
+void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
 
     Pair* found = getPair(id);
     if (!found) {
         return;
     }
+    found->getTarget()->setSkyBrowser(nullptr);
+
     auto it = std::remove_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&](const std::unique_ptr<Pair>& pair) {
             return *found == *(pair.get());

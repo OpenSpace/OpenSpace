@@ -91,8 +91,8 @@ public:
     bool isCameraInSolarSystem();
 
     // Managing the target browser pairs 
-    void removeTargetBrowserPair(std::string& browserId);
-    void addTargetBrowserPair(std::string targetId, std::string browserId);
+    void removeTargetBrowserPair(const std::string& browserId);
+    void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle
     void moveHoverCircle(int i);

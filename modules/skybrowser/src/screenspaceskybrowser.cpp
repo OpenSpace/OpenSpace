@@ -1,8 +1,10 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
@@ -121,7 +123,11 @@ namespace openspace {
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
+        if (module->getPair(identifier())) {
+            module->removeTargetBrowserPair(identifier());
+        }
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
