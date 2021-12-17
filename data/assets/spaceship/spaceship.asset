@@ -40,8 +40,8 @@ local shot = {
   Enabled = true,
   Name = "Shot",
   FaceCamera = true,
-  Scale = 0.25,
-  CartesianPosition = { 0.0, -1.1, -2.0 },
+  Scale = 0.20,
+  CartesianPosition = { 0.0, -1.0, -2.0 },
   TexturePath = openspace.absPath("${BASE}/../openspace-installations/spaceship-2021/images/laser.png"),
   Tag = { "installation_random" }
 }

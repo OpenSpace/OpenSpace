@@ -116,9 +116,9 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.Joystick.FullTrigger,
-    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, -1.1, -2.000000})" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.25)" ..
-    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, 1.1, -2.000000}, 1.0)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, -1.0, -2.000000})" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.2)" ..
+    "openspace.setPropertyValueSingle('ScreenSpace.shot.CartesianPosition', {0.0, 1.0, -2.000000}, 1.0)" ..
     "openspace.setPropertyValueSingle('ScreenSpace.shot.Scale', 0.0, 0.5)",
     "Pew Pew"
   );

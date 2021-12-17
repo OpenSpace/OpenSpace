@@ -44,7 +44,7 @@
 namespace {
     constexpr const char _loggerCat[] = "Path";
     constexpr const float Epsilon = 1e-5f;
-    constexpr const double DefaultHeightRadiusFactor = 2.8;
+    constexpr const double DefaultHeightRadiusFactor = 3.0;
 
     constexpr const char SunIdentifier[] = "Sun";
 

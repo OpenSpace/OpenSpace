@@ -17,7 +17,7 @@
       </Viewport>
     </Window>
     <!-- Forward, again, because the first one will just result in a black window... -->
-    <Window fullScreen="false" border="false">
+    <Window fullScreen="false" border="false" >
         <Pos x="1440" y="0" />
         <Size x="3840" y="2160" />
         <Res x="2560" y="1440"/>
@@ -35,7 +35,7 @@
         </Viewport>
     </Window>
     <!-- Left -->
-    <Window fullScreen="false" border="false">
+    <Window fullScreen="false" border="false" draw2D="false">
       <Pos x="0" y="0" />
       <Size x="1440" y="2560" />
       <Res x="1920" y="1080"/>
@@ -50,7 +50,7 @@
       </Viewport>
     </Window>
     <!-- Right -->
-    <Window fullScreen="false" border="false">
+    <Window fullScreen="false" border="false" draw2D="false">
       <Pos x="5280" y="0" />
       <Size x="1490" y="2560" />
       <Res x="1920" y="1080"/>
@@ -64,11 +64,11 @@
         </Projectionplane>
       </Viewport>
     </Window>
-    <!-- Bottom TODO-->
-    <Window fullScreen="false" border="false">
+    <!-- Bottom -->
+    <Window fullScreen="false" border="false" draw2D="false">
       <Pos x="1440" y="2160" />
       <Size x="3866" y="2160" />
-      <Res x="2560" y="1440"/>
+      <Res x="1920" y="1080"/>
       <Viewport>
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
@@ -84,7 +84,7 @@
     <Pos x="0.0" y="0.0" z="1030" />
   </User>
   <Settings>
-      <Display swapInterval="1" refreshRate="30"/>
+      <Display swapInterval="1" refreshRate="60"/>
   </Settings>
 </Cluster>
 

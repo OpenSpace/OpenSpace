@@ -4,7 +4,7 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("Scene.SunGlare.Renderable.MultiplyColor", {1.000000,0.996000,0.990000})
   openspace.setPropertyValueSingle("Scene.Sun.BoundingSphere", 1.1 * 6963400000.000000)
 
-  openspace.setPropertyValueSingle("Scene.Saturn.BoundingSphere", 58232000) -- Radius without the rings
+  openspace.setPropertyValueSingle("Scene.Saturn.BoundingSphere", 1.4 * 58232000) -- Radius without the rings
 
   openspace.setPropertyValueSingle('Dashboard.IsEnabled', false)
   openspace.setPropertyValueSingle("RenderEngine.ShowLog", false)
@@ -22,6 +22,9 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Sweden.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers.LolaDem_Utah.Enabled", false);
   openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.MinimumAllowedDistance", 300);
+  openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.JoystickSensitivity', 2.0);
+  openspace.setPropertyValueSingle('Scene.Venus.Renderable.Layers.ColorLayers.Texture.Enabled', true);
+  openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers.Magellan_Mosaic_Utah.Enabled", false)
 
   openspace.setPropertyValue("Scene.*.ApproachFactor", 10);
 end)
