@@ -948,6 +948,11 @@ int sendOSCMessage(lua_State* L) {
     std::replace(lable.begin(), lable.end(), '.', '_');
     std::replace(lable.begin(), lable.end(), '-', '_');
     std::replace(lable.begin(), lable.end(), '&', '_');
+
+    if (lable.size() > 0 && lable[0] != '/') {
+        lable = '/' + lable;
+    }
+
     stream.Clear();
     stream << osc::BeginMessage(lable.c_str()) << value << osc::EndMessage;
     socket->Send(stream.Data(), stream.Size());
