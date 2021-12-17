@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "masterAddress": "localhost",
+  "nodes": [
+    {
+      "address": "localhost",
+      "port": 20401,
+      "windows": [
+        {
+          "tags": [ "OpenVR" ],
+          "name": "OpenSpace",
+          "fullscreen": false,
+          "stereo": "side_by_side",
+          "size": { "x": 1332, "y": 840 },
+          "res": { "x": 3024, "y": 1680 },
+          "viewports": [
+            {
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 },
+              "projection": {
+                "type": "ProjectionPlane",
+                "lowerleft": { "x": -1.7156, "y": -0.965, "z": 0.0 },
+                "upperleft": { "x": -1.7156, "y": 0.965, "z": 0.0 },
+                "upperright": { "x": 1.7156, "y": 0.965, "z": 0.0 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
