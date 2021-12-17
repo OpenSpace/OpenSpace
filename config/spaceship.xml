@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<Cluster masterAddress="127.0.0.1">
+  <Node address="127.0.0.1" port="20401">
+    <!-- Forward (dummy) -->
+    <Window fullScreen="false" border="true" draw3D="false">
+      <Pos x="1440" y="0" />
+      <Size x="3840" y="2160" />
+      <Viewport tracked="true">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Res x="2560" y="1440"/>
+        <Projectionplane>
+          <Pos x="-605" y="-335" z="0.0" /> 
+          <Pos x="-605" y="335" z="0.0" />
+          <Pos x="605" y="335" z="0.0" />
+        </Projectionplane>
+      </Viewport>
+    </Window>
+    <!-- Forward, again, because the first one will just result in a black window... -->
+    <Window fullScreen="false" border="false">
+        <Pos x="1440" y="0" />
+        <Size x="3840" y="2160" />
+        <Res x="2560" y="1440"/>
+        <Viewport tracked="true">
+            <Pos x="0.0" y="0.0" />
+            <Size x="1.0" y="1.0" />
+            <Projectionplane>
+                <Pos x="-605" y="-335" z="0.0" />
+                <!-- lower left -->
+                <Pos x="-605" y="335" z="0.0" />
+                <!-- upper left -->
+                <Pos x="605" y="335" z="0.0" />
+                <!-- upper right -->
+            </Projectionplane>
+        </Viewport>
+    </Window>
+    <!-- Left -->
+    <Window fullScreen="false" border="false">
+      <Pos x="0" y="0" />
+      <Size x="1440" y="2560" />
+      <Res x="1920" y="1080"/>
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Projectionplane>
+          <Pos x="-934.7" y="-353" z="454.9" /> <!-- lower left -->
+          <Pos x="-934.7" y="357" z="454.9" /> <!-- upper left -->
+          <Pos x="-777.1" y="357" z="87.2" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+    </Window>
+    <!-- Right -->
+    <Window fullScreen="false" border="false">
+      <Pos x="5280" y="0" />
+      <Size x="1490" y="2560" />
+      <Res x="1920" y="1080"/>
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Projectionplane>
+          <Pos x="777.1" y="-353" z="87.2" /> <!-- lower left -->
+          <Pos x="777.1" y="357" z="87.2" /> <!-- upper left -->
+          <Pos x="934.7" y="357" z="454.9" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+    </Window>
+    <!-- Bottom TODO-->
+    <Window fullScreen="false" border="false">
+      <Pos x="1440" y="2160" />
+      <Size x="3866" y="2160" />
+      <Res x="2560" y="1440"/>
+      <Viewport>
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Projectionplane>
+          <Pos x="-465" y="-917.6" z="584.7" /> <!-- lower left -->
+          <Pos x="-465" y="-728.7" z="90.6" /> <!-- upper left -->
+          <Pos x="465" y="-728.7" z="90.6" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.065">
+    <Pos x="0.0" y="0.0" z="1030" />
+  </User>
+  <Settings>
+      <Display swapInterval="1" refreshRate="30"/>
+  </Settings>
+</Cluster>
+
