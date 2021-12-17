@@ -56,6 +56,9 @@ class SkyBrowserModule : public OpenSpaceModule {
 public:
 
     constexpr static const char* Name = "SkyBrowser";
+    constexpr static const double StopAnimationThreshold{ 0.0005 };
+    constexpr static const double FadingTime = { 2.0 };
+    constexpr static const double AnimationSpeed = { 1.0 };
     const double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
     // Constructor & destructor
@@ -117,6 +120,8 @@ protected:
 private:
     properties::BoolProperty _allowMouseInteraction;
     properties::BoolProperty _allowCameraRotation;
+    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
+
     // The browsers and targets
     std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
     Pair* _mouseOnPair{ nullptr };
@@ -126,7 +131,6 @@ private:
     std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
 
     // Fading
-    double _fadingTime = 2.0;
     Transparency _goal;
     
     // Flags
@@ -141,11 +145,8 @@ private:
     glm::vec2 _startDragPosition;
 
     // Animation of rotation of camera to look at coordinate galactic coordinates
-    glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
     glm::dvec3 _startAnimation;
     glm::dvec3 _endAnimation;
-    double _stopAnimationThreshold{ 0.05 };
-    double _animationSpeed{ 1.0 };
     
     // Data handler for the image collections
     std::unique_ptr<WwtDataHandler> _dataHandler;    

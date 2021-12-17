@@ -536,23 +536,23 @@ int createTargetBrowserPair(lua_State* L) {
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
         + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     openspace::global::scriptEngine->queueScript(
         "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::No
     );
 
     return 0;

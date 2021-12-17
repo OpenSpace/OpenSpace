@@ -661,13 +661,13 @@ void SkyBrowserModule::incrementallyRotateCamera(double deltaTime) {
     // Find smallest angle between the two vectors
     double angle = skybrowser::angleBetweenVectors(_startAnimation, _endAnimation);
 
-    if(angle > _stopAnimationThreshold) {
+    if(angle > StopAnimationThreshold) {
         
         glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
             _startAnimation, 
             _endAnimation, 
             deltaTime, 
-            _animationSpeed
+            AnimationSpeed
         );
 
         // Rotate
@@ -698,7 +698,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
          if (pair->isEnabled()) {
              bool isPairFinished = pair->hasFinishedFading(transparency);
              if (!isPairFinished) {
-                 pair->incrementallyFade(transparency, _fadingTime, deltaTime);
+                 pair->incrementallyFade(transparency, FadingTime, deltaTime);
              }
              else if (isPairFinished && goal == Transparency::Transparent) {
                  pair->setEnabled(false);
