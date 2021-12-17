@@ -239,6 +239,34 @@ namespace openspace {
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
             },
+            {
+                "setEquatorialAim",
+                &skybrowser::luascriptfunctions::setEquatorialAim,
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "setVerticalFov",
+                &skybrowser::luascriptfunctions::setVerticalFov,
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "setBorderColor",
+                &skybrowser::luascriptfunctions::setBorderColor,
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "setScreenSpaceSize",
+                &skybrowser::luascriptfunctions::setScreenSpaceSize,
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
         };
 
         return res;
@@ -358,6 +386,10 @@ SkyBrowserModule::SkyBrowserModule()
             incrementallyFadeBrowserTargets(_goal, deltaTime);
         }
         if (_isCameraInSolarSystem) {
+            std::for_each(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
+                [&](const std::unique_ptr<Pair>& pair) {
+                    pair->synchronizeAim();
+                });
             incrementallyAnimateTargets(deltaTime);
         }
         if (_isCameraRotating && _allowCameraRotation) {
@@ -451,7 +483,6 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     if (!found) {
         return;
     }
-    found->getTarget()->setSkyBrowser(nullptr);
 
     auto it = std::remove_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&](const std::unique_ptr<Pair>& pair) {

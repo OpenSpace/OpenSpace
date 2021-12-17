@@ -69,7 +69,7 @@ namespace openspace {
             glm::dvec2(360.0, 90.0))
     {
         _borderColor.onChange([this]() {
-            updateBorderColor();
+            _borderColorIsDirty = true;
         });
     }
 
@@ -111,7 +111,7 @@ namespace openspace {
 
     void WwtCommunicator::setVerticalFov(float vfov) {
         _verticalFov = vfov;
-        updateAim();
+        _equatorialAimIsDirty = true;
     }
 
     void WwtCommunicator::setWebpageBorderColor(glm::ivec3 color) {
@@ -130,7 +130,13 @@ namespace openspace {
     void WwtCommunicator::setEquatorialAim(const glm::dvec2& equatorial)
     {
         _equatorialAim = equatorial;
-        updateAim();
+        _equatorialAimIsDirty = true;
+    }
+
+    void WwtCommunicator::setBorderColor(const glm::ivec3& color)
+    {
+        _borderColor = color;
+        _borderColorIsDirty = true;
     }
 
     void WwtCommunicator::highlight(glm::ivec3 addition)
@@ -215,6 +221,22 @@ namespace openspace {
     void WwtCommunicator::update()
     {
         Browser::update();        
+        // Cap how messages are passed
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
+
+        if (timeSinceLastUpdate > _timeUpdateInterval) {
+
+            if (_equatorialAimIsDirty) {
+                updateAim();
+                _equatorialAimIsDirty = false;
+            }
+            if (_borderColorIsDirty) {
+                updateBorderColor();
+                _borderColorIsDirty = false;
+            }
+            _lastUpdateTime = std::chrono::system_clock::now();
+        }
     }
 
     void WwtCommunicator::render()

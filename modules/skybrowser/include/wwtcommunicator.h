@@ -67,6 +67,7 @@ public:
     void setVerticalFov(float vfov);
     void setIsSyncedWithWwt(bool isSynced);
     void setEquatorialAim(const glm::dvec2& equatorial);
+    void setBorderColor(const glm::ivec3& color);
 
     // Display
     void highlight(glm::ivec3 addition);
@@ -89,6 +90,9 @@ protected:
 private:
     bool _isSyncedWithWwt{ false };
 
+    bool _borderColorIsDirty{ false };
+    bool _equatorialAimIsDirty{ false };
+
     void setWebpageBorderColor(glm::ivec3 color);
     void sendMessageToWwt(const ghoul::Dictionary& msg);
 
@@ -104,6 +108,11 @@ private:
     ghoul::Dictionary setForegroundOpacity(double val);
     ghoul::Dictionary setLayerOrder(const std::string& id, int version);
     ghoul::Dictionary hideChromeGui(bool isHidden);
+
+    // Time variables
+    // For capping the message passing to WWT
+    constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
+    std::chrono::system_clock::time_point _lastUpdateTime;
 
 };
 

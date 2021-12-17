@@ -42,39 +42,6 @@ namespace openspace {
     {
         ghoul_assert(browser != nullptr, "Sky browser is null pointer!");
         ghoul_assert(target != nullptr, "Sky target is null pointer!");
-        
-        // Set browser callback functions
-        // Set callback functions so that the target and the browser update each other
-        /*
-        _browser->setCallbackEquatorialAim(
-            [&](const glm::dvec2& equatorialAim) {
-                _target->setEquatorialAim(equatorialAim);
-            }
-        );
-        */
-        _browser->setCallbackBorderColor(
-            [&](const glm::ivec3& color) {
-                _target->setColor(color);
-            }
-        );
-        _browser->setCallbackVerticalFov(
-            [&](float vfov) {
-                _target->setScaleFromVfov(vfov);
-            }
-        );
-        _browser->setCallbackDimensions(
-            [&](const glm::vec2& dimensions) {
-                _target->setDimensions(dimensions);
-            }
-        );
-        // Always make sure that the target and browser are visible together
-        _browser->setCallbackEnabled(
-            [&](bool enabled) {
-                _target->setEnabled(enabled);
-            }
-        );  
-
-        _target->setSkyBrowser(_browser);
     }
 
     Pair& Pair::operator=(Pair other)
@@ -166,6 +133,14 @@ namespace openspace {
     void Pair::translateSelected(const glm::vec2& start, const glm::vec2& translation)
     {
         _selected->translate(translation, start);
+    }
+
+    void Pair::synchronizeAim()
+    {
+        if (!_target->isAnimated()) {
+            _browser->setEquatorialAim(_target->equatorialAim());
+            _target->setScaleFromVfov(_browser->verticalFov());
+        }
     }
 
     void Pair::setEnabled(bool enable)
@@ -278,6 +253,34 @@ namespace openspace {
     void Pair::setIsSyncedWithWwt(bool isSynced)
     {
         _browser->setIsSyncedWithWwt(isSynced);
+    }
+
+    void Pair::setVerticalFov(float vfov)
+    {
+        _verticalFov = vfov;
+        _browser->setVerticalFov(vfov);
+        _target->setScaleFromVfov(vfov);
+    }
+
+    void Pair::setEquatorialAim(const glm::dvec2& aim)
+    {
+        _equatorialAim = aim;
+        _target->setEquatorialAim(aim);
+        _browser->setEquatorialAim(aim);
+    }
+
+    void Pair::setBorderColor(const glm::ivec3& color)
+    {
+        _borderColor = color;
+        _target->setColor(color);
+        _browser->setBorderColor(color);
+    }
+
+    void Pair::setScreenSpaceSize(const glm::vec2& dimensions)
+    {
+        _dimensions = dimensions;
+        _target->setDimensions(dimensions);
+        _browser->setScreenSpaceSize(dimensions);
     }
 
     void Pair::incrementallyAnimateToCoordinate(double deltaTime) 

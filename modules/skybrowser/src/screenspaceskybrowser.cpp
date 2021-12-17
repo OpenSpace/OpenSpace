@@ -113,7 +113,7 @@ namespace openspace {
             _textureDimensionsIsDirty = true;
             });        
         _size.onChange([this]() {
-            setScreenSpaceSize(_size);
+            _sizeIsDirty = true;
             });
 
         // Ensure that the browser is placed at the z-coordinate of the screen space plane
@@ -125,7 +125,7 @@ namespace openspace {
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-        if (module->getPair(identifier())) {
+        if (module && module->getPair(identifier())) {
             module->removeTargetBrowserPair(identifier());
         }
     }
@@ -175,6 +175,7 @@ namespace openspace {
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         ScreenSpaceRenderable::deinitializeGL();
         WwtCommunicator::deinitializeGL();
+       
         return true;
     }
 
@@ -223,7 +224,10 @@ namespace openspace {
             updateTextureResolution();
             _textureDimensionsIsDirty = false;
         }
-        
+        if (_sizeIsDirty) {
+            setScreenSpaceSize(_size);
+            _sizeIsDirty = false;
+        }
         _objectSize = _texture->dimensions();
 
         WwtCommunicator::update();
@@ -231,18 +235,11 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
-        // Cap how often the zoom is allowed to update
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
-
-        if (timeSinceLastUpdate > _timeUpdateInterval) {
-            // Make scroll more sensitive the smaller the FOV
-            float x = _verticalFov;
-            float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
-            float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
-            _verticalFov = std::clamp(_verticalFov + zoom, 0.001f, 70.0f);
-            _lastUpdateTime = std::chrono::system_clock::now();
-        }
+        // Make scroll more sensitive the smaller the FOV
+        float x = _verticalFov;
+        float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
+        float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
+        _verticalFov = std::clamp(_verticalFov + zoom, 0.001f, 70.0f);
     }
 
     void ScreenSpaceSkyBrowser::bindTexture()
@@ -261,43 +258,6 @@ namespace openspace {
             glm::vec3(browserRatio() * _scale, _scale, 1.f)
         );
         return scale;
-    }
-
-    void ScreenSpaceSkyBrowser::setCallbackEquatorialAim(
-        std::function<void(const glm::dvec2&)> function)
-    {
-        _equatorialAim.onChange([this, f = std::move(function)]() {
-            f(_equatorialAim);
-        });
-
-    }
-    void ScreenSpaceSkyBrowser::setCallbackVerticalFov(
-        std::function<void(float)> function)
-    {
-        _verticalFov.onChange([this, f = std::move(function)]() {
-            f(_verticalFov.value());
-        });
-
-    }
-    void ScreenSpaceSkyBrowser::setCallbackDimensions(
-        std::function<void(const glm::vec2&)> function)
-    {
-        _browserPixeldimensions.onChange([this, f = std::move(function)]() {
-            f(_browserPixeldimensions);
-        });
-
-    }
-    void ScreenSpaceSkyBrowser::setCallbackBorderColor(
-        std::function<void(const glm::ivec3&)> function) {
-        _borderColor.onChange([this, f = std::move(function)]() {
-            f(_borderColor.value());
-        });
-    }
-    void ScreenSpaceSkyBrowser::setCallbackEnabled(std::function<void(bool)> function)
-    {
-        _enabled.onChange([this, f = std::move(function)]() {
-            f(_enabled);
-        });
     }
 
     void ScreenSpaceSkyBrowser::setOpacity(float opacity)

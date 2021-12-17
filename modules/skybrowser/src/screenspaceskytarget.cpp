@@ -80,7 +80,7 @@ namespace openspace {
         , _showRectangleThreshold(RectangleThresholdInfo, 0.6f, 0.1f, 70.f)
         , _stopAnimationThreshold(AnimationThresholdInfo, 0.0005, 0.0, 0.005)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
-        , _color(220, 220, 220)  
+        , _borderColor(220, 220, 220)  
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -116,7 +116,7 @@ namespace openspace {
     ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-        if (module->getPair(identifier())) {
+        if (module && module->getPair(identifier())) {
             module->removeTargetBrowserPair(identifier());
         }
     }
@@ -173,11 +173,11 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::setColor(glm::ivec3 color) {
-        _color = color;
+        _borderColor = color;
     }
 
     glm::ivec3 ScreenSpaceSkyTarget::borderColor() const {
-        return _color;
+        return _borderColor;
     }
 
     void ScreenSpaceSkyTarget::render() {
@@ -185,7 +185,7 @@ namespace openspace {
         bool showCrosshair = _verticalFov < _showCrosshairThreshold;
         bool showRectangle = _verticalFov > _showRectangleThreshold;
         
-        glm::vec4 color = { glm::vec3(_color) / 255.f, _opacity.value() };
+        glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * 
             localRotationMatrix() * scaleMatrix();
         float lineWidth = 0.0016f/_scale.value();
@@ -230,23 +230,6 @@ namespace openspace {
                 );
             }
            
-        }
-        // Optimization: Only pass messages to the browser when the target is not moving 
-        if (_browser && !_isAnimated) {
-            const std::chrono::time_point<std::chrono::high_resolution_clock>
-                timeBefore = std::chrono::high_resolution_clock::now();
-
-            std::chrono::microseconds duration =
-                std::chrono::duration_cast<std::chrono::microseconds>(
-                    timeBefore - latestCall
-                    );
-
-            if (duration > interval) {
-                // Message WorldWide Telescope current view
-                _browser->setEquatorialAim(equatorialAim()); // Use camera roll
-
-                latestCall = std::chrono::high_resolution_clock::now();
-            }
         }
     }
 
@@ -383,12 +366,12 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::highlight(glm::ivec3 addition)
     {
-        _color += addition;
+        _borderColor += addition;
     }
 
     void ScreenSpaceSkyTarget::removeHighlight(glm::ivec3 removal)
     {
-        _color -= removal;
+        _borderColor -= removal;
     }
 
     float ScreenSpaceSkyTarget::opacity() const {
@@ -407,6 +390,9 @@ namespace openspace {
     }
     void ScreenSpaceSkyTarget::setEquatorialAim(const glm::dvec2& aim)
     {
+        _isAnimated = false;
+        _isLocked = false;
+
         glm::dvec3 cartesianAim = skybrowser::sphericalToCartesian(aim);
         glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(cartesianAim);
         if (_useRadiusAzimuthElevation) {
@@ -417,17 +403,5 @@ namespace openspace {
         else {
             _cartesianPosition = skybrowser::localCameraToScreenSpace3d(localCamera);
         }
-    }
-    void ScreenSpaceSkyTarget::setSkyBrowser(ScreenSpaceSkyBrowser* browser)
-    {
-        _browser = browser;
-        _enabled.onChange([this]() {
-            _browser->setEnabled(_enabled);
-        });
-       /* _scale.onChange([&]() {
-
-            setFovFromScale();
-            _browser->setVerticalFov(_verticalFov);
-            }); */
     }
 }

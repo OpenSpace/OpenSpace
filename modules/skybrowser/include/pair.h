@@ -62,6 +62,7 @@ public:
     bool isTargetSelected();
     void fineTuneTarget(const glm::vec2& start, const glm::vec2& translation);
     void translateSelected(const glm::vec2& start, const glm::vec2& translation);
+    void synchronizeAim();
 
     // Browser
     void sendIdToBrowser();
@@ -81,6 +82,10 @@ public:
     // Setters
     void setEnabled(bool enable);
     void setIsSyncedWithWwt(bool isSynced);
+    void setVerticalFov(float vfov);
+    void setEquatorialAim(const glm::dvec2& aim);
+    void setBorderColor(const glm::ivec3& color);
+    void setScreenSpaceSize(const glm::vec2& dimensions);
 
     // Getters by value 
     float verticalFov() const;
@@ -119,6 +124,12 @@ private:
 
     ScreenSpaceSkyTarget* _target{ nullptr };
     ScreenSpaceSkyBrowser* _browser{ nullptr };
+
+    // Shared properties between the target and the browser
+    float _verticalFov{ 70.0f };
+    glm::dvec2 _equatorialAim{ 0.0 };
+    glm::ivec3 _borderColor{ 255 };
+    glm::vec2 _dimensions{ 0.5f, 0.5f };
 };
 
 } // namespace openspace

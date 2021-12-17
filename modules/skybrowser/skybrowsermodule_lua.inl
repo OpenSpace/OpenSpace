@@ -114,7 +114,6 @@ int unlockTarget(lua_State* L) {
     return 0;
 }
 
-
 int setImageLayerOrder(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setImageLayerOrder");
     const std::string id = ghoul::lua::value<std::string>(L, 1);
@@ -613,6 +612,86 @@ int removeSelectedImageInBrowser(lua_State* L) {
     }
     else if (module->get3dBrowser(id)) {
         module->get3dBrowser(id)->removeSelectedImage(i);
+    }
+    return 0;
+}
+
+int setEquatorialAim(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setEquatorialAim");
+    // Browser id
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
+    double ra = ghoul::lua::value<double>(L, 1);
+    double dec = ghoul::lua::value<double>(L, 1);
+
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    Pair* pair = module->getPair(id);
+    if (pair) {
+        pair->setEquatorialAim(glm::dvec2(ra, dec));
+    }
+    else if (module->get3dBrowser(id)) {
+        module->get3dBrowser(id)->setEquatorialAim(glm::dvec2(ra, dec));
+    }
+
+    return 0;
+}
+
+int setVerticalFov(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setVerticalFov");
+    // Browser id
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
+    float vfov = ghoul::lua::value<float>(L, 1);
+
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    Pair* pair = module->getPair(id);
+    if (pair) {
+        pair->setVerticalFov(vfov);
+    }
+    else if (module->get3dBrowser(id)) {
+        module->get3dBrowser(id)->setVerticalFov(vfov);
+    }
+
+    return 0;
+}
+
+int setBorderColor(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::setBorderColor");
+    // Browser id
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
+    int r = ghoul::lua::value<int>(L, 1);
+    int g = ghoul::lua::value<int>(L, 1);
+    int b = ghoul::lua::value<int>(L, 1);
+    glm::ivec3 color{ r, g, b };
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    Pair* pair = module->getPair(id);
+    if (pair) {
+        pair->setBorderColor(color);
+    }
+    else if (module->get3dBrowser(id)) {
+        module->get3dBrowser(id)->setBorderColor(color);
+    }
+
+    return 0;
+}
+
+int setScreenSpaceSize(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setBorderColor");
+    // Browser id
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
+    float sizeX = ghoul::lua::value<float>(L, 1);
+    float sizeY = ghoul::lua::value<float>(L, 1);
+
+    // Get module
+    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
+    Pair* pair = module->getPair(id);
+    if (pair) {
+        pair->setScreenSpaceSize(glm::vec2(sizeX, sizeY));
     }
     return 0;
 }

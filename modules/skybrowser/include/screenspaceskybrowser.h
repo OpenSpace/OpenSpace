@@ -39,13 +39,6 @@ namespace openspace {
         void setOpacity(float opacity);
         void setScreenSpaceSize(const glm::vec2& newSize);
 
-        // Set callback functions
-        void setCallbackEquatorialAim(std::function<void(const glm::dvec2&)> function);
-        void setCallbackVerticalFov(std::function<void(float)> function);
-        void setCallbackDimensions(std::function<void(const glm::vec2&)> function);
-        void setCallbackBorderColor(std::function<void(const glm::ivec3&)> function);
-        void setCallbackEnabled(std::function<void(bool)> function);
-
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         void setIdInBrowser();
 
@@ -62,14 +55,10 @@ namespace openspace {
         bool _isSyncedWithWwt{ false };
         bool _isFovAnimated{ false };
         bool _textureDimensionsIsDirty{ false };
+        bool _sizeIsDirty{ false };
 
         // Animation of fieldOfView
         float _endVfov{ 0.f };
-
-        // Time variables
-        // For capping the calls onchange properties from scrolling
-        constexpr static const std::chrono::milliseconds _timeUpdateInterval{ 10 };
-        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 
