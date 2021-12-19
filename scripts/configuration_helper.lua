@@ -1,18 +1,12 @@
 -- Helper functions that are useful to customize the openspace.cfg loading
 
---[[
-########################################################################################## 
-                            Public functions
-########################################################################################## 
-]]--
+-- ####################################################################################### 
+-- ##                          Public functions                                         ##
+-- ####################################################################################### 
 
 -- SGCT related functions
 sgct = {}
 sgct.config = {}
-
--- This function takes a text definition for an SGCT configuration file and returns the
--- path to a temporary file containing the string which SGCT can use 
-function sgct.makeConfig(config) end
 
 -- Creates a configuration file similar to the default 'single.xml':
 -- The parameter is a table and can contain the follow attributes:
@@ -20,7 +14,7 @@ function sgct.makeConfig(config) end
 -- first argument: horizontal window size {default: 1280}
 -- second argument: vertical window size {default: 720}
 -- res: A table containing the horizontal and vertical resolution [example: res={3840, 2160}]
--- windowPos: The position of the window on the screen [example: windowPos={50, 100}] {default: {50, 50}}
+-- pos: The position of the window on the screen [example: pos={50, 100}] {default: {50, 50}}
 -- fullScreen: Whether the application should run in exclusive full screen [example: fullScreen=true] {default: false}
 -- border: Whether the application should have window decorations (aka. border) [example: border=false] {default: true}
 -- monitor: Determines the monitor on which the application is started [example: monitor=2] {default: 0}
@@ -33,7 +27,6 @@ function sgct.makeConfig(config) end
 -- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
--- capture: Settings to configure the image capture [example: capture = { path = "./images"]
 -- sgctDebug: Determines whether a higher debug level in SGCT is enabled [example: sgctDebug=true] {default: false}
 -- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=40.0, right=40.0, up=22.5, down=22.5}}
 -- tracked: Determines whether the aspect ratio of the camera defined at application startup should persist when the window is resized [example: tracked=false] {default: true}
@@ -45,13 +38,15 @@ function sgct.makeConfig(config) end
 -- sgct.config.single(msaa=1) -> 1280x720 resolution without multisampling
 function sgct.config.single(arg) end
 
+
+
 -- Creates a configuration file similar to the default 'single_fisheye.xml'
 -- The parameter is a table and can contain the follow attributes:
 
 -- first argument: horizontal window size {default: 1280}
 -- second argument: vertical window size {default: 720}
 -- res: A table containing the horizontal and vertical resolution [example: res={3840, 2160}]
--- windowPos: The position of the window on the screen [example: windowPos={50, 100}] {default: {50, 50}}
+-- pos: The position of the window on the screen [example: pos={50, 100}] {default: {50, 50}}
 -- fullScreen: Whether the application should run in exclusive full screen [example: fullScreen=true] {default: false}
 -- border: Whether the application should have window decorations (aka. border) [example: border=false] {default: true}
 -- monitor: Determines the monitor on which the application is started [example: monitor=2] {default: 0}
@@ -64,7 +59,6 @@ function sgct.config.single(arg) end
 -- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
--- capture: Settings to configure the image capture [example: capture = { path = "./images"]
 -- sgctDebug: Determines whether a higher debug level in SGCT is enabled [example: sgctDebug=true] {default: false}
 -- fov: The field of view for the fisheye [example: fov=360] {default: 180}
 -- quality: The quality setting for the cubemap textures [example: quality="4k"] {default: "1k"}
@@ -77,8 +71,6 @@ function sgct.config.single(arg) end
 -- sgct.config.fisheye(640, 360, res={3840, 3840}) -> 640x360 window with 4K rendering resolution
 -- sgct.config.fisheye(msaa=1) -> 1280x720 resolution without multisampling
 function sgct.config.fisheye(arg) end
-
-function sgct.config.cube(arg) end
 
 -- Global variable storing the name of the config function called at initialization
 sgctconfiginitializeString = ""
@@ -99,23 +91,6 @@ function generateSingleViewportFOV(down, up, left, right, tracked)
         <FOV down="]]..down..[[" left="]]..left..[[" right="]]..right..[[" up="]]..up..[[" />
         <Orientation heading="0.0" pitch="0.0" roll="0.0" />
     </PlanarProjection>
-</Viewport>
-]]
-end
-
-
-
-function generateSingleViewport(lowerLeft, upperLeft, upperRight, tracked)
-    return
-[[
-<Viewport ]]..tracked..[[>
-    <Pos x="0.0" y="0.0" />
-    <Size x="1.0" y="1.0" />
-    <Projectionplane>
-        <Pos x="]] .. lowerLeft[1] .. [[" y="]] .. lowerLeft[2] .. [[" z="]] .. lowerLeft[3] .. [[" />
-        <Pos x="]] .. upperLeft[1] .. [[" y="]] .. upperLeft[2] .. [[" z="]] .. upperLeft[3] .. [[" />
-        <Pos x="]] .. upperRight[1] .. [[" y="]] .. upperRight[2] .. [[" z="]] .. upperRight[3] .. [[" />
-    </Projectionplane>
 </Viewport>
 ]]
 end
@@ -200,7 +175,7 @@ function generateWindow(arg)
     >
         <Stereo type="]] .. arg["stereo"] .. [[" />
         <Size x="]] .. arg["windowSize"][1] .. [[" y="]] .. arg["windowSize"][2] .. [[" />
-        <Pos x="]].. arg["windowPos"][1] ..[[" y="]] .. arg["windowPos"][2] .. [[" />
+        <Pos x="]].. arg["pos"][1] ..[[" y="]] .. arg["pos"][2] .. [[" />
 ]]..resolution..
 [[
 ]]..
@@ -227,46 +202,33 @@ function generateScene(arg)
 
     if scene == nil then
         return ""
-    else
-        local offset = nil
-        if scene["offset"] then
-            local o = scene["offset"]
-            offset = [[<Offset x="]]..o["x"]..[[" y="]]..o["y"]..[[" z="]]..o["z"]..[[" />]]
-        end
-
-        local orientation = nil
-        if scene["orientation"] then
-            local o = scene["orientation"]
-            orientation = [[<Orientation yaw="]]..o["yaw"]..[[" pitch="]]..o["pitch"]..[[" roll="]]..o["roll"]..[[" />]]
-        end
-
-        local scale = nil
-        if scene["scale"] then
-            scale = [[<Scale value="]] .. scene["scale"] .. [[" />]]
-        end
-
-        local sceneString = "    <Scene>"
-        if offset then
-            sceneString = sceneString .. "\n        " .. offset .. "\n"
-        end
-        if orientation then
-            sceneString = sceneString .. "\n        " .. orientation .. "\n"
-        end
-        if scale then
-            sceneString = sceneString .. "\n        " .. scale .. "\n"
-        end
-
-        sceneString = sceneString .. "    </Scene>\n"
-
-        return sceneString
-
-    --     return [[
-    -- <Scene>
-    --     ]]..offset..[[
-    --     ]]..orientation..[[
-    --     ]]..scale..[[
-    -- </Scene>]]
     end
+
+    local offset = ""
+    if scene["offset"] then
+        local o = scene["offset"]
+        offset = [[<Offset x="]]..o["x"]..[[" y="]]..o["y"]..[[" z="]]..o["z"]..[[" />]]
+    end
+
+    local orientation = ""
+    if scene["orientation"] then
+        local o = scene["orientation"]
+        orientation = [[<Orientation yaw="]]..o["yaw"]..[[" pitch="]]..o["pitch"]..[[" roll="]]..o["roll"]..[[" />]]
+    end
+
+    local scale = ""
+    if scene["scale"] then
+        scale = [[<Scale value="]] .. scene["scale"] .. [[" />]]
+    end
+
+    return
+[[
+    <Scene>
+        ]] .. offset .. [[
+        ]] .. orientation .. [[
+        ]] .. scale .. [[
+    </Scene>
+]]
 end
 
 
@@ -295,39 +257,6 @@ end
 
 
 
-function generateCapture(arg)
-    if arg["capture"] == nil then
-        return ""
-    else
-        local path = ""
-        if arg["capture"]["path"] then
-            path = 'path="' .. arg["capture"]["path"] .. '" '
-        end
-
-        local monoPath = ""
-        if arg["capture"]["monoPath"] then
-            path = 'monoPath="' .. arg["capture"]["monoPath"] .. '" '
-        end
-
-        local leftPath = ""
-        if arg["capture"]["leftPath"] then
-            path = 'leftPath="' .. arg["capture"]["leftPath"] .. '" '
-        end
-
-        local rightPath = ""
-        if arg["capture"]["rightPath"] then
-            path = 'rightPath="' .. arg["capture"]["rightPath"] .. '" '
-        end
-
-        local format = ""
-        if arg["capture"]["format"] then
-            path = 'format="' .. arg["capture"]["format"] .. '" '
-        end
-    end
-end
-
-
-
 function generateCluster(arg)
     return [[
 <?xml version="1.0" ?>
@@ -341,7 +270,6 @@ function generateCluster(arg)
 ]] .. arg["window"] ..[[
     </Node>
 ]] .. arg["user"] .. [[
-]] .. (arg["capture"] or "") .. [[
 </Cluster>
 ]]
 end
@@ -375,21 +303,12 @@ function generateSingleWindowConfig(arg)
     end
 
     assert(
-        type(arg["windowSize"]) == "table" or type(arg["windowSize"]) == "nil",
-        "windowSize must be a table or nil"
+        type(arg["pos"]) == "table" or type(arg["pos"]) == "nil",
+        "pos must be a table or nil"
     )
-    if (type(arg["windowSize"]) == "table") then
-        assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
-        assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
-    end
-
-    assert(
-        type(arg["windowPos"]) == "table" or type(arg["windowPos"]) == "nil",
-        "windowPos must be a table or nil"
-    )
-    if (type(arg["windowPos"]) == "table") then
-        assert(type(arg["windowPos"][1]) == "number", "windowPos[1] must be a number")
-        assert(type(arg["windowPos"][2]) == "number", "windowPos[2] must be a number")
+    if (type(arg["pos"]) == "table") then
+        assert(type(arg["pos"][1]) == "number", "pos[1] must be a number")
+        assert(type(arg["pos"][2]) == "number", "pos[2] must be a number")
     end
 
     assert(
@@ -466,34 +385,6 @@ function generateSingleWindowConfig(arg)
         )
     end
 
-    assert(
-        type(arg["capture"]) == "table" or type(arg["capture"]) == "nil",
-        "capture must be a table or nil"
-    )
-    if type(arg["capture"]) == "table" then
-        local c = arg["capture"]
-        assert(
-            type(c["path"]) == "string" or type(c["path"]) == "nil",
-            "capture['path'] must be a string or nil"
-        )
-        assert(
-            type(c["monoPath"]) == "string" or type(c["monoPath"]) == "nil",
-            "capture['monoPath'] must be a string or nil"
-        )
-        assert(
-            type(c["leftPath"]) == "string" or type(c["leftPath"]) == "nil",
-            "capture['leftPath'] must be a string or nil"
-        )
-        assert(
-            type(c["rightPath"]) == "string" or type(c["rightPath"]) == "nil",
-            "capture['rightPath'] must be a string or nil"
-        )
-        assert(
-            type(c["format"]) == "string" or type(c["format"]) == "nil",
-            "capture['format'] must be a string or nil"
-        )
-    end
-
     assert(type(arg["viewport"]) == "string", "viewport must be a string")
 
     -- Then setting reasonable default values
@@ -530,8 +421,8 @@ function generateSingleWindowConfig(arg)
         arg["stereo"] = "none"
     end
 
-    if arg["windowPos"] == nil then
-        arg["windowPos"] = { 50, 50 }
+    if arg["pos"] == nil then
+        arg["pos"] = { 50, 50 }
     end
 
     if arg["sgctDebug"] == nil then
@@ -546,7 +437,6 @@ function generateSingleWindowConfig(arg)
     arg["settings"] = generateSettings(arg)
     arg["window"] = generateWindow(arg)
     arg["user"] = generateUser(arg)
-    arg["capture"] = generateCapture(arg)
 
     return generateCluster(arg)
 end
@@ -555,12 +445,6 @@ end
 function normalizeArg(arg)
     arg = arg or {}
 
-    if (type(arg["windowSize"]) == "table") then
-        assert(
-            type(arg[1]) == "nil" and type(arg[2]) == "nil",
-            "Only windowSize or the first and second arguments can be set. Not both"
-        )
-    end
     assert(
         type(arg[1]) == "number" or type(arg[1]) == "nil",
         "First argument must be a number or nil"
@@ -618,8 +502,8 @@ function sgct.config.single(arg)
         local tanDefaultFov = math.tan(math.pi * defaultFov / 180)
 
         if (type(arg["windowSize"]) == "table") then
-            assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
-            assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
+            assert(type(arg["windowSize"][1]) == "number", "windowSize[1] must be a number")
+            assert(type(arg["windowSize"][2]) == "number", "windowSize[2] must be a number")
             local tanHorizontalFov = tanDefaultFov
             local tanVerticalFov = tanDefaultFov
 
@@ -677,7 +561,6 @@ end
 
 
 function sgct.config.fisheye(arg)
-
     arg = normalizeArg(arg)
 
     assert(
@@ -772,90 +655,3 @@ function sgct.config.fisheye(arg)
 
     return sgct.makeConfig(generateSingleWindowConfig(arg))
 end
-
-
-
-function sgct.config.cube(arg)
-    function getCubeWindow(location, res, size, trackedSpecifier)
-        local pos
-        local lowerLeft
-        local upperLeft
-        local upperRight
-        if location == 'left' then
-            pos = { 0, size[2] }
-            lowerLeft =     { -1, -1,  1 }
-            upperLeft =     { -1,  1,  1 }
-            upperRight =    { -1,  1, -1 }
-        elseif location == 'right' then
-            pos = { 2 * size[1], size[2] }
-            lowerLeft =     {  1, -1, -1 }
-            upperLeft =     {  1,  1, -1 }
-            upperRight =    {  1,  1,  1 }
-        elseif location == 'up' then
-            pos = { size[1], 0 }
-            lowerLeft =     {  1,  1, -1 }
-            upperLeft =     {  1,  1,  1 }
-            upperRight =    { -1,  1,  1 }
-        elseif location == 'down' then
-            pos = { size[1], 2 * size[2] }
-            lowerLeft =     { -1, -1,  1 }
-            upperLeft =     { -1, -1, -1 }
-            upperRight =    {  1, -1, -1 }
-        elseif location == 'back' then
-            pos = { 2 * size[1], 2 * size[2] }
-            lowerLeft =     {  1, -1,  1 }
-            upperLeft =     {  1,  1,  1 }
-            upperRight =    { -1,  1,  1 }
-        elseif location == 'front' then
-            pos = { size[1], size[2] }
-            lowerLeft =     { -1, -1, -1 }
-            upperLeft =     { -1,  1, -1 }
-            upperRight =    {  1,  1, -1 }
-        end
-
-        arg = {}
-        arg["msaa"] = 8
-        arg["border"] = false
-        arg["name"] = "OpenSpace_" .. location
-        arg["tags"] = { "Spout" }
-        arg["windowSize"] = size
-        arg["windowPos"] = pos
-        arg["res"] = { res, res }
-        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight, trackedSpecifier)
-
-        return generateWindow(arg)
-    end
-
-    function getControlWindow(down, up, left, right, trackedSpecifier)
-        arg = {}
-        arg["viewport"] = generateSingleViewportFOV(down, up, left, right, trackedSpecifier)
-        return generateWindow(arg)
-    end
-
-    sgctconfiginitializeString = "sgct.config.cube"
-
-    res = 1024
-    size = { 640, 360 }
-    
-    arg["scene"] = generateScene(arg)
-    arg["settings"] = generateSettings(arg)
-    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
-        trackedSpecifier = "tracked=\"true\""
-    else
-        trackedSpecifier = "tracked=\"false\""
-    end
-
-    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0, trackedSpecifier) ..
-        getCubeWindow('front', res, size, trackedSpecifier) ..
-        getCubeWindow('back', res, size, trackedSpecifier) ..
-        getCubeWindow('left', res, size, trackedSpecifier) ..
-        getCubeWindow('right', res, size, trackedSpecifier) ..
-        getCubeWindow('up', res, size, trackedSpecifier) ..
-        getCubeWindow('down', res, size, trackedSpecifier)
-
-    arg["user"] = generateUser(arg)
-    arg["capture"] = generateCapture(arg)
-
-    return sgct.makeConfig(generateCluster(arg))
-end
-
