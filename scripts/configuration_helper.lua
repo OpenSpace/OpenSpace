@@ -83,62 +83,75 @@ sgctconfiginitializeString = ""
 
 function generateSingleViewportFOV(down, up, left, right, tracked)
   return [[
-<Viewport tracked="]] .. tostring(tracked) .. [[">
-  <Pos x="0.0" y="0.0" />
-  <Size x="1.0" y="1.0" />
-  <PlanarProjection>
-    <FOV down="]] .. down .. [[" left="]] .. left .. [[" right="]] .. right .. [[" up="]] .. up .. [[" />
-    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
-  </PlanarProjection>
-</Viewport>
+{
+  "pos": { "x": 0.0, "y": 0.0 },
+  "size": { "x": 1.0, "y": 1.0 },
+  "tracked": ]] .. tostring(tracked) .. [[,
+  "projection": {
+    "type": "PlanarProjection",
+    "fov": {
+      "left": ]] .. left .. [[,
+      "right": ]] .. right .. [[,
+      "up": ]] .. up .. [[,
+      "down": ]] .. down .. [[
+    },
+    "orientation": { "heading": 0.0, "pitch": 0.0, "roll": 0.0 }
+  }
+}
 ]]
 end
 
 
 
-function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, tracked)
+function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, tracked) 
   local background_fragment = [[
-<Background 
-  r="]]..background["r"]..[["
-  g="]]..background["g"]..[["
-  b="]]..background["b"]..[["
-  a="]]..background["a"]..[["
-/>
-]]
+{
+  "r": ]] .. background["r"] .. [[,
+  "g": ]] .. background["g"] .. [[,
+  "b": ]] .. background["b"] .. [[,
+  "a": ]] .. background["a"] .. [[
+}]]
 
 local crop_fragment = ""
-if crop then
-  crop_fragment = [[
-<Crop
-  left="]] .. crop["left"] .. [["
-  right="]] .. crop["right"] .. [["
-  top="]] .. crop["top"] .. [["
-  bottom="]] .. crop["bottom"] .. [["
-/>
-]]
+  if crop then
+    crop_fragment = [[
+{
+  "left": ]] .. crop["left"] .. [[,
+  "right": ]] .. crop["right"] .. [[,
+  "top": ]] .. crop["top"] .. [[,
+  "bottom": ]] .. crop["bottom"] .. [[
+}]]
+  else
+    crop_fragment = "{}"
   end
 
   local offset_fragment = ""
   if offset then
     offset_fragment = [[
-<Offset
-  x="]] .. offset["x"] .. [["
-  y="]] .. offset["y"] .. [["
-  z="]] .. offset["z"] .. [["
-/>
-]]
+{
+  "x": ]] .. offset["x"] .. [[,
+  "y": ]] .. offset["y"] .. [[,
+  "z": ]] .. offset["z"] .. [[
+}]]
+  else
+    offset_fragment = "{}"
   end
 
   return [[
-<Viewport name="fisheye" tracked="]] .. tostring(tracked) .. [[">
-  <Pos x="0.0" y="0.0" />
-  <Size x="1.0" y="1.0" />
-  <FisheyeProjection fov="]] .. fov .. [[" quality="]] .. quality .. [[" tilt="]] .. tilt .. [[">
-]] .. background_fragment .. [[
-]] .. crop_fragment .. [[
-]] .. offset_fragment .. [[
-  </FisheyeProjection>
-</Viewport>
+{
+  "pos": { "x": 0.0, "y": 0.0 },
+  "size": { "x": 1.0, "y": 1.0 },
+  "tracked": ]] .. tostring(tracked) .. [[,
+  "projection": {
+    "type": "FisheyeProjection",
+    "fov": ]] .. fov .. [[,
+    "quality": "]] .. quality .. [[",
+    "tilt": ]] .. tilt .. [[,
+    "background": ]] .. background_fragment .. [[,
+    "crop": ]] .. crop_fragment .. [[,
+    "offset": ]] .. offset_fragment .. [[
+  }
+}
 ]]
 end
 
@@ -151,7 +164,7 @@ function generateWindow(arg)
     arg["res"][2] = arg["res"][2] or arg["windowSize"][2]
 
     resolution_fragment =
-      [[<Res x="]] .. arg["res"][1] .. [[" y="]] .. arg["res"][2] .. [[" />]]
+      [[ "res": { "x": ]] .. arg["res"][1] .. [[ "y": ]] .. arg["res"][1] .. [[},]]
   end
 
   local tags
@@ -159,23 +172,22 @@ function generateWindow(arg)
     tags = table.concat(arg["tags"], ",")
   end
 
-
-  return
-[[
-<Window 
-  fullScreen="]] .. tostring(arg["fullScreen"]) .. [["
-  numberOfSamples="]] .. arg["msaa"] .. [["
-  border="]] .. tostring(arg["border"]) .. [["
-  name="OpenSpace"
-  monitor="]] .. arg["monitor"] .. [["
-  tags="]] .. tags .. [["
->
-  <Stereo type="]] .. arg["stereo"] .. [[" />
-  <Size x="]] .. arg["windowSize"][1] .. [[" y="]] .. arg["windowSize"][2] .. [[" />
-  <Pos x="]].. arg["pos"][1] ..[[" y="]] .. arg["pos"][2] .. [[" />
-]] .. resolution_fragment .. [[
-]] .. arg["viewport"].. [[
-</Window>
+  return [[
+{
+  "name": "OpenSpace",
+  "fullscreen": ]] .. tostring(arg["fullScreen"]) .. [[,
+  "msaa": ]] .. arg["msaa"] .. [[,
+  "border": ]] .. tostring(arg["border"]) .. [[,
+  "monitor": ]] .. arg["monitor"] .. [[,
+  "tags": [ ]] .. tags .. [[ ],
+  "stereo": "]] .. arg["stereo"] .. [[",
+  "size": { "x": ]] .. arg["windowSize"][1] .. [[, "y": ]] .. arg["windowSize"][2] .. [[ },
+  "pos": { "x": ]] .. arg["pos"][1] .. [[, "y": ]] .. arg["pos"][2] .. [[ },
+  ]] .. resolution_fragment .. [[
+  "viewports": [
+    ]] .. arg["viewport"] .. [[
+  ]
+}
 ]]
 end
 
@@ -183,9 +195,10 @@ end
 
 function generateUser(arg)
   return [[
-<User eyeSeparation="0.065">
-  <Pos x="0.0" y="0.0" z="0.0" />
-</User>
+{
+  "eyeSeparation": 0.06,
+  "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
+}
 ]]
 end
 
@@ -195,33 +208,27 @@ function generateScene(arg)
   local scene = arg["scene"]
 
   if scene == nil then
-    return ""
+    return "{}"
   end
 
-  local offset_fragment = ""
-  if scene["offset"] then
-    local o = scene["offset"]
-    offset_fragment = [[<Offset x="]]..o["x"]..[[" y="]]..o["y"]..[[" z="]]..o["z"]..[[" />]]
-  end
+  local offset = scene["offset"] or { x = 0.0, y = 0.0, z = 0.0 }
+  local orientation = scene["orientation"] or { yaw = 0.0, pitch = 0.0, roll = 0.0 }
+  local scale = scene["scale"] or 1.0
 
-  local orientation_fragment = ""
-  if scene["orientation"] then
-    local o = scene["orientation"]
-    orientation_fragment = [[<Orientation yaw="]]..o["yaw"]..[[" pitch="]]..o["pitch"]..[[" roll="]]..o["roll"]..[[" />]]
-  end
-
-  local scale_fragment = ""
-  if scene["scale"] then
-    scale_fragment = [[<Scale value="]] .. scene["scale"] .. [[" />]]
-  end
-
-  return
-[[
-<Scene>
-]] .. offset_fragment .. [[
-]] .. orientation_fragment .. [[
-]] .. scale_fragment .. [[
-</Scene>
+  return [[
+{
+  "offset": {
+    "x": ]] .. offset["x"] .. [[,
+    "y": ]] .. offset["y"] .. [[,
+    "z": ]] .. offset["z"] .. [[
+  },
+  "orientation": {
+    "yaw": ]] .. orientation["yaw"] .. [[,
+    "pitch": ]] .. orientation["pitch"] .. [[,
+    "roll": ]] .. orientation["roll"] .. [[
+   },
+   "scale": ]] .. scale .. [[
+}
 ]]
 end
 
@@ -237,15 +244,16 @@ function generateSettings(arg)
 
   local refresh_fragment = ""
   if arg["refreshRate"] then
-    refresh_fragment = "refreshRate=\"" .. arg["refreshRate"] .. "\" "
+    refresh_fragment = [[ "refreshRate": ]] .. arg["refreshRate"] .. ","
   end
 
-
-
   return [[
-<Settings>
-  <Display swapInterval="]].. v ..[[" ]] .. refresh_fragment .. [[/>
-</Settings>
+{
+  "display": {
+    ]] .. refresh_fragment .. [[
+    "swapInterval": ]] .. v .. [[
+  }
+}
 ]]
 end
 
@@ -253,18 +261,25 @@ end
 
 function generateCluster(arg)
   return [[
-<?xml version="1.0" ?>
-<Cluster
-  masterAddress="localhost"
-  debug="]] .. tostring(arg["sgctDebug"]) .. [["
->
-]] .. (arg["settings"] or "") .. [[
-]] .. (arg["scene"] or "") .. [[
-<Node address="localhost" port="20401">
-]] .. arg["window"] ..[[
-</Node>
-]] .. arg["user"] .. [[
-</Cluster>
+{
+  "version": 1,
+  "masterAddress": "127.0.0.1",
+  "debug": ]] .. tostring(arg["sgctDebug"]) .. [[,
+  "settings": ]] .. (arg["settings"] or "{}") .. [[,
+  "scene": ]] .. (arg["scene"] or "{}") .. [[,
+  "nodes": [
+    {
+      "address": "127.0.0.1",
+      "port": 20401,
+      "windows": [
+        ]] .. arg["window"] .. [[
+      ]
+    }
+  ],
+  "users": [
+    ]] .. arg["user"] .. [[
+  ]
+}
 ]]
 end
 
@@ -385,7 +400,7 @@ function generateSingleWindowConfig(arg)
   arg["fullScreen"] = arg["fullScreen"] or false
   arg["monitor"] = arg["monitor"] or 0
   arg["tags"] = arg["tags"] or {}
-  arg["msaa"] = arg["msaa"] or 4
+  arg["msaa"] = arg["msaa"] or 1
   arg["border"] = arg["border"] or true
   arg["stereo"] = arg["stereo"] or "none"
   arg["pos"] = arg["pos"] or { 50, 50 }
@@ -432,7 +447,8 @@ end
 
 
 function sgct.makeConfig(config)
-  local configFile = os.tmpname() .. ".xml"
+  -- local configFile = os.tmpname() .. ".json"
+  local configFile = "C:/Development/testing.json"
   local file = io.open(configFile, "w+")
   file:write(config)
   io.close(file)
