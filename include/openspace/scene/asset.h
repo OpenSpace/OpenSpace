@@ -76,13 +76,12 @@ public:
     /**
      * Creates a new Asset that is backed by the provided \p assetPath. The \p manager is
      * the AssetManager instance that is responsible for loading this and all the other
-     * required Assets, the \p watcher is the instance that will delegate information
-     * about successful or unsuccessful synchronizations.
+     * required Assets.
      *
      * \param manager The AssetManager that is responsible for loading this Asset and all
      *        of its dependencies
      * \param assetPath The file path that will be used to load this Asset
-     * 
+     *
      * \pre The \p assetPath must not be empty and must be an existing file
      */
     Asset(AssetManager& manager, std::filesystem::path assetPath);
@@ -96,25 +95,25 @@ public:
 
     /**
      * Adds a new dependent ResourceSynchronization object to this Asset.
-     * 
+     *
      * \param synchronization The resource synchronization object that is bound to this
      *        Asset
      * \pre \p synchronization must not be nullptr
      * \pre \p synchronization must not have been added to this Asset before
      */
     void addSynchronization(ResourceSynchronization* synchronization);
-    
+
     /**
      * Updates the state of this Asset based on the latest synchronization being
      * successfully resolved. Depending on the sum state of all registered
-     * synchronizations this Asset's state changes to successfull Synchronized, or Failed
+     * synchronizations this Asset's state changes to successfully Synchronized, or Failed
      */
     void setSynchronizationStateResolved();
 
     /**
      * Updates the state of this Asset based on the latest synchronization being rejected.
      * Depending on the sum state of all registered synchronizations this Asset's state
-     * changes to successfull Synchronized, or Failed
+     * changes to successfully Synchronized, or Failed
      */
     void setSynchronizationStateRejected();
 
@@ -125,21 +124,21 @@ public:
      * to be triggered and might be \c nullptr if this asset does not have any parents. If
      * this Asset has been previously loaded (even with a different \p parent), this
      * function does nothing.
-     * 
+     *
      * \param parent The parent asset (or \c nullptr) that triggered this loading
      */
     void load(Asset* parent);
 
     /**
      * Returns \c true if this Asset has at least one parent that is in the Loaded state.
-     * 
+     *
      * \return \c true if this Asset has at least one parent that is in the Loaded state
      */
     bool hasLoadedParent();
 
     /**
      * Returns \c true if this Asset has been successfully #load ed.
-     * 
+     *
      * /return \c true if this Asset has been successfully loaded
      */
     bool isLoaded() const;
@@ -158,7 +157,7 @@ public:
      * synchronizations and required assets' synchronizations could start. When all
      * synchronizations have completed successfully, this Asset transitions into the
      * Synchronized state.
-     * 
+     *
      * \pre This Asset must have been Loaded before
      */
     void startSynchronizations();
@@ -166,13 +165,13 @@ public:
     /**
      * Returns \c true if this Asset's synchronizations (if any) have completed
      * successfully.
-     * 
+     *
      * \return \c true if this Asset is in the Synchronized or Initialized state
      */
     bool isSynchronized() const;
 
     /**
-     * Initializes this asset and returns \ctrue if the initialized succeeded, i.e. if
+     * Initializes this asset and returns \c true if the initialized succeeded, i.e. if
      * this and all required assets initialized without errors. After this call, if it has
      * been successful, this Asset is in the Initialized state. If the Asset has already
      * been initialized, calling this function does nothing.
@@ -206,7 +205,7 @@ public:
     /**
      * Marks the passed \p child as being required by \p this Asset. If the \p child is
      * already required by this asset, this function does nothing.
-     * 
+     *
      * \param child The asset that is required by this asset
      * \pre \p child must not be nullptr
      */
@@ -215,7 +214,7 @@ public:
     /**
      * Returns \c true if the loading of the Asset has failed in any way so that
      * recovering from the error is impossible.
-     * 
+     *
      * \return \c true if the Asset handling failed in any way, \c false otherwise
      */
     bool isFailed() const;
@@ -231,7 +230,7 @@ public:
     /**
      * Returns the meta information of this asset back to the caller. If no such
      * information exists, a \c std::nullopt will be returned.
-     * 
+     *
      * \return The MetaInformation about this asset or \c std::nullopt
      */
     std::optional<MetaInformation> metaInformation() const;
@@ -264,7 +263,7 @@ private:
      * this Asset, if \p state is a state related to the synchronization, it will
      * potentially propagate to this Asset's parents and cause them to be set to be
      * successfully synchronized or faild.
-     * 
+     *
      * \param state The new State that this Asset is set to
      */
     void setState(State state);
@@ -279,7 +278,7 @@ private:
 
     /// The state that this Asset is currently in
     std::atomic<State> _state = State::Unloaded;
-    
+
     /// Reference to the manager that is responsible for loading and unloading this asset
     AssetManager& _manager;
 

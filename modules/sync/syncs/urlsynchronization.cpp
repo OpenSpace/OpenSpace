@@ -89,7 +89,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dictionary,
     else {
         throw ghoul::MissingCaseException();
     }
-    
+
     if (p.filename.has_value() && _urls.size() > 1) {
         throw ghoul::RuntimeError(fmt::format(
             "UrlSynchronization ({}) requested overwrite filename but specified {} URLs "
@@ -148,7 +148,7 @@ void UrlSynchronization::start() {
         for (const std::string& url : _urls) {
             if (_filename.empty()) {
                 std::string name = std::filesystem::path(url).filename().string();
-                
+
                 // We can not create filenames with question marks
                 name.erase(std::remove(name.begin(), name.end(), '?'), name.end());
                 _filename = name;

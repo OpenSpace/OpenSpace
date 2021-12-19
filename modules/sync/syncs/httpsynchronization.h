@@ -55,7 +55,7 @@ public:
      * will be asked to resolve the (identifier, version) pair. The first URL in the list
      * that can successfully resolve the requested (identifier, version) pair is the one
      * that will be used.
-     * 
+     *
      * \param dict The parameter dictionary (namely the identifier and version)
      * \param synchronizationRoot The path to the root from which the complete #directory
      *        path is constructed
@@ -72,7 +72,7 @@ public:
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
      * are saved.
-     * 
+     *
      * \return The location for files created by this class
      */
     std::filesystem::path directory() const override;
@@ -98,7 +98,7 @@ private:
 
     /// The file version for the requested files
     int _version = -1;
-    
+
     // The list of all repositories that we'll try to sync from
     const std::vector<std::string> _syncRepositories;
 

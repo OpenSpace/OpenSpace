@@ -45,7 +45,7 @@ namespace openspace {
  * registered using the #onHeader, #onProgress, and #onData functions. Calling these
  * functions will overwrite any previously registered handler.
  * The ProgressCallback can be used to stop the download if the handler returns \c false.
- * 
+ *
  * The workflow for this class:
  * 1. Create a new object with the URL that points to the location from which the data
  *    should be loaded
@@ -60,7 +60,7 @@ public:
      * hasn't started yet) and the total number of bytes if that value is known. The
      * return value determines if the download should continue (if the function returns
      * \c true) or if it should abort (if \c false is returned).
-     * 
+     *
      * \param downloadedBytes The number of bytes that have been downloaded thus far or 0
      *        if the download hasn't started yet
      * \param totalBytes The total number of bytes for the download if it is known, or a
@@ -79,7 +79,7 @@ public:
      * of the buffer before the callback returns. If the return value is \c true, the
      * download continues, if it is \c false, this signals to the library that an error
      * has occurred from which recovery is not possible.
-     * 
+     *
      * \param buffer The pointer to the beginning of the buffer where the new incoming
      *        data is located. This buffer is only valid during the execution of this
      *        callback and the contents of the buffer should be copied to a different
@@ -111,9 +111,9 @@ public:
     /**
      * Creates a new HttpRequest object that will try to download the contents at the
      * provided \p url.
-     * 
+     *
      * \param url The URL that should be requested by this HttpRequest
-     * 
+     *
      * \pre \p url must not be empty
      */
     explicit HttpRequest(std::string url);
@@ -122,7 +122,7 @@ public:
      * Registers a callback that will be called when the header for the request has been
      * transmitted successfully. The contents of the header will be passed into the
      * callback and the callback returns whether the request should proceed or be aborted.
-     * 
+     *
      * \param cb The callback that should be registered. This will silently replace any
      *        previously registered callback
      */
@@ -135,7 +135,7 @@ public:
      * should be downloaded to complete the request. This information might not always be
      * available. The callback's return value determines whether the request should
      * continue or be aborted.
-     * 
+     *
      * \param cb The callback that should be registered. This will silently replace any
      *        previously registered callback
      */
@@ -148,7 +148,7 @@ public:
      * storing it in an external buffer and appending to it. The callback can return
      * whether the download should proceed (by returning \c true) or be aborted (by
      * returning \c false).
-     * 
+     *
      * \param cb The callback that should be registered. This will silently replace any
      *        previously registered callback
      */
@@ -160,7 +160,7 @@ public:
      * completed successfully or failed. During this call, the registered callbacks will
      * be called repeatedly until the request finishes. This function returns whether the
      * request was completed successfully or failed.
-     * 
+     *
      * \param timeout The amount of time the request will wait before aborting due to the
      *        server not responding. If this value is 0, there is no timeout on the
      *        request.
@@ -204,9 +204,9 @@ public:
     /**
      * Creates a new HttpDownload that will start to download the file pointed to by the
      * \param url parameter as soon as the download is #start ed.
-     * 
+     *
      * \param url The URL that should be downloaded by this HttpDownload
-     * 
+     *
      * \pre \p url must not be empty
      */
     explicit HttpDownload(std::string url);
@@ -234,7 +234,7 @@ public:
      * take care of the download, meaning that this function will return almost
      * instantaneously. If the HttpDownload is already downloading a file this function
      * does nothing.
-     * 
+     *
      * \param timeout The number of milliseconds that the download will be kept alive
      *        while waiting for a reply from the server. If this value is 0, the
      *        connection will never time out
@@ -251,7 +251,7 @@ public:
     /**
      * This function will wait until the download has completed and will return the
      * success of the download back to the caller.
-     * 
+     *
      * \return \c true if the downloaded succeeded or \c false if the download failed
      */
     bool wait();
@@ -259,7 +259,7 @@ public:
     /**
      * Returns \c true if the download has completed and it failed, or \c false if either
      * the download is till ongoing or is finished and has succeeded.
-     * 
+     *
      * \return Whether the download has completed and it failed
      */
     bool hasFailed() const;
@@ -267,7 +267,7 @@ public:
     /**
      * Returns \c true if the download has completed successfully , or \c false if either
      * the download is till ongoing or is finished and has failed.
-     * 
+     *
      * \return Whether the download has completed successfully
      */
     bool hasSucceeded() const;
@@ -290,10 +290,10 @@ protected:
      * \c false, this signals to the library that an error has occurred from which
      * recovery is not possible. This function will be called on a different thread from
      * the one that called the #start method.
-     * 
+     *
      * \param buffer The beginning of the buffer of this chunk of data
      * \param size The number of bytes that the \p buffer contains
-     * 
+     *
      * \return The implementation should return \c true if the downloading should continue
      *         and \c false if the handling of the data caused some error that the
      *         subclass is incapable of recovering from
@@ -307,7 +307,7 @@ protected:
      * The return value determines if the setup operation completed successfully or if an
      * error occurred that will cause the download to be terminated. This function will be
      * called on a different thread from the one that called the #start method.
-     * 
+     *
      * \return \c true if the setup completed successfully and \c false if the setup
      *         failed unrecoverably
      */
@@ -320,7 +320,7 @@ protected:
      * closing file handles, committing some memory etc. The return value of this function
      * signals whether the teardown completed successfully. This function will be called
      * on a different thread from the one that called the #start method.
-     * 
+     *
      * \return \c true if the teardown completed successfully and \c false if it failed
      */
     virtual bool teardown();
@@ -380,7 +380,7 @@ public:
     /**
      * Returns the path where the contents of the URL provided in the constructor will be
      * saved to.
-     * 
+     *
      * \return The path where URL will be downloaded to
      */
     std::filesystem::path destination() const;
@@ -434,7 +434,7 @@ public:
     /**
      * Creates an instance of a HttpMemoryDownload that will download the contents of the
      * \p url into memory
-     * 
+     *
      * \param url The URL whose contents should be downloaded
      */
     explicit HttpMemoryDownload(std::string url);
@@ -451,7 +451,7 @@ public:
      * method returns \c false, this buffer will be changed by a different thread and
      * access is not thread-safe. After that function returns \c true, it is safe to
      * access the buffer.
-     * 
+     *
      * \return A reference to the buffer used to hold the contents of the URL
      */
     const std::vector<char>& downloadedData() const;

@@ -39,9 +39,9 @@ class ResourceSynchronization;
 
 /**
  * The AssetManager class manages the loading, initialization, and unloading of all assets
- * loaded in OpenSpace. Most actions of this class are doing in a two-step process where
- * first the intend is registered, which is then executed in the next execution of the
- * #update function.
+ * loaded in OpenSpace. Most actions of this class are operating in a two-step process
+ * where first the intent of an action is registered, which is then executed in the next
+ * call to the #update function.
  * All assets are loading through the same Lua state.
  */
 class AssetManager {
@@ -54,7 +54,7 @@ public:
     /**
      * Loads the asset at the provided \p path as a new root asset of the AssetManager.
      * If the asset at that path was already loaded, nothing happens.
-     * 
+     *
      * \param path The path from which the Asset is loaded. This path can be either
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
@@ -66,7 +66,7 @@ public:
     /**
      * Removes the asset at the provided \p path if it has been loaded by this
      * AssetManager. If the asset at that path was not found, nothing happens.
-     * 
+     *
      * \param path The path from which the Asset is loaded. This path can be either
      *        relative to the base directory (the path starting with . or ..), an absolute
      *        path (that path starting with *:/ or /) or relative to the global asset root
@@ -86,7 +86,7 @@ public:
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the
      * assets is undefined.
-     * 
+     *
      * \return A list of all assets that have been previously loaded by the AssetManager
      */
     std::vector<const Asset*> allAssets() const;
@@ -98,7 +98,7 @@ public:
      * means that asset file gets executed and the meta information is extracted from it.
      * The \p parent is the asset file that caused this loading to happen and can be a
      * \c nullptr if the asset is to be loaded as a root asset.
-     * 
+     *
      * \param asset The asset that should be loaded
      * \param parent The parent of the loaded asset file or \c nullptr if the asset is a
      *        root asset
@@ -110,7 +110,7 @@ public:
      * Unload the provided \p asset by removing all information about it from the Lua
      * state and placing the asset onto the deletion queue. Please note that the asset
      * will not actually get destroyed until the next #update call to the AssetManager.
-     * 
+     *
      * \param asset The asset that should get unloaded
      * \pre \p asset must not be a nullptr
      */
@@ -119,7 +119,7 @@ public:
     /**
      * This function calls the `onInitialize` function that was specified in the file of
      * the provided \p asset.
-     * 
+     *
      * \param asset The asset file whose `onInitialize` function should be called
      */
     void callOnInitialize(Asset* asset) const;
@@ -153,7 +153,7 @@ private:
     // Assets
     //
 
-    // The authoratative list of all assets that have been loaded through the AssetManager
+    /// The authoritative list of all assets loaded through the AssetManager
     std::vector<std::unique_ptr<Asset>> _assets;
 
     /// A list of all root assets that have been loaded directly by the `add` function
@@ -166,12 +166,12 @@ private:
     /// The list contains all of the assets that should be removed in the next update call
     std::unordered_set<std::string> _assetRemoveQueue;
 
-    /// This list contains all assets that need to be initializaed in the next update call
+    /// This list contains all assets that need to be initialized in the next update call
     std::vector<Asset*> _toBeInitialized;
 
     /// This list contains all of the assets that will be deleted in the next update call
     std::vector<std::unique_ptr<Asset>> _toBeDeleted;
-    
+
     //
     // ResourceSynchronizations
     //
@@ -194,7 +194,7 @@ private:
 
     /// The location of the asset root directory
     std::filesystem::path _assetRootDirectory;
-    
+
     /// The Lua state that is used for all asset initialization
     ghoul::lua::LuaState* _luaState = nullptr;
 

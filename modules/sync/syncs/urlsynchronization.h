@@ -47,7 +47,7 @@ public:
      * The constructor that takes the parameter \p dictionary and the
      * \p synchronizationRoot to the location that is used as the base to compute the
      * final storage location. The provided list of URLs must not contain any duplicates.
-     * 
+     *
      * \param dictionary The parameter dictionary that contains all information that this
      *        UrlSynchronization needs to download the provided files
      * \param synchronizationRoot The base location based off which the final placement
@@ -62,14 +62,14 @@ public:
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
      * are saved.
-     * 
+     *
      * \return The location for files created by this class
      */
     std::filesystem::path directory() const override;
 
     /// Starts the synchronization for this ResourceSynchronization
     void start() override;
-    
+
     /// Cancels any ongoing synchronization of this ResourceSynchronization
     void cancel() override;
 
@@ -81,7 +81,7 @@ private:
 
     /// Setting whether existing files should be ignored (false) or overwritten (true)
     bool _forceOverride = false;
-    
+
     /// An optional filename that might overwrite the storage destination. This is only
     /// valid if a single URL is specified
     std::string _filename;

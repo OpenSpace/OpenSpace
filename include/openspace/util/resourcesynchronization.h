@@ -58,11 +58,11 @@ public:
      * \c Identifier, and a \c Name, with other optional parameters depending on the
      * specific subtype of ResourceSynchronization class is is specified through the
      * provided \c Type.
-     * 
+     *
      * \param dictionary The dictionary containing the parameters with which to choose the
      *        specific type of ResourceSynchronization and all the necessary parameters to
      *        initialize said ResourceSynchronization
-     * 
+     *
      * \throw SpecificationError If the \p dictionary does not contain a \c Type, an
      *        \c Identifier, and a \c Name
      */
@@ -74,10 +74,10 @@ public:
      * \c Type and the \c Identifier values of the passed \p dictionary. All other
      * parameters are ignored, but as long as the \c Type and/or the \c Identifier values
      * differ, the resulting string will be different.
-     * 
+     *
      * \param dictionary The dictionary containing the \c Type and the \c Identifier used
      *        to create a unique identifier
-     * 
+     *
      * \throw SpecificationError If the \p dictionary does not contain a \c Type, an
      *        \c Identifier, and a \c Name
      */
@@ -89,7 +89,7 @@ public:
     /**
      * Returns the location to which files downloaded through this ResourceSynchronization
      * are saved.
-     * 
+     *
      * \return The location for files created by this class
      */
     virtual std::filesystem::path directory() const = 0;
@@ -105,7 +105,7 @@ public:
      * synchronization hasn't started yet. This number always will only contain the number
      * of bytes of actual payload data, not any additional data transfers that some
      * subtypes might require.
-     * 
+     *
      * \return The number of synchronized bytes
      */
     size_t nSynchronizedBytes() const;
@@ -116,7 +116,7 @@ public:
      * (yet), the returned value is 0. This number always will only contain the number of
      * bytes of actual payload data, not any additional data transfers that some subtypes
      * might require.
-     * 
+     *
      * \return The total number of required bytes
      */
     size_t nTotalBytes() const;
@@ -126,14 +126,14 @@ public:
      * known. Will return \c false otherwise. This number always will only contain the
      * number of bytes of actual payload data, not any additional data transfers that some
      * subtypes might require.
-     * 
+     *
      * \return The state whether the number of total bytes is known or not
      */
     bool nTotalBytesIsKnown() const;
 
     /**
      * Returns the unique identifier of this ResourceSynchronization.
-     * 
+     *
      * \return The unique identifier of this ResourceSynchronization
      */
     const std::string& identifier() const;
@@ -148,7 +148,7 @@ public:
     /**
      * Returns whether this ResourceSynchronization is currently syncing its files and has
      * not finished doing so.
-     * 
+     *
      * \return \c true if this object is currently synchronizing
      */
     bool isSyncing() const;
@@ -158,7 +158,7 @@ public:
      * synchronizing all of its files. Once this has returned \c true, it will stay so
      * until the object is destroyed and it is guaranteed that no more files will be added
      * to the #directory.
-     * 
+     *
      * \return \c true if this object is finished synchronizing
      */
     bool isResolved() const;
@@ -168,7 +168,7 @@ public:
      * of its files. Once this has returned \c true, it will stay so until the object is
      * destroyed. Some subclasses might try to download as many files as possible, but no
      * general guarantee is provided regarding the completeness of the download.
-     * 
+     *
      * \return \c true if this object has failed synchronizing one or more of the required
      *         files
      */
@@ -177,7 +177,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    // Empty constructor that just sets the synchronization root
+    /// Empty constructor that just sets the synchronization root
     ResourceSynchronization(std::filesystem::path synchronizationRoot);
 
     /// Representation of the state that this object can be in
@@ -210,7 +210,7 @@ protected:
 
     /// Contains the fact whether the total number of payload bytes is known
     std::atomic_bool _nTotalBytesKnown = false;
-    
+
     /// Contains the total number of payload bytes or 0 if that number is not known
     std::atomic_size_t _nTotalBytes = 0;
 

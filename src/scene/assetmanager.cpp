@@ -44,7 +44,7 @@ namespace {
         RelativeToAsset, ///< Specified as a path relative to the requiring asset
         RelativeToAssetRoot, ///< Specified as a path relative to the root folder
         Absolute,  ///< Specified as an absolute path
-        Tokenized ///< Specified as a path that starts with a token 
+        Tokenized ///< Specified as a path that starts with a token
     };
 
     PathType classifyPath(const std::string& path) {
@@ -67,12 +67,36 @@ namespace {
     }
 
     struct [[codegen::Dictionary(AssetMeta)]] Parameters {
+        // The user-facing name of the asset. It should describe to the user what they can
+        // expect when loading the asset into a profile
         std::optional<std::string> name;
+
+        // A version number for this specific asset. It is recommended to use SemVer for
+        // the versioning. The versioning used here does not have to correspond to any
+        // versioning information provided by OpenSpace
         std::optional<std::string> version;
+
+        // A user-facing description of the asset explaining what the contents are, where
+        // the data has been acquired from and what a user can do or see with this asset.
+        // This might also provide additional URLs for a user to read more details about
+        // the content of this asset
         std::optional<std::string> description;
+
+        // The name of the author for this asset file
         std::optional<std::string> author;
+
+        // A reprentative URL for this asset as chosen by the asset author. This might be
+        // a URL to the research group that provided the data, the personal URL of the
+        // author, or a webpage for the group that is responsible for this asset
         std::optional<std::string> url [[codegen::key("URL")]];
+
+        // The license information under which this asset is released. For suggestions on
+        // potential licenses, see https://opensource.org/licenses but we suggest the MIT
+        // or BSD 2-Clause or BSD 3-Clause license.
         std::optional<std::string> license;
+
+        // A list of all identifiers that are exposed by this asset. This list is needed
+        // to populate the descriptions in the main user interface
         std::optional<std::vector<std::string>> identifiers;
     };
 #include "assetmanager_codegen.cpp"
@@ -255,7 +279,7 @@ void AssetManager::add(const std::string& path) {
 
 void AssetManager::remove(const std::string& path) {
     ghoul_precondition(!path.empty(), "Path must not be empty");
-    
+
     // First check if the path is already in the add queue. If so, remove it from there
     const auto it = _assetAddQueue.find(path);
     if (it != _assetAddQueue.end()) {
@@ -360,7 +384,7 @@ void AssetManager::unloadAsset(Asset* asset) {
     lua_setfield(*_luaState, globalTableIndex, path.c_str());
     lua_settop(*_luaState, top);
 
-    
+
     const auto it = std::find_if(
         _assets.begin(),
         _assets.end(),
@@ -423,14 +447,12 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-            
+
             Asset* asset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::localResourceLua");
 
             std::string name = ghoul::lua::value<std::string>(L);
-            std::string path = fmt::format(
-                "{}/{}", asset->path().parent_path().string(), name
-            );
+            std::filesystem::path path = asset->path().parent_path() / name;
             ghoul::lua::push(L, path);
             return 1;
         },
@@ -445,7 +467,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-                
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::syncedResourceLua");
@@ -488,7 +510,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-                
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* parent = ghoul::lua::userData<Asset>(L, 2);
 
@@ -518,7 +540,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             if (dependency->isFailed()) {
                 return 0;
             }
-            
+
             dependency->load(parent);
             if (dependency->isLoaded()) {
                 if (parent->isSynchronized()) {
@@ -545,7 +567,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-                
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::exists");
@@ -570,7 +592,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-                
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::exportAsset");
@@ -605,14 +627,14 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-            
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onInitialize");
 
             const int referenceIndex = luaL_ref(L, LUA_REGISTRYINDEX);
             manager->_onInitializeFunctionRefs[asset].push_back(referenceIndex);
-            
+
             lua_settop(L, 0);
             return 0;
         },
@@ -627,7 +649,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
-                
+
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::onDeinitialize");

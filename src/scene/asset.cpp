@@ -62,7 +62,7 @@ void Asset::setState(State state) {
     if (_state == state) {
         return;
     }
-    
+
     _state = state;
 
     // If we change our state, there might have been a parent of ours that was waiting for
@@ -282,14 +282,6 @@ void Asset::initialize() {
     // 3. Update state
     setState(State::Initialized);
 }
-
-/*
-void Asset::deinitializeIfUnwanted() {
-    if (!hasInitializedParent()) {
-        deinitialize();
-    }
-}
-*/
 
 void Asset::deinitialize() {
     if (!isInitialized()) {

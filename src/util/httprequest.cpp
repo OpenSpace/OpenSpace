@@ -70,7 +70,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl,
         CURLOPT_HEADERFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
-            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);      
+            HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
             bool shouldContinue = r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
             return shouldContinue ? size * nmemb : 0;
         }
@@ -96,7 +96,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
            int64_t, int64_t)
         {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-            
+
             std::optional<int64_t> totalBytes;
             if (nTotalDownloadBytes > 0) {
                 totalBytes = nTotalDownloadBytes;
@@ -116,7 +116,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     if (res == CURLE_OK) {
         long responseCode;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-        
+
         if (responseCode >= 400) {
             LERRORC(
                 "HttpRequest",
@@ -198,7 +198,7 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
         else {
             _isSuccessful = false;
         }
-            
+
         _isFinished = true;
         if (_isSuccessful) {
             LTRACEC(
@@ -212,7 +212,7 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
                 fmt::format("Failed async download '{}'", _httpRequest.url())
             );
         }
-            
+
         _downloadFinishCondition.notify_all();
         _isDownloading = false;
     });
