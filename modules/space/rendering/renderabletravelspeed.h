@@ -92,4 +92,4 @@ private:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__

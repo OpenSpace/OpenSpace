@@ -997,8 +997,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if ( (config.length() >= xmlExt.length())
-                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
+            if (std::filesystem::path(config).extension() == ".xml") {
                 //user customzied sgct config
             }
             else {

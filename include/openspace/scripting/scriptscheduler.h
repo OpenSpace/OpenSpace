@@ -138,7 +138,8 @@ public:
     *
     * \returns a vector of all scripts that has been loaded
     */
-    std::vector<ScheduledScript> allScripts(std::optional<int> group = std::nullopt) const;
+    std::vector<ScheduledScript> allScripts(
+        std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.
