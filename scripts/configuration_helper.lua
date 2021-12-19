@@ -10,8 +10,8 @@
 sgct = {}
 sgct.config = {}
 
--- This function takes a text definition for an SGCT configuration file and returns the path
--- to a temporary file containing the string which SGCT can use 
+-- This function takes a text definition for an SGCT configuration file and returns the
+-- path to a temporary file containing the string which SGCT can use 
 function sgct.makeConfig(config) end
 
 -- Creates a configuration file similar to the default 'single.xml':
@@ -27,14 +27,10 @@ function sgct.makeConfig(config) end
 -- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}
 
 -- Expert settings:
--- name: The name of the window [example: window="Foobar"] {default: "OpenSpace"}
--- tags: A list of string tags that are passed to the window [example: tags ={"GUI"}] {default: {}}
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
 -- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
--- eyeSep: The base eye separation in m [example: eyeSep=0.1] {default: 0.065}
--- eyePos: The location of the user [example: eyePos={0.0, 1.0, 0.0}] {default: {0.0, 0.0, 0.0}}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
 -- capture: Settings to configure the image capture [example: capture = { path = "./images"]
@@ -62,14 +58,10 @@ function sgct.config.single(arg) end
 -- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}
 
 -- Expert settings:
--- name: The name of the window [example: window="Foobar"] {default: "OpenSpace"}
--- tags: A list of string tags that are passed to the window [example: tags ={"GUI"}] {default: {}}
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
 -- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
--- eyeSep: The base eye separation in m [example: eyeSep=0.1] {default: 0.065}
--- eyePos: The location of the user [example: eyePos={0.0, 1.0, 0.0}] {default: {0.0, 0.0, 0.0}}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
 -- capture: Settings to configure the image capture [example: capture = { path = "./images"]
@@ -190,7 +182,7 @@ function generateWindow(arg)
 ]]
     end
 
-    local tags = ""
+    local tags
     if arg["tags"] then
         tags = table.concat(arg["tags"], ",")
     end
@@ -202,7 +194,7 @@ function generateWindow(arg)
         fullScreen="]] .. tostring(arg["fullScreen"]) .. [["
         numberOfSamples="]] .. arg["msaa"] .. [["
         border="]] .. tostring(arg["border"]) .. [["
-        name="]] .. arg["name"] .. [["
+        name="OpenSpace"
         monitor="]] .. arg["monitor"] .. [["
         tags="]] .. tags .. [["
     >
@@ -222,12 +214,8 @@ end
 
 function generateUser(arg)
     return [[
-    <User eyeSeparation="]] .. arg["eyeSep"] .. [[">
-        <Pos
-            x="]] .. arg["eyePos"][1] .. [["
-            y="]] .. arg["eyePos"][2] .. [["
-            z="]] .. arg["eyePos"][3] .. [["
-        />
+    <User eyeSeparation="0.065">
+        <Pos x="0.0" y="0.0" z="0.0" />
     </User>
 ]]
 end
@@ -405,11 +393,6 @@ function generateSingleWindowConfig(arg)
     end
 
     assert(
-        type(arg["name"]) == "string" or type(arg["name"]) == "nil",
-        "name must be a string or nil"
-    )
-
-    assert(
         type(arg["fullScreen"]) == "boolean" or type(arg["fullScreen"]) == "nil",
         "fullScreen must be a boolean or nil"
     )
@@ -443,21 +426,6 @@ function generateSingleWindowConfig(arg)
         type(arg["stereo"]) == "string" or type(arg["stereo"]) == "nil",
         "stereo must be a boolean or nil"
     )
-
-    assert(
-        type(arg["eyeSep"]) == "number" or type(arg["eyeSep"]) == "nil",
-        "eyeSep must be a number or nil"
-    )
-
-    assert(
-        type(arg["eyePos"]) == "table" or type(arg["eyePos"]) == "nil",
-        "eyePos must be a table or nil"
-    )
-    if (type(arg["eyePos"]) == "table") then
-        assert(type(arg["eyePos"][1]) == "number", "eyePos[1] must be a number")
-        assert(type(arg["eyePos"][2]) == "number", "eyePos[2] must be a number")
-        assert(type(arg["eyePos"][3]) == "number", "eyePos[3] must be a number")
-    end
 
     assert(
         type(arg["sgctDebug"]) == "boolean" or type(arg["sgctDebug"]) == "nil",
@@ -558,24 +526,12 @@ function generateSingleWindowConfig(arg)
         t[#t + 1] = "Spout"
     end
 
-    if arg["name"] == nil then
-        arg["name"] = "OpenSpace"
-    end
-
     if arg["stereo"] == nil then
         arg["stereo"] = "none"
     end
 
     if arg["windowPos"] == nil then
         arg["windowPos"] = { 50, 50 }
-    end
-
-    if arg["eyeSep"] == nil then
-        arg["eyeSep"] = 0.065
-    end
-
-    if arg["eyePos"] == nil then
-        arg["eyePos"] = { 0.0, 0.0, 0.0 }
     end
 
     if arg["sgctDebug"] == nil then
@@ -627,7 +583,7 @@ end
 
 
 function sgct.makeConfig(config)
-    local configFile = os.tmpname()
+    local configFile = os.tmpname() .. ".xml"
 
     local file = io.open(configFile, "w+")
 
