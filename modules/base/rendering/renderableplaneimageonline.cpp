@@ -127,6 +127,7 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 ghoul::io::TextureReader::ref().loadTexture(
                     reinterpret_cast<void*>(imageFile.buffer),
                     imageFile.size,
+                    2,
                     imageFile.format
                 );
 

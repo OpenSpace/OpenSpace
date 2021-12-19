@@ -195,6 +195,7 @@ void TransferFunction::setTextureFromTxt() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
         transferFunction,
         glm::size3_t(width, 1, 1),
+        GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT,
@@ -204,7 +205,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string());
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string(), 1);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 }
 

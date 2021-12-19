@@ -370,6 +370,7 @@ void RenderableGalaxy::initializeGL() {
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_UNSIGNED_BYTE,
@@ -414,7 +415,8 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string()
+            absPath(_pointSpreadFunctionTexturePath).string(),
+            2
         );
 
         if (_pointSpreadFunctionTexture) {

@@ -235,7 +235,8 @@ void RenderableRings::loadTexture() {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath).string()
+            absPath(_texturePath).string(),
+            1
         );
 
         if (texture) {

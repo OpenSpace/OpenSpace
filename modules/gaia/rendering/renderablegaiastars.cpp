@@ -2067,6 +2067,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA32F,
                 GL_FLOAT
@@ -2100,7 +2101,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _pointSpreadFunctionTexture = nullptr;
         if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath).string()
+                absPath(_pointSpreadFunctionTexturePath).string(),
+                2
             );
 
             if (_pointSpreadFunctionTexture) {
@@ -2128,7 +2130,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string()
+                absPath(_colorTexturePath).string(),
+                2
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
@@ -2153,6 +2156,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         if (hasChanged) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA32F,
                 GL_FLOAT

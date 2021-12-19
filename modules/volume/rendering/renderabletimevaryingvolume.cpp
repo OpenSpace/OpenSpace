@@ -255,6 +255,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,
+            GL_TEXTURE_3D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT,

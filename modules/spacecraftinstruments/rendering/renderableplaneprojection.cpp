@@ -180,7 +180,7 @@ void RenderablePlaneProjection::loadTexture() {
     }
 
     std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string());
+        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string(), 2);
     if (!texture) {
         return;
     }

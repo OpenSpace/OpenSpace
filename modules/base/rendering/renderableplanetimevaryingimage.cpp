@@ -168,7 +168,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); ++i) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_sourceFiles[i]).string()
+            absPath(_sourceFiles[i]).string(),
+            2
         );
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
         _textureFiles[i]->uploadTexture();

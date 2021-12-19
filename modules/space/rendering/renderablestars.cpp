@@ -860,7 +860,8 @@ void RenderableStars::loadPSFTexture() {
         std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
     {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string()
+            absPath(_pointSpreadFunctionTexturePath).string(),
+            2
         );
 
         if (_pointSpreadFunctionTexture) {
@@ -1264,7 +1265,8 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string()
+                absPath(_colorTexturePath).string(),
+                1
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
@@ -1286,7 +1288,8 @@ void RenderableStars::update(const UpdateData&) {
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath).string()
+                absPath(_otherDataColorMapPath).string(),
+                1
             );
             if (_otherDataColorMapTexture) {
                 LDEBUG(fmt::format(
