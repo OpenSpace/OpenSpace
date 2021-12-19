@@ -1,9 +1,15 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
-local labelsPath = asset.require('./mercury_globelabels').LabelsPath
 
 asset.require("spice/base")
 asset.require('./trail')
+
+local labelsPath = asset.syncedResource({
+  Name = "Mercury Labels",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_labels",
+  Version = 1
+})
 
 local Mercury = {
   Identifier = "Mercury",

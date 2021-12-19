@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../mercury_textures").TexturesPath
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mercury Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_abundance_textures",
+  Version = 1
+})
 
 local layer = {
   Name = "Silicon Abundance",

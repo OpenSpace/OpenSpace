@@ -1,8 +1,14 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./dawn_kernels').Kernels
 
 
+
+local kernels = asset.syncedResource({
+  Name = "Dawn Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "dawn_kernels",
+  Version = 2
+})
 
 local textures = asset.syncedResource({
   Name = "Ceres Textures",
@@ -43,8 +49,7 @@ local Ceres = {
     Layers = {
       ColorLayers = {
         {
-          Name = "Texture",
-          Identifier = "CeresTexture",
+          Identifier = "Texture",
           FilePath = textures .. "/gray.png",
           Enabled = true
         }

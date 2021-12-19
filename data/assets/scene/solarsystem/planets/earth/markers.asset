@@ -1,8 +1,13 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require('./earth_textures').TexturesPath
 
 
+local texturesPath = asset.syncedResource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
 
 local EarthMarker = {
   Identifier = "EarthMarker",

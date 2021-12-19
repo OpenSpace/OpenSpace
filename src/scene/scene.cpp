@@ -854,13 +854,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "expression"
             },
             {
-                "loadScene",
-                &luascriptfunctions::loadScene,
-                "string",
-                "Loads the scene found at the file passed as an "
-                "argument. If a scene is already loaded, it is unloaded first"
-            },
-            {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
                 "table",

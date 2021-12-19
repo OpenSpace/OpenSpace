@@ -30,22 +30,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
+#include <curl/curl.h>
 #include <chrono>
 #include <filesystem>
 #include <thread>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
-#endif // WIN32
-
-#include <curl/curl.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
 
 namespace {
     constexpr const char* _loggerCat = "DownloadManager";

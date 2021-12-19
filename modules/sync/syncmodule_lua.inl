@@ -32,23 +32,20 @@ int syncResource(lua_State* L) {
     auto [identifier, version] = ghoul::lua::values<std::string, double>(L);
 
     ghoul::Dictionary dict;
+    dict.setValue("Type", std::string("HttpSynchronization"));
     dict.setValue("Identifier", identifier);
     dict.setValue("Version", version);
 
-    const SyncModule* module = global::moduleEngine->module<SyncModule>();
-    HttpSynchronization sync(
-        dict,
-        module->synchronizationRoot(),
-        module->httpSynchronizationRepositories()
-    );
+    std::unique_ptr<ResourceSynchronization> sync =
+        ResourceSynchronization::createFromDictionary(dict);
 
-    sync.start();
+    sync->start();
 
-    while (sync.isSyncing()) {
+    while (sync->isSyncing()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
-    ghoul::lua::push(L, sync.isResolved());
+    ghoul::lua::push(L, sync->isResolved());
     return 1;
 }
 

@@ -1,8 +1,14 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./transforms')
-local models = asset.require('./model').models
 asset.require('spice/base')
+
+local models = asset.syncedResource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 3
+})
 
 local band = asset.syncedResource({
   Name = "JWST band texture",

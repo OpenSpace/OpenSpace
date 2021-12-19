@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../titan_textures").TexturesPath
 local globeIdentifier = asset.require("./../../titan").Titan.Identifier
+
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Titan textures",
+  Identifier = "titan_textures",
+  Version = 2
+})
 
 local layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_Local",
