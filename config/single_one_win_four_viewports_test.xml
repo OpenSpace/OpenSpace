@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<Cluster masterAddress="127.0.0.1">
+  <Node address="127.0.0.1" port="20401">
+    <!-- Dummy -->
+    <Window fullScreen="false" border="true" draw3D="false" draw2D="false">
+      <Pos x="0" y="0" />
+      <Size x="1680" y="1080" />
+      <Viewport tracked="true">
+        <Pos x="0.2143" y="0.0" />
+        <Size x="0.5748" y="0.5" />
+        <Projectionplane>
+          <Pos x="-605" y="-335" z="0.0" /> <!-- lower left -->
+          <Pos x="-605" y="335" z="0.0" /> <!-- upper left -->
+          <Pos x="605" y="335" z="0.0" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+    </Window>
+
+    <Window fullScreen="false" border="false">
+      <Pos x="0" y="0" />
+      <Size x="1680" y="1080" />
+
+      <!-- Forward, again, because the first one will just result in a black window... -->
+      <Viewport tracked="true">
+        <Pos x="0.2143" y="0.5" />
+        <Size x="0.5714" y="0.5" />
+        <Projectionplane>
+          <Pos x="-605" y="-335" z="0.0" /> <!-- lower left -->
+          <Pos x="-605" y="335" z="0.0" /> <!-- upper left -->
+          <Pos x="605" y="335" z="0.0" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+      <!-- Left -->
+      <Viewport>
+        <Pos x="0.0" y="0.4074" />
+        <Size x="0.2143" y="0.5926" />
+        <Projectionplane>
+          <Pos x="-934.7" y="-353" z="454.9" /> <!-- lower left -->
+          <Pos x="-934.7" y="357" z="454.9" /> <!-- upper left -->
+          <Pos x="-777.1" y="357" z="87.2" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+      <!-- Right -->
+      <Viewport>
+        <Pos x="0.7857" y="0.4074" />
+        <Size x="0.2143" y="0.5926" />
+        <Projectionplane>
+          <Pos x="777.1" y="-353" z="87.2" /> <!-- lower left -->
+          <Pos x="777.1" y="357" z="87.2" /> <!-- upper left -->
+          <Pos x="934.7" y="357" z="454.9" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+      <!-- Bottom -->
+      <Viewport>
+        <Pos x="0.2143" y="0.0" />
+        <Size x="0.5714" y="0.5" />
+        <Projectionplane>
+          <Pos x="-465" y="-917.6" z="584.7" /> <!-- lower left -->
+          <Pos x="-465" y="-728.7" z="90.6" /> <!-- upper left -->
+          <Pos x="465" y="-728.7" z="90.6" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+    </Window>
+  </Node>
+  <User eyeSeparation="0.065">
+    <Pos x="0.0" y="0.0" z="1030" />
+  </User>
+</Cluster>
