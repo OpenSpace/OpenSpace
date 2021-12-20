@@ -18,22 +18,19 @@
     </Window>
     <!-- Forward, again, because the first one will just result in a black window... -->
     <Window fullScreen="false" border="false" >
-        <Pos x="1440" y="0" />
-        <Size x="3840" y="2160" />
-        <Res x="2560" y="1440"/>
-        <Viewport tracked="true">
-            <Pos x="0.0" y="0.0" />
-            <Size x="1.0" y="1.0" />
-            <Projectionplane>
-                <Pos x="-605" y="-335" z="0.0" />
-                <!-- lower left -->
-                <Pos x="-605" y="335" z="0.0" />
-                <!-- upper left -->
-                <Pos x="605" y="335" z="0.0" />
-                <!-- upper right -->
-            </Projectionplane>
-        </Viewport>
-    </Window>
+      <Pos x="1440" y="0" />
+      <Size x="3840" y="2160" />
+      <Res x="2560" y="1440"/>
+      <Viewport tracked="true">
+        <Pos x="0.0" y="0.0" />
+        <Size x="1.0" y="1.0" />
+        <Projectionplane>
+          <Pos x="-605" y="-335" z="0.0" /> <!-- lower left -->
+          <Pos x="-605" y="335" z="0.0" /> <!-- upper left -->
+          <Pos x="605" y="335" z="0.0" /> <!-- upper right -->
+        </Projectionplane>
+      </Viewport>
+  </Window>
     <!-- Left -->
     <Window fullScreen="false" border="false" draw2D="false">
       <Pos x="0" y="0" />
@@ -84,7 +81,7 @@
     <Pos x="0.0" y="0.0" z="1030" />
   </User>
   <Settings>
-      <Display swapInterval="1" refreshRate="60"/>
+    <Display swapInterval="1" refreshRate="60"/>
   </Settings>
 </Cluster>
 
