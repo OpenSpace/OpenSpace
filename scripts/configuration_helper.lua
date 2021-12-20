@@ -310,11 +310,11 @@ end
 
 
 
-function check(type_string, arg, param, subparam_type)
+function check(type_str, arg, param, subparam_type)
   local t = type(arg[param])
-  assert(t == type_string or t == "nil", param .. " must be a " .. type_string .. " or nil")
+  assert(t == type_str or t == "nil", param .. " must be a " .. type_str .. " or nil")
 
-  if type_string == "table" and subparam_type and arg[param] then
+  if type_str == "table" and subparam_type and arg[param] then
     for k, v in pairs(arg[param]) do
       assert(
         type(v == subparam_type),
@@ -368,8 +368,6 @@ function normalizeArg(arg)
     arg[1] = nil
     arg[2] = nil
   end
-
-  return arg
 end
 
 
@@ -385,7 +383,7 @@ end
 
 
 function sgct.config.single(arg)
-  arg = normalizeArg(arg)
+  normalizeArg(arg)
 
   check("table", arg, "size", "number")
   check("table", arg, "fov", "number")
@@ -422,24 +420,20 @@ function sgct.config.single(arg)
 
   arg["tracked"] = arg["tracked"] or true
 
-  local viewport = generateSingleViewportFOV(
-    arg["fov"]["down"],
-    arg["fov"]["up"], 
-    arg["fov"]["left"],
-    arg["fov"]["right"],
-    arg["tracked"]
-  )
+  local viewport = generateSingleViewportFOV(arg["fov"]["down"], arg["fov"]["up"], 
+    arg["fov"]["left"], arg["fov"]["right"], arg["tracked"])
+ 
   return sgct.makeConfig(generateSingleWindowConfig(arg, viewport))
 end
 
 
 
 function sgct.config.fisheye(arg)
-  arg = normalizeArg(arg)
+  normalizeArg(arg)
 
   check("number", arg, "fov")
-  check("string", arg, "quality")
   check("number", arg, "tilt")
+  check("string", arg, "quality")
   check("table", arg, "background", "number")
   check("table", arg, "crop", "number")
   check("table", arg, "offset", "number")
@@ -456,15 +450,8 @@ function sgct.config.fisheye(arg)
   arg["background"] = arg["background"] or { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
   arg["tracked"] = arg["tracked"] or false
 
-  local viewport = generateFisheyeViewport(
-    arg["fov"],
-    arg["quality"],
-    arg["tilt"],
-    arg["background"],
-    arg["crop"],
-    arg["offset"],
-    arg["tracked"]
-  )
+  local viewport = generateFisheyeViewport(arg["fov"], arg["quality"], arg["tilt"],
+    arg["background"], arg["crop"], arg["offset"], arg["tracked"])
 
   return sgct.makeConfig(generateSingleWindowConfig(arg, viewport))
 end
