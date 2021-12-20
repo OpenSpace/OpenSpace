@@ -75,6 +75,9 @@ function sgct.config.fisheye(arg) end
 -- Global variable storing the name of the config function called at initialization
 sgctconfiginitializeString = ""
 
+
+
+
 --[[
 ########################################################################################## 
                             Internal helper functions
@@ -82,362 +85,286 @@ sgctconfiginitializeString = ""
 ]]--
 
 function generateSingleViewportFOV(down, up, left, right, tracked)
-  return [[
-{
-  "pos": { "x": 0.0, "y": 0.0 },
-  "size": { "x": 1.0, "y": 1.0 },
-  "tracked": ]] .. tostring(tracked) .. [[,
-  "projection": {
-    "type": "PlanarProjection",
-    "fov": {
-      "left": ]] .. left .. [[,
-      "right": ]] .. right .. [[,
-      "up": ]] .. up .. [[,
-      "down": ]] .. down .. [[
-    },
-    "orientation": { "heading": 0.0, "pitch": 0.0, "roll": 0.0 }
-  }
-}
-]]
+  local result = {}
+
+  table.insert(result,   [[            {]])
+
+  if tracked then
+    table.insert(result, [[              "tracked": ]] .. tostring(tracked) .. [[,]])
+  end
+
+  table.insert(result,   [[              "projection": {]])
+  table.insert(result,   [[                "type": "PlanarProjection",]])
+  table.insert(result,   [[                "fov": {]])
+  table.insert(result,   [[                  "left": ]] .. left .. [[,]])
+  table.insert(result,   [[                  "right": ]] .. right .. [[,]])
+  table.insert(result,   [[                  "up": ]] .. up .. [[,]])
+  table.insert(result,   [[                  "down": ]] .. down .. [[ ]])
+  table.insert(result,   [[                }]])
+  table.insert(result,   [[              }]])
+  table.insert(result,   [[            }]])
+
+  return table.concat(result, "\n")
 end
 
 
 
-function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, tracked) 
-  local background_fragment = [[
-{
-  "r": ]] .. background["r"] .. [[,
-  "g": ]] .. background["g"] .. [[,
-  "b": ]] .. background["b"] .. [[,
-  "a": ]] .. background["a"] .. [[
-}]]
+function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, tracked)
+  local result = {}
 
-local crop_fragment = ""
+  table.insert(result,   [[           {]])
+
+  if tracked then
+    table.insert(result, [[             "tracked": ]] .. tostring(tracked) .. ",")
+  end
+
+  table.insert(result,   [[             "projection": {]])
+  table.insert(result,   [[               "type": "FisheyeProjection",]])
+
+  if fov then
+    table.insert(result, [[               "fov": ]] .. fov .. [[,]])
+  end
+  table.insert(result,   [[               "quality": "]] .. quality .. [[",]])
+  table.insert(result,   [[               "tilt": ]] .. tilt .. ",")
+
   if crop then
-    crop_fragment = [[
-{
-  "left": ]] .. crop["left"] .. [[,
-  "right": ]] .. crop["right"] .. [[,
-  "top": ]] .. crop["top"] .. [[,
-  "bottom": ]] .. crop["bottom"] .. [[
-}]]
-  else
-    crop_fragment = "{}"
+    table.insert(result, [[               "crop": {]])
+    table.insert(result, [[                 "left": ]] .. crop["left"] .. ",")
+    table.insert(result, [[                 "right": ]] .. crop["right"] .. ",")
+    table.insert(result, [[                 "top": ]] .. crop["top"] .. ",")
+    table.insert(result, [[                 "bottom": ]] .. crop["bottom"])
+    table.insert(result, [[               },]])
   end
 
-  local offset_fragment = ""
   if offset then
-    offset_fragment = [[
-{
-  "x": ]] .. offset["x"] .. [[,
-  "y": ]] .. offset["y"] .. [[,
-  "z": ]] .. offset["z"] .. [[
-}]]
-  else
-    offset_fragment = "{}"
+    table.insert(result, [[               "offset": {]])
+    table.insert(result, [[                 "x": ]] .. offset["x"] .. ",")
+    table.insert(result, [[                 "y": ]] .. offset["y"] .. ",")
+    table.insert(result, [[                 "z": ]] .. offset["z"])
+    table.insert(result, [[               },]])
   end
 
-  return [[
-{
-  "pos": { "x": 0.0, "y": 0.0 },
-  "size": { "x": 1.0, "y": 1.0 },
-  "tracked": ]] .. tostring(tracked) .. [[,
-  "projection": {
-    "type": "FisheyeProjection",
-    "fov": ]] .. fov .. [[,
-    "quality": "]] .. quality .. [[",
-    "tilt": ]] .. tilt .. [[,
-    "background": ]] .. background_fragment .. [[,
-    "crop": ]] .. crop_fragment .. [[,
-    "offset": ]] .. offset_fragment .. [[
-  }
-}
-]]
+  table.insert(result,   [[               "background": {]])
+  table.insert(result,   [[                 "r": ]] .. background["r"] .. ",")
+  table.insert(result,   [[                 "g": ]] .. background["g"] .. ",")
+  table.insert(result,   [[                 "b": ]] .. background["b"] .. ",")
+  table.insert(result,   [[                 "a": ]] .. background["a"])
+  table.insert(result,   [[               }]])
+  table.insert(result,   [[             }]])
+  table.insert(result,   [[           }]])
+
+  return table.concat(result, "\n")
 end
 
 
 
-function generateWindow(arg)
-  local resolution_fragment = ""
-  if arg["res"] then
-    arg["res"][1] = arg["res"][1] or arg["windowSize"][1]
-    arg["res"][2] = arg["res"][2] or arg["windowSize"][2]
+function generateWindow(result, fullScreen, msaa, border, monitor, tags, stereo, pos,
+                        size, res, viewport)
+  table.insert(result,   [[          "name": "OpenSpace",]])
 
-    resolution_fragment =
-      [[ "res": { "x": ]] .. arg["res"][1] .. [[ "y": ]] .. arg["res"][1] .. [[},]]
+  if fullScreen then
+    table.insert(result, [[          "fullscreen": ]] .. tostring(fullScreen) .. ",")
   end
 
-  local tags
-  if arg["tags"] then
-    tags = table.concat(arg["tags"], ",")
+  if msaa then
+    table.insert(result, [[          "msaa": ]] .. msaa .. ",")
   end
 
-  return [[
-{
-  "name": "OpenSpace",
-  "fullscreen": ]] .. tostring(arg["fullScreen"]) .. [[,
-  "msaa": ]] .. arg["msaa"] .. [[,
-  "border": ]] .. tostring(arg["border"]) .. [[,
-  "monitor": ]] .. arg["monitor"] .. [[,
-  "tags": [ ]] .. tags .. [[ ],
-  "stereo": "]] .. arg["stereo"] .. [[",
-  "size": { "x": ]] .. arg["windowSize"][1] .. [[, "y": ]] .. arg["windowSize"][2] .. [[ },
-  "pos": { "x": ]] .. arg["pos"][1] .. [[, "y": ]] .. arg["pos"][2] .. [[ },
-  ]] .. resolution_fragment .. [[
-  "viewports": [
-    ]] .. arg["viewport"] .. [[
-  ]
-}
-]]
+  if border then
+    table.insert(result, [[          "border": ]] .. tostring(border) .. ",")
+  end
+
+  if monitor then
+    table.insert(result, [[          "monitor": ]] .. monitor .. ",")
+  end
+
+  if #(tags) > 0 then
+    local t = table.concat(arg["tags"], ",")
+    table.insert(result, [[          "tags": [ ]] .. t .. [[ ], ]])
+  end
+
+  if stereo then
+    table.insert(result, [[          "stereo": "]] .. stereo .. [[",]])
+  end
+
+  local px = pos[1]
+  local py = pos[2]
+  table.insert(result,   [[          "pos": { "x": ]] .. px .. [[, "y": ]] .. py .. " },")
+
+  local sx = size[1]
+  local sy = size[2]
+  table.insert(result,   [[          "size": { "x": ]] .. sx .. [[, "y": ]] .. sy .. " },")
+
+  if res then
+    res[1] = res[1] or size[1]
+    res[2] = res[2] or size[2]
+    table.insert(result, [[          "res": {]])
+    table.insert(result, [[            "x": ]] .. res[1] .. ",")
+    table.insert(result, [[            "y": ]] .. res[2])
+    table.insert(result, [[          },]])
+  end
+
+  table.insert(result,   [[          "viewports": []])
+
+  table.insert(result, viewport)
+  table.insert(result,   [[          ] ]])
 end
 
 
 
-function generateUser(arg)
-  return [[
-{
-  "eyeSeparation": 0.06,
-  "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
-}
-]]
+function generateUser(result)
+  table.insert(result, [[    {]])
+  table.insert(result, [[      "eyeSeparation": 0.06,]])
+  table.insert(result, [[      "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }]])
+  table.insert(result, [[    }]])
 end
 
 
 
-function generateScene(arg)
-  local scene = arg["scene"]
-
+function generateScene(result, scene)
   if scene == nil then
-    return "{}"
+    return nil
   end
 
   local offset = scene["offset"] or { x = 0.0, y = 0.0, z = 0.0 }
   local orientation = scene["orientation"] or { yaw = 0.0, pitch = 0.0, roll = 0.0 }
   local scale = scene["scale"] or 1.0
 
-  return [[
-{
-  "offset": {
-    "x": ]] .. offset["x"] .. [[,
-    "y": ]] .. offset["y"] .. [[,
-    "z": ]] .. offset["z"] .. [[
-  },
-  "orientation": {
-    "yaw": ]] .. orientation["yaw"] .. [[,
-    "pitch": ]] .. orientation["pitch"] .. [[,
-    "roll": ]] .. orientation["roll"] .. [[
-   },
-   "scale": ]] .. scale .. [[
-}
-]]
+  table.insert(result, [[{]])
+  table.insert(result, [[  "offset": {]])
+  table.insert(result, [[    "x": ]] .. offset["x"] .. ",")
+  table.insert(result, [[    "y": ]] .. offset["y"] .. ",")
+  table.insert(result, [[    "z": ]] .. offset["z"] .. ",")
+  table.insert(result, [[  },]])
+  table.insert(result, [[  "orientation": {]])
+  table.insert(result, [[    "yaw": ]] .. orientation["yaw"] .. ",")
+  table.insert(result, [[    "pitch": ]] .. orientation["pitch"] .. ",")
+  table.insert(result, [[    "roll": ]] .. orientation["roll"] .. ",")
+  table.insert(result, [[  },]])
+  table.insert(result, [[  "scale": ]] .. scale)
+  table.insert(result, [[}]])
 end
 
 
 
-function generateSettings(arg)
-  local v
+function generateSettings(result, refreshRate, vsync)
+  table.insert(result,   [[    "display": {]])
+
+  if (arg["refreshRate"]) then
+    table.insert(result, [[      "refreshRate": ]] .. arg["refreshRate"] .. ",")
+  end
+
   if arg["vsync"] then
-    v = 1
+    table.insert(result, [[      "swapInterval": 1]])
   else
-    v = 0
+    table.insert(result, [[      "swapInterval": 0]])
   end
 
-  local refresh_fragment = ""
-  if arg["refreshRate"] then
-    refresh_fragment = [[ "refreshRate": ]] .. arg["refreshRate"] .. ","
-  end
-
-  return [[
-{
-  "display": {
-    ]] .. refresh_fragment .. [[
-    "swapInterval": ]] .. v .. [[
-  }
-}
-]]
+  table.insert(result,   [[    }]])
 end
 
 
 
-function generateCluster(arg)
-  return [[
-{
-  "version": 1,
-  "masterAddress": "127.0.0.1",
-  "debug": ]] .. tostring(arg["sgctDebug"]) .. [[,
-  "settings": ]] .. (arg["settings"] or "{}") .. [[,
-  "scene": ]] .. (arg["scene"] or "{}") .. [[,
-  "nodes": [
-    {
-      "address": "127.0.0.1",
-      "port": 20401,
-      "windows": [
-        ]] .. arg["window"] .. [[
-      ]
-    }
-  ],
-  "users": [
-    ]] .. arg["user"] .. [[
-  ]
-}
-]]
+function generateCluster(arg, viewport)
+  local result = {}
+
+  table.insert(result,   [[{]])
+  table.insert(result,   [[  "version": 1,]])
+  table.insert(result,   [[  "masterAddress": "127.0.0.1",]])
+
+  if arg["sgctDebug"] then
+    table.insert(result, [[  "debug": ]] .. tostring(arg["sgctDebug"]) .. ",")
+  end
+
+  if (arg["settings"]) then
+    table.insert(result, [[  "settings": {]])
+    generateSettings(result, arg["refreshRate"], arg["vsync"])
+    table.insert(result, [[  },]])
+  end
+
+  if arg["scene"] then
+    table.insert(result, [[  "scene": {]])
+    generateScene(result, arg["scene"])
+    table.insert(result, [[  },]])
+  end
+
+  table.insert(result,   [[  "nodes": []])
+  table.insert(result,   [[    {]])
+  table.insert(result,   [[      "address": "127.0.0.1",]])
+  table.insert(result,   [[      "port": 20401,]])
+  table.insert(result,   [[      "windows": []])
+  table.insert(result,   [[        {]])
+  generateWindow(result, arg["fullScreen"], arg["msaa"], arg["border"], arg["monitor"],
+    arg["tags"], arg["stereo"], arg["pos"], arg["size"], arg["res"], viewport)
+  table.insert(result,   [[        }]])
+  table.insert(result,   [[      ] ]])
+  table.insert(result,   [[    }]])
+  table.insert(result,   [[  ],]])
+  table.insert(result,   [[  "users": []])
+  generateUser(result)
+  table.insert(result,   [[  ] ]])
+  table.insert(result,   [[}]])
+
+  return table.concat(result, "\n")
 end
 
 
 
-function generateSingleWindowConfig(arg)
-  assert(
-    type(arg["res"]) == "table" or type(arg["res"]) == "nil",
-    "res must be a table or nil"
-  )
-  if (type(arg["res"]) == "table") then
-    assert(type(arg["res"][1]) == "number", "res[1] must be a number")
-    assert(type(arg["res"][2]) == "number", "res[2] must be a number")
+function check(type_string, arg, param, subparam_type)
+  local t = type(arg[param])
+  assert(t == type_string or t == "nil", param .. " must be a " .. type_string .. " or nil")
+
+  if type_string == "table" and subparam_type and arg[param] then
+    for k, v in pairs(arg[param]) do
+      assert(
+        type(v == subparam_type),
+        param .. "[" .. k .. "] must be a " .. subparam_type
+      )
+    end    
   end
+end
 
-  assert(
-    type(arg["shared"]) == "boolean" or type(arg["shared"]) == "nil",
-    "shared must be a boolean or nil"
-  )
 
-  assert(
-    type(arg["tags"]) == "table" or type(arg["tags"]) == "nil",
-    "tags must be a table or nil"
-  )
-  if (type(arg["tags"]) == "table") and (next(arg["tags"]) ~= nil) then
-    for index, value in ipairs(arg["tags"]) do
-      assert(type(value) == "string", "Each tag must be a string")
-    end
+
+function generateSingleWindowConfig(arg, viewport)
+  check("table", arg, "res", "number")
+  check("table", arg, "tags", "string")
+  check("table", arg, "pos", "number")
+  check("boolean", arg, "shared")
+  check("boolean", arg, "fullScreen")
+  check("boolean", arg, "border")
+  check("boolean", arg, "vsync")
+  check("boolean", arg, "sgctDebug")
+  check("number", arg, "monitor")
+  check("number", arg, "msaa")
+  check("number", arg, "refreshRate")
+  check("string", arg, "stereo")
+
+  check("table", arg, "scene")
+  if arg["scene"] then
+    check("table", arg["scene"], "offset", "number")
+    check("table", arg["scene"], "orientation", "number")
+    check("number", arg["scene"], "scale")
   end
-
-  assert(
-    type(arg["pos"]) == "table" or type(arg["pos"]) == "nil",
-    "pos must be a table or nil"
-  )
-  if (type(arg["pos"]) == "table") then
-    assert(type(arg["pos"][1]) == "number", "pos[1] must be a number")
-    assert(type(arg["pos"][2]) == "number", "pos[2] must be a number")
-  end
-
-  assert(
-    type(arg["fullScreen"]) == "boolean" or type(arg["fullScreen"]) == "nil",
-    "fullScreen must be a boolean or nil"
-  )
-
-  assert(
-    type(arg["monitor"]) == "number" or type(arg["monitor"]) == "nil",
-    "monitor must be a number or nil"
-  )
-
-  assert(
-    type(arg["border"]) == "boolean" or type(arg["border"]) == "nil",
-    "border must be a boolean or nil"
-  )
-
-  assert(
-    type(arg["msaa"]) == "number" or type(arg["msaa"]) == "nil",
-    "msaa must be a number or nil"
-  )
-
-  assert(
-    type(arg["vsync"]) == "boolean" or type(arg["vsync"]) == "nil",
-    "vsync must be a boolean or nil"
-  )
-
-  assert(
-    type(arg["refreshRate"]) == "number" or type(arg["refreshRate"]) == "nil",
-    "refreshRate must be a number or nil"
-  )
   
-  assert(
-    type(arg["stereo"]) == "string" or type(arg["stereo"]) == "nil",
-    "stereo must be a boolean or nil"
-  )
-
-  assert(
-    type(arg["sgctDebug"]) == "boolean" or type(arg["sgctDebug"]) == "nil",
-    "sgctDebug must be a boolean or nil"
-  )
-
-  assert(
-    type(arg["scene"]) == "table" or type(arg["scene"]) == "nil",
-    "scene must be a table or nil"
-  )
-  if type(arg["scene"]) == "table" then
-    local offset = arg["scene"]["offset"]
-    assert(
-      type(offset) == "table" or type(offset) == "nil",
-      "scene['offset'] must be a table or nil"
-    )
-    if type(offset) == "table" then
-      assert(type(offset["x"]) == "number", "scene['offset']['x'] must be a number")
-      assert(type(offset["y"]) == "number", "scene['offset']['y'] must be a number")
-      assert(type(offset["z"]) == "number", "scene['offset']['z'] must be a number")
-    end
-
-    local orientation = arg["scene"]["orientation"]
-    assert(
-      type(orientation) == "table" or type(orientation) == "nil",
-      "scene['orientation] must be a table or nil"
-    )
-    if type(orientation) == "table" then
-      assert(type(orientation["yaw"]) == "number", "orientation['yaw'] must be a number")
-      assert(type(orientation["pitch"]) == "number", "orientation['pitch'] must be a number")
-      assert(type(orientation["roll"]) == "number", "orientation['roll'] must be a number")
-    end
-
-    local scale = arg["scene"]["scale"]
-    assert(
-      type(scale) == "number" or type(scale) == "nil",
-      "scene['scale'] must be a number or nil"
-    )
-  end
-
-  assert(type(arg["viewport"]) == "string", "viewport must be a string")
-
-  -- Then setting reasonable default values
-  arg["vsync"] = arg["vsync"] or false
-  arg["fullScreen"] = arg["fullScreen"] or false
-  arg["monitor"] = arg["monitor"] or 0
-  arg["tags"] = arg["tags"] or {}
-  arg["msaa"] = arg["msaa"] or 1
-  arg["border"] = arg["border"] or true
-  arg["stereo"] = arg["stereo"] or "none"
-  arg["pos"] = arg["pos"] or { 50, 50 }
-  arg["sgctDebug"] = arg["sgctDebug"] or false
-  arg["windowSize"] = arg["windowSize"] or { 1280, 720 }
-
   if arg["shared"] then
     local t = arg["tags"]
     t[#t + 1] = "Spout"
   end
 
-
-  arg["scene"] = generateScene(arg)
-  arg["settings"] = generateSettings(arg)
-  arg["window"] = generateWindow(arg)
-  arg["user"] = generateUser(arg)
-
-  return generateCluster(arg)
+  return generateCluster(arg, viewport)
 end
+
 
 
 function normalizeArg(arg)
   arg = arg or {}
 
-  assert(
-    type(arg[1]) == "number" or type(arg[1]) == "nil",
-    "First argument must be a number or nil"
-  )
-  assert(
-    type(arg[2]) == "number" or type(arg[2]) == "nil",
-    "Second argument must be a number or nil"
-  )
-  if (type(arg[1]) == "number") then
-    if (type(arg[2]) == "nil") then
-      arg[2] = arg[1] * 9/16
-    end
-    arg["windowSize"] = { arg[1], arg[2] }
+  check("number", arg, 1)
+  check("number", arg, 2)
+
+  if type(arg[1]) == "number" and type(arg[2]) == "number" then
+    arg["size"] = { arg[1], arg[2] }
     arg[1] = nil
     arg[2] = nil
   end
@@ -446,9 +373,9 @@ function normalizeArg(arg)
 end
 
 
+
 function sgct.makeConfig(config)
-  -- local configFile = os.tmpname() .. ".json"
-  local configFile = "C:/Development/testing.json"
+  local configFile = os.tmpname() .. ".json"
   local file = io.open(configFile, "w+")
   file:write(config)
   io.close(file)
@@ -460,76 +387,49 @@ end
 function sgct.config.single(arg)
   arg = normalizeArg(arg)
 
-  assert(
-    type(arg["windowSize"]) == "table" or type(arg["windowSize"]) == "nil",
-    "windowSize must be a table or nil"
-  )
+  check("table", arg, "size", "number")
+  check("table", arg, "fov", "number")
 
-  assert(
-    type(arg["fov"]) == "table" or type(arg["fov"]) == "nil",
-    "fov must be a table or nil"
-  )
-  if (type(arg["fov"]) == "table") then
-    assert(type(arg["fov"]["left"]) == "number",  "fov['left'] must be a number")
-    assert(type(arg["fov"]["right"]) == "number", "fov['right'] must be a number")
-    assert(type(arg["fov"]["up"]) == "number",    "fov['up'] must be a number")
-    assert(type(arg["fov"]["down"]) == "number",  "fov['down'] must be a number")
-  else
-    local defaultFov = 40
-    local defaultRatio = 16/9 -- comes from default res 1280 x 720
-    local tanDefaultFov = math.tan(math.pi * defaultFov / 180)
+  arg["vsync"] = arg["vsync"] or false
+  arg["tags"] = arg["tags"] or {}
+  arg["pos"] = arg["pos"] or { 50, 50 }
+  arg["size"] = arg["size"] or { 1280, 720 }
 
-    if (type(arg["windowSize"]) == "table") then
-      assert(type(arg["windowSize"][1]) == "number", "windowSize[1] must be a number")
-      assert(type(arg["windowSize"][2]) == "number", "windowSize[2] must be a number")
-      local tanHorizontalFov = tanDefaultFov
-      local tanVerticalFov = tanDefaultFov
+  if (not arg["fov"]) then
+    local tanDefaultFov = math.tan(math.rad(40.0))
 
-      local ratio = arg["windowSize"][1] / arg["windowSize"][2]
-
-      -- ratio between w and h should be
-      -- same as tan(horizontalFov) and tan(verticalFov)
-
-      if (ratio > 1) then
-        tanVerticalFov = tanHorizontalFov / ratio
-      else
-        tanHorizontalFov = tanVerticalFov * ratio
-      end
-
-      -- sgct expects fov in degrees
-      arg["fov"] = {
-        down = 180 * math.atan(tanVerticalFov) / math.pi,
-        up = 180 * math.atan(tanVerticalFov) / math.pi,
-        left = 180 * math.atan(tanHorizontalFov) / math.pi,
-        right = 180 * math.atan(tanHorizontalFov) / math.pi
-      }
+    local tanHorizontalFov
+    local tanVerticalFov
+    local aspectRatio = arg["size"][1] / arg["size"][2]
+    if (aspectRatio > 1) then
+      tanHorizontalFov = tanDefaultFov
+      tanVerticalFov = tanDefaultFov / aspectRatio
     else
-      -- sgct expects fov in degrees
-      arg["fov"] = {
-        down = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
-        up = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
-        left = 180 * math.atan(tanDefaultFov) / math.pi,
-        right = 180 * math.atan(tanDefaultFov) / math.pi
-      }
+      tanHorizontalFov = tanDefaultFov * aspectRatio
+      tanVerticalFov = tanDefaultFov
     end
+
+    arg["fov"] = {
+      down = math.deg(math.atan(tanVerticalFov)),
+      up = math.deg(math.atan(tanVerticalFov)),
+      left = math.deg(math.atan(tanHorizontalFov)),
+      right = math.deg(math.atan(tanHorizontalFov))
+    }
   end
 
-  assert(
-    type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
-    "tracked must be a boolean or nil"
-  )
+  check("boolean", arg, "tracked")
   sgctconfiginitializeString = "sgct.config.single"
 
-  arg["tracked"] = arg["tracked"] or false
+  arg["tracked"] = arg["tracked"] or true
 
-  arg["viewport"] = generateSingleViewportFOV(
+  local viewport = generateSingleViewportFOV(
     arg["fov"]["down"],
     arg["fov"]["up"], 
     arg["fov"]["left"],
     arg["fov"]["right"],
     arg["tracked"]
   )
-  return sgct.makeConfig(generateSingleWindowConfig(arg))
+  return sgct.makeConfig(generateSingleWindowConfig(arg, viewport))
 end
 
 
@@ -537,70 +437,26 @@ end
 function sgct.config.fisheye(arg)
   arg = normalizeArg(arg)
 
-  assert(
-    type(arg["fov"]) == "number" or type(arg["fov"]) == "nil",
-    "fov must be a number or nil"
-  )
-
-  assert(
-    type(arg["quality"]) == "string" or type(arg["quality"]) == "nil",
-    "quality must be a string or nil"
-  )
-
-  assert(
-    type(arg["tilt"]) == "number" or type(arg["tilt"]) == "nil",
-    "tilt must be a number or nil"
-  )
-
-  assert(
-    type(arg["background"]) == "table" or type(arg["background"]) == "nil",
-    "background must be a table or nil"
-  )
-  if type(arg["background"]) == "table" then
-    assert(type(background["r"]) == "number", "backgroud['r'] must be a number")
-    assert(type(background["g"]) == "number", "backgroud['g'] must be a number")
-    assert(type(background["b"]) == "number", "backgroud['b'] must be a number")
-    assert(type(background["a"]) == "number", "backgroud['a'] must be a number")
-  end
-
-  assert(
-    type(arg["crop"]) == "table" or type(arg["crop"]) == "nil",
-    "crop must be a table or nil"
-  )
-  if type(arg["crop"]) == "table" then
-    assert(
-        type(arg["crop"]["left"]) == "number", "crop['left'] must be a number"
-    )
-    assert(
-        type(arg["crop"]["right"]) == "number", "crop['right'] must be a number"
-    )
-    assert(
-        type(arg["crop"]["top"]) == "number", "crop['top'] must be a number"
-    )
-    assert(
-        type(arg["crop"]["bottom"]) == "number", "crop['bottom'] must be a number"
-    )
-  end
-
-  assert(
-    type(arg["offset"]) == "table" or type(arg["offset"]) == "nil",
-    "offset must be a table or nil"
-  )
-  if type(arg["offset"]) == "table" then
-    assert(type(arg["offset"]["x"]) == "number", "offset['x'] must be a number")
-    assert(type(arg["offset"]["y"]) == "number", "offset['y'] must be a number")
-    assert(type(arg["offset"]["z"]) == "number", "offset['z'] must be a number")
-  end
+  check("number", arg, "fov")
+  check("string", arg, "quality")
+  check("number", arg, "tilt")
+  check("table", arg, "background", "number")
+  check("table", arg, "crop", "number")
+  check("table", arg, "offset", "number")
 
   sgctconfiginitializeString = "sgct.config.fisheye"
 
-  arg["fov"] = arg["fov"] or 180.0
+  arg["vsync"] = arg["vsync"] or false
+  arg["tags"] = arg["tags"] or {}
+  arg["pos"] = arg["pos"] or { 50, 50 }
+  arg["size"] = arg["size"] or { 1024, 1024 }
+
   arg["quality"] = arg["quality"] or "1k"
   arg["tilt"] = arg["tilt"] or 90.0
   arg["background"] = arg["background"] or { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
   arg["tracked"] = arg["tracked"] or false
 
-  arg["viewport"] = generateFisheyeViewport(
+  local viewport = generateFisheyeViewport(
     arg["fov"],
     arg["quality"],
     arg["tilt"],
@@ -610,5 +466,5 @@ function sgct.config.fisheye(arg)
     arg["tracked"]
   )
 
-  return sgct.makeConfig(generateSingleWindowConfig(arg))
+  return sgct.makeConfig(generateSingleWindowConfig(arg, viewport))
 end
