@@ -12,6 +12,8 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
   openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', false)
   openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_LiU.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.MDEM200M.Enabled", false)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.HeightLayers.Mola_Europe.Enabled", true)
@@ -25,6 +27,8 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.JoystickSensitivity', 2.0);
   openspace.setPropertyValueSingle('Scene.Venus.Renderable.Layers.ColorLayers.Texture.Enabled', true);
   openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.ColorLayers.Magellan_Mosaic_Utah.Enabled", false)
+  openspace.setPropertyValueSingle("Dashboard.Framerate.FontSize", 40.000000)
+  openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", {150.000000,-150.000000})
 
   openspace.setPropertyValue("Scene.*.ApproachFactor", 10);
 end)
