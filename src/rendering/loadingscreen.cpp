@@ -283,7 +283,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        std::lock_guard<std::mutex> guard(_messageMutex);
+        std::lock_guard guard(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -298,7 +298,7 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        std::lock_guard<std::mutex> guard(_itemsMutex);
+        std::lock_guard guard(_itemsMutex);
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
@@ -485,7 +485,7 @@ void LoadingScreen::render() {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    std::lock_guard<std::mutex> guard(_messageMutex);
+    std::lock_guard guard(_messageMutex);
     _message = std::move(message);
 }
 
@@ -535,7 +535,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    std::lock_guard<std::mutex> guard(_itemsMutex);
+    std::lock_guard guard(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),
@@ -552,16 +552,9 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         }
     }
     else {
-        ghoul_assert(
-            newStatus == ItemStatus::Started,
-            fmt::format(
-                "Item '{}' did not exist and first message was not 'Started'",
-                itemIdentifier
-            )
-        );
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
-        _items.push_back({
+        Item item = {
             itemIdentifier,
             itemName,
             ItemStatus::Started,
@@ -573,7 +566,15 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
             {},
             {},
             std::chrono::system_clock::from_time_t(0)
-        });
+        };
+
+        if (newStatus == ItemStatus::Finished) {
+            // This is only going to be triggered if an item finishes so quickly that
+            // there was not even time to create the item between starting and finishing
+            item.finishedTime = std::chrono::system_clock::now();
+        }
+
+        _items.push_back(std::move(item));
     }
 }
 

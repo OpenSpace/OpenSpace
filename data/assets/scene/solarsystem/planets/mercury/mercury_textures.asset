@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Mercury Textures",
-  Type = "HttpSynchronization",
-  Identifier = "mercury_abundance_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

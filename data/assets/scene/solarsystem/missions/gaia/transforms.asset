@@ -11,7 +11,7 @@ local trail = asset.syncedResource({
 
 local GaiaPosition = {
   Identifier = "GaiaPosition",
-  Parent = earthTransforms.EarthBarycenter.Identifier,
+  Parent = earthTransforms.EarthCenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",

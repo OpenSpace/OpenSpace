@@ -111,28 +111,24 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
             {
                 "loadMission",
                 &luascriptfunctions::loadMission,
-                {},
                 "string",
                 "Load mission phases from file"
             },
             {
                 "unloadMission",
                 &luascriptfunctions::unloadMission,
-                {},
                 "string",
                 "Unloads a previously loaded mission"
             },
             {
                 "hasMission",
                 &luascriptfunctions::hasMission,
-                {},
                 "string",
                 "Returns whether a mission with the provided name has been loaded"
             },
             {
                 "setCurrentMission",
                 &luascriptfunctions::setCurrentMission,
-                {},
                 "string",
                 "Set the currnet mission"
             },

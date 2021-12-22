@@ -28,6 +28,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
+#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -126,18 +127,18 @@ inline std::string to_string(const openspace::interaction::JoystickAction& value
         case openspace::interaction::JoystickAction::Press:   return "Press";
         case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
         case openspace::interaction::JoystickAction::Release: return "Release";
-       default:                                              throw MissingCaseException();
+        default:                                             throw MissingCaseException();
     }
 }
 
 template <>
 constexpr openspace::interaction::JoystickAction from_string(std::string_view string) {
-    if (string == "Idle") { return openspace::interaction::JoystickAction::Idle; }
-    if (string == "Press") { return openspace::interaction::JoystickAction::Press; }
-    if (string == "Repeat") { return openspace::interaction::JoystickAction::Repeat; }
+    if (string == "Idle")    { return openspace::interaction::JoystickAction::Idle; }
+    if (string == "Press")   { return openspace::interaction::JoystickAction::Press; }
+    if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
     if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
 
-    throw RuntimeError("Unknown action '" + std::string(string) + "'");
+    throw RuntimeError(fmt::format("Unknown action '{}'", string));
 }
 
 } // namespace ghoul

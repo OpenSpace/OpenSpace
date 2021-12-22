@@ -28,9 +28,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interactionmonitor.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 

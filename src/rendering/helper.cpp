@@ -458,7 +458,7 @@ std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments
             // 0 -> PI
             // azimuth angle (east to west)
             const float theta = fi * glm::pi<float>() / nSegments;
-                                                                    
+
             // 0 -> 2*PI
             const float phi = fj * glm::pi<float>() * 2.f / nSegments;
 

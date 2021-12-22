@@ -34,13 +34,13 @@ namespace {
             : _jobExecutingTime(jobExecutingTime)
         {}
 
-        virtual void execute() {
+        virtual void execute() override {
             std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
             prod = 1337;
         }
 
-        virtual int product() {
-            return int(prod);
+        virtual int product() override {
+            return prod;
         }
 
     private:
@@ -64,12 +64,12 @@ namespace {
             , _product(-1)
         {}
 
-        virtual void execute() {
+        virtual void execute() override {
             std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
             _product = VerboseProduct(1337);
         }
 
-        virtual VerboseProduct product() {
+        virtual VerboseProduct product() override {
             return _product;
         }
 

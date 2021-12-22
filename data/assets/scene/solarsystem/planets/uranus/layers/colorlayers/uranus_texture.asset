@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../uranus_textures").TexturesPath
 local globeIdentifier = asset.require("./../../uranus").Uranus.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Uranus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "uranus_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",

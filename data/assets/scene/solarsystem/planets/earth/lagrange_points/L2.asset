@@ -1,8 +1,20 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-local circle = asset.require('util/circle').circle
-local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
 asset.require('spice/base')
+
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
 
 local L2Small = {
   Identifier = "L2Small",
@@ -34,7 +46,6 @@ local L2 = {
   Identifier = "L2",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderablePlaneImageLocal",
     RenderableType = "Opaque",
     Billboard = true,
@@ -61,7 +72,6 @@ local L2SmallLabel = {
   Identifier = "L2SmallLabel",
   Parent = L2.Identifier,
   Renderable = {
-    Enabled = true,
     Type = "RenderableLabels",
     Text = "L2",
     FontSize = 20.0,
@@ -83,7 +93,6 @@ local L2Label = {
   Identifier = "L2Label",
   Parent = L2.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabels",
     Text = "L2",
     FontSize = 20,

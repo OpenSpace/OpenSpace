@@ -26,6 +26,8 @@
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/touch.h>
@@ -90,7 +92,6 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
@@ -108,7 +109,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void loadSingleAsset(const std::string& assetPath);
+    void loadAssets();
     void loadFonts();
 
     void runGlobalCustomizationScripts();
@@ -116,14 +117,13 @@ private:
     std::string generateFilePath(std::string openspaceRelativePath);
     void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
+    properties::BoolProperty _printEvents;
+
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
-
-    bool _hasScheduledAssetLoading = false;
-    std::string _scheduledAssetPathToLoad;
 
     glm::vec2 _mousePosition = glm::vec2(0.f);
 
@@ -136,8 +136,56 @@ private:
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
-    bool _isFirstRenderingFirstFrame = true;
+    bool _isRenderingFirstFrame = true;
 };
+
+/**
+ * Sets the camera position using the time contents of a profile. The function will
+ * set an absolute position or a go-to-geolocation command using the globebrowsing
+ * module.
+ * \param p The Profile to be read.
+ */
+void setCameraFromProfile(const Profile& p);
+
+/**
+ * Reads a list of modules from a profile, and executes scripts based on whether or
+ * not the corresponding module is loaded.
+ *
+ * \param p The Profile to be read.
+ */
+void setModulesFromProfile(const Profile& p);
+
+/**
+ * Registers actions from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setActionsFromProfile(const Profile& p);
+
+/**
+ * Registers keybindings from the contents of a profile.
+ *
+ * \param p The Profile to be read.
+ */
+void setKeybindingsFromProfile(const Profile& p);
+
+/**
+ * Reads list of nodes from profile to be marked as interesting nodes.
+ * If any nodes are listed, a script to mark these will be queued with the
+ * script engine.
+ *
+ * \param p The Profile to be read.
+ */
+void setMarkInterestingNodesFromProfile(const Profile& p);
+
+/**
+ * Reads list of "additional scripts" that are added to the profile to be run
+ * at the end of the initialization. Any openspace lua commands are allowed,
+ * and will be added to the script queue.
+ *
+ * \param p The Profile to be read.
+ */
+void setAdditionalScriptsFromProfile(const Profile& p);
 
 } // namespace openspace
 

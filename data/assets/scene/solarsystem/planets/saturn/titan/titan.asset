@@ -2,7 +2,13 @@ local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
 asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Titan = {
   Identifier = "Titan",

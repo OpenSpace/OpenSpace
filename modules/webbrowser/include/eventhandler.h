@@ -80,7 +80,7 @@ private:
     /**
      * Create a mouse event on the current cursor position.
      */
-    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::None);
 
 #ifdef WIN32
     /**

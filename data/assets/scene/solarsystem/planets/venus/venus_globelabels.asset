@@ -1,7 +1,0 @@
-local LabelsPath = asset.syncedResource({
-  Name = "Venus Labels",
-  Type = "HttpSynchronization",
-  Identifier = "venus_labels",
-  Version = 1
-})
-asset.export("LabelsPath", LabelsPath)

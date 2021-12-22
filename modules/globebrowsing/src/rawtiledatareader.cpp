@@ -188,7 +188,8 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     }
     const int sizeLevel0 = maxOverview->GetXSize();
     const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    return static_cast<int>(diff);
+    const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
+    return static_cast<int>(intdiff);
 }
 
 /**

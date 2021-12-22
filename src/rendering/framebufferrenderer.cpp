@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -33,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -1067,7 +1067,6 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         std::filesystem::path vsPath = caster->deferredcastVSPath();
         std::filesystem::path fsPath = caster->deferredcastFSPath();
-        std::filesystem::path deferredShaderPath = caster->deferredcastPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
@@ -1086,15 +1085,8 @@ void FramebufferRenderer::updateDeferredcastData() {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
                 vsPath,
-                deferredShaderPath,
+                fsPath,
                 dict
-            );
-
-            _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
@@ -1262,7 +1254,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor, glm::ivec4(viewport[0], viewport[1], viewport[2], viewport[3]));
+        applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {

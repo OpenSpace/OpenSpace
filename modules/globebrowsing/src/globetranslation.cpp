@@ -42,19 +42,19 @@ namespace {
         "The globe on which the longitude/latitude is specified"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
-        "Longitude",
-        "Longitude",
-        "The longitude of the location on the globe's surface. The value can range from "
-        "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
+        "globe. The default value is 0.0"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
+        "Longitude",
+        "Longitude",
+        "The longitude of the location on the globe's surface. The value can range from "
+        "-180 to 180, with negative values representing the western hemisphere of the "
         "globe. The default value is 0.0"
     };
 
@@ -80,11 +80,11 @@ namespace {
         std::string globe
             [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
-        // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude;
-
         // [[codegen::verbatim(LatitudeInfo.description)]]
         std::optional<double> latitude;
+
+        // [[codegen::verbatim(LongitudeInfo.description)]]
+        std::optional<double> longitude;
 
         // [[codegen::verbatim(AltitudeInfo.description)]]
         std::optional<double> altitude;
@@ -103,34 +103,31 @@ documentation::Documentation GlobeTranslation::Documentation() {
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     : _globe(GlobeInfo)
-    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
-    , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
+    , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
+    , _altitude(AltitudeInfo, 0.0, -1e12, 1e12)
     , _useHeightmap(UseHeightmapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _globe = p.globe;
-    _globe.onChange([this]() {
-        fillAttachedNode();
-        _positionIsDirty = true;
-    });
-
-    _longitude = p.longitude.value_or(_longitude);
-    _longitude.onChange([this]() { _positionIsDirty = true; });
-    addProperty(_longitude);
 
     _latitude = p.latitude.value_or(_latitude);
-    _latitude.onChange([this]() { _positionIsDirty = true; });
+    _latitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_latitude);
 
+    _longitude = p.longitude.value_or(_longitude);
+    _longitude.onChange([this]() { setUpdateVariables(); });
+    addProperty(_longitude);
+
     _altitude = p.altitude.value_or(_altitude);
-    _altitude.setExponent(8.f);
-    _altitude.onChange([this]() { _positionIsDirty = true; });
+    // @TODO (emmbr) uncomment when ranges with negative values are supported
+    //_altitude.setExponent(8.f);
+    _altitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_altitude);
 
     _useHeightmap = p.useHeightmap.value_or(_useHeightmap);
-    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
+    _useHeightmap.onChange([this]() { setUpdateVariables(); });
     addProperty(_useHeightmap);
 }
 
@@ -151,6 +148,20 @@ void GlobeTranslation::fillAttachedNode() {
     }
 }
 
+void GlobeTranslation::setUpdateVariables() {
+    _positionIsDirty = true;
+    requireUpdate();
+}
+
+void GlobeTranslation::update(const UpdateData& data) {
+    if (_useHeightmap) {
+        // If we use the heightmap, we have to compute the height every frame
+        setUpdateVariables();
+    }
+
+    Translation::update(data);
+}
+
 glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     if (!_attachedNode) {
         // @TODO(abock): The const cast should be removed on a redesign of the translation
@@ -161,19 +172,14 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         _positionIsDirty = true;
     }
 
-    if (_useHeightmap) {
-        // If we use the heightmap, we have to compute the height every frame
-        _positionIsDirty = true;
-    }
-
     if (!_positionIsDirty) {
         return _position;
     }
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
+    GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
     if (_useHeightmap) {
-        glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
+        glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,
@@ -183,7 +189,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         SurfacePositionHandle h =
             _attachedNode->calculateSurfacePositionHandle(groundPos);
 
-        _position = mod.cartesianCoordinatesFromGeo(
+        _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,
@@ -192,7 +198,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
     else {
-        _position = mod.cartesianCoordinatesFromGeo(
+        _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,
             _longitude,

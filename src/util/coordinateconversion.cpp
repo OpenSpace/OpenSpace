@@ -32,9 +32,11 @@ namespace {
     constexpr const char* _loggerCat = "Coordinateconversion";
 
     // J2000 Galactic reference frame
-    constexpr double A0 = glm::radians(192.8595); // Equatorial coordinates of the Galactic north pole
+    // Equatorial coordinates of the Galactic north pole
+    constexpr double A0 = glm::radians(192.8595);
     constexpr double D0 = glm::radians(27.1284);
-    constexpr double L0 = glm::radians(122.9320); // Galactic longitude of the equatorial north pole
+    // Galactic longitude of the equatorial north pole
+    constexpr double L0 = glm::radians(122.9320);
 
     void parseString(const std::string& str, int& hoursOrDegrees, int& minutes,
                      double& seconds)
@@ -49,7 +51,8 @@ namespace {
         {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
-                "and Dec 'XdYmZs'", str));
+                "and Dec 'XdYmZs'", str
+            ));
         }
 
         // Construct the number strings
@@ -64,7 +67,8 @@ namespace {
             if (std::floor(temp) != temp) {
                 throw ghoul::lua::LuaRuntimeException(fmt::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
-                    "and Dec 'XdYmZs', where X must be an integer", str));
+                    "and Dec 'XdYmZs', where X must be an integer", str
+                ));
             }
             hoursOrDegrees = std::stoi(sHoursOrDegrees);
 
@@ -73,83 +77,90 @@ namespace {
             if (std::floor(temp) != temp) {
                 throw ghoul::lua::LuaRuntimeException(fmt::format(
                     "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
-                    "and Dec 'XdYmZs', where Y must be an integer", str));
+                    "and Dec 'XdYmZs', where Y must be an integer", str
+                ));
             }
             minutes = std::stoi(sMinutes);
 
             // Seconds is a double
             seconds = std::stod(sSeconds);
-        } catch (const std::invalid_argument& ia) {
+        }
+        catch (const std::invalid_argument&) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
                 "Ra or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
-                "and Dec 'XdYmZs'", str));
+                "and Dec 'XdYmZs'", str
+            ));
         }
     }
 
     void parseRa(const std::string& ra, int& hours, int& minutes, double& seconds) {
         if (ra.find('d') != std::string::npos) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra));
+                "Ra '{}' format is incorrect. Correct format is: 'XhYmZs'", ra
+            ));
         }
         parseString(ra, hours, minutes, seconds);
     }
 
-    void parseDec(const std::string& dec, int& degrees, int& minutes,
-                  double& seconds)
-    {
+    void parseDec(const std::string& dec, int& degrees, int& minutes, double& seconds) {
         if (dec.find('h') != std::string::npos) {
             throw ghoul::lua::LuaRuntimeException(fmt::format(
-                "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec));
+                "Dec '{}' format is incorrect. Correct format is: 'XdYmZs'", dec
+            ));
         }
         parseString(dec, degrees, minutes, seconds);
     }
 
-    bool isRaDecValid(int raH, int raM, double raS, int decD,
-                      int decM, double decS)
-    {
+    bool isRaDecValid(int raH, int raM, double raS, int decD, int decM, double decS) {
         // Ra
         if (raH < 0.0 || raH >= 24.0) {
-            LWARNING(fmt::format("Right ascension hours '{}' is outside the allowed "
-                "range of 0 to 24 hours (exclusive)", raH)
-            );
+            LWARNING(fmt::format(
+                "Right ascension hours '{}' is outside the allowed range of 0 to 24 "
+                "hours (exclusive)", raH
+            ));
             return false;
         }
         if (raM < 0.0 || raM >= 60.0) {
-            LWARNING(fmt::format("Right ascension minutes '{}' is outside the allowed "
-                "range of 0 to 60 minutes (exclusive)", raM)
-            );
+            LWARNING(fmt::format(
+                "Right ascension minutes '{}' is outside the allowed range of 0 to 60 "
+                "minutes (exclusive)", raM
+            ));
             return false;
         }
         if (raS < 0.0 || raS >= 60.0) {
-            LWARNING(fmt::format("Right ascension seconds '{}' is outside the allowed "
-                "range of 0 to 60 seconds (exclusive)", raS)
-            );
+            LWARNING(fmt::format(
+                "Right ascension seconds '{}' is outside the allowed "
+                "range of 0 to 60 seconds (exclusive)", raS
+            ));
             return false;
         }
 
         // Dec
         if (decD < -90.0 || decD > 90.0) {
             LWARNING(fmt::format("Declination degrees '{}' is outside the allowed range "
-                "of -90 to 90 degrees (inclusive)", decD)
-            );
+                "of -90 to 90 degrees (inclusive)", decD
+            ));
             return false;
         }
         else if ((decD == -90.0 || decD == 90.0) && (decM != 0 || decS != 0)) {
-            LWARNING("Total declination is outside the allowed range of -90 to 90 "
-                "degrees (inclusive)"
+            LWARNING(
+                "Total declination is outside the allowed range of -90 to 90 degrees "
+                "(inclusive)"
             );
             return false;
         }
         if (decM < 0.0 || decM >= 60.0) {
-            LWARNING(fmt::format("Declination minutes '{}' is outside the allowed range "
-                "of 0 to 60 minutes (exclusive)", decM)
-            );
+            LWARNING(fmt::format(
+                "Declination minutes '{}' is outside the allowed range of 0 to 60 "
+                "minutes (exclusive)", decM
+            ));
             return false;
         }
         if (decS < 0.0 || decS >= 60.0) {
-            LWARNING(fmt::format("Declination seconds '{}' is outside the allowed range "
-                "of 0 to 60 seconds (exclusive)", decS)
-            );
+            LWARNING(fmt::format(
+                "Declination seconds '{}' is outside the allowed range of 0 to 60 "
+                "seconds (exclusive)", decS
+            ));
             return false;
         }
 
@@ -189,12 +200,14 @@ glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance) {
 // Dec format 'XdYmZs', where X is a signed integer, Y is a positive integer and Z is a
 // positive double
 // Reference:
-// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
+// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
+// coordinates-of-stars
 glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     if (ra.size() < 6 || dec.size() < 6) {
         throw ghoul::lua::LuaRuntimeException(fmt::format(
             "Ra '{}' or Dec '{}' format is incorrect. Correct format is: Ra 'XhYmZs', "
-            "and Dec 'XdYmZs'", ra, dec));
+            "and Dec 'XdYmZs'", ra, dec
+        ));
     }
 
     // Parse right ascension
@@ -216,13 +229,14 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec) {
     );
 
     if (!isValid) {
-        LWARNING(fmt::format("Ra '{}' or Dec '{}' is outside the allowed range, "
-            "result may be incorrect", ra, dec)
-        );
+        LWARNING(fmt::format(
+            "Ra '{}' or Dec '{}' is outside the allowed range, result may be incorrect",
+            ra, dec
+        ));
     }
 
     // Convert from hours/degrees, minutes, seconds to decimal degrees
-    double sign = signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
+    double sign = std::signbit(static_cast<float>(decDegrees)) ? -1.0 : 1.0;
     double raDeg = (raHours * 15.0) +
         (raMinutes * 15.0 / 60.0) +
         (raSeconds * 15.0 / 3600.0);
@@ -264,7 +278,8 @@ glm::dvec3 galacticCartesianToIcrs(double x, double y, double z) {
 // Return a pair with two formatted strings from the decimal degrees ra and dec
 // References:
 // https://www.rapidtables.com/convert/number/degrees-to-degrees-minutes-seconds.html,
-// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-coordinates-of-stars
+// https://math.stackexchange.com/questions/15323/how-do-i-calculate-the-cartesian-
+// coordinates-of-stars
 std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) {
     // Radians to degrees
     double raDeg = ra;
@@ -272,21 +287,22 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
 
     // Check input
     if (raDeg < 0 || raDeg > 360 || decDeg < -90 || decDeg > 90) {
-        LWARNING(fmt::format("Given Ra '{}' or Dec '{}' is outside the allowed range, "
-            "result may be incorrect", ra, dec)
-        );
+        LWARNING(fmt::format(
+            "Ra '{}' or Dec '{}' is outside the allowed range, result may be incorrect",
+            ra, dec
+        ));
     }
 
     // Calculate Ra
-    int raHours = std::trunc(raDeg) / 15.0;
+    int raHours = static_cast<int>(std::trunc(raDeg) / 15.0);
     double raMinutesFull = (raDeg - raHours * 15.0) * 60.0 / 15.0;
-    int raMinutes = std::trunc(raMinutesFull);
+    int raMinutes = static_cast<int>(std::trunc(raMinutesFull));
     double raSeconds = (raMinutesFull - raMinutes) * 60.0;
 
     // Calculate Dec
-    int decDegrees = std::trunc(decDeg);
+    int decDegrees = static_cast<int>(std::trunc(decDeg));
     double decMinutesFull = (abs(decDeg) - abs(decDegrees)) * 60.0;
-    int decMinutes = std::trunc(decMinutesFull);
+    int decMinutes = static_cast<int>(std::trunc(decMinutesFull));
     double decSeconds = (decMinutesFull - decMinutes) * 60.0;
 
     // Construct strings
@@ -309,9 +325,10 @@ std::pair<std::string, std::string> decimalDegreesToIcrs(double ra, double dec) 
     );
 
     if (!isValid) {
-        LWARNING(fmt::format("Resulting Ra '{}' or Dec '{}' is outside the allowed range, "
-            "result may be incorrect", result.first, result.second)
-        );
+        LWARNING(fmt::format(
+            "Resulting Ra '{}' or Dec '{}' is outside the allowed range, result may be "
+            "incorrect", result.first, result.second
+        ));
     }
     return result;
 }

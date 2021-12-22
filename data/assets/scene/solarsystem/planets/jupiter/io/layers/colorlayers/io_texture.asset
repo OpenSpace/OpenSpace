@@ -1,5 +1,11 @@
-local texturesPath = asset.require("./../../io_textures").TexturesPath
 local globeIdentifier = asset.require("./../../io").Io.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Io Textures",
+  Type = "HttpSynchronization",
+  Identifier = "io_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",

@@ -24,20 +24,21 @@
 
 #include <openspace/interaction/sessionrecording.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/tasks/convertrecfileversiontask.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
@@ -355,15 +356,15 @@ bool SessionRecording::startPlayback(std::string& filename,
                                      bool loop)
 {
     std::string absFilename;
-    // Run through conversion in case file is older. Does nothing if the file format
-    // is up-to-date
-    filename = convertFile(filename);
     if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
     }
     else {
         absFilename = absPath("${RECORDINGS}/" + filename).string();
     }
+    // Run through conversion in case file is older. Does nothing if the file format
+    // is up-to-date
+    absFilename = convertFile(absFilename);
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
@@ -461,7 +462,12 @@ bool SessionRecording::startPlayback(std::string& filename,
         (_playbackForceSimTimeAtStart ? 1 : 0)
     ));
 
+    global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+        events::EventSessionRecordingPlayback::State::Started
+    );
     initializePlayback_triggerStart();
+
+    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 
     return true;
 }
@@ -472,6 +478,8 @@ void SessionRecording::initializePlayback_time(double now) {
     _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
+    _saveRenderingCurrentApplicationTime_interpolation =
+        global::windowDelegate->applicationTime();
     _saveRenderingClockInterpolation_countsPerSec =
         system_clock::duration::period::den / system_clock::duration::period::num;
     _playbackPauseOffset = 0.0;
@@ -523,12 +531,18 @@ void SessionRecording::setPlaybackPause(bool pause) {
             global::timeManager->setPause(true);
         }
         _state = SessionState::PlaybackPaused;
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Paused
+        );
     }
     else if (!pause && _state == SessionState::PlaybackPaused) {
         if (!_playbackPausedWithinDeltaTimePause) {
             global::timeManager->setPause(false);
         }
         _state = SessionState::Playback;
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Resumed
+        );
     }
 }
 
@@ -571,7 +585,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 
     if (!_playbackActive_camera && !_playbackActive_time && !_playbackActive_script) {
         if (_playbackLoopMode) {
-            //Loop back to the beginning to replay
+            // Loop back to the beginning to replay
             _saveRenderingDuringPlayback = false;
             initializePlayback_time(global::windowDelegate->applicationTime());
             initializePlayback_modeFlags();
@@ -582,6 +596,9 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
             _state = SessionState::Idle;
             _cleanupNeeded = true;
             LINFO("Playback session finished");
+            global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+                events::EventSessionRecordingPlayback::State::Finished
+            );
         }
     }
 }
@@ -602,6 +619,9 @@ void SessionRecording::stopPlayback() {
         _state = SessionState::Idle;
         _cleanupNeeded = true;
         LINFO("Session playback stopped");
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Finished
+        );
     }
 }
 
@@ -1176,9 +1196,12 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 }
 
 std::chrono::steady_clock::time_point
-SessionRecording::currentPlaybackInterpolationTime() const
-{
+SessionRecording::currentPlaybackInterpolationTime() const {
     return _saveRenderingCurrentRecordedTime_interpolation;
+}
+
+double SessionRecording::currentApplicationInterpolationTime() const {
+    return _saveRenderingCurrentApplicationTime_interpolation;
 }
 
 bool SessionRecording::playbackCamera() {
@@ -1770,8 +1793,8 @@ bool SessionRecording::addKeyframe(Timestamps t3stamps,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
-    bool paused = global::timeManager->isPaused();
-    if (_state == SessionState::PlaybackPaused) {
+    bool playbackPaused = (_state == SessionState::PlaybackPaused);
+    if (playbackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }
@@ -1793,10 +1816,12 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            if (!paused) {
+            if (!playbackPaused) {
                 _saveRenderingCurrentRecordedTime_interpolation +=
                     _saveRenderingDeltaTime_interpolation_usec;
-               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                _saveRenderingCurrentApplicationTime_interpolation +=
+                    _saveRenderingDeltaTime;
                 global::renderEngine->takeScreenshot();
             }
         }
@@ -1954,9 +1979,13 @@ bool SessionRecording::processCameraKeyframe(double now) {
     }
 
     // getPrevTimestamp();
-    double prevTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrPrev].t3stamps);
+    double prevTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrPrev].t3stamps
+    );
     // getNextTimestamp();
-    double nextTime = appropriateTimestamp(_timeline[_idxTimeline_cameraPtrNext].t3stamps);
+    double nextTime = appropriateTimestamp(
+        _timeline[_idxTimeline_cameraPtrNext].t3stamps
+    );
 
     double t;
     if ((nextTime - prevTime) < 1e-7) {
@@ -2192,7 +2221,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
                                                 std::ifstream& inputFstream,
                                                 std::stringstream& stream)
 {
-    std::filesystem::path conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    std::filesystem::path conversionInFilename = absPath(filename);
     if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
             "Cannot find the specified playback file {} to convert", conversionInFilename
@@ -2530,7 +2559,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startRecording",
                 &luascriptfunctions::startRecording,
-                {},
                 "string",
                 "Starts a recording session. The string argument is the filename used "
                 "for the file where the recorded keyframes are saved. "
@@ -2539,7 +2567,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startRecordingAscii",
                 &luascriptfunctions::startRecordingAscii,
-                {},
                 "string",
                 "Starts a recording session. The string argument is the filename used "
                 "for the file where the recorded keyframes are saved. "
@@ -2548,14 +2575,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "stopRecording",
                 &luascriptfunctions::stopRecording,
-                {},
                 "void",
                 "Stops a recording session"
             },
             {
                 "startPlayback",
                 &luascriptfunctions::startPlaybackDefault,
-                {},
                 "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
@@ -2569,7 +2594,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackApplicationTime",
                 &luascriptfunctions::startPlaybackApplicationTime,
-                {},
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "application time (seconds since OpenSpace application started). "
@@ -2580,7 +2604,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackRecordedTime",
                 &luascriptfunctions::startPlaybackRecordedTime,
-                {},
                 "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
@@ -2593,7 +2616,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "startPlaybackSimulationTime",
                 &luascriptfunctions::startPlaybackSimulationTime,
-                {},
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "the simulated date & time. The string argument is the filename to pull "
@@ -2603,14 +2625,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "stopPlayback",
                 &luascriptfunctions::stopPlayback,
-                {},
-                "void",
+                "",
                 "Stops a playback session before playback of all keyframes is complete"
             },
             {
                 "enableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::enableTakeScreenShotDuringPlayback,
-                {},
                 "[int]",
                 "Enables that rendered frames should be saved during playback. The "
                 "parameter determines the number of frames that are exported per second "
@@ -2619,14 +2639,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "disableTakeScreenShotDuringPlayback",
                 &luascriptfunctions::disableTakeScreenShotDuringPlayback,
-                {},
-                "void",
+                "",
                 "Used to disable that renderings are saved during playback"
             },
             {
                 "fileFormatConversion",
                 &luascriptfunctions::fileFormatConversion,
-                {},
                 "string",
                 "Performs a conversion of the specified file to the most most recent "
                 "file format, creating a copy of the recording file."
@@ -2634,14 +2652,12 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                 "setPlaybackPause",
                 &luascriptfunctions::setPlaybackPause,
-                {},
                 "bool",
                 "Pauses or resumes the playback progression through keyframes"
             },
             {
                 "togglePlaybackPause",
                 &luascriptfunctions::togglePlaybackPause,
-                {},
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
                 " and restoring it afterwards"
@@ -2649,7 +2665,6 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             {
                "isPlayingBack",
                 & luascriptfunctions::isPlayingBack,
-                {},
                 "",
                 "Returns true if session recording is currently playing back a recording"
             }

@@ -28,6 +28,13 @@
 
 out vec4 renderTarget;
 
+uniform float Rg;
+uniform float Rt;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
 uniform sampler3D deltaJTexture;
@@ -35,7 +42,7 @@ uniform sampler3D deltaJTexture;
 // The integrand here is the f(y) of the trapezoidal rule:
 vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
-  float r_i = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
+  float r_i = sqrt(r * r + dist * dist + 2.0 * r * dist * mu);
   // r_i can be found using the dot product:
   // vec(y_i) dot vec(dist) = cos(theta_i) * ||vec(y_i)|| * ||vec(dist)||
   // But vec(y_i) = vec(x) + vec(dist), also: vec(x) dot vec(dist) = cos(theta) = mu
@@ -46,12 +53,15 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
   float muSun_i = (r * muSun + dist * nu) / r_i;
   // The irradiance attenuated from point r until y (y-x = dist)
-  return transmittance(r, mu, dist) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu).rgb;
+  return
+    transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
+    texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+      SAMPLES_MU_S, SAMPLES_NU).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   vec3 inScatteringRadiance = vec3(0.0);
-  float dy = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+  float dy = rayDistance(r, mu, Rt, Rg) / float(INSCATTER_INTEGRAL_SAMPLES);
   vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
   
   // In order to solve the integral from equation (11) we use the trapezoidal rule:
@@ -71,7 +81,7 @@ void main() {
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
   
   // Write to texture deltaSR 
   renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);

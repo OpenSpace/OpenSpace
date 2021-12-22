@@ -28,6 +28,10 @@
 
 out vec4 renderTarget;
 
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
 uniform int layer;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;

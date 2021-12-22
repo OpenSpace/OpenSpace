@@ -128,8 +128,16 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
+    const std::vector<std::string>& onApproachAction() const;
+    const std::vector<std::string>& onReachAction() const;
+    const std::vector<std::string>& onRecedeAction() const;
+    const std::vector<std::string>& onExitAction() const;
+
     double boundingSphere() const;
     double interactionSphere() const;
+
+    double reachFactor() const;
+    double approachFactor() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -154,6 +162,11 @@ private:
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene = nullptr;
+
+    std::vector<std::string> _onApproachAction;
+    std::vector<std::string> _onReachAction;
+    std::vector<std::string> _onRecedeAction;
+    std::vector<std::string> _onExitAction;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
@@ -183,6 +196,8 @@ private:
 
     properties::DoubleProperty _boundingSphere;
     properties::DoubleProperty _interactionSphere;
+    properties::DoubleProperty _approachFactor;
+    properties::DoubleProperty _reachFactor;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;

@@ -27,11 +27,9 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
-
 class QTextEdit;
 
-class AdditionalScriptsDialog : public QDialog {
+class AdditionalScriptsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -41,7 +39,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    AdditionalScriptsDialog(openspace::Profile& profile, QWidget* parent);
+    AdditionalScriptsDialog(QWidget* parent, std::vector<std::string>* scripts);
 
 private slots:
     void parseScript();
@@ -57,7 +55,8 @@ private slots:
 private:
     void createWidgets();
 
-    openspace::Profile& _profile;
+    std::vector<std::string>* _scripts = nullptr;
+    std::vector<std::string> _scriptsData;
     QTextEdit* _textScripts = nullptr;
     QPushButton* _chooseScriptsButton = nullptr;
 };

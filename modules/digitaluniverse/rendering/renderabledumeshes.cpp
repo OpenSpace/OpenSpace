@@ -515,7 +515,6 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (file.eof()) {
@@ -534,16 +533,9 @@ bool RenderableDUMeshes::readSpeckFile() {
 
         std::size_t found = line.find("mesh");
         if (found == std::string::npos) {
-        //if (line.substr(0, 4) != "mesh") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            //file.seekg(position);
-            //break;
             continue;
         }
         else {
-
-        //if (line.substr(0, 4) == "mesh") {
             // mesh lines are structured as follows:
             // mesh -t texnum -c colorindex -s style {
             // where textnum is the index of the texture;

@@ -136,7 +136,6 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
                                         fls::Model Model, float coordToMeters)
 {
-
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
     std::ifstream ifs(pathToJsonFile);
 

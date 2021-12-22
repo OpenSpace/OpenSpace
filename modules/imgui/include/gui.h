@@ -27,7 +27,7 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <modules/imgui/include/guiassetcomponent.h>
+#include <modules/imgui/include/guiactioncomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
@@ -38,7 +38,6 @@
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
-#include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -64,7 +63,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 17;
+        const int nRegularComponents = 16;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -105,7 +104,6 @@ public:
 //protected:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
-    GuiAssetComponent _asset;
     GuiGIBSComponent _gibs;
     GuiGlobeBrowsingComponent _globeBrowsing;
 
@@ -121,7 +119,7 @@ public:
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
-    GuiShortcutsComponent _shortcuts;
+    GuiActionComponent _actions;
     GuiJoystickComponent _joystick;
     GuiParallelComponent _parallel;
     GuiPropertyComponent _featuredProperties;
@@ -152,8 +150,7 @@ private:
         &_iswa,
 #endif
 
-        &_asset,
-        &_shortcuts,
+        &_actions,
         &_joystick,
         &_filePath,
 

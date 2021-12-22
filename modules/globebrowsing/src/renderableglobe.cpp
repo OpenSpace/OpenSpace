@@ -1209,8 +1209,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (global::sessionRecording->isSavingFramesDuringPlayback()) {
         // If our tile cache is very full, we assume we need to adjust the level of detail
         // dynamically to not keep rendering frames with unavailable data
-        // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
-        // unavailable/available data in a row, we assume that a change could be made.
+        // After certain number of iterations(_debugProperties.dynamicLodIterationCount)
+        // of unavailable/available data in a row, we assume that a change could be made.
         const int iterCount = _debugProperties.dynamicLodIterationCount;
         const bool exceededIterations =
             static_cast<int>(_iterationsOfUnavailableData) > iterCount;
