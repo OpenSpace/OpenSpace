@@ -50,11 +50,12 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/actionmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/mouseinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/interaction/keyboardinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/scriptcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/externinteraction.cpp
@@ -232,13 +233,14 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/scriptcamerastates.h

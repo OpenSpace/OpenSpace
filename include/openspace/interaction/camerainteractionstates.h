@@ -30,8 +30,6 @@
 
 namespace openspace::interaction {
 
-class InputState;
-
 class CameraInteractionStates {
 public:
     /**
@@ -41,8 +39,6 @@ public:
      */
     CameraInteractionStates(double sensitivity, double velocityScaleFactor);
     virtual ~CameraInteractionStates() = default;
-
-    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
 
     void setRotationalFriction(double friction);
     void setHorizontalFriction(double friction);

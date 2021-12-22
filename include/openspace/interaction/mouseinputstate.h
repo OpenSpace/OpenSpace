@@ -22,79 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/joystickinputstate.h>
+#ifndef __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
+#define __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
 
+#include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/stringconversion.h>
-#include <algorithm>
-#include <map>
-#include <numeric>
+#include <vector>
 
 namespace openspace::interaction {
 
-float JoystickInputStates::axis(const std::string& joystickName, int axis) const {
-    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
+// This class represents the global input state of interaction devices
+class MouseInputState {
+public:
+    // Callback functions
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double mouseX, double mouseY);
+    void mouseScrollWheelCallback(double mouseScrollDelta);
 
-    if (joystickName.empty()) {
-        float res = std::accumulate(
-            begin(),
-            end(),
-            0.f,
-            [axis](float value, const JoystickInputState& state) {
-                if (state.isConnected) {
-                    value += state.axes[axis];
-                }
-                return value;
-            }
-        );
+    // Accessors
+    const std::vector<MouseButton>& pressedMouseButtons() const;
+    glm::dvec2 mousePosition() const;
+    double mouseScrollDelta() const;
+    bool isMouseButtonPressed(MouseButton mouseButton) const;
 
-        // If multiple joysticks are connected, we might get values outside the -1,1 range by
-        // summing them up
-        glm::clamp(res, -1.f, 1.f);
-        return res;
-    }
-
-    const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            state = &(*it);
-        }
-    }
-
-    if (!state) {
-        return 0.f;
-    }
-
-    return state->axes[axis];
-}
-
-bool JoystickInputStates::button(const std::string& joystickName, int button, JoystickAction action) const {
-    ghoul_precondition(button >= 0, "button must be 0 or positive");
-
-    if (joystickName.empty()) {
-        bool res = std::any_of(
-            begin(),
-            end(),
-            [button, action](const JoystickInputState& state) {
-                return state.isConnected ? (state.buttons[button] == action) : false;
-            }
-        );
-        return res;
-    }
-
-    const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            state = &(*it);
-        }
-    }
-
-    if (!state) {
-        return false;
-    }
-
-    return state->isConnected ? (state->buttons[button] == action) : false;
-}
+private:
+    // Input from mouse
+    std::vector<MouseButton> _mouseButtonsDown;
+    glm::dvec2 _mousePosition = glm::dvec2(0.0);
+    double _mouseScrollDelta;
+};
 
 } // namespace openspace::interaction
+
+#endif // __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
