@@ -114,7 +114,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
 bool ScreenSpaceBrowser::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
-         glm::uvec3(_dimensions.value(), 1.f)
+        glm::uvec3(_dimensions.value(), 1),
+        GL_TEXTURE_2D
     );
 
     _renderHandler->setTexture(*_texture);

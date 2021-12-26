@@ -87,6 +87,7 @@ void TransferFunctionHandler::initialize() {
     this->addTag("TF");
     _texture = std::make_shared<ghoul::opengl::Texture>(
         glm::uvec3(1024, 1, 1),
+        GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT,

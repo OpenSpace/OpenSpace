@@ -422,6 +422,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
         _dimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::Red,
         GL_RED,
         GL_FLOAT,

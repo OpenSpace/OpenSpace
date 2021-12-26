@@ -136,6 +136,7 @@ bool DataCygnet::updateTexture() {
             std::unique_ptr<Texture> texture = std::make_unique<Texture>(
                 values,
                 _textureDimensions,
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::Red,
                 GL_RED,
                 GL_FLOAT,

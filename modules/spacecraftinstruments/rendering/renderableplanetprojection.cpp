@@ -640,7 +640,8 @@ void RenderablePlanetProjection::loadColorTexture() {
     _baseTexture = nullptr;
     if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath).string()
+            absPath(selectedPath).string(),
+            2
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
@@ -662,7 +663,8 @@ void RenderablePlanetProjection::loadHeightTexture() {
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath).string()
+            absPath(selectedPath).string(),
+            2
         );
         if (_heightMapTexture) {
             ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);

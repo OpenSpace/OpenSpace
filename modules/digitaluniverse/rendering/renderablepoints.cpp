@@ -344,7 +344,8 @@ void RenderablePoints::update(const UpdateData&) {
         _spriteTexture = nullptr;
         if (!_spriteTexturePath.value().empty()) {
             _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_spriteTexturePath).string()
+                absPath(_spriteTexturePath).string(),
+                2
             );
             if (_spriteTexture) {
                 LDEBUG(

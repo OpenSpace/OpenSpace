@@ -143,6 +143,7 @@ bool BrickManager::initialize() {
     dims.push_back(_atlasDim);
     _textureAtlas = new ghoul::opengl::Texture(
         glm::size3_t(_atlasDim, _atlasDim, _atlasDim),
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT

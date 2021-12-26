@@ -670,7 +670,7 @@ void initializeDefaultTile() {
     memset(pixels, 0, initData.totalNumBytes * sizeof(char));
 
     // Create ghoul texture
-    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions);
+    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions, GL_TEXTURE_2D);
     DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
     DefaultTileTexture->setPixelData(pixels);
     DefaultTileTexture->uploadTexture();
@@ -1648,7 +1648,7 @@ void reset(TileProvider& tp) {
             if (t.filePath.value().empty()) {
                 return;
             }
-            t.tileTexture = ghoul::io::TextureReader::ref().loadTexture(t.filePath);
+            t.tileTexture = ghoul::io::TextureReader::ref().loadTexture(t.filePath, 2);
             if (!t.tileTexture) {
                 throw ghoul::RuntimeError(
                     fmt::format("Unable to load texture '{}'", t.filePath.value())

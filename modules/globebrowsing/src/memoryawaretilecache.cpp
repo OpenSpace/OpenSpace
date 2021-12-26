@@ -210,6 +210,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
             _initData.dimensions,
+            GL_TEXTURE_2D,
             _initData.ghoulTextureFormat,
             toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
             _initData.glType,

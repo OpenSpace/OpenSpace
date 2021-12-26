@@ -118,6 +118,7 @@ void ScreenSpaceImageOnline::update() {
                     ghoul::io::TextureReader::ref().loadTexture(
                         reinterpret_cast<void*>(imageFile.buffer),
                         imageFile.size,
+                        2,
                         imageFile.format
                     );
 
