@@ -1,0 +1,75 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+
+local Name = "Seismic Waves: Northridge Earthquake - 1994"
+local Identifier = "noaa-sos-land-seismic_waves-1994northride"
+local Description = [[ At 4:30 a.m. on January 17, 1994, the shaking of an earthquake awakened 10 million people in the Los Angeles region of Southern California. The earthquake's epicenter was in Northridge, CA, and it was a magnitude 6.7 shock that proved to be the most costly earthquake in United States history. The shaking heavily damaged communities throughout the San Fernando Valley and Simi Valley, and the surrounding mountains north and west of Los Angeles, causing estimated losses of $20 billion. Fifty-seven people died, more than 9,000 were injured, and more than 20,000 were displaced from their homes by the effects of the quake.    ]]
+local URL = "https://sos.noaa.gov/catalog/datasets/seismic-waves-northridge-earthquake-1994/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local syncedDirectory_images = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-images",
+	Version = 1
+})
+
+local syncedDirectory_pip = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-pips",
+	Version = 1
+})
+
+local layer_base = {
+  Identifier = Identifier,
+  Name = Name,
+  FilePath = syncedDirectory .. "/background.jpg",
+  Description = Description
+}
+
+local layer_stations = {
+  Identifier = Identifier .. "-stations",
+  Name = Name .. " (Stations)",
+  FilePath = syncedDirectory .. "/station_names.png",
+  Description = Description
+}
+
+local layer_images = {
+  Identifier = Identifier .. "-images",
+  Name = Name .. " (Images)",
+  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
+  FilePath = syncedDirectory_images .. "/000011.png",
+  Description = Description
+}
+
+-- local layer_pips = {
+--   Identifier = Identifier,
+--   Name = Name,
+--   FilePath = syncedDirectory .. "/0002.png",
+--   Description = Description
+-- }
+
+
+asset.onInitialize(function ()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_stations)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_images)
+end)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

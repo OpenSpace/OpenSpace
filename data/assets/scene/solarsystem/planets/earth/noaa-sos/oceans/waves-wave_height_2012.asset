@@ -1,0 +1,44 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+
+local Name = "Wave Heights 2012"
+local Identifier = "noaa-sos-oceans-waves-wave_height_2012"
+local Description = [[ Meteorological offices worldwide forecast ocean wave heights for the shipping and fisheries industry. In the United States, NOAA's National Weather Service provides the wave forecasts. Just like in weather forecasting, scientists run numerical models to make these predictions.  ]]
+local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-2012/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local syncedDirectory_addons = asset.syncedResource({
+	Name = Name .. " (Addons)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-addons",
+	Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
+  FilePath = syncedDirectory .. "/waveheight_4096_0001.png",
+  Description = Description
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}

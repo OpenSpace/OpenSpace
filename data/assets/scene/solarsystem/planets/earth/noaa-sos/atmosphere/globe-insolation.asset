@@ -1,0 +1,44 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+
+local Name = "Solar Insolation - Monthly (NASA)"
+local Identifier = "noaa-sos-atmosphere-globe-insolation"
+local Description = [[ These maps show where and how much sunlight fell on Earth's surface during each month in 2018. Scientists call this measure solar insolation. Knowing how much of the Sun's energy reaches the surface helps scientists understand weather and climate patterns as well as patterns of plant growth around our world. Solar insolation maps are also useful to engineers who design solar panels and batteries designed to convert energy from the Sun into electricity to power appliances in our homes and work places. ]]
+local URL = "https://sos.noaa.gov/catalog/datasets/solar-insolation-monthly-nasa/"
+
+
+local syncedDirectory = asset.syncedResource({
+	Name = Name,
+	Type = "HttpSynchronization",
+	Identifier = Identifier,
+	Version = 1
+})
+
+local syncedDirectory_addons = asset.syncedResource({
+	Name = Name .. " (Addons)",
+	Type = "HttpSynchronization",
+	Identifier = Identifier .. "-addons",
+	Version = 1
+})
+
+local layer = {
+  Identifier = Identifier,
+  Name = Name,
+  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
+  FilePath = syncedDirectory .. "/CERES_INSOL_M_2018-01.PNG",
+  Description = Description
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+
+asset.meta = {
+  Name = Name,
+  Version = "1.0",
+  Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration.",
+  Author = "National Oceanic and Atmospheric Administration",
+  URL = URL,
+  License = "https://sos.noaa.gov/copyright/"
+}
