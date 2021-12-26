@@ -118,6 +118,25 @@ namespace singleimageprovider {
     };
 } // namespace singleimageprovider
 
+namespace imagesequenceprovider {
+    constexpr const char* KeyFolderPath = "FolderPath";
+    constexpr const char* KeyIndex = "Index";
+
+    constexpr openspace::properties::Property::PropertyInfo IndexInfo = {
+        "Index",
+        "Index",
+        "The index into the list of images that is used to pick the currently displayed "
+        "image"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {
+        "FolderPath",
+        "Folder Path",
+        "The path that is used to look for images for this image provider. The path must "
+        "point to an existing folder that contains images"
+    };
+} // namepsace imagesequenceprovider
+
 namespace sizereferenceprovider {
     constexpr const char* KeyRadii = "Radii";
 } // namespace sizereferenceprovider
@@ -779,6 +798,32 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 
 
+ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
+    : index(imagesequenceprovider::IndexInfo, 0)
+    , folderPath(imagesequenceprovider::FolderPathInfo)
+    , initDict(dictionary)
+{
+    ZoneScoped
+
+    type = Type::ImageSequenceTileProvider;
+
+    if (dictionary.hasValue<int>(imagesequenceprovider::KeyIndex)) {
+        index = dictionary.value<int>(imagesequenceprovider::KeyIndex);
+    }
+    index.setMinValue(0);
+    index.onChange([this]() { isImageDirty = true; });
+    addProperty(index);
+
+    folderPath = dictionary.value<std::string>(imagesequenceprovider::KeyFolderPath);
+    addProperty(folderPath);
+
+    reset(*this);
+}
+
+
+
+
+
 TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
     : initData(std::move(initData_))
     , fontSize(fontSize_)
@@ -1047,6 +1092,8 @@ bool initialize(TileProvider& tp) {
             break;
         case Type::SingleImageTileProvider:
             break;
+        case Type::ImageSequenceTileProvider:
+            break;
         case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
             initialize(t);
@@ -1090,6 +1137,8 @@ bool deinitialize(TileProvider& tp) {
         case Type::DefaultTileProvider:
             break;
         case Type::SingleImageTileProvider:
+            break;
+        case Type::ImageSequenceTileProvider:
             break;
         case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
@@ -1322,6 +1371,16 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
             return t.tile;
         }
+        case Type::ImageSequenceTileProvider: {
+            ZoneScopedN("Type::ImageSequenceTileProvider")
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            if (t.currentTileProvider) {
+                return tile(*t.currentTileProvider, tileIndex);
+            }
+            else {
+                return Tile();
+            }
+        }
         case Type::SizeReferenceTileProvider: {
             ZoneScopedN("Type::SizeReferenceTileProvider")
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
@@ -1447,6 +1506,15 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
             return t.tile.status;
         }
+        case Type::ImageSequenceTileProvider: {
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            if (t.currentTileProvider) {
+                return tileStatus(*t.currentTileProvider, index);
+            }
+            else {
+                return Tile::Status::Unavailable;
+            }
+        }
         case Type::SizeReferenceTileProvider:
             return Tile::Status::OK;
         case Type::TileIndexTileProvider:
@@ -1510,6 +1578,15 @@ TileDepthTransform depthTransform(TileProvider& tp) {
         }
         case Type::SingleImageTileProvider:
             return { 0.f, 1.f };
+        case Type::ImageSequenceTileProvider: {
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            if (t.currentTileProvider) {
+                return depthTransform(*t.currentTileProvider);
+            }
+            else {
+                return { 1.f, 0.f };
+            }
+        }
         case Type::SizeReferenceTileProvider:
             return { 0.f, 1.f };
         case Type::TileIndexTileProvider:
@@ -1571,6 +1648,28 @@ int update(TileProvider& tp) {
         }
         case Type::SingleImageTileProvider:
             break;
+        case Type::ImageSequenceTileProvider: {
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+
+            if (t.isImageDirty && !t.imagePaths.empty() &&
+                t.index >= 0 && t.index < t.imagePaths.size())
+            {
+                if (t.currentTileProvider) {
+                    deinitialize(*t.currentTileProvider);
+                }
+
+                std::string p = t.imagePaths[t.index].string();
+                t.initDict.setValue(KeyFilePath, p);
+                t.currentTileProvider = std::make_unique<DefaultTileProvider>(t.initDict);
+                initialize(*t.currentTileProvider);
+                t.isImageDirty = false;
+            }
+
+            if (t.currentTileProvider) {
+                update(*t.currentTileProvider);
+            }
+            break;
+        }
         case Type::SizeReferenceTileProvider:
             break;
         case Type::TileIndexTileProvider:
@@ -1664,6 +1763,25 @@ void reset(TileProvider& tp) {
             t.tile = Tile{ t.tileTexture.get(), std::nullopt, tileStatus };
             break;
         }
+        case Type::ImageSequenceTileProvider: {
+            namespace fs = std::filesystem;
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            std::string path = t.folderPath;
+            t.imagePaths.clear();
+            for (const fs::directory_entry& p : fs::directory_iterator(path)) {
+                if (p.is_regular_file()) {
+                    t.imagePaths.push_back(p.path());
+                }
+            }
+
+            t.index = 0;
+            t.index.setMaxValue(static_cast<int>(t.imagePaths.size() - 1));
+
+            if (t.currentTileProvider) {
+                reset(*t.currentTileProvider);
+            }
+            break;
+        }
         case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
             reset(t);
@@ -1733,6 +1851,15 @@ int maxLevel(TileProvider& tp) {
         }
         case Type::SingleImageTileProvider:
             return 1337; // unlimited
+        case Type::ImageSequenceTileProvider: {
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            if (t.currentTileProvider) {
+                return maxLevel(*t.currentTileProvider);
+            }
+            else {
+                return 0;
+            }
+        }
         case Type::SizeReferenceTileProvider:
             return 1337; // unlimited
         case Type::TileIndexTileProvider:
@@ -1782,6 +1909,15 @@ float noDataValueAsFloat(TileProvider& tp) {
         }
         case Type::SingleImageTileProvider:
             return std::numeric_limits<float>::min();
+        case Type::ImageSequenceTileProvider: {
+            ImageSequenceTileProvider& t = static_cast<ImageSequenceTileProvider&>(tp);
+            if (t.currentTileProvider) {
+                return noDataValueAsFloat(*t.currentTileProvider);
+            }
+            else {
+                return std::numeric_limits<float>::min();
+            }
+        }
         case Type::SizeReferenceTileProvider:
             return std::numeric_limits<float>::min();
         case Type::TileIndexTileProvider:

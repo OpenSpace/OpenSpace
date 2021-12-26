@@ -293,6 +293,11 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             layergroupid::TypeID::SingleImageTileLayer
         )]
     );
+    fTileProvider->registerClass<tileprovider::ImageSequenceTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::ImageSequenceTileLayer
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
