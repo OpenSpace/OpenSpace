@@ -1053,11 +1053,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(fixedTime);
 
     readFilePath(*this);
-    successfulInitialization = true;
-
-    if (!successfulInitialization) {
-        LERRORC("TemporalTileProvider", "Unable to read file " + filePath.value());
-    }
+    
     if (interpolation) {
         interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         interpolateTileProvider->colormap = colormap;
@@ -1474,13 +1470,8 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
         case Type::TemporalTileProvider: {
             ZoneScopedN("Type::TemporalTileProvider")
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                ensureUpdated(t);
-                return tile(*t.currentTileProvider, tileIndex);
-            }
-            else {
-                return Tile();
-            }
+            ensureUpdated(t);
+            return tile(*t.currentTileProvider, tileIndex);
         }
         default:
             throw ghoul::MissingCaseException();
@@ -1554,13 +1545,8 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
         }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                ensureUpdated(t);
-                return tileStatus(*t.currentTileProvider, index);
-            }
-            else {
-                return Tile::Status::Unavailable;
-            }
+            ensureUpdated(t);
+            return tileStatus(*t.currentTileProvider, index);
         }
         default:
             throw ghoul::MissingCaseException();
@@ -1612,13 +1598,8 @@ TileDepthTransform depthTransform(TileProvider& tp) {
         }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                ensureUpdated(t);
-                return depthTransform(*t.currentTileProvider);
-            }
-            else {
-                return { 1.f, 0.f };
-            }
+            ensureUpdated(t);
+            return depthTransform(*t.currentTileProvider);
         }
         default:
             throw ghoul::MissingCaseException();
@@ -1630,7 +1611,7 @@ TileDepthTransform depthTransform(TileProvider& tp) {
 
 
 
-int update(TileProvider& tp) {
+void update(TileProvider& tp) {
     ZoneScoped
 
     switch (tp.type) {
@@ -1641,7 +1622,7 @@ int update(TileProvider& tp) {
             }
 
             t.asyncTextureDataProvider->update();
-            bool hasUploaded = initTexturesFromLoadedData(t);
+            initTexturesFromLoadedData(t);
 
             if (t.asyncTextureDataProvider->shouldBeDeleted()) {
                 t.asyncTextureDataProvider = nullptr;
@@ -1649,9 +1630,6 @@ int update(TileProvider& tp) {
                     t,
                     tileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                 );
-            }
-            if (hasUploaded) {
-                return 1;
             }
             break;
         }
@@ -1711,21 +1689,18 @@ int update(TileProvider& tp) {
         }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                TileProvider* newCurr = getTileProvider(t, global::timeManager->time());
-                if (newCurr) {
-                    t.currentTileProvider = newCurr;
-                }
-                if (t.currentTileProvider) {
-                    update(*t.currentTileProvider);
-                }
+            TileProvider* newCurr = getTileProvider(t, global::timeManager->time());
+            if (newCurr) {
+                t.currentTileProvider = newCurr;
+            }
+            if (t.currentTileProvider) {
+                update(*t.currentTileProvider);
             }
             break;
         }
         default:
             throw ghoul::MissingCaseException();
     }
-    return 0;
 }
 
 
@@ -1829,12 +1804,10 @@ void reset(TileProvider& tp) {
         }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                using K = TemporalTileProvider::TimeKey;
-                using V = std::unique_ptr<TileProvider>;
-                for (std::pair<const K, V>& it : t.tileProviderMap) {
-                    reset(*it.second);
-                }
+            using K = TemporalTileProvider::TimeKey;
+            using V = std::unique_ptr<TileProvider>;
+            for (std::pair<const K, V>& it : t.tileProviderMap) {
+                reset(*it.second);
             }
             break;
         }
@@ -1888,13 +1861,8 @@ int maxLevel(TileProvider& tp) {
         }
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t.successfulInitialization) {
-                ensureUpdated(t);
-                return maxLevel(*t.currentTileProvider);
-            }
-            else {
-                return 0;
-            }
+            ensureUpdated(t);
+            return maxLevel(*t.currentTileProvider);
         }
         default:
             throw ghoul::MissingCaseException();

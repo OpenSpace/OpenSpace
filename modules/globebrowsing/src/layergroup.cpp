@@ -100,20 +100,17 @@ void LayerGroup::deinitialize() {
     }
 }
 
-int LayerGroup::update() {
+void LayerGroup::update() {
     ZoneScoped
 
-    int res = 0;
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
-            res += layer->update();
+            layer->update();
             _activeLayers.push_back(layer.get());
         }
     }
-
-    return res;
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {

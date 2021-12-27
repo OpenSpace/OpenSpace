@@ -227,7 +227,6 @@ struct TemporalTileProvider : public TileProvider {
     std::string colormap;
 
     std::string myResolution;
-    bool successfulInitialization = false;
     std::unique_ptr<InterpolateTileProvider> interpolateTileProvider;
 };
 
@@ -267,10 +266,8 @@ TileDepthTransform depthTransform(TileProvider& tp);
 /**
  * This method should be called once per frame. Here, TileProviders
  * are given the opportunity to update their internal state.
- *
- * \return The number of tiles that have been updated in this call
  */
-int update(TileProvider& tp);
+void update(TileProvider& tp);
 
 /**
  * Provides a uniform way of all TileProviders to reload or

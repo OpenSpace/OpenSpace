@@ -436,14 +436,11 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-int Layer::update() {
+void Layer::update() {
     ZoneScoped
 
     if (_tileProvider) {
-        return tileprovider::update(*_tileProvider);
-    }
-    else {
-        return 0;
+        tileprovider::update(*_tileProvider);
     }
 }
 

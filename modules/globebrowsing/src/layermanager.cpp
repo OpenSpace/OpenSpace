@@ -141,14 +141,12 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     return res;
 }
 
-int LayerManager::update() {
+void LayerManager::update() {
     ZoneScoped
 
-    int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        res += layerGroup->update();
+        layerGroup->update();
     }
-    return res;
 }
 
 void LayerManager::reset(bool includeDisabled) {
