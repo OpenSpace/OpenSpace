@@ -24,7 +24,7 @@ local L2Small = {
     RenderableType = "Opaque",
     Billboard = true,
     Size = 400E4,
-    Texture = circle .. "/circle.png",
+    Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Transform = {
@@ -32,7 +32,7 @@ local L2Small = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
       Observer = "SSB",
-      Kernels = kernels .. "/L2_de431.bsp"
+      Kernels = kernels .. "L2_de431.bsp"
     }
   },
   Tag = { "lagrange_points_earth_l2_small" },

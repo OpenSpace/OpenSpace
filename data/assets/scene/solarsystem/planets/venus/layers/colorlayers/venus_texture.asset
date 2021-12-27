@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/venus.jpg",
+  FilePath = texturesPath .. "venus.jpg",
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48

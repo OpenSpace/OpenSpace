@@ -17,13 +17,13 @@ local Deimos = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_DEIMOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels .. '/mar097.bsp'
+      Kernels = kernels .. 'mar097.bsp'
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "DEIMOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels .. '/mar097.bsp'
+      Kernels = kernels .. 'mar097.bsp'
     }
   },
   Renderable = {

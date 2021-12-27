@@ -11,7 +11,7 @@ local TexturesPath = asset.syncedResource({
 local legend = {
   Identifier = "LegendFluxNodes-bastille-day-2000",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = TexturesPath .. "/CMR_transparent_white_text.png",
+  TexturePath = TexturesPath .. "CMR_transparent_white_text.png",
   Scale = 0.15,
   CartesianPosition = { 0.677970, 0.0, -1.049180 }
 }

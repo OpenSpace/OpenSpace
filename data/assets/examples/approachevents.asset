@@ -32,7 +32,7 @@ local obj = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 1.0,
     LightSources = {
       {

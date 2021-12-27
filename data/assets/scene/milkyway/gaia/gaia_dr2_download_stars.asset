@@ -22,7 +22,7 @@ local gaiaFull = asset.syncedResource({
 asset.onInitialize(function()
   if not openspace.directoryExists(gaia618DestinationExtracted) then
     openspace.printInfo("Extracted Gaia dataset")
-    openspace.unzipFile(gaia618Destination .. '/DR2_full_Octree[50kSPN,500dist]_50,50.zip', gaia618DestinationExtracted, true)
+    openspace.unzipFile(gaia618Destination .. 'DR2_full_Octree[50kSPN,500dist]_50,50.zip', gaia618DestinationExtracted, true)
   end
 end)
 

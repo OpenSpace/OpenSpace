@@ -16,13 +16,13 @@ local TexturesPath = asset.syncedResource({
 })
 
 asset.onInitialize(function ()
-  local starTexture = TexturesPath .. "/sun.jpg"
-  local noDataTexture = TexturesPath .. "/grid-32.png"
-  local discTexture = TexturesPath .. "/disc_bw_texture.png"
+  local starTexture = TexturesPath .. "sun.jpg"
+  local noDataTexture = TexturesPath .. "grid-32.png"
+  local discTexture = TexturesPath .. "disc_bw_texture.png"
 
-  local starGlareTexture = sunTextures .. "/halo.png"
+  local starGlareTexture = sunTextures .. "halo.png"
 
-  local hzTexture = habitableZoneTextures .. "/hot_to_cold_faded.png"
+  local hzTexture = habitableZoneTextures .. "hot_to_cold_faded.png"
 
   -- Set the default textures used for the exoplanet system creation
   -- (Check if already set, to not override value in config file)

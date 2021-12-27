@@ -24,7 +24,7 @@ local images = asset.syncedResource({
   Version = 2
 })
 
-local imagesDestination = images .. "/images"
+local imagesDestination = images .. "images"
 
 local Barycenter = {
   Identifier = "67PBarycenter",
@@ -54,7 +54,7 @@ local Comet67P = {
   },
   Renderable = {
       Type = "RenderableModelProjection",
-      GeometryFile = models .. "/67P_rotated_5_130.obj",
+      GeometryFile = models .. "67P_rotated_5_130.obj",
       Projection = {
         Sequence   = { imagesDestination },
         SequenceType = "image-sequence",
@@ -134,7 +134,7 @@ local Trail67P = {
 asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting Rosetta images")
-    openspace.unzipFile(images .. "/images_v1_v2.zip", imagesDestination, true)
+    openspace.unzipFile(images .. "images_v1_v2.zip", imagesDestination, true)
   end
 end)
 

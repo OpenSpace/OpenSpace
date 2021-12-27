@@ -41,8 +41,8 @@ local Apollo11LemModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "/LM-2_ver2clean.obj",
-    RotationVector = { 91.044090,171.229706,111.666664 },
+    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
+    RotationVector = { 91.044090, 171.229706, 111.666664 },
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
   },
   GUI = {

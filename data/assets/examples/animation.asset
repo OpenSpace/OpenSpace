@@ -22,7 +22,7 @@ local animationLoop = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     EnableAnimation = true,
     AnimationMode = "LoopFromStart",
     AnimationStartTime = StartTime,
@@ -56,7 +56,7 @@ local animationLoopInf = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     EnableAnimation = true,
     AnimationMode = "LoopInfinitely",
     AnimationStartTime = StartTime,
@@ -90,7 +90,7 @@ local animationOnce = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     EnableAnimation = true,
     AnimationMode = "Once",
     AnimationStartTime = StartTime,
@@ -124,7 +124,7 @@ local animationBounceInf = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     EnableAnimation = true,
     AnimationMode = "BounceInfinitely",
     AnimationStartTime = StartTime,
@@ -158,7 +158,7 @@ local animationBounce = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     EnableAnimation = true,
     AnimationMode = "BounceFromStart",
     AnimationStartTime = StartTime,

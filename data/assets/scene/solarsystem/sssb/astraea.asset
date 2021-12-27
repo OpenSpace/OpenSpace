@@ -15,7 +15,7 @@ local AstraeaTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2014 JAN 01 00:00:00",
@@ -35,7 +35,7 @@ local AstraeaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     }
   },
   GUI = {

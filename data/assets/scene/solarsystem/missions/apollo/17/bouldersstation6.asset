@@ -64,7 +64,7 @@ local Station6Frag1Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/A17-S6-frag1.obj",
+    GeometryFile = models .. "A17-S6-frag1.obj",
     RotationVector = { 235.909088,165.000000,286.299194 },
     LightSources = LightSources,
     PerformShading = false,
@@ -107,7 +107,7 @@ local Station6Frag2Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/station6_boulder_frag2.obj",
+    GeometryFile = models .. "station6_boulder_frag2.obj",
     RotationVector = { 336.959991,210.239990,325.984253 },
     LightSources = LightSources,
     PerformShading = false,
@@ -138,7 +138,7 @@ local Station6Frag3Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/station6_boulder_frag3.obj",
+    GeometryFile = models .. "station6_boulder_frag3.obj",
     RotationVector = { 293.181824,255.000000,4.090910 },
     LightSources = LightSources,
     PerformShading = false,

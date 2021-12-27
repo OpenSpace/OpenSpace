@@ -37,7 +37,7 @@ local Example_GlobeRotation = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"

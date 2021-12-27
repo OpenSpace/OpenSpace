@@ -3,7 +3,7 @@ local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
 local rot = asset.require('./carringtonToHEEQRotation.asset')
 
-local TexturesPathEquitorial = asset.syncedResource({
+local TexturesPathEquatorial = asset.syncedResource({
 Type = "HttpSynchronization",
   Name = "cutplanes_textures",
   Identifier = "cutplanes_textures",
@@ -27,7 +27,7 @@ local EquatorialCutplane = {
     Type = "RenderablePlaneTimeVaryingImage",
     Size = 1.57E11,
     Enabled = true,
-    SourceFolder = TexturesPathEquitorial,
+    SourceFolder = TexturesPathEquatorial,
     BlendMode = "Normal",
     MirrorBackside = false,
     Opacity = 0.7

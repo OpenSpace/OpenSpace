@@ -67,7 +67,7 @@ local Apollo11Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_double_size.obj",
+    GeometryFile = models .. "Apollo_CSM_shrunk_rotated_xy_double_size.obj",
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
   },
   GUI = {
@@ -182,7 +182,7 @@ local Apollo11LemDescentModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "/lmremoved.obj",
+    GeometryFile = lem_model .. "lmremoved.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
@@ -208,7 +208,7 @@ local Apollo11LemLandedModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = lem_model .. "/LM-2_ver2clean.obj",
+    GeometryFile = lem_model .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
     LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)

@@ -17,7 +17,7 @@ local layer = {
     "<OpenSpaceTimeEnd>1990-10-01</OpenSpaceTimeEnd>" ..
     "<OpenSpaceTimeResolution>1M</OpenSpaceTimeResolution>" ..
     "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
-	"<OpenSpaceTransferFunction>" .. path .. "/rainbow.png</OpenSpaceTransferFunction>" ..
+	"<OpenSpaceTransferFunction>" .. path .. "rainbow.png</OpenSpaceTransferFunction>" ..
 	"<OpenSpaceTimeInterpolation>linear</OpenSpaceTimeInterpolation>" ..
 	"<FilePath>" .. path .. "/${OpenSpaceTimeId}-land.png</FilePath>" ..
   "</OpenSpaceTemporalGDALDataset>",

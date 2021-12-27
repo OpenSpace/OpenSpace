@@ -24,7 +24,7 @@ local Example_Fixed_Height = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"
@@ -46,7 +46,7 @@ local Example_Adaptive_Height = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"

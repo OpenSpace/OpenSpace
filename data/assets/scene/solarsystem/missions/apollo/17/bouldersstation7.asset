@@ -53,7 +53,7 @@ local Station7BoulderModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/b7model.obj",
+    GeometryFile = models .. "b7model.obj",
     RotationVector = { 1.945950,274.378387,212.903214 },
     LightSources = LightSources,
     PerformShading = false,

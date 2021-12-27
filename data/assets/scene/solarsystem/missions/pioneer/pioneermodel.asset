@@ -10,7 +10,7 @@ local modelFolder = asset.syncedResource({
 
 local ModelRenderable = {
   Type = "RenderableModel",
-  GeometryFile = modelFolder .. "/pioneer.fbx",
+  GeometryFile = modelFolder .. "pioneer.fbx",
   LightSources = assetHelper.getDefaultLightSources(
     sunTransforms.SolarSystemBarycenter.Identifier
   )

@@ -20,11 +20,11 @@ local JWSTPosition = {
       Keyframes = {
         ['2018 OCT 01 14:06:03'] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
         },
         ['2018 NOV 01 00:00:00'] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "/horizons_jwst_orbit.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
         }
       }
     },

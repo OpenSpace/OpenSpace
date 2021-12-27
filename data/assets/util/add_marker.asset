@@ -10,7 +10,7 @@ asset.onInitialize(function()
     Identifier = "target-marker",
     Name = "Target Marker",
     Type = "ScreenSpaceImageLocal",
-    TexturePath = icons .. '/target.png'
+    TexturePath = icons .. 'target.png'
   })
 end)
 

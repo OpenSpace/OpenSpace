@@ -31,7 +31,7 @@ local Gaia = {
   Renderable = {
     Type = "RenderableModel",
     Body = "GAIA",
-    GeometryFile = model .. "/gaia.obj",
+    GeometryFile = model .. "gaia.obj",
     LightSources = {
       {
         Type = "SceneGraphLightSource",

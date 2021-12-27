@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/enceladus.jpg",
+  FilePath = texturesPath .. "enceladus.jpg",
 }
 
 asset.onInitialize(function () 

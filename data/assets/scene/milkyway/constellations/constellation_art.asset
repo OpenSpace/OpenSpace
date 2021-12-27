@@ -58,7 +58,7 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
           Origin = "Center",
           Billboard = false,
           LazyLoading = true,
-          Texture = images .. "/" .. imageName,
+          Texture = images .. imageName,
           BlendMode = "Additive",
           Opacity = 0.1
         },

@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/callisto_os.tif",
+  FilePath = texturesPath .. "callisto_os.tif",
 }
 
 asset.onInitialize(function () 

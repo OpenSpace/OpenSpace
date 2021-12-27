@@ -496,7 +496,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             }
 
             asset->addSynchronization(syncItem->synchronization.get());
-            ghoul::lua::push(L, syncItem->synchronization->directory());
+            std::filesystem::path dir = syncItem->synchronization->directory();
+            dir += std::filesystem::path::preferred_separator;
+            ghoul::lua::push(L, dir);
             return 1;
         },
         2

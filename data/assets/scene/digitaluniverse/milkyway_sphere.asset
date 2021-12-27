@@ -15,7 +15,7 @@ local sphere = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 3.14159265359}
+      Rotation = { 0, 0, 3.14159265359 }
     }
   },
   Renderable = {
@@ -23,7 +23,7 @@ local sphere = {
     Size = 9.2E21,
     Segments = 40,
     Opacity = 0.35,
-    Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
+    Texture = sphereTextures .. "DarkUniverse_mellinger_4k.jpg",
     Orientation = "Inside",
     UseAdditiveBlending = true,
     MirrorTexture = true,

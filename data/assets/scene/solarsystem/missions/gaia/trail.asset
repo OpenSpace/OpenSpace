@@ -16,7 +16,7 @@ local GaiaTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
+      HorizonsTextFile = trail .. "gaia_orbit_horizons.dat"
     },
     Color = { 0.0, 0.8, 0.7 },
     ShowFullTrail = false,
@@ -42,7 +42,7 @@ local GaiaTrailEclip = {
     Enabled = false,
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons_sun.dat"
+      HorizonsTextFile = trail .. "gaia_orbit_horizons_sun.dat"
     },
     Color = { 1.0, 0.0, 0.0 },
     ShowFullTrail = false,

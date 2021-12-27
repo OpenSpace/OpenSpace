@@ -15,9 +15,9 @@ local frontend = asset.syncedResource({
 
 asset.onInitialize(function ()
   -- Unzip the frontend bundle
-  local dest = frontend .. "/frontend"
+  local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
+    openspace.unzipFile(frontend .. "frontend.zip", dest, true)
   end
 
   -- Disable the server, add production gui endpoint, and restart server.
@@ -31,7 +31,7 @@ asset.onInitialize(function ()
 
   local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
-  directories[#directories + 1] = frontend .. '/frontend'
+  directories[#directories + 1] = frontend .. 'frontend'
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")

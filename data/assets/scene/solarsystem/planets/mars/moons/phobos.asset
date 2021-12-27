@@ -17,13 +17,13 @@ local Phobos = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels .. '/mar097.bsp'
+      Kernels = kernels .. 'mar097.bsp'
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels .. '/mar097.bsp'
+      Kernels = kernels .. 'mar097.bsp'
     }
   },
   Renderable = {

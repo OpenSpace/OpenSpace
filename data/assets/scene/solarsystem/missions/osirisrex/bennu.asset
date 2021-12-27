@@ -34,7 +34,7 @@ local Bennu = {
     Enabled = false,
     Type = "RenderableModel",
     Body = BENNU_BODY,
-    GeometryFile = models .. "/Bennu_v20_200k_an.obj",
+    GeometryFile = models .. "Bennu_v20_200k_an.obj",
     LightSources = LightSources,
     SpecularIntensity = 0.0
   },

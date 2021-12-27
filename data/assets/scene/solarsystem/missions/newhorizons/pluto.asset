@@ -58,20 +58,20 @@ local PlutoProjection = {
         Segments = 400
     },
     ColorTexturePaths = {
-      textures .. "/pluto.png",
-      textures .. "/NH_Pluto_mosaic_16384.png",
-      textures .. "/NH_Pluto_mosaic_8192.png",
-      textures .. "/pmap_cyl_k201.jpg",
-      textures .. "/pmap_cyl_k201_4096.jpg"
+      textures .. "pluto.png",
+      textures .. "NH_Pluto_mosaic_16384.png",
+      textures .. "NH_Pluto_mosaic_8192.png",
+      textures .. "pmap_cyl_k201.jpg",
+      textures .. "pmap_cyl_k201_4096.jpg"
     },
     HeightTexturePaths = {
-      textures .. "/NH_Pluto_DTM_16384.png",
-      textures .. "/NH_Pluto_DTM_8192.png"
+      textures .. "NH_Pluto_DTM_16384.png",
+      textures .. "NH_Pluto_DTM_8192.png"
     },
     MeridianShift = false,
     Projection = {
       Sequence       = images,
-      EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+      EventFile      = assets .. "core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
       -- SequenceType   = "hybrid",
       SequenceType   = "image-sequence",
       Observer       = "NEW HORIZONS",
@@ -192,7 +192,7 @@ local PlutoBarycenterLabel = {
     Type = "RenderablePlaneImageLocal",
     Billboard = true,
     Size = 5E4,
-    Texture = encounterTextures .. "/barycenter.png",
+    Texture = encounterTextures .. "barycenter.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -215,7 +215,7 @@ local PlutoText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = encounterTextures .. "/Pluto-Text.png",
+    Texture = encounterTextures .. "Pluto-Text.png",
     BlendMode = "Additive"
   },
   GUI = {

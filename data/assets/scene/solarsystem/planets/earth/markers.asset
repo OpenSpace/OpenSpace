@@ -18,7 +18,7 @@ local EarthMarker = {
     Size = 3.0E11,
     Origin = "Center",
     Billboard = true,
-    Texture = texturesPath .. "/marker.png",
+    Texture = texturesPath .. "marker.png",
     BlendMode = "Additive"
   },
   GUI = {

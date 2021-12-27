@@ -75,7 +75,7 @@ for i = 1, #landingData do
       Size = size,
       Origin = "Center",
       Billboard = true,
-      Texture = insigniasPath .. "/" .. entry.Texture,
+      Texture = insigniasPath .. entry.Texture,
       Opacity = 0.0
     },
     GUI = {

@@ -15,7 +15,7 @@ asset.onInitialize(function ()
 
   p = "Modules.Exoplanets.BvColormap";
   if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, colormaps .. "/colorbv.cmap")
+    openspace.setPropertyValueSingle(p, colormaps .. "colorbv.cmap")
   end
 end)
 

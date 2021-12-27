@@ -6,7 +6,7 @@ local orbit = asset.syncedResource({
   Type = "HttpSynchronization",
   Identifier = "horizons_c2019y4atlas",
   Version = 1
-}) .. "/c2019y4atlas.txt"
+}) .. "c2019y4atlas.txt"
 
 local C2019Y4AtlasTrail = {
   Identifier = "C2019Y4AtlasTrail",
