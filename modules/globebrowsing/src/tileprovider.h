@@ -174,8 +174,8 @@ struct TileProviderByLevel : public TileProvider {
 struct ImageSequenceTileProvider : public TileProvider {
     ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    std::unique_ptr<TileProvider> currentTileProvider = nullptr;
-
+    std::unique_ptr<DefaultTileProvider> currentTileProvider = nullptr;
+    
     properties::IntProperty index;
     properties::StringProperty folderPath;
 

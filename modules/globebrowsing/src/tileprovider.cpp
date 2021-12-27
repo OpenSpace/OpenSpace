@@ -119,8 +119,12 @@ namespace singleimageprovider {
 } // namespace singleimageprovider
 
 namespace imagesequenceprovider {
-    constexpr const char* KeyFolderPath = "FolderPath";
-    constexpr const char* KeyIndex = "Index";
+    constexpr openspace::properties::Property::PropertyInfo PlaybackInfo = {
+        "Playback",
+        "Playback",
+        "If this property is set, the current image index will automatically advance as "
+        "soon as the previous image is fully loaded"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo IndexInfo = {
         "Index",
@@ -807,14 +811,16 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
 
     type = Type::ImageSequenceTileProvider;
 
-    if (dictionary.hasValue<int>(imagesequenceprovider::KeyIndex)) {
-        index = dictionary.value<int>(imagesequenceprovider::KeyIndex);
+    if (dictionary.hasValue<int>(imagesequenceprovider::IndexInfo.identifier)) {
+        index = dictionary.value<int>(imagesequenceprovider::IndexInfo.identifier);
     }
     index.setMinValue(0);
     index.onChange([this]() { isImageDirty = true; });
     addProperty(index);
 
-    folderPath = dictionary.value<std::string>(imagesequenceprovider::KeyFolderPath);
+    folderPath = dictionary.value<std::string>(
+        imagesequenceprovider::FolderPathInfo.identifier
+    );
     addProperty(folderPath);
 
     reset(*this);
