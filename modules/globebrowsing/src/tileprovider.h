@@ -177,6 +177,7 @@ struct ImageSequenceTileProvider : public TileProvider {
     std::unique_ptr<DefaultTileProvider> currentTileProvider = nullptr;
     
     properties::IntProperty index;
+    properties::StringProperty currentImage;
     properties::StringProperty folderPath;
 
     ghoul::Dictionary initDict;

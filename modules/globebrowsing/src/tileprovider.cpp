@@ -126,6 +126,12 @@ namespace imagesequenceprovider {
         "image"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
+        "CurrentImage",
+        "Current Image",
+        "The read-only value of the currently selected image"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {
         "FolderPath",
         "Folder Path",
@@ -797,6 +803,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
     : index(imagesequenceprovider::IndexInfo, 0)
+    , currentImage(imagesequenceprovider::CurrentImageInfo)
     , folderPath(imagesequenceprovider::FolderPathInfo)
     , initDict(dictionary)
 {
@@ -810,6 +817,9 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
     index.setMinValue(0);
     index.onChange([this]() { isImageDirty = true; });
     addProperty(index);
+
+    folderPath.setReadOnly(true);
+    addProperty(folderPath);
 
     folderPath = dictionary.value<std::string>(
         imagesequenceprovider::FolderPathInfo.identifier
@@ -1658,6 +1668,7 @@ int update(TileProvider& tp) {
                 }
 
                 std::string p = t.imagePaths[t.index].string();
+                t.currentImage = p;
                 t.initDict.setValue(KeyFilePath, p);
                 t.currentTileProvider = std::make_unique<DefaultTileProvider>(t.initDict);
                 initialize(*t.currentTileProvider);
