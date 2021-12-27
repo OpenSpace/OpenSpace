@@ -45,8 +45,8 @@ local layer_stations = {
 local layer_images = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory_images .. "/000011.png",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory,
   Description = Description
 }
 

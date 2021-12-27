@@ -21,16 +21,34 @@ local syncedDirectory_addons = asset.syncedResource({
 	Version = 1
 })
 
-local layer = {
-  Identifier = Identifier,
-  Name = Name,
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/2025_gfdl_a1b.png",
-  Description = Description
+local layers_names = {
+  "2025_gfdl_a1b",
+  "2025_gfdl_b1",
+  "2050_gfdl_a1b",
+  "2050_gfdl_b1",
+  "2075_gfdl_a1b",
+  "2075_gfdl_b1",
+  "2100_gfdl_a1b",
+  "2100_gfdl_b1"
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+local layers = {}
+for i,v in ipairs(layers_names) do
+  local layer = {
+    Identifier = Identifier,
+    Name = Name,
+    FilePath = syncedDirectory .. "/" .. v,
+    Description = Description
+  }
+
+  table.insert(layers, layer)
+end
+
+
+asset.onInitialize(function ()
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
+  end
 end)
 
 

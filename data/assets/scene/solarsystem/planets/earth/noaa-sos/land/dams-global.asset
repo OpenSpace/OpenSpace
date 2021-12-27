@@ -31,8 +31,8 @@ local layer_background = {
 local layer_images = {
   Identifier = Identifier,
   Name = Name,
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/dam_4096_0001.png",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory,
   Description = Description
 }
 
