@@ -119,13 +119,6 @@ namespace singleimageprovider {
 } // namespace singleimageprovider
 
 namespace imagesequenceprovider {
-    constexpr openspace::properties::Property::PropertyInfo PlaybackInfo = {
-        "Playback",
-        "Playback",
-        "If this property is set, the current image index will automatically advance as "
-        "soon as the previous image is fully loaded"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo IndexInfo = {
         "Index",
         "Index",
