@@ -149,18 +149,21 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
 #elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 2) // SizeReferenceTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 2) // ImageSequenceTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 3) // TemporalTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 3) // SizeReferenceTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 4) // TileIndexTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 4) // TemporalTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 5) // ByIndexTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 5) // TileIndexTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 6) // ByLevelTileLayer
+#elif (#{#{layerGroup}#{i}LayerType} == 6) // ByIndexTileLayer
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
-#elif (#{#{layerGroup}#{i}LayerType} == 7) // SolidColor
+#elif (#{#{layerGroup}#{i}LayerType} == 7) // ByLevelTileLayer
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
+#elif (#{#{layerGroup}#{i}LayerType} == 8) // SolidColor
   c.rgb = #{layerGroup}[#{i}].color;
+
 #endif
 
   return c;

@@ -38,6 +38,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
 #include <ghoul/opengl/programobject.h>
+
 struct CPLXMLNode;
 
 namespace ghoul::fontrendering {
@@ -59,6 +60,7 @@ namespace openspace::globebrowsing::tileprovider {
 enum class Type {
     DefaultTileProvider = 0,
     SingleImageTileProvider,
+    ImageSequenceTileProvider,
     SizeReferenceTileProvider,
     TemporalTileProvider,
     TileIndexTileProvider,
@@ -168,6 +170,20 @@ struct TileProviderByLevel : public TileProvider {
     std::vector<std::unique_ptr<TileProvider>> levelTileProviders;
 };
 
+
+struct ImageSequenceTileProvider : public TileProvider {
+    ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
+
+    std::unique_ptr<DefaultTileProvider> currentTileProvider = nullptr;
+    
+    properties::IntProperty index;
+    properties::StringProperty currentImage;
+    properties::StringProperty folderPath;
+
+    ghoul::Dictionary initDict;
+    bool isImageDirty = true;
+    std::vector<std::filesystem::path> imagePaths;
+};
 
 /**
  * Provide <code>Tile</code>s from web map services that have temporal resolution.
