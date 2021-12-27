@@ -16,7 +16,7 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local layers = {
+local layers_names = {
   "Map01a_PALEOMAP_PaleoAtlas_000",
   "Map02a_Last_Glacial_Maximum_001",
   "Map03a_Pliocene_004",
@@ -109,17 +109,22 @@ local layers = {
   "Map93a_MIddle_Cryogenian_750"
 }
 
-local layer = {
-  Identifier = Identifier,
-  Name = Name,
-  FilePath = syncedDirectory .. "/" .. layers[1] .. ".jpg",
-  Description = Description
-}
+local layers = {}
+for i,v in ipairs(layers_names) do
+  local layer = {
+    Identifier = Identifier .. "-" .. v,
+    Name = Name .. " " .. v,
+    FilePath = syncedDirectory .. "/" .. v .. ".jpg",
+    Description = Description
+  }
 
+  table.insert(layers, layer)
+end
 
 asset.onInitialize(function ()
-  -- @TODO loop over list and create layers
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
+  end
 end)
 
 

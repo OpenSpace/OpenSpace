@@ -24,8 +24,8 @@ local syncedDirectory_sat = asset.syncedResource({
 local layer_names = {
   Identifier = Identifier .. "-names",
   Name = Name .. "(Names)",
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory_names .. "/SOSnamesalpha.000000.png",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory,
   Description = Description
 }
 

@@ -17,8 +17,8 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/geo-1001.jpg",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = syncedDirectory,
   Description = Description
 }
 
