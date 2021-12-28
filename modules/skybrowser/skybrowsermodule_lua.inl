@@ -163,6 +163,20 @@ int loadImagesToWWT(lua_State* L) {
 	return 0;
 }
 
+int startSetup(lua_State* L) {
+    // This is called when the sky_browser website is connected to OpenSpace
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::startSetup");
+
+    // To ensure each node in a cluster calls its own instance of the wwt application
+    // Do not send this script to the other nodes
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.sendOutIdsToBrowsers();",
+        scripting::ScriptEngine::RemoteScripting::No
+    );
+    
+    return 0;
+}
+
 int sendOutIdsToBrowsers(lua_State* L) {
     // This is called when the sky_browser website is connected to OpenSpace
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::sendOutIdsToBrowsers");
@@ -512,8 +526,8 @@ int createTargetBrowserPair(lua_State* L) {
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
-    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
-    //std::string url = "http://localhost:8000"; // check webgl version
+    //std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
+    std::string url = "http://localhost:8000"; // check webgl version
     //std::string url = "https://get.webgl.org";
     glm::ivec3 color = randomBorderColor();
 
