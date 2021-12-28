@@ -2131,7 +2131,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorTexturePath).string(),
-                2
+                1
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));

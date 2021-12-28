@@ -496,9 +496,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             }
 
             asset->addSynchronization(syncItem->synchronization.get());
-            std::filesystem::path dir = syncItem->synchronization->directory();
-            dir += std::filesystem::path::preferred_separator;
-            ghoul::lua::push(L, dir);
+            std::filesystem::path path = syncItem->synchronization->directory();
+            path += std::filesystem::path::preferred_separator;
+            ghoul::lua::push(L, path);
             return 1;
         },
         2
@@ -697,6 +697,9 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path) {
         return it->get();
     }
 
+    if (!std::filesystem::is_regular_file(path)) {
+        throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
+    }
     std::unique_ptr<Asset> asset = std::make_unique<Asset>(*this, path);
     Asset* res = asset.get();
 
