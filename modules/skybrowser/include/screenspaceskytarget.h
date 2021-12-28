@@ -33,6 +33,7 @@ namespace openspace {
 
         glm::ivec3 borderColor() const;
         float opacity() const;
+        glm::dvec2 lockedCoordinates() const;
 
         // Setters
         void setScaleFromVfov(float verticalFov);

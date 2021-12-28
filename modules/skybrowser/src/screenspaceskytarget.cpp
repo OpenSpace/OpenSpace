@@ -378,6 +378,11 @@ namespace openspace {
         return _opacity.value();
     }
 
+    glm::dvec2 ScreenSpaceSkyTarget::lockedCoordinates() const
+    {
+        return skybrowser::cartesianToSpherical(_lockedCoordinates);
+    }
+
     void ScreenSpaceSkyTarget::setOpacity(float opacity) {
         _opacity = opacity;
     }

@@ -138,7 +138,17 @@ namespace openspace {
     void Pair::synchronizeAim()
     {
         if (!_target->isAnimated()) {
-            _browser->setEquatorialAim(_target->equatorialAim());
+            glm::dvec2 aim;
+            // To remove the lag effect when moving the camera while having a locked
+            // target, send the locked coordinates to wwt
+            if (_target->isLocked()) {
+                aim = _target->lockedCoordinates();
+            }
+            else {
+                aim = _target->equatorialAim();
+            }
+            
+            _browser->setEquatorialAim(aim);
             _target->setScaleFromVfov(_browser->verticalFov());
         }
     }
