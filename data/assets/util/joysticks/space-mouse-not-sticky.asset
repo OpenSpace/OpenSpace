@@ -1,5 +1,5 @@
-local propertyHelper = asset.require('../property_helper')
-local joystickHelper = asset.require('./joystick_helper')
+local propertyHelper = asset.require("../property_helper")
+local joystickHelper = asset.require("./joystick_helper")
 
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"

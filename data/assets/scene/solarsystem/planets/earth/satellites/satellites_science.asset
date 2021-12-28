@@ -1,7 +1,7 @@
-asset.require('./science/spaceearth')
-asset.require('./science/geodetic')
-asset.require('./science/engineering')
-asset.require('./science/education')
+asset.require("./science/spaceearth")
+asset.require("./science/geodetic")
+asset.require("./science/engineering")
+asset.require("./science/education")
 
 
 asset.meta = {

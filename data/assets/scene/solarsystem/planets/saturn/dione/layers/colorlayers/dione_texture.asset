@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../dione").Dione.Identifier
+local globeIdentifier = asset.require("../../dione").Dione.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Dione textures",

@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",

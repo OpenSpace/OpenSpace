@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../neptune").Neptune.Identifier
+local globeIdentifier = asset.require("../../neptune").Neptune.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Neptune textures",

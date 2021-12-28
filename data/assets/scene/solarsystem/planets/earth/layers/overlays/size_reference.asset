@@ -1,4 +1,4 @@
-local earthAsset = asset.require("./../../earth").Earth
+local earthAsset = asset.require("../../earth").Earth
 local globeIdentifier = earthAsset.Identifier
 
 local layer ={

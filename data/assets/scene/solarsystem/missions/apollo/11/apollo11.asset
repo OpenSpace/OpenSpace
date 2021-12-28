@@ -1,11 +1,12 @@
-local asset_helper = asset.require('util/asset_helper')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local asset_helper = asset.require("util/asset_helper")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local descentKeyframes = asset.require('./lem_descent.asset')
-local descentRotationKeyframes = asset.require('./lem_descent_rotation.asset')
+local descentKeyframes = asset.require("./lem_descent.asset")
+local descentRotationKeyframes = asset.require("./lem_descent_rotation.asset")
 
-local kernels = asset.require('./kernels').kernels
+local kernels = asset.require("./kernels").kernels
+asset.require("spice/base")
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -21,7 +22,6 @@ local lem_model = asset.syncedResource({
   Version = 4
 })
 
-asset.require('spice/base')
 
 --landing - 1969-07-20T20:17:40
 local apolloSpiceId = "-911"
@@ -108,14 +108,14 @@ local lemTranslation = {
     -- 20:14:30 is an arbitrary cutoff, but last 4 minutes data in descentKeyframes
     -- begins at 20.14.40. Due to linear interpolation, we will get
     -- a 10s linear transition to the location where the descentKeyframes start.
-    ['1969 JUL 20 20:14:30'] = {
+    ["1969 JUL 20 20:14:30"] = {
       Type = "SpiceTranslation",
       Target = apolloLemSpiceId,
       Observer = "MOON",
       Frame = "IAU_MOON",
       Kernels = kernels
     },
-    ['1969 JUL 20 20:14:40'] = {
+    ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
       Keyframes = descentKeyframes.keyframes
     }

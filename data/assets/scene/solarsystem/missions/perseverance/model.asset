@@ -1,9 +1,8 @@
---perseverance/model.asset
-local assetHelper = asset.require('util/asset_helper')
-local trail = asset.require('./trail')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
--- asset.require('./fov')
+local assetHelper = asset.require("util/asset_helper")
+local trail = asset.require("./trail")
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+-- asset.require("./fov")
 
 local LightSources = {
   {

@@ -1,10 +1,9 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Name = "Gebco [Utah]",
   Identifier = "Gebco_Utah",
-  FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
+  FilePath = asset.localResource("../../map_service_configs/Utah/Gebco.wms")
 }
 
 asset.onInitialize(function () 

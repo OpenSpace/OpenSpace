@@ -1,4 +1,4 @@
-asset.require('./triton')
+asset.require("./triton")
 
 
 asset.meta = {

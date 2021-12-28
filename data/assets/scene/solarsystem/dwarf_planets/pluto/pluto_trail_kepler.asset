@@ -1,7 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
-local kernels = asset.require('./kernels').PlutoKernels
+local kernels = asset.require("./kernels").PlutoKernels
 local OneAU = 1.496e+8
 
 
@@ -18,7 +18,7 @@ local PlutoKeplerianTrail = {
       AscendingNode = 1.102099981996057E+02,
       ArgumentOfPeriapsis = 1.142248569189779E+02,
       MeanAnomaly = 14.53,
-      Epoch = '2000 01 01 00:00',
+      Epoch = "2000 01 01 00:00",
       Period = 7.82438e+9
     },
     Color = { 0.2, 0.8, 0.3 },

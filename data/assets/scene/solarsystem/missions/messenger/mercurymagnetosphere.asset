@@ -1,6 +1,6 @@
 -- mercurymagnetosphere.asset
-local assetHelper = asset.require('util/asset_helper')
-local mercuryTransforms = asset.require('scene/solarsystem/planets/mercury/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
 local localFolder = asset.syncedResource({
   Name = "Mercury Magnetosphere",
@@ -40,7 +40,7 @@ local Magnetosphere = {
       SourceFrame = "MERCURYSE",
       DestinationFrame = "GALACTIC",
       Kernels = {
-        localFolder .. "/openspace_mercury.ti"
+        localFolder .. "openspace_mercury.ti"
       }
     },
     Scale = {

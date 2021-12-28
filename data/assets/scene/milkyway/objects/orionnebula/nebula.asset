@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
 
 local center = sunTransforms.SolarSystemBarycenter.Identifier;
 local LIGHTS = assetHelper.getDefaultLightSources(center);

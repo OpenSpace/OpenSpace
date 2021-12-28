@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../titan").Titan.Identifier
+local globeIdentifier = asset.require("../../titan").Titan.Identifier
 
 local texturesPath = asset.syncedResource({
   Type = "HttpSynchronization",

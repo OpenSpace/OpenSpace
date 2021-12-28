@@ -1,5 +1,5 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
 
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
@@ -7,7 +7,6 @@ local kernels = asset.syncedResource({
   Identifier = "mars_kernels",
   Version = 1
 })
-
 
 local Phobos = {
   Identifier = "Phobos",
@@ -17,13 +16,13 @@ local Phobos = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_PHOBOS",
       DestinationFrame = "GALACTIC",
-      Kernels = kernels .. 'mar097.bsp'
+      Kernels = kernels .. "mar097.bsp"
     },
     Translation = {
       Type = "SpiceTranslation",
       Target = "PHOBOS",
       Observer = "MARS BARYCENTER",
-      Kernels = kernels .. 'mar097.bsp'
+      Kernels = kernels .. "mar097.bsp"
     }
   },
   Renderable = {

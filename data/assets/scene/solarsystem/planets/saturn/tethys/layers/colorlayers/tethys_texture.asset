@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../tethys").Tethys.Identifier
+local globeIdentifier = asset.require("../../tethys").Tethys.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Tethys textures",

@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local kernels = asset.syncedResource({
@@ -705,7 +705,7 @@ local DawnSolarArray2 = {
     -- }
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 3.1415, 1.57075, 0.0 }
+      Rotation = { math.pi, math.pi/2, 0.0 }
     }
   },
   Renderable = {

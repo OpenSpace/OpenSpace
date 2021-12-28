@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../callisto").Callisto.Identifier
+local globeIdentifier = asset.require("../../callisto").Callisto.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Callisto Textures",

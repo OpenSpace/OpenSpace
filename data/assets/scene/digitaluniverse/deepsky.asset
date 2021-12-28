@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 local textures = asset.syncedResource({
   Name = "Deep Sky Objects Textures",
@@ -43,7 +43,7 @@ local deepSkyPoints = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   GUI = {
@@ -73,7 +73,7 @@ local deepSkyImages = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {3.14159265359, 3.14159265359, 0 }
+      Rotation = { math.pi, math.pi, 0 }
     }
   },
   GUI = {

@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
 
 local circle = asset.syncedResource({
   Name = "Circle",
@@ -50,7 +50,7 @@ local L2 = {
     RenderableType = "Opaque",
     Billboard = true,
     Size = 700E5,
-    Texture = circle .. "/circle.png",
+    Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Transform = {
@@ -58,7 +58,7 @@ local L2 = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
       Observer = "SSB",
-      Kernels = kernels .. "/L2_de431.bsp"
+      Kernels = kernels .. "L2_de431.bsp"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },

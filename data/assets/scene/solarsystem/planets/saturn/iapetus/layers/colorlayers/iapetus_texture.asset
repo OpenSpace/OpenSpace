@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../iapetus").Iapetus.Identifier
+local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Iapetus textures",

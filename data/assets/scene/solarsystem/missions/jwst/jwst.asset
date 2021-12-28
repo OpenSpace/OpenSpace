@@ -1,7 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+asset.require("spice/base")
 
 local models = asset.syncedResource({
   Name = "JWST Model",

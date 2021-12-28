@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local sync = asset.syncedResource({
   Name = "Swift Tuttle Orbit",

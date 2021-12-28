@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
 
 local circle = asset.syncedResource({
   Name = "Circle",

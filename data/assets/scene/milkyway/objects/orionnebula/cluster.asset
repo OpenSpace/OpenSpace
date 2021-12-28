@@ -1,6 +1,7 @@
---orionnebula/cluster.asset
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
+
+
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Star Cluster",

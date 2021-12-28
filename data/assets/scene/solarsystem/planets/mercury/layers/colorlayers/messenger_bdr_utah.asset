@@ -1,11 +1,10 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_BDR_Utah",
   Name = "Messenger BDR [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/MessengerBDR.wms",
-  TilePixelSize = 360,
+  FilePath = asset.localResource("../../map_service_configs/Utah/MessengerBDR.wms"),
+  TilePixelSize = 360
 }
 
 asset.onInitialize(function () 

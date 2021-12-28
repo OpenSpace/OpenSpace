@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms_magnetosphere')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms_magnetosphere")
 local transferFunction = asset.localResource("./CMR-illuminance2.txt")
 
 local fieldlinesDirectory = asset.syncedResource({

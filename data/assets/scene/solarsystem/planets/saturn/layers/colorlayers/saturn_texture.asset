@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../saturn").Saturn.Identifier
+local globeIdentifier = asset.require("../../saturn").Saturn.Identifier
 
 local texturesPath = asset.syncedResource({
   Type = "HttpSynchronization",

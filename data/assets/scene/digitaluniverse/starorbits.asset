@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local speck = asset.syncedResource({

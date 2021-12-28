@@ -1,7 +1,7 @@
--- asset.require('../examples/volume/generated/cartesian.asset')
-
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local data = asset.syncedResource({
   Name = "Milkyway Volume Data",
@@ -29,7 +29,7 @@ local MilkyWayVolumeGalaxy = {
     StepSize = 0.01,
     AbsorptionMultiply = 200,
     EmissionMultiply = 250,
-    Rotation = { 3.1415926, 3.1248, 4.45741 },
+    Rotation = { math.pi, 3.1248, 4.45741 },
     Volume = {
       Type = "Volume",
       Filename = openspace.absPath(data .. "MilkyWayRGBAVolume1024x1024x128.raw"),

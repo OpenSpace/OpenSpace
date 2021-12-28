@@ -19,7 +19,7 @@ local layer = {
     "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
 	"<OpenSpaceTransferFunction>" .. path .. "rainbow.png</OpenSpaceTransferFunction>" ..
 	"<OpenSpaceTimeInterpolation>linear</OpenSpaceTimeInterpolation>" ..
-	"<FilePath>" .. path .. "/${OpenSpaceTimeId}-land.png</FilePath>" ..
+	"<FilePath>" .. path .. "${OpenSpaceTimeId}-land.png</FilePath>" ..
   "</OpenSpaceTemporalGDALDataset>",
   Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
 }

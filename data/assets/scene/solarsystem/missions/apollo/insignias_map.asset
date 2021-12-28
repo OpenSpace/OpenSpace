@@ -2,7 +2,7 @@
 -- The insignias are invisible by default, but can be enabled using shown or hidden using
 -- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
-local asset_helper = asset.require('util/asset_helper')
+local asset_helper = asset.require("util/asset_helper")
 
 local insigniasPath =  asset.syncedResource({
   Name = "Apollo Insignias",
@@ -10,7 +10,7 @@ local insigniasPath =  asset.syncedResource({
   Identifier = "apollo_insignias",
   Version = 1
 })
-local moon = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local landingData = {
   {
@@ -88,7 +88,7 @@ end
 local show_apollo_labels = {
   Identifier = "apollo_insignias.show_insignias",
   Name = "Show Apollo Landing Labels",
-  Command = "openspace.setPropertyValue('Scene.Apollo*Insignia.Renderable.Opacity', 1, 0.5)",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, 0.5)]],
   Documentation = "Show patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",
   IsLocal = true
@@ -97,7 +97,7 @@ local show_apollo_labels = {
 local hide_apollo_labels = {
   Identifier = "apollo_insignias.hide_insignias",
   Name = "Hide Apollo Landing Labels",
-  Command = "openspace.setPropertyValue('Scene.Apollo*Insignia.Renderable.Opacity', 0, 0.5)",
+  Command = [[openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, 0.5)]],
   Documentation = "Hide patches of the Apollo missions on their respective landing sites",
   GuiPath = "/Missions/Apollo",
   IsLocal = true
@@ -113,19 +113,19 @@ asset.onDeinitialize(function ()
   openspace.action.removeAction(hide_apollo_labels.Identifier)
 end)
 
-asset.export('showInsignia', function (missinNumber, interpolationDuration)
+asset.export("showInsignia", function (missinNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)
 end)
 
-asset.export('hideInsignia', function (missinNumber, interpolationDuration)
+asset.export("hideInsignia", function (missinNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
 
-asset.export('showInsignias', function (interpolationDuration)
+asset.export("showInsignias", function (interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, interpolationDuration)
 end)
 
-asset.export('hideInsignias', function (interpolationDuration)
+asset.export("hideInsignias", function (interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
 

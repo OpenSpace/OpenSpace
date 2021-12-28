@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../io").Io.Identifier
+local globeIdentifier = asset.require("../../io").Io.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Io Textures",

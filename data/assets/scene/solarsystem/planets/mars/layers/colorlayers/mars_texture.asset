@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Mars Textures",

@@ -1,5 +1,5 @@
-local propertyHelper = asset.require('../property_helper')
-local joystickHelper = asset.require('./joystick_helper')
+local propertyHelper = asset.require("../property_helper")
+local joystickHelper = asset.require("./joystick_helper")
 
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
@@ -96,36 +96,40 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.Cross,
-    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
     "Toggle zoom friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.Circle,
-    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
     "Toggle rotational friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.DPad.Left,
-    propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
     "Toggle roll friction"
   )
 
   openspace.navigation.bindJoystickButton(
     name,
     controller.Square,
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+    [[
+      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+      "openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+    ]],
     "Switch target to Earth"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.Triangle,
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Mars');" ..
-    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+    [[
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Mars");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil);
+    ]],
     "Switch target to Mars"
   )
 end)

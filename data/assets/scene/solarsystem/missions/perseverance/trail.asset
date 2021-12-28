@@ -1,7 +1,6 @@
---trail.asset
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 
 local kernels = asset.syncedResource({
   Name = "Mars 2020 Kernels",

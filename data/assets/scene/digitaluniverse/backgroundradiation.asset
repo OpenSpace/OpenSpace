@@ -1,5 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local textures = asset.require('./backgroundradiation_textures').textures
+local assetHelper = asset.require("util/asset_helper")
+
+
 
 local speck = asset.syncedResource({
   Name = "Background Radiation Speck Files",
@@ -8,12 +9,19 @@ local speck = asset.syncedResource({
   Version = 1
 })
 
+local textures = asset.syncedResource({
+  Name = "Background Radiation Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_backgroundradiation_textures",
+  Version = 2
+})
+
 local wmap = {
   Identifier = "WMAP",
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -39,7 +47,7 @@ local cbe = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -65,7 +73,7 @@ local planck = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -92,7 +100,7 @@ local Halpha = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 3.14159265359}
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {

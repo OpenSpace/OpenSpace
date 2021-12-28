@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "CTX_Mosaic_Sweden",
   Name = "CTX Mosaic [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
+  FilePath = asset.localResource("../../map_service_configs/LiU/CTX.wms"),
   BlendMode = "Color"
 }
 

@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local model = asset.syncedResource({

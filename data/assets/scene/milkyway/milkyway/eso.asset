@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -14,7 +14,7 @@ local object = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 3.14159265359}
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../europa").Europa.Identifier
+local globeIdentifier = asset.require("../../europa").Europa.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Europa Textures",

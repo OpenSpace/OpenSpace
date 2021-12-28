@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../sun").Sun.Identifier
+local globeIdentifier = asset.require("../../sun").Sun.Identifier
 
 
 local texturesPath = asset.syncedResource({

@@ -1,5 +1,4 @@
---milkyway_label.asset
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 

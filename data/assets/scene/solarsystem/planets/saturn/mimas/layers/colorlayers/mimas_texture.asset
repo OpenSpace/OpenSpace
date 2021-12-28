@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../mimas").Mimas.Identifier
+local globeIdentifier = asset.require("../../mimas").Mimas.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Mimas textures",

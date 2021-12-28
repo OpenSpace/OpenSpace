@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../enceladus").Enceladus.Identifier
+local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Enceladus textures",

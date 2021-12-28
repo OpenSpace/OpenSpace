@@ -10,10 +10,10 @@ asset.onInitialize(function()
     Identifier = "target-marker",
     Name = "Target Marker",
     Type = "ScreenSpaceImageLocal",
-    TexturePath = icons .. 'target.png'
+    TexturePath = icons .. "target.png"
   })
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable('target-marker');
+  openspace.removeScreenSpaceRenderable("target-marker")
 end)

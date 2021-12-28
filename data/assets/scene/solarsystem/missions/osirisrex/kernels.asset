@@ -88,4 +88,4 @@ local OsirisRexKernels = {
   kernels .. "orx_210509_231025_210119_od298-R-ADM1-P-DB1_v1.bsp"
 }
 
-asset.export('kernels', OsirisRexKernels)
+asset.export("kernels", OsirisRexKernels)

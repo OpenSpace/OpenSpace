@@ -1,6 +1,6 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local propertyHelper = asset.require('util/property_helper')
+local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("./transforms")
 
 local textureSourcePath = asset.syncedResource({

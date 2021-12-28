@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = asset.require("./coastlines").layer
 layer.Enabled = true

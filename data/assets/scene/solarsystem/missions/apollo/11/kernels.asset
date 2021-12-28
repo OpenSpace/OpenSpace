@@ -13,4 +13,4 @@ local kernels = {
   kernelsFolder .. "apollo11_orbits_lm9km.bsp"
 }
 
-asset.export('kernels', kernels)
+asset.export("kernels", kernels)

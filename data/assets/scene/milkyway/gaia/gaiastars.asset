@@ -1,13 +1,26 @@
 local assetHelper = asset.require("util/asset_helper")
 
-local colorLUT = asset.require('scene/digitaluniverse/stars_colormap').ColorMaps
-local textures = asset.require('scene/digitaluniverse/stars_textures').textures
+
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
   Name = "Gaia Stars RV",
   Type = "HttpSynchronization",
   Identifier = "gaia_stars_rv_octree",
+  Version = 1
+})
+
+local colormaps = asset.syncedResource({
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars_colormap",
+  Version = 2
+})
+
+local textures = asset.syncedResource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
   Version = 1
 })
 
@@ -20,7 +33,7 @@ local GaiaStars = {
     RenderOption = "Motion",
     ShaderOption = "Point_SSBO",
     Texture = textures .. "halo.png",
-    ColorMap = colorLUT .. "colorbv.cmap",
+    ColorMap = colormaps .. "colorbv.cmap",
     LuminosityMultiplier = 35,
     MagnitudeBoost = 25,
     CutOffThreshold = 38,

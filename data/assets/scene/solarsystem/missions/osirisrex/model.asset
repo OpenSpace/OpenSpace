@@ -1,9 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local OsirisRexKernels = asset.require('./kernels').kernels
+local OsirisRexKernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
   Name = "Osiris Rex Models",

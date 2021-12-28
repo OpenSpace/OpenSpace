@@ -1,9 +1,9 @@
-local propertyHelper = asset.require('./property_helper')
+local propertyHelper = asset.require("./property_helper")
 
 local toggle_native_ui = {
   Identifier = "os_default.toggle_native_ui",
   Name = "Show Native GUI",
-  Command = propertyHelper.invert('Modules.ImGUI.Main.Enabled'),
+  Command = propertyHelper.invert("Modules.ImGUI.Main.Enabled"),
   Documentation = "Shows or hides the native UI",
   GuiPath = "/Native GUI",
   IsLocal = true,
@@ -57,7 +57,7 @@ local toggle_pause_immediate = {
 local toggle_rotation_friction = {
   Identifier = "os_default.toggle_rotation_friction",
   Name = "Toggle Rotation friction",
-  Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
   Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
   GuiPath = "/Navigation",
   IsLocal = false,
@@ -68,7 +68,7 @@ local toggle_rotation_friction = {
 local toggle_zoom_friction = {
   Identifier = "os_default.toggle_zoom_friction",
   Name = "Toggle Zoom Friction",
-  Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
   Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
   GuiPath = "/Navigation",
   IsLocal = false,
@@ -79,7 +79,7 @@ local toggle_zoom_friction = {
 local toggle_roll_friction = {
   Identifier = "os_default.toggle_roll_friction",
   Name = "Toggle Roll Friction",
-  Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+  Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
   Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
   GuiPath = "/Navigation",
   IsLocal = false,
@@ -90,7 +90,13 @@ local toggle_roll_friction = {
 local fade_to_black = {
   Identifier = "os_default.fade_to_black",
   Name = "Fade to/from black",
-  Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
+  Command = [[
+    if openspace.getPropertyValue("RenderEngine.BlackoutFactor") > 0.5 then
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 0.0, 3)
+    else
+      openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
+    end
+  ]],
   Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
   GuiPath = "/Rendering",
   IsLocal = false,
@@ -101,7 +107,7 @@ local fade_to_black = {
 local toggle_main_gui = {
   Identifier = "os_default.toggle_main_gui",
   Name = "Toggle main GUI",
-  Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
+  Command = propertyHelper.invert("Modules.CefWebGui.Visible"),
   Documentation = "Toggles the main GUI",
   GuiPath = "/GUI",
   IsLocal = true,
@@ -113,8 +119,8 @@ local toggle_overlays = {
   Identifier = "os_default.toggle_overlays",
   Name = "Toggle dashboard and overlays",
   Command =
-[[local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');
-openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);
+[[local isEnabled = openspace.getPropertyValue("Dashboard.IsEnabled");
+openspace.setPropertyValueSingle("Dashboard.IsEnabled", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
@@ -128,7 +134,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
 local toggle_master_rendering = {
   Identifier = "os_default.toggle_master_rendering",
   Name = "Toggle rendering on master",
-  Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
+  Command = propertyHelper.invert("RenderEngine.DisableMasterRendering"),
   Documentation = "Toggles the rendering on master",
   GuiPath = "/Rendering",
   IsLocal = true,

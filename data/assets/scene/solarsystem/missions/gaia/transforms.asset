@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local trail = asset.syncedResource({
