@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "BMNG_Utah",
   Name = "BMNG [Utah]",
-  FilePath = asset.localResource("../../map_service_configs/Utah/Bmng.wms"),
+  FilePath = asset.localResource("bmng_utah.wms"),
   Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
     This map is hosted on the OpenSpace servers in Utah]],    
 }

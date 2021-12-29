@@ -3,7 +3,7 @@ asset.require("./layers/colorlayers/venus_texture")
 local colorLayer = asset.require("./layers/colorlayers/magellan_mosaic_utah")
 
 -- Height layers
-local heightLayer = asset.require("./layers/heightlayers/magellan")
+local heightLayer = asset.require("./layers/heightlayers/magellan_utah")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 

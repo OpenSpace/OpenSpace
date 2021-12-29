@@ -4,7 +4,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "WAC_Sweden",
   Name = "WAC [Sweden]",
-  FilePath = asset.localResource("../../map_service_configs/LiU/WAC.wms"),
+  FilePath = asset.localResource("wac_sweden.wms"),
   Settings = { Gamma = 0.84 }
 }
 

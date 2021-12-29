@@ -5,7 +5,7 @@
     <NoDataValue>0</NoDataValue>
     <ColorInterp>Gray</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">HiRISELS.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">hirisels.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="83886080" RasterYSize="41943040" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="83886080" ySize="41943040" />
@@ -17,7 +17,7 @@
     <ColorInterp>Alpha</ColorInterp>
     <NoDataValue>0</NoDataValue>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">HiRISELS.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">hirisels.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="83886080" RasterYSize="41943040" DataType="Byte" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="83886080" ySize="41943040" />

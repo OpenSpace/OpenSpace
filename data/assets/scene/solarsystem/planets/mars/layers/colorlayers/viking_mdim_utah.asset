@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "Viking_MDIM_Utah",
   Name = "Viking MDIM [Utah]",
-  FilePath = asset.localResource("../../map_service_configs/Utah/Mdim.wms"),
+  FilePath = asset.localResource("viking_mdim_utah.wms"),
   Description = [[This global image map of Mars has a resolution of 256 pixels/degree
     (scale approximately 232 meters per pixel (m) at the equator). The colorized
     mosaic was completed by NASA AMES which warped the original Viking colorized

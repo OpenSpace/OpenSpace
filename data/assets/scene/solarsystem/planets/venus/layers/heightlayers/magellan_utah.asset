@@ -13,7 +13,7 @@ local layer = {
     the in-plane elements of each spacecraft orbit, and then originally re-sampled
     into sinusoidal, Mercator, and north and south polar stereographic projections
     at a resolution of 5 kilometers per pixel (4641 meters per pixel [m]).]],
-  FilePath = asset.localResource("../../map_service_configs/Utah/MagellanDEM.wms"),
+  FilePath = asset.localResource("magellan_utah.wms"),
   TilePixelSize = 64,
   Settings = {
     Gamma = 1.72,

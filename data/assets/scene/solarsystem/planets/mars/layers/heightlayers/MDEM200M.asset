@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "MDEM200M",
   Name = "HRSC MOLA Blended DEM Global 200m v2",
-  FilePath = asset.localResource("../../map_service_configs/ESRI/MDEM200M.tif"),
+  FilePath = asset.localResource("mdem200m.wms"),
   Description = [[ Blend of data derived from the Mars Orbiter Laser Altimeter 
     (MOLA, an instrument aboard NASA’s
     Mars Global Surveyor spacecraft), and data derived from the High-Resolution

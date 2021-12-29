@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 local layer = {
   Identifier = "Messenger_MDIS_Utah",
   Name = "Messenger MDIS [Utah]",
-  FilePath = asset.localResource("../../map_service_configs/Utah/MessengerMDIS.wms")
+  FilePath = asset.localResource("messenger_mdis_utah.wms")
 }
 
 asset.onInitialize(function () 

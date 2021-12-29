@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../mars").Mars.Identifier
 local layer = {
   Identifier = "Themis_IR_Night_Utah",
   Name = "Themis IR Night [Utah]",
-  FilePath = asset.localResource("../../map_service_configs/Utah/Themis_IR_Night.wms"),
+  FilePath = asset.localResource("themis_ir_night_utah.wms"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)
     -nighttime infrared (IR) 100 meter/pixel mosaic (version 12) released in the
