@@ -101,11 +101,16 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IndependentSessionInfo = {
+        "IndependentSession",
+        "Independent View Session",
+        "Allows peers to use a host-independent camera viewpoint."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo IndependentViewInfo = {
         "IndependentView",
         "Independent View",
-        "Enables host-independent camera viewpoint. As host, this option enables/disables "
-        "the optional use of independent view for all non-host clients."
+        "Enables host-independent camera viewpoint if the host is allowing it."
     };
 } // namespace
 
@@ -121,6 +126,7 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
+    , _independentSession(IndependentSessionInfo)
     , _independentView(IndependentViewInfo)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
@@ -136,8 +142,19 @@ ParallelPeer::ParallelPeer()
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
 
+    addProperty(_independentSession);
     addProperty(_independentView);
-    _independentView.setReadOnly(true);
+
+    _independentSession.onChange([this]() {
+        if (_isConnected) {
+            setSessionStatus();
+        }
+        else {
+            _independentSession = false;
+            LERROR("This option requires a connection.");
+        }
+    });
+
     _independentView.onChange([this]() {
         if (_isConnected) {
             setViewStatus();
@@ -247,10 +264,13 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             nConnectionsMessageReceived(message.content);
             break;
         case ParallelConnection::MessageType::IndependentSessionOn:
-            IndependentOnMessageReceived();
+            independentOnMessageReceived();
             break;
         case ParallelConnection::MessageType::IndependentSessionOff:
-            IndependentOffMessageReceived();
+            independentOffMessageReceived();
+            break;
+        case ParallelConnection::MessageType::ViewStatus:
+            viewStatusMessageReceived(message.content);
             break;
         default:
             // unknown message type
@@ -312,6 +332,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
     switch (static_cast<datamessagestructures::Type>(type)) {
     case datamessagestructures::Type::CameraData: {
+
         datamessagestructures::CameraKeyframe kf(buffer);
         const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
@@ -326,10 +347,15 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
 
-        global::navigationHandler->keyframeNavigator().addKeyframe(
-            convertedTimestamp,
-            pose
-        );
+        if (_viewStatus != ParallelConnection::ViewStatus::IndependentView) {
+            global::navigationHandler->keyframeNavigator().addKeyframe(
+                convertedTimestamp,
+                pose
+            );
+        }
+
+        //TODO: Ind. viewers render host's position
+
         break;
     }
     case datamessagestructures::Type::IndependentCameraData: {
@@ -345,7 +371,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
 
-        //TODO: handle independent client's data
+        // Host and host viewers render all ind. viewers' positions
+        // Ind. viewers render other ind. viewers positions
 
         break;
     }
@@ -470,14 +497,19 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
     setNConnections(nConnections);
 }
 
-void ParallelPeer::IndependentOnMessageReceived() {
+void ParallelPeer::independentOnMessageReceived() {
     _independentViewAllowed = true;
     LINFO(fmt::format("The host is now allowing host-independent viewpoints"));
 }
 
-void ParallelPeer::IndependentOffMessageReceived() {
+void ParallelPeer::independentOffMessageReceived() {
     _independentViewAllowed = false;
+    _independentView = false;
     LINFO(fmt::format("The host is now NOT allowing host-independent viewpoints"));
+}
+
+void viewStatusMessageReceived(const std::vector<char>& message) {
+    
 }
 
 void ParallelPeer::handleCommunication() {
@@ -518,7 +550,6 @@ void ParallelPeer::requestHostship() {
         buffer
     ));
 
-    //setViewStatus(ParallelConnection::ViewStatus::Host);
     setViewStatus();
 }
 
@@ -528,8 +559,6 @@ void ParallelPeer::resignHostship() {
         ParallelConnection::MessageType::HostshipResignation,
         buffer
     ));
-
-    // TODO: setViewStatus to independent?
 }
 
 void ParallelPeer::setPassword(std::string password) {
@@ -675,12 +704,12 @@ ParallelConnection::Status ParallelPeer::status() {
     return _status;
 }
 
-void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
+void ParallelPeer::setSessionStatus() {
     if (isHost()) {
         _viewStatus = ParallelConnection::ViewStatus::Host;
         std::vector<char> buffer;
 
-        if (_independentView) {
+        if (_independentSession) {
             _connection.sendMessage(ParallelConnection::Message(
                 ParallelConnection::MessageType::IndependentSessionOn,
                 buffer
@@ -693,22 +722,33 @@ void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
             ));
         }
     }
-    else if (_independentView) {
-        if (_independentViewAllowed) {
-            _viewStatus = ParallelConnection::ViewStatus::IndependentView;
+    else {
+        LERROR("This option is exclusive to the host.");
+    }
+}
 
+void ParallelPeer::setViewStatus() {
+    if (_independentView && !isHost()) {
+        if (_independentViewAllowed) {
+            // create nodes for host and other ind.viewers
+            _viewStatus = ParallelConnection::ViewStatus::IndependentView;
+            
             std::vector<char> buffer;
             _connection.sendMessage(ParallelConnection::Message(
                 ParallelConnection::MessageType::ViewRequest,
                 buffer
             ));
+
+            global::navigationHandler->keyframeNavigator().clearKeyframes();
+            global::scriptEngine->queueScript("openspace.setPropertyValueSingle('NavigationHandler.UseKeyFrameInteraction', false)"
+                , scripting::ScriptEngine::RemoteScripting(false));
         }
         else {
             _independentView = false;
             LERROR("The host is not currently allowing host-independent viewpoints.");
         }
     }
-    else {
+    else if (!isHost()) {
         _viewStatus = ParallelConnection::ViewStatus::HostView;
 
         std::vector<char> buffer;
@@ -716,36 +756,14 @@ void ParallelPeer::setViewStatus() { //(ParallelConnection::ViewStatus status)
             ParallelConnection::MessageType::ViewResignation,
             buffer
         ));
+
+        global::scriptEngine->queueScript("openspace.setPropertyValueSingle('NavigationHandler.UseKeyFrameInteraction', true)"
+            , scripting::ScriptEngine::RemoteScripting(false));
+    }
+    else {
+        LERROR("This option is exclusive to non-host peers.");
     }
 }
-
-
-    /*if (!_isConnected) {
-        _IndependentView = false;
-        LERROR("This action requires a connection.");
-        return;
-    }
-
-    _viewStatus = status;
-    //TODO: _connectionEvent->publish("statusChanged"); if you have gotten confirmation to enable indView
-
-    if (!isHost()) {
-        std::vector<char> buffer;
-
-        if (_viewStatus == ParallelConnection::ViewStatus::IndependentView) {
-            _connection.sendMessage(ParallelConnection::Message(
-                ParallelConnection::MessageType::ViewRequest,
-                buffer
-            ));
-        }
-        else if (_viewStatus == ParallelConnection::ViewStatus::HostView) {
-            _connection.sendMessage(ParallelConnection::Message(
-                ParallelConnection::MessageType::ViewResignation,
-                buffer
-            ));
-        }
-    }*/
-
 
 ParallelConnection::ViewStatus ParallelPeer::viewStatus() {
     return _viewStatus;
@@ -766,7 +784,7 @@ bool ParallelPeer::isHost() {
     return _status == ParallelConnection::Status::Host;
 }
 
-bool ParallelPeer::IndependentView() { // TODO: remove if still unused
+bool ParallelPeer::independentView() { // TODO: remove if still unused
     return _independentView;
 }
 
@@ -895,6 +913,47 @@ void ParallelPeer::reloadUI() {
 
 ghoul::Event<>& ParallelPeer::connectionEvent() {
     return *_connectionEvent;
+}
+
+void ParallelPeer::deleteNode() {
+    std::string script = "removeSceneGraphNode('IDENTIFIER')"; // how to call for specific identifier?
+
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::No
+    );
+}
+
+// Create a node with identifier tied to the name of the peer belonging to the node
+ghoul::Dictionary ParallelPeer::createDictionary(std::string nodeName) {
+
+    ghoul::Dictionary identifier;
+    ghoul::Dictionary path;
+    ghoul::Dictionary gui;
+    ghoul::Dictionary translationType;
+    ghoul::Dictionary body;
+    ghoul::Dictionary translation;
+    ghoul::Dictionary renderableType;
+    ghoul::Dictionary geometryFile;
+    ghoul::Dictionary renderable;
+    ghoul::Dictionary transform;
+
+    identifier.setValue<std::string>("Identifier", "Node_" + nodeName);
+
+        path.setValue<std::string>("Path", ""); // Insert path
+    gui.setValue<ghoul::Dictionary>("GUI", path);
+
+            translationType.setValue<std::string>("Type", "StaticTranslation");
+            body.setValue<std::string>("Body", "Node_" + std::string(_name));
+        translation.setValue<ghoul::Dictionary>("Translation", (translationType, body));
+
+            renderableType.setValue<std::string>("Type", "RenderableModel");
+            geometryFile.setValue<std::string>("GeometryFile", ""); // Insert model path
+        renderable.setValue<ghoul::Dictionary>("Renderable", (renderableType, geometryFile));
+
+    transform.setValue<ghoul::Dictionary>("Transform", (translation, renderable));
+
+    return (identifier, gui, transform);
 }
 
 scripting::LuaLibrary ParallelPeer::luaLibrary() {

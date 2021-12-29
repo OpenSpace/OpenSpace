@@ -37,6 +37,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/designpattern/event.h>
+#include <ghoul/misc/dictionary.h>
 #include <atomic>
 #include <deque>
 #include <mutex>
@@ -89,19 +90,23 @@ private:
     void dataMessageReceived(const std::vector<char>& message);
     void connectionStatusMessageReceived(const std::vector<char>& message);
     void nConnectionsMessageReceived(const std::vector<char>& message);
-    void IndependentOnMessageReceived();
-    void IndependentOffMessageReceived();
+    void independentOnMessageReceived();
+    void independentOffMessageReceived();
+    void viewStatusMessageReceived(const std::vector<char>& message);
+    void deleteNode();
+    ghoul::Dictionary createDictionary(std::string nodeName);
 
     void sendCameraKeyframe();
     void sendTimeTimeline();
     void reloadUI();
 
     void setStatus(ParallelConnection::Status status);
+    void setSessionStatus();
     void setViewStatus();
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
-    bool IndependentView();
+    bool independentView();
 
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
@@ -117,6 +122,7 @@ private:
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
+    properties::BoolProperty _independentSession;
     properties::BoolProperty _independentView;
 
     bool _independentViewAllowed = false;

@@ -81,8 +81,9 @@ private:
     void setNConnections(size_t nConnections);
     void sendConnectionStatus(Peer& peer);
     void setViewStatus(Peer& peer, ParallelConnection::ViewStatus viewStatus);
-    void sendIndependentSessionOn(Peer& peer);
-    void sendIndependentSessionOff(Peer& peer);
+    void sendIndependentSessionOn();
+    void sendIndependentSessionOff();
+    void sendViewStatusUpdate(Peer& peer);
 
     bool _independentViewAllowed = false;
 

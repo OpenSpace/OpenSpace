@@ -285,6 +285,8 @@ void ParallelServer::handleViewRequest(Peer& peer) {
     if (_independentViewAllowed) {
         setViewStatus(peer, ParallelConnection::ViewStatus::IndependentView);
         LINFO(fmt::format("{} is now using host-independent viewpoint", peer.id));
+
+        sendViewStatusUpdate(peer);
     }
 }
 
@@ -294,14 +296,14 @@ void ParallelServer::handleViewResignation(Peer& peer) {
 }
 
 void ParallelServer::handleIndependentSessionOn(Peer& peer) {
-    sendIndependentSessionOn(peer);
+    sendIndependentSessionOn();
     _independentViewAllowed = true;
 
     LINFO(fmt::format("Host ({}) is now allowing host-independent viewpoints", peer.id));
 }
 
 void ParallelServer::handleIndependentSessionOff(Peer& peer) {
-    sendIndependentSessionOff(peer);
+    sendIndependentSessionOff();
     _independentViewAllowed = false;
 
     LINFO(fmt::format("Host ({}) is now NOT allowing host-independent viewpoints", peer.id));
@@ -475,14 +477,40 @@ void ParallelServer::setViewStatus(Peer& peer, ParallelConnection::ViewStatus vi
     peer.viewStatus = viewStatus;
 }
 
-void ParallelServer::sendIndependentSessionOn(Peer& peer) {
+void ParallelServer::sendIndependentSessionOn() {
     std::vector<char> data;
     sendMessageToAll(ParallelConnection::MessageType::IndependentSessionOn, data);
 }
 
-void ParallelServer::sendIndependentSessionOff(Peer& peer) {
+void ParallelServer::sendIndependentSessionOff() {
     std::vector<char> data;
     sendMessageToAll(ParallelConnection::MessageType::IndependentSessionOff, data);
+}
+
+// Sends ViewStatus information about the given peer to all clients.
+void ParallelServer::sendViewStatusUpdate(Peer& peer) {
+    std::vector<char> data;
+    const uint32_t outViewStatus = static_cast<uint32_t>(peer.viewStatus);
+    data.insert(
+        data.end(),
+        reinterpret_cast<const char*>(&outViewStatus),
+        reinterpret_cast<const char*>(&outViewStatus) + sizeof(uint32_t)
+    );
+
+    const uint32_t outPeerNameSize = static_cast<uint32_t>(peer.name.size());
+    data.insert(
+        data.end(),
+        reinterpret_cast<const char*>(&outPeerNameSize),
+        reinterpret_cast<const char*>(&outPeerNameSize) + sizeof(uint32_t)
+    );
+
+    data.insert(
+        data.end(),
+        peer.name.data(),
+        peer.name.data() + outPeerNameSize
+    );
+
+    sendMessageToAll(ParallelConnection::MessageType::ViewStatus, data);
 }
 
 size_t ParallelServer::nConnections() const {
