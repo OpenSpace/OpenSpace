@@ -22,54 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCHRONIZATIONWATCHER___H__
-#define __OPENSPACE_CORE___SYNCHRONIZATIONWATCHER___H__
+#ifndef __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__
+#define __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__
 
-#include <openspace/util/resourcesynchronization.h>
-#include <memory>
-#include <mutex>
+#include <openspace/util/keys.h>
 #include <vector>
-#include <unordered_map>
 
-namespace openspace {
+namespace openspace::interaction {
 
-/**
- * Delays callbacks of synchronization state changes to
- * when notify is called.
- */
-class SynchronizationWatcher {
+// This class represents the global input state of interaction devices
+class KeyboardInputState {
 public:
-    using WatchHandle = size_t;
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
-    struct WatchData {
-        std::weak_ptr<ResourceSynchronization> synchronization;
-        ResourceSynchronization::CallbackHandle callbackHandle;
-    };
-
-    struct NotificationData {
-        std::weak_ptr<ResourceSynchronization> synchronization;
-        ResourceSynchronization::State state;
-        WatchHandle handle;
-        ResourceSynchronization::StateChangeCallback callback;
-    };
-
-    WatchHandle watchSynchronization(
-        std::shared_ptr<ResourceSynchronization> synchronization,
-        ResourceSynchronization::StateChangeCallback callback
-    );
-
-    void unwatchSynchronization(WatchHandle watchHandle);
-
-    void notify();
+    // Accessors
+    const std::vector<std::pair<Key, KeyModifier>>& pressedKeys() const;
+    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
+    bool isKeyPressed(Key key) const;
 
 private:
-    std::mutex _mutex;
-    std::unordered_map<WatchHandle, WatchData> _watchedSyncs;
-    std::vector<NotificationData> _pendingNotifications;
-
-    WatchHandle nextWatchHandle = 0;
+    // Input from keyboard
+    std::vector<std::pair<Key, KeyModifier>> _keysDown;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___SYNCHRONIZATIONWATCHER___H__
+#endif // __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__

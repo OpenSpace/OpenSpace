@@ -36,12 +36,6 @@ asset.syncedResource({
 })
 
 asset.syncedResource({
-  Name = "Example No ident",
-  Type = "UrlSynchronization",
-  Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
-})
-
-asset.syncedResource({
   Name = "Example No Hash",
   Type = "UrlSynchronization",
   Identifier = "no_hash",

@@ -175,11 +175,10 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
-    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(
-        resolution.x,
-        resolution.y,
-        1
-    ));
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(resolution.x, resolution.y, 1),
+        GL_TEXTURE_2D
+    );
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();

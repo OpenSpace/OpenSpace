@@ -12,7 +12,7 @@ asset.onInitialize(function ()
   -- Unzip the server bundle
   local dest = backend .. "/backend"
   if not openspace.directoryExists(dest) then
-    openspace.unzipFile(backend .. "/backend.zip", dest, true)
+    openspace.unzipFile(backend .. "backend.zip", dest, true)
   end
 
   openspace.setPropertyValueSingle(

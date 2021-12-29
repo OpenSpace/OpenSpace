@@ -54,10 +54,11 @@ enum class JoystickAction : uint8_t {
  * The input state of a single joystick.
  */
 struct JoystickInputState {
+    /// These two are just randomly selected numbers that can be increased if needed
     /// The maximum number of supported axes
     static constexpr const int MaxAxes = 8;
     /// The maximum number of supported buttons
-    static constexpr const int MaxButtons = 32;
+    static constexpr const int MaxButtons = 48;
 
     /// Marks whether this joystick is connected. If this value is \c false, all other
     /// members of this struct are undefined
@@ -72,11 +73,6 @@ struct JoystickInputState {
     /// \c nAxes values are defined values, the rest are undefined
     std::array<float, MaxAxes> axes;
 
-    /// The axis values can either go back to 0 when the joystick is released or it can
-    /// stay at the value it was before the joystick was released.
-    /// The latter is called a sticky axis, when the values don't go back to 0.
-    bool isSticky = false;
-
     /// The number of buttons that this joystick possesses
     int nButtons = 0;
     /// The status of each button. Only the first \c nButtons values are defined, the rest
@@ -88,6 +84,10 @@ struct JoystickInputState {
 /// derived from the available GLFW constants
 constexpr const int MaxJoysticks = 16;
 struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks> {
+    /// The maximum number of joysticks that are supported by this system. This number is
+    /// derived from the available GLFW constants
+    static constexpr const int MaxNumJoysticks = 16;
+
     /**
      * This function adds the contributions of all connected joysticks for the provided
      * \p axis. After adding each joysticks contribution, the result is clamped to [-1,1].
@@ -99,7 +99,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      *
      * \pre \p axis must be 0 or positive
      */
-    float axis(int axis) const;
+    float axis(const std::string& joystickName, int axis) const;
 
     /**
      * This functions checks whether any connected joystick has its \p button in the
@@ -113,7 +113,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      *
      * \pre \p button must be 0 or positive
      */
-    bool button(int button, JoystickAction action) const;
+    bool button(const std::string& joystickName, int button, JoystickAction action) const;
 };
 
 } // namespace openspace::interaction

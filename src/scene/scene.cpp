@@ -854,13 +854,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "expression"
             },
             {
-                "loadScene",
-                &luascriptfunctions::loadScene,
-                "string",
-                "Loads the scene found at the file passed as an "
-                "argument. If a scene is already loaded, it is unloaded first"
-            },
-            {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
                 "table",
@@ -915,6 +908,20 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string, string",
                 "The scene graph node identified by the first string is reparented to be "
                 "a child of the scene graph node identified by the second string."
+            },
+            {
+                "boundingSphere",
+                &luascriptfunctions::boundingSphere,
+                "string",
+                "Returns the bounding sphere of the scene graph node with the given "
+                "string as identifier"
+            },
+            {
+                "interactionSphere",
+                &luascriptfunctions::interactionSphere,
+                "string",
+                "Returns the interaction sphere of the scene graph node with the given "
+                "string as identifier"
             }
         }
     };

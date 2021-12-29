@@ -1,10 +1,9 @@
-local map_service_configs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../europa").Europa.Identifier
+local globeIdentifier = asset.require("../../europa").Europa.Identifier
 
 local layer = {
   Identifier = "Voyager_Global_Mosaic",
   Name = "Voyager Global Mosaic [Sweden]",
-  FilePath = map_service_configs .. "/LiU/Voyager_GalileoSSI_global_mosaic_500m.wms",
+  FilePath = asset.localResource("../../map_service_configs/LiU/Voyager_GalileoSSI_global_mosaic_500m.wms"),
   BlendMode = "Color",
 }
 

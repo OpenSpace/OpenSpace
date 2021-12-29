@@ -1,8 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./venus_globelabels').LabelsPath
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Venus Labels",
+  Type = "HttpSynchronization",
+  Identifier = "venus_labels",
+  Version = 1
+})
 
 local Venus = {
   Identifier = "Venus",
@@ -32,7 +38,7 @@ local Venus = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/venus.labels",
+      FileName = labelsPath .. "venus.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 11.0,

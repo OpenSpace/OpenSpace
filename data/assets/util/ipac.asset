@@ -13,6 +13,18 @@ asset.onInitialize(function()
   openspace.bindKey("ALT+UP", "openspace.navigation.addTruckMovement(0.0, 5.0)");
   openspace.bindKey("ALT+DOWN", "openspace.navigation.addTruckMovement(0.0, -5.0)");
 
-  openspace.bindKey("SPACE", "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);")
-  openspace.bindKey("Z", "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);")
+  openspace.bindKey(
+    "SPACE", 
+    [[
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Moon");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]])
+  openspace.bindKey(
+    "Z",
+    [[
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", "");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", "Earth");
+      openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]])
 end)

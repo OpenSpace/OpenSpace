@@ -1,5 +1,4 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
   Identifier = "Magellan_Mosaic_Utah",
@@ -20,7 +19,7 @@ local layer = {
     the radar system was sending signals to the left of the spacecraft. The SAR
     operated in this left-looking mode during cycles 1 and 3 of the mission.
     (Description from USGS)]],
-  FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
+  FilePath = asset.localResource("../../map_service_configs/Utah/MagellanMosaic.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 2.0

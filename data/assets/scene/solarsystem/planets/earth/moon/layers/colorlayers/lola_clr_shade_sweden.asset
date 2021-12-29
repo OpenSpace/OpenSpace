@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "Lola_Clr_Shade_Sweden",
   Name = "Lola Color Shade [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms"
+  FilePath = asset.localResource("../../map_service_configs/LiU/Lola_Clr_Shade.wms")
 }
 
 asset.onInitialize(function () 

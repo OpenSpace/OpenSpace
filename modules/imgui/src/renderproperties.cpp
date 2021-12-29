@@ -386,6 +386,11 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     float value = static_cast<float>(*p);
     float min = static_cast<float>(p->minValue());
     float max = static_cast<float>(p->maxValue());
+    
+    // Since we are doing a DoubleProperty, it would actually overflow here and produce
+    // -inf and inf as the min and max which confuses ImGui
+    min = std::max(min, std::numeric_limits<float>::min() / 2.f);
+    max = std::min(max, std::numeric_limits<float>::max() / 2.f);
 
     bool changed = ImGui::SliderFloat(
         name.c_str(),

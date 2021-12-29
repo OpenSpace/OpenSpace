@@ -1,9 +1,15 @@
-local texturesPath = asset.require("./../../neptune_textures").TexturesPath
-local globeIdentifier = asset.require("./../../neptune").Neptune.Identifier
+local globeIdentifier = asset.require("../../neptune").Neptune.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Neptune textures",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/neptune.jpg",
+  FilePath = texturesPath .. "neptune.jpg",
 }
 
 asset.onInitialize(function () 

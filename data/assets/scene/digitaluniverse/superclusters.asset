@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -24,9 +24,9 @@ local object = {
     DrawElements = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    File = speck .. "/superclust.speck",
-    Texture = textures .. "/point3A.png",
-    LabelFile = speck .. "/superclust.label",
+    File = speck .. "superclust.speck",
+    Texture = textures .. "point3A.png",
+    LabelFile = speck .. "superclust.label",
     Unit = "Mpc",
     TextColor = { 0.9, 0.9, 0.9 },
     ScaleFactor = 531.0,

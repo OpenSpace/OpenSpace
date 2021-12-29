@@ -66,8 +66,7 @@ public:
 
     void onChange(std::function<void(Layer*)> callback);
 
-    // Return:  number of tiles that were updated
-    int update();
+    void update();
 
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;

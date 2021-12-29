@@ -134,9 +134,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
-    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>("RenderablePlaneTimeVaryingImage");
+    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
+        "RenderablePlaneTimeVaryingImage"
+    );
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
-    fRenderable->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
+    fRenderable->registerClass<RenderableTimeVaryingSphere>(
+        "RenderableTimeVaryingSphere"
+    );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");

@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class SyncModule : public OpenSpaceModule {
@@ -35,10 +37,7 @@ public:
 
     SyncModule();
 
-    std::string synchronizationRoot() const;
-
-    void addHttpSynchronizationRepository(std::string repository);
-    std::vector<std::string> httpSynchronizationRepositories() const;
+    std::filesystem::path synchronizationRoot() const;
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -49,7 +48,7 @@ protected:
 
 private:
     std::vector<std::string> _synchronizationRepositories;
-    std::string _synchronizationRoot;
+    std::filesystem::path _synchronizationRoot;
 };
 
 } // namespace openspace

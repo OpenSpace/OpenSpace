@@ -65,7 +65,8 @@ public:
 
     WebsocketCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+    void updateStateFromInput(
+        const WebsocketInputStates& websocketInputStates, double deltaTime);
 
     void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,

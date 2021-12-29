@@ -22,28 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
-#define __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
+#include <openspace/interaction/mouseinputstate.h>
 
-#include <openspace/util/task.h>
+#include <algorithm>
 
-#include <string>
+namespace openspace::interaction {
 
-namespace openspace {
+void MouseInputState::mouseButtonCallback(MouseButton button, MouseAction action) {
+    if (action == MouseAction::Press) {
+        _mouseButtonsDown.push_back(button);
+    }
+    else if (action == MouseAction::Release) {
+        _mouseButtonsDown.erase(
+            std::remove(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), button),
+            _mouseButtonsDown.end()
+        );
+    }
+}
 
-class SyncAssetTask : public Task {
-public:
-    SyncAssetTask(const ghoul::Dictionary& dictionary);
+void MouseInputState::mousePositionCallback(double mouseX, double mouseY) {
+    _mousePosition = glm::dvec2(mouseX, mouseY);
+}
 
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
+void MouseInputState::mouseScrollWheelCallback(double mouseScrollDelta) {
+    _mouseScrollDelta = mouseScrollDelta;
+}
 
-    static documentation::Documentation documentation();
+const std::vector<MouseButton>& MouseInputState::pressedMouseButtons() const {
+    return _mouseButtonsDown;
+}
 
-private:
-    std::string _asset;
-};
+glm::dvec2 MouseInputState::mousePosition() const {
+    return _mousePosition;
+}
 
-} // namespace openspace
+double MouseInputState::mouseScrollDelta() const {
+    return _mouseScrollDelta;
+}
 
-#endif // __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
+bool MouseInputState::isMouseButtonPressed(MouseButton mouseButton) const {
+    auto it = std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), mouseButton);
+    return it != _mouseButtonsDown.end();
+}
+
+} // namespace openspace::interaction

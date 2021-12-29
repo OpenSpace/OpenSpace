@@ -1,12 +1,12 @@
-asset.require('./model')
-asset.require('./label')
-asset.require('./fov')
-asset.require('./trail')
+asset.require("./model")
+asset.require("./label")
+asset.require("./fov")
+asset.require("./trail")
 
-asset.require('./pluto')
-asset.require('./charon')
+asset.require("./pluto")
+asset.require("./charon")
 
-asset.require('./othermoons')
+asset.require("./othermoons")
 
 local mission = asset.localResource("newhorizons.mission")
 local missionName

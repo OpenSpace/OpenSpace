@@ -47,6 +47,7 @@ bool TextureCygnet::updateTexture() {
     std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
+        2,
         _imageFile.format
     );
 

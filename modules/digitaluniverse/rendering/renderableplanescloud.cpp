@@ -631,7 +631,7 @@ void RenderablePlanesCloud::loadTextures() {
         }
 
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(path.string());
+            ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
         if (t) {
             LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));

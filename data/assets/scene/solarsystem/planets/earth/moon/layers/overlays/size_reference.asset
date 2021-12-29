@@ -1,4 +1,4 @@
-local moonAsset = asset.require("./../../moon").Moon
+local moonAsset = asset.require("../../moon").Moon
 local globeIdentifier = moonAsset.Identifier
 
 local layer = {

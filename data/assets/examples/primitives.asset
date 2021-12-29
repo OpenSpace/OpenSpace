@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 local scale = 149597870700 -- 1 AU
 

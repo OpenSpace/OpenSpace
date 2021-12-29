@@ -439,7 +439,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         std::string filePath = e.path().string();
         double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(filePath);
+            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
 
         t->setInternalFormat(GL_COMPRESSED_RGBA);
         t->uploadTexture();

@@ -437,7 +437,7 @@ void RenderableSphere::update(const UpdateData&) {
 void RenderableSphere::loadTexture() {
     if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+            ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
 
         if (texture) {
             LDEBUGC(

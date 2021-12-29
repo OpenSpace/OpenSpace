@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../titan").Titan.Identifier
+local globeIdentifier = asset.require("../../titan").Titan.Identifier
 
 local layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_LiU",
   Name = "Cassini ISS Global Mosaic [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/ISS_P19658_Mosaic_Global_4km.wms",
+  FilePath = asset.localResource("../../map_service_configs/LiU/ISS_P19658_Mosaic_Global_4km.wms"),
   Description = [[ This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map
     was produced in June 2015 using data collected through Cassini's flyby on April 7,

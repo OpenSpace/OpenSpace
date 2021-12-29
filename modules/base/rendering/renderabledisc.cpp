@@ -116,7 +116,7 @@ bool RenderableDisc::isReady() const {
 }
 
 void RenderableDisc::initialize() {
-    _texture = std::make_unique<TextureComponent>();
+    _texture = std::make_unique<TextureComponent>(1);
     _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
     _texture->setShouldWatchFileForChanges(true);

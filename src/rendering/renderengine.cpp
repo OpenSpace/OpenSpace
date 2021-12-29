@@ -1119,12 +1119,11 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     );
 
     if (it != global::screenSpaceRenderables->end()) {
+        global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
         global::screenSpaceRenderables->erase(it);
     }
-
-    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {

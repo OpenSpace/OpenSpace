@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -543,13 +545,14 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
+void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
+                                             const KeyboardInputState& keyboardInputState,
                                              double deltaTime)
 {
-    _mouseStates.updateStateFromInput(inputState, deltaTime);
-    _joystickStates.updateStateFromInput(inputState, deltaTime);
-    _websocketStates.updateStateFromInput(inputState, deltaTime);
-    _scriptStates.updateStateFromInput(inputState, deltaTime);
+    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
+    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
+    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
+    _scriptStates.updateStateFromInput(deltaTime);
 
     bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||

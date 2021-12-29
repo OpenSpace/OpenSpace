@@ -1,9 +1,14 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
+local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
-local texturesPath = asset.require("./saturn_textures").TexturesPath
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Saturn textures",
+  Identifier = "saturn_textures",
+  Version = 4
+})
 
 local Saturn = {
   Identifier = "Saturn",
@@ -31,11 +36,11 @@ local Saturn = {
       --ColorFilter = 0.15,
 
       -- MultiTexture Valeus:
-      TextureFwrd = texturesPath .. "/forward_original_single.png",
-      TextureBckwrd = texturesPath .. "/back_original_single.png",
-      TextureUnlit = texturesPath .. "/unlit_original_single.png",
-      TextureColor = texturesPath .. "/color_original_single.png",
-      TextureTransparency = texturesPath .. "/trans_original_single.png",
+      TextureFwrd = texturesPath .. "forward_original_single.png",
+      TextureBckwrd = texturesPath .. "back_original_single.png",
+      TextureUnlit = texturesPath .. "unlit_original_single.png",
+      TextureColor = texturesPath .. "color_original_single.png",
+      TextureTransparency = texturesPath .. "trans_original_single.png",
       ColorFilter = 0.8,
       
       NightFactor = 1.0,

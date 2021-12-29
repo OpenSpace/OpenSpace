@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Mimas textures",
-  Type = "HttpSynchronization",
-  Identifier = "mimas_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

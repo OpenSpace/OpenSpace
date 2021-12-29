@@ -369,27 +369,34 @@ void mainPreSyncFunc() {
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+
+            // Check axes and buttons
+            glfwGetJoystickAxes(i, &state.nAxes);
+            if (state.nAxes > JoystickInputState::MaxAxes) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                    "All excess axes are ignored",
+                    state.name, state.nAxes, JoystickInputState::MaxAxes
+                ));
+            }
+            glfwGetJoystickButtons(i, &state.nButtons);
+            if (state.nButtons > JoystickInputState::MaxButtons) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                    "supported. All excess buttons are ignored",
+                    state.name, state.nButtons, JoystickInputState::MaxButtons
+                ));
+            }
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                "All excess axes are ignored",
-                state.name, state.nAxes, JoystickInputState::MaxAxes
-            ));
             state.nAxes = JoystickInputState::MaxAxes;
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-
         if (state.nButtons > JoystickInputState::MaxButtons) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                "supported. All excess buttons are ignored",
-                state.name, state.nButtons, JoystickInputState::MaxButtons
-            ));
             state.nButtons = JoystickInputState::MaxButtons;
         }
 
@@ -997,8 +1004,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if ( (config.length() >= xmlExt.length())
-                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
+            if (std::filesystem::path(config).extension() == ".xml") {
                 //user customzied sgct config
             }
             else {

@@ -1,4 +1,4 @@
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 function downloadSssbDatabaseFile(sceneAsset, name, identifier)
   assert(sceneAsset, "'asset' needs to be provided")
@@ -20,11 +20,11 @@ local createSssbGroupObject = function(filename, guiName, sssbFolder, trailColor
 
   local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
   return {
-    Identifier = 'sssb_'..filenameSansExt,
+    Identifier = "sssb_" .. filenameSansExt,
     Parent = transforms.SunECLIPJ2000.Identifier,
     Renderable = {
       Type = "RenderableSmallBody",
-      Path = sssbFolder.."/"..filename,
+      Path = sssbFolder .. filename,
       Segments = 200,
       Color = trailColor,
       TrailFade = 0.5,

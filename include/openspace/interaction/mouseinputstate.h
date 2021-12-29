@@ -22,21 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ASSETLISTENER___H__
-#define __OPENSPACE_CORE___ASSETLISTENER___H__
+#ifndef __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
+#define __OPENSPACE_CORE___MOUSEINPUTSTATE___H__
 
-#include <openspace/scene/asset.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/glm.h>
+#include <vector>
 
-namespace openspace {
+namespace openspace::interaction {
 
-class AssetListener {
+// This class represents the global input state of interaction devices
+class MouseInputState {
 public:
-    virtual ~AssetListener() = default;
-    virtual void assetStateChanged(Asset* asset, Asset::State state) = 0;
-    virtual void assetRequested(Asset* parent, std::shared_ptr<Asset> child) = 0;
-    virtual void assetUnrequested(Asset* parent, std::shared_ptr<Asset> child) = 0;
+    // Callback functions
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double mouseX, double mouseY);
+    void mouseScrollWheelCallback(double mouseScrollDelta);
+
+    // Accessors
+    const std::vector<MouseButton>& pressedMouseButtons() const;
+    glm::dvec2 mousePosition() const;
+    double mouseScrollDelta() const;
+    bool isMouseButtonPressed(MouseButton mouseButton) const;
+
+private:
+    // Input from mouse
+    std::vector<MouseButton> _mouseButtonsDown;
+    glm::dvec2 _mousePosition = glm::dvec2(0.0);
+    double _mouseScrollDelta;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___ASSETLISTENER___H__
+#endif // __OPENSPACE_CORE___MOUSEINPUTSTATE___H__

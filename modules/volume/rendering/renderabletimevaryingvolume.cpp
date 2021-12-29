@@ -183,7 +183,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
     );
-    
+
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
@@ -193,7 +193,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
     _stepSize = p.stepSize.value_or(_stepSize);
-    
+
     if (p.opacity.has_value()) {
         _opacity = *p.opacity * VolumeMaxOpacity;
     }
@@ -255,6 +255,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,
+            GL_TEXTURE_3D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT,

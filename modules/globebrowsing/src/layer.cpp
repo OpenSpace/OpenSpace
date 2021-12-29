@@ -113,8 +113,9 @@ namespace {
         // Specifies the type of layer that is to be added. If this value is not
         // specified, the layer is a DefaultTileLayer
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
-            "SingleImageTileLayer", "SizeReferenceTileLayer", "TemporalTileLayer",
-            "TileIndexTileLayer", "ByIndexTileLayer", "ByLevelTileLayer", "SolidColor")]];
+            "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
+            "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
+            "ByLevelTileLayer", "SolidColor")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -301,6 +302,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
             case layergroupid::TypeID::TileIndexTileLayer:
@@ -314,7 +316,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
                 removeProperty(_solidColor);
                 break;
             default:
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
@@ -434,14 +436,11 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-int Layer::update() {
+void Layer::update() {
     ZoneScoped
 
     if (_tileProvider) {
-        return tileprovider::update(*_tileProvider);
-    }
-    else {
-        return 0;
+        tileprovider::update(*_tileProvider);
     }
 }
 
@@ -471,6 +470,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
@@ -502,6 +502,7 @@ void Layer::addVisibleProperties() {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
@@ -517,7 +518,7 @@ void Layer::addVisibleProperties() {
             break;
         }
         default:
-            break;
+            throw ghoul::MissingCaseException();
     }
 }
 

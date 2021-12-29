@@ -64,10 +64,16 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
+    const glm::dvec3 startPosToEndPos = end.position() - start.position();
+    constexpr const double Epsilon = 1E-4;
+
     // Zoom out
-    if (start.nodeIdentifier() != end.nodeIdentifier()) {
+    if (start.nodeIdentifier() != end.nodeIdentifier() &&
+        glm::length(startPosToEndPos) > Epsilon)
+    {
         const glm::dvec3 n1 = startTangentDir;
         const glm::dvec3 n2 = endTangentDir;
+        const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
         // Decide the step direction for the "overview point" based on the directions
         // at the start and end of the path, to try to get a nice curve shape
@@ -82,7 +88,6 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
         // Find a direction that is orthogonal to the line between the start and end
         // position
-        const glm::dvec3 startPosToEndPos = end.position() - start.position();
         const glm::dvec3 outwardStepVector =
             0.5 * glm::length(startPosToEndPos) * goodStepDirection;
 
@@ -91,8 +96,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         const glm::dvec3 stepDirection = glm::normalize(orthogonalComponent);
 
         // Step half-way along the line between the position and then orthogonally
-        const glm::dvec3 extraKnot = start.position() + 0.5 * startPosToEndPos
-            + 1.5 * glm::length(startPosToEndPos) * stepDirection;
+        const double stepDistance = 1.5 * glm::length(startPosToEndPos);
+        const glm::dvec3 extraKnot = halfWayPos + stepDistance * stepDirection;
 
         _points.push_back(extraKnot);
     }

@@ -336,7 +336,8 @@ void GUI::initializeGL() {
         }
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
             texData,
-            glm::uvec3(texSize.x, texSize.y, 1)
+            glm::uvec3(texSize.x, texSize.y, 1),
+            GL_TEXTURE_2D
         );
         _fontTexture->setName("Gui Text");
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);

@@ -140,7 +140,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     {
         // Logo stuff
         _logoTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath("${DATA}/openspace-logo.png").string()
+            absPath("${DATA}/openspace-logo.png").string(),
+            2
         );
         _logoTexture->uploadTexture();
     }
@@ -552,16 +553,9 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         }
     }
     else {
-        ghoul_assert(
-            newStatus == ItemStatus::Started,
-            fmt::format(
-                "Item '{}' did not exist and first message was not 'Started'",
-                itemIdentifier
-            )
-        );
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
-        _items.push_back({
+        Item item = {
             itemIdentifier,
             itemName,
             ItemStatus::Started,
@@ -573,7 +567,15 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
             {},
             {},
             std::chrono::system_clock::from_time_t(0)
-        });
+        };
+
+        if (newStatus == ItemStatus::Finished) {
+            // This is only going to be triggered if an item finishes so quickly that
+            // there was not even time to create the item between starting and finishing
+            item.finishedTime = std::chrono::system_clock::now();
+        }
+
+        _items.push_back(std::move(item));
     }
 }
 

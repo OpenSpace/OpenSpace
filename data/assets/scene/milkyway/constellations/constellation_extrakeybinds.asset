@@ -1,4 +1,4 @@
-local mainAsset = asset.require('./constellation_art')
+local mainAsset = asset.require("./constellation_art")
 
 asset.onInitialize(function ()
   openspace.bindKey("v", mainAsset.ShowZodiacArt.Identifier)
