@@ -29,7 +29,8 @@
 
 namespace openspace::globebrowsing {
 
-struct TileProviderByLevel : public TileProvider {
+class TileProviderByLevel : public TileProvider {
+public:
     TileProviderByLevel(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -40,10 +41,10 @@ struct TileProviderByLevel : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    std::vector<int> providerIndices;
-    std::vector<std::unique_ptr<TileProvider>> levelTileProviders;
-
 private:
+    std::vector<int> _providerIndices;
+    std::vector<std::unique_ptr<TileProvider>> _levelTileProviders;
+
     void internalInitialize() override final;
     void internalDeinitialize() override final;
     TileProvider* levelProvider(int level) const;

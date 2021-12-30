@@ -25,17 +25,13 @@
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/asynctiledataprovider.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyFilePath = "FilePath";
-    constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
-    constexpr const char* KeyTilePixelSize = "TilePixelSize";
-    constexpr const char* KeyPadTiles = "PadTiles";
-
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
@@ -51,171 +47,158 @@ namespace {
         "(smaller images). The tile pixel size has to be smaller than the size of the "
         "complete image if a single image is used."
     };
+
+    struct [[codegen::Dictionary(DefaultTileProvider)]] Parameters {
+        // User-facing name of this tile provider
+        std::optional<std::string> name;
+
+        // The path to the file that is loaded by GDAL to produce tiles. Since GDAL
+        // supports it, this can also be the textual representation of the contents of a
+        // loading file
+        std::string filePath;
+
+        // The layer into which this tile provider is loaded
+        int layerGroupID;
+
+        // [[codegen::verbatim(TilePixelSizeInfo.description)]]
+        std::optional<int> tilePixelSize;
+
+        // Determines whether the tiles should have a padding zone around it, making the
+        // interpolation between tiles more pleasant
+        std::optional<bool> padTiles;
+
+        // Determines if the tiles should be preprocessed before uploading to the GPU
+        std::optional<bool> performPreProcessing;
+
+    };
+#include "defaulttileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
-    : filePath(FilePathInfo, "")
-    , tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
+    : _filePath(FilePathInfo, "")
+    , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {
     ZoneScoped
 
-    tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
-    name = "Name unspecified";
-    if (dictionary.hasValue<std::string>("Name")) {
-        name = dictionary.value<std::string>("Name");
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    name = p.name.value_or("Name unspecified");
     std::string _loggerCat = "DefaultTileProvider (" + name + ")";
 
     // 1. Get required Keys
-    filePath = dictionary.value<std::string>(KeyFilePath);
-    layerGroupID =
-        static_cast<layergroupid::GroupID>(dictionary.value<int>("LayerGroupID"));
+    _filePath = p.filePath;
+
+    _layerGroupID = layergroupid::GroupID(p.layerGroupID);
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
-    int pixelSize = 0;
-    if (dictionary.hasValue<double>(KeyTilePixelSize)) {
-        pixelSize = static_cast<int>(dictionary.value<double>(KeyTilePixelSize));
-        LDEBUG(fmt::format("Default pixel size overridden: {}", pixelSize));
-    }
-
-    if (dictionary.hasValue<bool>(KeyPadTiles)) {
-        padTiles = dictionary.value<bool>(KeyPadTiles);
-    }
-
-    TileTextureInitData initData(
-        tileTextureInitData(layerGroupID, padTiles, pixelSize)
-    );
-    tilePixelSize = initData.dimensions.x;
-
+    int pixelSize = p.tilePixelSize.value_or(0);
+    _padTiles = p.padTiles.value_or(_padTiles);
 
     // Only preprocess height layers by default
-    switch (layerGroupID) {
-    case layergroupid::GroupID::HeightLayers: performPreProcessing = true; break;
-    default:                                  performPreProcessing = false; break;
+    switch (_layerGroupID) {
+        case layergroupid::GroupID::HeightLayers: _performPreProcessing = true; break;
+        default:                                  _performPreProcessing = false; break;
     }
 
-    if (dictionary.hasValue<bool>(KeyPerformPreProcessing)) {
-        performPreProcessing = dictionary.value<bool>(KeyPerformPreProcessing);
-        LDEBUG(fmt::format(
-            "Default PerformPreProcessing overridden: {}", performPreProcessing
-        ));
-    }
+    _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
+    TileTextureInitData initData(
+        tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
+    );
+    _tilePixelSize = initData.dimensions.x;
     initAsyncTileDataReader(initData);
 
-    addProperty(filePath);
-    addProperty(tilePixelSize);
+    addProperty(_filePath);
+    addProperty(_tilePixelSize);
 }
 
 void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
     ZoneScoped
 
-    asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
+    _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         name,
         std::make_unique<RawTileDataReader>(
-            filePath,
+            _filePath,
             initData,
-            RawTileDataReader::PerformPreprocessing(performPreProcessing)
+            RawTileDataReader::PerformPreprocessing(_performPreProcessing)
         )
     );
 }
 
 Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-    if (asyncTextureDataProvider) {
-        if (tileIndex.level > maxLevel()) {
-            return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
-        }
-        const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
-        Tile tile = tileCache->get(key);
-        if (!tile.texture) {
-            //TracyMessage("Enqueuing tile", 32);
-            asyncTextureDataProvider->enqueueTileIO(tileIndex);
-        }
+    
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    if (tileIndex.level > maxLevel()) {
+        return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
+    }
+    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+    Tile tile = tileCache->get(key);
+    if (!tile.texture) {
+        _asyncTextureDataProvider->enqueueTileIO(tileIndex);
+    }
 
-        return tile;
-    }
-    else {
-        return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
-    }
+    return tile;
 }
 
 Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
-    if (asyncTextureDataProvider) {
-        const RawTileDataReader& reader = asyncTextureDataProvider->rawTileDataReader();
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    const RawTileDataReader& reader = _asyncTextureDataProvider->rawTileDataReader();
 
-        if (index.level > reader.maxChunkLevel()) {
-            return Tile::Status::OutOfRange;
-        }
+    if (index.level > reader.maxChunkLevel()) {
+        return Tile::Status::OutOfRange;
+    }
 
-        const cache::ProviderTileKey key = { index, uniqueIdentifier };
-        return tileCache->get(key).status;
-    }
-    else {
-        return Tile::Status::Unavailable;
-    }
+    const cache::ProviderTileKey key = { index, uniqueIdentifier };
+    cache::MemoryAwareTileCache* tileCache =
+        global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
+    return tileCache->get(key).status;
 }
 
 TileDepthTransform DefaultTileProvider::depthTransform() {
-    if (asyncTextureDataProvider) {
-        return asyncTextureDataProvider->rawTileDataReader().depthTransform();
-    }
-    else {
-        return { 1.f, 0.f };
-    }
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    return _asyncTextureDataProvider->rawTileDataReader().depthTransform();
 }
 
 void DefaultTileProvider::update() {
-    if (!asyncTextureDataProvider) {
-        return;
-    }
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    _asyncTextureDataProvider->update();
 
-    asyncTextureDataProvider->update();
-
-    std::optional<RawTile> tile = asyncTextureDataProvider->popFinishedRawTile();
+    std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
     if (tile) {
         const cache::ProviderTileKey key = { tile->tileIndex, uniqueIdentifier };
+        cache::MemoryAwareTileCache* tileCache =
+            global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
         ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");
         tileCache->createTileAndPut(key, std::move(*tile));
     }
 
-
-    if (asyncTextureDataProvider->shouldBeDeleted()) {
-        asyncTextureDataProvider = nullptr;
+    if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(layerGroupID, padTiles, tilePixelSize)
+            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize)
         );
     }
 }
 
 void DefaultTileProvider::reset() {
-    tileCache->clear();
-    if (asyncTextureDataProvider) {
-        asyncTextureDataProvider->prepareToBeDeleted();
-    }
-    else {
-        initAsyncTileDataReader(
-            tileTextureInitData(layerGroupID, padTiles, tilePixelSize)
-        );
-    }
+    global::moduleEngine->module<GlobeBrowsingModule>()->tileCache()->clear();
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    _asyncTextureDataProvider->prepareToBeDeleted();
 }
 
 int DefaultTileProvider::maxLevel() {
-    // 22 is the current theoretical maximum based on the number of hashes that are
-    // possible to uniquely identify a tile. See ProviderTileHasher in
-    // memoryawaretilecache.h
-    return asyncTextureDataProvider ?
-        asyncTextureDataProvider->rawTileDataReader().maxChunkLevel() :
-        22;
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    return _asyncTextureDataProvider->rawTileDataReader().maxChunkLevel();
 }
 
 float DefaultTileProvider::noDataValueAsFloat() {
-    return asyncTextureDataProvider ?
-        asyncTextureDataProvider->noDataValueAsFloat() :
-        std::numeric_limits<float>::min();
+    ghoul_assert(_asyncTextureDataProvider, "No data provider");
+    return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 
 } // namespace openspace::globebrowsing

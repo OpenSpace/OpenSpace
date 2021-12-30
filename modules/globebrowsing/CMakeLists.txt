@@ -61,7 +61,6 @@ set(HEADER_FILES
   src/timequantizer.h
   src/tileprovider/defaulttileprovider.h
   src/tileprovider/imagesequencetileprovider.h
-  src/tileprovider/interpolatetileprovider.h
   src/tileprovider/singleimagetileprovider.h
   src/tileprovider/sizereferencetileprovider.h
   src/tileprovider/temporaltileprovider.h
@@ -101,7 +100,6 @@ set(SOURCE_FILES
   src/timequantizer.cpp
   src/tileprovider/defaulttileprovider.cpp
   src/tileprovider/imagesequencetileprovider.cpp
-  src/tileprovider/interpolatetileprovider.cpp
   src/tileprovider/singleimagetileprovider.cpp
   src/tileprovider/sizereferencetileprovider.cpp
   src/tileprovider/temporaltileprovider.cpp

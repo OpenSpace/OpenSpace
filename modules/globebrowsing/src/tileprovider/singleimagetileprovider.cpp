@@ -24,39 +24,46 @@
 
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
-    constexpr const char* KeyFilePath = "FilePath";
-    
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The file path that is used for this image provider. The file must point to an "
         "image that is then loaded and used for all tiles."
     };
+
+    struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
+        // [[codegen::verbatim(FilePathInfo.description)]]
+        std::string filePath;
+    };
+#include "singleimagetileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
-    : filePath(FilePathInfo)
+    : _filePath(FilePathInfo)
 {
     ZoneScoped
 
-    filePath = dictionary.value<std::string>(KeyFilePath);
-    addProperty(filePath);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _filePath = p.filePath;
+    addProperty(_filePath);
 
     reset();
 }
 
 Tile SingleImageProvider::tile(const TileIndex&) {
     ZoneScoped
-    return ttile;
+    return _tile;
 }
 
 Tile::Status SingleImageProvider::tileStatus(const TileIndex&) {
-    return ttile.status;
+    return _tile.status;
 }
 
 TileDepthTransform SingleImageProvider::depthTransform() {
@@ -66,20 +73,20 @@ TileDepthTransform SingleImageProvider::depthTransform() {
 void SingleImageProvider::update() {}
 
 void SingleImageProvider::reset() {
-    if (filePath.value().empty()) {
+    if (_filePath.value().empty()) {
         return;
     }
-    tileTexture = ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-    if (!tileTexture) {
+    
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath, 2);
+    if (!_tileTexture) {
         throw ghoul::RuntimeError(
-            fmt::format("Unable to load texture '{}'", filePath.value())
+            fmt::format("Unable to load texture '{}'", _filePath.value())
         );
     }
-    Tile::Status tileStatus = Tile::Status::OK;
 
-    tileTexture->uploadTexture();
-    tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    ttile = Tile{ tileTexture.get(), std::nullopt, tileStatus };
+    _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 
 int SingleImageProvider::maxLevel() {

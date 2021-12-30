@@ -29,7 +29,8 @@
 
 namespace openspace::globebrowsing {
 
-struct SizeReferenceTileProvider : public TextTileProvider {
+class SizeReferenceTileProvider : public TextTileProvider {
+public:
     SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -39,7 +40,8 @@ struct SizeReferenceTileProvider : public TextTileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    Ellipsoid ellipsoid;
+private:
+    Ellipsoid _ellipsoid;
 };
 
 } // namespace openspace::globebrowsing

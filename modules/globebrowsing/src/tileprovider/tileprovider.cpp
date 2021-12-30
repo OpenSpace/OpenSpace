@@ -32,7 +32,6 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/interpolatetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
@@ -68,16 +67,9 @@ Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 
 constexpr const char* KeyFilePath = "FilePath";
 
-void reset(TextTileProvider& t) {
-    ZoneScoped
-
-    t.tileCache->clear();
-}
-
 } // namespace
 
 unsigned int TileProvider::NumTileProviders = 0;
-
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
                                                          layergroupid::TypeID layerTypeID,
@@ -89,6 +81,39 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
     auto factory = FactoryManager::ref().factory<TileProvider>();
     TileProvider* result = factory->create(type, dictionary);
     return std::unique_ptr<TileProvider>(result);
+}
+
+void TileProvider::initializeDefaultTile() {
+    ZoneScoped
+
+        ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
+    using namespace ghoul::opengl;
+
+    // Create pixel data
+    TileTextureInitData initData(
+        8,
+        8,
+        GL_UNSIGNED_BYTE,
+        Texture::Format::RGBA,
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::Yes
+    );
+    char* pixels = new char[initData.totalNumBytes];
+    memset(pixels, 0, initData.totalNumBytes * sizeof(char));
+
+    // Create ghoul texture
+    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions, GL_TEXTURE_2D);
+    DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
+    DefaultTileTexture->setPixelData(pixels);
+    DefaultTileTexture->uploadTexture();
+    DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+
+    // Create tile
+    DefaultTile = Tile{ DefaultTileTexture.get(), std::nullopt, Tile::Status::OK };
+}
+
+void TileProvider::deinitializeDefaultTile() {
+    DefaultTileTexture = nullptr;
 }
 
 TileProvider::TileProvider() : properties::PropertyOwner({ "tileProvider" }) {}

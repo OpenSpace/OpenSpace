@@ -37,7 +37,6 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/interpolatetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
@@ -245,12 +244,20 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
+        TileProvider::initializeDefaultTile();
+
         // Convert from MB to Bytes
         GdalWrapper::create(
             512ULL * 1024ULL * 1024ULL, // 512 MB
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
+    });
+
+    global::callback::deinitializeGL->emplace_back([]() {
+        ZoneScopedN("GlobeBrowsingModule")
+
+        TileProvider::deinitializeDefaultTile();
     });
 
     // Render

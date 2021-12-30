@@ -29,7 +29,8 @@
 
 namespace openspace::globebrowsing {
 
-struct TileProviderByIndex : public TileProvider {
+class TileProviderByIndex : public TileProvider {
+public:
     TileProviderByIndex(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -40,11 +41,9 @@ struct TileProviderByIndex : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-
-    std::unordered_map<
-        TileIndex::TileHashKey, std::unique_ptr<TileProvider>
-    > tileProviderMap;
-    std::unique_ptr<TileProvider> defaultTileProvider;
+private:
+    std::unordered_map<TileIndex::TileHashKey, std::unique_ptr<TileProvider>> _providers;
+    std::unique_ptr<TileProvider> _defaultTileProvider;
 };
 
 } // namespace openspace::globebrowsing

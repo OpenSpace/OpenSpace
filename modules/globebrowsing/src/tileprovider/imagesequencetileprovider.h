@@ -31,7 +31,8 @@
 
 namespace openspace::globebrowsing {
 
-struct ImageSequenceTileProvider : public TileProvider {
+class ImageSequenceTileProvider : public TileProvider {
+public:
     ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -42,15 +43,16 @@ struct ImageSequenceTileProvider : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    std::unique_ptr<DefaultTileProvider> currentTileProvider = nullptr;
+private:
+    std::unique_ptr<DefaultTileProvider> _currentTileProvider = nullptr;
 
-    properties::IntProperty index;
-    properties::StringProperty currentImage;
-    properties::StringProperty folderPath;
+    properties::IntProperty _index;
+    properties::StringProperty _currentImage;
+    properties::StringProperty _folderPath;
 
-    ghoul::Dictionary initDict;
-    bool isImageDirty = true;
-    std::vector<std::filesystem::path> imagePaths;
+    ghoul::Dictionary _initDict;
+    bool _isImageDirty = true;
+    std::vector<std::filesystem::path> _imagePaths;
 };
 
 } // namespace openspace::globebrowsing

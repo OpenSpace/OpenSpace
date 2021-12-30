@@ -32,17 +32,16 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
 
 Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-    text = fmt::format(
+    std::string text = fmt::format(
         "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
     );
-    textPosition = glm::vec2(
+    glm::vec2 textPosition = glm::vec2(
         initData.dimensions.x / 4 -
         (initData.dimensions.x / 32) * log10(1 << tileIndex.level),
         initData.dimensions.y / 2 + fontSize
     );
-    textColor = glm::vec4(1.f);
 
-    return TextTileProvider::tile(tileIndex);
+    return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
 }
 
 Tile::Status TileIndexTileProvider::tileStatus(const TileIndex&) {

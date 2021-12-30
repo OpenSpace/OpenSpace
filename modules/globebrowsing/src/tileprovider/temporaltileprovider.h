@@ -27,7 +27,6 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <modules/globebrowsing/src/tileprovider/interpolatetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 namespace openspace::globebrowsing {
@@ -42,7 +41,8 @@ namespace openspace::globebrowsing {
  * temporal properties of the dataset. See
  * <code>TemporalTileProvider::TemporalXMLTags</code>
  */
-struct TemporalTileProvider : public TileProvider {
+class TemporalTileProvider : public TileProvider {
+public:
     enum class TimeFormatType {
         YYYY_MM_DD = 0,
         YYYYMMDD_hhmmss,
@@ -63,36 +63,61 @@ struct TemporalTileProvider : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    ghoul::Dictionary initDict;
-    properties::StringProperty filePath;
-    properties::BoolProperty useFixedTime;
-    properties::StringProperty fixedTime;
-    std::string gdalXmlTemplate;
-
-    std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> tileProviderMap;
-
-    bool interpolation = false;
-
-    TileProvider* currentTileProvider = nullptr;
-    double startTimeJ2000;
-    double endTimeJ2000;
-    TimeFormatType timeFormat;
-    TimeQuantizer timeQuantizer;
-    std::string colormap;
-
-    std::string myResolution;
-    std::unique_ptr<InterpolateTileProvider> interpolateTileProvider;
-
 private:
-    void readFilePath();
-    std::string consumeTemporalMetaData(const std::string& xml);
+    struct InterpolateTileProvider : public TileProvider {
+        InterpolateTileProvider(const ghoul::Dictionary&);
+        virtual ~InterpolateTileProvider();
+
+        Tile tile(const TileIndex& tileIndex) override final;
+        Tile::Status tileStatus(const TileIndex& index) override final;
+        TileDepthTransform depthTransform() override final;
+        void update() override final;
+        void reset() override final;
+        int maxLevel() override final;
+        float noDataValueAsFloat() override final;
+
+        TileProvider* before = nullptr;
+        TileProvider* t1 = nullptr;
+        TileProvider* t2 = nullptr;
+        TileProvider* future = nullptr;
+        float factor = 1.f;
+        GLuint vaoQuad = 0;
+        GLuint vboQuad = 0;
+        GLuint fbo = 0;
+        std::string colormap;
+        std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
+        std::unique_ptr<SingleImageProvider> singleImageProvider;
+        cache::MemoryAwareTileCache* tileCache = nullptr;
+    };
+
+    ghoul::Dictionary _initDict;
+    properties::StringProperty _filePath;
+    properties::BoolProperty _useFixedTime;
+    properties::StringProperty _fixedTime;
+    std::string _gdalXmlTemplate;
+
+    std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> _tileProviderMap;
+
+    bool _interpolation = false;
+
+    TileProvider* _currentTileProvider = nullptr;
+    double _startTimeJ2000;
+    double _endTimeJ2000;
+    TimeFormatType _timeFormat;
+    TimeQuantizer _timeQuantizer;
+    std::string _colormap;
+
+    std::string _myResolution;
+    std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
+
     void ensureUpdated();
     std::string_view timeStringify(TimeFormatType type, const Time& t);
     std::unique_ptr<TileProvider> initTileProvider(std::string_view timekey);
-    TileProvider* getTileProvider(std::string_view timekey);
-    TileProvider* getTileProvider(const Time& time);
+    TileProvider* tileProvider(std::string_view timekey);
+    TileProvider* tileProvider(const Time& time);
+    std::string xmlValue(CPLXMLNode* node, const std::string& key,
+        const std::string& defaultVal, bool isOptional = false);
 };
-
 
 } // namespace openspace::globebrowsing
 

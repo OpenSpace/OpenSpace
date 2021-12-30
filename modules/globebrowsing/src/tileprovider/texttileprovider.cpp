@@ -59,7 +59,9 @@ void TextTileProvider::internalDeinitialize() {
     glDeleteFramebuffers(1, &fbo);
 }
 
-Tile TextTileProvider::tile(const TileIndex& tileIndex) {
+Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string& text,
+                                  const glm::vec2& position, const glm::vec4& color)
+{
     ZoneScoped
     TracyGpuZone("tile")
 
@@ -69,8 +71,7 @@ Tile TextTileProvider::tile(const TileIndex& tileIndex) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
-        GLint defaultFBO;
-        defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+        GLint defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -88,7 +89,7 @@ Tile TextTileProvider::tile(const TileIndex& tileIndex) {
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        fontRenderer->render(*font, textPosition, text, textColor);
+        fontRenderer->render(*font, position, text, color);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         global::renderEngine->openglStateCache().resetViewportState();

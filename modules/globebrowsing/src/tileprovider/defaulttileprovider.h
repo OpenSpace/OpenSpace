@@ -27,9 +27,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/src/asynctiledataprovider.h>
+#include <memory>
+
 namespace openspace::globebrowsing {
 
-struct DefaultTileProvider : public TileProvider {
+class DefaultTileProvider : public TileProvider {
+public:
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -40,18 +44,16 @@ struct DefaultTileProvider : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    std::unique_ptr<AsyncTileDataProvider> asyncTextureDataProvider;
-
-    cache::MemoryAwareTileCache* tileCache = nullptr;
-
-    properties::StringProperty filePath;
-    properties::IntProperty tilePixelSize;
-    layergroupid::GroupID layerGroupID = layergroupid::GroupID::Unknown;
-    bool performPreProcessing = false;
-    bool padTiles = true;
-
 private:
     void initAsyncTileDataReader(TileTextureInitData initData);
+
+    properties::StringProperty _filePath;
+    properties::IntProperty _tilePixelSize;
+
+    std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+    layergroupid::GroupID _layerGroupID = layergroupid::GroupID::Unknown;
+    bool _performPreProcessing = false;
+    bool _padTiles = true;
 };
 
 } // namespace openspace::globebrowsing

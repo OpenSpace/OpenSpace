@@ -29,7 +29,8 @@
 
 namespace openspace::globebrowsing {
 
-struct SingleImageProvider : public TileProvider {
+class SingleImageProvider : public TileProvider {
+public:
     SingleImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -40,11 +41,11 @@ struct SingleImageProvider : public TileProvider {
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-
-    std::unique_ptr<ghoul::opengl::Texture> tileTexture;
-    Tile ttile;
-
-    properties::StringProperty filePath;
+private:
+    properties::StringProperty _filePath;
+  
+    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
+    Tile _tile;
 };
 
 } // namespace openspace::globebrowsing

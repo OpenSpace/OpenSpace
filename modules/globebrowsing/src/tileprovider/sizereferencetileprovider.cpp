@@ -25,11 +25,17 @@
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>
+#include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* KeyRadii = "Radii";
+    struct [[codegen::Dictionary(SizeReferenceTileProvider)]] Parameters {
+        std::optional<std::variant<glm::dvec3, double>> radii;
+    };
+#include "sizereferencetileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -39,14 +45,18 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 {
     ZoneScoped
 
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
 
-    if (dictionary.hasValue<glm::dvec3>(KeyRadii)) {
-        ellipsoid = dictionary.value<glm::dvec3>(KeyRadii);
-    }
-    else if (dictionary.hasValue<double>(KeyRadii)) {
-        const double r = dictionary.value<double>(KeyRadii);
-        ellipsoid = glm::dvec3(r, r, r);
+    if (p.radii.has_value()) {
+        if (std::holds_alternative<glm::dvec3>(*p.radii)) {
+            _ellipsoid = std::get<glm::dvec3>(*p.radii);
+        }
+        else {
+            const double r = std::get<double>(*p.radii);
+            _ellipsoid = glm::dvec3(r, r, r);
+        }
     }
 }
 
@@ -58,7 +68,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     const double lat = aboveEquator ? patch.minLat() : patch.maxLat();
     const double lon1 = patch.minLon();
     const double lon2 = patch.maxLon();
-    int l = static_cast<int>(ellipsoid.longitudalDistance(lat, lon1, lon2));
+    int l = static_cast<int>(_ellipsoid.longitudalDistance(lat, lon1, lon2));
 
     const bool useKm = l > 9999;
     if (useKm) {
@@ -79,16 +89,15 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
         unit = "m";
     }
 
-    text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
-    textPosition = {
+    std::string text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
+    glm::vec2 textPosition = {
         0.f,
         aboveEquator ?
             fontSize / 2.f :
             initData.dimensions.y - 3.f * fontSize / 2.f
     };
-    textColor = glm::vec4(1.f);
 
-    return TextTileProvider::tile(tileIndex);
+    return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
 }
 
 Tile::Status SizeReferenceTileProvider::tileStatus(const TileIndex& index) {

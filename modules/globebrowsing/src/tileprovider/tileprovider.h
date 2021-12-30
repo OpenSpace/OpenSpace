@@ -76,6 +76,9 @@ struct TileProvider : public properties::PropertyOwner {
     static std::unique_ptr<TileProvider> createFromDictionary(
         layergroupid::TypeID layerTypeID, const ghoul::Dictionary& dictionary);
 
+    static void initializeDefaultTile();
+    static void deinitializeDefaultTile();
+
     TileProvider();
     virtual ~TileProvider() = default;
 

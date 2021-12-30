@@ -25,10 +25,10 @@
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <openspace/documentation/documentation.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyFilePath = "FilePath";
-    
     constexpr openspace::properties::Property::PropertyInfo IndexInfo = {
         "Index",
         "Index",
@@ -48,56 +48,58 @@ namespace {
         "The path that is used to look for images for this image provider. The path must "
         "point to an existing folder that contains images"
     };
+
+    struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {
+        // [[codegen::verbatim(IndexInfo.description)]]
+        std::optional<int> index;
+
+        // [[codegen::verbatim(FolderPathInfo.description)]]
+        std::filesystem::path folderPath [[codegen::directory()]];
+    };
+#include "imagesequencetileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
-    : index(IndexInfo, 0)
-    , currentImage(CurrentImageInfo)
-    , folderPath(FolderPathInfo)
-    , initDict(dictionary)
+    : _index(IndexInfo, 0)
+    , _currentImage(CurrentImageInfo)
+    , _folderPath(FolderPathInfo)
+    , _initDict(dictionary)
 {
     ZoneScoped
 
-    if (dictionary.hasValue<int>(IndexInfo.identifier)) {
-        index = dictionary.value<int>(IndexInfo.identifier);
-    }
-    index.setMinValue(0);
-    index.onChange([this]() { isImageDirty = true; });
-    addProperty(index);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    folderPath.setReadOnly(true);
-    addProperty(folderPath);
+    _index = p.index.value_or(_index);
+    _index.setMinValue(0);
+    _index.onChange([this]() { _isImageDirty = true; });
+    addProperty(_index);
 
-    folderPath = dictionary.value<std::string>(FolderPathInfo.identifier);
-    addProperty(folderPath);
+    _folderPath.setReadOnly(true);
+    addProperty(_folderPath);
+
+    _folderPath = p.folderPath.string();
+    addProperty(_folderPath);
 
     reset();
 }
 
 Tile ImageSequenceTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-    if (currentTileProvider) {
-        return currentTileProvider->tile(tileIndex);
-    }
-    else {
-        return Tile();
-    }
+
+    return _currentTileProvider ? _currentTileProvider->tile(tileIndex) : Tile();
 }
 
 Tile::Status ImageSequenceTileProvider::tileStatus(const TileIndex& index) {
-    if (currentTileProvider) {
-        return currentTileProvider->tileStatus(index);
-    }
-    else {
-        return Tile::Status::Unavailable;
-    }
+    return _currentTileProvider ?
+        _currentTileProvider->tileStatus(index) :
+        Tile::Status::Unavailable;
 }
 
 TileDepthTransform ImageSequenceTileProvider::depthTransform() {
-    if (currentTileProvider) {
-        return currentTileProvider->depthTransform();
+    if (_currentTileProvider) {
+        return _currentTileProvider->depthTransform();
     }
     else {
         return { 1.f, 0.f };
@@ -105,55 +107,52 @@ TileDepthTransform ImageSequenceTileProvider::depthTransform() {
 }
 
 void ImageSequenceTileProvider::update() {
-    if (isImageDirty && !imagePaths.empty() &&
-        index >= 0 && index < imagePaths.size())
+    if (_isImageDirty && !_imagePaths.empty() &&
+        _index >= 0 && _index < _imagePaths.size())
     {
-        if (currentTileProvider) {
-            currentTileProvider->deinitialize();
+        if (_currentTileProvider) {
+            _currentTileProvider->deinitialize();
         }
 
-        std::string p = imagePaths[index].string();
-        currentImage = p;
-        initDict.setValue(KeyFilePath, p);
-        currentTileProvider = std::make_unique<DefaultTileProvider>(initDict);
-        currentTileProvider->initialize();
-        isImageDirty = false;
+        std::string p = _imagePaths[_index].string();
+        _currentImage = p;
+        _initDict.setValue("FilePath", p);
+        _currentTileProvider = std::make_unique<DefaultTileProvider>(_initDict);
+        _currentTileProvider->initialize();
+        _isImageDirty = false;
     }
 
-    if (currentTileProvider) {
-        currentTileProvider->update();
+    if (_currentTileProvider) {
+        _currentTileProvider->update();
     }
 }
 
 void ImageSequenceTileProvider::reset() {
     namespace fs = std::filesystem;
-    std::string path = folderPath;
-    imagePaths.clear();
+    std::string path = _folderPath;
+    _imagePaths.clear();
     for (const fs::directory_entry& p : fs::directory_iterator(path)) {
         if (p.is_regular_file()) {
-            imagePaths.push_back(p.path());
+            _imagePaths.push_back(p.path());
         }
     }
 
-    index = 0;
-    index.setMaxValue(static_cast<int>(imagePaths.size() - 1));
+    _index = 0;
+    _index.setMaxValue(static_cast<int>(_imagePaths.size() - 1));
 
-    if (currentTileProvider) {
-        currentTileProvider->reset();
+    if (_currentTileProvider) {
+        _currentTileProvider->reset();
     }
 }
 
 int ImageSequenceTileProvider::maxLevel() {
-    return currentTileProvider ? currentTileProvider->maxLevel() : 0;
+    return _currentTileProvider ? _currentTileProvider->maxLevel() : 0;
 }
 
 float ImageSequenceTileProvider::noDataValueAsFloat() {
-    if (currentTileProvider) {
-        return currentTileProvider->noDataValueAsFloat();
-    }
-    else {
-        return std::numeric_limits<float>::min();
-    }
+    return _currentTileProvider ?
+        _currentTileProvider->noDataValueAsFloat() :
+        std::numeric_limits<float>::min();
 }
 
 } // namespace openspace::globebrowsing

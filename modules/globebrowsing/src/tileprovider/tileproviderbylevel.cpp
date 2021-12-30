@@ -24,11 +24,19 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace {
-    constexpr const char* KeyProviders = "LevelTileProviders";
-    constexpr const char* KeyMaxLevel = "MaxLevel";
-    constexpr const char* KeyTileProvider = "TileProvider";
-    constexpr const char* KeyLayerGroupID = "LayerGroupID";
+    struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
+        int layerGroupID;
+
+        struct Providers {
+            int maxLevel [[codegen::greaterequal(0)]];
+            ghoul::Dictionary tileProvider;
+        };
+        std::vector<Providers> levelTileProviders;
+    };
+#include "tileproviderbylevel_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -36,74 +44,58 @@ namespace openspace::globebrowsing {
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
-    layergroupid::GroupID layerGroupID = static_cast<layergroupid::GroupID>(
-        dictionary.value<int>(KeyLayerGroupID)
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyProviders)) {
-        ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
+    layergroupid::GroupID layerGroup = static_cast<layergroupid::GroupID>(p.layerGroupID);
+    
+    for (Parameters::Providers p : p.levelTileProviders) {
+        p.tileProvider.setValue("LayerGroupID", static_cast<int>(layerGroup));
+        
+        layergroupid::TypeID typeID = layergroupid::TypeID::DefaultTileLayer;
+        if (p.tileProvider.hasValue<std::string>("Type")) {
+            std::string type = p.tileProvider.value<std::string>("Type");
+            typeID = ghoul::from_string<layergroupid::TypeID>(type);
 
-        for (size_t i = 1; i <= providers.size(); i++) {
-            ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
-                std::to_string(i)
-            );
-            double floatMaxLevel = levelProviderDict.value<double>(KeyMaxLevel);
-            int maxLevel = static_cast<int>(std::round(floatMaxLevel));
-
-            ghoul::Dictionary providerDict = levelProviderDict.value<ghoul::Dictionary>(
-                KeyTileProvider
-            );
-            providerDict.setValue(KeyLayerGroupID, static_cast<int>(layerGroupID));
-
-            layergroupid::TypeID typeID;
-            if (providerDict.hasValue<std::string>("Type")) {
-                const std::string& typeString = providerDict.value<std::string>("Type");
-                typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
-
-                if (typeID == layergroupid::TypeID::Unknown) {
-                    throw ghoul::RuntimeError("Unknown layer type: " + typeString);
-                }
+            if (typeID == layergroupid::TypeID::Unknown) {
+                throw ghoul::RuntimeError("Unknown layer type: " + type);
             }
-            else {
-                typeID = layergroupid::TypeID::DefaultTileLayer;
-            }
-
-            std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, providerDict);
-
-            std::string provId = providerDict.value<std::string>("Identifier");
-            tp->setIdentifier(provId);
-            std::string providerName = providerDict.value<std::string>("Name");
-            tp->setGuiName(providerName);
-            addPropertySubOwner(tp.get());
-
-            levelTileProviders.push_back(std::move(tp));
-
-            // Ensure we can represent the max level
-            if (static_cast<int>(providerIndices.size()) < maxLevel) {
-                providerIndices.resize(maxLevel + 1, -1);
-            }
-
-            // map this level to the tile provider index
-            providerIndices[maxLevel] = static_cast<int>(levelTileProviders.size()) - 1;
         }
+
+        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, p.tileProvider);
+
+        std::string provId = p.tileProvider.value<std::string>("Identifier");
+        tp->setIdentifier(provId);
+        std::string providerName = p.tileProvider.value<std::string>("Name");
+        tp->setGuiName(providerName);
+        addPropertySubOwner(tp.get());
+
+        _levelTileProviders.push_back(std::move(tp));
+
+        // Ensure we can represent the max level
+        if (static_cast<int>(_providerIndices.size()) < p.maxLevel) {
+            _providerIndices.resize(p.maxLevel + 1, -1);
+        }
+
+        // map this level to the tile provider index
+        _providerIndices[p.maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
     }
 
     // Fill in the gaps (value -1 ) in provider indices, from back to end
-    for (int i = static_cast<int>(providerIndices.size()) - 2; i >= 0; --i) {
-        if (providerIndices[i] == -1) {
-            providerIndices[i] = providerIndices[i + 1];
+    for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
+        if (_providerIndices[i] == -1) {
+            _providerIndices[i] = _providerIndices[i + 1];
         }
     }
 }
 
 void TileProviderByLevel::internalInitialize() {
-    for (const std::unique_ptr<TileProvider>& prov : levelTileProviders) {
+    for (const std::unique_ptr<TileProvider>& prov : _levelTileProviders) {
         prov->initialize();
     }
 }
 
 void TileProviderByLevel::internalDeinitialize() {
-    for (const std::unique_ptr<TileProvider>& prov : levelTileProviders) {
+    for (const std::unique_ptr<TileProvider>& prov : _levelTileProviders) {
         prov->deinitialize();
     }
 }
@@ -128,14 +120,14 @@ Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
 TileProvider* TileProviderByLevel::levelProvider(int level) const {
     ZoneScoped
 
-    if (!levelTileProviders.empty()) {
+    if (!_levelTileProviders.empty()) {
         int clampedLevel = glm::clamp(
             level,
             0,
-            static_cast<int>(providerIndices.size() - 1)
+            static_cast<int>(_providerIndices.size() - 1)
         );
-        int idx = providerIndices[clampedLevel];
-        return levelTileProviders[idx].get();
+        int idx = _providerIndices[clampedLevel];
+        return _levelTileProviders[idx].get();
     }
     else {
         return nullptr;
@@ -147,19 +139,19 @@ TileDepthTransform TileProviderByLevel::depthTransform() {
 }
 
 void TileProviderByLevel::update() {
-    for (const std::unique_ptr<TileProvider>& provider : levelTileProviders) {
+    for (const std::unique_ptr<TileProvider>& provider : _levelTileProviders) {
         provider->update();
     }
 }
 
 void TileProviderByLevel::reset() {
-    for (const std::unique_ptr<TileProvider>& provider : levelTileProviders) {
+    for (const std::unique_ptr<TileProvider>& provider : _levelTileProviders) {
         provider->reset();
     }
 }
 
 int TileProviderByLevel::maxLevel() {
-    return static_cast<int>(providerIndices.size() - 1);
+    return static_cast<int>(_providerIndices.size() - 1);
 }
 
 float TileProviderByLevel::noDataValueAsFloat() {
