@@ -22,59 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/scalar/boolproperty.h>
+#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 
 namespace openspace::globebrowsing {
 
-class Layer;
-struct TileProvider;
+TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
+    : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
+{}
 
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layergroupid::GroupID id);
+Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
+    ZoneScoped
+    text = fmt::format(
+        "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
+    );
+    textPosition = glm::vec2(
+        initData.dimensions.x / 4 -
+        (initData.dimensions.x / 32) * log10(1 << tileIndex.level),
+        initData.dimensions.y / 2 + fontSize
+    );
+    textColor = glm::vec4(1.f);
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
+    return TextTileProvider::tile(tileIndex);
+}
 
-    void initialize();
-    void deinitialize();
+Tile::Status TileIndexTileProvider::tileStatus(const TileIndex&) {
+    return Tile::Status::OK;
+}
 
-    /// Updates all layers tile providers within this group
-    void update();
+TileDepthTransform TileIndexTileProvider::depthTransform() {
+    return { 0.f, 1.f };
+}
 
-    Layer* addLayer(const ghoul::Dictionary& layerDict);
-    void deleteLayer(const std::string& layerName);
-    void moveLayers(int oldPosition, int newPosition);
+void TileIndexTileProvider::update() {}
 
-    /// @returns const vector of all layers
-    std::vector<Layer*> layers() const;
+int TileIndexTileProvider::maxLevel() {
+    return 1337; // unlimited
+}
 
-    /// @returns const vector of all active layers
-    const std::vector<Layer*>& activeLayers() const;
-
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
-
-    bool layerBlendingEnabled() const;
-
-    void onChange(std::function<void(Layer*)> callback);
-
-private:
-    const layergroupid::GroupID _groupId;
-    std::vector<std::unique_ptr<Layer>> _layers;
-    std::vector<Layer*> _activeLayers;
-
-    properties::BoolProperty _levelBlendingEnabled;
-    std::function<void(Layer*)> _onChangeCallback;
-};
+float TileIndexTileProvider::noDataValueAsFloat() {
+    return std::numeric_limits<float>::min();
+}
 
 } // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

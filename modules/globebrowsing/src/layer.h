@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layerrendersettings.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
@@ -40,8 +40,7 @@ namespace openspace::globebrowsing {
 
 struct LayerGroup;
 struct TileIndex;
-
-namespace tileprovider { struct TileProvider; }
+struct TileProvider;
 
 class Layer : public properties::PropertyOwner {
 public:
@@ -59,7 +58,7 @@ public:
     TileDepthTransform depthTransform() const;
     void setEnabled(bool enabled);
     bool enabled() const;
-    tileprovider::TileProvider* tileProvider() const;
+    TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
@@ -89,7 +88,7 @@ private:
     properties::StringProperty _guiDescription;
 
     layergroupid::TypeID _type;
-    std::unique_ptr<tileprovider::TileProvider> _tileProvider;
+    std::unique_ptr<TileProvider> _tileProvider;
     properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
