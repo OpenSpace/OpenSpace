@@ -44,12 +44,6 @@ namespace {
     constexpr const char* KeyBasePath = "BasePath";
 
     constexpr const char* UrlTimePlaceholder = "${OpenSpaceTimeId}";
-    //constexpr const char* TimeStart = "OpenSpaceTimeStart";
-    //constexpr const char* TimeEnd = "OpenSpaceTimeEnd";
-    //constexpr const char* TimeResolution = "OpenSpaceTimeResolution";
-    //constexpr const char* TimeFormat = "OpenSpaceTimeIdFormat";
-    //constexpr const char* TimeInterpolation = "OpenSpaceTimeInterpolation";
-    //constexpr const char* TransferFunction = "OpenSpaceTransferFunction";
     
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -74,7 +68,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
-
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;
 
@@ -97,17 +90,25 @@ namespace {
             // The specification of the date format that is used in the tile provider
             std::string timeFormat;
 
+            // The text that will be used as the prototype to generate the data to load
+            // the image layer. Any occurance of `${OpenSpaceTimeId}` in this prototype
+            // is replaced with the current date according to the remaining information
+            // such as the resolution and the format and the resulting text is used to
+            // load the corresponding images
             std::string prototype;
 
         };
         std::optional<Prototyped> prototyped;
 
+        // Determines whether this tile provider should interpolate between two adjacent
+        // layers
         std::optional<bool> interpolation;
-
+        
+        // If provided, the tile provider will use this color map to convert a greyscale
+        // image to color
         std::optional<std::string> colormap;
     };
 #include "temporaltileprovider_codegen.cpp"
-
 
     std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
         ZoneScoped
@@ -170,7 +171,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 std::string(end.ISO8601())
             );
             _timeQuantizer.setResolution(p.prototyped->temporalResolution);
-            _myResolution = p.prototyped->temporalResolution;
+            _temporalResolution = p.prototyped->temporalResolution;
         }
         catch (const ghoul::RuntimeError& e) {
             throw ghoul::RuntimeError(fmt::format(
@@ -236,7 +237,9 @@ void TemporalTileProvider::update() {
 }
 
 void TemporalTileProvider::reset() {
-    for (std::pair<const TimeKey, std::unique_ptr<TileProvider>>& it : _tileProviderMap) {
+    using K = TimeKey;
+    using V = std::unique_ptr<DefaultTileProvider>;
+    for (std::pair<const K, V>& it : _tileProviderMap) {
         it.second->reset();
     }
 }
@@ -250,7 +253,7 @@ float TemporalTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-std::unique_ptr<TileProvider> TemporalTileProvider::initTileProvider(
+std::unique_ptr<DefaultTileProvider> TemporalTileProvider::initTileProvider(
                                                                  std::string_view timekey)
 {
     ZoneScoped
@@ -279,21 +282,21 @@ std::unique_ptr<TileProvider> TemporalTileProvider::initTileProvider(
     return std::make_unique<DefaultTileProvider>(_initDict);
 }
 
-TileProvider* TemporalTileProvider::tileProvider(std::string_view timekey) {
+DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view time) {
     ZoneScoped
 
     // @TODO (abock, 2020-08-20) This std::string creation can be removed once we switch
     // to C++20 thanks to P0919R2
-    const auto it = _tileProviderMap.find(std::string(timekey));
+    const auto it = _tileProviderMap.find(std::string(time));
     if (it != _tileProviderMap.end()) {
         return it->second.get();
     }
     else {
-        std::unique_ptr<TileProvider> tileProvider = initTileProvider(timekey);
+        std::unique_ptr<DefaultTileProvider> tileProvider = initTileProvider(time);
         tileProvider->initialize();
 
-        TileProvider* res = tileProvider.get();
-        _tileProviderMap[std::string(timekey)] = std::move(tileProvider);
+        DefaultTileProvider* res = tileProvider.get();
+        _tileProviderMap[std::string(time)] = std::move(tileProvider);
         return res;
     }
 }
@@ -304,7 +307,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
     if (!_interpolation) {
         if (_useFixedTime && !_fixedTime.value().empty()) {
             try {
-                return tileProvider(_fixedTime.value());
+                return retrieveTileProvider(_fixedTime.value());
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC("TemporalTileProvider", e.message);
@@ -316,7 +319,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
             if (_timeQuantizer.quantize(tCopy, true)) {
                 std::string_view timeStr = timeStringify(_timeFormat, tCopy);
                 try {
-                    return tileProvider(timeStr);
+                    return retrieveTileProvider(timeStr);
                 }
                 catch (const ghoul::RuntimeError& e) {
                     LERRORC("TemporalTileProvider", e.message);
@@ -340,14 +343,14 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
 
     std::string_view tCopyStr = timeStringify(_timeFormat, tCopy);
     try {
-        _interpolateTileProvider->t1 = tileProvider(tCopyStr);
+        _interpolateTileProvider->t1 = retrieveTileProvider(tCopyStr);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC("TemporalTileProvider", e.message);
         return nullptr;
     }
     // if the images are for each hour
-    if (_myResolution == "1h") {
+    if (_temporalResolution == "1h") {
         // the second tile to interpolate between
         nextTile.setTime(tCopy.j2000Seconds() + 60 * 60);
         // the tile after the second tile
@@ -360,7 +363,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         secondToFirst.setTime(_startTimeJ2000 + 60 * 60);
     }
     // if the images are for each month
-    if (_myResolution == "1M") {
+    if (_temporalResolution == "1M") {
         // the second tile to interpolate between
         nextTile.setTime(tCopy.j2000Seconds() + 32 * 60 * 60 * 24);
         // the tile after the second tile
@@ -396,28 +399,28 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         if (secondToLast.j2000Seconds() > simulationTime.j2000Seconds() &&
             secondToFirst.j2000Seconds() < simulationTime.j2000Seconds())
         {
-            _interpolateTileProvider->t2 = tileProvider(nextTileStr);
-            _interpolateTileProvider->future = tileProvider(nextNextTileStr);
-            _interpolateTileProvider->before = tileProvider(prevTileStr);
+            _interpolateTileProvider->t2 = retrieveTileProvider(nextTileStr);
+            _interpolateTileProvider->future = retrieveTileProvider(nextNextTileStr);
+            _interpolateTileProvider->before = retrieveTileProvider(prevTileStr);
         }
         else if (secondToLast.j2000Seconds() < simulationTime.j2000Seconds() &&
                  _endTimeJ2000 > simulationTime.j2000Seconds())
         {
-            _interpolateTileProvider->t2 = tileProvider(nextTileStr);
-            _interpolateTileProvider->future = tileProvider(tCopyStr);
-            _interpolateTileProvider->before = tileProvider(prevTileStr);
+            _interpolateTileProvider->t2 = retrieveTileProvider(nextTileStr);
+            _interpolateTileProvider->future = retrieveTileProvider(tCopyStr);
+            _interpolateTileProvider->before = retrieveTileProvider(prevTileStr);
         }
         else if (secondToFirst.j2000Seconds() > simulationTime.j2000Seconds() &&
                  _startTimeJ2000 < simulationTime.j2000Seconds())
         {
-            _interpolateTileProvider->t2 = tileProvider(nextTileStr);
-            _interpolateTileProvider->future = tileProvider(nextNextTileStr);
-            _interpolateTileProvider->before = tileProvider(tCopyStr);
+            _interpolateTileProvider->t2 = retrieveTileProvider(nextTileStr);
+            _interpolateTileProvider->future = retrieveTileProvider(nextNextTileStr);
+            _interpolateTileProvider->before = retrieveTileProvider(tCopyStr);
         }
         else {
-            _interpolateTileProvider->t2 = tileProvider(tCopyStr);
-            _interpolateTileProvider->future = tileProvider(tCopyStr);
-            _interpolateTileProvider->before = tileProvider(tCopyStr);
+            _interpolateTileProvider->t2 = retrieveTileProvider(tCopyStr);
+            _interpolateTileProvider->future = retrieveTileProvider(tCopyStr);
+            _interpolateTileProvider->before = retrieveTileProvider(tCopyStr);
         }
         _interpolateTileProvider->factor =
             (simulationTime.j2000Seconds() - tCopy.j2000Seconds()) /
@@ -505,7 +508,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // The texture that will give the color for the interpolated texture
     ghoul::opengl::Texture* colormapTexture = singleImageProvider->tile(tileIndex).texture;
-    long long hkey = cache::ProviderTileHasher()(key);
+   
     // The data for initializing the texture
     TileTextureInitData initData(
         prev.texture->dimensions().x,

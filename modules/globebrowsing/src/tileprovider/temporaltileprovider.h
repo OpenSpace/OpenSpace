@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 namespace openspace::globebrowsing {
@@ -87,7 +88,7 @@ private:
     properties::StringProperty _fixedTime;
     std::string _prototype;
 
-    std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> _tileProviderMap;
+    std::unordered_map<TimeKey, std::unique_ptr<DefaultTileProvider>> _tileProviderMap;
 
     bool _interpolation = false;
 
@@ -98,12 +99,12 @@ private:
     TimeQuantizer _timeQuantizer;
     std::string _colormap;
 
-    std::string _myResolution;
+    std::string _temporalResolution;
     std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 
     void ensureUpdated();
-    std::unique_ptr<TileProvider> initTileProvider(std::string_view timekey);
-    TileProvider* tileProvider(std::string_view timekey);
+    std::unique_ptr<DefaultTileProvider> initTileProvider(std::string_view timekey);
+    DefaultTileProvider* retrieveTileProvider(std::string_view timekey);
     TileProvider* tileProvider(const Time& time);
 };
 

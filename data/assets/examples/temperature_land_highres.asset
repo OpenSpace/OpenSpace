@@ -11,15 +11,17 @@ local layer = {
   Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal",
   Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal)",
   Type = "TemporalTileLayer",
-  Time = {
-    Start = "1981-01-01",
-    End = "1990-10-01"
+  Prototyped = {
+    Time = {
+      Start = "1981-01-01",
+      End = "1990-10-01"
+    },
+    TemporalResolution = "1M",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = path .. "${OpenSpaceTimeId}-land.png"
   },
-  TemporalResolution = "1M",
-  TimeFormat = "YYYY-MM-DD",
   Interpolation = true,
-  Colormap = path .. "rainbow.png"
-  FilePath = path .. "${OpenSpaceTimeId}-land.png",
+  Colormap = path .. "rainbow.png",
   Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
 }
 
