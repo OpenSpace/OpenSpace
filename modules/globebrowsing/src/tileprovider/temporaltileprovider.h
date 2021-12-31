@@ -77,9 +77,8 @@ private:
         GLuint vaoQuad = 0;
         GLuint vboQuad = 0;
         GLuint fbo = 0;
-        std::string colormap;
         std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
-        std::unique_ptr<SingleImageProvider> singleImageProvider;
+        std::unique_ptr<ghoul::opengl::Texture> colormap;
         cache::MemoryAwareTileCache* tileCache = nullptr;
     };
 

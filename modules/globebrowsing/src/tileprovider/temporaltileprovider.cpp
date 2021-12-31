@@ -35,15 +35,14 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
-#include "cpl_minixml.h"
-#include <fstream>
 
 namespace {
     constexpr const char* KeyBasePath = "BasePath";
 
-    constexpr const char* UrlTimePlaceholder = "${OpenSpaceTimeId}";
+    constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
     
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -193,12 +192,13 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     if (_interpolation) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
-        _interpolateTileProvider->colormap = _colormap;
         _interpolateTileProvider->initialize();
-        ghoul::Dictionary dict;
-        dict.setValue("FilePath", _colormap);
-        _interpolateTileProvider->singleImageProvider =
-            std::make_unique<SingleImageProvider>(dict);
+        _interpolateTileProvider->colormap =
+            ghoul::io::TextureReader::ref().loadTexture(_colormap, 1);
+        _interpolateTileProvider->colormap->uploadTexture();
+        _interpolateTileProvider->colormap->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
     }
 }
 
@@ -270,15 +270,21 @@ std::unique_ptr<DefaultTileProvider> TemporalTileProvider::initTileProvider(
 
 
     std::string prototype = _prototype;
-    const size_t pos = prototype.find(UrlTimePlaceholder);
-    const size_t numChars = std::string_view(UrlTimePlaceholder).size();
-    // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
-    // commented out ---abock
-    std::string xml = prototype.replace(pos, numChars, timekey);
+    while (true) {
+        const size_t pos = prototype.find(TimePlaceholder);
 
-    xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
+        if (pos == std::string::npos) {
+            break;
+        }
+        
+        const size_t numChars = std::string_view(TimePlaceholder).size();
+        prototype = prototype.replace(pos, numChars, timekey);
+    }
 
-    _initDict.setValue("FilePath", xml);
+
+    prototype = FileSys.expandPathTokens(std::move(prototype), IgnoredTokens).string();
+
+    _initDict.setValue("FilePath", prototype);
     return std::make_unique<DefaultTileProvider>(_initDict);
 }
 
@@ -507,7 +513,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     // There is a previous and next texture to interpolate between so do the interpolation
 
     // The texture that will give the color for the interpolated texture
-    ghoul::opengl::Texture* colormapTexture = singleImageProvider->tile(tileIndex).texture;
+    ghoul::opengl::Texture* colormapTexture = colormap.get();
    
     // The data for initializing the texture
     TileTextureInitData initData(
