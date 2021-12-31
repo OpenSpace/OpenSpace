@@ -4,11 +4,16 @@ local layer =  {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
   Type = "TemporalTileLayer",
+  Generative = {
+    Time = {
+      Start = "2012-05-08",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+  },
   FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
     "VIIRS_SNPP_DayNightBand_ENCC",
-    "2012-05-08",
-    "Yesterday",
-    "1d",
     "500m",
     "png"
   ),

@@ -4,11 +4,16 @@ local layer = {
   Identifier = "Aqua_Modis_Temporal",
   Name = "Aqua Modis (Temporal)",
   Type = "TemporalTileLayer",
+  Generative = {
+    Time = {
+      Start = "2002-07-04",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+  },
   FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
     "MODIS_Aqua_CorrectedReflectance_TrueColor",
-    "2002-07-04",
-    "Yesterday",
-    "1d",
     "250m",
     "jpg"
   ),

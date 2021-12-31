@@ -4,11 +4,16 @@ local layer = {
   Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
   Type = "TemporalTileLayer",
+  Generative = {
+    Time = {
+      Start = "2012-05-08",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+  },
   FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
     "AMSRU2_Sea_Ice_Concentration_12km",
-    "2012-05-08",
-    "Yesterday",
-    "1d",
     "2km",
     "png"
   ),

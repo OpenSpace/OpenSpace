@@ -11,16 +11,15 @@ local layer = {
   Identifier = "ERA5_Land_HighRes_Monthly_2M_Temperature_Temporal",
   Name = "ERA5 Land HighRes Monthly 2M Temperature (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = 
-  "<OpenSpaceTemporalGDALDataset>" ..
-    "<OpenSpaceTimeStart>1981-01-01</OpenSpaceTimeStart>" ..
-    "<OpenSpaceTimeEnd>1990-10-01</OpenSpaceTimeEnd>" ..
-    "<OpenSpaceTimeResolution>1M</OpenSpaceTimeResolution>" ..
-    "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
-	"<OpenSpaceTransferFunction>" .. path .. "rainbow.png</OpenSpaceTransferFunction>" ..
-	"<OpenSpaceTimeInterpolation>linear</OpenSpaceTimeInterpolation>" ..
-	"<FilePath>" .. path .. "${OpenSpaceTimeId}-land.png</FilePath>" ..
-  "</OpenSpaceTemporalGDALDataset>",
+  Time = {
+    Start = "1981-01-01",
+    End = "1990-10-01"
+  },
+  TemporalResolution = "1M",
+  TimeFormat = "YYYY-MM-DD",
+  Interpolation = true,
+  Colormap = path .. "rainbow.png"
+  FilePath = path .. "${OpenSpaceTimeId}-land.png",
   Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
 }
 

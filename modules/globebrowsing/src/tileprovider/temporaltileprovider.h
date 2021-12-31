@@ -111,12 +111,9 @@ private:
     std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 
     void ensureUpdated();
-    std::string_view timeStringify(TimeFormatType type, const Time& t);
     std::unique_ptr<TileProvider> initTileProvider(std::string_view timekey);
     TileProvider* tileProvider(std::string_view timekey);
     TileProvider* tileProvider(const Time& time);
-    std::string xmlValue(CPLXMLNode* node, const std::string& key,
-        const std::string& defaultVal, bool isOptional = false);
 };
 
 } // namespace openspace::globebrowsing
