@@ -82,29 +82,48 @@ private:
         cache::MemoryAwareTileCache* tileCache = nullptr;
     };
 
-    ghoul::Dictionary _initDict;
-    properties::BoolProperty _useFixedTime;
-    properties::StringProperty _fixedTime;
-    std::string _prototype;
-
-    std::unordered_map<TimeKey, std::unique_ptr<DefaultTileProvider>> _tileProviderMap;
-
-    bool _interpolation = false;
-
-    TileProvider* _currentTileProvider = nullptr;
-    double _startTimeJ2000;
-    double _endTimeJ2000;
-    std::string _timeFormat;
-    TimeQuantizer _timeQuantizer;
-    std::string _colormap;
-
-    std::string _temporalResolution;
-    std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
-
     void ensureUpdated();
     std::unique_ptr<DefaultTileProvider> initTileProvider(std::string_view timekey);
     DefaultTileProvider* retrieveTileProvider(std::string_view timekey);
     TileProvider* tileProvider(const Time& time);
+    
+    std::vector<std::pair<double, std::string>>::const_iterator findMatchingTime(
+        double t) const;
+
+    enum class Mode {
+        Prototype,
+        Folder
+    };
+    Mode _mode;
+
+    struct {
+        double startTimeJ2000 = 0.0;
+        double endTimeJ2000 = 0.0;
+
+        std::string temporalResolution;
+        std::string timeFormat;
+        TimeQuantizer timeQuantizer;
+        std::string prototype;
+    } _prototyped;
+
+    struct {
+        std::filesystem::path folder;
+        std::string format;
+
+        std::vector<std::pair<double, std::string>> files;
+    } _folder;
+
+    ghoul::Dictionary _initDict;
+    properties::BoolProperty _useFixedTime;
+    properties::StringProperty _fixedTime;
+
+    TileProvider* _currentTileProvider = nullptr;
+    std::unordered_map<TimeKey, std::unique_ptr<DefaultTileProvider>> _tileProviderMap;
+
+    bool _isInterpolating = false;
+
+    std::string _colormap;
+    std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 };
 
 } // namespace openspace::globebrowsing

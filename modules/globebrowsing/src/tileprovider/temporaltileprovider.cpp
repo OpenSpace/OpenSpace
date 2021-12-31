@@ -38,6 +38,10 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 namespace {
     constexpr const char* KeyBasePath = "BasePath";
@@ -99,6 +103,12 @@ namespace {
         };
         std::optional<Prototyped> prototyped;
 
+        struct Folder {
+            std::filesystem::path folder [[codegen::directory()]];
+            std::string format;
+        };
+        std::optional<Folder> folder;
+
         // Determines whether this tile provider should interpolate between two adjacent
         // layers
         std::optional<bool> interpolation;
@@ -117,9 +127,9 @@ namespace {
 
         using namespace openspace;
 
-        char InBuf[BufferSize];
-        std::memset(InBuf, '\0', BufferSize);
-        std::memcpy(InBuf, format.c_str(), format.size());
+        char FormatBuf[BufferSize];
+        std::memset(FormatBuf, '\0', BufferSize);
+        std::memcpy(FormatBuf, format.c_str(), format.size());
 
         char* OutBuf = reinterpret_cast<char*>(
             global::memoryManager->TemporaryMemory.allocate(BufferSize)
@@ -127,7 +137,7 @@ namespace {
         std::memset(OutBuf, '\0', BufferSize);
 
         const double time = t.j2000Seconds();
-        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, InBuf);
+        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
         return std::string_view(OutBuf, format.size());
     }
 } // namespace
@@ -143,6 +153,13 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    if (p.prototyped.has_value() == p.folder.has_value()) {
+        // Doesn't matter if they are both false or both true
+        throw ghoul::RuntimeError(
+            "Need to specify exactly one of the 'Prototyped' and 'Folder' values"
+        );
+    }
+
     _useFixedTime = p.useFixedTime.value_or(_useFixedTime);
     addProperty(_useFixedTime);
 
@@ -152,11 +169,13 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     _colormap = p.colormap.value_or(_colormap);
 
     if (p.prototyped.has_value()) {
+        _mode = Mode::Prototype;
+
         Time start = Time(p.prototyped->time.start);
         Time end = Time::now();
         Time endOfInterval = Time(p.prototyped->time.end);
-        _startTimeJ2000 = start.j2000Seconds();
-        _endTimeJ2000 = endOfInterval.j2000Seconds();
+        _prototyped.startTimeJ2000 = start.j2000Seconds();
+        _prototyped.endTimeJ2000 = endOfInterval.j2000Seconds();
         if (p.prototyped->time.end == "Yesterday") {
             end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
         }
@@ -165,12 +184,12 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         }
 
         try {
-            _timeQuantizer.setStartEndRange(
+            _prototyped.timeQuantizer.setStartEndRange(
                 std::string(start.ISO8601()),
                 std::string(end.ISO8601())
             );
-            _timeQuantizer.setResolution(p.prototyped->temporalResolution);
-            _temporalResolution = p.prototyped->temporalResolution;
+            _prototyped.timeQuantizer.setResolution(p.prototyped->temporalResolution);
+            _prototyped.temporalResolution = p.prototyped->temporalResolution;
         }
         catch (const ghoul::RuntimeError& e) {
             throw ghoul::RuntimeError(fmt::format(
@@ -184,13 +203,56 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 p.prototyped->timeFormat
             ));
         }
-        _timeFormat = p.prototyped->timeFormat;
-        _prototype = p.prototyped->prototype;
+        _prototyped.timeFormat = p.prototyped->timeFormat;
+        _prototyped.prototype = p.prototyped->prototype;
     }
-    _interpolation = p.interpolation.value_or(_interpolation);
 
+    if (p.folder.has_value()) {
+        _mode = Mode::Folder;
 
-    if (_interpolation) {
+        _folder.folder = p.folder->folder;
+        _folder.format = p.folder->format;
+
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& path : fs::directory_iterator(_folder.folder)) {
+            if (!path.is_regular_file()) {
+                continue;
+            }
+
+            std::string file = path.path().filename().string();
+            std::istringstream ss(file);
+
+            std::tm tm = {};
+            ss >> std::get_time(&tm, p.folder->format.c_str());
+            if (!ss.fail()) {
+                std::string date = fmt::format(
+                    "{}-{}-{} {}:{}:{}",
+                    tm.tm_year + 1900,
+                    tm.tm_mon + 1,
+                    tm.tm_mday,
+                    tm.tm_hour,
+                    tm.tm_min,
+                    tm.tm_sec
+                );
+
+                double et = SpiceManager::ref().ephemerisTimeFromDate(date);
+                _folder.files.push_back({ et, path.path().string() });
+            }
+        }
+
+        using K = double;
+        using V = std::string;
+        std::sort(
+            _folder.files.begin(),
+            _folder.files.end(),
+            [](const std::pair<K, V>& lhs, const std::pair<K, V>& rhs) {
+                return lhs.first < rhs.first;
+            }
+        );
+    }
+    
+    _isInterpolating = p.interpolation.value_or(_isInterpolating);
+    if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
         _interpolateTileProvider->colormap =
@@ -227,7 +289,14 @@ TileDepthTransform TemporalTileProvider::depthTransform() {
 }
 
 void TemporalTileProvider::update() {
-    TileProvider* newCurr = tileProvider(global::timeManager->time());
+    TileProvider* newCurr = nullptr;
+    try {
+         newCurr = tileProvider(global::timeManager->time());
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("TemporalTileProvider", e.message);
+    }
+
     if (newCurr) {
         _currentTileProvider = newCurr;
     }
@@ -258,33 +327,46 @@ std::unique_ptr<DefaultTileProvider> TemporalTileProvider::initTileProvider(
 {
     ZoneScoped
 
-    static const std::vector<std::string> IgnoredTokens = {
-        // From: http://www.gdal.org/frmt_wms.html
-        "${x}",
-        "${y}",
-        "${z}",
-        "${version}",
-        "${format}",
-        "${layer}"
-    };
+    std::string content;
+    switch (_mode) {
+        case Mode::Prototype: {
+            static const std::vector<std::string> IgnoredTokens = {
+                // From: http://www.gdal.org/frmt_wms.html
+                "${x}",
+                "${y}",
+                "${z}",
+                "${version}",
+                "${format}",
+                "${layer}"
+            };
 
 
-    std::string prototype = _prototype;
-    while (true) {
-        const size_t pos = prototype.find(TimePlaceholder);
+            content = _prototyped.prototype;
+            while (true) {
+                const size_t pos = content.find(TimePlaceholder);
 
-        if (pos == std::string::npos) {
+                if (pos == std::string::npos) {
+                    break;
+                }
+
+                const size_t numChars = std::string_view(TimePlaceholder).size();
+                content = content.replace(pos, numChars, timekey);
+            }
+
+
+            content = FileSys.expandPathTokens(
+                std::move(content),
+                IgnoredTokens
+            ).string();
             break;
         }
-        
-        const size_t numChars = std::string_view(TimePlaceholder).size();
-        prototype = prototype.replace(pos, numChars, timekey);
+        case Mode::Folder: {
+            content = std::string(timekey);
+            break;
+        }
     }
 
-
-    prototype = FileSys.expandPathTokens(std::move(prototype), IgnoredTokens).string();
-
-    _initDict.setValue("FilePath", prototype);
+    _initDict.setValue("FilePath", content);
     return std::make_unique<DefaultTileProvider>(_initDict);
 }
 
@@ -307,36 +389,60 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view
     }
 }
 
+std::vector<std::pair<double, std::string>>::const_iterator
+TemporalTileProvider::findMatchingTime(double t) const
+{
+    auto it = std::upper_bound(
+        _folder.files.begin(),
+        _folder.files.end(),
+        t,
+        [&t](double time, const std::pair<double, std::string>& p) {
+            return time < p.first;
+        }
+    );
+
+    if (it != _folder.files.begin()) {
+        std::advance(it, -1);
+    }
+    return it;
+}
+
 TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
     ZoneScoped
 
-    if (!_interpolation) {
+    if (!_isInterpolating) {
         if (_useFixedTime && !_fixedTime.value().empty()) {
-            try {
-                return retrieveTileProvider(_fixedTime.value());
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERRORC("TemporalTileProvider", e.message);
-                return nullptr;
+            std::string fixedTime = _fixedTime.value();
+            switch (_mode) {
+                case Mode::Prototype:
+                    return retrieveTileProvider(fixedTime);
+                case Mode::Folder: {
+                    double et = SpiceManager::ref().ephemerisTimeFromDate(fixedTime);
+                    auto it = findMatchingTime(et);
+                    return retrieveTileProvider(it->second);
+                }
             }
         }
         else {
-            Time tCopy(time);
-            if (_timeQuantizer.quantize(tCopy, true)) {
-                std::string_view timeStr = timeStringify(_timeFormat, tCopy);
-                try {
-                    return retrieveTileProvider(timeStr);
+            switch (_mode) {
+                case Mode::Prototype: {
+                    Time tCopy(time);
+                    if (_prototyped.timeQuantizer.quantize(tCopy, true)) {
+                        std::string_view timeStr = 
+                            timeStringify(_prototyped.timeFormat, tCopy);
+                        return retrieveTileProvider(timeStr);
+                    }
                 }
-                catch (const ghoul::RuntimeError& e) {
-                    LERRORC("TemporalTileProvider", e.message);
-                    return nullptr;
+                case Mode::Folder: {
+                    auto it = findMatchingTime(time.j2000Seconds());
+                    return retrieveTileProvider(it->second);
                 }
             }
         }
     }
 
     Time tCopy(time);
-    if (!_timeQuantizer.quantize(tCopy, true)) {
+    if (!_prototyped.timeQuantizer.quantize(tCopy, true)) {
         return nullptr;
     }
 
@@ -347,7 +453,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
     Time secondToLast;
     Time secondToFirst;
 
-    std::string_view tCopyStr = timeStringify(_timeFormat, tCopy);
+    std::string_view tCopyStr = timeStringify(_prototyped.timeFormat, tCopy);
     try {
         _interpolateTileProvider->t1 = retrieveTileProvider(tCopyStr);
     }
@@ -356,7 +462,7 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         return nullptr;
     }
     // if the images are for each hour
-    if (_temporalResolution == "1h") {
+    if (_prototyped.temporalResolution == "1h") {
         // the second tile to interpolate between
         nextTile.setTime(tCopy.j2000Seconds() + 60 * 60);
         // the tile after the second tile
@@ -365,11 +471,11 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         prevTile.setTime(tCopy.j2000Seconds() - 60 * 60 + 1);
         // to make sure that an image outside the dataset is not searched for both ends of
         // the dataset are calculated
-        secondToLast.setTime(_endTimeJ2000 - 60 * 60);
-        secondToFirst.setTime(_startTimeJ2000 + 60 * 60);
+        secondToLast.setTime(_prototyped.endTimeJ2000 - 60 * 60);
+        secondToFirst.setTime(_prototyped.startTimeJ2000 + 60 * 60);
     }
     // if the images are for each month
-    if (_temporalResolution == "1M") {
+    if (_prototyped.temporalResolution == "1M") {
         // the second tile to interpolate between
         nextTile.setTime(tCopy.j2000Seconds() + 32 * 60 * 60 * 24);
         // the tile after the second tile
@@ -378,8 +484,8 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         prevTile.setTime(tCopy.j2000Seconds() - 2 * 60 * 60 * 24);
         // to make sure that an image outside the dataset is not searched for both ends of
         // the dataset are calculated
-        secondToLast.setTime(_endTimeJ2000 - 2 * 60 * 60 * 24);
-        secondToFirst.setTime(_startTimeJ2000 + 32 * 60 * 60 * 24);
+        secondToLast.setTime(_prototyped.endTimeJ2000 - 2 * 60 * 60 * 24);
+        secondToFirst.setTime(_prototyped.startTimeJ2000 + 32 * 60 * 60 * 24);
 
         // since months vary in length the time strings are set to the first of each month
         auto setToFirstOfMonth = [](Time& time) {
@@ -396,9 +502,9 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
         setToFirstOfMonth(secondToFirst);
     }
 
-    std::string_view nextTileStr = timeStringify(_timeFormat, nextTile);
-    std::string_view nextNextTileStr = timeStringify(_timeFormat, nextNextTile);
-    std::string_view prevTileStr = timeStringify(_timeFormat, prevTile);
+    std::string_view nextTileStr = timeStringify(_prototyped.timeFormat, nextTile);
+    std::string_view nextNextTileStr = timeStringify(_prototyped.timeFormat, nextNextTile);
+    std::string_view prevTileStr = timeStringify(_prototyped.timeFormat, prevTile);
     try {
         // the necessary tile providers are loaded if they exist within the
         // dataset's timespan
@@ -410,14 +516,14 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
             _interpolateTileProvider->before = retrieveTileProvider(prevTileStr);
         }
         else if (secondToLast.j2000Seconds() < simulationTime.j2000Seconds() &&
-                 _endTimeJ2000 > simulationTime.j2000Seconds())
+                 _prototyped.endTimeJ2000 > simulationTime.j2000Seconds())
         {
             _interpolateTileProvider->t2 = retrieveTileProvider(nextTileStr);
             _interpolateTileProvider->future = retrieveTileProvider(tCopyStr);
             _interpolateTileProvider->before = retrieveTileProvider(prevTileStr);
         }
         else if (secondToFirst.j2000Seconds() > simulationTime.j2000Seconds() &&
-                 _startTimeJ2000 < simulationTime.j2000Seconds())
+                 _prototyped.startTimeJ2000 < simulationTime.j2000Seconds())
         {
             _interpolateTileProvider->t2 = retrieveTileProvider(nextTileStr);
             _interpolateTileProvider->future = retrieveTileProvider(nextNextTileStr);
