@@ -74,8 +74,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
-        // [[codegen::verbatim(FilePathInfo.description)]]
-        std::string filePath;
 
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;
@@ -83,7 +81,7 @@ namespace {
         // [[codegen::verbatim(FixedTimeInfo.description)]]
         std::optional<std::string> fixedTime;
 
-        struct Generative {
+        struct Prototyped {
             struct Time {
                 // The (inclusive) starting time of the temporal image range
                 std::string start;
@@ -98,8 +96,11 @@ namespace {
 
             // The specification of the date format that is used in the tile provider
             std::string timeFormat;
+
+            std::string prototype;
+
         };
-        std::optional<Generative> generative;
+        std::optional<Prototyped> prototyped;
 
         std::optional<bool> interpolation;
 
@@ -108,94 +109,33 @@ namespace {
 #include "temporaltileprovider_codegen.cpp"
 
 
-    // Buffer needs at least 22 characters space
-    std::string_view timeStringify(
-                      openspace::globebrowsing::TemporalTileProvider::TimeFormatType type,
-                                                                 const openspace::Time& t)
-    {
+    std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
         ZoneScoped
 
+        constexpr const int BufferSize = 64;
+        ghoul_assert(format.size() < BufferSize, "Format string too long");
+
         using namespace openspace;
-        using namespace openspace::globebrowsing;
 
-        char* buffer = reinterpret_cast<char*>(
-            global::memoryManager->TemporaryMemory.allocate(22)
+        char InBuf[BufferSize];
+        std::memset(InBuf, '\0', BufferSize);
+        std::memcpy(InBuf, format.c_str(), format.size());
+
+        char* OutBuf = reinterpret_cast<char*>(
+            global::memoryManager->TemporaryMemory.allocate(BufferSize)
         );
+        std::memset(OutBuf, '\0', BufferSize);
 
-        std::memset(buffer, 0, 22);
         const double time = t.j2000Seconds();
-
-        switch (type) {
-            case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
-            {
-                constexpr const char Format[] = "YYYY-MM-DD";
-                constexpr const int Size = sizeof(Format);
-                SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-                return std::string_view(buffer, Size - 1);
-            }
-            case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
-                constexpr const char Format[] = "YYYYMMDD_HRMNSC";
-                constexpr const int Size = sizeof(Format);
-                SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-                return std::string_view(buffer, Size - 1);
-            }
-            case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
-                constexpr const char Format[] = "YYYYMMDD_HRMN";
-                constexpr const int Size = sizeof(Format);
-                SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-                return std::string_view(buffer, Size - 1);
-            }
-            case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
-            {
-                constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SCZ";
-                constexpr const int Size = sizeof(Format);
-                SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-                return std::string_view(buffer, Size - 1);
-            }
-            case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
-                constexpr const char Format[] = "YYYY-MM-DDTHR_MN_SCZ";
-                constexpr const int Size = sizeof(Format);
-                SpiceManager::ref().dateFromEphemerisTime(time, buffer, Size, Format);
-                return std::string_view(buffer, Size - 1);
-            }
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, InBuf);
+        return std::string_view(OutBuf, format.size());
     }
 } // namespace
-
-namespace ghoul {
-    template <>
-    constexpr openspace::globebrowsing::TemporalTileProvider::TimeFormatType
-        from_string(std::string_view string)
-    {
-        using namespace openspace::globebrowsing;
-        if (string == "YYYY-MM-DD") {
-            return TemporalTileProvider::TimeFormatType::YYYY_MM_DD;
-        }
-        else if (string == "YYYY-MM-DDThh:mm:ssZ") {
-            return TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ;
-        }
-        else if (string == "YYYY-MM-DDThh_mm_ssZ") {
-            return TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ;
-        }
-        else if (string == "YYYYMMDD_hhmmss") {
-            return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss;
-        }
-        else if (string == "YYYYMMDD_hhmm") {
-            return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm;
-        }
-        else {
-            throw ghoul::RuntimeError("Unknown timeformat '" + std::string(string) + "'");
-        }
-    }
-} // namespace ghoul
 
 namespace openspace::globebrowsing {
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
-    , _filePath(FilePathInfo)
     , _useFixedTime(UseFixedTimeInfo, false)
     , _fixedTime(FixedTimeInfo)
 {
@@ -203,35 +143,25 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = p.filePath;
-    addProperty(_filePath);
-
     _useFixedTime = p.useFixedTime.value_or(_useFixedTime);
     addProperty(_useFixedTime);
 
     _fixedTime = p.fixedTime.value_or(_fixedTime);
     addProperty(_fixedTime);
 
-
-    // File path was not a path to a file but a GDAL config or empty
-    std::filesystem::path f(_filePath.value());
-    if (std::filesystem::is_regular_file(f)) {
-        _initDict.setValue(KeyBasePath, f.parent_path().string());
-    }
-
     _colormap = p.colormap.value_or(_colormap);
 
-    if (p.generative.has_value()) {
-        Time start = Time(p.generative->time.start);
+    if (p.prototyped.has_value()) {
+        Time start = Time(p.prototyped->time.start);
         Time end = Time::now();
-        Time endOfInterval = Time(p.generative->time.end);
+        Time endOfInterval = Time(p.prototyped->time.end);
         _startTimeJ2000 = start.j2000Seconds();
         _endTimeJ2000 = endOfInterval.j2000Seconds();
-        if (p.generative->time.end == "Yesterday") {
+        if (p.prototyped->time.end == "Yesterday") {
             end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
         }
-        else if (p.generative->time.end != "Today") {
-            end.setTime(p.generative->time.end);
+        else if (p.prototyped->time.end != "Today") {
+            end.setTime(p.prototyped->time.end);
         }
 
         try {
@@ -239,20 +169,26 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 std::string(start.ISO8601()),
                 std::string(end.ISO8601())
             );
-            _timeQuantizer.setResolution(p.generative->temporalResolution);
-            _myResolution = p.generative->temporalResolution;
+            _timeQuantizer.setResolution(p.prototyped->temporalResolution);
+            _myResolution = p.prototyped->temporalResolution;
         }
         catch (const ghoul::RuntimeError& e) {
             throw ghoul::RuntimeError(fmt::format(
-                "Could not create time quantizer for Temporal GDAL dataset '{}'. {}",
-                _filePath.value(), e.message
+                "Could not create time quantizer for Temporal GDAL dataset. {}", e.message
             ));
         }
-        _timeFormat = ghoul::from_string<TimeFormatType>(p.generative->timeFormat);
+
+        if (p.prototyped->timeFormat.size() >= 64) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Time format string '{}' too large. Maximum length of 64 is allowed",
+                p.prototyped->timeFormat
+            ));
+        }
+        _timeFormat = p.prototyped->timeFormat;
+        _prototype = p.prototyped->prototype;
     }
     _interpolation = p.interpolation.value_or(_interpolation);
 
-    _gdalXmlTemplate = p.filePath;
 
     if (_interpolation) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
@@ -330,12 +266,12 @@ std::unique_ptr<TileProvider> TemporalTileProvider::initTileProvider(
     };
 
 
-    std::string xmlTemplate(_gdalXmlTemplate);
-    const size_t pos = xmlTemplate.find(UrlTimePlaceholder);
-    const size_t numChars = strlen(UrlTimePlaceholder);
+    std::string prototype = _prototype;
+    const size_t pos = prototype.find(UrlTimePlaceholder);
+    const size_t numChars = std::string_view(UrlTimePlaceholder).size();
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    std::string xml = xmlTemplate.replace(pos, numChars, timekey);
+    std::string xml = prototype.replace(pos, numChars, timekey);
 
     xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
 

@@ -4,19 +4,19 @@ local layer = {
   Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
   Name = "MODIS Terra Chlorophyll A (Temporal)",
   Type = "TemporalTileLayer",
-  Generative = {
+  Prototyped = {
     Time = {
       Start = "2013-07-02",
       End = "Yesterday"
     },
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Terra_Chlorophyll_A",
+      "1km",
+      "png"
+    )
   },
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "MODIS_Terra_Chlorophyll_A",
-    "1km",
-    "png"
-  ),
   Description = [[ Temporal coverage: 02 July 2013 - Present. The imagery resolution
     is 1 km, and the temporal resolution is daily.]]
 }

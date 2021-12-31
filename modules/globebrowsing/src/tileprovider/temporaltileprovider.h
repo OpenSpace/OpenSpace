@@ -43,14 +43,6 @@ namespace openspace::globebrowsing {
  */
 class TemporalTileProvider : public TileProvider {
 public:
-    enum class TimeFormatType {
-        YYYY_MM_DD = 0,
-        YYYYMMDD_hhmmss,
-        YYYYMMDD_hhmm,
-        YYYY_MM_DDThhColonmmColonssZ,
-        YYYY_MM_DDThh_mm_ssZ
-    };
-
     using TimeKey = std::string;
 
     TemporalTileProvider(const ghoul::Dictionary& dictionary);
@@ -91,10 +83,9 @@ private:
     };
 
     ghoul::Dictionary _initDict;
-    properties::StringProperty _filePath;
     properties::BoolProperty _useFixedTime;
     properties::StringProperty _fixedTime;
-    std::string _gdalXmlTemplate;
+    std::string _prototype;
 
     std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> _tileProviderMap;
 
@@ -103,7 +94,7 @@ private:
     TileProvider* _currentTileProvider = nullptr;
     double _startTimeJ2000;
     double _endTimeJ2000;
-    TimeFormatType _timeFormat;
+    std::string _timeFormat;
     TimeQuantizer _timeQuantizer;
     std::string _colormap;
 

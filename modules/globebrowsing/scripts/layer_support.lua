@@ -96,14 +96,14 @@ openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, start
     local layer = {
         Identifier = layerName, 
         Type = "TemporalTileLayer",
-        Generative = {
+        Prototyped = {
             Time = {
                 Start = startDate,
                 End = endDate
             },
             TemporalResolution = "1d",
             TimeFormat = "YYYY-MM-DD",
-            FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(layerName, resolution, format)
+            Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(layerName, resolution, format)
         }
     }
 

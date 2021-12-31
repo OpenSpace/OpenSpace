@@ -13,19 +13,19 @@ local layer = {
         Identifier = "Temporal_VIIRS_SNPP",
         Name = "Temporal VIIRS SNPP",
         Type = "TemporalTileLayer",
-        Generative = {
+        Prototyped = {
           Time = {
             Start = "2015-11-24",
             End = "Today"
           },
           TemporalResolution = "1d",
           TimeFormat = "YYYY-MM-DD",
+          Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+            "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+            "250m",
+            "jpg"
+          )
         },
-        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-          "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-          "250m",
-          "jpg"
-        ),
         PadTiles = false
       }
     },
