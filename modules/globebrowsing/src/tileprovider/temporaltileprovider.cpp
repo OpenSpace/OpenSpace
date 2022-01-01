@@ -408,24 +408,6 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
     return &it.first->second;
 }
 
-std::vector<std::pair<double, std::string>>::const_iterator
-TemporalTileProvider::findMatchingTime(double t) const
-{
-    auto it = std::upper_bound(
-        _folder.files.cbegin(),
-        _folder.files.cend(),
-        t,
-        [&t](double time, const std::pair<double, std::string>& p) {
-            return time < p.first;
-        }
-    );
-
-    if (it != _folder.files.begin()) {
-        std::advance(it, -1);
-    }
-    return it;
-}
-
 template <>
 TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
@@ -439,7 +421,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
                                                                          const Time& time)
 {
-    using It = std::vector<std::pair<double, std::string>>::const_iterator;
+     using It = std::vector<std::pair<double, std::string>>::const_iterator;
     It next = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
@@ -449,29 +431,9 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         }
     );
 
-    It curr;
-    if (next != _folder.files.begin()) {
-        curr = next - 1;
-    }
-    else {
-        curr = next;
-    }
-
-    It nextNext;
-    if (next != _folder.files.end()) {
-        nextNext = next + 1;
-    }
-    else {
-        nextNext = curr;
-    }
-
-    It prev;
-    if (curr != _folder.files.begin()) {
-        prev = curr - 1;
-    }
-    else {
-        prev = curr;
-    }
+    It curr = next != _folder.files.begin() ? next - 1 : next;
+    It nextNext = next != _folder.files.end() ? next + 1 : curr;
+    It prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
     _interpolateTileProvider->t2 = retrieveTileProvider(Time(next->first));
@@ -709,17 +671,13 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
-        // Get the tile from the tilecache
         ourTile = tileCache->get(key);
-        // Use the texture from the tileCache
         writeTexture = ourTile.texture;
     }
     else {
         // Create a texture with the initialization data
         writeTexture = tileCache->texture(initData);
-        // Create a tile with the texture
         ourTile = Tile{ writeTexture, std::nullopt, Tile::Status::OK };
-        // Add it to the tilecache
         tileCache->put(key, initData.hashKey, ourTile);
     }
 
@@ -734,10 +692,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glDisable(GL_BLEND);
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
-    // Check that our framebuffer is ok
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LERRORC("TileProvider", "Incomplete framebuffer");
-    }
+    
     // Setup our own viewport settings
     GLsizei w = static_cast<GLsizei>(writeTexture->width());
     GLsizei h = static_cast<GLsizei>(writeTexture->height());

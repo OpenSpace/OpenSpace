@@ -44,8 +44,6 @@ namespace openspace::globebrowsing {
  */
 class TemporalTileProvider : public TileProvider {
 public:
-    using TimeKey = std::string;
-
     TemporalTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
@@ -93,10 +91,6 @@ private:
     TileProvider* tileProvider(const Time& time);
 
     TileProvider* tileProvider(const Time& time);
-
-    std::vector<std::pair<double, std::string>>::const_iterator findMatchingTime(
-        double t) const;
-
 
     Mode _mode;
 
