@@ -24,7 +24,7 @@
 
 #include "catch2/catch.hpp"
 
-#include <modules/globebrowsing/src/tileprovider.h>
+//#include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/util/time.h>
 #include <glm/glm.hpp>
 

@@ -82,8 +82,7 @@ private:
         cache::MemoryAwareTileCache* tileCache = nullptr;
     };
 
-    void ensureUpdated();
-    std::unique_ptr<DefaultTileProvider> initTileProvider(std::string_view timekey);
+    DefaultTileProvider initTileProvider(std::string_view timekey);
     DefaultTileProvider* retrieveTileProvider(std::string_view timekey);
     TileProvider* tileProvider(const Time& time);
     
@@ -118,7 +117,7 @@ private:
     properties::StringProperty _fixedTime;
 
     TileProvider* _currentTileProvider = nullptr;
-    std::unordered_map<TimeKey, std::unique_ptr<DefaultTileProvider>> _tileProviderMap;
+    std::unordered_map<TimeKey, DefaultTileProvider> _tileProviderMap;
 
     bool _isInterpolating = false;
 

@@ -43,7 +43,8 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_folder)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", layer_prototype)
+
 asset.meta = {
   Name = "Climate Earth Layers",
   Version = "1.0",

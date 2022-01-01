@@ -264,27 +264,25 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     }
 }
 
-void TemporalTileProvider::ensureUpdated() {
+Tile TemporalTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped
-
     if (!_currentTileProvider) {
         update();
     }
-}
-
-Tile TemporalTileProvider::tile(const TileIndex& tileIndex) {
-    ZoneScoped
-    ensureUpdated();
     return _currentTileProvider->tile(tileIndex);
 }
 
 Tile::Status TemporalTileProvider::tileStatus(const TileIndex& index) {
-    ensureUpdated();
+    if (!_currentTileProvider) {
+        update();
+    }
     return _currentTileProvider->tileStatus(index);
 }
 
 TileDepthTransform TemporalTileProvider::depthTransform() {
-    ensureUpdated();
+    if (!_currentTileProvider) {
+        update();
+    }
     return _currentTileProvider->depthTransform();
 }
 
@@ -306,15 +304,15 @@ void TemporalTileProvider::update() {
 }
 
 void TemporalTileProvider::reset() {
-    using K = TimeKey;
-    using V = std::unique_ptr<DefaultTileProvider>;
-    for (std::pair<const K, V>& it : _tileProviderMap) {
-        it.second->reset();
+    for (std::pair<const TimeKey, DefaultTileProvider>& it : _tileProviderMap) {
+        it.second.reset();
     }
 }
 
 int TemporalTileProvider::maxLevel() {
-    ensureUpdated();
+    if (!_currentTileProvider) {
+        update();
+    }
     return _currentTileProvider->maxLevel();
 }
 
@@ -322,9 +320,7 @@ float TemporalTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-std::unique_ptr<DefaultTileProvider> TemporalTileProvider::initTileProvider(
-                                                                 std::string_view timekey)
-{
+DefaultTileProvider TemporalTileProvider::initTileProvider(std::string_view timekey) {
     ZoneScoped
 
     std::string content;
@@ -367,7 +363,7 @@ std::unique_ptr<DefaultTileProvider> TemporalTileProvider::initTileProvider(
     }
 
     _initDict.setValue("FilePath", content);
-    return std::make_unique<DefaultTileProvider>(_initDict);
+    return DefaultTileProvider(_initDict);
 }
 
 DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view time) {
@@ -377,15 +373,14 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view
     // to C++20 thanks to P0919R2
     const auto it = _tileProviderMap.find(std::string(time));
     if (it != _tileProviderMap.end()) {
-        return it->second.get();
+        return &it->second;
     }
     else {
-        std::unique_ptr<DefaultTileProvider> tileProvider = initTileProvider(time);
-        tileProvider->initialize();
+        DefaultTileProvider tileProvider = initTileProvider(time);
+        tileProvider.initialize();
 
-        DefaultTileProvider* res = tileProvider.get();
-        _tileProviderMap[std::string(time)] = std::move(tileProvider);
-        return res;
+        auto it = _tileProviderMap.insert({ std::string(time), std::move(tileProvider) });
+        return &it.first->second;
     }
 }
 
@@ -431,6 +426,9 @@ TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
                         std::string_view timeStr = 
                             timeStringify(_prototyped.timeFormat, tCopy);
                         return retrieveTileProvider(timeStr);
+                    }
+                    else {
+                        return nullptr;
                     }
                 }
                 case Mode::Folder: {
@@ -618,8 +616,6 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // There is a previous and next texture to interpolate between so do the interpolation
 
-    // The texture that will give the color for the interpolated texture
-    ghoul::opengl::Texture* colormapTexture = colormap.get();
    
     // The data for initializing the texture
     TileTextureInitData initData(
@@ -683,9 +679,10 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     shaderProgram->activate();
     shaderProgram->setUniform("blendFactor", factor);
 
+    // The texture that will give the color for the interpolated texture
     ghoul::opengl::TextureUnit colormapUnit;
     colormapUnit.activate();
-    colormapTexture->bind();
+    colormap->bind();
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
     ghoul::opengl::TextureUnit prevUnit;
@@ -720,14 +717,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 Tile::Status TemporalTileProvider::InterpolateTileProvider::tileStatus(
                                                                    const TileIndex& index)
 {
-    Tile::Status t1Stat = t1->tileStatus(index);
-    Tile::Status t2Stat = t2->tileStatus(index);
-    if (t1Stat <= t2Stat) {
-        return t1Stat;
-    }
-    else {
-        return t2Stat;
-    }
+    return std::min(t1->tileStatus(index), t2->tileStatus(index));
 }
 
 TileDepthTransform TemporalTileProvider::InterpolateTileProvider::depthTransform() {
