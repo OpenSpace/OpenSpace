@@ -57,6 +57,11 @@ public:
     float noDataValueAsFloat() override final;
 
 private:
+    enum class Mode {
+        Prototype,
+        Folder
+    };
+
     struct InterpolateTileProvider : public TileProvider {
         InterpolateTileProvider(const ghoul::Dictionary&);
         virtual ~InterpolateTileProvider();
@@ -83,15 +88,16 @@ private:
 
     DefaultTileProvider createTileProvider(std::string_view timekey) const;
     DefaultTileProvider* retrieveTileProvider(const Time& t);
+
+    template <Mode mode, bool interpolation>
     TileProvider* tileProvider(const Time& time);
-    
+
+    TileProvider* tileProvider(const Time& time);
+
     std::vector<std::pair<double, std::string>>::const_iterator findMatchingTime(
         double t) const;
 
-    enum class Mode {
-        Prototype,
-        Folder
-    };
+
     Mode _mode;
 
     struct {

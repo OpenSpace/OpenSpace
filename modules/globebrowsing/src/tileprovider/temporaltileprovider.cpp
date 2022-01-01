@@ -426,117 +426,201 @@ TemporalTileProvider::findMatchingTime(double t) const
     return it;
 }
 
+template <>
+TileProvider*
+TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
+                                                                         const Time& time)
+{
+    return retrieveTileProvider(time);
+}
+
+template <>
+TileProvider*
+TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
+                                                                         const Time& time)
+{
+    using It = std::vector<std::pair<double, std::string>>::const_iterator;
+    It next = std::lower_bound(
+        _folder.files.begin(),
+        _folder.files.end(),
+        time.j2000Seconds(),
+        [](const std::pair<double, std::string>& p, double t) {
+            return p.first < t;
+        }
+    );
+
+    It curr;
+    if (next != _folder.files.begin()) {
+        curr = next - 1;
+    }
+    else {
+        curr = next;
+    }
+
+    It nextNext;
+    if (next != _folder.files.end()) {
+        nextNext = next + 1;
+    }
+    else {
+        nextNext = curr;
+    }
+
+    It prev;
+    if (curr != _folder.files.begin()) {
+        prev = curr - 1;
+    }
+    else {
+        prev = curr;
+    }
+
+    _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
+    _interpolateTileProvider->t2 = retrieveTileProvider(Time(next->first));
+    _interpolateTileProvider->future = retrieveTileProvider(Time(nextNext->first));
+    _interpolateTileProvider->before = retrieveTileProvider(Time(prev->first));
+
+    _interpolateTileProvider->factor = static_cast<float>(
+        (time.j2000Seconds() - curr->first) /
+        (next->first - curr->first)
+    );
+
+    if (_interpolateTileProvider->factor > 1.f) {
+        _interpolateTileProvider->factor = 1.f;
+    }
+
+    return _interpolateTileProvider.get();
+}
+
+template <>
+TileProvider*
+TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, false>(
+                                                                         const Time& time)
+{
+    Time tCopy(time);
+    if (_prototyped.timeQuantizer.quantize(tCopy, true)) {
+        return retrieveTileProvider(tCopy);
+    }
+    else {
+        return nullptr;
+    }
+}
+
+template <>
+TileProvider*
+TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
+                                                                         const Time& time)
+{
+    Time tCopy(time);
+    if (!_prototyped.timeQuantizer.quantize(tCopy, true)) {
+        return nullptr;
+    }
+
+    Time nextTile = tCopy;
+    Time nextNextTile = tCopy;
+    Time prevTile = tCopy;
+    Time secondToLast = Time(_prototyped.endTimeJ2000);
+    Time secondToFirst = Time(_prototyped.startTimeJ2000);
+
+    _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
+    
+    // if the images are for each hour
+    if (_prototyped.temporalResolution == "1h") {
+        constexpr const int Hour = 60 * 60;
+        // the second tile to interpolate between
+        nextTile.advanceTime(Hour);
+        // the tile after the second tile
+        nextNextTile.advanceTime(2 * Hour);
+        // the tile before the first tile
+        prevTile.advanceTime(-Hour + 1);
+        // to make sure that an image outside the dataset is not searched for both
+        // ends of the dataset are calculated
+        secondToLast.advanceTime(-Hour);
+        secondToFirst.advanceTime(Hour);
+    }
+    // if the images are for each month
+    if (_prototyped.temporalResolution == "1M") {
+        constexpr const int Day = 24 * 60 * 60;
+
+        // the second tile to interpolate between
+        nextTile.advanceTime(32 * Day);
+        // the tile after the second tile
+        nextNextTile.advanceTime(64 * Day);
+        // the tile before the first tile
+        prevTile.advanceTime(-2 * Day);
+        // to make sure that an image outside the dataset is not searched for both
+        // ends of the dataset are calculated
+        secondToLast.advanceTime(-2 * Day);
+        secondToFirst.advanceTime(32 * Day);
+
+        // since months vary in length the time is set to the first of each month
+        auto setToFirstOfMonth = [](Time& t) {
+            std::string timeString = std::string(t.ISO8601());
+            timeString[8] = '0';
+            timeString[9] = '1';
+            t.setTime(timeString);
+        };
+
+        setToFirstOfMonth(nextTile);
+        setToFirstOfMonth(nextNextTile);
+        setToFirstOfMonth(prevTile);
+        setToFirstOfMonth(secondToLast);
+        setToFirstOfMonth(secondToFirst);
+    }
+
+    // the necessary tile providers are loaded if they exist within the timespan
+    if (secondToLast.j2000Seconds() > time.j2000Seconds() &&
+        secondToFirst.j2000Seconds() < time.j2000Seconds())
+    {
+        _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
+        _interpolateTileProvider->future = retrieveTileProvider(nextNextTile);
+        _interpolateTileProvider->before = retrieveTileProvider(prevTile);
+    }
+    else if (secondToLast.j2000Seconds() < time.j2000Seconds() &&
+        _prototyped.endTimeJ2000 > time.j2000Seconds())
+    {
+        _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
+        _interpolateTileProvider->future = retrieveTileProvider(tCopy);
+        _interpolateTileProvider->before = retrieveTileProvider(prevTile);
+    }
+    else if (secondToFirst.j2000Seconds() > time.j2000Seconds() &&
+        _prototyped.startTimeJ2000 < time.j2000Seconds())
+    {
+        _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
+        _interpolateTileProvider->future = retrieveTileProvider(nextNextTile);
+        _interpolateTileProvider->before = retrieveTileProvider(tCopy);
+    }
+    else {
+        _interpolateTileProvider->t2 = retrieveTileProvider(tCopy);
+        _interpolateTileProvider->future = retrieveTileProvider(tCopy);
+        _interpolateTileProvider->before = retrieveTileProvider(tCopy);
+    }
+    _interpolateTileProvider->factor = static_cast<float>(
+        (time.j2000Seconds() - tCopy.j2000Seconds()) /
+        (nextTile.j2000Seconds() - tCopy.j2000Seconds())
+    );
+
+    if (_interpolateTileProvider->factor > 1.f) {
+        _interpolateTileProvider->factor = 1.f;
+    }
+    return _interpolateTileProvider.get();
+}
+
 TileProvider* TemporalTileProvider::tileProvider(const Time& time) {
-    ZoneScoped
-
     if (_isInterpolating) {
-        Time tCopy(time);
-        if (!_prototyped.timeQuantizer.quantize(tCopy, true)) {
-            return nullptr;
+        switch (_mode) {
+            case Mode::Folder:
+                return tileProvider<Mode::Folder, true>(time);
+            case Mode::Prototype:
+                return tileProvider<Mode::Prototype, true>(time);
+            default: throw ghoul::MissingCaseException();
         }
-
-        Time nextTile = tCopy;
-        Time nextNextTile = tCopy;
-        Time prevTile = tCopy;
-        Time secondToLast = Time(_prototyped.endTimeJ2000);
-        Time secondToFirst = Time(_prototyped.startTimeJ2000);
-
-        _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
-        // if the images are for each hour
-        if (_prototyped.temporalResolution == "1h") {
-            constexpr const int Hour = 60 * 60;
-            // the second tile to interpolate between
-            nextTile.advanceTime(Hour);
-            // the tile after the second tile
-            nextNextTile.advanceTime(2 * Hour);
-            // the tile before the first tile
-            prevTile.advanceTime(-Hour + 1);
-            // to make sure that an image outside the dataset is not searched for both
-            // ends of the dataset are calculated
-            secondToLast.advanceTime(-Hour);
-            secondToFirst.advanceTime(Hour);
-        }
-        // if the images are for each month
-        if (_prototyped.temporalResolution == "1M") {
-            constexpr const int Day = 24 * 60 * 60;
-
-            // the second tile to interpolate between
-            nextTile.advanceTime(32 * Day);
-            // the tile after the second tile
-            nextNextTile.advanceTime(64 * Day);
-            // the tile before the first tile
-            prevTile.advanceTime(-2 * Day);
-            // to make sure that an image outside the dataset is not searched for both
-            // ends of the dataset are calculated
-            secondToLast.advanceTime(-2 * Day);
-            secondToFirst.advanceTime(32 * Day);
-
-            // since months vary in length the time is set to the first of each month
-            auto setToFirstOfMonth = [](Time& t) {
-                std::string timeString = std::string(t.ISO8601());
-                timeString[8] = '0';
-                timeString[9] = '1';
-                t.setTime(timeString);
-            };
-
-            setToFirstOfMonth(nextTile);
-            setToFirstOfMonth(nextNextTile);
-            setToFirstOfMonth(prevTile);
-            setToFirstOfMonth(secondToLast);
-            setToFirstOfMonth(secondToFirst);
-        }
-
-        // the necessary tile providers are loaded if they exist within the timespan
-        if (secondToLast.j2000Seconds() > time.j2000Seconds() &&
-            secondToFirst.j2000Seconds() < time.j2000Seconds())
-        {
-            _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
-            _interpolateTileProvider->future = retrieveTileProvider(nextNextTile);
-            _interpolateTileProvider->before = retrieveTileProvider(prevTile);
-        }
-        else if (secondToLast.j2000Seconds() < time.j2000Seconds() &&
-                 _prototyped.endTimeJ2000 > time.j2000Seconds())
-        {
-            _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
-            _interpolateTileProvider->future = retrieveTileProvider(tCopy);
-            _interpolateTileProvider->before = retrieveTileProvider(prevTile);
-        }
-        else if (secondToFirst.j2000Seconds() > time.j2000Seconds() &&
-                 _prototyped.startTimeJ2000 < time.j2000Seconds())
-        {
-            _interpolateTileProvider->t2 = retrieveTileProvider(nextTile);
-            _interpolateTileProvider->future = retrieveTileProvider(nextNextTile);
-            _interpolateTileProvider->before = retrieveTileProvider(tCopy);
-        }
-        else {
-            _interpolateTileProvider->t2 = retrieveTileProvider(tCopy);
-            _interpolateTileProvider->future = retrieveTileProvider(tCopy);
-            _interpolateTileProvider->before = retrieveTileProvider(tCopy);
-        }
-        _interpolateTileProvider->factor = static_cast<float>(
-            (time.j2000Seconds() - tCopy.j2000Seconds()) /
-            (nextTile.j2000Seconds() - tCopy.j2000Seconds())
-        );
-
-        if (_interpolateTileProvider->factor > 1.f) {
-            _interpolateTileProvider->factor = 1.f;
-        }
-        return _interpolateTileProvider.get();
     }
     else {
         switch (_mode) {
-            case Mode::Prototype: {
-                Time tCopy(time);
-                if (_prototyped.timeQuantizer.quantize(tCopy, true)) {
-                    return retrieveTileProvider(tCopy);
-                }
-                else {
-                    return nullptr;
-                }
-            }
-            case Mode::Folder: {
-                return retrieveTileProvider(time);
-            }
+            case Mode::Folder:
+                return tileProvider<Mode::Folder, false>(time);
+            case Mode::Prototype:
+                return tileProvider<Mode::Prototype, false>(time);
+            default: throw ghoul::MissingCaseException();
         }
     }
 }
