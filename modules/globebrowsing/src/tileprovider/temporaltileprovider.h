@@ -114,6 +114,7 @@ private:
     ghoul::Dictionary _initDict;
     properties::BoolProperty _useFixedTime;
     properties::StringProperty _fixedTime;
+    bool _fixedTimeDirty = true;
 
     TileProvider* _currentTileProvider = nullptr;
     std::unordered_map<double, DefaultTileProvider> _tileProviderMap;
