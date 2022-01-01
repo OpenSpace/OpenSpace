@@ -173,9 +173,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
         Time start = Time(p.prototyped->time.start);
         Time end = Time::now();
-        Time endOfInterval = Time(p.prototyped->time.end);
         _prototyped.startTimeJ2000 = start.j2000Seconds();
-        _prototyped.endTimeJ2000 = endOfInterval.j2000Seconds();
+        _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
         if (p.prototyped->time.end == "Yesterday") {
             end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
         }
@@ -269,6 +268,7 @@ Tile TemporalTileProvider::tile(const TileIndex& tileIndex) {
     if (!_currentTileProvider) {
         update();
     }
+
     return _currentTileProvider->tile(tileIndex);
 }
 
@@ -276,6 +276,7 @@ Tile::Status TemporalTileProvider::tileStatus(const TileIndex& index) {
     if (!_currentTileProvider) {
         update();
     }
+
     return _currentTileProvider->tileStatus(index);
 }
 
@@ -283,6 +284,7 @@ TileDepthTransform TemporalTileProvider::depthTransform() {
     if (!_currentTileProvider) {
         update();
     }
+
     return _currentTileProvider->depthTransform();
 }
 
@@ -320,50 +322,43 @@ float TemporalTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-DefaultTileProvider TemporalTileProvider::initTileProvider(std::string_view timekey) {
+DefaultTileProvider TemporalTileProvider::createTileProvider(
+                                                           std::string_view timekey) const
+{
     ZoneScoped
 
-    std::string content;
+    std::string value;
     switch (_mode) {
         case Mode::Prototype: {
             static const std::vector<std::string> IgnoredTokens = {
                 // From: http://www.gdal.org/frmt_wms.html
-                "${x}",
-                "${y}",
-                "${z}",
-                "${version}",
-                "${format}",
-                "${layer}"
+                "${x}", "${y}", "${z}", "${version}" "${format}", "${layer}"
             };
 
-
-            content = _prototyped.prototype;
+            value = _prototyped.prototype;
             while (true) {
-                const size_t pos = content.find(TimePlaceholder);
+                const size_t pos = value.find(TimePlaceholder);
 
                 if (pos == std::string::npos) {
                     break;
                 }
 
                 const size_t numChars = std::string_view(TimePlaceholder).size();
-                content = content.replace(pos, numChars, timekey);
+                value = value.replace(pos, numChars, timekey);
             }
 
-
-            content = FileSys.expandPathTokens(
-                std::move(content),
-                IgnoredTokens
-            ).string();
+            value = FileSys.expandPathTokens(std::move(value), IgnoredTokens).string();
             break;
         }
         case Mode::Folder: {
-            content = std::string(timekey);
+            value = std::string(timekey);
             break;
         }
     }
 
-    _initDict.setValue("FilePath", content);
-    return DefaultTileProvider(_initDict);
+    ghoul::Dictionary dict = _initDict;
+    dict.setValue("FilePath", value);
+    return DefaultTileProvider(dict);
 }
 
 DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view time) {
@@ -376,7 +371,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(std::string_view
         return &it->second;
     }
     else {
-        DefaultTileProvider tileProvider = initTileProvider(time);
+        DefaultTileProvider tileProvider = createTileProvider(time);
         tileProvider.initialize();
 
         auto it = _tileProviderMap.insert({ std::string(time), std::move(tileProvider) });

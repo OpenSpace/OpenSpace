@@ -82,7 +82,7 @@ private:
         cache::MemoryAwareTileCache* tileCache = nullptr;
     };
 
-    DefaultTileProvider initTileProvider(std::string_view timekey);
+    DefaultTileProvider createTileProvider(std::string_view timekey) const;
     DefaultTileProvider* retrieveTileProvider(std::string_view timekey);
     TileProvider* tileProvider(const Time& time);
     
