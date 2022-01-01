@@ -90,7 +90,10 @@ namespace {
             // The temporal resolution between each image
             std::string temporalResolution;
 
-            // The specification of the date format that is used in the tile provider
+            // The specification of the date format that is used in the tile provider. The
+            // time format must be specified in a manner appropriate for the SPICE
+            // function `timout_c`.
+            // https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
             std::string timeFormat;
 
             // The text that will be used as the prototype to generate the data to load
@@ -104,7 +107,14 @@ namespace {
         std::optional<Prototyped> prototyped;
 
         struct Folder {
+            // The folder that is parsed for files. Every file in the provided directory
+            // is checked against the provided format and added if it adheres to said
+            // format
             std::filesystem::path folder [[codegen::directory()]];
+            
+            // The format of files that is pared in the provided folder. The format string
+            // has to be compatible to the C++ function get_time.
+            // https://en.cppreference.com/w/cpp/io/manip/get_time
             std::string format;
         };
         std::optional<Folder> folder;
