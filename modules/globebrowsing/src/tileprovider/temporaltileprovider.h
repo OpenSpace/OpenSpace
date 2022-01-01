@@ -79,11 +79,10 @@ private:
         GLuint fbo = 0;
         std::unique_ptr<ghoul::opengl::ProgramObject> shaderProgram;
         std::unique_ptr<ghoul::opengl::Texture> colormap;
-        cache::MemoryAwareTileCache* tileCache = nullptr;
     };
 
     DefaultTileProvider createTileProvider(std::string_view timekey) const;
-    DefaultTileProvider* retrieveTileProvider(std::string_view timekey);
+    DefaultTileProvider* retrieveTileProvider(const Time& t);
     TileProvider* tileProvider(const Time& time);
     
     std::vector<std::pair<double, std::string>>::const_iterator findMatchingTime(
@@ -117,7 +116,7 @@ private:
     properties::StringProperty _fixedTime;
 
     TileProvider* _currentTileProvider = nullptr;
-    std::unordered_map<TimeKey, DefaultTileProvider> _tileProviderMap;
+    std::unordered_map<double, DefaultTileProvider> _tileProviderMap;
 
     bool _isInterpolating = false;
 
