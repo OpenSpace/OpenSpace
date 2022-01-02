@@ -183,7 +183,7 @@ namespace {
         // [[codegen::verbatim(DistanceEPSInfo.description)]]
         std::optional<float> distanceEPS;
 
-        enum class Alignment {
+        enum class [[codegen::map(LabelRenderingAlignmentType)]] Alignment {
             Horizontally,
             Circularly
         };
@@ -282,16 +282,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _distanceEPS = p.distanceEPS.value_or(_distanceEPS);
 
     if (p.alignmentOption.has_value()) {
-        switch (*p.alignmentOption) {
-            case Parameters::Alignment::Horizontally:
-                _alignmentOption = Horizontally;
-                break;
-            case Parameters::Alignment::Circularly:
-                _alignmentOption = Circularly;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _alignmentOption = codegen::map<LabelRenderingAlignmentType>(*p.alignmentOption);
     }
 
     initializeFonts();

@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
@@ -65,16 +66,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
-
     std::vector<double> createDataSlice();
 
     void readColorMapFile();
@@ -99,7 +90,7 @@ private:
     std::filesystem::path _speckFile;
     std::filesystem::path _colorMapFile;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
     std::vector<glm::vec4> _colorMapData;

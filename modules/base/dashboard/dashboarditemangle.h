@@ -49,12 +49,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Type {
-        Node = 0,
-        Focus,
-        Camera
-    };
-
     struct Component {
         properties::OptionProperty type;
         properties::StringProperty nodeName;

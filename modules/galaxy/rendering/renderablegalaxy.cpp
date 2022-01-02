@@ -57,6 +57,11 @@ namespace {
 
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
+    enum StarRenderingMethod {
+        Points,
+        Billboards
+    };
+
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
         "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
@@ -147,7 +152,7 @@ namespace {
         // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
         std::optional<float> emissionMultiply;
 
-        enum class StarRenderingMethod {
+        enum class [[codegen::map(StarRenderingMethod)]] StarRenderingMethod {
             Points,
             Billboards
         };
@@ -255,18 +260,11 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _emissionMultiply = p.emissionMultiply.value_or(_emissionMultiply);
 
     _starRenderingMethod.addOptions({
-        { 0, "Points" },
-        { 1, "Billboards" }
+        { StarRenderingMethod::Points, "Points" },
+        { StarRenderingMethod::Billboards, "Billboards" }
     });
     if (p.starRenderingMethod.has_value()) {
-        switch (*p.starRenderingMethod) {
-            case Parameters::StarRenderingMethod::Points:
-                _starRenderingMethod = 0;
-                break;
-            case Parameters::StarRenderingMethod::Billboards:
-                _starRenderingMethod = 1;
-                break;
-        }
+        _starRenderingMethod = codegen::map<StarRenderingMethod>(*p.starRenderingMethod);
     }
 
     _rotation = p.rotation.value_or(_rotation);

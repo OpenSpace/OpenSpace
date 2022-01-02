@@ -119,7 +119,7 @@ namespace {
         // [[codegen::verbatim(ResolutionInfo.description)]]
         int resolution;
 
-        enum class RenderableType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
             Background,
             Opaque,
             PreDeferredTransparent,
@@ -177,25 +177,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 
     if (p.renderableType.has_value()) {
-        switch (*p.renderableType) {
-            case Parameters::RenderableType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderableType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderableType::PreDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderableType::PostDeferredTransparent:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderableType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Overlay);
