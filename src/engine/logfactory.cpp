@@ -70,7 +70,7 @@ namespace {
         // was used to create the log message
         std::optional<bool> logLevelStamping;
 
-        enum class LogLevel {
+        enum class [[codegen::map(ghoul::logging::LogLevel)]] LogLevel {
             AllLogging,
             Trace,
             Debug,
@@ -101,28 +101,9 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     bool dateStamp = p.dateStamping.value_or(true);
     bool categoryStamp = p.categoryStamping.value_or(true);
     bool logLevelStamp = p.logLevelStamping.value_or(true);
-    ghoul::logging::LogLevel level = [](Parameters::LogLevel l) {
-        switch (l) {
-            case Parameters::LogLevel::AllLogging:
-                return ghoul::logging::LogLevel::AllLogging;
-            case Parameters::LogLevel::Trace:
-                return ghoul::logging::LogLevel::Trace;
-            case Parameters::LogLevel::Debug:
-                return ghoul::logging::LogLevel::Debug;
-            case Parameters::LogLevel::Info:
-                return ghoul::logging::LogLevel::Info;
-            case Parameters::LogLevel::Warning:
-                return ghoul::logging::LogLevel::Warning;
-            case Parameters::LogLevel::Error:
-                return ghoul::logging::LogLevel::Error;
-            case Parameters::LogLevel::Fatal:
-                return ghoul::logging::LogLevel::Fatal;
-            case Parameters::LogLevel::NoLogging:
-                return ghoul::logging::LogLevel::NoLogging;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }(p.logLevel.value_or(Parameters::LogLevel::AllLogging));
+    ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
+        p.logLevel.value_or(Parameters::LogLevel::AllLogging)
+    );
 
     switch (p.type) {
         case Parameters::Type::Html:

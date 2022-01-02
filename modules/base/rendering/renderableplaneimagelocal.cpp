@@ -56,11 +56,11 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        enum class RenderType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
             Background,
             Opaque,
-            PreDeferredTransparency,
-            PostDeferredTransparency,
+            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
+            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
             Overlay
         };
 
@@ -110,23 +110,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (p.renderType.has_value()) {
-        switch (*p.renderType) {
-            case Parameters::RenderType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderType::PreDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderType::PostDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Opaque);

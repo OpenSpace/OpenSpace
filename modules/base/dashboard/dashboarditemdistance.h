@@ -52,13 +52,6 @@ public:
     bool storyStyleActive();
 
 private:
-    enum Type {
-        Node = 0,
-        NodeSurface,
-        Focus,
-        Camera
-    };
-
     struct Component {
         properties::OptionProperty type;
         properties::StringProperty nodeName;

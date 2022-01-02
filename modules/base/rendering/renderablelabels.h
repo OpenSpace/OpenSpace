@@ -81,21 +81,6 @@ protected:
     // applied
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
-    enum Unit {
-        Meter = 0,
-        Kilometer,
-        Megameter,
-        Gigameter,
-        AU,
-        Terameter,
-        Petameter,
-        Parsec,
-        Kiloparsec,
-        Megaparsec,
-        Gigaparsec,
-        GigalightYears
-    };
-
 private:
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);

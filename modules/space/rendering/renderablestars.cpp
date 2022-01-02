@@ -58,8 +58,19 @@ namespace {
         "otherDataRange", "filterOutOfRange", "fixedColor"
     };
 
-    constexpr const int RenderOptionPointSpreadFunction = 0;
-    constexpr const int RenderOptionTexture = 1;
+    enum RenderMethod {
+        PointSpreadFunction = 0,
+        TextureBased
+    };
+
+    enum SizeComposition {
+        AppBrightness = 0,
+        LumSize,
+        LumSizeAppBrightness,
+        AbsMagnitude,
+        AppMagnitude,
+        DistanceModulus
+    };
 
     constexpr const int PsfMethodSpencer = 0;
     constexpr const int PsfMethodMoffat = 1;
@@ -393,8 +404,8 @@ namespace {
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
-        enum class RenderMethod {
-            PSF,
+        enum class [[codegen::map(RenderMethod)]] RenderMethod {
+            PointSpreadFunction [[codegen::key("PSF")]],
             TextureBased [[codegen::key("Texture Based")]]
         };
 
@@ -404,7 +415,7 @@ namespace {
         // [[codegen::verbatim(PsfTextureInfo.description)]]
         std::filesystem::path texture;
 
-        enum class SizeComposition {
+        enum class [[codegen::map(SizeComposition)]] SizeComposition {
             AppBrightness [[codegen::key("App Brightness")]],
             LumSize [[codegen::key("Lum and Size")]],
             LumSizeAppBrightness [[codegen::key("Lum, Size and App Brightness")]],
@@ -630,18 +641,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_filterOutOfRange);
 
     _renderingMethodOption.addOption(
-        RenderOptionPointSpreadFunction,
+        RenderMethod::PointSpreadFunction,
         "Point Spread Function Based"
     );
-    _renderingMethodOption.addOption(RenderOptionTexture, "Textured Based");
+    _renderingMethodOption.addOption(RenderMethod::TextureBased, "Textured Based");
     addProperty(_renderingMethodOption);
 
-    if (p.renderMethod == Parameters::RenderMethod::PSF) {
-        _renderingMethodOption = RenderOptionPointSpreadFunction;
-    }
-    else {
-        _renderingMethodOption = RenderOptionTexture;
-    }
+    _renderingMethodOption = codegen::map<RenderMethod>(p.renderMethod);
 
     _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
     _pointSpreadFunctionFile = std::make_unique<File>(
@@ -661,35 +667,20 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _psfMethodOption.onChange([&]() { renderPSFToTexture(); });
     _parametersOwner.addProperty(_psfMethodOption);
 
-    _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
-    _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
-    _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
-    _psfMultiplyOption.addOption(3, "Absolute Magnitude");
-    _psfMultiplyOption.addOption(4, "Apparent Magnitude");
-    _psfMultiplyOption.addOption(5, "Distance Modulus");
+    _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
+    _psfMultiplyOption.addOption(LumSize, "Use Star's Luminosity and Size");
+    _psfMultiplyOption.addOption(
+        LumSizeAppBrightness,
+        "Luminosity, Size, App Brightness"
+    );
+    _psfMultiplyOption.addOption(AbsMagnitude, "Absolute Magnitude");
+    _psfMultiplyOption.addOption(AppMagnitude, "Apparent Magnitude");
+    _psfMultiplyOption.addOption(DistanceModulus, "Distance Modulus");
 
 
     if (p.sizeComposition.has_value()) {
-        switch (*p.sizeComposition) {
-            case Parameters::SizeComposition::AppBrightness:
-                _psfMultiplyOption = 0;
-                break;
-            case Parameters::SizeComposition::LumSize:
-                _psfMultiplyOption = 1;
-                break;
-            case Parameters::SizeComposition::LumSizeAppBrightness:
-                _psfMultiplyOption = 2;
-                break;
-            case Parameters::SizeComposition::AbsMagnitude:
-                _psfMultiplyOption = 3;
-                break;
-            case Parameters::SizeComposition::AppMagnitude:
-                _psfMultiplyOption = 4;
-                break;
-            case Parameters::SizeComposition::DistanceModulus:
-                _psfMultiplyOption = 5;
-                break;
-        }
+        _psfMultiplyOption =
+            static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition));
     }
     else {
         _psfMultiplyOption = 5;
@@ -1052,12 +1043,12 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
 
-    if (_renderingMethodOption.value() == 0) { // PSF Based Methods
+    if (_renderingMethodOption.value() == RenderMethod::PointSpreadFunction) {
         glBindTexture(GL_TEXTURE_2D, _psfTexture);\
         // Convolutioned texture
         //glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
     }
-    else if (_renderingMethodOption.value() == 1) { // Textured based Method
+    else if (_renderingMethodOption.value() == RenderMethod::TextureBased) {
         _pointSpreadFunctionTexture->bind();
     }
 

@@ -38,16 +38,6 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    enum class FrametimeType {
-        DtTimeAvg = 0,
-        DtTimeExtremes,
-        DtStandardDeviation,
-        DtCoefficientOfVariation,
-        FPS,
-        FPSAvg,
-        None
-    };
-
     DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;

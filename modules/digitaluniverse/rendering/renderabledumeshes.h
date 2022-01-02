@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
@@ -65,16 +66,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
-
     enum MeshType {
         Solid = 0,
         Wire = 1,
@@ -135,7 +126,7 @@ private:
     std::string _speckFile;
     std::string _labelFile;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
     std::vector<float> _fullData;
     speck::Labelset _labelset;

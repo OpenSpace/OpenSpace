@@ -133,7 +133,7 @@ namespace {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::string textureSource;
 
-        enum class Orientation {
+        enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
             Inside,
             Both
@@ -201,19 +201,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     });
 
     if (p.orientation.has_value()) {
-        switch (*p.orientation) {
-            case Parameters::Orientation::Inside:
-                _orientation = static_cast<int>(Orientation::Inside);
-                break;
-            case Parameters::Orientation::Outside:
-                _orientation = static_cast<int>(Orientation::Outside);
-                break;
-            case Parameters::Orientation::Both:
-                _orientation = static_cast<int>(Orientation::Both);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
     }
     else {
         _orientation = static_cast<int>(Orientation::Outside);
