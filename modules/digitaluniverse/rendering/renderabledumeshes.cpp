@@ -215,7 +215,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
         _unit = DistanceUnit::Meter;
     }
 

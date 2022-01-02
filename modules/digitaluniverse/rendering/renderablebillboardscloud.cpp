@@ -1000,7 +1000,36 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
             e.position, 1.0
         ));
-        glm::vec4 position(transformedPos, static_cast<float>(_unit));
+
+        float unitValue = 0.f;
+        // (abock, 2022-01-02)  This is vestigial from a previous rewrite. I just want to
+        // make it work for now and we can rewrite it properly later
+        switch (_unit) {
+            case DistanceUnit::Meter:
+                unitValue = 0.f;
+                break;
+            case DistanceUnit::Kilometer:
+                unitValue = 1.f;
+                break;
+            case DistanceUnit::Parsec:
+                unitValue = 2;
+                break;
+            case DistanceUnit::Kiloparsec:
+                unitValue = 3;
+                break;
+            case DistanceUnit::Megaparsec:
+                unitValue = 4;
+                break;
+            case DistanceUnit::Gigaparsec:
+                unitValue = 5;
+                break;
+            case DistanceUnit::Gigalightyear:
+                unitValue = 6;
+                break;
+            default: ghoul::MissingCaseException();
+        }
+
+        glm::vec4 position(transformedPos, unitValue);
 
         const double unitMeter = toMeter(_unit);
         glm::dvec3 p = glm::dvec3(position) * unitMeter;

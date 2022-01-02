@@ -57,8 +57,6 @@ namespace {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     enum BlendMode {
         BlendModeNormal = 0,
         BlendModeAdditive
