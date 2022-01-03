@@ -52,7 +52,7 @@ void Display::initializeLayout() {
     _layoutMonButton->addStretch(1);
     _layout->addLayout(_layoutMonButton);
 
-    _layoutWindowCtrl = new QHBoxLayout(this);
+    //_layoutWindowCtrl = new QHBoxLayout(this);
     //////////Move the rest of the layout in this func to WindowControl class,
     // with _layoutWindowCtrl as parent layout
 
