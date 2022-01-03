@@ -28,6 +28,7 @@ public:
     void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb);
+    void cleanupLayouts();
     QVBoxLayout* initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/);
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
@@ -52,7 +53,7 @@ private:
         {50.0, 50.0, 800.0, 600.0},
         {900.0, 400.0, 640.0, 480.0}
     };
-    int _lineEditWidthFixed = 80;
+    int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
     int _index = 0;
 
@@ -80,6 +81,8 @@ private:
     QLabel* _labelOffset = nullptr;
     QLabel* _labelComma = nullptr;
     QHBoxLayout* _layoutOffset = nullptr;
+    QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
+    QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
     QHBoxLayout* _layoutCBoxFullscreen = nullptr;
     QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;

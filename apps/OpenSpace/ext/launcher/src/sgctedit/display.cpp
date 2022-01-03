@@ -25,6 +25,7 @@ Display::Display()
 Display::~Display() {
     delete _toggleNumMonitorsButton;
     delete _monBox;
+    delete _layoutMonBox;
     delete _layoutMonButton;
     delete _layoutWindows;
     delete _layout;
@@ -32,7 +33,12 @@ Display::~Display() {
 
 void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
-    _layout->addWidget(_monBox);
+    _layoutMonBox = new QHBoxLayout(this);
+    _layoutMonBox->addStretch(1);
+    //_layout->addWidget(_monBox);
+    _layoutMonBox->addWidget(_monBox);
+    _layoutMonBox->addStretch(1);
+    _layout->addLayout(_layoutMonBox);
     _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _monBox->setFixedSize(400, 400);
     _layoutMonButton = new QHBoxLayout(this);
@@ -60,6 +66,10 @@ void Display::initializeLayout() {
 
     QRect defaultMonitorResolution(_monitorResolution[0], _monitorResolution[1], 0, 0);
     _monBox->setResolution(defaultMonitorResolution);
+
+    for (WindowControl* w : _windowControl) {
+        w->cleanupLayouts();
+    }
 }
 
 void Display::toggleWindows() {
@@ -70,6 +80,7 @@ void Display::toggleWindows() {
     else if (_nWindowsDisplayed == 2) {
         _toggleNumMonitorsButton->setText("Add 2nd window");
         hideSecondWindow();
+        int minWidth = minimumWidth();
     }
 }
 

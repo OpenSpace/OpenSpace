@@ -56,13 +56,13 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _layoutSize = new QHBoxLayout(parentWidget);
     _layoutSize->addStretch(1);
     _layoutSize->addWidget(_labelSize);
-    _labelSize->setFixedWidth(60);
+    //_labelSize->setFixedWidth(50);
     _labelSize->setText("Size:");
     _layoutSize->addWidget(_size_x);
     _layoutSize->addWidget(_labelDelim);
     _layoutSize->addWidget(_size_y);
     _layoutSize->addStretch(1);
-    _labelDelim->setText(" x ");
+    _labelDelim->setText("x");
     _layoutWindowCtrl->addLayout(_layoutSize);
 
     //Window offset
@@ -73,39 +73,56 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _layoutOffset = new QHBoxLayout(parentWidget);
     _layoutOffset->addStretch(1);
     _layoutOffset->addWidget(_labelOffset);
-    _labelOffset->setFixedWidth(60);
+    //_labelOffset->setFixedWidth(50);
     _labelOffset->setText("Offset:");
     _layoutOffset->addWidget(_offset_x);
     _layoutOffset->addWidget(_labelComma);
     _layoutOffset->addWidget(_offset_y);
     _layoutOffset->addStretch(1);
-    _labelComma->setText(" , ");
+    _labelComma->setText(",");
     _layoutWindowCtrl->addLayout(_layoutOffset);
 
     //Window options
+    _layoutCheckboxesFull1 = new QHBoxLayout(parentWidget);
+    _layoutCheckboxesFull2 = new QVBoxLayout(parentWidget);
+    _layoutCheckboxesFull1->addStretch(1);
     _layoutCBoxFullscreen = new QHBoxLayout(parentWidget);
-    _layoutCBoxFullscreen->addStretch(1);
+    //_layoutCBoxFullscreen->addStretch(1);
     _layoutCBoxFullscreen->addWidget(_checkBoxFullscreen);
     _layoutCBoxFullscreen->addStretch(1);
-    _layoutWindowCtrl->addLayout(_layoutCBoxFullscreen);
+    _layoutCheckboxesFull2->addLayout(_layoutCBoxFullscreen);
     _layoutCBoxVsync= new QHBoxLayout(parentWidget);
-    _layoutCBoxVsync->addStretch(1);
+    //_layoutCBoxVsync->addStretch(1);
     _layoutCBoxVsync->addWidget(_checkBoxVsync);
     _layoutCBoxVsync->addStretch(1);
-    _layoutWindowCtrl->addLayout(_layoutCBoxVsync);
+    _layoutCheckboxesFull2->addLayout(_layoutCBoxVsync);
     _layoutCBoxWebGui= new QHBoxLayout(parentWidget);
-    _layoutCBoxWebGui->addStretch(1);
+    //_layoutCBoxWebGui->addStretch(1);
     _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
     _layoutCBoxWebGui->addStretch(1);
-    _layoutWindowCtrl->addLayout(_layoutCBoxWebGui);
+    _layoutCheckboxesFull2->addLayout(_layoutCBoxWebGui);
     _layoutCBoxSpoutOutput= new QHBoxLayout(parentWidget);
-    _layoutCBoxSpoutOutput->addStretch(1);
+    //_layoutCBoxSpoutOutput->addStretch(1);
     _layoutCBoxSpoutOutput->addWidget(_checkBoxSpoutOutput);
     _layoutCBoxSpoutOutput->addStretch(1);
-    _layoutWindowCtrl->addLayout(_layoutCBoxSpoutOutput);
+    _layoutCheckboxesFull2->addLayout(_layoutCBoxSpoutOutput);
 
+    _layoutCheckboxesFull1->addLayout(_layoutCheckboxesFull2);
+    _layoutCheckboxesFull1->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutCheckboxesFull1);
     _layoutFullWindow->addLayout(_layoutWindowCtrl);
+
     return _layoutFullWindow;
+}
+
+void WindowControl::cleanupLayouts() {
+    int labelSize1 = _labelSize->width();
+    int labelSize2 = _labelOffset->width();
+std::cout << "label1 = " << std::to_string(labelSize1) << std::endl;
+std::cout << "label2 = " << std::to_string(labelSize2) << std::endl;
+    int labelWidthStandard = std::max(labelSize1, labelSize2);
+    _labelSize->setFixedWidth(labelWidthStandard);
+    _labelOffset->setFixedWidth(labelWidthStandard);
 }
 
 void WindowControl::onSizeXChanged(const QString& newText) {
@@ -220,6 +237,8 @@ WindowControl::~WindowControl()
     delete _layoutCBoxVsync;
     delete _layoutCBoxWebGui;
     delete _layoutCBoxSpoutOutput;
+    delete _layoutCheckboxesFull2;
+    delete _layoutCheckboxesFull1;
     delete _layoutWindowCtrl;
 }
 

@@ -48,6 +48,7 @@ private:
     QPushButton* _toggleNumMonitorsButton = nullptr;
     MonitorBox* _monBox = nullptr;
     QVBoxLayout* _layout = nullptr;
+    QHBoxLayout* _layoutMonBox = nullptr;
     QHBoxLayout* _layoutMonButton = nullptr;
     QHBoxLayout* _layoutWindows = nullptr;
     std::vector<QVBoxLayout*> _winCtrlLayouts;
