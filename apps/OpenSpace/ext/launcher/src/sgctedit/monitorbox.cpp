@@ -29,15 +29,18 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     //Draw monitor outline
     painter.setPen(QPen(Qt::black, 2));
     painter.drawRect(_monitorDimensionsScaled);
+    painter.setFont(QFont("Arial", 14));
+    QPointF textPos = QPointF(_monitorDimensionsScaled.left() + 5,
+        _monitorDimensionsScaled.bottom() - 5);
+    painter.drawText(textPos, QString::fromStdString(std::to_string(0)));
     //Draw window(s)
     painter.setPen(Qt::blue);
-    painter.setFont(QFont("Arial", 16));
     for (unsigned int i = 0; i < _nWindows; ++i) {
         if (i <= _windowRendering.size()) {
             painter.drawRect(*_windowRendering[i]);
-            QPointF t = QPointF(_windowRendering[i]->left() + 5,
+            QPointF textPos = QPointF(_windowRendering[i]->left() + 5,
                 _windowRendering[i]->bottom() - 5);
-            painter.drawText(t, QString::fromStdString(std::to_string(i + 1)));
+            painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
         }
     }
 }
