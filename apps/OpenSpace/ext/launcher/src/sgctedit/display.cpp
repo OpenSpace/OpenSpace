@@ -8,24 +8,27 @@
 #include "include/display.h"
 
 
-Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox, bool showLabel)
+Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
+                                              unsigned int numWindowsInit, bool showLabel)
     : _monitorIdx(monitorIdx)
     , _monBox(monitorRenderBox)
 {
-    _toggleNumWindowsButton = new QPushButton("Add 2nd Window", this);
-    _toggleNumWindowsButton->setObjectName("toggleNumWindows");
+    _addWindowButton = new QPushButton("Add Window", this);
+    _removeWindowButton = new QPushButton("Remove Window", this);
 
     //Add 2 window controls
     addWindowControl();
     addWindowControl();
-    initializeLayout(showLabel);
+    initializeLayout(showLabel, numWindowsInit);
 
-    connect(_toggleNumWindowsButton, SIGNAL(released()), this,
-            SLOT(toggleWindows()));
+    connect(_addWindowButton, SIGNAL(released()), this,
+            SLOT(addWindow()));
+    connect(_removeWindowButton, SIGNAL(released()), this,
+            SLOT(removeWindow()));
 }
 
 Display::~Display() {
-    delete _toggleNumWindowsButton;
+    delete _addWindowButton;
     delete _monBox;
     delete _layoutMonBox;
     delete _layoutMonButton;
@@ -33,7 +36,7 @@ Display::~Display() {
     delete _layout;
 }
 
-void Display::initializeLayout(bool showLabel) {
+void Display::initializeLayout(bool showLabel, unsigned int numWindowsInit) {
     _layout = new QVBoxLayout(this);
 
     if (showLabel) {
@@ -48,7 +51,8 @@ void Display::initializeLayout(bool showLabel) {
 
     _layoutMonButton = new QHBoxLayout();
     _layoutMonButton->addStretch(1);
-    _layoutMonButton->addWidget(_toggleNumWindowsButton);
+    _layoutMonButton->addWidget(_removeWindowButton);
+    _layoutMonButton->addWidget(_addWindowButton);
     _layoutMonButton->addStretch(1);
     _layout->addLayout(_layoutMonButton);
     _layoutWindows = new QHBoxLayout();
@@ -64,7 +68,7 @@ void Display::initializeLayout(bool showLabel) {
     _layoutWindowWrappers.push_back(new QWidget());
     _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
     _layoutWindows->addWidget(_layoutWindowWrappers.back());
-    hideSecondWindow();
+    showWindows(numWindowsInit);
     _layout->addLayout(_layoutWindows);
 
     //for (WindowControl* w : _windowControl) {
@@ -72,35 +76,50 @@ void Display::initializeLayout(bool showLabel) {
     //}
 }
 
-void Display::toggleWindows() {
+void Display::addWindow() {
+    if (_nWindowsDisplayed == 0) {
+        showWindows(1);
+        _removeWindowButton->setEnabled(true);
+    }
+    else if (_nWindowsDisplayed == 1) {
+        showWindows(2);
+        _addWindowButton->setEnabled(false);
+    }
+}
+
+void Display::removeWindow() {
     if (_nWindowsDisplayed == 1) {
-        _toggleNumWindowsButton->setText("Remove 2nd window");
-        showSecondWindow();
+        showWindows(0);
+        _removeWindowButton->setEnabled(false);
     }
     else if (_nWindowsDisplayed == 2) {
-        _toggleNumWindowsButton->setText("Add 2nd window");
-        hideSecondWindow();
-        int minWidth = minimumWidth();
+        showWindows(1);
+        _addWindowButton->setEnabled(true);
     }
 }
 
-void Display::hideSecondWindow() {
-    _borderFrame->setVisible(false);
-    _layoutWindowWrappers[1]->setVisible(false);
-    _nWindowsDisplayed = 1;
+void Display::showWindows(unsigned int nWindowControlsDisplayed) {
+    _nWindowsDisplayed = nWindowControlsDisplayed;
+    _borderFrame->setVisible(_nWindowsDisplayed == 2);
+    _layoutWindowWrappers[0]->setVisible(_nWindowsDisplayed > 0);
+    _layoutWindowWrappers[1]->setVisible(_nWindowsDisplayed == 2);
+    _addWindowButton->setEnabled(_nWindowsDisplayed < 2);
+    _removeWindowButton->setEnabled(_nWindowsDisplayed > 0);
     _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
     for (auto w : _windowControl) {
-        w->showWindowLabel(false);
+        w->showWindowLabel(_nWindowsDisplayed == 2);
     }
-}
-
-void Display::showSecondWindow() {
-    _borderFrame->setVisible(true);
-    _layoutWindowWrappers[1]->setVisible(true);
-    _nWindowsDisplayed = 2;
-    _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
-    for (auto w : _windowControl) {
-        w->showWindowLabel(true);
+    if (_nWindowsDisplayed == 0) {
+        _addWindowButton->setText("Add Window");
+        _removeWindowButton->setText("Remove Window");
+    }
+    else if (_nWindowsDisplayed == 1) {
+        _addWindowButton->setText("Add 2nd Window");
+        _removeWindowButton->setText("Remove Window");
+    }
+    else if (_nWindowsDisplayed == 2) {
+        _addWindowButton->setText("Add Window");
+        _removeWindowButton->setText("Remove Window 2");
     }
 }
 

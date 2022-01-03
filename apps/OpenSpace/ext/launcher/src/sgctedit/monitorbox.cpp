@@ -40,7 +40,6 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     }
 
     //Draw window outline(s)
-//    painter.setPen(Qt::blue);
     for (unsigned int i = 0; i < _nMonitors ; ++i) {
         for (unsigned int j = 0; j < _nWindows[i]; ++j) {
             if (j == 0) {

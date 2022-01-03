@@ -64,7 +64,7 @@ int main(int argc, char *argv[ ])
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
 
-//monitorSizeList.push_back({3440, 0, 1920, 1080});
+monitorSizeList.push_back({3440, 0, 1920, 1080});
 
     bool showMonitorLabel = (monitorSizeList.size() > 1);
     MonitorBox* monBox = new MonitorBox(
@@ -87,7 +87,7 @@ int main(int argc, char *argv[ ])
     std::vector<Display*> displayWidget = {nullptr, nullptr};
 
     displayLayout[0] = new QVBoxLayout();
-    displayWidget[0] = new Display(0, monBox, showMonitorLabel);
+    displayWidget[0] = new Display(0, monBox, 1, showMonitorLabel);
     displayFrame[0] = new QFrame;
     displayLayout[0]->addWidget(displayWidget[0]);
     displayFrame[0]->setLayout(displayLayout[0]);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[ ])
 
     if (monitorSizeList.size() > 1) {
         displayLayout[1] = new QVBoxLayout();
-        displayWidget[1] = new Display(1, monBox, showMonitorLabel);
+        displayWidget[1] = new Display(1, monBox, 0, showMonitorLabel);
         displayFrame[1] = new QFrame;
         displayLayout[1]->addWidget(displayWidget[1]);
         displayFrame[1]->setLayout(displayLayout[1]);
