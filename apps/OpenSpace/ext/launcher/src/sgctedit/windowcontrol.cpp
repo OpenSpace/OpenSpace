@@ -63,10 +63,10 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
 }
 
 QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/) {
-    _layoutFullWindow = new QVBoxLayout(parentWidget);
+    _layoutFullWindow = new QVBoxLayout();
     //Window size
-    _layoutWindowCtrl = new QVBoxLayout(parentWidget);
-    _layoutName = new QHBoxLayout(parentWidget);
+    _layoutWindowCtrl = new QVBoxLayout();
+    _layoutName = new QHBoxLayout();
     _labelName = new QLabel(this);
     _labelName->setText("Window Name: ");
     _windowName = new QLineEdit(this);
@@ -80,7 +80,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _size_y->setFixedWidth(_lineEditWidthFixed);
     _labelSize = new QLabel(this);
     _labelDelim = new QLabel(this);
-    _layoutSize = new QHBoxLayout(parentWidget);
+    _layoutSize = new QHBoxLayout();
     _layoutSize->addStretch(1);
     _layoutSize->addWidget(_labelSize);
     //_labelSize->setFixedWidth(50);
@@ -97,7 +97,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _offset_y->setFixedWidth(_lineEditWidthFixed);
     _labelOffset = new QLabel(this);
     _labelComma = new QLabel(this);
-    _layoutOffset = new QHBoxLayout(parentWidget);
+    _layoutOffset = new QHBoxLayout();
     _layoutOffset->addStretch(1);
     _layoutOffset->addWidget(_labelOffset);
     //_labelOffset->setFixedWidth(50);
@@ -110,41 +110,41 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _layoutWindowCtrl->addLayout(_layoutOffset);
 
     //Window options
-    _layoutCheckboxesFull1 = new QHBoxLayout(parentWidget);
-    _layoutCheckboxesFull2 = new QVBoxLayout(parentWidget);
+    _layoutCheckboxesFull1 = new QHBoxLayout();
+    _layoutCheckboxesFull2 = new QVBoxLayout();
     _layoutCheckboxesFull1->addStretch(1);
-    _layoutCBoxFullscreen = new QHBoxLayout(parentWidget);
+    _layoutCBoxFullscreen = new QHBoxLayout();
     //_layoutCBoxFullscreen->addStretch(1);
     _layoutCBoxFullscreen->addWidget(_checkBoxFullscreen);
     _layoutCBoxFullscreen->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxFullscreen);
-    _layoutCBoxVsync= new QHBoxLayout(parentWidget);
+    _layoutCBoxVsync= new QHBoxLayout();
     //_layoutCBoxVsync->addStretch(1);
     _layoutCBoxVsync->addWidget(_checkBoxVsync);
     _layoutCBoxVsync->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxVsync);
-    _layoutCBoxWebGui= new QHBoxLayout(parentWidget);
+    _layoutCBoxWebGui= new QHBoxLayout();
     //_layoutCBoxWebGui->addStretch(1);
     _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
     _layoutCBoxWebGui->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxWebGui);
-    _layoutCBoxSpoutOutput= new QHBoxLayout(parentWidget);
+    _layoutCBoxSpoutOutput= new QHBoxLayout();
     //_layoutCBoxSpoutOutput->addStretch(1);
     _layoutCBoxSpoutOutput->addWidget(_checkBoxSpoutOutput);
     _layoutCBoxSpoutOutput->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxSpoutOutput);
 
-    _layoutComboProjection = new QHBoxLayout(parentWidget);
+    _layoutComboProjection = new QHBoxLayout();
     _layoutComboProjection->addWidget(_comboProjection);
     _layoutComboProjection->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutComboProjection);
 
-    _layoutComboQuality = new QHBoxLayout(parentWidget);
+    _layoutComboQuality = new QHBoxLayout();
     _layoutComboQuality->addWidget(_comboQuality);
     _layoutComboQuality->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutComboQuality);
 
-    _layoutFov = new QHBoxLayout(parentWidget);
+    _layoutFov = new QHBoxLayout();
     _labelFov = new QLabel();
     _labelFov->setText("Horizontal FOV:");
     _layoutFov->addWidget(_labelFov);
@@ -153,7 +153,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _layoutFovWrapper = new QWidget();
     _layoutFovWrapper->setLayout(_layoutFov);
     _layoutCheckboxesFull2->addWidget(_layoutFovWrapper);
-    _layoutHeightOffset = new QHBoxLayout(parentWidget);
+    _layoutHeightOffset = new QHBoxLayout();
     _labelHeightOffset = new QLabel();
     _labelHeightOffset->setText("Height Offset:");
     _layoutHeightOffset->addWidget(_labelHeightOffset);

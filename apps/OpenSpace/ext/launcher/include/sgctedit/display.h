@@ -27,7 +27,7 @@ class Display : public QWidget
     Q_OBJECT
 
 public:
-    explicit Display(QHBoxLayout* parentLayout, QSize* monitorDims);
+    explicit Display(QSize* monitorDims);
     ~Display();
 
 private slots:
@@ -36,7 +36,7 @@ private slots:
 private:
     void addWindowControl();
     void removeWindowControl();
-    void initializeLayout(QHBoxLayout* parentLayout);
+    void initializeLayout();
     void hideSecondWindow();
     void showSecondWindow();
     unsigned int _monitorResolution[2] = {1920, 1080};

@@ -51,9 +51,13 @@ int main(int argc, char *argv[ ])
     }
     QVBoxLayout* layoutMainV = new QVBoxLayout();
     QHBoxLayout* layoutMainH = new QHBoxLayout();
-//    QWidget* layoutMainHWrapper = new QWidget();
-//    layoutMainHWrapper->setLayout(layoutMainH);
-    displayWidget = new Display(layoutMainH, &monitorSizeList[0]);
+
+    orientationWidget = new Orientation(layoutMainV);
+    QWidget* mainWindow = new QWidget();
+    mainWindow->setLayout(layoutMainV);
+    win.setCentralWidget(mainWindow);
+
+    displayWidget = new Display(&monitorSizeList[0]);
     layoutMainH->addWidget(displayWidget);
 
 screenList.push_back(screenList[0]);
@@ -61,21 +65,13 @@ QSize* m2 = new QSize(1080, 1920);
 monitorSizeList.push_back({m2->width(), m2->height()});
 
     if (screenList.size() > 1) {
-std::cout << "Add display2." << std::endl;
-//        displayWidget2 = new Display(layoutMainH, &monitorSizeList[1]);
-        displayWidget2 = new Display(layoutMainH, &monitorSizeList[1]);
+        displayWidget2 = new Display(&monitorSizeList[1]);
         monitorBorderFrame = new QFrame();
         monitorBorderFrame->setFrameShape(QFrame::VLine);
         layoutMainH->addWidget(monitorBorderFrame);
         layoutMainH->addWidget(displayWidget2);
     }
-
     layoutMainV->addLayout(layoutMainH);
-    orientationWidget = new Orientation(layoutMainV);
-
-    QWidget* mainWindow = new QWidget();
-    mainWindow->setLayout(layoutMainV);
-    win.setCentralWidget(mainWindow);
 
     win.setWindowTitle("Window Details");
     win.show();

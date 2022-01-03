@@ -8,7 +8,7 @@
 #include "include/display.h"
 
 
-Display::Display(QHBoxLayout* parentLayout, QSize* monitorDims)
+Display::Display(QSize* monitorDims)
 {
     _toggleNumWindowsButton = new QPushButton("Add 2nd Window", this);
     _toggleNumWindowsButton->setObjectName("toggleNumWindows");
@@ -17,7 +17,7 @@ Display::Display(QHBoxLayout* parentLayout, QSize* monitorDims)
     //Add 2 window controls
     addWindowControl();
     addWindowControl();
-    initializeLayout(parentLayout);
+    initializeLayout();
 
     connect(_toggleNumWindowsButton, SIGNAL(released()), this,
             SLOT(toggleWindows()));
@@ -32,9 +32,9 @@ Display::~Display() {
     delete _layout;
 }
 
-void Display::initializeLayout(QHBoxLayout* parentLayout) {
+void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
-    _layoutMonBox = new QHBoxLayout(this);
+    _layoutMonBox = new QHBoxLayout();
     _layoutMonBox->addStretch(1);
     //_layout->addWidget(_monBox);
     _layoutMonBox->addWidget(_monBox);
@@ -43,12 +43,12 @@ void Display::initializeLayout(QHBoxLayout* parentLayout) {
 
     _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _monBox->setFixedSize(400, 400);
-    _layoutMonButton = new QHBoxLayout(this);
+    _layoutMonButton = new QHBoxLayout();
     _layoutMonButton->addStretch(1);
     _layoutMonButton->addWidget(_toggleNumWindowsButton);
     _layoutMonButton->addStretch(1);
     _layout->addLayout(_layoutMonButton);
-    _layoutWindows = new QHBoxLayout(this);
+    _layoutWindows = new QHBoxLayout();
 
     _winCtrlLayouts.push_back(_windowControl[0]->initializeLayout(this));
     _layoutWindowWrappers.push_back(new QWidget());
@@ -63,12 +63,6 @@ void Display::initializeLayout(QHBoxLayout* parentLayout) {
     _layoutWindows->addWidget(_layoutWindowWrappers.back());
     hideSecondWindow();
     _layout->addLayout(_layoutWindows);
-
-    parentLayout->addLayout(_layout);
-//    this->setLayout(parentLayoutWrapper);
-
-    //QSize defaultMonitorResolution(_monitorResolution[0], _monitorResolution[1], 0, 0);
-    //_monBox->setResolution(defaultMonitorResolution);
 
     //for (WindowControl* w : _windowControl) {
     //    w->cleanupLayouts();

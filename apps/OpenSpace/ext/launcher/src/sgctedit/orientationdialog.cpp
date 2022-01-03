@@ -6,9 +6,9 @@ OrientationDialog::OrientationDialog(QWidget* parent)
 {
     setWindowTitle("Global Orientation");
     _layoutWindow = new QVBoxLayout(this);
-    _layoutPitch = new QHBoxLayout(this);
-    _layoutRoll = new QHBoxLayout(this);
-    _layoutYaw = new QHBoxLayout(this);
+    _layoutPitch = new QHBoxLayout();
+    _layoutRoll = new QHBoxLayout();
+    _layoutYaw = new QHBoxLayout();
 
     _labelPitch = new QLabel(this);
     _labelRoll = new QLabel(this);
