@@ -31,9 +31,13 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     painter.drawRect(_monitorDimensionsScaled);
     //Draw window(s)
     painter.setPen(Qt::blue);
+    painter.setFont(QFont("Arial", 16));
     for (unsigned int i = 0; i < _nWindows; ++i) {
         if (i <= _windowRendering.size()) {
             painter.drawRect(*_windowRendering[i]);
+            QPointF t = QPointF(_windowRendering[i]->left() + 5,
+                _windowRendering[i]->bottom() - 5);
+            painter.drawText(t, QString::fromStdString(std::to_string(i + 1)));
         }
     }
 }
