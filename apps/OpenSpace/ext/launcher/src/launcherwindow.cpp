@@ -61,18 +61,24 @@ namespace {
         constexpr const QRect ProfileBox(
             LeftRuler, TopRuler + 110, ItemWidth, ItemHeight
         );
-        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 180, 151, 24);
+        constexpr const QRect NewProfileButton(
+            LeftRuler + 140, TopRuler + 180, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect EditProfileButton(
+            LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
         constexpr const QRect WindowConfigBox(
-            LeftRuler, TopRuler + 210, ItemWidth, ItemHeight
+            LeftRuler, TopRuler + 260, ItemWidth, ItemHeight
+        );
+        constexpr const QRect NewWindowButton(
+            LeftRuler + 140, TopRuler + 330, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect EditWindowButton(
+            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
         );
         constexpr const QRect StartButton(
-            LeftRuler, TopRuler + 290, ItemWidth, ItemHeight
-        );
-        constexpr const QRect NewButton(
-            LeftRuler + 140, TopRuler + 380, SmallItemWidth, SmallItemHeight
-        );
-        constexpr const QRect EditButton(
-            LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 400, ItemWidth, ItemHeight
         );
     } // geometry
 
@@ -138,11 +144,13 @@ namespace {
 
 using namespace openspace;
 
-LauncherWindow::LauncherWindow(bool profileEnabled,
+LauncherWindow::LauncherWindow(QApplication& qtApp,
+                               bool profileEnabled,
                                const configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
+    , _qApp(qtApp)
     , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")).string() + '/')
     , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")).string() + '/')
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string() + '/')
@@ -248,20 +256,20 @@ QWidget* LauncherWindow::createCentralWidget() {
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* newButton = new QPushButton("New", centralWidget);
+    QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
-        newButton, &QPushButton::released,
+        newProfileButton, &QPushButton::released,
         [this]() {
             openProfileEditor("", true);
         }
     );
-    newButton->setObjectName("small");
-    newButton->setGeometry(geometry::NewButton);
-    newButton->setCursor(Qt::PointingHandCursor);
+    newProfileButton->setObjectName("small");
+    newProfileButton->setGeometry(geometry::NewProfileButton);
+    newProfileButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* editButton = new QPushButton("Edit", centralWidget);
+    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
-        editButton, &QPushButton::released,
+        editProfileButton, &QPushButton::released,
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
             int selectedIndex = _profileBox->currentIndex();
@@ -269,9 +277,31 @@ QWidget* LauncherWindow::createCentralWidget() {
             openProfileEditor(selection, isUserProfile);
         }
     );
-    editButton->setObjectName("small");
-    editButton->setGeometry(geometry::EditButton);
-    editButton->setCursor(Qt::PointingHandCursor);
+    editProfileButton->setObjectName("small");
+    editProfileButton->setGeometry(geometry::EditProfileButton);
+    editProfileButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+    connect(
+        newWindowButton, &QPushButton::released,
+        [this]() {
+            openWindowEditor();
+        }
+    );
+    newWindowButton->setObjectName("small");
+    newWindowButton->setGeometry(geometry::NewWindowButton);
+    newWindowButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* editWindowButton = new QPushButton("Edit", centralWidget);
+    connect(
+        editWindowButton, &QPushButton::released,
+        [this]() {
+            openWindowEditor();
+        }
+    );
+    editWindowButton->setObjectName("small");
+    editWindowButton->setGeometry(geometry::EditWindowButton);
+    editWindowButton->setCursor(Qt::PointingHandCursor);
 
     return centralWidget;
 }
@@ -466,6 +496,11 @@ void LauncherWindow::openProfileEditor(const std::string& profile, const bool is
         const std::string current = _profileBox->currentText().toStdString();
         populateProfilesList(current);
     }
+}
+
+void LauncherWindow::openWindowEditor() {
+    SgctEdit editor(this, _qApp);
+    editor.exec();
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
