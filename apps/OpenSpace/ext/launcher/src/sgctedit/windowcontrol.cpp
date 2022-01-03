@@ -45,6 +45,73 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
             SLOT(onOffsetYChanged(const QString&)));
 }
 
+void WindowControl::initializeLayout(QWidget* parentWidget, QHBoxLayout* layout) {
+    _layoutFullWindow = new QVBoxLayout(parentWidget);
+    //Window size
+    _layoutWindowCtrl = new QVBoxLayout(parentWidget);
+//    _size_x = _windowControl.back()->lineEditSizeWidth();
+//    _size_y = _windowControl.back()->lineEditSizeHeight();
+    _size_x->setFixedWidth(_lineEditWidthFixed);
+    _size_y->setFixedWidth(_lineEditWidthFixed);
+    _labelSize = new QLabel(this);
+    _labelDelim = new QLabel(this);
+    _layoutSize = new QHBoxLayout(parentWidget);
+    _layoutSize->addStretch(1);
+    _layoutSize->addWidget(_labelSize);
+    _labelSize->setFixedWidth(60);
+    _labelSize->setText("Size:");
+    _layoutSize->addWidget(_size_x);
+    _layoutSize->addWidget(_labelDelim);
+    _layoutSize->addWidget(_size_y);
+    _layoutSize->addStretch(1);
+    _labelDelim->setText(" x ");
+    _layoutWindowCtrl->addLayout(_layoutSize);
+
+    //Window offset
+//    _lineOffsetX = _windowControl.back()->lineEditSizeOffsetX();
+//    _lineOffsetY = _windowControl.back()->lineEditSizeOffsetY();
+    _offset_x->setFixedWidth(_lineEditWidthFixed);
+    _offset_y->setFixedWidth(_lineEditWidthFixed);
+    _labelOffset = new QLabel(this);
+    _labelComma = new QLabel(this);
+    _layoutOffset = new QHBoxLayout(parentWidget);
+    _layoutOffset->addStretch(1);
+    _layoutOffset->addWidget(_labelOffset);
+    _labelOffset->setFixedWidth(60);
+    _labelOffset->setText("Offset:");
+    _layoutOffset->addWidget(_offset_x);
+    _layoutOffset->addWidget(_labelComma);
+    _layoutOffset->addWidget(_offset_y);
+    _layoutOffset->addStretch(1);
+    _labelComma->setText(" , ");
+    _layoutWindowCtrl->addLayout(_layoutOffset);
+
+    //Window options
+    _layoutCBoxFullscreen = new QHBoxLayout(parentWidget);
+    _layoutCBoxFullscreen->addStretch(1);
+    _layoutCBoxFullscreen->addWidget(_checkBoxFullscreen);
+    _layoutCBoxFullscreen->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutCBoxFullscreen);
+    _layoutCBoxVsync= new QHBoxLayout(parentWidget);
+    _layoutCBoxVsync->addStretch(1);
+    _layoutCBoxVsync->addWidget(_checkBoxVsync);
+    _layoutCBoxVsync->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutCBoxVsync);
+    _layoutCBoxWebGui= new QHBoxLayout(parentWidget);
+    _layoutCBoxWebGui->addStretch(1);
+    _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
+    _layoutCBoxWebGui->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutCBoxWebGui);
+    _layoutCBoxSpoutOutput= new QHBoxLayout(parentWidget);
+    _layoutCBoxSpoutOutput->addStretch(1);
+    _layoutCBoxSpoutOutput->addWidget(_checkBoxSpoutOutput);
+    _layoutCBoxSpoutOutput->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutCBoxSpoutOutput);
+
+    _layoutFullWindow->addLayout(_layoutWindowCtrl);
+    layout->addLayout(_layoutFullWindow);
+}
+
 void WindowControl::onSizeXChanged(const QString& newText) {
     std::string x = newText.toStdString();
     if (!x.empty()) {
@@ -143,5 +210,20 @@ WindowControl::~WindowControl()
     delete _size_y;
     delete _offset_x;
     delete _offset_y;
+    delete _labelSize;
+    delete _labelDelim;
+    delete _layoutSize;
+    delete _labelOffset;
+    delete _labelComma;
+    delete _layoutOffset;
+    delete _checkBoxFullscreen;
+    delete _checkBoxVsync;
+    delete _checkBoxWebGui;
+    delete _checkBoxSpoutOutput;
+    delete _layoutCBoxFullscreen;
+    delete _layoutCBoxVsync;
+    delete _layoutCBoxWebGui;
+    delete _layoutCBoxSpoutOutput;
+    delete _layoutWindowCtrl;
 }
 

@@ -2,7 +2,10 @@
 #define WINDOWCONTROL_H
 
 #include <QCheckBox>
+#include <QFrame>
 #include <QIntValidator>
+#include <QLabel>
+#include <QLayout>
 #include <QLineEdit>
 #include <QPainter>
 #include <QPainterPath>
@@ -25,6 +28,7 @@ public:
     void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb);
+    void initializeLayout(QWidget* parentWidget, QHBoxLayout* layout);
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
     QLineEdit* lineEditSizeHeight();
@@ -48,12 +52,18 @@ private:
         {50.0, 50.0, 800.0, 600.0},
         {900.0, 400.0, 640.0, 480.0}
     };
+    int _lineEditWidthFixed = 80;
+    float _marginFractionOfWidgetSize = 0.025;
+    int _index = 0;
+
+    QVBoxLayout* _layoutWindowCtrl;
+    QVBoxLayout* _layoutFullWindow;
+
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
     QLineEdit* _offset_x = nullptr;
     QLineEdit* _offset_y = nullptr;
 
-    int _index = 0;
     QRect _monitorResolution;
     QRectF _monitorDimsScaled;
     QRectF _windowDims;
@@ -64,7 +74,24 @@ private:
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
 
-    float _marginFractionOfWidgetSize = 0.025;
+    QLabel* _labelSize = nullptr;
+    QLabel* _labelDelim = nullptr;
+    QHBoxLayout* _layoutSize = nullptr;
+//    QLineEdit* _lineSizeX = nullptr;
+//    QLineEdit* _lineSizeY = nullptr;
+//    QLineEdit* _lineOffsetX = nullptr;
+//    QLineEdit* _lineOffsetY = nullptr;
+    QLabel* _labelOffset = nullptr;
+    QLabel* _labelComma = nullptr;
+    QHBoxLayout* _layoutOffset = nullptr;
+//    QCheckBox* _optFullscreen = nullptr;
+//    QCheckBox* _optVsync = nullptr;
+//    QCheckBox* _optWebGui = nullptr;
+//    QCheckBox* _optSpoutOutput = nullptr;
+    QHBoxLayout* _layoutCBoxFullscreen = nullptr;
+    QHBoxLayout* _layoutCBoxVsync = nullptr;
+    QHBoxLayout* _layoutCBoxWebGui = nullptr;
+    QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
 };
 
 #endif // WINDOWCONTROL_H

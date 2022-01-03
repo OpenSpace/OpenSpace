@@ -30,6 +30,7 @@ public:
     void windowDimensionsChanged(unsigned int index, const QRectF newDimensions);
 //    float monitorScaleFactor();
     void addWindowControl(WindowControl* wCtrl);
+    void removeAdditionalWindowDimensions();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

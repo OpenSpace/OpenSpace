@@ -35,35 +35,19 @@ private slots:
 
 private:
     void addWindowControl();
-    void initializeLayout();
+    void removeWindowControl();
+    void initializeLayout(unsigned int windowIndex, WindowControl* winCtrl);
     unsigned int _monitorResolution[2] = {1920, 1080};
     QRect _monitorRes = {0, 0, _monitorResolution[0], _monitorResolution[1]};
     QRect _widgetDims = {0, 0, 400, 400};
     std::vector<WindowControl*> _windowControl;
     unsigned int _nWindows = 0;
-    int _lineEditWidthFixed = 80;
     QPushButton* _toggleNumMonitorsButton = nullptr;
     MonitorBox* _monBox = nullptr;
-    QBoxLayout* _layout = nullptr;
-    QBoxLayout* _layoutMonButton = nullptr;
-    QLabel* _labelSize = nullptr;
-    QLabel* _labelDelim = nullptr;
-    QBoxLayout* _layoutSize = nullptr;
-    QLineEdit* _lineSizeX = nullptr;
-    QLineEdit* _lineSizeY = nullptr;
-    QLineEdit* _lineOffsetX = nullptr;
-    QLineEdit* _lineOffsetY = nullptr;
-    QLabel* _labelOffset = nullptr;
-    QLabel* _labelComma = nullptr;
-    QBoxLayout* _layoutOffset = nullptr;
-    QCheckBox* _optFullscreen = nullptr;
-    QCheckBox* _optVsync = nullptr;
-    QCheckBox* _optWebGui = nullptr;
-    QCheckBox* _optSpoutOutput = nullptr;
-    QBoxLayout* _layoutCBoxFullscreen = nullptr;
-    QBoxLayout* _layoutCBoxVsync = nullptr;
-    QBoxLayout* _layoutCBoxWebGui = nullptr;
-    QBoxLayout* _layoutCBoxSpoutOutput = nullptr;
+    QVBoxLayout* _layout = nullptr;
+    QHBoxLayout* _layoutMonButton = nullptr;
+    QHBoxLayout* _layoutWindows = nullptr;
+    QFrame* _borderFrame = nullptr;
 };
 
 #endif // DISPLAY_H

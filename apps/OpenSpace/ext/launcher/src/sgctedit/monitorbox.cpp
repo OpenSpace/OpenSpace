@@ -95,3 +95,10 @@ void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int index, cons
     this->update();
 }
 
+void MonitorBox::removeAdditionalWindowDimensions() {
+    if (_windowRendering.size() > 1) {
+        delete _windowRendering.back();
+        _windowRendering.pop_back();
+    }
+}
+
