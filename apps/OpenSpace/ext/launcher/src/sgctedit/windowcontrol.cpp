@@ -25,11 +25,15 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
         = new QIntValidator(10, _monitorResolution.width() - 10);
     QIntValidator* _validatorOffset_y
         = new QIntValidator(10, _monitorResolution.height() - 10);
-
     _size_x->setValidator(_validatorSize_x);
     _size_y->setValidator(_validatorSize_y);
     _offset_x->setValidator(_validatorSize_y);
     _offset_y->setValidator(_validatorSize_y);
+
+    _checkBoxFullscreen = new QCheckBox("Fullscreen", this);
+    _checkBoxVsync = new QCheckBox("VSync", this);
+    _checkBoxWebGui = new QCheckBox("WebGUI here", this);
+    _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
 
     connect(_size_x, SIGNAL(textChanged(const QString&)), this,
             SLOT(onSizeXChanged(const QString&)));
@@ -115,6 +119,22 @@ QLineEdit* WindowControl::lineEditSizeOffsetX() {
 
 QLineEdit* WindowControl::lineEditSizeOffsetY() {
     return _offset_y;
+}
+
+QCheckBox* WindowControl::checkBoxFullscreen() {
+    return _checkBoxFullscreen;
+}
+
+QCheckBox* WindowControl::checkBoxVsync() {
+    return _checkBoxVsync;
+}
+
+QCheckBox* WindowControl::checkBoxWebGui() {
+    return _checkBoxWebGui;
+}
+
+QCheckBox* WindowControl::checkBoxSpoutOutput() {
+    return _checkBoxSpoutOutput;
 }
 
 WindowControl::~WindowControl()

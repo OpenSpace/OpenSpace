@@ -24,10 +24,10 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     QPen pen = painter.pen();
     painter.setPen(pen);
     //Draw border
-    painter.setPen(Qt::gray);
+    painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width() - 1, height() - 1, 10, 10);
     //Draw monitor outline
-    painter.setPen(Qt::black);
+    painter.setPen(QPen(Qt::black, 2));
     painter.drawRect(_monitorDimensionsScaled);
     //Draw window(s)
     painter.setPen(Qt::blue);
