@@ -57,6 +57,8 @@ void Display::initializeLayout(bool showLabel, unsigned int numWindowsInit) {
     _layout->addLayout(_layoutMonButton);
     _layoutWindows = new QHBoxLayout();
 
+    _layout->addStretch();
+
     _winCtrlLayouts.push_back(_windowControl[0]->initializeLayout(this));
     _layoutWindowWrappers.push_back(new QWidget());
     _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
@@ -111,15 +113,19 @@ void Display::showWindows(unsigned int nWindowControlsDisplayed) {
     }
     if (_nWindowsDisplayed == 0) {
         _addWindowButton->setText("Add Window");
-        _removeWindowButton->setText("Remove Window");
+        _addWindowButton->setVisible(true);
+        _removeWindowButton->setVisible(false);
     }
     else if (_nWindowsDisplayed == 1) {
         _addWindowButton->setText("Add 2nd Window");
         _removeWindowButton->setText("Remove Window");
+        _addWindowButton->setVisible(true);
+        _removeWindowButton->setVisible(true);
     }
     else if (_nWindowsDisplayed == 2) {
-        _addWindowButton->setText("Add Window");
         _removeWindowButton->setText("Remove Window 2");
+        _addWindowButton->setVisible(false);
+        _removeWindowButton->setVisible(true);
     }
 }
 

@@ -28,18 +28,18 @@ class Display : public QWidget
 
 public:
     explicit Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
-        bool showLabel);
+        unsigned int numWindowsInit, bool showLabel);
     ~Display();
 
 private slots:
-    void toggleWindows();
+    void addWindow();
+    void removeWindow();
 
 private:
     void addWindowControl();
     void removeWindowControl();
-    void initializeLayout(bool showLabel);
-    void hideSecondWindow();
-    void showSecondWindow();
+    void initializeLayout(bool showLabel, unsigned int numWindowsInit);
+    void showWindows(unsigned int nWindowControlsDisplayed);
     unsigned int _monitorResolution[2] = {1920, 1080};
     QRect _monitorRes = {0, 0, _monitorResolution[0], _monitorResolution[1]};
     QRect _widgetDims = {0, 0, 400, 400};
@@ -47,7 +47,8 @@ private:
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     QLabel* _labelMonNum = nullptr;
-    QPushButton* _toggleNumWindowsButton = nullptr;
+    QPushButton* _addWindowButton = nullptr;
+    QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
     MonitorBox* _monBox;
     QVBoxLayout* _layout = nullptr;
