@@ -44,6 +44,8 @@ void MonitorBox::paintEvent(QPaintEvent *event)
                 painter.drawRect(_windowRendering[i][j]);
                 QPointF textPos = QPointF(_windowRendering[i][j].left() + 5,
                     _windowRendering[i][j].bottom() - 5);
+                textPos.setX(std::clamp(textPos.x(), 0.0, _monitorWidgetSize.width() - 10));
+                textPos.setY(std::clamp(textPos.y(), 0.0, _monitorWidgetSize.height() - 10));
                 painter.drawText(textPos, QString::fromStdString(std::to_string(j + 1)));
             }
         }

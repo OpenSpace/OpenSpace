@@ -9,6 +9,7 @@
 #include <QVector>
 #include <QWidget>
 
+#include <algorithm>
 #include <vector>
 #include <iostream>
 
