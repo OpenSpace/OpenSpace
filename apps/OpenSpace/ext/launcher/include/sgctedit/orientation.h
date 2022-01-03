@@ -23,8 +23,9 @@ class Orientation : public QWidget
     Q_OBJECT
 
 public:
-    explicit Orientation(QVBoxLayout* parentLayout);
+    explicit Orientation();
     ~Orientation();
+    void addButtonToLayout(QVBoxLayout* parentLayout);
 
 private slots:
     void orientationDialog();

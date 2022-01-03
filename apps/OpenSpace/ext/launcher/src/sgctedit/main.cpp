@@ -60,7 +60,7 @@ int main(int argc, char *argv[ ])
     QVBoxLayout* layoutMainV = new QVBoxLayout();
     QHBoxLayout* layoutMainH = new QHBoxLayout();
 
-    orientationWidget = new Orientation(layoutMainV);
+    orientationWidget = new Orientation();
     QWidget* mainWindow = new QWidget();
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
@@ -93,6 +93,7 @@ monitorSizeList.push_back({3440, 0, 1080, 1920});
     }
 
     layoutMainV->addLayout(layoutMainH);
+    orientationWidget->addButtonToLayout(layoutMainV);
     FileSupport* fileSupportWidget = new FileSupport(layoutMainV);
 
     win.setWindowTitle("Window Details");
