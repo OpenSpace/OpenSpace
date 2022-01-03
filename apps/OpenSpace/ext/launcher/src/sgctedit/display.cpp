@@ -8,7 +8,7 @@
 #include "include/display.h"
 
 
-Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox)
+Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox, bool showLabel)
     : _monitorIdx(monitorIdx)
     , _monBox(monitorRenderBox)
 {
@@ -18,7 +18,7 @@ Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox)
     //Add 2 window controls
     addWindowControl();
     addWindowControl();
-    initializeLayout();
+    initializeLayout(showLabel);
 
     connect(_toggleNumWindowsButton, SIGNAL(released()), this,
             SLOT(toggleWindows()));
@@ -33,8 +33,18 @@ Display::~Display() {
     delete _layout;
 }
 
-void Display::initializeLayout() {
+void Display::initializeLayout(bool showLabel) {
     _layout = new QVBoxLayout(this);
+
+    if (showLabel) {
+        _labelMonNum = new QLabel();
+        _labelMonNum->setText("Display " + QString::number(_monitorIdx + 1));
+        _layoutMonNumLabel = new QHBoxLayout();
+        _layoutMonNumLabel->addStretch(1);
+        _layoutMonNumLabel->addWidget(_labelMonNum);
+        _layoutMonNumLabel->addStretch(1);
+        _layout->addLayout(_layoutMonNumLabel);
+    }
 
     _layoutMonButton = new QHBoxLayout();
     _layoutMonButton->addStretch(1);
@@ -79,6 +89,9 @@ void Display::hideSecondWindow() {
     _layoutWindowWrappers[1]->setVisible(false);
     _nWindowsDisplayed = 1;
     _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
+    for (auto w : _windowControl) {
+        w->showWindowLabel(false);
+    }
 }
 
 void Display::showSecondWindow() {
@@ -86,6 +99,9 @@ void Display::showSecondWindow() {
     _layoutWindowWrappers[1]->setVisible(true);
     _nWindowsDisplayed = 2;
     _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
+    for (auto w : _windowControl) {
+        w->showWindowLabel(true);
+    }
 }
 
 void Display::addWindowControl() {

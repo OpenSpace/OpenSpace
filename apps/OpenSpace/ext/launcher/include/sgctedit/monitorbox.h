@@ -21,7 +21,8 @@ class MonitorBox : public QWidget
     Q_OBJECT
 
 public:
-    explicit MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution/*, QWidget *parent = nullptr*/);
+    explicit MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
+        bool showMonitorLabel);
     ~MonitorBox();
     void mapMonitorResolutionToWidgetCoordinates();
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
@@ -56,6 +57,7 @@ private:
     };
     float _monitorScaleFactor = 1.0;
     float _offset[2] = {10.0, 10.0};
+    bool _showLabel = false;
 
     float _marginFractionOfWidgetSize = 0.025;
     float _marginWidget = 5.0;

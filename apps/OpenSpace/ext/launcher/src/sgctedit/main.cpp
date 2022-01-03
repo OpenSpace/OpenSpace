@@ -17,6 +17,7 @@
 #include "include/orientation.h"
 
 
+
 int main(int argc, char *argv[ ])
 {
     QApplication app(argc, argv);
@@ -48,8 +49,6 @@ int main(int argc, char *argv[ ])
     //QRect screenGeometry = screen->geometry();
     //End code for monitor detection
 */
-    Display* displayWidget = nullptr;
-    Display* displayWidget2 = nullptr;
     QFrame* monitorBorderFrame = nullptr;
     Orientation* orientationWidget = nullptr;
 
@@ -65,11 +64,13 @@ int main(int argc, char *argv[ ])
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
 
-monitorSizeList.push_back({3440, 0, 1080, 1920});
+//monitorSizeList.push_back({3440, 0, 1920, 1080});
+
+    bool showMonitorLabel = (monitorSizeList.size() > 1);
     MonitorBox* monBox = new MonitorBox(
         {0, 0, 400, 340},
-        monitorSizeList/*,
-        this*/
+        monitorSizeList,
+        showMonitorLabel
     );
     QHBoxLayout* layoutMonBox = new QHBoxLayout();
     layoutMonBox->addStretch(1);
@@ -81,15 +82,26 @@ monitorSizeList.push_back({3440, 0, 1080, 1920});
     monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     monBox->setFixedSize(400, 340);
 
-    displayWidget = new Display(0, monBox);
-    layoutMainH->addWidget(displayWidget);
+    std::vector<QVBoxLayout*> displayLayout = {nullptr, nullptr};
+    std::vector<QFrame*> displayFrame = {nullptr, nullptr};
+    std::vector<Display*> displayWidget = {nullptr, nullptr};
+
+    displayLayout[0] = new QVBoxLayout();
+    displayWidget[0] = new Display(0, monBox, showMonitorLabel);
+    displayFrame[0] = new QFrame;
+    displayLayout[0]->addWidget(displayWidget[0]);
+    displayFrame[0]->setLayout(displayLayout[0]);
+    displayFrame[0]->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    layoutMainH->addWidget(displayFrame[0]);
 
     if (monitorSizeList.size() > 1) {
-        displayWidget2 = new Display(1, monBox);
-        monitorBorderFrame = new QFrame();
-        monitorBorderFrame->setFrameShape(QFrame::VLine);
-        layoutMainH->addWidget(monitorBorderFrame);
-        layoutMainH->addWidget(displayWidget2);
+        displayLayout[1] = new QVBoxLayout();
+        displayWidget[1] = new Display(1, monBox, showMonitorLabel);
+        displayFrame[1] = new QFrame;
+        displayLayout[1]->addWidget(displayWidget[1]);
+        displayFrame[1]->setLayout(displayLayout[1]);
+        displayFrame[1]->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+        layoutMainH->addWidget(displayFrame[1]);
     }
 
     layoutMainV->addLayout(layoutMainH);
@@ -99,10 +111,12 @@ monitorSizeList.push_back({3440, 0, 1080, 1920});
     win.setWindowTitle("Window Details");
     win.show();
     app.exec();
+
     delete orientationWidget;
-    delete displayWidget;
-    if (displayWidget2) {
-        delete displayWidget2;
+    for (unsigned int i = 0; i <= 1; ++i) {
+        if (displayWidget[i]) delete displayWidget[i];
+        if (displayLayout[i]) delete displayLayout[i];
+        if (displayFrame[i]) delete displayFrame[i];
     }
     if (monitorBorderFrame) {
         delete monitorBorderFrame;

@@ -30,7 +30,7 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _offset_x->setValidator(_validatorSize_y);
     _offset_y->setValidator(_validatorSize_y);
 
-    _checkBoxFullscreen = new QCheckBox("Fullscreen", this);
+    _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
     _checkBoxVsync = new QCheckBox("VSync", this);
     _checkBoxWebGui = new QCheckBox("WebGUI here", this);
     _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
@@ -62,10 +62,19 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
             this, SLOT(onQualityChanged(int)));
 }
 
-QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/) {
+QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutFullWindow = new QVBoxLayout();
     //Window size
     _layoutWindowCtrl = new QVBoxLayout();
+
+    _labelWinNum = new QLabel();
+    _labelWinNum->setText("Window " + QString::number(_index + 1));
+    _layoutWinNum = new QHBoxLayout();
+    _layoutWinNum->addStretch(1);
+    _layoutWinNum->addWidget(_labelWinNum);
+    _layoutWinNum->addStretch(1);
+    _layoutWindowCtrl->addLayout(_layoutWinNum);
+
     _layoutName = new QHBoxLayout();
     _labelName = new QLabel(this);
     _labelName->setText("Window Name: ");
@@ -137,11 +146,11 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _layoutCheckboxesFull1 = new QHBoxLayout();
     _layoutCheckboxesFull2 = new QVBoxLayout();
 //    _layoutCheckboxesFull1->addStretch(1);
-    _layoutCBoxFullscreen = new QHBoxLayout();
-    //_layoutCBoxFullscreen->addStretch(1);
-    _layoutCBoxFullscreen->addWidget(_checkBoxFullscreen);
-    _layoutCBoxFullscreen->addStretch(1);
-    _layoutCheckboxesFull2->addLayout(_layoutCBoxFullscreen);
+    _layoutCBoxWindowDecor = new QHBoxLayout();
+    //_layoutCBoxWindowDecor->addStretch(1);
+    _layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
+    _layoutCBoxWindowDecor->addStretch(1);
+    _layoutCheckboxesFull2->addLayout(_layoutCBoxWindowDecor);
     _layoutCBoxVsync= new QHBoxLayout();
     //_layoutCBoxVsync->addStretch(1);
     _layoutCBoxVsync->addWidget(_checkBoxVsync);
@@ -198,6 +207,10 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     onQualityChanged(2);
 
     return _layoutFullWindow;
+}
+
+void WindowControl::showWindowLabel(bool show) {
+    _labelWinNum->setVisible(show);
 }
 
 void WindowControl::cleanupLayouts() {
@@ -328,8 +341,8 @@ QLineEdit* WindowControl::lineEditSizeOffsetY() {
     return _offset_y;
 }
 
-QCheckBox* WindowControl::checkBoxFullscreen() {
-    return _checkBoxFullscreen;
+QCheckBox* WindowControl::checkBoxWindowDecor() {
+    return _checkBoxWindowDecor;
 }
 
 QCheckBox* WindowControl::checkBoxVsync() {
@@ -366,7 +379,7 @@ WindowControl::~WindowControl()
     delete _layoutGridFrame;
     delete _layoutGridSizeValues;
     delete _layoutGridOffsetValues;
-    delete _checkBoxFullscreen;
+    delete _checkBoxWindowDecor;
     delete _checkBoxVsync;
     delete _checkBoxWebGui;
     delete _checkBoxSpoutOutput;
@@ -378,7 +391,7 @@ WindowControl::~WindowControl()
     delete _labelHeightOffset;
     delete _lineHeightOffset;
     delete _validatorHeightOffset;
-    delete _layoutCBoxFullscreen;
+    delete _layoutCBoxWindowDecor;
     delete _layoutCBoxVsync;
     delete _layoutCBoxWebGui;
     delete _layoutCBoxSpoutOutput;

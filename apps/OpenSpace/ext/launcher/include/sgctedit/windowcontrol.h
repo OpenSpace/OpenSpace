@@ -30,14 +30,15 @@ public:
     void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(
         std::function<void(unsigned int, unsigned int, const QRectF&)> cb);
+    void showWindowLabel(bool show);
     void cleanupLayouts();
-    QVBoxLayout* initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/);
+    QVBoxLayout* initializeLayout(QWidget* parentWidget);
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
     QLineEdit* lineEditSizeHeight();
     QLineEdit* lineEditSizeOffsetX();
     QLineEdit* lineEditSizeOffsetY();
-    QCheckBox* checkBoxFullscreen();
+    QCheckBox* checkBoxWindowDecor();
     QCheckBox* checkBoxVsync();
     QCheckBox* checkBoxWebGui();
     QCheckBox* checkBoxSpoutOutput();
@@ -73,6 +74,9 @@ private:
     QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;
 
+    QHBoxLayout* _layoutWinNum = nullptr;
+    QLabel* _labelWinNum = nullptr;
+
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
     QLineEdit* _offset_x = nullptr;
@@ -88,7 +92,7 @@ private:
     QRectF _windowDims;
     QRectF _windowDimsScaled;
     float _monitorScaleFactor = 1.0;
-    QCheckBox* _checkBoxFullscreen = nullptr;
+    QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
@@ -113,10 +117,9 @@ private:
     QHBoxLayout* _layoutGridOffsetValues = nullptr;
     QLabel* _labelOffset = nullptr;
     QLabel* _labelComma = nullptr;
-    //QHBoxLayout* _layoutOffset = nullptr;
     QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
     QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
-    QHBoxLayout* _layoutCBoxFullscreen = nullptr;
+    QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
     QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
     QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;

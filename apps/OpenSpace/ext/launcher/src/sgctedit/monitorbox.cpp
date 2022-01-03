@@ -1,10 +1,11 @@
 #include "monitorbox.h"
 
 
-MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution/*, QWidget *parent*/)
-    : /*QWidget(parent)
-    ,*/ _monitorWidgetSize(widgetDims)
+MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
+                                                                    bool showMonitorLabel)
+    : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
+    , _showLabel(showMonitorLabel)
 {
     _nMonitors = monitorResolution.size();
     mapMonitorResolutionToWidgetCoordinates();
@@ -30,9 +31,11 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     for (unsigned int i = 0; i < _nMonitors; ++i) {
         if (i <= _monitorDimensionsScaled.size()) {
             painter.drawRect(_monitorDimensionsScaled[i]);
-            QPointF textPos = QPointF(_monitorDimensionsScaled[i].left() + 5,
-                _monitorDimensionsScaled[i].bottom() - 5);
-            painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
+            if (_showLabel) {
+                QPointF textPos = QPointF(_monitorDimensionsScaled[i].left() + 5,
+                    _monitorDimensionsScaled[i].bottom() - 5);
+                painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
+            }
         }
     }
 
