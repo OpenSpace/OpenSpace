@@ -69,6 +69,14 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
 
     _labelWinNum = new QLabel();
     _labelWinNum->setText("Window " + QString::number(_index + 1));
+//    _labelWinNum->setStyleSheet("QLabel { color : blue; }");
+    if (_index == 1) {
+        _labelWinNum->setStyleSheet("QLabel { color : #CD6D1D; }");
+    }
+    else {
+        _labelWinNum->setStyleSheet("QLabel { color : #1C1B8B; }");
+    }
+
     _layoutWinNum = new QHBoxLayout();
     _layoutWinNum->addStretch(1);
     _layoutWinNum->addWidget(_labelWinNum);

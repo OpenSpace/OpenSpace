@@ -40,9 +40,15 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     }
 
     //Draw window outline(s)
-    painter.setPen(Qt::blue);
+//    painter.setPen(Qt::blue);
     for (unsigned int i = 0; i < _nMonitors ; ++i) {
         for (unsigned int j = 0; j < _nWindows[i]; ++j) {
+            if (j == 0) {
+                painter.setPen(QColor(0x1C, 0x1B, 0x8B));
+            }
+            else if (j == 1) {
+                painter.setPen(QColor(0xCD, 0x6D, 0x1D));
+            }
             if (j <= _windowRendering[i].size()) {
                 painter.drawRect(_windowRendering[i][j]);
                 QPointF textPos = QPointF(_windowRendering[i][j].left() + 5,
