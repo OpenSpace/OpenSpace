@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QPoint>
+#include <QPushButton>
 #include <QVector>
 #include <QWidget>
 
@@ -24,7 +25,7 @@ class WindowControl : public QWidget
 
 public:
     explicit WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-        QRect& widgetDims, QWidget *parent = nullptr);
+        QRect& widgetDims, QRect& monitorDims, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
@@ -50,6 +51,7 @@ private slots:
     void onOffsetYChanged(const QString& newText);
     void onProjectionChanged(int newSelection);
     void onQualityChanged(int newSelection);
+    void onFullscreenClicked();
 
 private:
     void updateScaledWindowDimensions();
@@ -87,11 +89,12 @@ private:
     QIntValidator* _validatorOffset_x = nullptr;
     QIntValidator* _validatorOffset_y = nullptr;
 
-    QRect _monitorResolution;
+    QRect& _monitorResolution;
     QRectF _monitorDimsScaled;
     QRectF _windowDims;
     QRectF _windowDimsScaled;
     float _monitorScaleFactor = 1.0;
+    QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
@@ -119,6 +122,7 @@ private:
     QLabel* _labelComma = nullptr;
     QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
     QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
+    QHBoxLayout* _layoutFullscreenButton = nullptr;
     QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
     QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;

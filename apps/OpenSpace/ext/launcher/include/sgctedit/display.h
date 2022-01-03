@@ -28,7 +28,7 @@ class Display : public QWidget
 
 public:
     explicit Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
-        unsigned int numWindowsInit, bool showLabel);
+         std::vector<QRect>& monitorSizeList, unsigned int numWindowsInit, bool showLabel);
     ~Display();
 
 private slots:
@@ -40,8 +40,7 @@ private:
     void removeWindowControl();
     void initializeLayout(bool showLabel, unsigned int numWindowsInit);
     void showWindows(unsigned int nWindowControlsDisplayed);
-    unsigned int _monitorResolution[2] = {1920, 1080};
-    QRect _monitorRes = {0, 0, _monitorResolution[0], _monitorResolution[1]};
+    std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
     std::vector<WindowControl*> _windowControl;
     unsigned int _nWindowsAllocated = 0;

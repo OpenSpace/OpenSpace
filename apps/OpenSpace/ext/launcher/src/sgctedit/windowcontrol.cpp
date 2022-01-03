@@ -3,9 +3,10 @@
 #include "windowcontrol.h"
 
 WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-                                                       QRect& widgetDims, QWidget *parent)
+                                    QRect& widgetDims, QRect& monitorDims, QWidget *parent)
     : _monIndex(monitorIndex)
     , _index(windowIndex)
+    , _monitorResolution(monitorDims)
     , QWidget(parent)
 {
     _windowDims = defaultWindowSizes[windowIndex];
@@ -30,6 +31,8 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _offset_x->setValidator(_validatorSize_y);
     _offset_y->setValidator(_validatorSize_y);
 
+    _fullscreenButton = new QPushButton(this);
+    _fullscreenButton->setText("Set to Fullscreen");
     _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
     _checkBoxVsync = new QCheckBox("VSync", this);
     _checkBoxWebGui = new QCheckBox("WebGUI here", this);
@@ -60,6 +63,8 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
             this, SLOT(onProjectionChanged(int)));
     connect(_comboQuality, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onQualityChanged(int)));
+
+    connect(_fullscreenButton, SIGNAL(released()), this, SLOT(onFullscreenClicked()));
 }
 
 QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
@@ -154,6 +159,12 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutCheckboxesFull1 = new QHBoxLayout();
     _layoutCheckboxesFull2 = new QVBoxLayout();
 //    _layoutCheckboxesFull1->addStretch(1);
+    _layoutFullscreenButton = new QHBoxLayout();
+    //_layoutFullscreenButton->addStretch(1);
+    _layoutFullscreenButton->addWidget(_fullscreenButton);
+    _layoutFullscreenButton->addStretch(1);
+    _layoutCheckboxesFull2->addLayout(_layoutFullscreenButton);
+
     _layoutCBoxWindowDecor = new QHBoxLayout();
     //_layoutCBoxWindowDecor->addStretch(1);
     _layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
@@ -271,6 +282,13 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
     if (_windowChangeCallback) {
         _windowChangeCallback(_monIndex, _index, _windowDims);
     }
+}
+
+void WindowControl::onFullscreenClicked() {
+    _offset_x->setText("0");
+    _offset_y->setText("0");
+    _size_x->setText(QString::number(_monitorResolution.width()));
+    _size_y->setText(QString::number(_monitorResolution.height()));
 }
 
 void WindowControl::onProjectionChanged(int newSelection) {
@@ -399,6 +417,7 @@ WindowControl::~WindowControl()
     delete _labelHeightOffset;
     delete _lineHeightOffset;
     delete _validatorHeightOffset;
+    delete _layoutFullscreenButton;
     delete _layoutCBoxWindowDecor;
     delete _layoutCBoxVsync;
     delete _layoutCBoxWebGui;

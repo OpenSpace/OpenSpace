@@ -9,9 +9,10 @@
 
 
 Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
-                                              unsigned int numWindowsInit, bool showLabel)
+          std::vector<QRect>& monitorSizeList, unsigned int numWindowsInit, bool showLabel)
     : _monitorIdx(monitorIdx)
     , _monBox(monitorRenderBox)
+    , _monitorResolutions(monitorSizeList)
 {
     _addWindowButton = new QPushButton("Add Window", this);
     _removeWindowButton = new QPushButton("Remove Window", this);
@@ -136,6 +137,7 @@ void Display::addWindowControl() {
                 _monitorIdx,
                 _nWindowsAllocated,
                 _widgetDims,
+                _monitorResolutions[_monitorIdx],
                 this
             )
         );

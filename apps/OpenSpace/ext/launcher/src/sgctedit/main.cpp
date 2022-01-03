@@ -27,11 +27,15 @@ int main(int argc, char *argv[ ])
     QList<QScreen*> screenList = app.screens();
     std::vector<QRect> monitorSizeList;
     for (size_t s = 0; s < std::min(screenList.length(), 2); ++s) {
+        int actualWidth = std::max(screenList[s]->size().width(),
+            screenList[s]->availableGeometry().width());
+        int actualHeight = std::max(screenList[s]->size().height(),
+            screenList[s]->availableGeometry().height());
         monitorSizeList.push_back({
             screenList[s]->availableGeometry().x(),
             screenList[s]->availableGeometry().y(),
-            screenList[s]->availableGeometry().width(),
-            screenList[s]->availableGeometry().height()
+            actualWidth,
+            actualHeight
         });
     }
 /*for (QScreen* s : screenList) {
@@ -64,8 +68,13 @@ int main(int argc, char *argv[ ])
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
 
-monitorSizeList.push_back({3440, 0, 1920, 1080});
-
+//monitorSizeList.push_back({3440, 0, 1920, 1080});
+for (QRect m : monitorSizeList) {
+  std::cout << "Display " << m.x() << "," << m.y() << " and " << m.width() << "x" << m.height() << std::endl;
+}
+for (QScreen* s : screenList) {
+  std::cout << "Screen  " << s->size().width() << "," << s->size().height() << std::endl;
+}
     bool showMonitorLabel = (monitorSizeList.size() > 1);
     MonitorBox* monBox = new MonitorBox(
         {0, 0, 400, 340},
@@ -87,7 +96,7 @@ monitorSizeList.push_back({3440, 0, 1920, 1080});
     std::vector<Display*> displayWidget = {nullptr, nullptr};
 
     displayLayout[0] = new QVBoxLayout();
-    displayWidget[0] = new Display(0, monBox, 1, showMonitorLabel);
+    displayWidget[0] = new Display(0, monBox, monitorSizeList, 1, showMonitorLabel);
     displayFrame[0] = new QFrame;
     displayLayout[0]->addWidget(displayWidget[0]);
     displayFrame[0]->setLayout(displayLayout[0]);
@@ -96,7 +105,7 @@ monitorSizeList.push_back({3440, 0, 1920, 1080});
 
     if (monitorSizeList.size() > 1) {
         displayLayout[1] = new QVBoxLayout();
-        displayWidget[1] = new Display(1, monBox, 0, showMonitorLabel);
+        displayWidget[1] = new Display(1, monBox, monitorSizeList, 0, showMonitorLabel);
         displayFrame[1] = new QFrame;
         displayLayout[1]->addWidget(displayWidget[1]);
         displayFrame[1]->setLayout(displayLayout[1]);
