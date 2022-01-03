@@ -104,10 +104,13 @@ private:
     QLineEdit* _windowName = nullptr;
     QLabel* _labelSize = nullptr;
     QLabel* _labelDelim = nullptr;
-    QHBoxLayout* _layoutSize = nullptr;
+    QGridLayout* _layoutSize = nullptr;
+    QHBoxLayout* _layoutGridFrame= nullptr;
+    QHBoxLayout* _layoutGridSizeValues = nullptr;
+    QHBoxLayout* _layoutGridOffsetValues = nullptr;
     QLabel* _labelOffset = nullptr;
     QLabel* _labelComma = nullptr;
-    QHBoxLayout* _layoutOffset = nullptr;
+    //QHBoxLayout* _layoutOffset = nullptr;
     QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
     QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
     QHBoxLayout* _layoutCBoxFullscreen = nullptr;

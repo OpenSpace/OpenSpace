@@ -71,7 +71,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _labelName->setText("Window Name: ");
     _windowName = new QLineEdit(this);
     _windowName->setFixedWidth(100);
-    _layoutName->addStretch(1);
+//    _layoutName->addStretch(1);
     _layoutName->addWidget(_labelName);
     _layoutName->addWidget(_windowName);
     _layoutName->addStretch(1);
@@ -80,16 +80,26 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _size_y->setFixedWidth(_lineEditWidthFixed);
     _labelSize = new QLabel(this);
     _labelDelim = new QLabel(this);
-    _layoutSize = new QHBoxLayout();
-    _layoutSize->addStretch(1);
-    _layoutSize->addWidget(_labelSize);
+    QGridLayout* _layoutSize = new QGridLayout;
+    //_layoutSize = new QHBoxLayout();
+    //_layoutSize->addStretch(1);
+//    _layoutSize->addRow(_labelSize, _size_x, _labelDelim, _size_y);
+    _layoutSize->addWidget(_labelSize, 0, 0);
+    _layoutGridSizeValues = new QHBoxLayout();
+    _layoutGridSizeValues->addWidget(_size_x);
+    _layoutGridSizeValues->addWidget(_labelDelim);
+    _layoutGridSizeValues->addWidget(_size_y);
+    _layoutGridSizeValues->addStretch(1);
+    _layoutSize->addLayout(_layoutGridSizeValues, 0, 1);
+//    _layoutSize->addWidget(_labelSize);
     //_labelSize->setFixedWidth(50);
     _labelSize->setText("Size:");
-    _layoutSize->addWidget(_size_x);
-    _layoutSize->addWidget(_labelDelim);
-    _layoutSize->addWidget(_size_y);
-    _layoutSize->addStretch(1);
+//    _layoutSize->addWidget(_size_x);
+//    _layoutSize->addWidget(_labelDelim);
+//    _layoutSize->addWidget(_size_y);
+//    _layoutSize->addStretch(1);
     _labelDelim->setText("x");
+    _labelDelim->setFixedWidth(10);
     _layoutWindowCtrl->addLayout(_layoutSize);
 
     //Window offset
@@ -97,22 +107,36 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayou
     _offset_y->setFixedWidth(_lineEditWidthFixed);
     _labelOffset = new QLabel(this);
     _labelComma = new QLabel(this);
-    _layoutOffset = new QHBoxLayout();
-    _layoutOffset->addStretch(1);
-    _layoutOffset->addWidget(_labelOffset);
+//    _layoutOffset = new QHBoxLayout();
+//    _layoutOffset->addStretch(1);
+//    _layoutOffset->addWidget(_labelOffset);
+//    _layoutSize->addRow(_labelOffset, _offset_x, _labelComma, _offset_y);
+    _layoutSize->addWidget(_labelOffset, 1, 0);
+    _layoutGridOffsetValues = new QHBoxLayout();
+    _layoutGridOffsetValues->addWidget(_offset_x);
+    _layoutGridOffsetValues->addWidget(_labelComma);
+    _layoutGridOffsetValues->addWidget(_offset_y);
+    _layoutGridOffsetValues->addStretch(1);
+    _layoutSize->addLayout(_layoutGridOffsetValues, 1, 1);
     //_labelOffset->setFixedWidth(50);
     _labelOffset->setText("Offset:");
-    _layoutOffset->addWidget(_offset_x);
-    _layoutOffset->addWidget(_labelComma);
-    _layoutOffset->addWidget(_offset_y);
-    _layoutOffset->addStretch(1);
+//    _layoutOffset->addWidget(_offset_x);
+//    _layoutOffset->addWidget(_labelComma);
+//    _layoutOffset->addWidget(_offset_y);
+//    _layoutOffset->addStretch(1);
     _labelComma->setText(",");
-    _layoutWindowCtrl->addLayout(_layoutOffset);
+    _labelComma->setFixedWidth(10);
+    _layoutGridFrame = new QHBoxLayout();
+    _layoutGridFrame->addStretch(1);
+    _layoutGridFrame->addLayout(_layoutSize);
+    _layoutGridFrame->addStretch(1);
+
+    _layoutWindowCtrl->addLayout(_layoutGridFrame);
 
     //Window options
     _layoutCheckboxesFull1 = new QHBoxLayout();
     _layoutCheckboxesFull2 = new QVBoxLayout();
-    _layoutCheckboxesFull1->addStretch(1);
+//    _layoutCheckboxesFull1->addStretch(1);
     _layoutCBoxFullscreen = new QHBoxLayout();
     //_layoutCBoxFullscreen->addStretch(1);
     _layoutCBoxFullscreen->addWidget(_checkBoxFullscreen);
@@ -231,28 +255,38 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
 void WindowControl::onProjectionChanged(int newSelection) {
     switch (newSelection) {
     case 0:
-        _layoutFovWrapper->setVisible(true);
-        _layoutHeightOffsetWrapper->setVisible(false);
+        _labelFov->setEnabled(true);
+        _lineFov->setEnabled(true);
+        _labelHeightOffset->setEnabled(false);
+        _lineHeightOffset->setEnabled(false);
         break;
 
     case 1:
-        _layoutFovWrapper->setVisible(false);
-        _layoutHeightOffsetWrapper->setVisible(false);
+        _labelFov->setEnabled(false);
+        _lineFov->setEnabled(false);
+        _labelHeightOffset->setEnabled(false);
+        _lineHeightOffset->setEnabled(false);
         break;
 
     case 2:
-        _layoutFovWrapper->setVisible(false);
-        _layoutHeightOffsetWrapper->setVisible(false);
+        _labelFov->setEnabled(false);
+        _lineFov->setEnabled(false);
+        _labelHeightOffset->setEnabled(false);
+        _lineHeightOffset->setEnabled(false);
         break;
 
     case 3:
-        _layoutFovWrapper->setVisible(false);
-        _layoutHeightOffsetWrapper->setVisible(true);
+        _labelFov->setEnabled(false);
+        _lineFov->setEnabled(false);
+        _labelHeightOffset->setEnabled(true);
+        _lineHeightOffset->setEnabled(true);
         break;
 
     case 4:
-        _layoutFovWrapper->setVisible(false);
-        _layoutHeightOffsetWrapper->setVisible(false);
+        _labelFov->setEnabled(false);
+        _lineFov->setEnabled(false);
+        _labelHeightOffset->setEnabled(false);
+        _lineHeightOffset->setEnabled(false);
         break;
     }
 }
@@ -326,7 +360,10 @@ WindowControl::~WindowControl()
     delete _layoutSize;
     delete _labelOffset;
     delete _labelComma;
-    delete _layoutOffset;
+//    delete _layoutOffset;
+    delete _layoutGridFrame;
+    delete _layoutGridSizeValues;
+    delete _layoutGridOffsetValues;
     delete _checkBoxFullscreen;
     delete _checkBoxVsync;
     delete _checkBoxWebGui;

@@ -65,7 +65,6 @@ OrientationDialog::OrientationDialog(QWidget* parent)
     _layoutButtonBox->addStretch(1);
 
     _layoutWindow->addLayout(_layoutButtonBox);
-
 }
 
 OrientationDialog::~OrientationDialog()

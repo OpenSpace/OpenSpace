@@ -31,10 +31,15 @@ int main(int argc, char *argv[ ])
             screenList[s]->size().height(),
         });
     }
-    //for (QScreen* s : screenList) {
-    //    std::cout << "Monitor ";
-    //    std::cout << s->size().width() << "x" << s->size().height() << std::endl;
-    //}
+for (QScreen* s : screenList) {
+    std::cout << "Monitor ";
+    std::cout << s->size().width() << "x" << s->size().height();
+    std::cout << ", " << s->availableGeometry().width() << "x";
+    std::cout << s->availableGeometry().height() << " offset [";
+    std::cout << s->availableGeometry().x() << ",";
+    std::cout << s->availableGeometry().y() << "]";
+    std::cout << std::endl;
+}
     //std::cout << "Primary";
     //QScreen* screen = app.primaryScreen();
     //std::cout << screen->size().width() << "x" << screen->size().height() << std::endl;
