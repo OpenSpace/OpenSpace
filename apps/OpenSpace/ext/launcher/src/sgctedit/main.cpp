@@ -38,21 +38,6 @@ int main(int argc, char *argv[ ])
             actualHeight
         });
     }
-/*for (QScreen* s : screenList) {
-    std::cout << "Monitor ";
-    std::cout << s->size().width() << "x" << s->size().height();
-    std::cout << ", " << s->availableGeometry().width() << "x";
-    std::cout << s->availableGeometry().height() << " offset [";
-    std::cout << s->availableGeometry().x() << ",";
-    std::cout << s->availableGeometry().y() << "]";
-    std::cout << std::endl;
-}
-    //std::cout << "Primary";
-    //QScreen* screen = app.primaryScreen();
-    //std::cout << screen->size().width() << "x" << screen->size().height() << std::endl;
-    //QRect screenGeometry = screen->geometry();
-    //End code for monitor detection
-*/
     QFrame* monitorBorderFrame = nullptr;
     Orientation* orientationWidget = nullptr;
 
@@ -68,13 +53,6 @@ int main(int argc, char *argv[ ])
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
 
-//monitorSizeList.push_back({3440, 0, 1920, 1080});
-for (QRect m : monitorSizeList) {
-  std::cout << "Display " << m.x() << "," << m.y() << " and " << m.width() << "x" << m.height() << std::endl;
-}
-for (QScreen* s : screenList) {
-  std::cout << "Screen  " << s->size().width() << "," << s->size().height() << std::endl;
-}
     bool showMonitorLabel = (monitorSizeList.size() > 1);
     MonitorBox* monBox = new MonitorBox(
         {0, 0, 400, 340},

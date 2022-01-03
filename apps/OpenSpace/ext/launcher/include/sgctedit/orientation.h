@@ -31,8 +31,10 @@ private slots:
     void orientationDialog();
 
 private:
-    QHBoxLayout* _layoutOrientationButton = nullptr;
+    QHBoxLayout* _layoutOrientationFull = nullptr;
+    QVBoxLayout* _layoutOrientationControls = nullptr;
     QPushButton* _orientationButton = nullptr;
+    QCheckBox* _checkBoxVsync = nullptr;
 };
 
 #endif // ORIENTATION_H

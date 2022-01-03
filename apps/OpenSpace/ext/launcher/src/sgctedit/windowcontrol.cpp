@@ -34,7 +34,6 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
     _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
-    _checkBoxVsync = new QCheckBox("VSync", this);
     _checkBoxWebGui = new QCheckBox("WebGUI here", this);
     _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
     _comboProjection = new QComboBox(this);
@@ -170,11 +169,6 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
     _layoutCBoxWindowDecor->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxWindowDecor);
-    _layoutCBoxVsync= new QHBoxLayout();
-    //_layoutCBoxVsync->addStretch(1);
-    _layoutCBoxVsync->addWidget(_checkBoxVsync);
-    _layoutCBoxVsync->addStretch(1);
-    _layoutCheckboxesFull2->addLayout(_layoutCBoxVsync);
     _layoutCBoxWebGui= new QHBoxLayout();
     //_layoutCBoxWebGui->addStretch(1);
     _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
@@ -294,6 +288,7 @@ void WindowControl::onFullscreenClicked() {
 void WindowControl::onProjectionChanged(int newSelection) {
     switch (newSelection) {
     case 0:
+        _comboQuality->setEnabled(false);
         _labelFov->setEnabled(true);
         _lineFov->setEnabled(true);
         _labelHeightOffset->setEnabled(false);
@@ -301,6 +296,7 @@ void WindowControl::onProjectionChanged(int newSelection) {
         break;
 
     case 1:
+        _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
@@ -308,6 +304,7 @@ void WindowControl::onProjectionChanged(int newSelection) {
         break;
 
     case 2:
+        _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
@@ -315,6 +312,7 @@ void WindowControl::onProjectionChanged(int newSelection) {
         break;
 
     case 3:
+        _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(true);
@@ -322,6 +320,7 @@ void WindowControl::onProjectionChanged(int newSelection) {
         break;
 
     case 4:
+        _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
@@ -371,10 +370,6 @@ QCheckBox* WindowControl::checkBoxWindowDecor() {
     return _checkBoxWindowDecor;
 }
 
-QCheckBox* WindowControl::checkBoxVsync() {
-    return _checkBoxVsync;
-}
-
 QCheckBox* WindowControl::checkBoxWebGui() {
     return _checkBoxWebGui;
 }
@@ -406,7 +401,6 @@ WindowControl::~WindowControl()
     delete _layoutGridSizeValues;
     delete _layoutGridOffsetValues;
     delete _checkBoxWindowDecor;
-    delete _checkBoxVsync;
     delete _checkBoxWebGui;
     delete _checkBoxSpoutOutput;
     delete _comboProjection;
@@ -419,7 +413,6 @@ WindowControl::~WindowControl()
     delete _validatorHeightOffset;
     delete _layoutFullscreenButton;
     delete _layoutCBoxWindowDecor;
-    delete _layoutCBoxVsync;
     delete _layoutCBoxWebGui;
     delete _layoutCBoxSpoutOutput;
     delete _layoutComboProjection;

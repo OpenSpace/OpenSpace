@@ -40,7 +40,6 @@ public:
     QLineEdit* lineEditSizeOffsetX();
     QLineEdit* lineEditSizeOffsetY();
     QCheckBox* checkBoxWindowDecor();
-    QCheckBox* checkBoxVsync();
     QCheckBox* checkBoxWebGui();
     QCheckBox* checkBoxSpoutOutput();
 
@@ -96,7 +95,6 @@ private:
     float _monitorScaleFactor = 1.0;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
-    QCheckBox* _checkBoxVsync = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
 
@@ -124,7 +122,6 @@ private:
     QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
     QHBoxLayout* _layoutFullscreenButton = nullptr;
     QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
-    QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
     QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
     QHBoxLayout* _layoutComboProjection = nullptr;
