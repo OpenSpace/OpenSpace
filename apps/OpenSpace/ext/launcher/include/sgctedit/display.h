@@ -25,7 +25,6 @@ class Display : public QWidget
 public:
     explicit Display();
     ~Display();
-    static void windowResizedCallback(unsigned int windowIndex, const QRectF& newDims);
 
 private:
     void addWindowControl();
@@ -34,6 +33,7 @@ private:
     QRect _widgetDims = {0, 0, 400, 400};
     std::vector<WindowControl*> _windowControl;
     unsigned int _nWindows = 0;
+    int _lineEditWidthFixed = 80;
     QPushButton* _toggleNumMonitorsButton = nullptr;
     MonitorBox* _monBox = nullptr;
     QBoxLayout* _layout = nullptr;

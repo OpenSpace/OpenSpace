@@ -1,3 +1,4 @@
+#include "display.h"
 #include "monitorbox.h"
 #include "windowcontrol.h"
 
@@ -34,6 +35,10 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
             SLOT(onSizeXChanged(const QString&)));
     connect(_size_y, SIGNAL(textChanged(const QString&)), this,
             SLOT(onSizeYChanged(const QString&)));
+    connect(_offset_x, SIGNAL(textChanged(const QString&)), this,
+            SLOT(onOffsetXChanged(const QString&)));
+    connect(_offset_y, SIGNAL(textChanged(const QString&)), this,
+            SLOT(onOffsetYChanged(const QString&)));
 }
 
 void WindowControl::onSizeXChanged(const QString& newText) {
@@ -50,6 +55,30 @@ void WindowControl::onSizeYChanged(const QString& newText) {
     std::string y = newText.toStdString();
     if (!y.empty()) {
         _windowDims.setHeight(std::stoi(y));
+    }
+    if (_windowChangeCallback) {
+        _windowChangeCallback(_index, _windowDims);
+    }
+}
+
+void WindowControl::onOffsetXChanged(const QString& newText) {
+    std::string xOffset = newText.toStdString();
+    float prevWidth = _windowDims.width();
+    if (!xOffset.empty()) {
+        _windowDims.setX(std::stoi(xOffset));
+        _windowDims.setWidth(prevWidth);
+    }
+    if (_windowChangeCallback) {
+        _windowChangeCallback(_index, _windowDims);
+    }
+}
+
+void WindowControl::onOffsetYChanged(const QString& newText) {
+    std::string yOffset = newText.toStdString();
+    float prevHeight = _windowDims.height();
+    if (!yOffset.empty()) {
+        _windowDims.setY(std::stoi(yOffset));
+        _windowDims.setHeight(prevHeight);
     }
     if (_windowChangeCallback) {
         _windowChangeCallback(_index, _windowDims);

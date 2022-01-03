@@ -25,7 +25,7 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     painter.setPen(pen);
     //Draw border
     painter.setPen(Qt::gray);
-    painter.drawRoundedRect(0,5,width()-5, height()-7,3,3);
+    painter.drawRoundedRect(0, 0, width() - 1, height() - 1, 10, 10);
     //Draw monitor outline
     painter.setPen(Qt::black);
     painter.drawRect(_monitorDimensionsScaled);
@@ -86,12 +86,12 @@ void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int index, cons
     if (_windowRendering[index]) {
         QRectF wF = w;
         *_windowRendering[index] = {
-            _marginWidget + _monitorBoundaryRect.topLeft().x() + wF.left() * _monitorScaleFactor,
-            _marginWidget + _monitorBoundaryRect.topLeft().y() + wF.top() * _monitorScaleFactor,
+            _monitorDimensionsScaled.x() + wF.left() * _monitorScaleFactor,
+            _monitorDimensionsScaled.y() + wF.top() * _monitorScaleFactor,
             wF.width() * _monitorScaleFactor,
             wF.height() * _monitorScaleFactor
         };
     }
-//    _windowRendering[index] = w * _monitorScaleFactor;
+    this->update();
 }
 

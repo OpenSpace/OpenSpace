@@ -33,6 +33,8 @@ public:
 private slots:
     void onSizeXChanged(const QString& newText);
     void onSizeYChanged(const QString& newText);
+    void onOffsetXChanged(const QString& newText);
+    void onOffsetYChanged(const QString& newText);
 
 private:
     void updateScaledWindowDimensions();
