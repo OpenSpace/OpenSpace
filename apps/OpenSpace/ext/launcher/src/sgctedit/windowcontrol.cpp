@@ -45,12 +45,10 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
             SLOT(onOffsetYChanged(const QString&)));
 }
 
-void WindowControl::initializeLayout(QWidget* parentWidget, QHBoxLayout* layout) {
+QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/) {
     _layoutFullWindow = new QVBoxLayout(parentWidget);
     //Window size
     _layoutWindowCtrl = new QVBoxLayout(parentWidget);
-//    _size_x = _windowControl.back()->lineEditSizeWidth();
-//    _size_y = _windowControl.back()->lineEditSizeHeight();
     _size_x->setFixedWidth(_lineEditWidthFixed);
     _size_y->setFixedWidth(_lineEditWidthFixed);
     _labelSize = new QLabel(this);
@@ -68,8 +66,6 @@ void WindowControl::initializeLayout(QWidget* parentWidget, QHBoxLayout* layout)
     _layoutWindowCtrl->addLayout(_layoutSize);
 
     //Window offset
-//    _lineOffsetX = _windowControl.back()->lineEditSizeOffsetX();
-//    _lineOffsetY = _windowControl.back()->lineEditSizeOffsetY();
     _offset_x->setFixedWidth(_lineEditWidthFixed);
     _offset_y->setFixedWidth(_lineEditWidthFixed);
     _labelOffset = new QLabel(this);
@@ -109,7 +105,7 @@ void WindowControl::initializeLayout(QWidget* parentWidget, QHBoxLayout* layout)
     _layoutWindowCtrl->addLayout(_layoutCBoxSpoutOutput);
 
     _layoutFullWindow->addLayout(_layoutWindowCtrl);
-    layout->addLayout(_layoutFullWindow);
+    return _layoutFullWindow;
 }
 
 void WindowControl::onSizeXChanged(const QString& newText) {

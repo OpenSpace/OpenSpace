@@ -26,9 +26,9 @@ public:
     void mapMonitorResolutionToWidgetCoordinates(QRect r);
     void mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w);
     void setResolution(QRect& res);
+    void setNumWindowsDisplayed(unsigned int nWindows);
     int numWindows();
     void windowDimensionsChanged(unsigned int index, const QRectF newDimensions);
-//    float monitorScaleFactor();
     void addWindowControl(WindowControl* wCtrl);
     void removeAdditionalWindowDimensions();
 

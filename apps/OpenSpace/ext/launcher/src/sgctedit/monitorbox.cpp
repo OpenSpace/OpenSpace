@@ -31,8 +31,10 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     painter.drawRect(_monitorDimensionsScaled);
     //Draw window(s)
     painter.setPen(Qt::blue);
-    for (QRectF* w : _windowRendering) {
-        painter.drawRect(*w);
+    for (unsigned int i = 0; i < _nWindows; ++i) {
+        if (i <= _windowRendering.size()) {
+            painter.drawRect(*_windowRendering[i]);
+        }
     }
 }
 
@@ -41,7 +43,6 @@ void MonitorBox::windowDimensionsChanged(unsigned int index, const QRectF newDim
 }
 
 void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRect r) {
-//    _monitorResolution = r;
     float aspectRatio = static_cast<float>(r.width()) /
         static_cast<float>(r.height());
     _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
@@ -74,6 +75,13 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRect r) {
 
 void MonitorBox::setResolution(QRect& res) {
     _monitorResolution = res;
+}
+
+void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
+    if (_nWindows != nWindows) {
+        _nWindows = nWindows;
+        this->update();
+    }
 }
 
 void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w) {

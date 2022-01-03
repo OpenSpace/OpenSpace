@@ -12,10 +12,11 @@ Display::Display()
     _toggleNumMonitorsButton = new QPushButton("Add 2nd Window", this);
     _toggleNumMonitorsButton->setObjectName("toggleNumMonitors");
 
-    //WindowControl wCtrl(0, _widgetDims, _monitorRes, this);
     _monBox = new MonitorBox(_widgetDims, _monitorRes, this);
+    //Add 2 window controls
     addWindowControl();
-    initializeLayout(0, _windowControl[0]);
+    addWindowControl();
+    initializeLayout();
 
     connect(_toggleNumMonitorsButton, SIGNAL(released()), this,
             SLOT(toggleWindows()));
@@ -29,7 +30,7 @@ Display::~Display() {
     delete _layout;
 }
 
-void Display::initializeLayout(unsigned int windowIndex, WindowControl* winCtrl) {
+void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
     _layout->addWidget(_monBox);
     _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -41,7 +42,18 @@ void Display::initializeLayout(unsigned int windowIndex, WindowControl* winCtrl)
     _layout->addLayout(_layoutMonButton);
     _layoutWindows = new QHBoxLayout(this);
 
-    winCtrl->initializeLayout(this, _layoutWindows);
+    _winCtrlLayouts.push_back(_windowControl[0]->initializeLayout(this));
+    _layoutWindowWrappers.push_back(new QWidget());
+    _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
+    _layoutWindows->addWidget(_layoutWindowWrappers.back());
+    _borderFrame = new QFrame;
+    _borderFrame->setFrameShape(QFrame::VLine);
+    _layoutWindows->addWidget(_borderFrame);
+    _winCtrlLayouts.push_back(_windowControl[1]->initializeLayout(this));
+    _layoutWindowWrappers.push_back(new QWidget());
+    _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
+    _layoutWindows->addWidget(_layoutWindowWrappers.back());
+    hideSecondWindow();
     _layout->addLayout(_layoutWindows);
 
     this->setLayout(_layout);
@@ -51,26 +63,35 @@ void Display::initializeLayout(unsigned int windowIndex, WindowControl* winCtrl)
 }
 
 void Display::toggleWindows() {
-    if (_nWindows == 1) {
-        addWindowControl();
-        _borderFrame = new QFrame;
-        _borderFrame->setFrameShape(QFrame::VLine);
-        _layoutWindows->addWidget(_borderFrame);
-        _windowControl.back()->initializeLayout(this, _layoutWindows);
+    if (_nWindowsDisplayed == 1) {
         _toggleNumMonitorsButton->setText("Remove 2nd window");
+        showSecondWindow();
     }
-    else if (_nWindows == 2) {
-        removeWindowControl();
-        delete _borderFrame;
+    else if (_nWindowsDisplayed == 2) {
         _toggleNumMonitorsButton->setText("Add 2nd window");
+        hideSecondWindow();
     }
 }
 
+void Display::hideSecondWindow() {
+    _borderFrame->setVisible(false);
+    _layoutWindowWrappers[1]->setVisible(false);
+    _nWindowsDisplayed = 1;
+    _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
+}
+
+void Display::showSecondWindow() {
+    _borderFrame->setVisible(true);
+    _layoutWindowWrappers[1]->setVisible(true);
+    _nWindowsDisplayed = 2;
+    _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
+}
+
 void Display::addWindowControl() {
-    if (_nWindows < 2) {
+    if (_nWindowsAllocated < 2) {
         _windowControl.push_back(
             new WindowControl(
-                _nWindows,
+                _nWindowsAllocated,
                 _widgetDims,
                 _monitorRes,
                 this
@@ -81,17 +102,8 @@ void Display::addWindowControl() {
                 _monBox->windowDimensionsChanged(windowIndex, newDims);
             }
         );
-        _monBox->mapWindowResolutionToWidgetCoordinates(_nWindows,
+        _monBox->mapWindowResolutionToWidgetCoordinates(_nWindowsAllocated,
             _windowControl.back()->dimensions());
-        _nWindows++;
-    }
-}
-
-void Display::removeWindowControl() {
-    if (_nWindows == 2) {
-        delete _windowControl.back();
-        _windowControl.pop_back();
-        _monBox->removeAdditionalWindowDimensions();
-        _nWindows--;
+        _nWindowsAllocated++;
     }
 }

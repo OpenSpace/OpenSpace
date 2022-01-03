@@ -28,7 +28,7 @@ public:
     void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb);
-    void initializeLayout(QWidget* parentWidget, QHBoxLayout* layout);
+    QVBoxLayout* initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/);
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
     QLineEdit* lineEditSizeHeight();
@@ -77,17 +77,9 @@ private:
     QLabel* _labelSize = nullptr;
     QLabel* _labelDelim = nullptr;
     QHBoxLayout* _layoutSize = nullptr;
-//    QLineEdit* _lineSizeX = nullptr;
-//    QLineEdit* _lineSizeY = nullptr;
-//    QLineEdit* _lineOffsetX = nullptr;
-//    QLineEdit* _lineOffsetY = nullptr;
     QLabel* _labelOffset = nullptr;
     QLabel* _labelComma = nullptr;
     QHBoxLayout* _layoutOffset = nullptr;
-//    QCheckBox* _optFullscreen = nullptr;
-//    QCheckBox* _optVsync = nullptr;
-//    QCheckBox* _optWebGui = nullptr;
-//    QCheckBox* _optSpoutOutput = nullptr;
     QHBoxLayout* _layoutCBoxFullscreen = nullptr;
     QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
