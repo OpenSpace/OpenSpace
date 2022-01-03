@@ -68,6 +68,7 @@ set(SOURCE_FILES
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
   src/sgctedit/display.cpp
+  src/sgctedit/filesupport.cpp
   src/sgctedit/main.cpp
   src/sgctedit/monitorbox.cpp
   src/sgctedit/orientation.cpp

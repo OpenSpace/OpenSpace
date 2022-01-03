@@ -11,6 +11,7 @@
 #include <string>
 
 #include "include/display.h"
+#include "include/filesupport.h"
 #include "include/monitorbox.h"
 #include "include/windowcontrol.h"
 #include "include/orientation.h"
@@ -71,7 +72,9 @@ monitorSizeList.push_back({m2->width(), m2->height()});
         layoutMainH->addWidget(monitorBorderFrame);
         layoutMainH->addWidget(displayWidget2);
     }
+
     layoutMainV->addLayout(layoutMainH);
+    FileSupport* fileSupportWidget = new FileSupport(layoutMainV);
 
     win.setWindowTitle("Window Details");
     win.show();
