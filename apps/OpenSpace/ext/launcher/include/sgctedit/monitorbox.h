@@ -12,6 +12,8 @@
 #include <vector>
 #include <iostream>
 
+#include "windowcontrol.h"
+
 
 struct ConfigResolution
 {
@@ -34,21 +36,19 @@ class MonitorBox : public QWidget
     Q_OBJECT
 
 public:
-    explicit MonitorBox(QLineEdit* size_text_x, QLineEdit* size_text_y,
+    explicit MonitorBox(QRect widgetDims, QRect monitorResolution,
         QWidget *parent = nullptr);
     ~MonitorBox();
-    void setMonitorResolution(ConfigResolution r);
-    void setNumWindows(int nWindows);
+    void mapMonitorResolutionToWidgetCoordinates(QRect r);
+    void mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w);
+    void setResolution(QRect& res);
     int numWindows();
-    void setWindowSize(int index, ConfigResolution r, ConfigResolution offset);
-    ConfigResolution windowSize(int index);
+    void windowDimensionsChanged(unsigned int index, const QRectF& newDimensions);
+//    float monitorScaleFactor();
+    void addWindowControl(WindowControl* wCtrl);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-
-private slots:
-    void onSizeXChanged(const QString& newText);
-    void onSizeYChanged(const QString& newText);
 
 private:
     void redrawMonitor(ConfigResolution);
@@ -57,17 +57,22 @@ private:
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
 
-    ConfigResolution _monitorDimensions;
+    QRect _monitorResolution;
+    QRectF _monitorDimensionsScaled;
+    std::vector<WindowControl*> _windowControl;
 
     std::vector<ConfigResolution> _windowResolutions;
-    QRectF _monitorRect;
-    std::vector<QRectF> _windowRect;
+    QRectF _monitorRendering;
+    std::vector<QRectF*> _windowRendering;
     float _monitorScaleFactor = 1.0;
     float _offset[2] = {10.0, 10.0};
 
     float _marginFractionOfWidgetSize = 0.025;
-    ConfigResolution _monitorWidgetSize;
-    int _nWindows = 1;
+    QRectF _monitorWidgetSize;
+    QRectF _monitorBoundaryRect;
+    float _marginWidget = 5.0;
+
+    unsigned int _nWindows = 0;
 };
 
 #endif // MONITORBOX_H

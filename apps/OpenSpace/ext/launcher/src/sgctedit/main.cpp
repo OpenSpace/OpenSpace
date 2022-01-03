@@ -10,7 +10,11 @@
 #include <string>
 
 #include "include/monitorbox.h"
+#include "include/windowcontrol.h"
 
+void windowResizedCallback(unsigned int windowIndex, const QRectF& newDims) {
+
+}
 
 int main(int argc, char *argv[ ])
 {
@@ -19,30 +23,25 @@ int main(int argc, char *argv[ ])
     QWidget* centralWidget = new QWidget;
     win.setCentralWidget(centralWidget);
 
-    QComboBox* monitorResolutionCombo = new QComboBox(centralWidget);
-    monitorResolutionCombo->setObjectName("monitorResolution");
-    QStringList monitorResolutionTypes = { "640x480", "1280x720", "1920x1080",
-        "1920x1200", "2560x1440", "2048x1080", "3440x1440", "3840x2160", "7680x4320",
-        "custom" };
-    monitorResolutionCombo->addItems(monitorResolutionTypes);
-
+    unsigned int monitorResolution[2] = {1920, 1080};
     QPushButton* toggleNumMonitorsButton
         = new QPushButton("Add 2nd Window", centralWidget);
     toggleNumMonitorsButton->setObjectName("toggleNumMonitors");
 
     QLabel* label_size = new QLabel(centralWidget);
     QLabel* label_delim = new QLabel(centralWidget);
-    QLineEdit* size_x = new QLineEdit("900", centralWidget);
-    QLineEdit* size_y = new QLineEdit("500", centralWidget);
-    QIntValidator* _validatorSize_x = new QIntValidator(10, 1920);
-    QIntValidator* _validatorSize_y = new QIntValidator(10, 1080);
-    size_x->setValidator(_validatorSize_x);
-    size_y->setValidator(_validatorSize_y);
-    MonitorBox* monBox = new MonitorBox(size_x, size_y, centralWidget);
+
+    QRect widgetDims(400, 400, 0, 0);
+    QRect monitorRes(monitorResolution[0], monitorResolution[1], 0, 0);
+    WindowControl wCtrl(0, widgetDims, monitorRes, centralWidget);
+    MonitorBox* monBox = new MonitorBox(widgetDims, monitorRes, centralWidget);
+    monBox->addWindowControl(&wCtrl);
+    QLineEdit* size_x = wCtrl.lineEditSizeWidth();
+    QLineEdit* size_y = wCtrl.lineEditSizeHeight();
+
     QBoxLayout* layout = new QVBoxLayout(centralWidget);
     layout->addWidget(monBox);
     layout->addWidget(toggleNumMonitorsButton);
-    layout->addWidget(monitorResolutionCombo);
     QBoxLayout* sizeLayout = new QHBoxLayout(centralWidget);
     sizeLayout->addWidget(label_size);
     sizeLayout->addWidget(size_x);
@@ -57,16 +56,13 @@ int main(int argc, char *argv[ ])
 
     int windowSize_x = std::stoi(size_x->text().toStdString());
     int windowSize_y = std::stoi(size_y->text().toStdString());
-    monBox->setMonitorResolution({1920, 1080});
-    monBox->setNumWindows(1);
-    monBox->setWindowSize(0, {windowSize_x, 600}, {20, 10});
-    monBox->setWindowSize(1, {400, 400}, {1020, 610});
+    QRect defaultMonitorResolution(monitorResolution[0], monitorResolution[1], 0, 0);
+    monBox->setResolution(defaultMonitorResolution);
 
     win.show();
     app.exec();
 
     delete centralWidget;
-    delete monitorResolutionCombo;
     delete toggleNumMonitorsButton;
     delete monBox;
     delete layout;

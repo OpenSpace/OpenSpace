@@ -1,31 +1,25 @@
 #include "mainwindow.h"
 #include "monitorbox.h"
 
-MonitorBox::MonitorBox(QLineEdit* size_text_x, QLineEdit* size_text_y, QWidget *parent)
-  : QWidget(parent)
-  , _monitorWidgetSize({300.0, 300.0})
-  , _monitorDimensions(_monitorWidgetSize._width * (1.0 - _marginFractionOfWidgetSize * 2.0),
-                       _monitorWidgetSize._height * (1.0 - _marginFractionOfWidgetSize * 2.0))
-  , _size_x(size_text_x)
-  , _size_y(size_text_y)
+
+
+MonitorBox::MonitorBox(QRect widgetDims, QRect monitorResolution, QWidget *parent)
+    : QWidget(parent)
+    , _monitorWidgetSize(widgetDims)
 {
-    setFixedSize(_monitorWidgetSize._width, _monitorWidgetSize._height);
-
-    _monitorRect = {
-        _monitorWidgetSize._width * _marginFractionOfWidgetSize,
-        _monitorWidgetSize._height * _marginFractionOfWidgetSize,
-        _monitorWidgetSize._width * (1.0 - _marginFractionOfWidgetSize * 2.0),
-        _monitorWidgetSize._height * (1.0 - _marginFractionOfWidgetSize * 2.0)
-    };
-
-    connect(_size_x, SIGNAL(textChanged(const QString&)), this,
-            SLOT(onSizeXChanged(const QString&)));
-    connect(_size_y, SIGNAL(textChanged(const QString&)), this,
-            SLOT(onSizeYChanged(const QString&)));
+    mapMonitorResolutionToWidgetCoordinates(monitorResolution);
 }
 
 MonitorBox::~MonitorBox()
 { }
+
+void MonitorBox::addWindowControl(WindowControl* wCtrl) {
+    if (_nWindows < 2) {
+        _windowControl.push_back(wCtrl);
+        _windowControl.back()->setWindowChangeCallback(windowDimensionsChanged);
+        _nWindows++;
+    }
+}
 
 void MonitorBox::paintEvent(QPaintEvent *event)
 {
@@ -33,57 +27,44 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     QPen pen = painter.pen();
     painter.setPen(pen);
+    //Draw monitor outline
     painter.setPen(Qt::black);
-    painter.drawRect(_monitorRect);
+    painter.drawRect(_monitorDimensionsScaled);
+    //Draw window(s)
     painter.setPen(Qt::blue);
-    for (QRectF w : _windowRect) {
-        painter.drawRect(w);
+    for (QRectF* w : _windowRendering) {
+        painter.drawRect(*w);
     }
 }
 
-void MonitorBox::onSizeXChanged(const QString& newText) {
-    ConfigResolution offset(50, 50);
-    std::string x = newText.toStdString();
-    if (!x.empty()) {
-        _windowResolutions[0]._width = std::stoi(x);
-    }
-    setWindowSize(0, _windowResolutions[0], offset);
+void MonitorBox::windowDimensionsChanged(unsigned int index, const QRectF& newDimensions) {
+    mapWindowResolutionToWidgetCoordinates(index, newDimensions);
 }
 
-void MonitorBox::onSizeYChanged(const QString& newText) {
-    ConfigResolution size(0, 400);
-    ConfigResolution offset(50, 50);
-    std::string y = newText.toStdString();
-    if (!y.empty()) {
-        _windowResolutions[0]._height = std::stoi(y);
-    }
-    setWindowSize(0, _windowResolutions[0], offset);
-}
-
-void MonitorBox::setMonitorResolution(ConfigResolution r) {
-    _monitorDimensions = r;
-    float aspectRatio = r._width / r._height;
-    float margin = _monitorWidgetSize._width * _marginFractionOfWidgetSize;
+void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRect r) {
+//    _monitorResolution = r;
+    float aspectRatio = r.width() / r.height();
+    _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
     if (aspectRatio >= 1.0) {
-        float newWidth = _monitorWidgetSize._width
+        float newWidth = _monitorWidgetSize.width()
             * (1.0 - _marginFractionOfWidgetSize * 2.0);
-        _monitorScaleFactor = newWidth / static_cast<float>(r._width);
+        _monitorScaleFactor = newWidth / static_cast<float>(r.width());
         float newHeight = newWidth / aspectRatio;
-        _monitorRect = {
-            margin,
-            margin + (_monitorWidgetSize._height - newHeight) / 2.0,
+        _monitorRendering = {
+            _marginWidget,
+            _marginWidget + (_monitorWidgetSize.height() - newHeight) / 2.0,
             newWidth,
             newHeight
         };
     }
     else {
-        float newHeight = _monitorWidgetSize._height
+        float newHeight = _monitorWidgetSize.height()
             * (1.0 - _marginFractionOfWidgetSize * 2.0);
-        _monitorScaleFactor = newHeight / static_cast<float>(r._height);
+        _monitorScaleFactor = newHeight / static_cast<float>(r.height());
         float newWidth = newHeight * aspectRatio;
-        _monitorRect = {
-            margin + (_monitorWidgetSize._width - newWidth) / 2.0,
-            margin,
+        _monitorRendering = {
+            _marginWidget + (_monitorWidgetSize.width() - newWidth) / 2.0,
+            _marginWidget,
             newWidth,
             newHeight
         };
@@ -91,33 +72,29 @@ void MonitorBox::setMonitorResolution(ConfigResolution r) {
     this->update();
 }
 
-void MonitorBox::setNumWindows(int nWindows) {
-    if (nWindows >= 1 && nWindows <= 2) {
-        _nWindows = nWindows;
-        while (_windowResolutions.size() < _nWindows) {
-            _windowResolutions.push_back({0, 0});
-            _windowRect.push_back({0, 0, 0, 0});
+void MonitorBox::setResolution(QRect& res) {
+    _monitorResolution = res;
+}
+
+void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w) {
+    if (index < _windowRendering.size() ) {
+        if (_windowRendering[index]) {
+            *_windowRendering[index] = {
+                _marginWidget + _monitorBoundaryRect.topLeft().x() + w.left() * _monitorScaleFactor,
+                _marginWidget + _monitorBoundaryRect.topLeft().y() + w.top() * _monitorScaleFactor,
+                w.width() * _monitorScaleFactor,
+                w.height() * _monitorScaleFactor
+            };
         }
-        if (_windowResolutions.size() > _nWindows) {
-            _windowResolutions.pop_back();
-            _windowRect.pop_back();
-        }
+//        _windowRendering[index] = w * _monitorScaleFactor;
     }
 }
+
+//float MonitorBox::monitorScaleFactor() {
+//    return _monitorScaleFactor;
+//}
 
 int MonitorBox::numWindows() {
     return _nWindows;
 }
 
-void MonitorBox::setWindowSize(int index, ConfigResolution r, ConfigResolution offset) {
-    if (index <= _nWindows - 1) {
-        _windowResolutions[index] = r;
-    }
-    _windowRect[index] = {
-        _monitorRect.topLeft().x() + offset._width * _monitorScaleFactor,
-        _monitorRect.topLeft().y() + offset._height * _monitorScaleFactor,
-        r._width * _monitorScaleFactor,
-        r._height * _monitorScaleFactor
-    };
-    this->update();
-}
