@@ -43,6 +43,7 @@ set(HEADER_FILES
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
   include/sgctedit/display.h
+  include/sgctedit/filesupport.h
   include/sgctedit/monitorbox.h
   include/sgctedit/orientation.h
   include/sgctedit/orientationdialog.h
@@ -92,6 +93,7 @@ set(HEADER_SOURCE
   include/profile/profileedit.h
   include/profile/propertiesdialog.h
   include/sgctedit/display.h
+  include/sgctedit/filesupport.h
   include/sgctedit/monitorbox.h
   include/sgctedit/orientation.h
   include/sgctedit/orientationdialog.h
