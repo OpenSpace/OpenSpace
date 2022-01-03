@@ -20,12 +20,12 @@ class MonitorBox : public QWidget
     Q_OBJECT
 
 public:
-    explicit MonitorBox(QRect widgetDims, QRect monitorResolution,
+    explicit MonitorBox(QRect widgetDims, QSize monitorResolution,
         QWidget *parent = nullptr);
     ~MonitorBox();
-    void mapMonitorResolutionToWidgetCoordinates(QRect r);
+    void mapMonitorResolutionToWidgetCoordinates(QSize r);
     void mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w);
-    void setResolution(QRect& res);
+    void setResolution(QSize& res);
     void setNumWindowsDisplayed(unsigned int nWindows);
     int numWindows();
     void windowDimensionsChanged(unsigned int index, const QRectF newDimensions);
@@ -39,7 +39,7 @@ private:
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
 
-    QRect _monitorResolution;
+    QSize _monitorResolution;
     QRectF _monitorDimensionsScaled;
 
     std::vector<QRectF> _windowResolutions;

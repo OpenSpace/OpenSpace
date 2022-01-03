@@ -2,7 +2,7 @@
 
 
 
-MonitorBox::MonitorBox(QRect widgetDims, QRect monitorResolution, QWidget *parent)
+MonitorBox::MonitorBox(QRect widgetDims, QSize monitorResolution, QWidget *parent)
     : QWidget(parent)
     , _monitorWidgetSize(widgetDims)
 {
@@ -42,7 +42,7 @@ void MonitorBox::windowDimensionsChanged(unsigned int index, const QRectF newDim
     mapWindowResolutionToWidgetCoordinates(index, newDimensions);
 }
 
-void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRect r) {
+void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QSize r) {
     float aspectRatio = static_cast<float>(r.width()) /
         static_cast<float>(r.height());
     _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
@@ -73,7 +73,7 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QRect r) {
     this->update();
 }
 
-void MonitorBox::setResolution(QRect& res) {
+void MonitorBox::setResolution(QSize& res) {
     _monitorResolution = res;
 }
 

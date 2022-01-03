@@ -2,6 +2,7 @@
 #define WINDOWCONTROL_H
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFrame>
 #include <QIntValidator>
 #include <QLabel>
@@ -45,6 +46,8 @@ private slots:
     void onSizeYChanged(const QString& newText);
     void onOffsetXChanged(const QString& newText);
     void onOffsetYChanged(const QString& newText);
+    void onProjectionChanged(int newSelection);
+    void onQualityChanged(int newSelection);
 
 private:
     void updateScaledWindowDimensions();
@@ -53,17 +56,29 @@ private:
         {50.0, 50.0, 800.0, 600.0},
         {900.0, 400.0, 640.0, 480.0}
     };
+    QList<QString> _projectionTypes = {
+        "Planar", "Fisheye", "Spherical Mirror", "Cylindrical", "Equirectangular"
+    };
+    QList<QString> _qualityTypes = {
+        "Low (256)", "Medium (512)", "High (1K)", "1.5K (1536)", "2K (2048)",
+        "4K (4096)", "8K (8192)", "16K (16384)", "32K (32768)", "64K (65536)"
+    };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
     int _index = 0;
 
-    QVBoxLayout* _layoutWindowCtrl;
-    QVBoxLayout* _layoutFullWindow;
+    QVBoxLayout* _layoutWindowCtrl = nullptr;
+    QVBoxLayout* _layoutFullWindow = nullptr;
 
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
     QLineEdit* _offset_x = nullptr;
     QLineEdit* _offset_y = nullptr;
+
+    QIntValidator* _validatorSize_x = nullptr;
+    QIntValidator* _validatorSize_y = nullptr;
+    QIntValidator* _validatorOffset_x = nullptr;
+    QIntValidator* _validatorOffset_y = nullptr;
 
     QRect _monitorResolution;
     QRectF _monitorDimsScaled;
@@ -75,6 +90,18 @@ private:
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
 
+    QComboBox* _comboProjection = nullptr;
+    QComboBox* _comboQuality = nullptr;
+    QLabel* _labelFov = nullptr;
+    QLineEdit* _lineFov = nullptr;
+    QDoubleValidator* _validatorFov = nullptr;
+    QLabel* _labelHeightOffset = nullptr;
+    QLineEdit* _lineHeightOffset = nullptr;
+    QDoubleValidator* _validatorHeightOffset = nullptr;
+
+    QHBoxLayout* _layoutName = nullptr;
+    QLabel* _labelName = nullptr;
+    QLineEdit* _windowName = nullptr;
     QLabel* _labelSize = nullptr;
     QLabel* _labelDelim = nullptr;
     QHBoxLayout* _layoutSize = nullptr;
@@ -87,6 +114,12 @@ private:
     QHBoxLayout* _layoutCBoxVsync = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
     QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
+    QHBoxLayout* _layoutComboProjection = nullptr;
+    QHBoxLayout* _layoutComboQuality = nullptr;
+    QHBoxLayout* _layoutFov = nullptr;
+    QWidget* _layoutFovWrapper = nullptr;
+    QHBoxLayout* _layoutHeightOffset = nullptr;
+    QWidget* _layoutHeightOffsetWrapper = nullptr;
 };
 
 #endif // WINDOWCONTROL_H

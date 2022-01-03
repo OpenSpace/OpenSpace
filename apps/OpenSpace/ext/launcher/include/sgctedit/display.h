@@ -27,7 +27,7 @@ class Display : public QWidget
     Q_OBJECT
 
 public:
-    explicit Display();
+    explicit Display(QHBoxLayout* parentLayout, QSize* monitorDims);
     ~Display();
 
 private slots:
@@ -36,7 +36,7 @@ private slots:
 private:
     void addWindowControl();
     void removeWindowControl();
-    void initializeLayout();
+    void initializeLayout(QHBoxLayout* parentLayout);
     void hideSecondWindow();
     void showSecondWindow();
     unsigned int _monitorResolution[2] = {1920, 1080};
@@ -45,8 +45,8 @@ private:
     std::vector<WindowControl*> _windowControl;
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
-    QPushButton* _toggleNumMonitorsButton = nullptr;
-    MonitorBox* _monBox = nullptr;
+    QPushButton* _toggleNumWindowsButton = nullptr;
+    MonitorBox* _monBox;
     QVBoxLayout* _layout = nullptr;
     QHBoxLayout* _layoutMonBox = nullptr;
     QHBoxLayout* _layoutMonButton = nullptr;

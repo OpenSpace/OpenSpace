@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QMainWindow>
+#include <QScreen>
 #include <string>
 
 #include "include/monitorbox.h"
@@ -7,23 +8,23 @@
 #include "include/display.h"
 
 
-Display::Display()
+Display::Display(QHBoxLayout* parentLayout, QSize* monitorDims)
 {
-    _toggleNumMonitorsButton = new QPushButton("Add 2nd Window", this);
-    _toggleNumMonitorsButton->setObjectName("toggleNumMonitors");
+    _toggleNumWindowsButton = new QPushButton("Add 2nd Window", this);
+    _toggleNumWindowsButton->setObjectName("toggleNumWindows");
 
-    _monBox = new MonitorBox(_widgetDims, _monitorRes, this);
+    _monBox = new MonitorBox(_widgetDims, *monitorDims, this);
     //Add 2 window controls
     addWindowControl();
     addWindowControl();
-    initializeLayout();
+    initializeLayout(parentLayout);
 
-    connect(_toggleNumMonitorsButton, SIGNAL(released()), this,
+    connect(_toggleNumWindowsButton, SIGNAL(released()), this,
             SLOT(toggleWindows()));
 }
 
 Display::~Display() {
-    delete _toggleNumMonitorsButton;
+    delete _toggleNumWindowsButton;
     delete _monBox;
     delete _layoutMonBox;
     delete _layoutMonButton;
@@ -31,7 +32,7 @@ Display::~Display() {
     delete _layout;
 }
 
-void Display::initializeLayout() {
+void Display::initializeLayout(QHBoxLayout* parentLayout) {
     _layout = new QVBoxLayout(this);
     _layoutMonBox = new QHBoxLayout(this);
     _layoutMonBox->addStretch(1);
@@ -39,11 +40,12 @@ void Display::initializeLayout() {
     _layoutMonBox->addWidget(_monBox);
     _layoutMonBox->addStretch(1);
     _layout->addLayout(_layoutMonBox);
+
     _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _monBox->setFixedSize(400, 400);
     _layoutMonButton = new QHBoxLayout(this);
     _layoutMonButton->addStretch(1);
-    _layoutMonButton->addWidget(_toggleNumMonitorsButton);
+    _layoutMonButton->addWidget(_toggleNumWindowsButton);
     _layoutMonButton->addStretch(1);
     _layout->addLayout(_layoutMonButton);
     _layoutWindows = new QHBoxLayout(this);
@@ -62,27 +64,29 @@ void Display::initializeLayout() {
     hideSecondWindow();
     _layout->addLayout(_layoutWindows);
 
-    this->setLayout(_layout);
+    parentLayout->addLayout(_layout);
+//    this->setLayout(parentLayoutWrapper);
 
-    QRect defaultMonitorResolution(_monitorResolution[0], _monitorResolution[1], 0, 0);
-    _monBox->setResolution(defaultMonitorResolution);
+    //QSize defaultMonitorResolution(_monitorResolution[0], _monitorResolution[1], 0, 0);
+    //_monBox->setResolution(defaultMonitorResolution);
 
-    for (WindowControl* w : _windowControl) {
-        w->cleanupLayouts();
-    }
+    //for (WindowControl* w : _windowControl) {
+    //    w->cleanupLayouts();
+    //}
 }
 
 void Display::toggleWindows() {
     if (_nWindowsDisplayed == 1) {
-        _toggleNumMonitorsButton->setText("Remove 2nd window");
+        _toggleNumWindowsButton->setText("Remove 2nd window");
         showSecondWindow();
     }
     else if (_nWindowsDisplayed == 2) {
-        _toggleNumMonitorsButton->setText("Add 2nd window");
+        _toggleNumWindowsButton->setText("Add 2nd window");
         hideSecondWindow();
         int minWidth = minimumWidth();
     }
 }
+
 
 void Display::hideSecondWindow() {
     _borderFrame->setVisible(false);
