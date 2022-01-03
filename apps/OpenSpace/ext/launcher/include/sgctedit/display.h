@@ -27,7 +27,7 @@ class Display : public QWidget
     Q_OBJECT
 
 public:
-    explicit Display(QSize* monitorDims);
+    explicit Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox);
     ~Display();
 
 private slots:
@@ -46,6 +46,7 @@ private:
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     QPushButton* _toggleNumWindowsButton = nullptr;
+    unsigned int _monitorIdx = 0;
     MonitorBox* _monBox;
     QVBoxLayout* _layout = nullptr;
     QHBoxLayout* _layoutMonBox = nullptr;

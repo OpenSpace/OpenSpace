@@ -24,14 +24,16 @@ int main(int argc, char *argv[ ])
 
     //Temporary code for monitor detection
     QList<QScreen*> screenList = app.screens();
-    std::vector<QSize> monitorSizeList;
+    std::vector<QRect> monitorSizeList;
     for (size_t s = 0; s < std::min(screenList.length(), 2); ++s) {
-        monitorSizeList.push_back({//QRect(
-            screenList[s]->size().width(),
-            screenList[s]->size().height(),
+        monitorSizeList.push_back({
+            screenList[s]->availableGeometry().x(),
+            screenList[s]->availableGeometry().y(),
+            screenList[s]->availableGeometry().width(),
+            screenList[s]->availableGeometry().height()
         });
     }
-for (QScreen* s : screenList) {
+/*for (QScreen* s : screenList) {
     std::cout << "Monitor ";
     std::cout << s->size().width() << "x" << s->size().height();
     std::cout << ", " << s->availableGeometry().width() << "x";
@@ -45,7 +47,7 @@ for (QScreen* s : screenList) {
     //std::cout << screen->size().width() << "x" << screen->size().height() << std::endl;
     //QRect screenGeometry = screen->geometry();
     //End code for monitor detection
-
+*/
     Display* displayWidget = nullptr;
     Display* displayWidget2 = nullptr;
     QFrame* monitorBorderFrame = nullptr;
@@ -63,15 +65,27 @@ for (QScreen* s : screenList) {
     mainWindow->setLayout(layoutMainV);
     win.setCentralWidget(mainWindow);
 
-    displayWidget = new Display(&monitorSizeList[0]);
+monitorSizeList.push_back({3440, 0, 1080, 1920});
+    MonitorBox* monBox = new MonitorBox(
+        {0, 0, 400, 340},
+        monitorSizeList/*,
+        this*/
+    );
+    QHBoxLayout* layoutMonBox = new QHBoxLayout();
+    layoutMonBox->addStretch(1);
+    //_layout->addWidget(_monBox);
+    layoutMonBox->addWidget(monBox);
+    layoutMonBox->addStretch(1);
+    layoutMainV->addLayout(layoutMonBox);
+
+    monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    monBox->setFixedSize(400, 340);
+
+    displayWidget = new Display(0, monBox);
     layoutMainH->addWidget(displayWidget);
 
-screenList.push_back(screenList[0]);
-QSize* m2 = new QSize(1080, 1920);
-monitorSizeList.push_back({m2->width(), m2->height()});
-
-    if (screenList.size() > 1) {
-        displayWidget2 = new Display(&monitorSizeList[1]);
+    if (monitorSizeList.size() > 1) {
+        displayWidget2 = new Display(1, monBox);
         monitorBorderFrame = new QFrame();
         monitorBorderFrame->setFrameShape(QFrame::VLine);
         layoutMainH->addWidget(monitorBorderFrame);
@@ -92,6 +106,7 @@ monitorSizeList.push_back({m2->width(), m2->height()});
     if (monitorBorderFrame) {
         delete monitorBorderFrame;
     }
+    delete monBox;
     delete layoutMainH;
     delete layoutMainV;
     delete mainWindow;

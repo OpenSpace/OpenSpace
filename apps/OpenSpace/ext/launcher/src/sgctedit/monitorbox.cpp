@@ -1,20 +1,17 @@
 #include "monitorbox.h"
 
 
-
-MonitorBox::MonitorBox(QRect widgetDims, QSize monitorResolution, QWidget *parent)
-    : QWidget(parent)
-    , _monitorWidgetSize(widgetDims)
+MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution/*, QWidget *parent*/)
+    : /*QWidget(parent)
+    ,*/ _monitorWidgetSize(widgetDims)
+    , _monitorResolution(monitorResolution)
 {
-    mapMonitorResolutionToWidgetCoordinates(monitorResolution);
+    _nMonitors = monitorResolution.size();
+    mapMonitorResolutionToWidgetCoordinates();
 }
 
 MonitorBox::~MonitorBox()
 {
-    while (_windowRendering.size() > 0) {
-        delete _windowRendering.back();
-        _windowRendering.pop_back();
-    }
 }
 
 void MonitorBox::paintEvent(QPaintEvent *event)
@@ -26,94 +23,117 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     //Draw border
     painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width() - 1, height() - 1, 10, 10);
-    //Draw monitor outline
+
+    //Draw monitor outline(s)
     painter.setPen(QPen(Qt::black, 2));
-    painter.drawRect(_monitorDimensionsScaled);
     painter.setFont(QFont("Arial", 14));
-    QPointF textPos = QPointF(_monitorDimensionsScaled.left() + 5,
-        _monitorDimensionsScaled.bottom() - 5);
-    painter.drawText(textPos, QString::fromStdString(std::to_string(0)));
-    //Draw window(s)
-    painter.setPen(Qt::blue);
-    for (unsigned int i = 0; i < _nWindows; ++i) {
-        if (i <= _windowRendering.size()) {
-            painter.drawRect(*_windowRendering[i]);
-            QPointF textPos = QPointF(_windowRendering[i]->left() + 5,
-                _windowRendering[i]->bottom() - 5);
+    for (unsigned int i = 0; i < _nMonitors; ++i) {
+        if (i <= _monitorDimensionsScaled.size()) {
+            painter.drawRect(_monitorDimensionsScaled[i]);
+            QPointF textPos = QPointF(_monitorDimensionsScaled[i].left() + 5,
+                _monitorDimensionsScaled[i].bottom() - 5);
             painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
+        }
+    }
+
+    //Draw window outline(s)
+    painter.setPen(Qt::blue);
+    for (unsigned int i = 0; i < _nMonitors ; ++i) {
+        for (unsigned int j = 0; j < _nWindows[i]; ++j) {
+            if (j <= _windowRendering[i].size()) {
+                painter.drawRect(_windowRendering[i][j]);
+                QPointF textPos = QPointF(_windowRendering[i][j].left() + 5,
+                    _windowRendering[i][j].bottom() - 5);
+                painter.drawText(textPos, QString::fromStdString(std::to_string(j + 1)));
+            }
         }
     }
 }
 
-void MonitorBox::windowDimensionsChanged(unsigned int index, const QRectF newDimensions) {
-    mapWindowResolutionToWidgetCoordinates(index, newDimensions);
+void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
+                                                               const QRectF& newDimensions)
+{
+    mapWindowResolutionToWidgetCoordinates(monitorIdx, windowIdx, newDimensions);
 }
 
-void MonitorBox::mapMonitorResolutionToWidgetCoordinates(QSize r) {
-    float aspectRatio = static_cast<float>(r.width()) /
-        static_cast<float>(r.height());
-    _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
+void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
+    QSize virtualDesktopResolution;
+    float maxWidth = 0.0;
+    float maxHeight = 0.0;
+    for (auto m : _monitorResolution) {
+        if ((m.x() + m.width()) > maxWidth) {
+            maxWidth = m.x() + m.width();
+        }
+        if ((m.y() + m.height()) > maxHeight) {
+            maxHeight = m.y() + m.height();
+        }
+    }
+    float aspectRatio = maxWidth / maxHeight;
     if (aspectRatio >= 1.0) {
-        float newWidth = _monitorWidgetSize.width()
+        _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
+        float virtualWidth = _monitorWidgetSize.width()
             * (1.0 - _marginFractionOfWidgetSize * 2.0);
-        _monitorScaleFactor = newWidth / static_cast<float>(r.width());
-        float newHeight = newWidth / aspectRatio;
-        _monitorDimensionsScaled = {
-            _marginWidget,
-            _marginWidget + (_monitorWidgetSize.height() - newHeight) / 2.0,
-            newWidth,
-            newHeight
-        };
+        _monitorScaleFactor = virtualWidth / maxWidth;
+        float newHeight = virtualWidth / aspectRatio;
+        for (size_t m = 0; m < _monitorResolution.size(); ++m) {
+            _monitorOffsets.push_back({
+                _marginWidget + _monitorResolution[m].x() * _monitorScaleFactor,
+                _marginWidget + (_monitorWidgetSize.height() - newHeight) / 2.0 +
+                    _monitorResolution[m].y() * _monitorScaleFactor
+            });
+        }
     }
     else {
-        float newHeight = _monitorWidgetSize.height()
+        _marginWidget = _monitorWidgetSize.height() * _marginFractionOfWidgetSize;
+        float virtualHeight = _monitorWidgetSize.height()
             * (1.0 - _marginFractionOfWidgetSize * 2.0);
-        _monitorScaleFactor = newHeight / static_cast<float>(r.height());
-        float newWidth = newHeight * aspectRatio;
-        _monitorDimensionsScaled = {
-            _marginWidget + (_monitorWidgetSize.width() - newWidth) / 2.0,
-            _marginWidget,
-            newWidth,
-            newHeight
-        };
+        _monitorScaleFactor = virtualHeight / maxHeight;
+        float newWidth = virtualHeight * aspectRatio;
+        for (size_t m = 0; m < _monitorResolution.size(); ++m) {
+            _monitorOffsets.push_back({
+                _marginWidget + (_monitorWidgetSize.width() - newWidth) / 2.0
+                    + _monitorResolution[m].x() * _monitorScaleFactor,
+                _marginWidget + _monitorResolution[m].y() * _monitorScaleFactor
+            });
+        }
+    }
+
+    for (size_t m = 0; m < _monitorResolution.size(); ++m) {
+        _monitorDimensionsScaled.push_back({
+            _monitorOffsets[m].width(),
+            _monitorOffsets[m].height(),
+            _monitorResolution[m].width() * _monitorScaleFactor,
+            _monitorResolution[m].height() * _monitorScaleFactor,
+        });
     }
     this->update();
 }
 
-void MonitorBox::setResolution(QSize& res) {
-    _monitorResolution = res;
+void MonitorBox::setResolution(unsigned int index, QRect& res) {
+    _monitorResolution[index] = res;
 }
 
-void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
-    if (_nWindows != nWindows) {
-        _nWindows = nWindows;
+void MonitorBox::setNumWindowsDisplayed(unsigned int mIdx, unsigned int nWindows) {
+    if ((mIdx <= (_nMonitors - 1)) && (_nWindows[mIdx] != nWindows)) {
+        _nWindows[mIdx] = nWindows;
         this->update();
     }
 }
 
-void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int index, const QRectF& w) {
-    if (index > 1) {
+void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
+                                                        unsigned int wIdx,
+                                                        const QRectF& w)
+{
+    if (mIdx > (_maxNumMonitors - 1) || wIdx > (_maxNumWindowsPerMonitor - 1)) {
         return;
     }
-    while ((index + 1) > _windowRendering.size()) {
-        _windowRendering.push_back(new QRectF());
-    }
-    if (_windowRendering[index]) {
-        QRectF wF = w;
-        *_windowRendering[index] = {
-            _monitorDimensionsScaled.x() + wF.left() * _monitorScaleFactor,
-            _monitorDimensionsScaled.y() + wF.top() * _monitorScaleFactor,
-            wF.width() * _monitorScaleFactor,
-            wF.height() * _monitorScaleFactor
-        };
-    }
+    QRectF wF = w;
+    _windowRendering[mIdx][wIdx] = {
+        _monitorDimensionsScaled[mIdx].x() + wF.left() * _monitorScaleFactor,
+        _monitorDimensionsScaled[mIdx].y() + wF.top() * _monitorScaleFactor,
+        wF.width() * _monitorScaleFactor,
+        wF.height() * _monitorScaleFactor
+    };
     this->update();
-}
-
-void MonitorBox::removeAdditionalWindowDimensions() {
-    if (_windowRendering.size() > 1) {
-        delete _windowRendering.back();
-        _windowRendering.pop_back();
-    }
 }
 

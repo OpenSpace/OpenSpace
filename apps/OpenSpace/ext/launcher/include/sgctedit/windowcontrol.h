@@ -23,12 +23,13 @@ class WindowControl : public QWidget
     Q_OBJECT
 
 public:
-    explicit WindowControl(unsigned int windowIndex, QRect& widgetDims, QRect& monitorDims,
-        QWidget *parent = nullptr);
+    explicit WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
+        QRect& widgetDims, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
-    void setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb);
+    void setWindowChangeCallback(
+        std::function<void(unsigned int, unsigned int, const QRectF&)> cb);
     void cleanupLayouts();
     QVBoxLayout* initializeLayout(QWidget* parentWidget/*, QHBoxLayout* layout*/);
     QRectF& dimensions();
@@ -51,10 +52,10 @@ private slots:
 
 private:
     void updateScaledWindowDimensions();
-    std::function<void(unsigned int, const QRectF&)> _windowChangeCallback;
+    std::function<void(unsigned int, unsigned int, const QRectF&)> _windowChangeCallback;
     QRectF defaultWindowSizes[2] = {
         {50.0, 50.0, 800.0, 600.0},
-        {900.0, 400.0, 640.0, 480.0}
+        {900.0, 400.0, 2540.0, 680.0}
     };
     QList<QString> _projectionTypes = {
         "Planar", "Fisheye", "Spherical Mirror", "Cylindrical", "Equirectangular"
@@ -65,7 +66,9 @@ private:
     };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
-    int _index = 0;
+    unsigned int _monIndex = 0;
+    unsigned int _index = 0;
+    unsigned int _maxWindowSizePixels = 10000;
 
     QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;

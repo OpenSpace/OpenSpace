@@ -8,12 +8,13 @@
 #include "include/display.h"
 
 
-Display::Display(QSize* monitorDims)
+Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox)
+    : _monitorIdx(monitorIdx)
+    , _monBox(monitorRenderBox)
 {
     _toggleNumWindowsButton = new QPushButton("Add 2nd Window", this);
     _toggleNumWindowsButton->setObjectName("toggleNumWindows");
 
-    _monBox = new MonitorBox(_widgetDims, *monitorDims, this);
     //Add 2 window controls
     addWindowControl();
     addWindowControl();
@@ -34,15 +35,7 @@ Display::~Display() {
 
 void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
-    _layoutMonBox = new QHBoxLayout();
-    _layoutMonBox->addStretch(1);
-    //_layout->addWidget(_monBox);
-    _layoutMonBox->addWidget(_monBox);
-    _layoutMonBox->addStretch(1);
-    _layout->addLayout(_layoutMonBox);
 
-    _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    _monBox->setFixedSize(400, 400);
     _layoutMonButton = new QHBoxLayout();
     _layoutMonButton->addStretch(1);
     _layoutMonButton->addWidget(_toggleNumWindowsButton);
@@ -81,38 +74,40 @@ void Display::toggleWindows() {
     }
 }
 
-
 void Display::hideSecondWindow() {
     _borderFrame->setVisible(false);
     _layoutWindowWrappers[1]->setVisible(false);
     _nWindowsDisplayed = 1;
-    _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
+    _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
 }
 
 void Display::showSecondWindow() {
     _borderFrame->setVisible(true);
     _layoutWindowWrappers[1]->setVisible(true);
     _nWindowsDisplayed = 2;
-    _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
+    _monBox->setNumWindowsDisplayed(_monitorIdx, _nWindowsDisplayed);
 }
 
 void Display::addWindowControl() {
     if (_nWindowsAllocated < 2) {
         _windowControl.push_back(
             new WindowControl(
+                _monitorIdx,
                 _nWindowsAllocated,
                 _widgetDims,
-                _monitorRes,
                 this
             )
         );
         _windowControl.back()->setWindowChangeCallback(
-            [this](unsigned int windowIndex, const QRectF& newDims) {
-                _monBox->windowDimensionsChanged(windowIndex, newDims);
+            [this](unsigned int monIndex, unsigned int winIndex, const QRectF& newDims) {
+                _monBox->windowDimensionsChanged(monIndex, winIndex, newDims);
             }
         );
-        _monBox->mapWindowResolutionToWidgetCoordinates(_nWindowsAllocated,
-            _windowControl.back()->dimensions());
+        _monBox->mapWindowResolutionToWidgetCoordinates(
+            _monitorIdx,
+            _nWindowsAllocated,
+            _windowControl.back()->dimensions()
+        );
         _nWindowsAllocated++;
     }
 }

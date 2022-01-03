@@ -2,10 +2,10 @@
 #include "monitorbox.h"
 #include "windowcontrol.h"
 
-WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
-                                                QRect& monitorResolution, QWidget *parent)
-    : _index(windowIndex)
-    , _monitorResolution(monitorResolution)
+WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
+                                                       QRect& widgetDims, QWidget *parent)
+    : _monIndex(monitorIndex)
+    , _index(windowIndex)
     , QWidget(parent)
 {
     _windowDims = defaultWindowSizes[windowIndex];
@@ -18,13 +18,13 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
     _offset_y = new QLineEdit(
         QString::fromUtf8(std::to_string(int(_windowDims.y())).c_str()), parent);
     QIntValidator* _validatorSize_x
-        = new QIntValidator(10, _monitorResolution.width());
+        = new QIntValidator(10, _maxWindowSizePixels);
     QIntValidator* _validatorSize_y
-        = new QIntValidator(10, _monitorResolution.height());
+        = new QIntValidator(10, _maxWindowSizePixels);
     QIntValidator* _validatorOffset_x
-        = new QIntValidator(10, _monitorResolution.width() - 10);
+        = new QIntValidator(10, _maxWindowSizePixels);
     QIntValidator* _validatorOffset_y
-        = new QIntValidator(10, _monitorResolution.height() - 10);
+        = new QIntValidator(10, _maxWindowSizePixels);
     _size_x->setValidator(_validatorSize_x);
     _size_y->setValidator(_validatorSize_y);
     _offset_x->setValidator(_validatorSize_y);
@@ -214,7 +214,7 @@ void WindowControl::onSizeXChanged(const QString& newText) {
         _windowDims.setWidth(std::stoi(x));
     }
     if (_windowChangeCallback) {
-        _windowChangeCallback(_index, _windowDims);
+        _windowChangeCallback(_monIndex, _index, _windowDims);
     }
 }
 
@@ -224,7 +224,7 @@ void WindowControl::onSizeYChanged(const QString& newText) {
         _windowDims.setHeight(std::stoi(y));
     }
     if (_windowChangeCallback) {
-        _windowChangeCallback(_index, _windowDims);
+        _windowChangeCallback(_monIndex, _index, _windowDims);
     }
 }
 
@@ -236,7 +236,7 @@ void WindowControl::onOffsetXChanged(const QString& newText) {
         _windowDims.setWidth(prevWidth);
     }
     if (_windowChangeCallback) {
-        _windowChangeCallback(_index, _windowDims);
+        _windowChangeCallback(_monIndex, _index, _windowDims);
     }
 }
 
@@ -248,7 +248,7 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
         _windowDims.setHeight(prevHeight);
     }
     if (_windowChangeCallback) {
-        _windowChangeCallback(_index, _windowDims);
+        _windowChangeCallback(_monIndex, _index, _windowDims);
     }
 }
 
@@ -298,7 +298,9 @@ void WindowControl::setDimensions(const QRectF& dimensions) {
     _windowDims = dimensions;
 }
 
-void WindowControl::setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb) {
+void WindowControl::setWindowChangeCallback(
+                        std::function<void(unsigned int, unsigned int, const QRectF&)> cb)
+{
     _windowChangeCallback = cb;
 }
 
