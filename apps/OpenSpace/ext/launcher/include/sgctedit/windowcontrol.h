@@ -21,10 +21,10 @@ public:
     explicit WindowControl(unsigned int windowIndex, QRect& widgetDims, QRect& monitorDims,
         QWidget *parent = nullptr);
     ~WindowControl();
-    void setDimensions(const QRect& dimensions);
+    void setDimensions(const QRectF& dimensions);
     void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(std::function<void(unsigned int, const QRectF&)> cb);
-    QRect* dimensions();
+    QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
     QLineEdit* lineEditSizeHeight();
     QLineEdit* lineEditSizeOffsetX();
@@ -37,7 +37,10 @@ private slots:
 private:
     void updateScaledWindowDimensions();
     std::function<void(unsigned int, const QRectF&)> _windowChangeCallback;
-
+    QRectF defaultWindowSizes[2] = {
+        {50.0, 50.0, 800.0, 600.0},
+        {900.0, 400.0, 640.0, 480.0}
+    };
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
     QLineEdit* _offset_x = nullptr;
@@ -45,7 +48,7 @@ private:
 
     QRect _monitorResolution;
     QRectF _monitorDimsScaled;
-    QRect _windowDims;
+    QRectF _windowDims;
     QRectF _windowDimsScaled;
     float _monitorScaleFactor = 1.0;
     int _index = 0;

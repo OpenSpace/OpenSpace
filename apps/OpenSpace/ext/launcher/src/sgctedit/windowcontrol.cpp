@@ -1,5 +1,5 @@
-#include "mainwindow.h"
 #include "monitorbox.h"
+#include "windowcontrol.h"
 
 WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
                                                 QRect& monitorResolution, QWidget *parent)
@@ -7,22 +7,23 @@ WindowControl::WindowControl(unsigned int windowIndex, QRect& widgetDims,
     , _monitorResolution(monitorResolution)
     , QWidget(parent)
 {
-    if (windowIndex == 0) {
-        _size_x = new QLineEdit("800", parent);
-        _size_y = new QLineEdit("600", parent);
-        _offset_x = new QLineEdit("50", parent);
-        _offset_y = new QLineEdit("50", parent);
-    }
-    else {
-        _size_x = new QLineEdit("640", parent);
-        _size_y = new QLineEdit("480", parent);
-        _offset_x = new QLineEdit("900", parent);
-        _offset_y = new QLineEdit("400", parent);
-    }
-    QIntValidator* _validatorSize_x = new QIntValidator(10, _monitorResolution.width());
-    QIntValidator* _validatorSize_y = new QIntValidator(10, _monitorResolution.height());
-    QIntValidator* _validatorOffset_x = new QIntValidator(10, _monitorResolution.width() - 10);
-    QIntValidator* _validatorOffset_y = new QIntValidator(10, _monitorResolution.height() - 10);
+    _windowDims = defaultWindowSizes[windowIndex];
+    _size_x = new QLineEdit(
+        QString::fromUtf8(std::to_string(int(_windowDims.width())).c_str()), parent);
+    _size_y = new QLineEdit(
+        QString::fromUtf8(std::to_string(int(_windowDims.height())).c_str()), parent);
+    _offset_x = new QLineEdit(
+        QString::fromUtf8(std::to_string(int(_windowDims.x())).c_str()), parent);
+    _offset_y = new QLineEdit(
+        QString::fromUtf8(std::to_string(int(_windowDims.y())).c_str()), parent);
+    QIntValidator* _validatorSize_x
+        = new QIntValidator(10, _monitorResolution.width());
+    QIntValidator* _validatorSize_y
+        = new QIntValidator(10, _monitorResolution.height());
+    QIntValidator* _validatorOffset_x
+        = new QIntValidator(10, _monitorResolution.width() - 10);
+    QIntValidator* _validatorOffset_y
+        = new QIntValidator(10, _monitorResolution.height() - 10);
 
     _size_x->setValidator(_validatorSize_x);
     _size_y->setValidator(_validatorSize_y);
@@ -55,7 +56,7 @@ void WindowControl::onSizeYChanged(const QString& newText) {
     }
 }
 
-void WindowControl::setDimensions(const QRect& dimensions) {
+void WindowControl::setDimensions(const QRectF& dimensions) {
     _windowDims = dimensions;
 }
 
@@ -67,8 +68,8 @@ void WindowControl::setWindowScaleFactor(float scaleFactor) {
     _monitorScaleFactor = scaleFactor;
 }
 
-QRect* WindowControl::dimensions() {
-    return &_windowDims;
+QRectF& WindowControl::dimensions() {
+    return _windowDims;
 }
 
 QLineEdit* WindowControl::lineEditSizeWidth() {
