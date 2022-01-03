@@ -1,6 +1,6 @@
-#include "display.h"
-#include "monitorbox.h"
-#include "windowcontrol.h"
+#include "sgctedit/display.h"
+#include "sgctedit/monitorbox.h"
+#include "sgctedit/windowcontrol.h"
 
 WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
                                     QRect& widgetDims, QRect& monitorDims, QWidget *parent)
@@ -23,13 +23,13 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     QIntValidator* _validatorSize_y
         = new QIntValidator(10, _maxWindowSizePixels);
     QIntValidator* _validatorOffset_x
-        = new QIntValidator(10, _maxWindowSizePixels);
+        = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
     QIntValidator* _validatorOffset_y
-        = new QIntValidator(10, _maxWindowSizePixels);
+        = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
     _size_x->setValidator(_validatorSize_x);
     _size_y->setValidator(_validatorSize_y);
-    _offset_x->setValidator(_validatorSize_y);
-    _offset_y->setValidator(_validatorSize_y);
+    _offset_x->setValidator(_validatorOffset_x);
+    _offset_y->setValidator(_validatorOffset_y);
 
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
@@ -60,8 +60,6 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
 
     connect(_comboProjection, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onProjectionChanged(int)));
-    connect(_comboQuality, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(onQualityChanged(int)));
 
     connect(_fullscreenButton, SIGNAL(released()), this, SLOT(onFullscreenClicked()));
 }
@@ -73,7 +71,6 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
 
     _labelWinNum = new QLabel();
     _labelWinNum->setText("Window " + QString::number(_index + 1));
-//    _labelWinNum->setStyleSheet("QLabel { color : blue; }");
     if (_index == 1) {
         _labelWinNum->setStyleSheet("QLabel { color : #CD6D1D; }");
     }
@@ -92,7 +89,6 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _labelName->setText("Window Name: ");
     _windowName = new QLineEdit(this);
     _windowName->setFixedWidth(100);
-//    _layoutName->addStretch(1);
     _layoutName->addWidget(_labelName);
     _layoutName->addWidget(_windowName);
     _layoutName->addStretch(1);
@@ -101,26 +97,16 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _size_y->setFixedWidth(_lineEditWidthFixed);
     _labelSize = new QLabel(this);
     _labelDelim = new QLabel(this);
-    QGridLayout* _layoutSize = new QGridLayout;
-    //_layoutSize = new QHBoxLayout();
-    //_layoutSize->addStretch(1);
-//    _layoutSize->addRow(_labelSize, _size_x, _labelDelim, _size_y);
-    _layoutSize->addWidget(_labelSize, 0, 0);
-    _layoutGridSizeValues = new QHBoxLayout();
-    _layoutGridSizeValues->addWidget(_size_x);
-    _layoutGridSizeValues->addWidget(_labelDelim);
-    _layoutGridSizeValues->addWidget(_size_y);
-    _layoutGridSizeValues->addStretch(1);
-    _layoutSize->addLayout(_layoutGridSizeValues, 0, 1);
-//    _layoutSize->addWidget(_labelSize);
-    //_labelSize->setFixedWidth(50);
+    _layoutSize = new QHBoxLayout();
+    _layoutSize->addWidget(_labelSize);
     _labelSize->setText("Size:");
-//    _layoutSize->addWidget(_size_x);
-//    _layoutSize->addWidget(_labelDelim);
-//    _layoutSize->addWidget(_size_y);
-//    _layoutSize->addStretch(1);
+    _labelSize->setFixedWidth(55);
+    _layoutSize->addWidget(_size_x);
+    _layoutSize->addWidget(_labelDelim);
+    _layoutSize->addWidget(_size_y);
+    _layoutSize->addStretch(1);
     _labelDelim->setText("x");
-    _labelDelim->setFixedWidth(10);
+    _labelDelim->setFixedWidth(7);
     _layoutWindowCtrl->addLayout(_layoutSize);
 
     //Window offset
@@ -128,68 +114,45 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _offset_y->setFixedWidth(_lineEditWidthFixed);
     _labelOffset = new QLabel(this);
     _labelComma = new QLabel(this);
-//    _layoutOffset = new QHBoxLayout();
-//    _layoutOffset->addStretch(1);
-//    _layoutOffset->addWidget(_labelOffset);
-//    _layoutSize->addRow(_labelOffset, _offset_x, _labelComma, _offset_y);
-    _layoutSize->addWidget(_labelOffset, 1, 0);
-    _layoutGridOffsetValues = new QHBoxLayout();
-    _layoutGridOffsetValues->addWidget(_offset_x);
-    _layoutGridOffsetValues->addWidget(_labelComma);
-    _layoutGridOffsetValues->addWidget(_offset_y);
-    _layoutGridOffsetValues->addStretch(1);
-    _layoutSize->addLayout(_layoutGridOffsetValues, 1, 1);
-    //_labelOffset->setFixedWidth(50);
+    _layoutOffset = new QHBoxLayout();
+    _layoutOffset->addWidget(_labelOffset);
     _labelOffset->setText("Offset:");
-//    _layoutOffset->addWidget(_offset_x);
-//    _layoutOffset->addWidget(_labelComma);
-//    _layoutOffset->addWidget(_offset_y);
-//    _layoutOffset->addStretch(1);
+    _labelOffset->setFixedWidth(55);
+    _layoutOffset->addWidget(_offset_x);
+    _layoutOffset->addWidget(_labelComma);
+    _layoutOffset->addWidget(_offset_y);
+    _layoutOffset->addStretch(1);
     _labelComma->setText(",");
-    _labelComma->setFixedWidth(10);
-    _layoutGridFrame = new QHBoxLayout();
-    _layoutGridFrame->addStretch(1);
-    _layoutGridFrame->addLayout(_layoutSize);
-    _layoutGridFrame->addStretch(1);
-
-    _layoutWindowCtrl->addLayout(_layoutGridFrame);
+    _labelComma->setFixedWidth(7);
+    _layoutWindowCtrl->addLayout(_layoutOffset);
 
     //Window options
     _layoutCheckboxesFull1 = new QHBoxLayout();
     _layoutCheckboxesFull2 = new QVBoxLayout();
-//    _layoutCheckboxesFull1->addStretch(1);
     _layoutFullscreenButton = new QHBoxLayout();
-    //_layoutFullscreenButton->addStretch(1);
     _layoutFullscreenButton->addWidget(_fullscreenButton);
     _layoutFullscreenButton->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutFullscreenButton);
-
     _layoutCBoxWindowDecor = new QHBoxLayout();
-    //_layoutCBoxWindowDecor->addStretch(1);
     _layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
     _layoutCBoxWindowDecor->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxWindowDecor);
     _layoutCBoxWebGui= new QHBoxLayout();
-    //_layoutCBoxWebGui->addStretch(1);
     _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
     _layoutCBoxWebGui->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxWebGui);
     _layoutCBoxSpoutOutput= new QHBoxLayout();
-    //_layoutCBoxSpoutOutput->addStretch(1);
     _layoutCBoxSpoutOutput->addWidget(_checkBoxSpoutOutput);
     _layoutCBoxSpoutOutput->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutCBoxSpoutOutput);
-
     _layoutComboProjection = new QHBoxLayout();
     _layoutComboProjection->addWidget(_comboProjection);
     _layoutComboProjection->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutComboProjection);
-
     _layoutComboQuality = new QHBoxLayout();
     _layoutComboQuality->addWidget(_comboQuality);
     _layoutComboQuality->addStretch(1);
     _layoutCheckboxesFull2->addLayout(_layoutComboQuality);
-
     _layoutFov = new QHBoxLayout();
     _labelFov = new QLabel();
     _labelFov->setText("Horizontal FOV:");
@@ -208,7 +171,6 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutHeightOffsetWrapper = new QWidget();
     _layoutHeightOffsetWrapper->setLayout(_layoutHeightOffset);
     _layoutCheckboxesFull2->addWidget(_layoutHeightOffsetWrapper);
-
     _layoutCheckboxesFull1->addLayout(_layoutCheckboxesFull2);
     _layoutCheckboxesFull1->addStretch(1);
     _layoutWindowCtrl->addLayout(_layoutCheckboxesFull1);
@@ -217,7 +179,6 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _comboProjection->setCurrentIndex(0);
     onProjectionChanged(0);
     _comboQuality->setCurrentIndex(2);
-    onQualityChanged(2);
 
     return _layoutFullWindow;
 }
@@ -329,21 +290,14 @@ void WindowControl::onProjectionChanged(int newSelection) {
     }
 }
 
-void WindowControl::onQualityChanged(int newSelection) {
-}
-
 void WindowControl::setDimensions(const QRectF& dimensions) {
     _windowDims = dimensions;
 }
 
 void WindowControl::setWindowChangeCallback(
-                        std::function<void(unsigned int, unsigned int, const QRectF&)> cb)
+                        std::function<void(int, int, const QRectF&)> cb)
 {
     _windowChangeCallback = cb;
-}
-
-void WindowControl::setWindowScaleFactor(float scaleFactor) {
-    _monitorScaleFactor = scaleFactor;
 }
 
 QRectF& WindowControl::dimensions() {
@@ -391,20 +345,19 @@ WindowControl::~WindowControl()
     delete _layoutName;
     delete _labelName;
     delete _windowName;
+    delete _labelWinNum;
     delete _labelSize;
     delete _labelDelim;
     delete _layoutSize;
     delete _labelOffset;
     delete _labelComma;
-//    delete _layoutOffset;
-    delete _layoutGridFrame;
-    delete _layoutGridSizeValues;
-    delete _layoutGridOffsetValues;
+    delete _layoutOffset;
     delete _checkBoxWindowDecor;
     delete _checkBoxWebGui;
     delete _checkBoxSpoutOutput;
     delete _comboProjection;
     delete _comboQuality;
+    delete _fullscreenButton;
     delete _labelFov;
     delete _lineFov;
     delete _validatorFov;
@@ -423,6 +376,8 @@ WindowControl::~WindowControl()
     delete _layoutHeightOffsetWrapper;
     delete _layoutCheckboxesFull2;
     delete _layoutCheckboxesFull1;
+    delete _layoutWinNum;
     delete _layoutWindowCtrl;
+    delete _layoutFullWindow;
 }
 

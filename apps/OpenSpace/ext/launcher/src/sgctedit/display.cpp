@@ -3,9 +3,9 @@
 #include <QScreen>
 #include <string>
 
-#include "include/monitorbox.h"
-#include "include/windowcontrol.h"
-#include "include/display.h"
+#include "sgctedit/monitorbox.h"
+#include "sgctedit/windowcontrol.h"
+#include "sgctedit/display.h"
 
 
 Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
@@ -18,8 +18,8 @@ Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
     _removeWindowButton = new QPushButton("Remove Window", this);
 
     //Add 2 window controls
-    addWindowControl();
-    addWindowControl();
+    initializeWindowControl();
+    initializeWindowControl();
     initializeLayout(showLabel, numWindowsInit);
 
     connect(_addWindowButton, SIGNAL(released()), this,
@@ -30,9 +30,19 @@ Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
 
 Display::~Display() {
     delete _addWindowButton;
+    delete _removeWindowButton;
     delete _monBox;
+    delete _borderFrame;
+    delete _labelMonNum;
+    for (auto w : _windowControl) {
+        delete w;
+    }
+    delete _layoutMonNumLabel;
     delete _layoutMonBox;
     delete _layoutMonButton;
+    for (auto w : _layoutWindowWrappers) {
+        delete w;
+    }
     delete _layoutWindows;
     delete _layout;
 }
@@ -130,7 +140,7 @@ void Display::showWindows(unsigned int nWindowControlsDisplayed) {
     }
 }
 
-void Display::addWindowControl() {
+void Display::initializeWindowControl() {
     if (_nWindowsAllocated < 2) {
         _windowControl.push_back(
             new WindowControl(
@@ -142,7 +152,7 @@ void Display::addWindowControl() {
             )
         );
         _windowControl.back()->setWindowChangeCallback(
-            [this](unsigned int monIndex, unsigned int winIndex, const QRectF& newDims) {
+            [this](int monIndex, int winIndex, const QRectF& newDims) {
                 _monBox->windowDimensionsChanged(monIndex, winIndex, newDims);
             }
         );

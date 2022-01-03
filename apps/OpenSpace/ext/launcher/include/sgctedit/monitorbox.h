@@ -27,9 +27,7 @@ public:
     void mapMonitorResolutionToWidgetCoordinates();
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
         const QRectF& w);
-    void setResolution(unsigned int index, QRect& res);
     void setNumWindowsDisplayed(unsigned int mIdx, unsigned int nWindows);
-    int numWindows();
     void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
             const QRectF& newDimensions);
     void addWindowControl(WindowControl* wCtrl);
@@ -38,6 +36,21 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
+    void paintWidgetBorder(QPainter& painter, int width, int height);
+    void paintMonitorOutlines(QPainter& painter);
+    void paintWindowOutline(QPainter& painter, unsigned int monIdx, unsigned int winIdx);
+    void paintOutOfBoundsAreas(QPainter& painter, unsigned int monIdx,unsigned int winIdx);
+    void paintWindowNumber(QPainter& painter, unsigned int monIdx, unsigned int winIdx);
+    void setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
+        bool visibleBorder);
+    void computeScaledResolution_landscape(float aspectRatio, float maxWidth);
+    void computeScaledResolution_portrait(float aspectRatio, float maxHeight);
+    void computeOutOfBounds_horizontal(unsigned int mIdx, unsigned int wIdx);
+    void computeOutOfBounds_vertical(unsigned int mIdx, unsigned int wIdx);
+    void addOutOfBoundsArea_horizontal(unsigned int mIdx, unsigned int wIdx,
+            qreal bounds, qreal extent);
+    void addOutOfBoundsArea_vertical(unsigned int mIdx, unsigned int wIdx,
+            qreal bounds, qreal extent);
     unsigned int _maxNumMonitors = 2;
     unsigned int _maxNumWindowsPerMonitor = 2;
     std::vector<QRect> _monitorResolution;
@@ -45,15 +58,17 @@ private:
     std::vector<QRectF> _monitorDimensionsScaled;
 
     std::vector<QRectF> _windowResolutions;
+    std::vector<std::vector<std::vector<QRectF>>> _outOfBoundsRect = {
+        {{{0.0, 0.0, 0.0, 0.0}},
+         {{0.0, 0.0, 0.0, 0.0}}},
+        {{{0.0, 0.0, 0.0, 0.0}},
+         {{0.0, 0.0, 0.0, 0.0}}}
+    };
     std::vector<std::vector<QRectF>> _windowRendering = {
-        {
-            {0.0, 0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0, 0.0}
-        },
-        {
-            {0.0, 0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0, 0.0}
-        }
+        {{0.0, 0.0, 0.0, 0.0},
+         {0.0, 0.0, 0.0, 0.0}},
+        {{0.0, 0.0, 0.0, 0.0},
+         {0.0, 0.0, 0.0, 0.0}}
     };
     float _monitorScaleFactor = 1.0;
     float _offset[2] = {10.0, 10.0};

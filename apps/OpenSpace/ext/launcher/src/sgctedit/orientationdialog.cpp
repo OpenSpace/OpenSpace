@@ -1,5 +1,5 @@
-#include "display.h"
-#include "orientationdialog.h"
+#include "sgctedit/display.h"
+#include "sgctedit/orientationdialog.h"
 
 OrientationDialog::OrientationDialog(QWidget* parent)
     : QDialog(parent)

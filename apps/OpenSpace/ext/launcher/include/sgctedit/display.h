@@ -36,10 +36,11 @@ private slots:
     void removeWindow();
 
 private:
-    void addWindowControl();
+    void initializeWindowControl();
     void removeWindowControl();
     void initializeLayout(bool showLabel, unsigned int numWindowsInit);
     void showWindows(unsigned int nWindowControlsDisplayed);
+    void addDisplayLayout(unsigned int column, MonitorBox* monBox, QVBoxLayout* layout);
     std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
     std::vector<WindowControl*> _windowControl;

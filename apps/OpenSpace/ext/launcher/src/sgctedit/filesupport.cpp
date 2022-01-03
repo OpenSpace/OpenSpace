@@ -1,4 +1,4 @@
-#include "filesupport.h"
+#include "sgctedit/filesupport.h"
 
 FileSupport::FileSupport(QVBoxLayout* parentLayout)
 {
@@ -12,6 +12,7 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout)
     _cancelButton->setToolTip("Cancel global orientation changes");
     //connect(_buttonCancel, &QPushButton::clicked, this, &ModulesDialog::listItemCancelSave);
     _layoutButtonBox->addWidget(_cancelButton);
+    //_layoutButtonBox->setSizeConstraint(QLayout::SetFixedSize);
     parentLayout->addLayout(_layoutButtonBox);
     connect(_cancelButton, SIGNAL(released()), this,
             SLOT(cancel()));

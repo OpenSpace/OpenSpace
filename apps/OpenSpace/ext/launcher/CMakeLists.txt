@@ -47,6 +47,7 @@ set(HEADER_FILES
   include/sgctedit/monitorbox.h
   include/sgctedit/orientation.h
   include/sgctedit/orientationdialog.h
+  include/sgctedit/sgctedit.h
   include/sgctedit/windowcontrol.h
 )
 
@@ -68,9 +69,9 @@ set(SOURCE_FILES
   src/profile/timedialog.cpp
   src/profile/profileedit.cpp
   src/profile/propertiesdialog.cpp
+  src/sgctedit/sgctedit.cpp
   src/sgctedit/display.cpp
   src/sgctedit/filesupport.cpp
-  src/sgctedit/main.cpp
   src/sgctedit/monitorbox.cpp
   src/sgctedit/orientation.cpp
   src/sgctedit/orientationdialog.cpp
@@ -97,6 +98,7 @@ set(HEADER_SOURCE
   include/sgctedit/monitorbox.h
   include/sgctedit/orientation.h
   include/sgctedit/orientationdialog.h
+  include/sgctedit/sgctedit.h
   include/sgctedit/windowcontrol.h
 )
 

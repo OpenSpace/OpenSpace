@@ -28,9 +28,8 @@ public:
         QRect& widgetDims, QRect& monitorDims, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
-    void setWindowScaleFactor(float scaleFactor);
     void setWindowChangeCallback(
-        std::function<void(unsigned int, unsigned int, const QRectF&)> cb);
+        std::function<void(int, int, const QRectF&)> cb);
     void showWindowLabel(bool show);
     void cleanupLayouts();
     QVBoxLayout* initializeLayout(QWidget* parentWidget);
@@ -49,15 +48,14 @@ private slots:
     void onOffsetXChanged(const QString& newText);
     void onOffsetYChanged(const QString& newText);
     void onProjectionChanged(int newSelection);
-    void onQualityChanged(int newSelection);
     void onFullscreenClicked();
 
 private:
     void updateScaledWindowDimensions();
-    std::function<void(unsigned int, unsigned int, const QRectF&)> _windowChangeCallback;
+    std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     QRectF defaultWindowSizes[2] = {
-        {50.0, 50.0, 800.0, 600.0},
-        {900.0, 400.0, 2540.0, 680.0}
+        {50.0, 50.0, 1280.0, 720.0},
+        {900.0, 400.0, 800.0, 600.0}
     };
     QList<QString> _projectionTypes = {
         "Planar", "Fisheye", "Spherical Mirror", "Cylindrical", "Equirectangular"
@@ -70,7 +68,7 @@ private:
     float _marginFractionOfWidgetSize = 0.025;
     unsigned int _monIndex = 0;
     unsigned int _index = 0;
-    unsigned int _maxWindowSizePixels = 10000;
+    int _maxWindowSizePixels = 10000;
 
     QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;
@@ -89,10 +87,7 @@ private:
     QIntValidator* _validatorOffset_y = nullptr;
 
     QRect& _monitorResolution;
-    QRectF _monitorDimsScaled;
     QRectF _windowDims;
-    QRectF _windowDimsScaled;
-    float _monitorScaleFactor = 1.0;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
@@ -112,10 +107,9 @@ private:
     QLineEdit* _windowName = nullptr;
     QLabel* _labelSize = nullptr;
     QLabel* _labelDelim = nullptr;
-    QGridLayout* _layoutSize = nullptr;
-    QHBoxLayout* _layoutGridFrame= nullptr;
-    QHBoxLayout* _layoutGridSizeValues = nullptr;
-    QHBoxLayout* _layoutGridOffsetValues = nullptr;
+    QHBoxLayout* _layoutSize = nullptr;
+    QWidget* _widgetSize = nullptr;
+    QHBoxLayout* _layoutOffset = nullptr;
     QLabel* _labelOffset = nullptr;
     QLabel* _labelComma = nullptr;
     QHBoxLayout* _layoutCheckboxesFull1 = nullptr;

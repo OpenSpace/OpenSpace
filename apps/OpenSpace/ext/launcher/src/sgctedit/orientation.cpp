@@ -1,6 +1,6 @@
-#include "display.h"
-#include "orientation.h"
-#include "orientationdialog.h"
+#include "sgctedit/display.h"
+#include "sgctedit/orientation.h"
+#include "sgctedit/orientationdialog.h"
 
 Orientation::Orientation() {
     _layoutOrientationFull = new QHBoxLayout();
@@ -13,6 +13,7 @@ Orientation::Orientation() {
     _layoutOrientationFull->addStretch(1);
     _layoutOrientationFull->addLayout(_layoutOrientationControls);
     _layoutOrientationFull->addStretch(1);
+    //_layoutOrientationFull->setSizeConstraint(QLayout::SetFixedSize);
 
     connect(_orientationButton, SIGNAL(released()), this,
             SLOT(orientationDialog()));
