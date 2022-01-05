@@ -466,7 +466,6 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
             break;
         }
         default: {
-            LERROR(fmt::format("Uknown camera path target type: {}", p.targetType));
             throw ghoul::MissingCaseException();
         }
     }
