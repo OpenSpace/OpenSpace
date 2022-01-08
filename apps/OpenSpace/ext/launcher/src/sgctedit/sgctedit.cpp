@@ -90,11 +90,21 @@ void SgctEdit::createWidgets() {
 }
 
 void SgctEdit::addDisplayLayout(unsigned int column, MonitorBox* monBox,
-                                                                     QHBoxLayout* layout)
+                                                                      QHBoxLayout* layout)
 {
     _displayLayout[column] = new QVBoxLayout();
-    _displayWidget[column] = new Display(column, monBox, _monitorSizeList,
-        (column == 0) ? 1 : 0, _showMonitorLabel);
+    _displayWidget[column] = new Display(
+        column,
+        monBox,
+        _monitorSizeList,
+        (column == 0) ? 1 : 0,
+        _showMonitorLabel,
+        [this](unsigned int monIndex) {
+            if (_monitorSizeList.size() > 1) {
+                _displayWidget[(monIndex == 0) ? 1 : 0]->uncheckWebGuiOptions();
+            }
+        }
+    );
     _displayFrame[column] = new QFrame;
     _displayLayout[column]->addWidget(_displayWidget[column]);
     _displayFrame[column]->setLayout(_displayLayout[column]);

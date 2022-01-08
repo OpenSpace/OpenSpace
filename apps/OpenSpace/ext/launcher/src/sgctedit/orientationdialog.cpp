@@ -1,8 +1,10 @@
 #include "sgctedit/display.h"
 #include "sgctedit/orientationdialog.h"
 
-OrientationDialog::OrientationDialog(QWidget* parent)
-    : QDialog(parent)
+
+OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
+    : _orientationValue(orientation)
+    , QDialog(parent)
 {
     setWindowTitle("Global Orientation");
     _layoutWindow = new QVBoxLayout(this);
@@ -20,9 +22,9 @@ OrientationDialog::OrientationDialog(QWidget* parent)
     _linePitch = new QLineEdit(this);
     _lineRoll = new QLineEdit(this);
     _lineYaw = new QLineEdit(this);
-    _linePitch->setText("0.0");
-    _lineRoll->setText("0.0");
-    _lineYaw->setText("0.0");
+    _linePitch->setText(QString::number(_orientationValue.x));
+    _lineRoll->setText(QString::number(_orientationValue.z));
+    _lineYaw->setText(QString::number(_orientationValue.y));
      _validatorPitch = new QDoubleValidator(-90.0, 90.0, 15);
      _validatorPitch->setNotation(QDoubleValidator::StandardNotation);
      _validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
@@ -52,7 +54,7 @@ OrientationDialog::OrientationDialog(QWidget* parent)
     _layoutWindow->addLayout(_layoutYaw);
 
     _layoutButtonBox = new QHBoxLayout;
-    _buttonSave = new QPushButton("Save");
+    _buttonSave = new QPushButton("OK");
     _buttonSave->setToolTip("Save global orientation changes");
     //connect(_buttonSave, &QPushButton::clicked, this, &ModulesDialog::listItemSave);
     _layoutButtonBox->addStretch(1);
@@ -64,7 +66,23 @@ OrientationDialog::OrientationDialog(QWidget* parent)
     _layoutButtonBox->addWidget(_buttonCancel);
     _layoutButtonBox->addStretch(1);
 
+    connect(_buttonSave, SIGNAL(released()), this,
+            SLOT(ok()));
+    connect(_buttonCancel, SIGNAL(released()), this,
+            SLOT(cancel()));
+
     _layoutWindow->addLayout(_layoutButtonBox);
+}
+
+void OrientationDialog::ok() {
+    _orientationValue.x = QString(_linePitch->text()).toFloat();
+    _orientationValue.y = QString(_lineYaw->text()).toFloat();
+    _orientationValue.z = QString(_lineRoll->text()).toFloat();
+    accept();
+}
+
+void OrientationDialog::cancel() {
+    reject();
 }
 
 OrientationDialog::~OrientationDialog()

@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <iostream>
+#include <sgct/config.h>
 
 
 class OrientationDialog : public QDialog
@@ -24,12 +25,15 @@ class OrientationDialog : public QDialog
 Q_OBJECT
 
 public:
-    explicit OrientationDialog(QWidget* parent);
+    explicit OrientationDialog(sgct::quat& orientation, QWidget* parent);
     ~OrientationDialog();
 
 private slots:
+    void cancel();
+    void ok();
 
 private:
+    sgct::quat& _orientationValue;
     QVBoxLayout* _layoutWindow = nullptr;
     QHBoxLayout* _layoutPitch = nullptr;
     QHBoxLayout* _layoutRoll = nullptr;

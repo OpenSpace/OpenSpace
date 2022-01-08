@@ -34,7 +34,7 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
     _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
-    _checkBoxWebGui = new QCheckBox("WebGUI here", this);
+    _checkBoxWebGui = new QCheckBox("WebGUI only this window", this);
     _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
     _comboProjection = new QComboBox(this);
     _comboProjection->addItems(_projectionTypes);
@@ -60,6 +60,10 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
 
     connect(_comboProjection, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onProjectionChanged(int)));
+    connect(_checkBoxSpoutOutput, SIGNAL(stateChanged(int)),
+            this, SLOT(onSpoutSelection(int)));
+    connect(_checkBoxWebGui, SIGNAL(stateChanged(int)),
+            this, SLOT(onWebGuiSelection(int)));
 
     connect(_fullscreenButton, SIGNAL(released()), this, SLOT(onFullscreenClicked()));
 }
@@ -106,7 +110,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutSize->addWidget(_size_y);
     _layoutSize->addStretch(1);
     _labelDelim->setText("x");
-    _labelDelim->setFixedWidth(7);
+    _labelDelim->setFixedWidth(9);
     _layoutWindowCtrl->addLayout(_layoutSize);
 
     //Window offset
@@ -123,7 +127,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutOffset->addWidget(_offset_y);
     _layoutOffset->addStretch(1);
     _labelComma->setText(",");
-    _labelComma->setFixedWidth(7);
+    _labelComma->setFixedWidth(9);
     _layoutWindowCtrl->addLayout(_layoutOffset);
 
     //Window options
@@ -246,46 +250,94 @@ void WindowControl::onFullscreenClicked() {
     _size_y->setText(QString::number(_monitorResolution.height()));
 }
 
+void WindowControl::enableGuiWindowSelection(bool enabled) {
+    _checkBoxWebGui->setEnabled(enabled);
+}
+
+void WindowControl::onWebGuiSelection(int selectionState) {
+    if (_windowGuiCheckCallback && (selectionState == Qt::Checked)) {
+        _windowGuiCheckCallback(_monIndex, _index);
+    }
+}
+
+void WindowControl::onSpoutSelection(int selectionState) {
+    if (selectionState == Qt::Checked) {
+        int currentProjectionSelection = _comboProjection->currentIndex();
+        if ((currentProjectionSelection != ProjectionIndeces::Equirectangular) &&
+            (currentProjectionSelection != ProjectionIndeces::Fisheye))
+        {
+            _comboProjection->setCurrentIndex(ProjectionIndeces::Equirectangular);
+        }
+        enableSpoutProjectionOptions(_comboProjection, false);
+    }
+    else {
+        enableSpoutProjectionOptions(_comboProjection, true);
+    }
+}
+
+void WindowControl::enableSpoutProjectionOptions(QComboBox* comboBox, bool enable) {
+    auto * comboModel = qobject_cast<QStandardItemModel*>(comboBox->model());
+    if (comboModel) {
+        enableProjectionOption(comboModel, ProjectionIndeces::Planar, enable);
+        enableProjectionOption(comboModel, ProjectionIndeces::Spherical_Mirror, enable);
+        enableProjectionOption(comboModel, ProjectionIndeces::Cylindrical, enable);
+    }
+}
+
+template <typename T>
+void WindowControl::enableProjectionOption(T* comboModel, int selectionIndex, bool enable)
+{
+    auto* item = comboModel->item(selectionIndex);
+    if (item) {
+        item->setEnabled(enable);
+    }
+}
+
 void WindowControl::onProjectionChanged(int newSelection) {
     switch (newSelection) {
-    case 0:
+    case ProjectionIndeces::Planar:
         _comboQuality->setEnabled(false);
         _labelFov->setEnabled(true);
         _lineFov->setEnabled(true);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
+        _checkBoxSpoutOutput->setEnabled(false);
         break;
 
-    case 1:
+    case ProjectionIndeces::Fisheye:
         _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
+        _checkBoxSpoutOutput->setEnabled(true);
         break;
 
-    case 2:
+    case ProjectionIndeces::Spherical_Mirror:
         _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
+        _checkBoxSpoutOutput->setEnabled(false);
         break;
 
-    case 3:
+    case ProjectionIndeces::Cylindrical:
         _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(true);
         _lineHeightOffset->setEnabled(true);
+        _checkBoxSpoutOutput->setEnabled(false);
         break;
 
-    case 4:
+    case ProjectionIndeces::Equirectangular:
         _comboQuality->setEnabled(true);
         _labelFov->setEnabled(false);
         _lineFov->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
+        _checkBoxSpoutOutput->setEnabled(true);
         break;
     }
 }
@@ -298,6 +350,16 @@ void WindowControl::setWindowChangeCallback(
                         std::function<void(int, int, const QRectF&)> cb)
 {
     _windowChangeCallback = cb;
+}
+
+void WindowControl::setWebGuiChangeCallback(
+                        std::function<void(unsigned int, unsigned int)> cb)
+{
+    _windowGuiCheckCallback = cb;
+}
+
+void WindowControl::uncheckWebGuiOption() {
+    _checkBoxWebGui->setCheckState(Qt::Unchecked);
 }
 
 QRectF& WindowControl::dimensions() {
@@ -330,6 +392,52 @@ QCheckBox* WindowControl::checkBoxWebGui() {
 
 QCheckBox* WindowControl::checkBoxSpoutOutput() {
     return _checkBoxSpoutOutput;
+}
+
+std::string WindowControl::windowName() {
+    return _windowName->text().toStdString();
+}
+
+sgct::ivec2 WindowControl::windowSize() {
+    return {
+        stoi(_size_x->text().toStdString()),
+        stoi(_size_y->text().toStdString())
+    };
+}
+
+sgct::ivec2 WindowControl::windowPos() {
+    return {
+        stoi(_offset_x->text().toStdString()),
+        stoi(_offset_y->text().toStdString())
+    };
+}
+
+bool WindowControl::isDecorated() {
+    return (_checkBoxWindowDecor->checkState() == Qt::Checked);
+}
+
+bool WindowControl::isGuiWindow() {
+    return (_checkBoxWebGui->checkState() == Qt::Checked);
+}
+
+bool WindowControl::isSpoutSelected() {
+    return (_checkBoxSpoutOutput->checkState() == Qt::Checked);
+}
+
+int WindowControl::projectionSelectedIndex() {
+    return _comboProjection->currentIndex();
+}
+
+int WindowControl::qualitySelectedIndex() {
+    return _comboQuality->currentIndex();
+}
+
+float WindowControl::fov() {
+    return _lineFov->text().toFloat();
+}
+
+float WindowControl::heightOffset() {
+    return _lineHeightOffset->text().toFloat();
 }
 
 WindowControl::~WindowControl()

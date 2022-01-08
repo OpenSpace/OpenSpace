@@ -9,10 +9,12 @@
 
 
 Display::Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
-          std::vector<QRect>& monitorSizeList, unsigned int numWindowsInit, bool showLabel)
+          std::vector<QRect>& monitorSizeList, unsigned int numWindowsInit, bool showLabel,
+          std::function<void(unsigned int)> webGuiCallback)
     : _monitorIdx(monitorIdx)
     , _monBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
+    , _webGuiCheckCallback(webGuiCallback)
 {
     _addWindowButton = new QPushButton("Add Window", this);
     _removeWindowButton = new QPushButton("Remove Window", this);
@@ -89,6 +91,21 @@ void Display::initializeLayout(bool showLabel, unsigned int numWindowsInit) {
     //}
 }
 
+std::vector<WindowControl*> Display::windowControls() {
+    return _windowControl;
+}
+
+unsigned int Display::nWindows() {
+    return _nWindowsDisplayed;
+}
+
+sgct::ivec2 Display::monitorResolution() {
+    return {
+        _monitorResolutions[_monitorIdx].width(),
+        _monitorResolutions[_monitorIdx].height()
+    };
+}
+
 void Display::addWindow() {
     if (_nWindowsDisplayed == 0) {
         showWindows(1);
@@ -156,6 +173,12 @@ void Display::initializeWindowControl() {
                 _monBox->windowDimensionsChanged(monIndex, winIndex, newDims);
             }
         );
+        _windowControl.back()->setWebGuiChangeCallback(
+            [this](unsigned int monIndex, unsigned int winIndex) {
+                _windowControl[(winIndex == 0)? 1 : 0]->uncheckWebGuiOption();
+                _webGuiCheckCallback(monIndex);
+            }
+        );
         _monBox->mapWindowResolutionToWidgetCoordinates(
             _monitorIdx,
             _nWindowsAllocated,
@@ -164,3 +187,10 @@ void Display::initializeWindowControl() {
         _nWindowsAllocated++;
     }
 }
+
+void Display::uncheckWebGuiOptions() {
+    for (auto w : _windowControl) {
+        w->uncheckWebGuiOption();
+    }
+}
+

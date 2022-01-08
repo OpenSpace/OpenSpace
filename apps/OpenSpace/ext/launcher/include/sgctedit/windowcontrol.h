@@ -12,11 +12,13 @@
 #include <QPainterPath>
 #include <QPoint>
 #include <QPushButton>
+#include <QStandardItemModel>
 #include <QVector>
 #include <QWidget>
 
 #include <vector>
 #include <iostream>
+#include <sgct/config.h>
 
 
 class WindowControl : public QWidget
@@ -28,8 +30,8 @@ public:
         QRect& widgetDims, QRect& monitorDims, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
-    void setWindowChangeCallback(
-        std::function<void(int, int, const QRectF&)> cb);
+    void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
+    void setWebGuiChangeCallback(std::function<void(unsigned int, unsigned int)> cb);
     void showWindowLabel(bool show);
     void cleanupLayouts();
     QVBoxLayout* initializeLayout(QWidget* parentWidget);
@@ -41,6 +43,30 @@ public:
     QCheckBox* checkBoxWindowDecor();
     QCheckBox* checkBoxWebGui();
     QCheckBox* checkBoxSpoutOutput();
+    std::string windowName();
+    sgct::ivec2 windowSize();
+    sgct::ivec2 windowPos();
+    bool isDecorated();
+    bool isSpoutSelected();
+    bool isGuiWindow();
+    void enableGuiWindowSelection(bool enabled);
+    void uncheckWebGuiOption();
+    int projectionSelectedIndex();
+    int qualitySelectedIndex();
+    float fov();
+    float heightOffset();
+    enum ProjectionIndeces : unsigned int {
+        Planar = 0,
+        Fisheye,
+        Spherical_Mirror,
+        Cylindrical,
+        Equirectangular
+    };
+    std::string ProjectionTypeNames[5] = {"Planar", "Fisheye", "Spherical Mirror",
+        "Cylindrical", "Equirectangular"};
+    std::string QualityTypeNames[10] = {"Low (256)", "Medium (512)", "High (1K)",
+        "1.5K (1536)", "2K (2048)", "4K (4096)", "8K (8192)", "16K (16384)",
+        "32K (32768)", "64K (65536)"};
 
 private slots:
     void onSizeXChanged(const QString& newText);
@@ -49,20 +75,38 @@ private slots:
     void onOffsetYChanged(const QString& newText);
     void onProjectionChanged(int newSelection);
     void onFullscreenClicked();
+    void onSpoutSelection(int selectionState);
+    void onWebGuiSelection(int selectionState);
 
 private:
+    void enableSpoutProjectionOptions(QComboBox* comboBox, bool enable);
+    template <typename T>
+    void enableProjectionOption(T* comboModel, int selectionIndex, bool enable);
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
+    std::function<void(unsigned int, unsigned int)> _windowGuiCheckCallback;
     QRectF defaultWindowSizes[2] = {
         {50.0, 50.0, 1280.0, 720.0},
         {900.0, 400.0, 800.0, 600.0}
     };
     QList<QString> _projectionTypes = {
-        "Planar", "Fisheye", "Spherical Mirror", "Cylindrical", "Equirectangular"
+        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Planar]),
+        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Fisheye]),
+        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Spherical_Mirror]),
+        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Cylindrical]),
+        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Equirectangular]),
     };
     QList<QString> _qualityTypes = {
-        "Low (256)", "Medium (512)", "High (1K)", "1.5K (1536)", "2K (2048)",
-        "4K (4096)", "8K (8192)", "16K (16384)", "32K (32768)", "64K (65536)"
+        QString::fromStdString(QualityTypeNames[0]),
+        QString::fromStdString(QualityTypeNames[1]),
+        QString::fromStdString(QualityTypeNames[2]),
+        QString::fromStdString(QualityTypeNames[3]),
+        QString::fromStdString(QualityTypeNames[4]),
+        QString::fromStdString(QualityTypeNames[5]),
+        QString::fromStdString(QualityTypeNames[6]),
+        QString::fromStdString(QualityTypeNames[7]),
+        QString::fromStdString(QualityTypeNames[8]),
+        QString::fromStdString(QualityTypeNames[9]),
     };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;

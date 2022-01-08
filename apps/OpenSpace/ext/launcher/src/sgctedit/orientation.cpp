@@ -3,6 +3,7 @@
 #include "sgctedit/orientationdialog.h"
 
 Orientation::Orientation() {
+    _orientationDialog = new OrientationDialog(_orientationValue, this);
     _layoutOrientationFull = new QHBoxLayout();
     _layoutOrientationControls = new QVBoxLayout();
     _orientationButton = new QPushButton("Global Orientation");
@@ -24,11 +25,20 @@ void Orientation::addButtonToLayout(QVBoxLayout* parentLayout) {
 }
 
 void Orientation::orientationDialog() {
-    OrientationDialog(this).exec();
+    _orientationDialog->exec();
+}
+
+sgct::quat Orientation::orientationValue() {
+    return _orientationValue;
+}
+
+bool Orientation::vsyncValue() {
+    return (_checkBoxVsync->checkState() == Qt::Checked);
 }
 
 Orientation::~Orientation()
 {
+    delete _orientationDialog;
     delete _orientationButton;
     delete _checkBoxVsync;
     delete _layoutOrientationFull;
