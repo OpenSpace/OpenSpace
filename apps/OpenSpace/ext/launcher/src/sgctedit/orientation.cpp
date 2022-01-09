@@ -2,7 +2,8 @@
 #include "sgctedit/orientation.h"
 #include "sgctedit/orientationdialog.h"
 
-Orientation::Orientation() {
+Orientation::Orientation()
+{
     _orientationDialog = new OrientationDialog(_orientationValue, this);
     _layoutOrientationFull = new QHBoxLayout();
     _layoutOrientationControls = new QVBoxLayout();

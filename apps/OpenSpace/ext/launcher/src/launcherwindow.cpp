@@ -140,6 +140,26 @@ namespace {
             );
         }
     }
+
+    void saveWindowConfig(QWidget* parent, const std::string& path,
+                          std::vector<sgct::config::Window>& windowList,
+                          sgct::config::Cluster& cluster)
+    {
+        std::ofstream outFile;
+        try {
+            outFile.open(path, std::ofstream::out);
+            //outFile << p.serialize();
+        }
+        catch (const std::ofstream::failure& e) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Error writing data to file: {} ({})", path, e.what()
+                ))
+            );
+        }
+    }
 } // namespace
 
 using namespace openspace;
@@ -292,16 +312,16 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* editWindowButton = new QPushButton("Edit", centralWidget);
-    connect(
-        editWindowButton, &QPushButton::released,
-        [this]() {
-            openWindowEditor();
-        }
-    );
-    editWindowButton->setObjectName("small");
-    editWindowButton->setGeometry(geometry::EditWindowButton);
-    editWindowButton->setCursor(Qt::PointingHandCursor);
+    //QPushButton* editWindowButton = new QPushButton("Edit", centralWidget);
+    //connect(
+    //    editWindowButton, &QPushButton::released,
+    //    [this]() {
+    //        openWindowEditor();
+    //    }
+    //);
+    //editWindowButton->setObjectName("small");
+    //editWindowButton->setGeometry(geometry::EditWindowButton);
+    //editWindowButton->setCursor(Qt::PointingHandCursor);
 
     return centralWidget;
 }
@@ -499,8 +519,19 @@ void LauncherWindow::openProfileEditor(const std::string& profile, const bool is
 }
 
 void LauncherWindow::openWindowEditor() {
-    SgctEdit editor(this, _qApp);
+    sgct::config::Cluster cluster;
+    std::vector<sgct::config::Window> windowList;
+    SgctEdit editor(this, windowList, cluster, _qApp);
     editor.exec();
+    if (editor.wasSaved()) {
+        const std::string path = _userConfigPath + editor.saveFilename() + ".config";
+        saveWindowConfig(this, path, windowList, cluster);
+        populateWindowConfigsList(editor.saveFilename());
+    }
+    else {
+        const std::string current = _windowConfigBox->currentText().toStdString();
+        populateWindowConfigsList(current);
+    }
 }
 
 bool LauncherWindow::wasLaunchSelected() const {

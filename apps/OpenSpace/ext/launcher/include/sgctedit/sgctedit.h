@@ -27,15 +27,17 @@ class SgctEdit final : public QDialog
 {
 Q_OBJECT
 public:
-    SgctEdit(QWidget* parent, QApplication& qtApp);
+    SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
+        sgct::config::Cluster& cluster, QApplication& qtApp);
     ~SgctEdit();
     void addDisplayLayout(unsigned int column, MonitorBox* monBox, QHBoxLayout* layout);
     void createWidgets();
-
-private slots:
+    bool wasSaved() const;
+    std::string saveFilename();
 
 private:
     void systemMonitorConfiguration(QApplication& qtApp);
+    MonitorBox* _monBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     std::vector<QVBoxLayout*> _displayLayout = {nullptr, nullptr};
     std::vector<QFrame*> _displayFrame = {nullptr, nullptr};
@@ -44,6 +46,9 @@ private:
     FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
     bool _showMonitorLabel = false;
+    sgct::config::Cluster& _cluster;
+    std::vector<sgct::config::Window>& _windowList;
+    bool _saveSelected = false;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__

@@ -131,7 +131,12 @@ endif()
 
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
-target_include_directories(openspace-ui-launcher PUBLIC include)
+target_include_directories(
+  openspace-ui-launcher
+  PUBLIC
+  include
+  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
+)
 target_link_libraries(
   openspace-ui-launcher
   PUBLIC

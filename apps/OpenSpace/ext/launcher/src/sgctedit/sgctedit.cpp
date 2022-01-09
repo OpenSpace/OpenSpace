@@ -6,8 +6,11 @@ namespace {
 
 }*/
 
-SgctEdit::SgctEdit(QWidget* parent, QApplication& qtApp)
-    : QDialog(parent)
+SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
+                   sgct::config::Cluster& cluster, QApplication& qtApp)
+    : _cluster(cluster)
+    , _windowList(windowList)
+    , QDialog(parent)
 {
     setWindowTitle("Display/Window Editor");
     systemMonitorConfiguration(qtApp);
@@ -40,18 +43,9 @@ void SgctEdit::systemMonitorConfiguration(QApplication& qtApp) {
 }
 
 void SgctEdit::createWidgets() {
-//    QApplication app(argc, argv);
-//    QMainWindow win(nullptr);
-
-//    QFrame* monitorBorderFrame = nullptr;
-
     QVBoxLayout* layoutMainV = new QVBoxLayout(this);
     QHBoxLayout* layoutMainH = new QHBoxLayout;
-
     _orientationWidget = new Orientation();
-//    QWidget* mainWindow = new QWidget();
-//    mainWindow->setLayout(layoutMainV);
-//    win.setCentralWidget(mainWindow);
 
     if (_monitorSizeList.size() > 1) {
         _monitorWidgetSize = QRect(0, 0, 600, 350);
@@ -59,34 +53,47 @@ void SgctEdit::createWidgets() {
     }
 
     {
-        MonitorBox* monBox = new MonitorBox(
+        _monBox = new MonitorBox(
             _monitorWidgetSize,
             _monitorSizeList,
             _showMonitorLabel
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout();
         layoutMonBox->addStretch(1);
-        //_layout->addWidget(_monBox);
-        layoutMonBox->addWidget(monBox);
+        layoutMonBox->addWidget(_monBox);
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
 
-        monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
+        _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        _monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
 
-        addDisplayLayout(0, monBox, layoutMainH);
+        addDisplayLayout(0, _monBox, layoutMainH);
         if (_monitorSizeList.size() > 1) {
-            addDisplayLayout(1, monBox, layoutMainH);
+            addDisplayLayout(1, _monBox, layoutMainH);
         }
     }
-    //layoutMainH->setSizeConstraint(QLayout::SetFixedSize);
-    layoutMainV->addLayout(layoutMainH);
-    _orientationWidget->addButtonToLayout(layoutMainV);
-    _fileSupportWidget = new FileSupport(layoutMainV);
+    {
+        layoutMainV->addLayout(layoutMainH);
+        _orientationWidget->addButtonToLayout(layoutMainV);
 
-//    win.setWindowTitle("Window Details");
-//    win.show();
-//    app.exec();
+        _fileSupportWidget = new FileSupport(
+            layoutMainV,
+            _monitorSizeList,
+            _displayWidget,
+            _orientationWidget,
+            _windowList,
+            _cluster,
+            [this](bool accepted) {
+                if (accepted) {
+                    _saveSelected = true;
+                    accept();
+                }
+                else {
+                    reject();
+                }
+            }
+        );
+    }
 }
 
 void SgctEdit::addDisplayLayout(unsigned int column, MonitorBox* monBox,
@@ -112,20 +119,21 @@ void SgctEdit::addDisplayLayout(unsigned int column, MonitorBox* monBox,
     layout->addWidget(_displayFrame[column]);
 }
 
+bool SgctEdit::wasSaved() const {
+    return _saveSelected;
+}
+
+std::string SgctEdit::saveFilename() {
+    return _fileSupportWidget->saveFilename();
+}
+
 SgctEdit::~SgctEdit() {
     delete _orientationWidget;
     delete _fileSupportWidget;
-/*    for (unsigned int i = 0; i <= 1; ++i) {
-        if (displayWidget[i]) delete displayWidget[i];
-        if (displayLayout[i]) delete displayLayout[i];
-        if (displayFrame[i]) delete displayFrame[i];
+    for (unsigned int i = 0; i <= _monitorSizeList.size(); ++i) {
+        if (_displayWidget[i]) delete _displayWidget[i];
+        if (_displayLayout[i]) delete _displayLayout[i];
+        if (_displayFrame[i]) delete _displayFrame[i];
     }
-    if (monitorBorderFrame) {
-        delete monitorBorderFrame;
-    }
-    delete monBox;
-    delete layoutMonBox;
-    delete layoutMainH;
-    delete layoutMainV;
-    delete mainWindow;*/
+    delete _monBox;
 }
