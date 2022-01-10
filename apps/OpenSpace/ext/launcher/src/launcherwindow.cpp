@@ -40,6 +40,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <sgct/readconfig.h>
 
 using namespace openspace;
 
@@ -148,7 +149,7 @@ namespace {
         std::ofstream outFile;
         try {
             outFile.open(path, std::ofstream::out);
-            //outFile << p.serialize();
+            outFile << sgct::serializeWindowConfig(windowList, cluster);
         }
         catch (const std::ofstream::failure& e) {
             QMessageBox::critical(
@@ -524,7 +525,7 @@ void LauncherWindow::openWindowEditor() {
     SgctEdit editor(this, windowList, cluster, _qApp);
     editor.exec();
     if (editor.wasSaved()) {
-        const std::string path = _userConfigPath + editor.saveFilename() + ".config";
+        const std::string path = _userConfigPath + editor.saveFilename() + ".json";
         saveWindowConfig(this, path, windowList, cluster);
         populateWindowConfigsList(editor.saveFilename());
     }

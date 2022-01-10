@@ -16,8 +16,10 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     _lineFilename = new QLineEdit();
     QLabel* labelFilename = new QLabel();
     labelFilename->setText("Filename: ");
+    layoutFilename->addStretch(1);
     layoutFilename->addWidget(labelFilename);
     layoutFilename->addWidget(_lineFilename);
+    layoutFilename->addStretch(1);
 
     _layoutButtonBox = new QHBoxLayout;
     _saveButton = new QPushButton("Save");
@@ -27,9 +29,7 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
 
     _cancelButton = new QPushButton("Cancel");
     _cancelButton->setToolTip("Cancel global orientation changes");
-    //connect(_buttonCancel, &QPushButton::clicked, this, &ModulesDialog::listItemCancelSave);
     _layoutButtonBox->addWidget(_cancelButton);
-    //_layoutButtonBox->setSizeConstraint(QLayout::SetFixedSize);
     layoutFullVertical->addLayout(layoutFilename);
     layoutFullVertical->addLayout(_layoutButtonBox);
     parentLayout->addLayout(layoutFullVertical);
@@ -108,13 +108,24 @@ void FileSupport::saveWindows() {
                 }
                 if (isOneOfWindowsSetAsWebGui) {
                     if (windowIndex == webGuiWindowIndex) {
+                        _windowList.back().draw2D = true;
                         _windowList.back().draw3D = false;
                         _windowList.back().viewports.back().isTracked = false;
                         _windowList.back().tags.push_back("GUI");
                     }
                     else {
                         _windowList.back().draw2D = false;
+                        _windowList.back().draw3D = true;
                     }
+                }
+                else {
+                        _windowList.back().draw2D = true;
+                        _windowList.back().draw3D = true;
+                        _windowList.back().viewports.back().isTracked = true;
+                }
+                if (!_displayWidgets[m]->windowControls()[w]->windowName().empty()) {
+                    _windowList.back().name
+                        = _displayWidgets[m]->windowControls()[w]->windowName();
                 }
                 _windowList.back().id = windowIndex++;
             }
@@ -182,7 +193,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             default:
                 {
                     sgct::config::PlanarProjection projection;
-                    projection.fov.left = winControl->fov() / 2.0;
+                    projection.fov.left = -winControl->fov() / 2.0;
                     projection.fov.right = winControl->fov() / 2.0;
                     viewport.projection = std::move(projection);
                 }
@@ -192,7 +203,6 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
 }
 
 void FileSupport::filenameEdited(const QString& newString) {
-    std::cout << "Edited callback." << std::endl;
     if (newString.isEmpty()) {
         _saveButton->setEnabled(false);
     }
@@ -206,6 +216,8 @@ std::string FileSupport::saveFilename() {
 }
 
 void FileSupport::save() {
+    saveCluster();
+    saveWindows();
     _finishedCallback(true);
 }
 

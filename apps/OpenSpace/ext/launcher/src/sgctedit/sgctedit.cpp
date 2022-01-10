@@ -36,10 +36,6 @@ void SgctEdit::systemMonitorConfiguration(QApplication& qtApp) {
             actualHeight
         });
     }
-
-    //_monitorSizeList.clear();
-    //_monitorSizeList.push_back({3440, 0, 1920, 1200});
-    //_monitorSizeList.push_back({1080, 0, 1920, 1080});
 }
 
 void SgctEdit::createWidgets() {
