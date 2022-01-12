@@ -222,24 +222,37 @@ void WindowControl::onSizeYChanged(const QString& newText) {
 void WindowControl::onOffsetXChanged(const QString& newText) {
     std::string xOffset = newText.toStdString();
     float prevWidth = _windowDims.width();
-    if (!xOffset.empty()) {
-        _windowDims.setX(std::stoi(xOffset));
-        _windowDims.setWidth(prevWidth);
+    try {
+        if (!xOffset.empty()) {
+            _windowDims.setX(std::stoi(xOffset));
+            _windowDims.setWidth(prevWidth);
+        }
+        if (_windowChangeCallback) {
+            _windowChangeCallback(_monIndex, _index, _windowDims);
+        }
     }
-    if (_windowChangeCallback) {
-        _windowChangeCallback(_monIndex, _index, _windowDims);
+    catch (...) {
+        //The QIntValidator ensures that the range is a +/- integer
+        //However, it's possible to enter only a - character which
+        //causes an exception throw, which is ignored here (when user
+        //enters an integer after the - then the value will be updated).
     }
 }
 
 void WindowControl::onOffsetYChanged(const QString& newText) {
     std::string yOffset = newText.toStdString();
     float prevHeight = _windowDims.height();
-    if (!yOffset.empty()) {
-        _windowDims.setY(std::stoi(yOffset));
-        _windowDims.setHeight(prevHeight);
+    try {
+        if (!yOffset.empty()) {
+            _windowDims.setY(std::stoi(yOffset));
+            _windowDims.setHeight(prevHeight);
+        }
+        if (_windowChangeCallback) {
+            _windowChangeCallback(_monIndex, _index, _windowDims);
+        }
     }
-    if (_windowChangeCallback) {
-        _windowChangeCallback(_monIndex, _index, _windowDims);
+    catch (...) {
+        //See comment in onOffsetXChanged
     }
 }
 
