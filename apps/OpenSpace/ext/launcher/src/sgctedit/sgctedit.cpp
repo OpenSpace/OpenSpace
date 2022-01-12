@@ -131,5 +131,4 @@ SgctEdit::~SgctEdit() {
         if (_displayLayout[i]) delete _displayLayout[i];
         if (_displayFrame[i]) delete _displayFrame[i];
     }
-    delete _monBox;
 }

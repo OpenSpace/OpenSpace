@@ -42,7 +42,5 @@ Orientation::~Orientation()
     delete _orientationDialog;
     delete _orientationButton;
     delete _checkBoxVsync;
-    delete _layoutOrientationFull;
     delete _layoutOrientationControls;
 }
-
