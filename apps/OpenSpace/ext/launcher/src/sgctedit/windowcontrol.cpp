@@ -90,9 +90,9 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
 
     _layoutName = new QHBoxLayout();
     _labelName = new QLabel(this);
-    _labelName->setText("Window Name: ");
+    _labelName->setText("Name: ");
     _windowName = new QLineEdit(this);
-    _windowName->setFixedWidth(100);
+    _windowName->setFixedWidth(160);
     _layoutName->addWidget(_labelName);
     _layoutName->addWidget(_windowName);
     _layoutName->addStretch(1);

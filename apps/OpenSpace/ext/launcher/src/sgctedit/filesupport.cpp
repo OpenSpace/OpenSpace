@@ -14,6 +14,7 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     QVBoxLayout* layoutFullVertical = new QVBoxLayout();
     QHBoxLayout* layoutFilename = new QHBoxLayout();
     _lineFilename = new QLineEdit();
+    _lineFilename->setFixedWidth(190);
     QLabel* labelFilename = new QLabel();
     labelFilename->setText("Filename: ");
     layoutFilename->addStretch(1);
