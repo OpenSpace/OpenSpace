@@ -169,7 +169,7 @@ int moveLayer(lua_State* L) {
     }
 
     globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    lg.moveLayers(oldPosition, newPosition);
+    lg.moveLayer(oldPosition, newPosition);
     return 0;
 }
 
