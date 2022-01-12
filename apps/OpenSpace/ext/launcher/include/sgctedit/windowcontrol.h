@@ -158,6 +158,8 @@ private:
     QLabel* _labelComma = nullptr;
     QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
     QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
+    QVBoxLayout* _layoutProjectionGroup = nullptr;
+    QFrame* _borderProjectionGroup = nullptr;
     QHBoxLayout* _layoutFullscreenButton = nullptr;
     QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
