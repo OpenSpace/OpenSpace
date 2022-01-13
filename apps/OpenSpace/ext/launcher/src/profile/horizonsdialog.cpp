@@ -57,6 +57,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace {
     std::string replaceAll(const std::string& string, const std::string& from, const std::string& to) {
