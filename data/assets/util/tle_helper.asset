@@ -1,5 +1,5 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local assetHelper = asset.require("util/asset_helper")
 
 function downloadTLEFile(sceneAsset, url, name, filename)
   local identifier = name
@@ -15,7 +15,7 @@ function downloadTLEFile(sceneAsset, url, name, filename)
     Override = true
   }
 
-  if (filename ~= '')  then
+  if (filename ~= "")  then
     urlSyncTable.Filename = filename
   end
 
@@ -24,7 +24,7 @@ end
 
 -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
 function isValidTLEFileFormat(lineArr)
-  local function isEmpty(s) return s == nil or s == '' end
+  local function isEmpty(s) return s == nil or s == "" end
 
   if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
     return false
@@ -44,9 +44,9 @@ local makeSingleLineElement = function(tle, filename)
   assert(file, "File not found: " .. path)
 
   local line = {
-    file:read('*l'), --title line
-    file:read('*l'),
-    file:read('*l')
+    file:read("*l"), --title line
+    file:read("*l"),
+    file:read("*l")
   }
 
   assert(isValidTLEFileFormat(line), "TLE file syntax error on line " .. 1 .. ": " .. path)

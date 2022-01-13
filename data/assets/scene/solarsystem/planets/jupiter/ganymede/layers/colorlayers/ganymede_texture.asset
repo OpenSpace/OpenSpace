@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../ganymede").Ganymede.Identifier
+local globeIdentifier = asset.require("../../ganymede").Ganymede.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Ganymede Textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/ganymede.jpg",
+  FilePath = texturesPath .. "ganymede.jpg",
 }
 
 asset.onInitialize(function () 

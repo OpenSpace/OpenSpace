@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,6 +56,11 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
     constexpr const char* _loggerCat = "Renderable Galaxy";
+
+    enum StarRenderingMethod {
+        Points,
+        Billboards
+    };
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
         "modelMatrix", "viewProjectionMatrix", "eyePosition",
@@ -147,7 +152,7 @@ namespace {
         // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
         std::optional<float> emissionMultiply;
 
-        enum class StarRenderingMethod {
+        enum class [[codegen::map(StarRenderingMethod)]] StarRenderingMethod {
             Points,
             Billboards
         };
@@ -255,18 +260,11 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     _emissionMultiply = p.emissionMultiply.value_or(_emissionMultiply);
 
     _starRenderingMethod.addOptions({
-        { 0, "Points" },
-        { 1, "Billboards" }
+        { StarRenderingMethod::Points, "Points" },
+        { StarRenderingMethod::Billboards, "Billboards" }
     });
     if (p.starRenderingMethod.has_value()) {
-        switch (*p.starRenderingMethod) {
-            case Parameters::StarRenderingMethod::Points:
-                _starRenderingMethod = 0;
-                break;
-            case Parameters::StarRenderingMethod::Billboards:
-                _starRenderingMethod = 1;
-                break;
-        }
+        _starRenderingMethod = codegen::map<StarRenderingMethod>(*p.starRenderingMethod);
     }
 
     _rotation = p.rotation.value_or(_rotation);
@@ -370,6 +368,7 @@ void RenderableGalaxy::initializeGL() {
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_UNSIGNED_BYTE,
@@ -414,7 +413,8 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string()
+            absPath(_pointSpreadFunctionTexturePath).string(),
+            2
         );
 
         if (_pointSpreadFunctionTexture) {

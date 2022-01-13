@@ -1,7 +1,7 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
 
 local labelsPath = asset.syncedResource({
   Name = "Saturn Labels",
@@ -33,7 +33,7 @@ local Titan = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/titan.labels",
+      FileName = labelsPath .. "titan.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 9.6,

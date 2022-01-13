@@ -1,5 +1,4 @@
---milkyway_label.asset
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -19,7 +18,7 @@ local homeLabel = {
     Opacity = 0.99,
     ScaleFactor = 500.0,
     DrawLabels = true,
-    LabelFile = homespeck .. "/home.label",
+    LabelFile = homespeck .. "home.label",
     Unit = "Mpc",
     TextColor = { 0.8, 0.8, 0.8 },
     TextSize = 20.50,

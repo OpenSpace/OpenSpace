@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
-local colormaps = asset.require('./stars_colormap').ColorMaps
-local textures = asset.require('./stars_textures').textures
+
 
 local speck = asset.syncedResource({
   Name = "Stars Speck Files",
@@ -17,15 +16,29 @@ local sunspeck = asset.syncedResource({
   Version = 1
 })
 
+local colormaps = asset.syncedResource({
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars_colormap",
+  Version = 2
+})
+
+local textures = asset.syncedResource({
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
+  Version = 1
+})
+
 local stars = {
   Identifier = "Stars",
   Renderable = {
     Type = "RenderableStars",
-    File = speck .. "/stars.speck",
-    Texture = textures .. "/halo.png",
-    --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colormaps .. "/colorbv.cmap",
-    OtherDataColorMap = colormaps .. "/viridis.cmap",
+    File = speck .. "stars.speck",
+    Texture = textures .. "halo.png",
+    --ShapeTexture = textures .. "disc.png",
+    ColorMap = colormaps .. "colorbv.cmap",
+    OtherDataColorMap = colormaps .. "viridis.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based", -- or PSF
@@ -57,10 +70,10 @@ local sunstar = {
   Identifier = "SunStar",
   Renderable = {
     Type = "RenderableStars",
-    File = sunspeck .. "/sunstar.speck",
-    Texture = textures .. "/halo.png",
-    --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colormaps .. "/colorbv.cmap",
+    File = sunspeck .. "sunstar.speck",
+    Texture = textures .. "halo.png",
+    --ShapeTexture = textures .. "disc.png",
+    ColorMap = colormaps .. "colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based", -- or PSF

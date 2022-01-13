@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Mars Textures",
@@ -10,7 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
-  FilePath = texturesPath .. "/mars.jpg",
+  FilePath = texturesPath .. "mars.jpg",
   Description = [[ Default jpg texture for Mars]]
 }
 

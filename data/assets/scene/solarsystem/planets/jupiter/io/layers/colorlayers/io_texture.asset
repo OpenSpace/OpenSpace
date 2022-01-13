@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../io").Io.Identifier
+local globeIdentifier = asset.require("../../io").Io.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Io Textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/io.jpg",
+  FilePath = texturesPath .. "io.jpg",
 }
 
 asset.onInitialize(function () 

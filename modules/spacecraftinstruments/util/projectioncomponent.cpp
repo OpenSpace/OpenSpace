@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -352,7 +352,8 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(placeholderFile).string()
+        absPath(placeholderFile).string(),
+        2
     );
     if (texture) {
         texture->uploadTexture();
@@ -874,7 +875,8 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     }
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(texturePath).string()
+        absPath(texturePath).string(),
+        2
     );
     if (texture) {
         if (texture->format() == Texture::Format::Red) {
@@ -895,6 +897,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
+        GL_TEXTURE_2D,
         Texture::Format::RGBA
     );
     if (_projectionTexture) {
@@ -904,6 +907,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
+            GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::RGBA
         );
 
@@ -913,6 +917,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
+            GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
             static_cast<GLenum>(ghoul::opengl::Texture::Format::Red)
         );
@@ -930,6 +935,7 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
+        GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
     );

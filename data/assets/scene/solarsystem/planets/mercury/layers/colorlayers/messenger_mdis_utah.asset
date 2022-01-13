@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_MDIS_Utah",
   Name = "Messenger MDIS [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/MessengerMDIS.wms",
+  FilePath = asset.localResource("messenger_mdis_utah.wms")
 }
 
 asset.onInitialize(function () 

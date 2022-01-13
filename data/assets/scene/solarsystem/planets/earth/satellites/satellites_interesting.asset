@@ -1,9 +1,9 @@
-asset.require('./misc/brightest')
-asset.require('./communications/geostationary')
-asset.require('./navigation/gps')
-asset.require('./misc/spacestations')
-asset.require('./misc/iss')
-asset.require('./misc/tle-new')
+asset.require("./misc/brightest")
+asset.require("./communications/geostationary")
+asset.require("./navigation/gps")
+asset.require("./misc/spacestations")
+asset.require("./misc/iss")
+asset.require("./misc/tle-new")
 
 
 asset.meta = {

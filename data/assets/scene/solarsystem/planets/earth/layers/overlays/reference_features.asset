@@ -1,10 +1,9 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Reference_Features",
   Name = "Reference Features",
-  FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Features.wms"
+  FilePath = asset.localResource("reference_features.wms")
 }
 
 asset.onInitialize(function () 

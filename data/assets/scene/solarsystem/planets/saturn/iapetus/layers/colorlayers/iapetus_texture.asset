@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../iapetus").Iapetus.Identifier
+local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Iapetus textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/iapetus.jpg",
+  FilePath = texturesPath .. "iapetus.jpg",
 }
 
 asset.onInitialize(function () 

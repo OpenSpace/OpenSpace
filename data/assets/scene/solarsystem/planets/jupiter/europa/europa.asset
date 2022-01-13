@@ -1,8 +1,8 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
-asset.require('./trail')
-local kernel = asset.require('../kernels').jup310
+asset.require("./trail")
+local kernel = asset.require("../kernels").jup310
 
 local labelsPath = asset.syncedResource({
   Name = "Jupiter Labels",
@@ -35,7 +35,7 @@ local Europa = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/europa.labels",
+      FileName = labelsPath .. "europa.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 11.0,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,13 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
+    enum Type {
+        Node = 0,
+        NodeSurface,
+        Focus,
+        Camera
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -106,7 +113,7 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
-        enum class TypeInfo {
+        enum class [[codegen::map(Type)]] TypeInfo {
             Node,
             NodeSurface [[codegen::key("Node Surface")]],
             Focus,
@@ -181,20 +188,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         );
     });
     if (p.sourceType.has_value()) {
-        switch (*p.sourceType) {
-            case Parameters::TypeInfo::Node:
-                _source.type = Type::Node;
-                break;
-            case Parameters::TypeInfo::NodeSurface:
-                _source.type = Type::NodeSurface;
-                break;
-            case Parameters::TypeInfo::Focus:
-                _source.type = Type::Focus;
-                break;
-            case Parameters::TypeInfo::Camera:
-                _source.type = Type::Camera;
-                break;
-        }
+        _source.type = codegen::map<Type>(*p.sourceType);
     }
     else {
         _source.type = Type::Camera;
@@ -229,20 +223,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         );
     });
     if (p.destinationType.has_value()) {
-        switch (*p.destinationType) {
-            case Parameters::TypeInfo::Node:
-                _destination.type = Type::Node;
-                break;
-            case Parameters::TypeInfo::NodeSurface:
-                _destination.type = Type::NodeSurface;
-                break;
-            case Parameters::TypeInfo::Focus:
-                _destination.type = Type::Focus;
-                break;
-            case Parameters::TypeInfo::Camera:
-                _destination.type = Type::Camera;
-                break;
-        }
+        _destination.type = codegen::map<Type>(*p.destinationType);
     }
     else {
         _destination.type = Type::Focus;

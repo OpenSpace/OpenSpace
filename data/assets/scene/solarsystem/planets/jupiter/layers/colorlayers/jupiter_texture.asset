@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../jupiter").Jupiter.Identifier
+local globeIdentifier = asset.require("../../jupiter").Jupiter.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Jupiter Textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/jupiter_os.tif",
+  FilePath = texturesPath .. "jupiter_os.tif",
 }
 
 asset.onInitialize(function () 

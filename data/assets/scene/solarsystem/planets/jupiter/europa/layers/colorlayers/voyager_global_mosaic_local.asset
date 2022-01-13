@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../europa").Europa.Identifier
+local globeIdentifier = asset.require("../../europa").Europa.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Europa Textures",
@@ -10,7 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Identifier = "Voyager_Global_Mosaic_Local",
   Name = "Voyager Global Mosaic [Local]",
-  FilePath = texturesPath .. "/evgos.vrt",
+  FilePath = texturesPath .. "evgos.vrt",
   BlendMode = "Color"
 }
 

@@ -1,5 +1,4 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
 
@@ -30,7 +29,7 @@ local layer = {
       TileProvider = {
         Identifier = "ESRI_World_Imagery",
         Name = "ESRI World Imagery",
-        FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
+        FilePath = asset.localResource("esri_world_imagery.wms"),
         PadTiles = false
       }
     },

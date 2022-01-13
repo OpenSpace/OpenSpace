@@ -1,7 +1,7 @@
-local asset_helper = asset.require('util/asset_helper')
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels').kernels
+local asset_helper = asset.require("util/asset_helper")
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels").kernels
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -58,12 +58,12 @@ local Apollo8Model = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -3.1415 / 2}
+      Rotation = {0.0, 0.0, -math.pi / 2}
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.osmodel",
+    GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
       {

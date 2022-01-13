@@ -1,5 +1,5 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./transforms")
+local assetHelper = asset.require("util/asset_helper")
 
 local labelsPath = asset.syncedResource({
   Name = "Earth Labels",
@@ -30,7 +30,7 @@ local Earth = {
     },
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/Earth.labels",
+      FileName = labelsPath .. "Earth.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 5.0,

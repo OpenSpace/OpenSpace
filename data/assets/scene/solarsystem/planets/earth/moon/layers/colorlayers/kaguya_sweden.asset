@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "Kaguya_Sweden",
   Name = "Kaguya [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Kaguya.vrt",
+  FilePath = asset.localResource("kaguya_sweden.vrt"),
   Settings = {
     Gamma = 1.0,
     Multiplier = 1.23

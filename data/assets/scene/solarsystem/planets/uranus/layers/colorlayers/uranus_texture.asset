@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../uranus").Uranus.Identifier
+local globeIdentifier = asset.require("../../uranus").Uranus.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Uranus Textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/uranus.jpg",
+  FilePath = texturesPath .. "uranus.jpg",
 }
 
 asset.onInitialize(function () 

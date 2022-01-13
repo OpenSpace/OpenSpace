@@ -1,8 +1,8 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local jwstTransforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local image = asset.require('./image').image
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local jwstTransforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local image = asset.require("./image").image
 
 local DISTANCE = 9.2E15;
 
@@ -42,7 +42,7 @@ local HUDFImage = {
   RadiusAzimuthElevation = { 200.0, 0.5, 0.1 },
   UsePerspectiveProjection = false,
   Opacity = 1.0,
-  TexturePath = image .. "/Hubble_ultra_deep_field.png",
+  TexturePath = image .. "Hubble_ultra_deep_field.png",
   Tag = { "mission_jwst_hudf" },
   Description = [[
     Image of the Hubble Ultra Deep Field by NASA, ESA, and S. Beckwith (STScI) and

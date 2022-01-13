@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 local trail = asset.syncedResource({
@@ -15,7 +15,7 @@ local GaiaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
+      HorizonsTextFile = trail .. "gaia_orbit_horizons.dat"
     },
   },
   GUI = {

@@ -1,7 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./../transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("../transforms")
 asset.require("spice/base")
-asset.require('../trail')
+asset.require("../trail")
 
 
 
@@ -34,7 +34,7 @@ local Charon = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/charon.labels",
+      FileName = labelsPath .. "charon.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 9.0,

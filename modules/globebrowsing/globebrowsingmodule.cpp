@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -293,6 +293,11 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
             layergroupid::TypeID::SingleImageTileLayer
         )]
     );
+    fTileProvider->registerClass<tileprovider::ImageSequenceTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::ImageSequenceTileLayer
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
@@ -371,12 +376,14 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
             "string, string, number, number",
-            "Rearranges the order of a single layer in a scene graph node. The first "
-            "parameter specifies the scene graph node, the second parameter specifies "
+            "Rearranges the order of a single layer on a globe. The first parameter"
+            "is the identifier of the globe, the second parameter specifies "
             "the name of the layer group, the third parameter is the original position "
             "of the layer that should be moved and the last parameter is the new "
-            "position. The new position may be -1 to place the layer at the top or any "
-            "large number bigger than the number of layers to place it at the bottom."
+            "position in the list. The first position in the list has index 0, and the "
+            "last position is given by the number of layers minus one. The new position "
+            "may be -1 to place the layer at the top or any number bigger than the "
+            "number of layers to place it at the bottom."
         },
         {
             "goToChunk",

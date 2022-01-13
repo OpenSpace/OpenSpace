@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../rhea").Rhea.Identifier
+local globeIdentifier = asset.require("../../rhea").Rhea.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Rhea textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/rhea.jpg",
+  FilePath = texturesPath .. "rhea.jpg",
 }
 
 asset.onInitialize(function () 
