@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
 #include <ghoul/opengl/programobject.h>
+
 struct CPLXMLNode;
 
 namespace ghoul::fontrendering {
@@ -59,6 +60,7 @@ namespace openspace::globebrowsing::tileprovider {
 enum class Type {
     DefaultTileProvider = 0,
     SingleImageTileProvider,
+    ImageSequenceTileProvider,
     SizeReferenceTileProvider,
     TemporalTileProvider,
     TileIndexTileProvider,
@@ -169,6 +171,20 @@ struct TileProviderByLevel : public TileProvider {
 };
 
 
+struct ImageSequenceTileProvider : public TileProvider {
+    ImageSequenceTileProvider(const ghoul::Dictionary& dictionary);
+
+    std::unique_ptr<DefaultTileProvider> currentTileProvider = nullptr;
+    
+    properties::IntProperty index;
+    properties::StringProperty currentImage;
+    properties::StringProperty folderPath;
+
+    ghoul::Dictionary initDict;
+    bool isImageDirty = true;
+    std::vector<std::filesystem::path> imagePaths;
+};
+
 /**
  * Provide <code>Tile</code>s from web map services that have temporal resolution.
  *
@@ -211,7 +227,6 @@ struct TemporalTileProvider : public TileProvider {
     std::string colormap;
 
     std::string myResolution;
-    bool successfulInitialization = false;
     std::unique_ptr<InterpolateTileProvider> interpolateTileProvider;
 };
 
@@ -251,10 +266,8 @@ TileDepthTransform depthTransform(TileProvider& tp);
 /**
  * This method should be called once per frame. Here, TileProviders
  * are given the opportunity to update their internal state.
- *
- * \return The number of tiles that have been updated in this call
  */
-int update(TileProvider& tp);
+void update(TileProvider& tp);
 
 /**
  * Provides a uniform way of all TileProviders to reload or

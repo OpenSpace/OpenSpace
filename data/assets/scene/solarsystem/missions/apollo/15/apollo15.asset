@@ -1,7 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
 
 local models = asset.syncedResource({
   Name = "Apollo Models",
@@ -10,7 +10,7 @@ local models = asset.syncedResource({
   Version = 4
 })
 
-local kernels = asset.require('scene/solarsystem/missions/apollo/15/kernels').kernels
+local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels").kernels
 
 
 -- local models = asset.syncedResource({
@@ -55,7 +55,7 @@ local Apollo15 = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.osmodel",
+    GeometryFile = models .. "ApolloCSM.osmodel",
     ModelScale = 0.0001,
     LightSources = {
       {

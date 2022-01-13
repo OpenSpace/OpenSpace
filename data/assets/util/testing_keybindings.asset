@@ -1,6 +1,6 @@
 --testing_keybindings.asset
 
-local propertyHelper = asset.require('./property_helper')
+local propertyHelper = asset.require("./property_helper")
 
 local take_screenshot = {
   Identifier = "testing_keyboard.take_screenshot",

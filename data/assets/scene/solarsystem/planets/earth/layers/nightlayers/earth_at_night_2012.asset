@@ -1,12 +1,11 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local fallBackLayer = asset.require("./fallbacks/earth_night_texture").layer
 
 local layer = {
   Identifier = "Earth_at_Night_2012",
   Name = "Earth at Night 2012",
-  FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
+  FilePath = asset.localResource("earth_at_night_2012.wms"),
   Fallback = fallBackLayer,
   Description = [[ The lights of cities and villages trace the outlines of civilization
     in this global view. ]],

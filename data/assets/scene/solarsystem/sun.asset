@@ -1,2 +1,2 @@
-asset.require('./sun/sun')
-asset.require('./sun/glare')
+asset.require("./sun/sun")
+asset.require("./sun/glare")

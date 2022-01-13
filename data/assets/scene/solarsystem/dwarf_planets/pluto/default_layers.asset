@@ -1,6 +1,4 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/greyscale_usgs")
+local colorLayer = asset.require("./layers/colorlayers/greyscale_usgs")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 

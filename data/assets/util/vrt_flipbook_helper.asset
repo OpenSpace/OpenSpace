@@ -1,4 +1,3 @@
---vrt_slideshow_helper.asset
 local createFlipbook = function (assetPrefix, assetGlobe, count)
   return {
     AssetPrefix = assetPrefix,
@@ -43,6 +42,6 @@ local previousFlipbookPage = function (flipbook)
   flipbook.CurrentFlipIndex = localIndex;
 end
 
-asset.export('nextFlipbookPage', nextFlipbookPage)
-asset.export('previousFlipbookPage', previousFlipbookPage)
-asset.export('createFlipbook', createFlipbook)
+asset.export("nextFlipbookPage", nextFlipbookPage)
+asset.export("previousFlipbookPage", previousFlipbookPage)
+asset.export("createFlipbook", createFlipbook)

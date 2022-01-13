@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -24,9 +24,9 @@ local object = {
     Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
     ScaleFactor = 410.0,
-    File = speck .. "/kepler.speck",
+    File = speck .. "kepler.speck",
     Unit = "pc",
-    Texture = textures .. "/halo.png",
+    Texture = textures .. "halo.png",
     CorrectionSizeEndDistance = 15.86,
     CorrectionSizeFactor = 8.59,
     BillboardMinMaxSize = { 0.0, 30.0 },

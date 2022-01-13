@@ -4,7 +4,7 @@
   <VRTRasterBand band="1">
     <ColorInterp>Gray</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">HiRISE_PSP.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">hirise.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="134217728" RasterYSize="67108864" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="134217728" ySize="67108864"/>
@@ -14,7 +14,7 @@
   <VRTRasterBand band="2">
     <ColorInterp>Alpha</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">HiRISE_PSP.tif</SourceFilename>
+      <SourceFilename relativeToVRT="1">hirise.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="134217728" RasterYSize="67108864" BlockXSize="512" BlockYSize="512" />
       <SrcRect xOff="0" yOff="0" xSize="134217728" ySize="67108864" />

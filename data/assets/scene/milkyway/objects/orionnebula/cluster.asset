@@ -1,6 +1,7 @@
---orionnebula/cluster.asset
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
+
+
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Star Cluster",
@@ -14,9 +15,9 @@ local OrionClusterStars = {
   Parent = transforms.NebulaPosition.Identifier,
   Renderable = {
     Type = "RenderableStars",
-    File = sync .. "/oricluster.speck",
-    Texture = sync .. "/halo.png",
-    ColorMap = sync .. "/colorbv.cmap",
+    File = sync .. "oricluster.speck",
+    Texture = sync .. "halo.png",
+    ColorMap = sync .. "colorbv.cmap",
     MagnitudeExponent = 5.02,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based",

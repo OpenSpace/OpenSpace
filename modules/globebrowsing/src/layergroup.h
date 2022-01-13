@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,12 +48,11 @@ struct LayerGroup : public properties::PropertyOwner {
     void deinitialize();
 
     /// Updates all layers tile providers within this group
-    /// Return:  Number of tiles that were updated
-    int update();
+    void update();
 
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
-    void moveLayers(int oldPosition, int newPosition);
+    void moveLayer(int oldPosition, int newPosition);
 
     /// @returns const vector of all layers
     std::vector<Layer*> layers() const;

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Mercury Textures",
@@ -10,7 +10,7 @@ local texturesPath = asset.syncedResource({
 local layer = {
   Name = "Calcium Abundance",
   Identifier = "casimap_02122015",
-  FilePath = texturesPath .. "/casimap_02122015.png",
+  FilePath = texturesPath .. "casimap_02122015.png",
   BlendMode = "Multiply",
 }
 

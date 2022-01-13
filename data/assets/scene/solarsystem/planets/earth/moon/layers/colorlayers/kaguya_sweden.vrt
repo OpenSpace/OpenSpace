@@ -4,7 +4,7 @@
   <VRTRasterBand dataType="Byte" band="1">
     <ColorInterp>Gray</ColorInterp>
     <SimpleSource>
-      <SourceFilename relativeToVRT="1">Kaguya.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">kaguya_sweden.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="1474560" RasterYSize="737280" DataType="Byte" BlockXSize="360" BlockYSize="360" />
       <SrcRect xOff="0" yOff="0" xSize="1474560" ySize="737280" />
@@ -15,7 +15,7 @@
     <ColorInterp>Alpha</ColorInterp>
     <NoDataValue>0</NoDataValue>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">Kaguya.wms</SourceFilename>
+      <SourceFilename relativeToVRT="1">kaguya_sweden.wms</SourceFilename>
       <SourceBand>1</SourceBand>
       <SourceProperties RasterXSize="1474560" RasterYSize="737280" DataType="Byte" BlockXSize="360" BlockYSize="360" />
       <SrcRect xOff="0" yOff="0" xSize="1474560" ySize="737280" />

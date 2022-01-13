@@ -1,9 +1,8 @@
---perseverance/model.asset
-local assetHelper = asset.require('util/asset_helper')
-local trail = asset.require('./trail')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
--- asset.require('./fov')
+local assetHelper = asset.require("util/asset_helper")
+local trail = asset.require("./trail")
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+-- asset.require("./fov")
 
 local LightSources = {
   {
@@ -54,7 +53,7 @@ local Body = {
   Renderable = {
     Type = "RenderableModel",
     Body = "MARS SCIENCE LABORATORY",
-    GeometryFile = models .. "/Perseverance.obj",
+    GeometryFile = models .. "Perseverance.obj",
     LightSources = LightSources,
     PerformShading = false,
     RotationVector = {65.940000,201.389999,263.980011}

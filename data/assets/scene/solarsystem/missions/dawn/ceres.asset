@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -26,9 +26,9 @@ local Ceres = {
       SourceFrame = "IAU_CERES",
       DestinationFrame = "GALACTIC",
       Kernels = {
-        kernels .. "/dawn_ceres_v01.tpc",
-        kernels .. "/sb_ceres_140724.bsp",
-        kernels .. "/sb_ceres_110211.bsp"
+        kernels .. "dawn_ceres_v01.tpc",
+        kernels .. "sb_ceres_140724.bsp",
+        kernels .. "sb_ceres_110211.bsp"
       }
     },
     Translation = {
@@ -36,9 +36,9 @@ local Ceres = {
       Target = "CERES",
       Observer = "SSB",
       Kernels = {
-        kernels .. "/dawn_ceres_v01.tpc",
-        kernels .. "/sb_ceres_140724.bsp",
-        kernels .. "/sb_ceres_110211.bsp"
+        kernels .. "dawn_ceres_v01.tpc",
+        kernels .. "sb_ceres_140724.bsp",
+        kernels .. "sb_ceres_110211.bsp"
       }
     }
   },
@@ -50,7 +50,7 @@ local Ceres = {
       ColorLayers = {
         {
           Identifier = "Texture",
-          FilePath = textures .. "/gray.png",
+          FilePath = textures .. "gray.png",
           Enabled = true
         }
       }

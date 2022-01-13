@@ -1,12 +1,11 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local fallbackLayer = asset.require("./fallbacks/mars_texture").layer
 
 local layer = {
   Identifier = "MOC_WA_Color_Utah",
   Name = "MOC WA Color [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
+  FilePath = asset.localResource("moc_wa_color_utah.wms"),
   Settings = {
     Gamma = 1.6,
     Multiplier = 1.07

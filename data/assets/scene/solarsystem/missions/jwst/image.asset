@@ -5,7 +5,7 @@ local image = asset.syncedResource({
   Version = 3
 })
 
-asset.export('image', image)
+asset.export("image", image)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",

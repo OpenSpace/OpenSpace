@@ -1,6 +1,6 @@
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local asset_helper = asset.require('util/asset_helper')
-local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local asset_helper = asset.require("util/asset_helper")
+local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
   Name = "Apollo Boulders Models",
@@ -53,7 +53,7 @@ local Station7BoulderModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/b7model.obj",
+    GeometryFile = models .. "b7model.obj",
     RotationVector = { 1.945950,274.378387,212.903214 },
     LightSources = LightSources,
     PerformShading = false,

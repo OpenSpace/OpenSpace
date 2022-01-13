@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../deimos").Deimos.Identifier
+local globeIdentifier = asset.require("../../deimos").Deimos.Identifier
 
 local layer = {
   Identifier = "Deimos_Global_Mosaic_USGS",

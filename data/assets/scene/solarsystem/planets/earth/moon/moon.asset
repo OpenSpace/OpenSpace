@@ -1,8 +1,8 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local earthAsset = asset.require('../earth')
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local earthAsset = asset.require("../earth")
+asset.require("spice/base")
 
 local labelsPath = asset.syncedResource({
   Name = "Moon Labels",
@@ -41,7 +41,7 @@ local Moon = {
     },        
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/moon.labels",
+      FileName = labelsPath .. "moon.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 7.6,

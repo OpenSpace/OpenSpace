@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../enceladus").Enceladus.Identifier
+local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
 
 local texturesPath = asset.syncedResource({
   Name = "Enceladus textures",
@@ -9,7 +9,7 @@ local texturesPath = asset.syncedResource({
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/enceladus.jpg",
+  FilePath = texturesPath .. "enceladus.jpg",
 }
 
 asset.onInitialize(function () 

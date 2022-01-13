@@ -19,7 +19,7 @@ local SunMarker = {
     Size = 3.0E11,
     Origin = "Center",
     Billboard = true,
-    Texture = textures .. "/marker.png",
+    Texture = textures .. "marker.png",
     BlendMode = "Additive"
   },
   GUI = {

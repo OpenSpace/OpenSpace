@@ -4,7 +4,7 @@
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/generate_cartesian.task'
 
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local sunRadius = 695508000
