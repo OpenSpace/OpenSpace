@@ -194,8 +194,8 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             default:
                 {
                     sgct::config::PlanarProjection projection;
-                    projection.fov.left = -winControl->fov() / 2.0;
-                    projection.fov.right = winControl->fov() / 2.0;
+                    projection.fov.left = winControl->fov() / 2.0;
+                    projection.fov.right = projection.fov.left;
                     viewport.projection = std::move(projection);
                 }
                 break;

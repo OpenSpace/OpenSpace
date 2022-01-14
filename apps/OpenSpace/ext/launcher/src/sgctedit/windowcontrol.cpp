@@ -34,6 +34,7 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
     _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
+    _checkBoxWindowDecor->setChecked(Qt::CheckState::Checked);
     _checkBoxWebGui = new QCheckBox("WebGUI only this window", this);
     _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
     _comboProjection = new QComboBox(this);

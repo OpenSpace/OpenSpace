@@ -990,6 +990,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                             std::string windowConfiguration,
                                             const std::string& labelFromCfgFile,
+                                            const std::string& jsonExt,
                                             const std::string& xmlExt)
 {
     std::string config = windowConfiguration;
@@ -1004,13 +1005,10 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if (std::filesystem::path(config).extension() == ".xml") {
-                //user customzied sgct config
+            std::string foundExtension = std::filesystem::path(config).extension().string();
+            if (foundExtension != jsonExt && foundExtension != xmlExt) {
+                config += jsonExt;
             }
-            else {
-                config += xmlExt;
-            }
-
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1163,6 +1161,7 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
+    const std::string jsonExt = ".json";
     const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
@@ -1213,6 +1212,7 @@ int main(int argc, char* argv[]) {
             hasSGCTConfig,
             windowConfiguration,
             labelFromCfgFile,
+            jsonExt,
             xmlExt
         );
     } else {
