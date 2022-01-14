@@ -43,9 +43,12 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _comboQuality = new QComboBox(this);
     _comboQuality->addItems(_qualityTypes);
 
-    _lineFov = new QLineEdit("0.0", parent);
-    _validatorFov = new QDoubleValidator(-180.0, 180.0, 10);
-    _lineFov->setValidator(_validatorFov);
+    _lineFovH = new QLineEdit("80.0", parent);
+    _validatorFovH = new QDoubleValidator(-180.0, 180.0, 10);
+    _lineFovH->setValidator(_validatorFovH);
+    _lineFovV = new QLineEdit("50.534", parent);
+    _validatorFovV = new QDoubleValidator(-90.0, 90.0, 10);
+    _lineFovV->setValidator(_validatorFovV);
     _lineHeightOffset = new QLineEdit("0.0", parent);
     _validatorHeightOffset = new QDoubleValidator(-1000000.0, 1000000.0, 12);
     _lineHeightOffset->setValidator(_validatorHeightOffset);
@@ -163,15 +166,24 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutComboQuality->addWidget(_comboQuality);
     _layoutComboQuality->addStretch(1);
     _layoutProjectionGroup->addLayout(_layoutComboQuality);
-    _layoutFov = new QHBoxLayout();
-    _labelFov = new QLabel();
-    _labelFov->setText("Horizontal FOV:");
-    _layoutFov->addWidget(_labelFov);
-    _layoutFov->addWidget(_lineFov);
-    _layoutFov->addStretch(1);
-    _layoutFovWrapper = new QWidget();
-    _layoutFovWrapper->setLayout(_layoutFov);
-    _layoutProjectionGroup->addWidget(_layoutFovWrapper);
+    _layoutFovH = new QHBoxLayout();
+    _labelFovH = new QLabel();
+    _labelFovH->setText("Horizontal FOV:");
+    _layoutFovH->addWidget(_labelFovH);
+    _layoutFovH->addWidget(_lineFovH);
+    _layoutFovH->addStretch(1);
+    _layoutFovV = new QHBoxLayout();
+    _labelFovV = new QLabel();
+    _labelFovV->setText("Vertical FOV:");
+    _layoutFovV->addWidget(_labelFovV);
+    _layoutFovV->addWidget(_lineFovV);
+    _layoutFovV->addStretch(1);
+    _layoutFovWrapperH = new QWidget();
+    _layoutFovWrapperH->setLayout(_layoutFovH);
+    _layoutFovWrapperV = new QWidget();
+    _layoutFovWrapperV->setLayout(_layoutFovV);
+    _layoutProjectionGroup->addWidget(_layoutFovWrapperH);
+    _layoutProjectionGroup->addWidget(_layoutFovWrapperV);
     _layoutHeightOffset = new QHBoxLayout();
     _labelHeightOffset = new QLabel();
     _labelHeightOffset->setText("Height Offset:");
@@ -317,8 +329,10 @@ void WindowControl::onProjectionChanged(int newSelection) {
     switch (newSelection) {
     case ProjectionIndeces::Planar:
         _comboQuality->setEnabled(false);
-        _labelFov->setEnabled(true);
-        _lineFov->setEnabled(true);
+        _labelFovH->setEnabled(true);
+        _lineFovH->setEnabled(true);
+        _labelFovV->setEnabled(true);
+        _lineFovV->setEnabled(true);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
         _checkBoxSpoutOutput->setEnabled(false);
@@ -326,8 +340,10 @@ void WindowControl::onProjectionChanged(int newSelection) {
 
     case ProjectionIndeces::Fisheye:
         _comboQuality->setEnabled(true);
-        _labelFov->setEnabled(false);
-        _lineFov->setEnabled(false);
+        _labelFovH->setEnabled(false);
+        _lineFovH->setEnabled(false);
+        _labelFovV->setEnabled(false);
+        _lineFovV->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
         _checkBoxSpoutOutput->setEnabled(true);
@@ -335,8 +351,10 @@ void WindowControl::onProjectionChanged(int newSelection) {
 
     case ProjectionIndeces::Spherical_Mirror:
         _comboQuality->setEnabled(true);
-        _labelFov->setEnabled(false);
-        _lineFov->setEnabled(false);
+        _labelFovH->setEnabled(false);
+        _lineFovH->setEnabled(false);
+        _labelFovV->setEnabled(false);
+        _lineFovV->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
         _checkBoxSpoutOutput->setEnabled(false);
@@ -344,8 +362,10 @@ void WindowControl::onProjectionChanged(int newSelection) {
 
     case ProjectionIndeces::Cylindrical:
         _comboQuality->setEnabled(true);
-        _labelFov->setEnabled(false);
-        _lineFov->setEnabled(false);
+        _labelFovH->setEnabled(false);
+        _lineFovH->setEnabled(false);
+        _labelFovV->setEnabled(false);
+        _lineFovV->setEnabled(false);
         _labelHeightOffset->setEnabled(true);
         _lineHeightOffset->setEnabled(true);
         _checkBoxSpoutOutput->setEnabled(false);
@@ -353,8 +373,10 @@ void WindowControl::onProjectionChanged(int newSelection) {
 
     case ProjectionIndeces::Equirectangular:
         _comboQuality->setEnabled(true);
-        _labelFov->setEnabled(false);
-        _lineFov->setEnabled(false);
+        _labelFovH->setEnabled(false);
+        _lineFovH->setEnabled(false);
+        _labelFovV->setEnabled(false);
+        _lineFovV->setEnabled(false);
         _labelHeightOffset->setEnabled(false);
         _lineHeightOffset->setEnabled(false);
         _checkBoxSpoutOutput->setEnabled(true);
@@ -452,8 +474,12 @@ int WindowControl::qualitySelectedIndex() {
     return _comboQuality->currentIndex();
 }
 
-float WindowControl::fov() {
-    return _lineFov->text().toFloat();
+float WindowControl::fovH() {
+    return _lineFovH->text().toFloat();
+}
+
+float WindowControl::fovV() {
+    return _lineFovV->text().toFloat();
 }
 
 float WindowControl::heightOffset() {
@@ -486,9 +512,12 @@ WindowControl::~WindowControl()
     delete _comboProjection;
     delete _comboQuality;
     delete _fullscreenButton;
-    delete _labelFov;
-    delete _lineFov;
-    delete _validatorFov;
+    delete _labelFovH;
+    delete _lineFovH;
+    delete _validatorFovH;
+    delete _labelFovV;
+    delete _lineFovV;
+    delete _validatorFovV;
     delete _labelHeightOffset;
     delete _lineHeightOffset;
     delete _validatorHeightOffset;
@@ -498,8 +527,10 @@ WindowControl::~WindowControl()
     delete _layoutCBoxSpoutOutput;
     delete _layoutComboProjection;
     delete _layoutComboQuality;
-    delete _layoutFov;
-    delete _layoutFovWrapper;
+    delete _layoutFovH;
+    delete _layoutFovV;
+    delete _layoutFovWrapperH;
+    delete _layoutFovWrapperV;
     delete _layoutHeightOffset;
     delete _layoutHeightOffsetWrapper;
     delete _layoutProjectionGroup;

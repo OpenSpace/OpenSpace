@@ -53,7 +53,8 @@ public:
     void uncheckWebGuiOption();
     int projectionSelectedIndex();
     int qualitySelectedIndex();
-    float fov();
+    float fovH();
+    float fovV();
     float heightOffset();
     enum ProjectionIndeces : unsigned int {
         Planar = 0,
@@ -139,9 +140,12 @@ private:
 
     QComboBox* _comboProjection = nullptr;
     QComboBox* _comboQuality = nullptr;
-    QLabel* _labelFov = nullptr;
-    QLineEdit* _lineFov = nullptr;
-    QDoubleValidator* _validatorFov = nullptr;
+    QLabel* _labelFovH = nullptr;
+    QLineEdit* _lineFovH = nullptr;
+    QDoubleValidator* _validatorFovH = nullptr;
+    QLabel* _labelFovV = nullptr;
+    QLineEdit* _lineFovV = nullptr;
+    QDoubleValidator* _validatorFovV = nullptr;
     QLabel* _labelHeightOffset = nullptr;
     QLineEdit* _lineHeightOffset = nullptr;
     QDoubleValidator* _validatorHeightOffset = nullptr;
@@ -166,8 +170,10 @@ private:
     QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
     QHBoxLayout* _layoutComboProjection = nullptr;
     QHBoxLayout* _layoutComboQuality = nullptr;
-    QHBoxLayout* _layoutFov = nullptr;
-    QWidget* _layoutFovWrapper = nullptr;
+    QHBoxLayout* _layoutFovH = nullptr;
+    QHBoxLayout* _layoutFovV = nullptr;
+    QWidget* _layoutFovWrapperH = nullptr;
+    QWidget* _layoutFovWrapperV = nullptr;
     QHBoxLayout* _layoutHeightOffset = nullptr;
     QWidget* _layoutHeightOffsetWrapper = nullptr;
 };
