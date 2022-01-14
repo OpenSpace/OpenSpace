@@ -22,59 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/documentation/documentation.h>
+#include <ghoul/io/texture/texturereader.h>
 
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/scalar/boolproperty.h>
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+        "FilePath",
+        "File Path",
+        "The file path that is used for this image provider. The file must point to an "
+        "image that is then loaded and used for all tiles."
+    };
+
+    struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
+        // [[codegen::verbatim(FilePathInfo.description)]]
+        std::string filePath;
+    };
+#include "singleimagetileprovider_codegen.cpp"
+} // namespace
 
 namespace openspace::globebrowsing {
 
-class Layer;
-struct TileProvider;
+SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
+    : _filePath(FilePathInfo)
+{
+    ZoneScoped
 
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layergroupid::GroupID id);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
+    _filePath = p.filePath;
+    addProperty(_filePath);
 
-    void initialize();
-    void deinitialize();
+    reset();
+}
 
-    /// Updates all layers tile providers within this group
-    void update();
+Tile SingleImageProvider::tile(const TileIndex&) {
+    ZoneScoped
+    return _tile;
+}
 
-    Layer* addLayer(const ghoul::Dictionary& layerDict);
-    void deleteLayer(const std::string& layerName);
-    void moveLayer(int oldPosition, int newPosition);
+Tile::Status SingleImageProvider::tileStatus(const TileIndex&) {
+    return _tile.status;
+}
 
-    /// @returns const vector of all layers
-    std::vector<Layer*> layers() const;
+TileDepthTransform SingleImageProvider::depthTransform() {
+    return { 0.f, 1.f };
+}
 
-    /// @returns const vector of all active layers
-    const std::vector<Layer*>& activeLayers() const;
+void SingleImageProvider::update() {}
 
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
+void SingleImageProvider::reset() {
+    if (_filePath.value().empty()) {
+        return;
+    }
+    
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath, 2);
+    if (!_tileTexture) {
+        throw ghoul::RuntimeError(
+            fmt::format("Unable to load texture '{}'", _filePath.value())
+        );
+    }
 
-    bool layerBlendingEnabled() const;
+    _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
+}
 
-    void onChange(std::function<void(Layer*)> callback);
+int SingleImageProvider::maxLevel() {
+    return 1337; // unlimited
+}
 
-private:
-    const layergroupid::GroupID _groupId;
-    std::vector<std::unique_ptr<Layer>> _layers;
-    std::vector<Layer*> _activeLayers;
-
-    properties::BoolProperty _levelBlendingEnabled;
-    std::function<void(Layer*)> _onChangeCallback;
-};
+float SingleImageProvider::noDataValueAsFloat() {
+    return std::numeric_limits<float>::min();
+}
 
 } // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

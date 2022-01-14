@@ -35,7 +35,15 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -236,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
-        tileprovider::initializeDefaultTile();
+        TileProvider::initializeDefaultTile();
 
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -249,9 +257,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        tileprovider::deinitializeDefaultTile();
+        TileProvider::deinitializeDefaultTile();
     });
-
 
     // Render
     global::callback::render->emplace_back([&]() {
@@ -279,46 +286,45 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    auto fTileProvider =
-        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
+    fTileProvider->registerClass<DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::DefaultTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::SingleImageProvider>(
+    fTileProvider->registerClass<SingleImageProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::ImageSequenceTileProvider>(
+    fTileProvider->registerClass<ImageSequenceTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ImageSequenceTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
+    fTileProvider->registerClass<TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
+    fTileProvider->registerClass<TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
+    fTileProvider->registerClass<SizeReferenceTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SizeReferenceTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
+    fTileProvider->registerClass<TileProviderByLevel>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByLevelTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
+    fTileProvider->registerClass<TileProviderByIndex>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByIndexTileLayer
         )]

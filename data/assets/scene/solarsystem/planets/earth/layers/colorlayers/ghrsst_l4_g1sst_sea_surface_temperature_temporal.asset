@@ -4,14 +4,20 @@ local layer =  {
   Identifier = "GHRSST_L4_G1SST_Sea_Surface_Temperature_Temporal",
   Name = "GHRSST L4 G1SST Sea Surface Temperature (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "GHRSST_L4_G1SST_Sea_Surface_Temperature",
-    "2010-06-21",
-    "2019-12-08",
-    "1d",
-    "1km",
-    "png"
-  ),
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2010-06-21",
+      End = "2019-12-08"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+      "1km",
+      "png"
+    )
+  },
   Description = [[ Temporal coverage: 21 June 2010 - 08 December 2019. The imagery
   resolution is 1 km, and the temporal resolution is daily.]],
   Author = "NASA EOSDIS Global Imagery Browse Services"

@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -322,7 +322,7 @@ ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
-                tileprovider::chunkTile(*layer->tileProvider(), tileIndex),
+                layer->tileProvider()->chunkTile(tileIndex),
                 &layer->renderSettings()
             );
         }
@@ -403,7 +403,7 @@ bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
 
     for (Layer* lyr : colorLayers.activeLayers()) {
         if (lyr->tileProvider()) {
-            ChunkTile t = tileprovider::chunkTile(*lyr->tileProvider(), chunk.tileIndex);
+            ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
             if (t.tile.status == Tile::Status::Unavailable) {
                 return false;
             }
@@ -1886,16 +1886,15 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
         _layerManager.layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
 
     for (Layer* layer : heightMapLayers) {
-        tileprovider::TileProvider* tileProvider = layer->tileProvider();
+        TileProvider* tileProvider = layer->tileProvider();
         if (!tileProvider) {
             continue;
         }
         // Transform the uv coordinates to the current tile texture
-        const ChunkTile chunkTile = tileprovider::chunkTile(*tileProvider, tileIndex);
+        const ChunkTile chunkTile = tileProvider->chunkTile(tileIndex);
         const Tile& tile = chunkTile.tile;
         const TileUvTransform& uvTransform = chunkTile.uvTransform;
-        const TileDepthTransform& depthTransform =
-            tileprovider::depthTransform(*tileProvider);
+        const TileDepthTransform& depthTransform = tileProvider->depthTransform();
         if (tile.status != Tile::Status::OK) {
             return 0;
         }
@@ -1953,10 +1952,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             std::isnan(sample11);
 
         const bool anySampleIsNoData =
-            sample00 == tileprovider::noDataValueAsFloat(*tileProvider) ||
-            sample01 == tileprovider::noDataValueAsFloat(*tileProvider) ||
-            sample10 == tileprovider::noDataValueAsFloat(*tileProvider) ||
-            sample11 == tileprovider::noDataValueAsFloat(*tileProvider);
+            sample00 == tileProvider->noDataValueAsFloat() ||
+            sample01 == tileProvider->noDataValueAsFloat() ||
+            sample10 == tileProvider->noDataValueAsFloat() ||
+            sample11 == tileProvider->noDataValueAsFloat();
 
         if (anySampleIsNaN || anySampleIsNoData) {
             continue;
