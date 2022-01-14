@@ -413,15 +413,17 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
             case Mode::Prototype:
                 return timeStringify(_prototyped.timeFormat, Time(time));
             case Mode::Folder: {
-                auto it = std::find_if(
+                // Yes this will have to be done twice since we do the check previously
+                // but it is only happening when the images change, so I think that should
+                // be fine
+                auto it = std::lower_bound(
                     _folder.files.cbegin(),
                     _folder.files.cend(),
-                    [time](const std::pair<double, std::string>& p) {
-                        return p.first == time;
+                    time,
+                    [](const std::pair<double, std::string>& p, double time) {
+                        return p.first < time;
                     }
                 );
-                ghoul_assert(it != _folder.files.end(), "Time not found");
-
                 return std::string_view(it->second);
             }
             default:  throw ghoul::MissingCaseException();
@@ -440,7 +442,25 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
                                                                          const Time& time)
 {
-    return retrieveTileProvider(time);
+    // Find the most current image that matches the current time. We can't pass the `time`
+    // variable into the retrieveTileProvider function as it would generate a new
+    // non-existing TileProvider for every new frame
+    using It = std::vector<std::pair<double, std::string>>::const_iterator;
+    It it = std::lower_bound(
+        _folder.files.begin(),
+        _folder.files.end(),
+        time.j2000Seconds(),
+        [](const std::pair<double, std::string>& p, double t) {
+            return p.first < t;
+        }
+    );
+    
+    if (it != _folder.files.begin()) {
+        it -= 1;
+    }
+
+    double t = it->first;
+    return retrieveTileProvider(Time(t));
 }
 
 template <>
@@ -448,7 +468,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
                                                                          const Time& time)
 {
-     using It = std::vector<std::pair<double, std::string>>::const_iterator;
+    using It = std::vector<std::pair<double, std::string>>::const_iterator;
     It next = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
