@@ -17,8 +17,13 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/nt_monthext_19790901-19790910_n07_sos.png",
+  Type = "TemporalTileLayer",
+  Folder = {
+    Folder = syncedDirectory,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "nt_monthext_%Y%m%d-%Y%m%d_n07_sos.png"
+  },
   Description = Description
 }
 

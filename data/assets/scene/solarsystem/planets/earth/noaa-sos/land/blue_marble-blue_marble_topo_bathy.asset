@@ -2,7 +2,7 @@ local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 
 
 local Name = "Blue Marble: with Topography and Bathymetry"
-local Identifier = "noaa-sos-land-blue_marble_topo_bathy"
+local Identifier = "noaa-sos-land-blue_marble-next_gen-topo_bathy"
 local Description = [[ The Blue Marble is an incredibly detailed, true-color depiction of the Earth. The Blue Marble Next Generation is an update on the original that has greater detail. "The original Blue Marble was a composite of four months of MODIS observations with a spatial resolution (level of detail) of 1 square kilometer per pixel. Blue Marble: Next Generation offers a years worth of monthly composites at a spatial resolution of 500 meters.".]]
 local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-with-topography-seasonal/"
 
@@ -17,8 +17,13 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory .. "/world.topo.bathy.200401.3x5400x2700.jpg",
+  Type = "TemporalTileLayer",
+  Folder = {
+    Folder = syncedDirectory,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "world.topo.bathy.%Y%m.3x5400x2700.jpg"
+  },
   Description = Description
 }
 

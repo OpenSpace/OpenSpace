@@ -24,16 +24,26 @@ local syncedDirectory_sat = asset.syncedResource({
 local layer_radar = {
   Identifier = Identifier .. "-radar",
   Name = Name .. " (Radar)",
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory_radar .. "/122331900.png",
+  Type = "TemporalTileLayer",
+  Folder = {
+    Folder = syncedDirectory,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "%Y%j%H%M.png"
+  },   
   Description = Description
 }
 
 local layer_sat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Sat)",
-  -- @TODO:  Needs new temporal time interpolations to understand the linear numbering of these files
-  FilePath = syncedDirectory_sat .. "/linear_rgb_cyl_20120820_1900.jpg",
+  Type = "TemporalTileLayer",
+  Folder = {
+    Folder = syncedDirectory,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "linear_rgb_cyl_%Y%m%d_%H%M.jpg"
+  },     
   Description = Description
 }
 
