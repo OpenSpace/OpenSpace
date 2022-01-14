@@ -76,8 +76,8 @@ ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& di
     _index.onChange([this]() { _isImageDirty = true; });
     addProperty(_index);
 
-    _folderPath.setReadOnly(true);
-    addProperty(_folderPath);
+    _currentImage.setReadOnly(true);
+    addProperty(_currentImage);
 
     _folderPath = p.folderPath.string();
     addProperty(_folderPath);
