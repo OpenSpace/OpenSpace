@@ -53,6 +53,7 @@ public:
     void uncheckWebGuiOption();
     int projectionSelectedIndex();
     int qualitySelectedIndex();
+    int qualitySelectedValue();
     float fovH();
     float fovV();
     float heightOffset();
@@ -68,6 +69,8 @@ public:
     std::string QualityTypeNames[10] = {"Low (256)", "Medium (512)", "High (1K)",
         "1.5K (1536)", "2K (2048)", "4K (4096)", "8K (8192)", "16K (16384)",
         "32K (32768)", "64K (65536)"};
+    int QualityValues[10] = {256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
+        32768, 65536};
 
 private slots:
     void onSizeXChanged(const QString& newText);

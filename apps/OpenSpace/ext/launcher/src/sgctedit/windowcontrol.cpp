@@ -468,6 +468,10 @@ int WindowControl::qualitySelectedIndex() {
     return _comboQuality->currentIndex();
 }
 
+int WindowControl::qualitySelectedValue() {
+    return QualityValues[_comboQuality->currentIndex()];
+}
+
 float WindowControl::fovH() {
     return _lineFovH->text().toFloat();
 }

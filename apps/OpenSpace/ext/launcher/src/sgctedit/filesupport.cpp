@@ -151,7 +151,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
                     = sgct::config::SpoutOutputProjection::Mapping::Equirectangular;
                 break;
         }
-        projection.quality = winControl->qualitySelectedIndex();
+        projection.quality = winControl->qualitySelectedValue();
         projection.mappingSpoutName = "OpenSpace";
         viewport.projection = std::move(projection);
     }
@@ -160,7 +160,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             case WindowControl::ProjectionIndeces::Fisheye:
                 {
                     sgct::config::FisheyeProjection projection;
-                    projection.quality = winControl->qualitySelectedIndex();
+                    projection.quality = winControl->qualitySelectedValue();
                     viewport.projection = std::move(projection);
                 }
                 break;
@@ -168,7 +168,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             case WindowControl::ProjectionIndeces::Spherical_Mirror:
                 {
                     sgct::config::SphericalMirrorProjection projection;
-                    projection.quality = winControl->qualitySelectedIndex();
+                    projection.quality = winControl->qualitySelectedValue();
                     viewport.projection = std::move(projection);
                 }
                 break;
@@ -176,7 +176,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             case WindowControl::ProjectionIndeces::Cylindrical:
                 {
                     sgct::config::CylindricalProjection projection;
-                    projection.quality = winControl->qualitySelectedIndex();
+                    projection.quality = winControl->qualitySelectedValue();
                     projection.heightOffset = winControl->heightOffset();
                     viewport.projection = std::move(projection);
                 }
@@ -185,7 +185,7 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             case WindowControl::ProjectionIndeces::Equirectangular:
                 {
                     sgct::config::EquirectangularProjection projection;
-                    projection.quality = winControl->qualitySelectedIndex();
+                    projection.quality = winControl->qualitySelectedValue();
                     viewport.projection = std::move(projection);
                 }
                 break;
