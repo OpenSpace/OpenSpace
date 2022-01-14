@@ -56,12 +56,20 @@ local layer_quakes_gte8 = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_allquakes)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_allquakes.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quake_basemap.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8.Identifier)
 end)
 
 

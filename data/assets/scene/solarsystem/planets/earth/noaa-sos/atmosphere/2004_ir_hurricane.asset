@@ -27,8 +27,12 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
 end)
 
 

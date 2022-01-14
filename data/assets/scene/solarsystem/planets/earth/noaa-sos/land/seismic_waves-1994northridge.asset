@@ -64,6 +64,12 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_images)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_stations.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_images.Identifier)
+end)
+
 
 asset.meta = {
   Name = Name,

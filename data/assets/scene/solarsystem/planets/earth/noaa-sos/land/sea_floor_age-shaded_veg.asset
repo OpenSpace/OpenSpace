@@ -50,6 +50,13 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_trans)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_aol.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_no_labels.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_trans.Identifier)
+end)
+
 
 asset.meta = {
   Name = Name,

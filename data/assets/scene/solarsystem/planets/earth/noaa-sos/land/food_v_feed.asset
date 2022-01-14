@@ -28,9 +28,14 @@ local layer_countries = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_countries)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_countries.Identifier)
 end)
 
 

@@ -51,6 +51,11 @@ asset.onInitialize(function ()
   end
 end)
 
+asset.onDeinitialize(function()
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v.Identifier)
+  end
+end)
 
 asset.meta = {
   Name = Name,

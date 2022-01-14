@@ -42,9 +42,14 @@ local layer_sat = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_names)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_sat)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_names.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat.Identifier)
 end)
 
 

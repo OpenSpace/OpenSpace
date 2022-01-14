@@ -35,10 +35,16 @@ local layer_labels = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_combined)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_currents)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_labels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_combined.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_currents.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_labels.Identifier)
 end)
 
 

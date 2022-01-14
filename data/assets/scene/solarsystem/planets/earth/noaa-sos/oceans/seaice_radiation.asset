@@ -28,9 +28,14 @@ local layer_solar = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_fraction)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_solar)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_fraction.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_solar.Identifier)
 end)
 
 

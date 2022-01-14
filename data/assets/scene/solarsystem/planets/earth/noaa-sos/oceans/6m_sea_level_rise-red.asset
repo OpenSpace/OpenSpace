@@ -63,7 +63,7 @@ local layer_6m = {
   Description = Description
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_0m)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_1m)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2m)
@@ -71,6 +71,16 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4m)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_5m)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_6m)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_0m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_1m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_3m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_5m.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_6m.Identifier)
 end)
 
 

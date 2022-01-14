@@ -44,11 +44,18 @@ local layer_null = {
 }
 
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy_coastal)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_energy)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_null)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_coastal.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy_coastal.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_energy.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_null.Identifier)
 end)
 
 

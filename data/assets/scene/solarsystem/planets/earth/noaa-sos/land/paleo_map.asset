@@ -121,12 +121,17 @@ for i,v in ipairs(layers_names) do
   table.insert(layers, layer)
 end
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   for i,v in ipairs(layers) do
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
   end
 end)
 
+asset.onDeinitialize(function()
+  for i,v in ipairs(layers) do
+    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v.Identifier)
+  end
+end)
 
 asset.meta = {
   Name = Name,
