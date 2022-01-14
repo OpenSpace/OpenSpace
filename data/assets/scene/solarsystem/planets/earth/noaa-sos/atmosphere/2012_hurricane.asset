@@ -32,7 +32,8 @@ local layer_names = {
 local layer_sat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. "(Sat)",
-  Type = "TemporalTileProvider",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = syncedDirectory,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
