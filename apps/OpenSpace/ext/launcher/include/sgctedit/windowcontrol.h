@@ -172,10 +172,7 @@ private:
     QHBoxLayout* _layoutComboQuality = nullptr;
     QHBoxLayout* _layoutFovH = nullptr;
     QHBoxLayout* _layoutFovV = nullptr;
-    QWidget* _layoutFovWrapperH = nullptr;
-    QWidget* _layoutFovWrapperV = nullptr;
     QHBoxLayout* _layoutHeightOffset = nullptr;
-    QWidget* _layoutHeightOffsetWrapper = nullptr;
 };
 
 #endif // WINDOWCONTROL_H
