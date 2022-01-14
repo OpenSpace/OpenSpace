@@ -4,6 +4,7 @@ local layer =  {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
   Type = "TemporalTileLayer",
+  Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2012-05-08",

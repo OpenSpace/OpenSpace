@@ -77,6 +77,17 @@ namespace {
         // [[codegen::verbatim(FixedTimeInfo.description)]]
         std::optional<std::string> fixedTime;
 
+        enum class Mode {
+            Prototyped,
+            Folder
+        };
+        // The mode that his temporal tile provider operates in. In the `Prototyped` mode,
+        // a given start and end time, temporal resolution, and perscriptive time format
+        // is used to generate the information used by GDAL to access the data. In the
+        // `folder` method, a folder and a time format is provided and each file in the
+        // folder is scanned using the time format instead
+        Mode mode;
+
         struct Prototyped {
             struct Time {
                 // The (inclusive) starting time of the temporal image range
@@ -163,10 +174,16 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.prototyped.has_value() == p.folder.has_value()) {
-        // Doesn't matter if they are both false or both true
+    // Make sure that the user provided the data that they requested. The mode parameter
+    // is a required one and these two if statements tie the table requirement to the mode
+    if (p.mode == Parameters::Mode::Folder && !p.folder.has_value()) {
         throw ghoul::RuntimeError(
-            "Need to specify exactly one of the 'Prototyped' and 'Folder' values"
+            "When selecting the `Folder` mode, a `Folder` table must be specified"
+        );
+    }
+    if (p.mode == Parameters::Mode::Prototyped && !p.prototyped.has_value()) {
+        throw ghoul::RuntimeError(
+            "When selecting the `Prototyped` mode, a `Prototyped` table must be specified"
         );
     }
 

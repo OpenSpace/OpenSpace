@@ -96,6 +96,7 @@ openspace.globebrowsing.addGibsLayer = function(layer, resolution, format, start
     local layer = {
         Identifier = layerName, 
         Type = "TemporalTileLayer",
+        Mode = "Prototyped",
         Prototyped = {
             Time = {
                 Start = startDate,

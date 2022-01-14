@@ -4,6 +4,7 @@ local layer =  {
   Identifier = "GHRSST_L4_G1SST_Sea_Surface_Temperature_Temporal",
   Name = "GHRSST L4 G1SST Sea Surface Temperature (Temporal)",
   Type = "TemporalTileLayer",
+  Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2010-06-21",

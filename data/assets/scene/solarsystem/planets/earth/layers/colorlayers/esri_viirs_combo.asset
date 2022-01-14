@@ -13,6 +13,7 @@ local layer = {
         Identifier = "Temporal_VIIRS_SNPP",
         Name = "Temporal VIIRS SNPP",
         Type = "TemporalTileLayer",
+        Mode = "Prototyped",
         Prototyped = {
           Time = {
             Start = "2015-11-24",

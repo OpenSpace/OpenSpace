@@ -4,6 +4,7 @@ local layer = {
   Identifier = "Aqua_Modis_Temporal",
   Name = "Aqua Modis (Temporal)",
   Type = "TemporalTileLayer",
+  Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2002-07-04",

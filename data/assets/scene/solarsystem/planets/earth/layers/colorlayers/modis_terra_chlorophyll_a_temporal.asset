@@ -4,6 +4,7 @@ local layer = {
   Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
   Name = "MODIS Terra Chlorophyll A (Temporal)",
   Type = "TemporalTileLayer",
+  Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2013-07-02",

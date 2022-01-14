@@ -4,6 +4,7 @@ local layer = {
   Identifier = "Terra_Modis_Temporal",
   Name = "Terra Modis (Temporal)",
   Type = "TemporalTileLayer",
+  Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2000-02-24",
