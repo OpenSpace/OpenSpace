@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -155,7 +155,7 @@ void LayerManager::reset(bool includeDisabled) {
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
             if ((layer->enabled() || includeDisabled) && layer->tileProvider()) {
-                tileprovider::reset(*layer->tileProvider());
+                layer->tileProvider()->reset();
             }
         }
     }

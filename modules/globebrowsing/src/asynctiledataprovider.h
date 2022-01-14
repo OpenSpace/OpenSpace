@@ -50,8 +50,6 @@ public:
     AsyncTileDataProvider(std::string name,
         std::unique_ptr<RawTileDataReader> rawTileDataReader);
 
-    ~AsyncTileDataProvider();
-
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
      */

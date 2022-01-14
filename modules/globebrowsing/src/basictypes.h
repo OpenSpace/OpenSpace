@@ -115,9 +115,8 @@ struct TileMetaData {
 class Tile {
 public:
     /**
-    * Describe if this Tile is good for usage (OK) or otherwise
-    * the reason why it is not.
-    */
+     * Describe if this Tile is good for usage (OK) or otherwise the reason why it is not.
+     */
     enum class Status {
         /**
          * E.g when texture data is not currently in memory.
@@ -168,7 +167,6 @@ struct ChunkTile {
 
 
 
-//using ChunkTilePile = std::vector<ChunkTile>;
 // The ChunkTilePile either contains 1 or 3 ChunkTile, depending on if layer-blending is
 // enabled. If it is enabled, we need the two adjacent levels, if it is not enabled, only
 // the current layer is needed

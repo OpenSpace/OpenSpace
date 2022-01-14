@@ -22,14 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEINDEXTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEINDEXTILEPROVIDER___H__
 
-#include <modules/globebrowsing/src/tileprovider.h>
-#include <openspace/util/time.h>
-#include <glm/glm.hpp>
+#include <modules/globebrowsing/src/tileprovider/texttileprovider.h>
 
-namespace {
-    constexpr const char* fileName = "data/scene/debugglobe/map_service_configs/"
-        "VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
-} // namespace
+namespace openspace::globebrowsing {
 
+class TileIndexTileProvider : public TextTileProvider {
+public:
+    TileIndexTileProvider(const ghoul::Dictionary& dictionary);
+
+    Tile tile(const TileIndex& tileIndex) override final;
+    Tile::Status tileStatus(const TileIndex& index) override final;
+    TileDepthTransform depthTransform() override final;
+    void update() override final;
+    int maxLevel() override final;
+    float noDataValueAsFloat() override final;
+};
+
+} // namespace openspace::globebrowsing
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEINDEXTILEPROVIDER___H__
