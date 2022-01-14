@@ -25,6 +25,7 @@ local layer_radar = {
   Identifier = Identifier .. "-radar",
   Name = Name .. " (Radar)",
   Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = syncedDirectory,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
@@ -38,6 +39,7 @@ local layer_sat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Sat)",
   Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = syncedDirectory,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the

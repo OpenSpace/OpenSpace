@@ -18,6 +18,7 @@ local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = syncedDirectory,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the

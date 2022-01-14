@@ -18,6 +18,7 @@ local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = syncedDirectory,
     -- @TODO: This dataset is not using equirectangular projection, so it will look

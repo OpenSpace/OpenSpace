@@ -33,6 +33,7 @@ local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "TemporalTileLayer",
+  Mode = "Folder",
   Folder = {
     Folder = "C:/Development/sync/http/earth_textures_climate/1",
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
