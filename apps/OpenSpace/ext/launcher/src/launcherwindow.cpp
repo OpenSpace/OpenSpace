@@ -525,9 +525,10 @@ void LauncherWindow::openWindowEditor() {
     SgctEdit editor(this, windowList, cluster, _qApp);
     editor.exec();
     if (editor.wasSaved()) {
-        const std::string path = _userConfigPath + editor.saveFilename() + ".json";
+        std::string fullFilename = editor.saveFilename() + ".json";
+        const std::string path = _userConfigPath + fullFilename;
         saveWindowConfig(this, path, windowList, cluster);
-        populateWindowConfigsList(editor.saveFilename());
+        populateWindowConfigsList(fullFilename);
     }
     else {
         const std::string current = _windowConfigBox->currentText().toStdString();
