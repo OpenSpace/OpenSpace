@@ -53,6 +53,7 @@ private:
     enum class HorizonsResult {
         Valid = 1,
         Empty,
+        AlreadyExist,
         IncorrectObserver,
         ErrorConnect,
         ErrorNoObserver,

@@ -624,25 +624,31 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     }
 
     QString answer = reply->readAll();
+    reply->deleteLater();
 
-    std::cout << "Reply: '";
+    std::cout << "Reply: '" << std::endl;
     std::cout << answer.toStdString();
     std::cout << "'" << std::endl;
 
     // Create a text file and write reply to it
-    QString filePath = _directoryEdit->text();
-    filePath.append(QDir::separator());
-    filePath.append(_nameEdit->text());
+    QString filePathQ = _directoryEdit->text();
+    filePathQ.append(QDir::separator());
+    filePathQ.append(_nameEdit->text());
+    std::string filePath = filePathQ.toStdString();
+    std::filesystem::path fullFilePath = std::filesystem::absolute(filePath);
 
-    std::ofstream file(filePath.toStdString());
+    // Check if the file already exists
+    if (std::filesystem::is_regular_file(fullFilePath)) {
+        return HorizonsDialog::HorizonsResult::AlreadyExist;
+    }
+
+    // Write response into a new file
+    std::ofstream file(filePath);
     file << answer.toStdString() << std::endl;
-
     file.close();
-    std::string fullFilePath = filePath.toStdString();
-    _horizonsFile = std::filesystem::absolute(fullFilePath);
 
-    reply->deleteLater();
-    return isValidHorizonsFile(fullFilePath);
+    _horizonsFile = fullFilePath;
+    return isValidHorizonsFile(filePath);
 }
 
 // Check whether the given Horizons file is valid or not
@@ -745,6 +751,9 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             return true;
         case HorizonsDialog::HorizonsResult::Empty:
             message = "The received horizons file is empty";
+            break;
+        case HorizonsDialog::HorizonsResult::AlreadyExist:
+            message = "File already exist, try another filename";
             break;
         case HorizonsDialog::HorizonsResult::ErrorConnect:
             message = "Connection error";
