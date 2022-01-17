@@ -53,11 +53,12 @@ private:
     enum class HorizonsResult {
         Valid = 1,
         Empty,
+        IncorrectObserver,
         ErrorConnect,
         ErrorNoObserver,
-        ErrorMultipleObserver,
+        MultipleObserver,
         ErrorNoTarget,
-        ErrorMultipleTarget,
+        MultipleTarget,
         ErrorTimeRange,
         ErrorStepSize,
         UnknownError
