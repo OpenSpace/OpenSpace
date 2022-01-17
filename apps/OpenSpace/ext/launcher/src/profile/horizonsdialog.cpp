@@ -118,8 +118,10 @@ namespace {
         return result;
     }
 
-    std::map<int, std::string> parseMatchingBodies(std::filesystem::path& file) {
+    std::map<int, std::string> parseBodies(std::filesystem::path& file) {
         std::ifstream fileStream(file);
+        std::string startPhrase = "Name";
+        std::string endPhrase = "matches";
 
         if (!fileStream.good()) {
             fileStream.close();
@@ -130,7 +132,7 @@ namespace {
         // query that we do not care about. Ignore everything until head of matching body list
         std::map<int, std::string> matchingBodies;
         std::string line;
-        while (fileStream.good() && line.find("Name") == std::string::npos) {
+        while (fileStream.good() && line.find(startPhrase) == std::string::npos) {
             std::getline(fileStream, line);
         }
 
@@ -143,20 +145,20 @@ namespace {
         std::getline(fileStream, line);
         std::getline(fileStream, line);
         while (fileStream.good()) {
-            if (line == " " || line.empty() || line.find("Number of matches") != std::string::npos) {
+            if (line == " " || line.empty() || line.find(endPhrase) != std::string::npos) {
                 fileStream.close();
                 return matchingBodies;
             }
 
             std::cout << "Matching body: " << line << std::endl;
-            // Matching body format: ID#, Name, Designation, IAU/aliases/other
+            // Matching body format: id, other information...
             std::stringstream str(line);
             int id;
-            std::string name;
+            std::string info;
 
             str >> id;
-            std::getline(str, name);
-            matchingBodies.insert(std::pair<int, std::string>(id, trim(name)));
+            std::getline(str, info);
+            matchingBodies.insert(std::pair<int, std::string>(id, trim(info)));
 
             std::getline(fileStream, line);
         }
@@ -716,6 +718,13 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             }
         }
 
+        // Multiple matching small bodies?
+        if (line.find("Small-body Index Search Results") != std::string::npos) {
+            // Small bodies can only be targets not observers
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::MultipleTarget;
+        }
+
         // No Target?
         if (line.find("No matches found") != std::string::npos) {
             std::cout << "No matches found for target" << std::endl;
@@ -766,7 +775,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             message = "Multiple matches was found for observer '" +
                 _observerName + "'";
             std::map<int, std::string> matchingObservers =
-                parseMatchingBodies(_horizonsFile);
+                parseBodies(_horizonsFile);
             if (matchingObservers.empty()) {
                 message += ". Could not parse the matching observers";
                 break;
@@ -791,9 +800,19 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             message = "No match was found for target '" + _targetName + "'";
             break;
         case HorizonsDialog::HorizonsResult::MultipleTarget: {
+            // Case Small Bodies:
+            // Line before data: Matching small-bodies
+            // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
+            // Line after data: (X matches. To SELECT, enter record # (integer), followed by semi-colon.)
+
+            // Case Major Bodies:
+            // Line before data: Multiple major-bodies match string "X*"
+            // Format: ID#, Name, Designation, IAU/aliases/other
+            // Line after data: Number of matches =  X. Use ID# to make unique selection.
+
             message = "Multiple matches was found for target '" + _targetName + "'";
             std::map<int, std::string> matchingTargets =
-                parseMatchingBodies(_horizonsFile);
+                parseBodies(_horizonsFile);
             if (matchingTargets.empty()) {
                 message += ". Could not parse the matching targets";
                 break;
