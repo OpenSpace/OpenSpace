@@ -50,8 +50,6 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     performReset(ResetRawTileDataReader::No);
 }
 
-AsyncTileDataProvider::~AsyncTileDataProvider() {} // NOLINT
-
 const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
     return *_rawTileDataReader;
 }

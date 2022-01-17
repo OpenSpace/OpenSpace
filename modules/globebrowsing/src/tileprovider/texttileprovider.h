@@ -22,59 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEXTTILEPROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEXTTILEPROVIDER___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/scalar/boolproperty.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 namespace openspace::globebrowsing {
 
-class Layer;
-struct TileProvider;
+class TextTileProvider : public TileProvider {
+public:
+    TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
+    virtual ~TextTileProvider();
 
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layergroupid::GroupID id);
+    void reset() override;
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
+protected:
+    Tile renderTile(const TileIndex& tileIndex, const std::string& text,
+        const glm::vec2& position, const glm::vec4& color);
+    
+    const TileTextureInitData initData;
 
-    void initialize();
-    void deinitialize();
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
+    std::shared_ptr<ghoul::fontrendering::Font> font;
+    size_t fontSize = 0;
 
-    /// Updates all layers tile providers within this group
-    void update();
+    GLuint fbo = 0;
 
-    Layer* addLayer(const ghoul::Dictionary& layerDict);
-    void deleteLayer(const std::string& layerName);
-    void moveLayer(int oldPosition, int newPosition);
-
-    /// @returns const vector of all layers
-    std::vector<Layer*> layers() const;
-
-    /// @returns const vector of all active layers
-    const std::vector<Layer*>& activeLayers() const;
-
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
-
-    bool layerBlendingEnabled() const;
-
-    void onChange(std::function<void(Layer*)> callback);
+    cache::MemoryAwareTileCache* tileCache;
 
 private:
-    const layergroupid::GroupID _groupId;
-    std::vector<std::unique_ptr<Layer>> _layers;
-    std::vector<Layer*> _activeLayers;
-
-    properties::BoolProperty _levelBlendingEnabled;
-    std::function<void(Layer*)> _onChangeCallback;
+    void internalInitialize() override final;
+    void internalDeinitialize() override final;
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEXTTILEPROVIDER___H__
