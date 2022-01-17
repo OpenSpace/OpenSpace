@@ -73,6 +73,51 @@ namespace {
         return result;
     }
 
+    std::string trim(const std::string& text) {
+        std::string result = text;
+        if (text.empty())
+            return "";
+
+        // front
+        while (result.front() == ' ') {
+            result = result.substr(1);
+        }
+
+        // end
+        while (result.back() == ' ') {
+            result = result.substr(0, result.length() - 1);
+        }
+
+        // middle
+        int offset = 0;
+        int start = -1;
+        int step = 1;
+        // Find start of gap
+        while ((start = result.find_first_of(' ', offset)) != std::string::npos) {
+            // Widen gap
+            while (result[start + step] == ' ') {
+                ++step;
+            }
+
+            // Measure gap, if big then erase it
+            if (step > 1) {
+                result = result.erase(start, step);
+
+                // Add one whitespace for readability
+                result = result.insert(start, " ");
+
+                step = 1;
+                offset = start;
+            }
+
+            // Keep looking
+            offset = start + step;
+            step = 1;
+        }
+
+        return result;
+    }
+
     std::map<int, std::string> parseMatchingBodies(std::filesystem::path& file) {
         std::ifstream fileStream(file);
 
@@ -111,7 +156,7 @@ namespace {
 
             str >> id;
             std::getline(str, name);
-            matchingBodies.insert(std::pair<int, std::string>(id, name));
+            matchingBodies.insert(std::pair<int, std::string>(id, trim(name)));
 
             std::getline(fileStream, line);
         }
