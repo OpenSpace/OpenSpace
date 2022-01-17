@@ -392,9 +392,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
     model->item(_userConfigCount)->setEnabled(false);
     ++_userConfigCount;
-    // Add all the files with the .xml extension to the dropdown
+    // Add all the files with the .xml or .json extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
-        if (p.path().extension() != ".xml") {
+        if (p.path().extension() != ".xml" && p.path().extension() != ".json") {
             continue;
         }
         _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
@@ -405,9 +405,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     model->item(_userConfigCount)->setEnabled(false);
 
     if (std::filesystem::exists(_configPath)) {
-        // Add all the files with the .xml extension to the dropdown
+        // Add all the files with the .xml or .json extension to the dropdown
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
-            if (p.path().extension() != ".xml") {
+            if (p.path().extension() != ".xml" && p.path().extension() != ".json") {
                 continue;
             }
             _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
