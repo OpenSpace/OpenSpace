@@ -46,7 +46,7 @@ public:
 
 private slots:
     void openHorizonsFile();
-    void openSaveDirectory();
+    void openDirectory();
     void approved();
 
 private:
@@ -64,10 +64,12 @@ private:
     };
 
     void createWidgets();
-    bool sendHorizonsRequest();
+    bool handleRequest();
+    std::string constructUrl();
     HorizonsResult sendRequest(const std::string url);
     HorizonsResult handleReply(QNetworkReply* reply);
     HorizonsResult isValidHorizonsFile(const std::string& file) const;
+    bool handleResult(HorizonsDialog::HorizonsResult& result);
 
     std::filesystem::path _horizonsFile;
     QNetworkAccessManager* _manager;
@@ -77,10 +79,14 @@ private:
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;
     QComboBox* _chooseTargetCombo = nullptr;
+    std::string _targetName;
     QLineEdit* _centerEdit = nullptr;
     QComboBox* _chooseObserverCombo = nullptr;
+    std::string _observerName;
     QDateTimeEdit* _startEdit;
+    std::string _startTime;
     QDateTimeEdit* _endEdit;
+    std::string _endTime;
     QLineEdit* _stepEdit = nullptr;
     QComboBox* _timeTypeCombo = nullptr;
 

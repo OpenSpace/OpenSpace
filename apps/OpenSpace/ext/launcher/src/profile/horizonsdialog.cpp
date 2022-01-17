@@ -279,7 +279,7 @@ void HorizonsDialog::createWidgets() {
             directoryButton,
             &QPushButton::released,
             this,
-            &HorizonsDialog::openSaveDirectory
+            &HorizonsDialog::openDirectory
         );
         directoryButton->setCursor(Qt::PointingHandCursor);
         container->addWidget(directoryButton);
@@ -377,60 +377,66 @@ void HorizonsDialog::openHorizonsFile() {
     _fileEdit->setText(QString(_horizonsFile.string().c_str()));
 }
 
-void HorizonsDialog::openSaveDirectory() {
+void HorizonsDialog::openDirectory() {
     std::string directory = QFileDialog::getExistingDirectory(this).toStdString();
     std::cout << "Directory: " << directory << std::endl;
     _directoryEdit->setText(directory.c_str());
 }
 
-bool HorizonsDialog::sendHorizonsRequest() {
+bool HorizonsDialog::handleRequest() {
+    std::string url = constructUrl();
+    HorizonsDialog::HorizonsResult result = sendRequest(url);
+    return handleResult(result);
+}
+
+std::string HorizonsDialog::constructUrl() {
     // Construct url for request
     std::string url = "";
     url.append(HORIZONS_REQUEST_URL);
 
-    std::string command, targetName;
+    std::string command;
     if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
         command = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex()).toString().toStdString();
-        targetName = _chooseTargetCombo->currentText().toStdString();
+        _targetName = _chooseTargetCombo->currentText().toStdString();
     }
     else {
         command = _targetEdit->text().toStdString();
-        targetName = command;
+        _targetName = command;
     }
     url.append(COMMAND);
     url.append("'");
     url.append(replaceAll(command, " ", SPACE));
     url.append("'");
 
-    std::string center, observerName;
+    std::string center;
     if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() != 0) {
         center = "@" +
             _chooseObserverCombo->itemData(_chooseObserverCombo->currentIndex()).toString().toStdString();
-        observerName = _chooseObserverCombo->currentText().toStdString();
+        _observerName = _chooseObserverCombo->currentText().toStdString();
     }
     else {
         center = _centerEdit->text().toStdString();
-        observerName = center;
+        _observerName = center;
     }
     url.append(CENTER);
     url.append("'");
     url.append(replaceAll(center, " ", SPACE));
     url.append("'");
 
-    std::string startTime = _startEdit->date().toString("yyyy-MM-dd").toStdString();
-    startTime.append(" ");
-    startTime.append(_startEdit->time().toString("hh:mm").toStdString());
+    _startTime = _startEdit->date().toString("yyyy-MM-dd").toStdString();
+    _startTime.append(" ");
+    _startTime.append(_startEdit->time().toString("hh:mm").toStdString());
     url.append(START_TIME);
     url.append("'");
-    url.append(replaceAll(startTime, " ", SPACE));
+    url.append(replaceAll(_startTime, " ", SPACE));
     url.append("'");
 
-    std::string endTime = _endEdit->date().toString("yyyy-MM-dd").toStdString();
-    endTime.append(" ");
-    endTime.append(_endEdit->time().toString("hh:mm").toStdString());
+    _endTime = _endEdit->date().toString("yyyy-MM-dd").toStdString();
+    _endTime.append(" ");
+    _endTime.append(_endEdit->time().toString("hh:mm").toStdString());
     url.append(STOP_TIME);
     url.append("'");
-    url.append(replaceAll(endTime, " ", SPACE));
+    url.append(replaceAll(_endTime, " ", SPACE));
     url.append("'");
 
     url.append(STEP_SIZE);
@@ -458,98 +464,7 @@ bool HorizonsDialog::sendHorizonsRequest() {
     // else?
 
     std::cout << "URL: " << url << std::endl;
-
-    HorizonsDialog::HorizonsResult result = sendRequest(url);
-    std::string errorMessage;
-    switch (result) {
-        case HorizonsDialog::HorizonsResult::Valid:
-            std::cout << "Valid result" << std::endl;
-            return true;
-            break;
-        case HorizonsDialog::HorizonsResult::Empty:
-            errorMessage = "The generated horizons file is empty";
-            break;
-        case HorizonsDialog::HorizonsResult::ErrorConnect:
-            errorMessage =
-                "A connection error occured while downloading the horizons file";
-            break;
-        case HorizonsDialog::HorizonsResult::ErrorNoObserver:
-            errorMessage = "No match was found for observer '" + observerName + "'. "
-                "Use '@body' as observer to list possible matches";
-            break;
-        case HorizonsDialog::HorizonsResult::ErrorMultipleObserver: {
-            errorMessage = "Multiple matches was found for observer '" +
-                observerName + "'";
-            std::map<int, std::string> matchingObservers =
-                parseMatchingBodies(_horizonsFile);
-            if (matchingObservers.empty()) {
-                errorMessage += ". Could not parse the matching observers";
-                break;
-            }
-            _chooseObserverCombo->clear();
-            _chooseObserverCombo->addItem("Choose Observer");
-            for (std::pair matchingObserver : matchingObservers) {
-                _chooseObserverCombo->addItem(
-                    matchingObserver.second.c_str(),
-                    matchingObserver.first
-                );
-            }
-            _chooseObserverCombo->setCurrentIndex(0);
-            _chooseObserverCombo->show();
-            break;
-        }
-        case HorizonsDialog::HorizonsResult::ErrorNoTarget:
-            errorMessage = "No match was found for target '" + targetName + "'";
-            break;
-        case HorizonsDialog::HorizonsResult::ErrorMultipleTarget: {
-            errorMessage = "Multiple matches was found for target '" + targetName + "'";
-            std::map<int, std::string> matchingTargets =
-                parseMatchingBodies(_horizonsFile);
-            if (matchingTargets.empty()) {
-                errorMessage += ". Could not parse the matching targets";
-                break;
-            }
-            _chooseTargetCombo->clear();
-            _chooseTargetCombo->addItem("Choose Target");
-            for (std::pair matchingTarget : matchingTargets) {
-                _chooseTargetCombo->addItem(
-                    matchingTarget.second.c_str(),
-                    matchingTarget.first
-                );
-            }
-            _chooseTargetCombo->setCurrentIndex(0);
-            _chooseTargetCombo->show();
-            break;
-        }
-        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
-            std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(_horizonsFile);
-            if (validTimeRange.first.empty()) {
-                errorMessage = ". Could not parse the valid time range";
-                break;
-            }
-            errorMessage = "Time range is outside the valid time range for target '"
-                + targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
-                validTimeRange.second + "'";
-            break;
-        }
-        case HorizonsDialog::HorizonsResult::ErrorStepSize:
-            errorMessage = "Time range '" + startTime + "' to '" + endTime +
-                "' with step size '" + _stepEdit->text().toStdString() +
-                "' results in a too big file, try to increase the step size or decrease "
-                "the time range";
-            break;
-        case HorizonsDialog::HorizonsResult::UnknownError:
-            errorMessage = "An unknown error occured";
-            break;
-        default:
-            errorMessage = "Unknown Result type";
-            break;
-    }
-
-    _errorMsg->setText(errorMessage.c_str());
-    std::filesystem::remove(_horizonsFile);
-    return false;
+    return url;
 }
 
 // Send request synchronously, EventLoop waits until request has finished
@@ -605,6 +520,8 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply *reply)
     return isValidHorizonsFile(fullFilePath);
 }
 
+// Check whether the given Horizons file is valid or not
+// Return an error code with what is the problem if there was one
 HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::string& file) const {
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
@@ -612,45 +529,60 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
     }
 
     // The header of a Horizons file has a lot of information about the
-    // query that we can skip. The line $$SOE indicates start of data.
+    // query that can tell us if the file is valid or not.
+    // The line $$SOE indicates start of data.
     std::string line;
     bool foundTarget = false;
     while (line[0] != '$' && fileStream.good()) {
+        // Valid Target?
         if (line.find("Revised") != std::string::npos) {
+            // If the target is valid, the first line is the date it was last revised
             foundTarget = true;
         }
-        else if (line.find("No site matches") != std::string::npos) {
+
+        // Valid Observer?
+        if (line.find("No site matches") != std::string::npos) {
             std::cout << "No matching observer found" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorNoObserver;
         }
-        else if (line.find("No ephemeris for target") != std::string::npos) {
-            // Valid time range is several lines before this line, harder to parse
-            std::cout << "The selected time range is outside the valid range for target"
+
+        // Valid data?
+        if (line.find("No ephemeris for target") != std::string::npos) {
+            // Avalable time range is located several lines before this in the file
+            // The avalable time range is persed later
+            std::cout << "The selected time range is outside the valid range for the target"
                 << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorTimeRange;
         }
-        else if (line.find("Multiple major-bodies match string") != std::string::npos) {
-            // Target or Observer
-            if (foundTarget) {
-                // If target was found then it is the observer that has multiple matches
-                std::cout << "Observer has multiple matches" << std::endl;
-                fileStream.close();
-                return HorizonsDialog::HorizonsResult::ErrorMultipleObserver;
-            }
-            else {
+
+        // Multiple matching major bodies?
+        if (line.find("Multiple major-bodies match string") != std::string::npos) {
+            // Target
+            if (!foundTarget) {
+                // If target was not found then it is the target that has multiple matches
                 std::cout << "Target has multiple matches" << std::endl;
                 fileStream.close();
                 return HorizonsDialog::HorizonsResult::ErrorMultipleTarget;
             }
+            // Observer
+            else {
+                std::cout << "Observer has multiple matches" << std::endl;
+                fileStream.close();
+                return HorizonsDialog::HorizonsResult::ErrorMultipleObserver;
+            }
         }
-        else if (line.find("No matches found") != std::string::npos) {
+
+        // No Target?
+        if (line.find("No matches found") != std::string::npos) {
             std::cout << "No matches found for target" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorNoTarget;
         }
-        else if (line.find("-- change step-size") != std::string::npos) {
+
+        // Selected time range too big?
+        if (line.find("change step-size") != std::string::npos) {
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorStepSize;
         }
@@ -669,12 +601,106 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
     }
 }
 
+bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
+    std::string errorMessage;
+    switch (result) {
+        case HorizonsDialog::HorizonsResult::Valid:
+            std::cout << "Valid result" << std::endl;
+            return true;
+            break;
+        case HorizonsDialog::HorizonsResult::Empty:
+            errorMessage = "The generated horizons file is empty";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorConnect:
+            errorMessage =
+                "A connection error occured while downloading the horizons file";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorNoObserver:
+            errorMessage = "No match was found for observer '" + _observerName + "'. "
+                "Use '@" + _observerName + "' as observer to list possible matches";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorMultipleObserver: {
+            errorMessage = "Multiple matches was found for observer '" +
+                _observerName + "'";
+            std::map<int, std::string> matchingObservers =
+                parseMatchingBodies(_horizonsFile);
+            if (matchingObservers.empty()) {
+                errorMessage += ". Could not parse the matching observers";
+                break;
+            }
+            _chooseObserverCombo->clear();
+            _chooseObserverCombo->addItem("Choose Observer");
+            for (std::pair matchingObserver : matchingObservers) {
+                _chooseObserverCombo->addItem(
+                    matchingObserver.second.c_str(),
+                    matchingObserver.first
+                );
+            }
+            _chooseObserverCombo->setCurrentIndex(0);
+            _chooseObserverCombo->show();
+            break;
+        }
+        case HorizonsDialog::HorizonsResult::ErrorNoTarget:
+            errorMessage = "No match was found for target '" + _targetName + "'";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorMultipleTarget: {
+            errorMessage = "Multiple matches was found for target '" + _targetName + "'";
+            std::map<int, std::string> matchingTargets =
+                parseMatchingBodies(_horizonsFile);
+            if (matchingTargets.empty()) {
+                errorMessage += ". Could not parse the matching targets";
+                break;
+            }
+            _chooseTargetCombo->clear();
+            _chooseTargetCombo->addItem("Choose Target");
+            for (std::pair matchingTarget : matchingTargets) {
+                _chooseTargetCombo->addItem(
+                    matchingTarget.second.c_str(),
+                    matchingTarget.first
+                );
+            }
+            _chooseTargetCombo->setCurrentIndex(0);
+            _chooseTargetCombo->show();
+            break;
+        }
+        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
+            std::pair<std::string, std::string> validTimeRange =
+                parseValidTimeRange(_horizonsFile);
+            if (validTimeRange.first.empty()) {
+                errorMessage = ". Could not parse the valid time range";
+                break;
+            }
+            errorMessage = "Time range is outside the valid time range for target '"
+                + _targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
+                validTimeRange.second + "'";
+            break;
+        }
+        case HorizonsDialog::HorizonsResult::ErrorStepSize:
+            errorMessage = "Time range '" + _startTime + "' to '" + _endTime +
+                "' with step size '" + _stepEdit->text().toStdString() +
+                "' results in a too big file, try to increase the step size or decrease "
+                "the time range";
+            break;
+        case HorizonsDialog::HorizonsResult::UnknownError:
+            errorMessage = "An unknown error occured";
+            break;
+        default:
+            errorMessage = "Unknown Result type";
+            break;
+    }
+
+    _errorMsg->setText(errorMessage.c_str());
+    std::filesystem::remove(_horizonsFile);
+    return false;
+}
+
+//Function called when the user presses 'Save' button
 void HorizonsDialog::approved() {
     // Send request of Horizon file if no local file has been specified
-    if (!std::filesystem::is_regular_file(_horizonsFile) && !sendHorizonsRequest()) {
+    if (!std::filesystem::is_regular_file(_horizonsFile) && !handleRequest()) {
         return;
     }
 
-    std::cout << "File: " << _horizonsFile << std::endl;
+    std::cout << "File: " << std::endl << _horizonsFile << std::endl;
     accept();
 }
