@@ -66,6 +66,7 @@ private:
 
     void createWidgets();
     bool handleRequest();
+    bool isValidInput();
     std::string constructUrl();
     HorizonsResult sendRequest(const std::string url);
     HorizonsResult handleReply(QNetworkReply* reply);

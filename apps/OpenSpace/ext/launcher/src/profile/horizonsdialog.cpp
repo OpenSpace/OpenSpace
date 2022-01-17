@@ -384,9 +384,87 @@ void HorizonsDialog::openDirectory() {
 }
 
 bool HorizonsDialog::handleRequest() {
+    if (!isValidInput()) {
+        return false;
+    }
+
     std::string url = constructUrl();
+
+    _chooseObserverCombo->clear();
+    _chooseObserverCombo->hide();
+    _chooseTargetCombo->clear();
+    _chooseTargetCombo->hide();
+
     HorizonsDialog::HorizonsResult result = sendRequest(url);
     return handleResult(result);
+}
+
+bool HorizonsDialog::isValidInput() {
+    bool isValid = true;
+    std::string message;
+
+    // Local file
+    if (!_fileEdit->text().isEmpty()) {
+        if (!std::filesystem::is_regular_file(_horizonsFile))
+        {
+            isValid = false;
+            message = "The selected horizons file could not be found";
+        }
+    }
+    // Request
+    else {
+        // Name
+        if (_nameEdit->text().isEmpty()) {
+            isValid = false;
+            message = "Filename not selected";
+        }
+
+        // Directory
+        else if (_directoryEdit->text().isEmpty()) {
+            isValid = false;
+            message = "Directory not selected";
+        }
+        else if(!std::filesystem::is_directory(_directoryEdit->text().toStdString()))
+        {
+            isValid = false;
+            message = "The selected directory could not be found";
+        }
+
+        // Target field
+        else if (_targetEdit->text().isEmpty() &&
+                (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0))
+        {
+            isValid = false;
+            message = "Target not selected";
+        }
+        else if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0)
+        {
+            isValid = false;
+            message = "Target not selected";
+        }
+
+        // Observer field
+        else if (_centerEdit->text().isEmpty() &&
+            (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0))
+        {
+            isValid = false;
+            message = "Observer not selected";
+        }
+        else if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0)
+        {
+            isValid = false;
+            message = "Observer not selected";
+        }
+
+        // Step size
+        else if (_stepEdit->text().isEmpty()) {
+            isValid = false;
+            message = "Step size not selected";
+        }
+    }
+
+    _errorMsg->setText(message.c_str());
+    return isValid;
 }
 
 std::string HorizonsDialog::constructUrl() {
@@ -398,6 +476,7 @@ std::string HorizonsDialog::constructUrl() {
     if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
         command = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex()).toString().toStdString();
         _targetName = _chooseTargetCombo->currentText().toStdString();
+        _targetEdit->setText(_targetName.c_str());
     }
     else {
         command = _targetEdit->text().toStdString();
@@ -413,6 +492,7 @@ std::string HorizonsDialog::constructUrl() {
         center = "@" +
             _chooseObserverCombo->itemData(_chooseObserverCombo->currentIndex()).toString().toStdString();
         _observerName = _chooseObserverCombo->currentText().toStdString();
+        _centerEdit->setText(_observerName.c_str());
     }
     else {
         center = _centerEdit->text().toStdString();
