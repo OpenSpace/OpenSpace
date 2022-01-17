@@ -29,12 +29,39 @@ local layer = {
   Description = Description
 }
 
+local colorbar_2007_2009 = {
+  Identifier = Identifier .. "-2007_2009",
+  Name = Name .. " (2007-2009 Compare)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "2007-2009-Compare.png"
+}
+
+local colorbar_2008_minimum = {
+  Identifier = Identifier .. "-2008_minimum",
+  Name = Name .. " (2008 Minimum)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "2008-Minimum-Label.png"
+}
+
+local colorbar_2009_iceconcentration = {
+  Identifier = Identifier .. "-2009_iceconcentration",
+  Name = Name .. " (2009 Ice Concentration)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "2009-IceConcentration-Label.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar_2007_2009);  
+  openspace.addScreenSpaceRenderable(colorbar_2008_minimum);  
+  openspace.addScreenSpaceRenderable(colorbar_2009_iceconcentration);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_2007_2009.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_2008_minimum.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_2009_iceconcentration.Identifier)
 end)
 
 

@@ -56,12 +56,20 @@ local layer_quakes_gte8 = {
   Description = Description
 }
 
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "Earthquake_Legend.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_allquakes)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
+  openspace.addScreenSpaceRenderable(legend);  
 end)
 
 asset.onDeinitialize(function()
@@ -70,6 +78,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_tsunami_basemap.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8.Identifier)
+  openspace.removeScreenSpaceRenderable(legend.Identifier)
 end)
 
 

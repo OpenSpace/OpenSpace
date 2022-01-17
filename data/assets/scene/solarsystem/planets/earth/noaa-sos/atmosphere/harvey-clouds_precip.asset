@@ -28,12 +28,30 @@ local layer = {
   Description = Description
 }
 
+local colorbar_rain = {
+  Identifier = Identifier .. "-rain",
+  Name = Name .. " (Rain)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "rainbar_white.png"
+}
+
+local colorbar_snow = {
+  Identifier = Identifier .. "-snow",
+  Name = Name ..  " (Snow)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "snowbar_white.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar_rain);  
+  openspace.addScreenSpaceRenderable(colorbar_snow);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_rain.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_snow.Identifier)
 end)
 
 

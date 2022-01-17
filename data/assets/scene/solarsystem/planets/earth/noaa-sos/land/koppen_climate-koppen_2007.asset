@@ -21,12 +21,30 @@ local layer = {
   Description = Description
 }
 
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "legend.png"
+}
+
+local legend1 = {
+  Identifier = Identifier .. "-1",
+  Name = Name .. "(1)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "legend2.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(legend1);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(legend.Identifier)
+  openspace.removeScreenSpaceRenderable(legend1.Identifier)
 end)
 
 

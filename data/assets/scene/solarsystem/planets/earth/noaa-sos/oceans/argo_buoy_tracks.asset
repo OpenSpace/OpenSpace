@@ -29,12 +29,21 @@ local layer = {
   Description = Description
 }
 
+local buoy = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "argobuoy.jpg"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(buoy);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(buoy.Identifier)
 end)
 
 

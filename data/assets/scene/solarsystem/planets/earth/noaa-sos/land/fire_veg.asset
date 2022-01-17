@@ -29,12 +29,30 @@ local layer = {
   Description = Description
 }
 
+local colorbar_fire = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "fire_colorbar.png"
+}
+
+local colorbar_veg = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "veg_colorbar.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar_fire);  
+  openspace.addScreenSpaceRenderable(colorbar_veg);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_fire.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar_veg.Identifier)
 end)
 
 

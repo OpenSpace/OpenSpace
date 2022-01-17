@@ -56,11 +56,20 @@ local layer_mat_2070 = {
   Description = Description
 }
 
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "niche-scale.png"
+}
+
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2020)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_precip_2070)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2020)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_mat_2070)
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
@@ -68,6 +77,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_precip_2070.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_mat_2020.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_mat_2070.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

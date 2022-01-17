@@ -49,16 +49,25 @@ local layer_2050 = {
   Description = Description
 }
 
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "colorbar.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2012)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2030)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_2050)
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2012.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2030.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_2050.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

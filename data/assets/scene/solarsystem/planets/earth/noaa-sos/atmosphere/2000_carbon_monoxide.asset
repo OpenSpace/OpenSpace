@@ -29,7 +29,7 @@ local layer = {
   Description = Description
 }
 
-local overlay = {
+local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
@@ -38,12 +38,12 @@ local overlay = {
 
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(overlay);  
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(overlay.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

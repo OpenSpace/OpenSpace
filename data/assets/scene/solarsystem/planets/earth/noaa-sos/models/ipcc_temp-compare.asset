@@ -44,17 +44,26 @@ for i,v in ipairs(layers_names) do
   table.insert(layers, layer)
 end
 
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "colorbar.png"
+}
+
 
 asset.onInitialize(function ()
   for i,v in ipairs(layers) do
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", v)
   end
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
   for i,v in ipairs(layers) do
     openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v.Identifier)
   end
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 asset.meta = {

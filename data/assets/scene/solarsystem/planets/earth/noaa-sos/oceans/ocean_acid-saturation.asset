@@ -35,12 +35,30 @@ local layer = {
   Description = Description
 }
 
+local reefs = {
+  Identifier = Identifiers .. "-reefs",
+  Name = Name .. " (Reefs)",
+  FilePath = syncedDirectory_addons .. "reefs.png"
+  Description = Description,
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "colorbar.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", reefs)
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", reefs.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

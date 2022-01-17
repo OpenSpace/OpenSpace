@@ -29,12 +29,39 @@ local layer = {
   Description = Description
 }
 
+local legend = {
+  Identifier = Identifier .. "-legend",
+  Name = Name .. " (Legend)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "legend.png"
+}
+
+local quakebar = {
+  Identifier = Identifier .. "-quake",
+  Name = Name .. " (Quake)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "quakebar.png"
+}
+
+local quakebar_combined = {
+  Identifier = Identifier .. "-combined",
+  Name = Name .. " (Combined)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "quakebar_combined.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(legend);  
+  openspace.addScreenSpaceRenderable(quakebar);  
+  openspace.addScreenSpaceRenderable(quakebar_combined);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(legend.Identifier)
+  openspace.removeScreenSpaceRenderable(quakebar.Identifier)
+  openspace.removeScreenSpaceRenderable(quakebar_combined.Identifier)
 end)
 
 

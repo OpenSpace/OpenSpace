@@ -28,15 +28,24 @@ local layer_with_background = {
   Description = Description
 }
 
+local labels = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "labels.png"
+}
+
 
 asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_4096)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_with_background)
+  openspace.addScreenSpaceRenderable(labels);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4096.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background.Identifier)
+  openspace.removeScreenSpaceRenderable(labels.Identifier);  
 end)
 
 

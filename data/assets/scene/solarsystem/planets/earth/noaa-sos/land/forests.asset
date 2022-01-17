@@ -49,12 +49,28 @@ local layer_map = {
   Description = Description
 }
 
+local label = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "forest_label.png"
+}
+
+local label1 = {
+  Identifier = Identifier .. "-1",
+  Name = Name .. "(1)",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "forest_label1.png"
+}
+
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_combined)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_extent)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_gain)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_loss)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_map)
+  openspace.addScreenSpaceRenderable(label);  
+  openspace.addScreenSpaceRenderable(label1);  
 end)
 
 asset.onDeinitialize(function()
@@ -63,6 +79,8 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_gain.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_loss.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_map.Identifier)
+  openspace.removeScreenSpaceRenderable(label.Identifier)
+  openspace.removeScreenSpaceRenderable(label1.Identifier)
 end)
 
 

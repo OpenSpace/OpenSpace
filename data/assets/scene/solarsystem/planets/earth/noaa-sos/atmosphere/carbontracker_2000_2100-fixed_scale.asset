@@ -29,13 +29,13 @@ local syncedDirectory_obs = asset.syncedResource({
 })
 
 
-local layer = {
-  Identifier = Identifier,
-  Name = Name,
+local layer_field = {
+  Identifier = Identifier .. "-field",
+  Name = Name .. " (Field)",
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = "C:/Development/sync/http/earth_textures_climate/1",
+    Folder = syncedDirectory,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co2wx_%Y%m%d.png"
@@ -43,12 +43,38 @@ local layer = {
   Description = Description
 }
 
+local layer_obs = {
+  Identifier = Identifier .. "-obs",
+  Name = Name .. " (Observed)",
+  Type = "TemporalTileLayer",
+  Mode = "Folder",
+  Folder = {
+    Folder = syncedDirectory,
+    -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
+    -- time formatting string
+    Format = "co2wx_%Y%m%d.obs.png"
+  },  
+  Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
+  TexturePath = syncedDirectory_colorbar .. "co2wx_20000101.cpt.png"
+}
+
 asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_field)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_obs)
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_field.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_obs.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

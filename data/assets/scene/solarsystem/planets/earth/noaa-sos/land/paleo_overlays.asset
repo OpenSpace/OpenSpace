@@ -63,6 +63,13 @@ local layer_tree_rings = {
   Description = Description
 }
 
+local legend = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory_addons .. "legend.jpg"
+}
+
 
 asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
@@ -71,6 +78,7 @@ asset.onInitialize(function ()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_ocean)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_speleothem)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_tree_rings)
+  openspace.addScreenSpaceRenderable(legend);  
 end)
 
 asset.onDeinitialize(function()
@@ -80,6 +88,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_ocean.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_speleothem.Identifier)
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_tree_rings.Identifier)
+  openspace.removeScreenSpaceRenderable(legend.Identifier)
 end)
 
 
