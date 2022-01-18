@@ -30,7 +30,7 @@ local multiverse_planck_1 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -60,7 +60,7 @@ local multiverse_planck_2 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -90,7 +90,7 @@ local multiverse_planck_3 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {
@@ -120,7 +120,7 @@ local multiverse_planck_4 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    UseAdditiveBlending = true,
+    RenderBinMode = "PreDeferredTransparent",
     FadeInThreshold = 0.4
   },
   GUI = {

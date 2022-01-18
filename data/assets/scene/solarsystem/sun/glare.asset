@@ -21,7 +21,7 @@ local SunGlare = {
     Texture = textures .. "halo.png",
     BlendMode = "Additive",
     Opacity = 0.65,
-    RenderableType = "PreDeferredTransparency"
+    RenderBinMode = "PreDeferredTransparent"
   },
   GUI = {
     Name = "Sun Glare",

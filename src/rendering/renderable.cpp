@@ -58,6 +58,14 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo = {
+        "RenderBinMode",
+        "Render Bin Mode",
+        "This value specifies if the plane should be rendered in the Background,"
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step..",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -71,6 +79,20 @@ namespace {
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
         std::optional<std::string> type;
+
+        // Fragile! Keep in sync with documentation
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderBinMode {
+            Background,
+            Opaque,
+            PreDeferredTransparent,
+            PostDeferredTransparent,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
+        std::optional<RenderBinMode> renderBinMode [[codegen::key("RenderBinMode")]];
+
+
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -101,6 +123,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     );
     return ghoul::mm_unique_ptr<Renderable>(result);
 }
+
 
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
@@ -140,6 +163,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
+
+    //only used by a few classes such as RenderableTrail and RenderableSphere
+    if (p.renderBinMode.has_value()) {
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
+    }
+
 }
 
 void Renderable::initialize() {}
@@ -220,7 +249,9 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
-    if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+    if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
+        (_renderBin != Renderable::RenderBin::Overlay))
+    {
         if (_opacity >= 0.f && _opacity < 1.f) {
             setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
         }
