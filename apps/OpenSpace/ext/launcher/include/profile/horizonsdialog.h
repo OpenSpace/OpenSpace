@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 #define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 
+#include <openspace/json.h>
 #include <QDialog>
 #include <filesystem>
 #include <string>
@@ -35,6 +36,8 @@ class QDateTimeEdit;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QLineEdit;
+
+using json = nlohmann::json;
 
 class HorizonsDialog : public QDialog {
 Q_OBJECT
@@ -51,17 +54,22 @@ private slots:
 
 private:
     enum class HorizonsResult {
-        Valid = 1,
-        Empty,
-        AlreadyExist,
-        IncorrectObserver,
-        ErrorConnect,
+        Valid,
+        FileEmpty,
+        FileAlreadyExist,
+        ConnectionError,
+
+        // Erros caught by the error field in the json output
+        ErrorSize,
+        ErrorTimeRange,
         ErrorNoObserver,
+        IncorrectObserver,
+
+        // Erros NOT caught by the error field in the json output
         MultipleObserver,
         ErrorNoTarget,
         MultipleTarget,
-        ErrorTimeRange,
-        ErrorStepSize,
+
         UnknownError
     };
 
@@ -71,6 +79,7 @@ private:
     std::string constructUrl();
     HorizonsResult sendRequest(const std::string url);
     HorizonsResult handleReply(QNetworkReply* reply);
+    HorizonsResult isValidAnswer(const json& answer) const;
     HorizonsResult isValidHorizonsFile(const std::string& file) const;
     bool handleResult(HorizonsDialog::HorizonsResult& result);
 

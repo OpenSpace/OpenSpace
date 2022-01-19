@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
  // Things needed to construct the url for the http request to JPL Horizons interface
-#define HORIZONS_REQUEST_URL "https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&MAKE_EPHEM='YES'&TABLE_TYPE='OBSERVER'&QUANTITIES='20,33'&RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'"
+#define HORIZONS_REQUEST_URL "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM='YES'&TABLE_TYPE='OBSERVER'&QUANTITIES='20,33'&RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'"
 #define COMMAND "&COMMAND="
 #define CENTER "&CENTER="
 #define START_TIME "&START_TIME="
@@ -426,7 +426,6 @@ void HorizonsDialog::openHorizonsFile() {
 
 void HorizonsDialog::openDirectory() {
     std::string directory = QFileDialog::getExistingDirectory(this).toStdString();
-    std::cout << "Directory: " << directory << std::endl;
     _directoryEdit->setText(directory.c_str());
 }
 
@@ -590,7 +589,6 @@ std::string HorizonsDialog::constructUrl() {
     }
     // else?
 
-    std::cout << "URL: " << url << std::endl;
     return url;
 }
 
@@ -605,7 +603,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
     auto status = QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     if (!status) {
         std::cout << "Connection failed" << std::endl;
-        return HorizonsDialog::HorizonsResult::ErrorConnect;
+        return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
     loop.exec(QEventLoop::ExcludeUserInputEvents);
@@ -617,12 +615,17 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     if (reply->error()) {
         std::cout << reply->errorString().toStdString();
         reply->deleteLater();
-        return HorizonsDialog::HorizonsResult::ErrorConnect;
+        return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (redirect.isValid() && reply->url() != redirect) {
         std::cout << "Redirect has been requested" << std::endl;
+    }
+    auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+    if (statusCode.isValid() && statusCode != 200) {
+        std::cout << "HTTP status code '" << statusCode.toString().toStdString() << "' was returned" << std::endl;
+        return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
     QString answer = reply->readAll();
@@ -632,6 +635,13 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     std::cout << answer.toStdString();
     std::cout << "'" << std::endl;
 
+    // Convert the answer to a json object and validate it
+    json jsonAnswer = json::parse(answer.toStdString());
+    HorizonsDialog::HorizonsResult isValid = isValidAnswer(jsonAnswer);
+    if (isValid != HorizonsDialog::HorizonsResult::Valid) {
+        return isValid;
+    }
+
     // Create a text file and write reply to it
     QString filePathQ = _directoryEdit->text();
     filePathQ.append(QDir::separator());
@@ -639,18 +649,33 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     std::string filePath = filePathQ.toStdString();
     std::filesystem::path fullFilePath = std::filesystem::absolute(filePath);
 
+    auto result = jsonAnswer.find("result");
+    if (result == jsonAnswer.end()) {
+        return HorizonsDialog::HorizonsResult::UnknownError;
+    }
+
     // Check if the file already exists
     if (std::filesystem::is_regular_file(fullFilePath)) {
-        return HorizonsDialog::HorizonsResult::AlreadyExist;
+        return HorizonsDialog::HorizonsResult::FileAlreadyExist;
     }
 
     // Write response into a new file
     std::ofstream file(filePath);
-    file << answer.toStdString() << std::endl;
+    file << replaceAll(*result, "\n", "\r") << std::endl;
     file.close();
 
     _horizonsFile = fullFilePath;
     return isValidHorizonsFile(filePath);
+}
+
+HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer) const {
+    auto it = answer.find("error");
+    if (it != answer.end()) {
+        // There was an error
+        std::cout << "Error: " << *it << std::endl;
+        return HorizonsDialog::HorizonsResult::UnknownError;
+    }
+    return HorizonsDialog::HorizonsResult::Valid;
 }
 
 // Check whether the given Horizons file is valid or not
@@ -658,7 +683,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
 HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::string& file) const {
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        return HorizonsDialog::HorizonsResult::Empty;
+        return HorizonsDialog::HorizonsResult::FileEmpty;
     }
 
     // The header of a Horizons file has a lot of information about the
@@ -666,7 +691,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
     // The line $$SOE indicates start of data.
     std::string line;
     bool foundTarget = false;
-    while (line[0] != '$' && fileStream.good()) {
+    while (fileStream.good() && line.find("$$SOE") == std::string::npos) {
         // Valid Target?
         if (line.find("Revised") != std::string::npos) {
             // If the target is valid, the first line is the date it was last revised
@@ -735,7 +760,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
         // Selected time range too big?
         if (line.find("change step-size") != std::string::npos) {
             fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorStepSize;
+            return HorizonsDialog::HorizonsResult::ErrorSize;
         }
 
         std::getline(fileStream, line);
@@ -743,11 +768,12 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 
     // If we reached end of file before we found the start of data then it is
     // not a valid file
-    fileStream.close();
     if (fileStream.good()) {
+        fileStream.close();
         return HorizonsDialog::HorizonsResult::Valid;
     }
     else {
+        fileStream.close();
         return HorizonsDialog::HorizonsResult::UnknownError;
     }
 }
@@ -758,13 +784,13 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
         case HorizonsDialog::HorizonsResult::Valid:
             std::cout << "Valid result" << std::endl;
             return true;
-        case HorizonsDialog::HorizonsResult::Empty:
+        case HorizonsDialog::HorizonsResult::FileEmpty:
             message = "The received horizons file is empty";
             break;
-        case HorizonsDialog::HorizonsResult::AlreadyExist:
+        case HorizonsDialog::HorizonsResult::FileAlreadyExist:
             message = "File already exist, try another filename";
             break;
-        case HorizonsDialog::HorizonsResult::ErrorConnect:
+        case HorizonsDialog::HorizonsResult::ConnectionError:
             message = "Connection error";
             break;
         case HorizonsDialog::HorizonsResult::ErrorNoObserver:
@@ -841,7 +867,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
                 validTimeRange.second + "'";
             break;
         }
-        case HorizonsDialog::HorizonsResult::ErrorStepSize:
+        case HorizonsDialog::HorizonsResult::ErrorSize:
             message = "Time range '" + _startTime + "' to '" + _endTime +
                 "' with step size '" + _stepEdit->text().toStdString() +
                 "' is too big, try to increase the step size and/or decrease "
@@ -860,13 +886,11 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
     return false;
 }
 
-//Function called when the user presses 'Save' button
+// When the user presses the 'Save' button
 void HorizonsDialog::approved() {
     // Send request of Horizon file if no local file has been specified
     if (!std::filesystem::is_regular_file(_horizonsFile) && !handleRequest()) {
         return;
     }
-
-    std::cout << "File: " << std::endl << _horizonsFile << std::endl;
     accept();
 }
