@@ -81,6 +81,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    void handlePathEnd();
+
     /**
     * Populate list of nodes that are relevant for collision checks, etc
     */
@@ -90,6 +92,7 @@ private:
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
+    bool _startSimulationTimeOnFinish = false;
 
     properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;
