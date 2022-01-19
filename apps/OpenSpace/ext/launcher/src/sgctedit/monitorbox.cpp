@@ -28,7 +28,7 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     //Draw window outline(s)
     for (unsigned int i = 0; i < _nMonitors ; ++i) {
         for (unsigned int j = 0; j < _nWindows[i]; ++j) {
-            paintWindowOutline(painter, i, j);
+            paintWindow(painter, i, j);
         }
     }
 }
@@ -53,12 +53,17 @@ void MonitorBox::paintMonitorOutlines(QPainter& painter) {
     }
 }
 
-void MonitorBox::paintWindowOutline(QPainter& painter, unsigned int monIdx,
+void MonitorBox::paintWindow(QPainter& painter, unsigned int monIdx,
                                                                       unsigned int winIdx)
 {
     setPenSpecificToWindow(painter, winIdx, true);
     if (winIdx <= _windowRendering[monIdx].size()) {
         painter.drawRect(_windowRendering[monIdx][winIdx]);
+        QColor fillColor = _colorWindow[winIdx];
+        fillColor.setAlpha(_alphaWindowTransparency);
+        QBrush brush(fillColor);
+        brush.setStyle(Qt::SolidPattern);
+        painter.fillRect(_windowRendering[monIdx][winIdx], brush);
         //Draw areas of window that are past the monitor boundaries
         if (_outOfBoundsRect[monIdx][winIdx].size() > 0) {
             paintOutOfBoundsAreas(painter, monIdx, winIdx);
@@ -95,12 +100,7 @@ void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowId
                                                                        bool visibleBorder)
 {
     int penWidth = (visibleBorder) ? 1 : -1;
-    if (windowIdx == 0) {
-        painter.setPen(QPen(QColor(0x1C, 0x1B, 0x8B), penWidth));
-    }
-    else if (windowIdx == 1) {
-        painter.setPen(QPen(QColor(0xCD, 0x6D, 0x1D), penWidth));
-    }
+    painter.setPen(QPen(_colorWindow[windowIdx], penWidth));
 }
 
 void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,

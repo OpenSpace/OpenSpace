@@ -1,6 +1,7 @@
 #ifndef MONITORBOX_H
 #define MONITORBOX_H
 
+#include <QColor>
 #include <QIntValidator>
 #include <QLineEdit>
 #include <QPainter>
@@ -38,7 +39,7 @@ protected:
 private:
     void paintWidgetBorder(QPainter& painter, int width, int height);
     void paintMonitorOutlines(QPainter& painter);
-    void paintWindowOutline(QPainter& painter, unsigned int monIdx, unsigned int winIdx);
+    void paintWindow(QPainter& painter, unsigned int monIdx, unsigned int winIdx);
     void paintOutOfBoundsAreas(QPainter& painter, unsigned int monIdx,unsigned int winIdx);
     void paintWindowNumber(QPainter& painter, unsigned int monIdx, unsigned int winIdx);
     void setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
@@ -70,6 +71,11 @@ private:
         {{0.0, 0.0, 0.0, 0.0},
          {0.0, 0.0, 0.0, 0.0}}
     };
+    QColor _colorWindow[2] = {
+        {0x1C, 0x1B, 0x8B},
+        {0xCD, 0x6D, 0x1D}
+    };
+    int _alphaWindowTransparency = 111;
     float _monitorScaleFactor = 1.0;
     float _offset[2] = {10.0, 10.0};
     bool _showLabel = false;
