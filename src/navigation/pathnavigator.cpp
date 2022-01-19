@@ -200,7 +200,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached end of path");
-        _isPlaying = false;
+        handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
             constexpr const char* ApplyIdleBehaviorScript =
@@ -263,10 +263,16 @@ void PathNavigator::startPath() {
         return;
     }
 
-    //OBS! Until we can handle simulation time: early out if not paused
+    // Always pause the simulation time when flying, to aovid problem with objects
+    // moving. However, keep track of whether the time was running before the path
+    // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        LERROR("Simulation time must be paused to run a camera path");
-        return;
+        global::timeManager->setPause(true);
+        _startSimulationTimeOnFinish = true;
+        LINFO(
+            "Pausing time simulation during path traversal. "
+            "Will unpause once the camera path is finished"
+        );
     }
 
     LINFO("Starting path");
@@ -280,9 +286,7 @@ void PathNavigator::abortPath() {
         LWARNING("No camera path is playing");
         return;
     }
-    _isPlaying = false;
-    clearPath(); // TODO: instead of clearing this could be handled better
-
+    handlePathEnd();
     LINFO("Aborted camera path");
 }
 
@@ -327,6 +331,16 @@ const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
     }
 
     return _relevantNodes;
+}
+
+void PathNavigator::handlePathEnd() {
+    _isPlaying = false;
+
+    if (_startSimulationTimeOnFinish) {
+        global::timeManager->setPause(false);
+    }
+    _startSimulationTimeOnFinish = false;
+    clearPath();
 }
 
 void PathNavigator::findRelevantNodes() {
