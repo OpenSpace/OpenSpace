@@ -36,6 +36,7 @@ void SgctEdit::systemMonitorConfiguration(QApplication& qtApp) {
             actualHeight
         });
     }
+    _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
 }
 
 void SgctEdit::createWidgets() {
@@ -52,7 +53,9 @@ void SgctEdit::createWidgets() {
         _monBox = new MonitorBox(
             _monitorWidgetSize,
             _monitorSizeList,
-            _showMonitorLabel
+            _nMaxWindows,
+            _showMonitorLabel,
+            _colorsForWindows
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout();
         layoutMonBox->addStretch(1);
@@ -63,10 +66,7 @@ void SgctEdit::createWidgets() {
         _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         _monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
 
-        addDisplayLayout(0, _monBox, layoutMainH);
-        if (_monitorSizeList.size() > 1) {
-            addDisplayLayout(1, _monBox, layoutMainH);
-        }
+        addDisplayLayout(_monBox, layoutMainH);
     }
     {
         layoutMainV->addLayout(layoutMainH);
@@ -92,27 +92,25 @@ void SgctEdit::createWidgets() {
     }
 }
 
-void SgctEdit::addDisplayLayout(unsigned int column, MonitorBox* monBox,
-                                                                      QHBoxLayout* layout)
+void SgctEdit::addDisplayLayout(MonitorBox* monBox, QHBoxLayout* layout)
 {
-    _displayLayout[column] = new QVBoxLayout();
-    _displayWidget[column] = new Display(
-        column,
+    _displayLayout = new QVBoxLayout();
+    _displayWidget = new Display(
         monBox,
         _monitorSizeList,
-        (column == 0) ? 1 : 0,
-        _showMonitorLabel,
         [this](unsigned int monIndex) {
             if (_monitorSizeList.size() > 1) {
-                _displayWidget[(monIndex == 0) ? 1 : 0]->uncheckWebGuiOptions();
+                _displayWidget->uncheckWebGuiOptions();
             }
-        }
+        },
+        _nMaxWindows,
+        _colorsForWindows
     );
-    _displayFrame[column] = new QFrame;
-    _displayLayout[column]->addWidget(_displayWidget[column]);
-    _displayFrame[column]->setLayout(_displayLayout[column]);
-    _displayFrame[column]->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-    layout->addWidget(_displayFrame[column]);
+    _displayFrame = new QFrame;
+    _displayLayout->addWidget(_displayWidget);
+    _displayFrame->setLayout(_displayLayout);
+    _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+    layout->addWidget(_displayFrame);
 }
 
 bool SgctEdit::wasSaved() const {
@@ -126,9 +124,7 @@ std::string SgctEdit::saveFilename() {
 SgctEdit::~SgctEdit() {
     delete _orientationWidget;
     delete _fileSupportWidget;
-    for (unsigned int i = 0; i <= _monitorSizeList.size(); ++i) {
-        if (_displayWidget[i]) delete _displayWidget[i];
-        if (_displayLayout[i]) delete _displayLayout[i];
-        if (_displayFrame[i]) delete _displayFrame[i];
-    }
+    delete _displayWidget;
+    delete _displayLayout;
+    delete _displayFrame;
 }

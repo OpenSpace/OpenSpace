@@ -2,6 +2,7 @@
 #define WINDOWCONTROL_H
 
 #include <QCheckBox>
+#include <QColor>
 #include <QComboBox>
 #include <QFrame>
 #include <QIntValidator>
@@ -23,11 +24,11 @@
 
 class WindowControl : public QWidget
 {
-    Q_OBJECT
-
+Q_OBJECT
 public:
-    explicit WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-        QRect& widgetDims, QRect& monitorDims, QWidget *parent = nullptr);
+    explicit WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
+        unsigned int windowIndex, QRect& widgetDims, std::vector<QRect>& monitorDims,
+        QString* winColors, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
@@ -54,6 +55,7 @@ public:
     int projectionSelectedIndex();
     int qualitySelectedIndex();
     int qualitySelectedValue();
+    unsigned int monitorNum();
     float fovH();
     float fovV();
     float heightOffset();
@@ -77,6 +79,7 @@ private slots:
     void onSizeYChanged(const QString& newText);
     void onOffsetXChanged(const QString& newText);
     void onOffsetYChanged(const QString& newText);
+    void onMonitorChanged(int newSelection);
     void onProjectionChanged(int newSelection);
     void onFullscreenClicked();
     void onSpoutSelection(int selectionState);
@@ -89,9 +92,11 @@ private:
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     std::function<void(unsigned int, unsigned int)> _windowGuiCheckCallback;
-    QRectF defaultWindowSizes[2] = {
+    QRectF defaultWindowSizes[4] = {
         {50.0, 50.0, 1280.0, 720.0},
-        {900.0, 400.0, 800.0, 600.0}
+        {900.0, 250.0, 1280.0, 720.0},
+        {1200.0, 340.0, 1280.0, 720.0},
+        {50.0, 50.0, 1280.0, 720.0}
     };
     QList<QString> _projectionTypes = {
         QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Planar]),
@@ -112,11 +117,14 @@ private:
         QString::fromStdString(QualityTypeNames[8]),
         QString::fromStdString(QualityTypeNames[9]),
     };
+    QList<QString> _monitorNames = { "Monitor 1", "Monitor 2" };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
+    unsigned int _nMonitors = 1;
     unsigned int _monIndex = 0;
     unsigned int _index = 0;
     int _maxWindowSizePixels = 10000;
+    QString* _colorsForWindows = nullptr;
 
     QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;
@@ -134,13 +142,14 @@ private:
     QIntValidator* _validatorOffset_x = nullptr;
     QIntValidator* _validatorOffset_y = nullptr;
 
-    QRect& _monitorResolution;
+    std::vector<QRect>& _monitorResolutions;
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
 
+    QComboBox* _comboMonitorSelect = nullptr;
     QComboBox* _comboProjection = nullptr;
     QComboBox* _comboQuality = nullptr;
     QLabel* _labelFovH = nullptr;
@@ -156,6 +165,7 @@ private:
     QHBoxLayout* _layoutName = nullptr;
     QLabel* _labelName = nullptr;
     QLineEdit* _windowName = nullptr;
+    QHBoxLayout* _layoutMonitorNum = nullptr;
     QLabel* _labelSize = nullptr;
     QLabel* _labelDelim = nullptr;
     QHBoxLayout* _layoutSize = nullptr;

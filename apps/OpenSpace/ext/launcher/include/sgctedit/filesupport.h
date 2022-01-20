@@ -21,11 +21,11 @@ class FileSupport : public QWidget
 
 public:
     explicit FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
-        std::vector<Display*>& displays, Orientation* orientation,
+        Display* display, Orientation* orientation,
         std::vector<sgct::config::Window>& windowList, sgct::config::Cluster& cluster,
         std::function<void(bool)> cb);
     ~FileSupport();
-    bool isWindowFullscreen(sgct::ivec2 mDims, sgct::ivec2 wDims);
+    bool isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims);
     int findGuiWindow();
     void saveCluster();
     void saveWindows();
@@ -43,7 +43,7 @@ private:
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     Orientation* _orientationWidget;
-    std::vector<Display*>& _displayWidgets;
+    Display* _displayWidget;
     std::vector<QRect>& _monitors;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;

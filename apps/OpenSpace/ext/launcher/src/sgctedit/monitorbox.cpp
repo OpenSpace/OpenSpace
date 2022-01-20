@@ -2,10 +2,12 @@
 
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                                                                    bool showMonitorLabel)
+                         unsigned int nWindows, bool showMonitorLabel, QString* winColors)
     : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
+    , _nWindows(nWindows)
     , _showLabel(showMonitorLabel)
+    , _colorsForWindows(winColors)
 {
     _nMonitors = monitorResolution.size();
     mapMonitorResolutionToWidgetCoordinates();
@@ -26,10 +28,8 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     paintMonitorOutlines(painter);
 
     //Draw window outline(s)
-    for (unsigned int i = 0; i < _nMonitors ; ++i) {
-        for (unsigned int j = 0; j < _nWindows[i]; ++j) {
-            paintWindow(painter, i, j);
-        }
+    for (unsigned int i = 0; i < _nWindows; ++i) {
+        paintWindow(painter, i);
     }
 }
 
@@ -53,42 +53,40 @@ void MonitorBox::paintMonitorOutlines(QPainter& painter) {
     }
 }
 
-void MonitorBox::paintWindow(QPainter& painter, unsigned int monIdx,
-                                                                      unsigned int winIdx)
+void MonitorBox::paintWindow(QPainter& painter, unsigned int winIdx)
 {
     setPenSpecificToWindow(painter, winIdx, true);
-    if (winIdx <= _windowRendering[monIdx].size()) {
-        painter.drawRect(_windowRendering[monIdx][winIdx]);
-        QColor fillColor = _colorWindow[winIdx];
-        fillColor.setAlpha(_alphaWindowTransparency);
+    if (winIdx <= _windowRendering.size()) {
+        painter.drawRect(_windowRendering[winIdx]);
+        QColor fillColor = QColor(_colorsForWindows[winIdx]);
+        fillColor.setAlpha(_alphaWindowOpacity);
         QBrush brush(fillColor);
         brush.setStyle(Qt::SolidPattern);
-        painter.fillRect(_windowRendering[monIdx][winIdx], brush);
+        painter.fillRect(_windowRendering[winIdx], brush);
         //Draw areas of window that are past the monitor boundaries
-        if (_outOfBoundsRect[monIdx][winIdx].size() > 0) {
-            paintOutOfBoundsAreas(painter, monIdx, winIdx);
+        if (_outOfBoundsRect.size() >= winIdx && _outOfBoundsRect[winIdx].size() > 0) {
+            paintOutOfBoundsAreas(painter, winIdx);
         }
-        paintWindowNumber(painter, monIdx, winIdx);
+        paintWindowNumber(painter, winIdx);
     }
 }
 
-void MonitorBox::paintOutOfBoundsAreas(QPainter& painter, unsigned int monIdx,
-                                                                      unsigned int winIdx)
-{
+void MonitorBox::paintOutOfBoundsAreas(QPainter& painter, unsigned int winIdx) {
+    if (_outOfBoundsRect.size() <= winIdx) {
+        return;
+    }
     painter.setBrush(Qt::BDiagPattern);
     setPenSpecificToWindow(painter, winIdx, false);
-    for (QRectF r : _outOfBoundsRect[monIdx][winIdx]) {
+    for (QRectF r : _outOfBoundsRect[winIdx]) {
         painter.drawRect(r);
     }
     setPenSpecificToWindow(painter, winIdx, true);
     painter.setBrush(Qt::NoBrush);
 }
 
-void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int monIdx,
-                                                                      unsigned int winIdx)
-{
-    QPointF textPos = QPointF(_windowRendering[monIdx][winIdx].left() + 5,
-        _windowRendering[monIdx][winIdx].bottom() - 5);
+void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int winIdx) {
+    QPointF textPos = QPointF(_windowRendering[winIdx].left() + 5,
+        _windowRendering[winIdx].bottom() - 5);
     textPos.setX(std::clamp(textPos.x(), 0.0,
         _monitorWidgetSize.width() - 10));
     textPos.setY(std::clamp(textPos.y(), 0.0,
@@ -100,7 +98,7 @@ void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowId
                                                                        bool visibleBorder)
 {
     int penWidth = (visibleBorder) ? 1 : -1;
-    painter.setPen(QPen(_colorWindow[windowIdx], penWidth));
+    painter.setPen(QPen(QColor(_colorsForWindows[windowIdx]), penWidth));
 }
 
 void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
@@ -169,9 +167,9 @@ void MonitorBox::computeScaledResolution_portrait(float aspectRatio, float maxHe
     }
 }
 
-void MonitorBox::setNumWindowsDisplayed(unsigned int mIdx, unsigned int nWindows) {
-    if ((mIdx <= (_nMonitors - 1)) && (_nWindows[mIdx] != nWindows)) {
-        _nWindows[mIdx] = nWindows;
+void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
+    if (_nWindows != nWindows) {
+        _nWindows = nWindows;
         this->update();
     }
 }
@@ -185,94 +183,95 @@ void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
                                                         unsigned int wIdx,
                                                         const QRectF& w)
 {
-    if (mIdx > (_maxNumMonitors - 1) || wIdx > (_maxNumWindowsPerMonitor - 1)) {
+std::cout << "mapWindowResolutionToWidgetCoordinates mon=" << mIdx << ", win=" << wIdx << std::endl;
+    if (mIdx > (_maxNumMonitors - 1) || wIdx > (_nWindows - 1)) {
         return;
     }
     QRectF wF = w;
-    _windowRendering[mIdx][wIdx] = {
+    _windowRendering[wIdx] = {
         _monitorDimensionsScaled[mIdx].x() + wF.left() * _monitorScaleFactor,
         _monitorDimensionsScaled[mIdx].y() + wF.top() * _monitorScaleFactor,
         wF.width() * _monitorScaleFactor,
         wF.height() * _monitorScaleFactor
     };
-    _outOfBoundsRect[mIdx][wIdx].clear();
+    _outOfBoundsRect[wIdx].clear();
     computeOutOfBounds_horizontal(mIdx, wIdx);
     computeOutOfBounds_vertical(mIdx, wIdx);
     this->update();
 }
 
 void MonitorBox::computeOutOfBounds_horizontal(unsigned int mIdx, unsigned int wIdx) {
-    qreal windowWidthPlusOffset = _windowRendering[mIdx][wIdx].width()
-        + _windowRendering[mIdx][wIdx].x() - _monitorDimensionsScaled[mIdx].x();
+    qreal windowWidthPlusOffset = _windowRendering[wIdx].width()
+        + _windowRendering[wIdx].x() - _monitorDimensionsScaled[mIdx].x();
     if (windowWidthPlusOffset > _monitorDimensionsScaled[mIdx].width()) {
         qreal bounds_x = std::max(
             _monitorDimensionsScaled[mIdx].width() + _monitorDimensionsScaled[mIdx].x(),
-            _windowRendering[mIdx][wIdx].x()
+            _windowRendering[wIdx].x()
         );
         qreal extent_x = std::min(
-            _windowRendering[mIdx][wIdx].width(),
+            _windowRendering[wIdx].width(),
             windowWidthPlusOffset - _monitorDimensionsScaled[mIdx].width()
         );
-        addOutOfBoundsArea_horizontal(mIdx, wIdx, bounds_x, extent_x);
+        addOutOfBoundsArea_horizontal(wIdx, bounds_x, extent_x);
     }
-    if (_windowRendering[mIdx][wIdx].x() < _monitorDimensionsScaled[mIdx].x() ) {
+    if (_windowRendering[wIdx].x() < _monitorDimensionsScaled[mIdx].x() ) {
         qreal extent_x = std::min(
-            _windowRendering[mIdx][wIdx].width(),
-            _monitorDimensionsScaled[mIdx].x() - _windowRendering[mIdx][wIdx].x()
+            _windowRendering[wIdx].width(),
+            _monitorDimensionsScaled[mIdx].x() - _windowRendering[wIdx].x()
         );
-        addOutOfBoundsArea_horizontal(mIdx, wIdx, _windowRendering[mIdx][wIdx].x(),
+        addOutOfBoundsArea_horizontal(wIdx, _windowRendering[wIdx].x(),
             extent_x);
     }
 }
 
-void MonitorBox::addOutOfBoundsArea_horizontal(unsigned int mIdx, unsigned int wIdx,
-                                                               qreal bounds, qreal extent)
+void MonitorBox::addOutOfBoundsArea_horizontal(unsigned int wIdx, qreal bounds,
+                                                                             qreal extent)
 {
-    _outOfBoundsRect[mIdx][wIdx].push_back({
+    _outOfBoundsRect[wIdx].push_back({
         bounds,
-        _windowRendering[mIdx][wIdx].y(),
+        _windowRendering[wIdx].y(),
         extent,
-        _windowRendering[mIdx][wIdx].height()
+        _windowRendering[wIdx].height()
     });
 }
 
 void MonitorBox::computeOutOfBounds_vertical(unsigned int mIdx, unsigned int wIdx) {
-    qreal windowHeightPlusOffset = _windowRendering[mIdx][wIdx].height()
-        + _windowRendering[mIdx][wIdx].y() - _monitorDimensionsScaled[mIdx].y();
+    qreal windowHeightPlusOffset = _windowRendering[wIdx].height()
+        + _windowRendering[wIdx].y() - _monitorDimensionsScaled[mIdx].y();
     if (windowHeightPlusOffset > _monitorDimensionsScaled[mIdx].height()) {
         qreal bounds_y = std::max(
             _monitorDimensionsScaled[mIdx].height() + _monitorDimensionsScaled[mIdx].y(),
-            _windowRendering[mIdx][wIdx].y()
+            _windowRendering[wIdx].y()
         );
         qreal extent_y = std::min(
-            _windowRendering[mIdx][wIdx].height(),
+            _windowRendering[wIdx].height(),
             windowHeightPlusOffset - _monitorDimensionsScaled[mIdx].height()
         );
-        addOutOfBoundsArea_vertical(mIdx, wIdx, bounds_y, extent_y);
+        addOutOfBoundsArea_vertical(wIdx, bounds_y, extent_y);
     }
-    if (_windowRendering[mIdx][wIdx].y() < _monitorDimensionsScaled[mIdx].y() ) {
+    if (_windowRendering[wIdx].y() < _monitorDimensionsScaled[mIdx].y() ) {
         qreal extent_y = std::min(
-            _windowRendering[mIdx][wIdx].height(),
-            _monitorDimensionsScaled[mIdx].y() - _windowRendering[mIdx][wIdx].y()
+            _windowRendering[wIdx].height(),
+            _monitorDimensionsScaled[mIdx].y() - _windowRendering[wIdx].y()
         );
-        _outOfBoundsRect[mIdx][wIdx].push_back({
-            _windowRendering[mIdx][wIdx].x(),
-            _windowRendering[mIdx][wIdx].y(),
-            _windowRendering[mIdx][wIdx].width(),
+        _outOfBoundsRect[wIdx].push_back({
+            _windowRendering[wIdx].x(),
+            _windowRendering[wIdx].y(),
+            _windowRendering[wIdx].width(),
             extent_y
         });
-        addOutOfBoundsArea_vertical(mIdx, wIdx, _windowRendering[mIdx][wIdx].y(),
+        addOutOfBoundsArea_vertical(wIdx, _windowRendering[wIdx].y(),
             extent_y);
     }
 }
 
-void MonitorBox::addOutOfBoundsArea_vertical(unsigned int mIdx, unsigned int wIdx,
+void MonitorBox::addOutOfBoundsArea_vertical(unsigned int wIdx,
                                                                qreal bounds, qreal extent)
 {
-    _outOfBoundsRect[mIdx][wIdx].push_back({
-        _windowRendering[mIdx][wIdx].x(),
+    _outOfBoundsRect[wIdx].push_back({
+        _windowRendering[wIdx].x(),
         bounds,
-        _windowRendering[mIdx][wIdx].width(),
+        _windowRendering[wIdx].width(),
         extent
     });
 }

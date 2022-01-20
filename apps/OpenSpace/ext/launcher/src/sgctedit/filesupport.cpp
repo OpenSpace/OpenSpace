@@ -1,11 +1,11 @@
 #include "sgctedit/filesupport.h"
 
 FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
-                         std::vector<Display*>& displays, Orientation* orientation,
+                         Display* display, Orientation* orientation,
                          std::vector<sgct::config::Window>& windowList,
                          sgct::config::Cluster& cluster, std::function<void(bool)> cb)
     : _monitors(monitorList)
-    , _displayWidgets(displays)
+    , _displayWidget(display)
     , _orientationWidget(orientation)
     , _cluster(cluster)
     , _windowList(windowList)
@@ -51,21 +51,18 @@ void FileSupport::saveCluster() {
     }
 }
 
-bool FileSupport::isWindowFullscreen(sgct::ivec2 mDims, sgct::ivec2 wDims) {
+bool FileSupport::isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims) {
+    sgct::ivec2 mDims = {_monitors[monitorIdx].width(), _monitors[monitorIdx].height()};
     return ((mDims.x == wDims.x) && (mDims.y == wDims.y));
 }
 
 int FileSupport::findGuiWindow() {
     unsigned int windowIndex = 0;
-    for (unsigned int m = 0; m < _displayWidgets.size(); ++m) {
-        if (_displayWidgets[m]) {
-            for (unsigned int w = 0; w < _displayWidgets[m]->nWindows(); ++w) {
-                if (_displayWidgets[m]->windowControls()[w]->isGuiWindow()) {
-                    return windowIndex;
-                }
-                windowIndex++;
-            }
+    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
+        if (_displayWidget->windowControls()[w]->isGuiWindow()) {
+            return windowIndex;
         }
+        windowIndex++;
     }
     return -1;
 }
@@ -75,62 +72,58 @@ void FileSupport::saveWindows() {
     bool isOneOfWindowsSetAsWebGui = (webGuiWindowIndex >= 0);
 
     unsigned int windowIndex = 0;
-    for (unsigned int m = 0; m < _displayWidgets.size(); ++m) {
-        if (_displayWidgets[m]) {
-            for (unsigned int w = 0; w < _displayWidgets[m]->nWindows(); ++w) {
-                _windowList.push_back(sgct::config::Window());
-                _windowList.back().viewports.push_back(sgct::config::Viewport());
-                _windowList.back().viewports.back().isTracked = true;
-                _windowList.back().viewports.back().position = {0.0, 0.0};
-                _windowList.back().viewports.back().size = {1.0, 1.0};
-                int projectionIdx
-                    = _displayWidgets[m]->windowControls()[w]->projectionSelectedIndex();
-                bool isSpoutSelected
-                    = _displayWidgets[m]->windowControls()[w]->isSpoutSelected();
+    for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
+        _windowList.push_back(sgct::config::Window());
+        _windowList.back().viewports.push_back(sgct::config::Viewport());
+        _windowList.back().viewports.back().isTracked = true;
+        _windowList.back().viewports.back().position = {0.0, 0.0};
+        _windowList.back().viewports.back().size = {1.0, 1.0};
+        int projectionIdx
+            = _displayWidget->windowControls()[w]->projectionSelectedIndex();
+        bool isSpoutSelected
+            = _displayWidget->windowControls()[w]->isSpoutSelected();
 
-                saveProjectionInformation(
-                    isSpoutSelected,
-                    projectionIdx,
-                    _displayWidgets[m]->windowControls()[w],
-                    _windowList.back().viewports.back()
-                );
-                _windowList.back().size
-                    = _displayWidgets[m]->windowControls()[w]->windowSize();
-                _windowList.back().pos
-                    = _displayWidgets[m]->windowControls()[w]->windowPos();
-                _windowList.back().isDecorated
-                    = _displayWidgets[m]->windowControls()[w]->isDecorated();
-                bool isFullScreen = isWindowFullscreen(
-                    _displayWidgets[m]->monitorResolution(),
-                    _displayWidgets[m]->windowControls()[w]->windowSize()
-                );
-                if (isFullScreen) {
-                    _windowList.back().isFullScreen = true;
-                }
-                if (isOneOfWindowsSetAsWebGui) {
-                    if (windowIndex == webGuiWindowIndex) {
-                        _windowList.back().draw2D = true;
-                        _windowList.back().draw3D = false;
-                        _windowList.back().viewports.back().isTracked = false;
-                        _windowList.back().tags.push_back("GUI");
-                    }
-                    else {
-                        _windowList.back().draw2D = false;
-                        _windowList.back().draw3D = true;
-                    }
-                }
-                else {
-                        _windowList.back().draw2D = true;
-                        _windowList.back().draw3D = true;
-                        _windowList.back().viewports.back().isTracked = true;
-                }
-                if (!_displayWidgets[m]->windowControls()[w]->windowName().empty()) {
-                    _windowList.back().name
-                        = _displayWidgets[m]->windowControls()[w]->windowName();
-                }
-                _windowList.back().id = windowIndex++;
+        saveProjectionInformation(
+            isSpoutSelected,
+            projectionIdx,
+            _displayWidget->windowControls()[w],
+            _windowList.back().viewports.back()
+        );
+        _windowList.back().size
+            = _displayWidget->windowControls()[w]->windowSize();
+        _windowList.back().pos
+            = _displayWidget->windowControls()[w]->windowPos();
+        _windowList.back().isDecorated
+            = _displayWidget->windowControls()[w]->isDecorated();
+        bool isFullScreen = isWindowFullscreen(
+            _displayWidget->windowControls()[w]->monitorNum(),
+            _displayWidget->windowControls()[w]->windowSize()
+        );
+        if (isFullScreen) {
+            _windowList.back().isFullScreen = true;
+        }
+        if (isOneOfWindowsSetAsWebGui) {
+            if (windowIndex == webGuiWindowIndex) {
+                _windowList.back().draw2D = true;
+                _windowList.back().draw3D = false;
+                _windowList.back().viewports.back().isTracked = false;
+                _windowList.back().tags.push_back("GUI");
+            }
+            else {
+                _windowList.back().draw2D = false;
+                _windowList.back().draw3D = true;
             }
         }
+        else {
+            _windowList.back().draw2D = true;
+            _windowList.back().draw3D = true;
+            _windowList.back().viewports.back().isTracked = true;
+        }
+        if (!_displayWidget->windowControls()[w]->windowName().empty()) {
+            _windowList.back().name
+                = _displayWidget->windowControls()[w]->windowName();
+        }
+        _windowList.back().id = windowIndex++;
     }
 }
 

@@ -24,16 +24,14 @@
 
 class Display : public QWidget
 {
-    Q_OBJECT
-
+Q_OBJECT
 public:
-    explicit Display(unsigned int monitorIdx, MonitorBox* monitorRenderBox,
-         std::vector<QRect>& monitorSizeList, unsigned int numWindowsInit, bool showLabel,
-         std::function<void(unsigned int)> webGuiCallback);
+    explicit Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
+        std::function<void(unsigned int)> webGuiCallback, unsigned int nMaxWindows,
+        QString* winColors);
     ~Display();
     std::vector<WindowControl*> windowControls();
     unsigned int nWindows();
-    sgct::ivec2 monitorResolution();
     void uncheckWebGuiOptions();
     void setindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
 
@@ -44,27 +42,29 @@ private slots:
 private:
     void initializeWindowControl();
     void removeWindowControl();
-    void initializeLayout(bool showLabel, unsigned int numWindowsInit);
-    void showWindows(unsigned int nWindowControlsDisplayed);
+    void initializeLayout();
+    void showWindows();
     void addDisplayLayout(unsigned int column, MonitorBox* monBox, QVBoxLayout* layout);
     std::function<void(unsigned int)> _webGuiCheckCallback;
     std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
+    QString* _winColors;
     std::vector<WindowControl*> _windowControl;
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
-    QLabel* _labelMonNum = nullptr;
+    unsigned int _nMaxWindows = 3;
+    unsigned int _nMonitors = 1;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
     MonitorBox* _monBox;
     QVBoxLayout* _layout = nullptr;
     QHBoxLayout* _layoutMonBox = nullptr;
-    QHBoxLayout* _layoutMonNumLabel = nullptr;
     QHBoxLayout* _layoutMonButton = nullptr;
     QHBoxLayout* _layoutWindows = nullptr;
     std::vector<QVBoxLayout*> _winCtrlLayouts;
     std::vector<QWidget*> _layoutWindowWrappers;
+    std::vector<QFrame*> _frameBorderLines;
     QFrame* _borderFrame = nullptr;
 };
 

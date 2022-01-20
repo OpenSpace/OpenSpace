@@ -2,11 +2,14 @@
 #include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
 
-WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-                                    QRect& widgetDims, QRect& monitorDims, QWidget *parent)
-    : _monIndex(monitorIndex)
+WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
+             unsigned int windowIndex, QRect& widgetDims, std::vector<QRect>& monitorDims,
+                                                      QString* winColors, QWidget *parent)
+    : _nMonitors(nMonitors)
+    , _monIndex(monitorIndex)
     , _index(windowIndex)
-    , _monitorResolution(monitorDims)
+    , _monitorResolutions(monitorDims)
+    , _colorsForWindows(winColors)
     , QWidget(parent)
 {
     _windowDims = defaultWindowSizes[windowIndex];
@@ -30,6 +33,10 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     _size_y->setValidator(_validatorSize_y);
     _offset_x->setValidator(_validatorOffset_x);
     _offset_y->setValidator(_validatorOffset_y);
+
+    _comboMonitorSelect = new QComboBox(this);
+    _comboMonitorSelect->addItems(_monitorNames);
+    _comboMonitorSelect->setCurrentIndex(_monIndex);
 
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
@@ -62,6 +69,8 @@ WindowControl::WindowControl(unsigned int monitorIndex, unsigned int windowIndex
     connect(_offset_y, SIGNAL(textChanged(const QString&)), this,
             SLOT(onOffsetYChanged(const QString&)));
 
+    connect(_comboMonitorSelect, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(onMonitorChanged(int)));
     connect(_comboProjection, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onProjectionChanged(int)));
     connect(_checkBoxSpoutOutput, SIGNAL(stateChanged(int)),
@@ -79,12 +88,10 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
 
     _labelWinNum = new QLabel();
     _labelWinNum->setText("Window " + QString::number(_index + 1));
-    if (_index == 1) {
-        _labelWinNum->setStyleSheet("QLabel { color : #CD6D1D; }");
-    }
-    else {
-        _labelWinNum->setStyleSheet("QLabel { color : #1C1B8B; }");
-    }
+    QString colorStr = "QLabel { color : ";
+    colorStr += _colorsForWindows ? _colorsForWindows[_index] : "#FFFFFF";
+    colorStr += "; }";
+    _labelWinNum->setStyleSheet(colorStr);
 
     _layoutWinNum = new QHBoxLayout();
     _layoutWinNum->addStretch(1);
@@ -101,6 +108,16 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutName->addWidget(_windowName);
     _layoutName->addStretch(1);
     _layoutWindowCtrl->addLayout(_layoutName);
+
+    if (_nMonitors > 1) {
+        _layoutMonitorNum = new QHBoxLayout();
+        _layoutMonitorNum->addWidget(_comboMonitorSelect);
+        _layoutMonitorNum->addStretch(1);
+        _layoutWindowCtrl->addLayout(_layoutMonitorNum);
+    }
+    else {
+        _comboMonitorSelect->setVisible(false);
+    }
     _size_x->setFixedWidth(_lineEditWidthFixed);
     _size_y->setFixedWidth(_lineEditWidthFixed);
     _labelSize = new QLabel(this);
@@ -272,8 +289,8 @@ void WindowControl::onOffsetYChanged(const QString& newText) {
 void WindowControl::onFullscreenClicked() {
     _offset_x->setText("0");
     _offset_y->setText("0");
-    _size_x->setText(QString::number(_monitorResolution.width()));
-    _size_y->setText(QString::number(_monitorResolution.height()));
+    _size_x->setText(QString::number(_monitorResolutions[_monIndex].width()));
+    _size_y->setText(QString::number(_monitorResolutions[_monIndex].height()));
 }
 
 void WindowControl::enableGuiWindowSelection(bool enabled) {
@@ -316,6 +333,13 @@ void WindowControl::enableProjectionOption(T* comboModel, int selectionIndex, bo
     auto* item = comboModel->item(selectionIndex);
     if (item) {
         item->setEnabled(enable);
+    }
+}
+
+void WindowControl::onMonitorChanged(int newSelection) {
+    _monIndex = newSelection;
+    if (_windowChangeCallback) {
+        _windowChangeCallback(_monIndex, _index, _windowDims);
     }
 }
 
@@ -484,6 +508,10 @@ float WindowControl::heightOffset() {
     return _lineHeightOffset->text().toFloat();
 }
 
+unsigned int WindowControl::monitorNum() {
+    return _monIndex;
+}
+
 WindowControl::~WindowControl()
 {
     delete _size_x;
@@ -532,6 +560,7 @@ WindowControl::~WindowControl()
     delete _borderProjectionGroup;
     delete _layoutCheckboxesFull2;
     delete _layoutCheckboxesFull1;
+    delete _layoutMonitorNum;
     delete _layoutWinNum;
     delete _layoutWindowCtrl;
     delete _layoutFullWindow;
