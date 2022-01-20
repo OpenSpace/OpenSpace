@@ -427,8 +427,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Stops a path, if one is being played"
             },
             {
-                "goTo",
-                &luascriptfunctions::goTo,
+                "flyTo",
+                &luascriptfunctions::flyTo,
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
                 "double specifies the duration of the motion. If the optional bool is "
@@ -436,8 +436,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "node. Either of the optional parameters can be left out."
             },
             {
-                "goToHeight",
-                &luascriptfunctions::goToHeight,
+                "flyToHeight",
+                &luascriptfunctions::flyToHeight,
                 "string, double [, bool, double]",
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
@@ -447,8 +447,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "parameters can be left out."
             },
              {
-                "goToNavigationState",
-                &luascriptfunctions::goToNavigationState,
+                "flyToNavigationState",
+                &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
                 "The optional double specifies the target duration of the motion. Note "
@@ -459,7 +459,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "createPath",
                 &luascriptfunctions::createPath,
                 "table",
-                "Create the path as described by the lua table input argument"
+                "Create a camera path as described by the lua table input argument"
             },
         }
     };
