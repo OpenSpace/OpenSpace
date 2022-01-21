@@ -65,14 +65,14 @@ void PathCurve::initializeParameterData() {
     _lengthSums.clear();
     _parameterSamples.clear();
 
+    const double max = static_cast<double>(_nSegments);
+
     // Evenly space out parameter intervals
     _curveParameterSteps.reserve(_nSegments + 1);
-    const double dt = 1.0 / _nSegments;
-    _curveParameterSteps.push_back(0.0);
-    for (unsigned int i = 1; i < _nSegments; i++) {
-        _curveParameterSteps.push_back(dt * i);
+    for (double i = 0.0; i < max; i += 1.0) {
+        _curveParameterSteps.push_back(i);
     }
-    _curveParameterSteps.push_back(1.0);
+    _curveParameterSteps.push_back(max);
 
     // Arc lengths
     _lengthSums.reserve(_nSegments + 1);
@@ -87,27 +87,32 @@ void PathCurve::initializeParameterData() {
 
     // Compute a map of arc lengths s and curve parameters u, for reparameterization
     _parameterSamples.reserve(NrSamplesPerSegment * _nSegments + 1);
-    const double uStep = 1.0 / (_nSegments * NrSamplesPerSegment);
+
+    const double uStep = 1.0 / static_cast<double>(NrSamplesPerSegment);
+
     for (unsigned int i = 0; i < _nSegments; i++) {
         double uStart = _curveParameterSteps[i];
         double sStart = _lengthSums[i];
         for (int j = 0; j < NrSamplesPerSegment; ++j) {
             double u = uStart + j * uStep;
             double s = sStart + arcLength(uStart, u);
+            // TODO: remove samples that are indistinguishable
+
             _parameterSamples.push_back({ u, s });
         }
     }
-    _parameterSamples.push_back({ 1.0, _totalLength });
+
+    _parameterSamples.push_back({ max, _totalLength });
 }
 
 // Compute the curve parameter from an arc length value, using a combination of
 // Newton's method and bisection. Source:
 // https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf
 // Input s is a length value, in the range [0, _totalLength]
-// Returns curve parameter in range [0, 1]
+// Returns curve parameter in range [0, _nSegments]
 double PathCurve::curveParameter(double s) const {
     if (s <= 0.0) return 0.0;
-    if (s >= _totalLength) return 1.0;
+    if (s >= _totalLength) return static_cast<double>(_nSegments);
 
     unsigned int segmentIndex = 1;
     while (s > _lengthSums[segmentIndex]) {
@@ -174,12 +179,15 @@ double PathCurve::curveParameter(double s) const {
     return u;
 }
 
+// TODO: correct?
 double PathCurve::approximatedDerivative(double u, double h) const {
+    const double max = _curveParameterSteps.back();
+
     if (u <= h) {
         return (1.0 / h) * glm::length(interpolate(0.0 + h) - interpolate(0.0));
     }
-    if (u >= 1.0 - h) {
-        return (1.0 / h) * glm::length(interpolate(1.0) - interpolate(1.0 - h));
+    if (u >= max - h) {
+        return (1.0 / h) * glm::length(interpolate(max) - interpolate(max - h));
     }
     return (0.5 / h) * glm::length(interpolate(u + h) - interpolate(u - h));
 }
@@ -197,12 +205,14 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) const {
 }
 
 glm::dvec3 PathCurve::interpolate(double u) const {
-    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable must be in range [0,1]");
+    const double max = _curveParameterSteps.back();
+
+    ghoul_assert(u >= 0 && u <= max, "Interpolation variable must be in range [0,_nSegments]");
 
     if (u < 0.0) {
         return _points[1];
     }
-    if (u > 1.0) {
+    if (u > max) {
         return *(_points.end() - 2);
     }
 
@@ -215,6 +225,7 @@ glm::dvec3 PathCurve::interpolate(double u) const {
     double segmentStart = _curveParameterSteps[index];
     double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     double uSegment = (u - segmentStart) / segmentDuration;
+    // TODO make sure scaling is correct
 
     return ghoul::interpolateCatmullRom(
         uSegment,
