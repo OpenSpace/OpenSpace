@@ -256,6 +256,10 @@ void TimeManager::progressTime(double dt) {
         // will override any timeline operations.
         _currentTime.data().setTime(_timeNextFrame.j2000Seconds());
         _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
+
+        // Also make sure the script scheduler is up to date
+        global::scriptScheduler->setCurrentTime(_timeNextFrame.j2000Seconds());
+
         _shouldSetTime = false;
 
         using K = CallbackHandle;
@@ -272,6 +276,7 @@ void TimeManager::progressTime(double dt) {
     std::function<bool(const KeyframeBase&, double)> comparisonFunc =
         (global::sessionRecording->isPlayingBack()) ?
         &compareKeyframeTimeWithTime_playbackWithFrames : &compareKeyframeTimeWithTime;
+
     auto firstFutureKeyframe = std::lower_bound(
         keyframes.begin(),
         keyframes.end(),
@@ -406,7 +411,6 @@ void TimeManager::setTimeNextFrame(Time t) {
     _shouldSetTime = true;
     _timeNextFrame = std::move(t);
     clearKeyframes();
-    global::scriptScheduler->setCurrentTime(t.j2000Seconds());
 }
 
 void TimeManager::setDeltaTime(double deltaTime) {
