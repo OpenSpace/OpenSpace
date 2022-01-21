@@ -1,13 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local assetHelper = asset.require("util/asset_helper")
+local sharedSssb = asset.require("./sssb_shared")
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(
   asset,
-  'outer_main_belt_asteroid',
-  'sssb_data_outer_main_belt_asteroid'
+  "outer_main_belt_asteroid",
+  "sssb_data_outer_main_belt_asteroid"
 )
 local object = sharedSssb.createSssbGroupObject(
-  'sssb_data_outer_main_belt_asteroid.csv',
+  "sssb_data_outer_main_belt_asteroid.csv",
   "Outer Main Asteroid Belt",
   filepath,
   { 0.4, 0.4, 1.0 }

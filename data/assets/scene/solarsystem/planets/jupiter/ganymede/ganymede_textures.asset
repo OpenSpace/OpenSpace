@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Ganymede Textures",
-  Type = "HttpSynchronization",
-  Identifier = "ganymede_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

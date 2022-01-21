@@ -1,7 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local models = asset.require("./model" ).modelFolder;
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+local models = asset.syncedResource({
+  Name = "Voyager Model",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_model",
+  Version = 1
+})
 
 local kernels = asset.syncedResource({
   Name = "Voyager 2 Kernels",
@@ -11,16 +17,16 @@ local kernels = asset.syncedResource({
 })
 
 local Kernels = {
-  kernels .. '/vg2_v02.tf',
-  kernels .. '/vg200022.tsc',
-  kernels .. '/Voyager_2.m05016u.merged.bsp',
-  kernels .. '/voyager_2.ST+1992_m05208u.merged.bsp',
-  kernels .. '/vgr2_jup230.bsp',
-  kernels .. '/vgr2_sat337.bsp',
-  kernels .. '/vgr2_ura083.bsp',
-  kernels .. '/vgr2_nep081.bsp',
-  kernels .. '/vgr2_super.bc',
-  kernels .. '/vgr2_super_v2.bc'
+  kernels .. "vg2_v02.tf",
+  kernels .. "vg200022.tsc",
+  kernels .. "Voyager_2.m05016u.merged.bsp",
+  kernels .. "voyager_2.ST+1992_m05208u.merged.bsp",
+  kernels .. "vgr2_jup230.bsp",
+  kernels .. "vgr2_sat337.bsp",
+  kernels .. "vgr2_ura083.bsp",
+  kernels .. "vgr2_nep081.bsp",
+  kernels .. "vgr2_super.bc",
+  kernels .. "vgr2_super_v2.bc"
 }
 
 local RotationMatrix = {
@@ -76,7 +82,7 @@ local Voyager2Main = {
   Parent = Voyager2.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-main.obj",
+    GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
@@ -91,7 +97,7 @@ local Voyager2Antenna = {
   Parent = Voyager2.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-antenna.obj",
+    GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },

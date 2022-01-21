@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,6 @@
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
-
 #include <optional>
 
 namespace openspace {
@@ -53,13 +52,15 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-class InputState;
+class MouseInputState;
+class KeyboardInputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
     OrbitalNavigator();
 
-    void updateStatesFromInput(const InputState& inputState, double deltaTime);
+    void updateStatesFromInput(const MouseInputState& mouseInputState,
+        const KeyboardInputState& keyboardInputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
@@ -147,6 +148,7 @@ private:
     // Reset camera direction to the aim node.
     properties::TriggerProperty _retargetAim;
 
+    properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
 

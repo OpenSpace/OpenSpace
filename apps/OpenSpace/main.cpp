@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -369,27 +369,34 @@ void mainPreSyncFunc() {
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+
+            // Check axes and buttons
+            glfwGetJoystickAxes(i, &state.nAxes);
+            if (state.nAxes > JoystickInputState::MaxAxes) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                    "All excess axes are ignored",
+                    state.name, state.nAxes, JoystickInputState::MaxAxes
+                ));
+            }
+            glfwGetJoystickButtons(i, &state.nButtons);
+            if (state.nButtons > JoystickInputState::MaxButtons) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                    "supported. All excess buttons are ignored",
+                    state.name, state.nButtons, JoystickInputState::MaxButtons
+                ));
+            }
         }
 
         const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                "All excess axes are ignored",
-                state.name, state.nAxes, JoystickInputState::MaxAxes
-            ));
             state.nAxes = JoystickInputState::MaxAxes;
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
         const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-
         if (state.nButtons > JoystickInputState::MaxButtons) {
-            LWARNING(fmt::format(
-                "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                "supported. All excess buttons are ignored",
-                state.name, state.nButtons, JoystickInputState::MaxButtons
-            ));
             state.nButtons = JoystickInputState::MaxButtons;
         }
 
@@ -858,11 +865,11 @@ void setSgctDelegateFunctions() {
             currentWindow->viewports().front()->nonLinearProjection()
         ) != nullptr;
     };
-    sgctDelegate.takeScreenshot = [](bool applyWarping) {
+    sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped
 
         Settings::instance().setCaptureFromBackBuffer(applyWarping);
-        Engine::instance().takeScreenshot();
+        Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {

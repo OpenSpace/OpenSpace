@@ -6,11 +6,11 @@ local kernelsFolder = asset.syncedResource({
 })
 
 local kernels = {
-  kernelsFolder .. "/moon_080317.tf",
-  kernelsFolder .. "/apollo_naif_ids.tf",
-  kernelsFolder .. "/moon_pa_de421_1900-2050.bpc",
-  kernelsFolder .. '/apollo11_orbits_full9km.bsp',
-  kernelsFolder .. '/apollo11_orbits_lm9km.bsp',
+  kernelsFolder .. "moon_080317.tf",
+  kernelsFolder .. "apollo_naif_ids.tf",
+  kernelsFolder .. "moon_pa_de421_1900-2050.bpc",
+  kernelsFolder .. "apollo11_orbits_full9km.bsp",
+  kernelsFolder .. "apollo11_orbits_lm9km.bsp"
 }
 
-asset.export('kernels', kernels)
+asset.export("kernels", kernels)

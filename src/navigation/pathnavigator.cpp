@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -200,7 +200,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached end of path");
-        _isPlaying = false;
+        handlePathEnd();
 
         if (_applyIdleBehaviorOnFinish) {
             constexpr const char* ApplyIdleBehaviorScript =
@@ -263,10 +263,16 @@ void PathNavigator::startPath() {
         return;
     }
 
-    //OBS! Until we can handle simulation time: early out if not paused
+    // Always pause the simulation time when flying, to aovid problem with objects
+    // moving. However, keep track of whether the time was running before the path
+    // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        LERROR("Simulation time must be paused to run a camera path");
-        return;
+        global::timeManager->setPause(true);
+        _startSimulationTimeOnFinish = true;
+        LINFO(
+            "Pausing time simulation during path traversal. "
+            "Will unpause once the camera path is finished"
+        );
     }
 
     LINFO("Starting path");
@@ -280,9 +286,7 @@ void PathNavigator::abortPath() {
         LWARNING("No camera path is playing");
         return;
     }
-    _isPlaying = false;
-    clearPath(); // TODO: instead of clearing this could be handled better
-
+    handlePathEnd();
     LINFO("Aborted camera path");
 }
 
@@ -327,6 +331,16 @@ const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
     }
 
     return _relevantNodes;
+}
+
+void PathNavigator::handlePathEnd() {
+    _isPlaying = false;
+
+    if (_startSimulationTimeOnFinish) {
+        global::timeManager->setPause(false);
+    }
+    _startSimulationTimeOnFinish = false;
+    clearPath();
 }
 
 void PathNavigator::findRelevantNodes() {
@@ -413,8 +427,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "Stops a path, if one is being played"
             },
             {
-                "goTo",
-                &luascriptfunctions::goTo,
+                "flyTo",
+                &luascriptfunctions::flyTo,
                 "string [, bool, double]",
                 "Move the camera to the node with the specified identifier. The optional "
                 "double specifies the duration of the motion. If the optional bool is "
@@ -422,8 +436,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "node. Either of the optional parameters can be left out."
             },
             {
-                "goToHeight",
-                &luascriptfunctions::goToHeight,
+                "flyToHeight",
+                &luascriptfunctions::flyToHeight,
                 "string, double [, bool, double]",
                 "Move the camera to the node with the specified identifier. The second "
                 "argument is the desired target height above the target node's bounding "
@@ -433,8 +447,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "parameters can be left out."
             },
              {
-                "goToNavigationState",
-                &luascriptfunctions::goToNavigationState,
+                "flyToNavigationState",
+                &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
                 "Create a path to the navigation state described by the input table. "
                 "The optional double specifies the target duration of the motion. Note "
@@ -445,7 +459,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "createPath",
                 &luascriptfunctions::createPath,
                 "table",
-                "Create the path as described by the lua table input argument"
+                "Create a camera path as described by the lua table input argument"
             },
         }
     };

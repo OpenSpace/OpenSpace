@@ -1,12 +1,12 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local orbit = asset.syncedResource({
   Name = "Comet C/2019 Y4 ATLAS",
   Type = "HttpSynchronization",
   Identifier = "horizons_c2019y4atlas",
   Version = 1
-}) .. "/c2019y4atlas.txt"
+}) .. "c2019y4atlas.txt"
 
 local C2019Y4AtlasTrail = {
   Identifier = "C2019Y4AtlasTrail",
@@ -42,7 +42,7 @@ local C2019Y4AtlasPosition = {
   GUI = {
     Name = "C/2019 Y4 Atlas",
     Path = "/Solar System/Comets",
-    Description = 'This is the position for C/2019 Y4 Atlas'
+    Description = "This is the position for C/2019 Y4 Atlas"
   }
 }
 
@@ -55,7 +55,7 @@ asset.meta = {
   Name = "C/2019 Y4 Atlas",
   Version = "1.0",
   Description = [[ This asset contains the trail  and position of C/2019 Y4 Atlas from
-    1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons']],
+    1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
   License = "NASA",

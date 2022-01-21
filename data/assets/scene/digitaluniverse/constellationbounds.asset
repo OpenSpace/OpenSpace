@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -19,8 +19,8 @@ local object = {
   Renderable = {
     Type = "RenderableConstellationBounds",
     Enabled = false,
-    File = data .. "/bound_20.dat",
-    ConstellationFile = data .. "/constellations.dat"
+    File = data .. "bound_20.dat",
+    ConstellationFile = data .. "constellations.dat"
     -- ConstellationSelection = zodiacs
   },
   Transform = {

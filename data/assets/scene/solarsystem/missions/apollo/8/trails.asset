@@ -1,8 +1,8 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
-local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local kernels = asset.require('./kernels').kernels
+local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local kernels = asset.require("./kernels").kernels
 
 local apolloSpiceId = "-908"
 

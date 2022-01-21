@@ -1,4 +1,4 @@
-local marsAsset = asset.require("./../../mars").Mars
+local marsAsset = asset.require("../../mars").Mars
 local globeIdentifier = marsAsset.Identifier
 
 local layer ={

@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
 
 
 
@@ -355,7 +355,7 @@ local Rex = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-3.141502/2, 0, -3.141502/2}
+      Rotation = { -math.pi/2, 0.0, -math.pi/2 }
     },
     Translation = {
       Type = "StaticTranslation",
