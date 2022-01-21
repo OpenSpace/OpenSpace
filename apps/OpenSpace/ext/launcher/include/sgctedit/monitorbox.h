@@ -30,37 +30,26 @@ public:
     void setNumWindowsDisplayed(unsigned int nWindows);
     void windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
             const QRectF& newDimensions);
-    void addWindowControl(WindowControl* wCtrl);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
     void paintWidgetBorder(QPainter& painter, int width, int height);
-    void paintMonitorOutlines(QPainter& painter);
+    void paintMonitorBackgrounds(QPainter& painter);
     void paintWindow(QPainter& painter, unsigned int winIdx);
-    void paintOutOfBoundsAreas(QPainter& painter, unsigned int winIdx);
+    void paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx);
     void paintWindowNumber(QPainter& painter, unsigned int winIdx);
     void setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
         bool visibleBorder);
     void computeScaledResolution_landscape(float aspectRatio, float maxWidth);
     void computeScaledResolution_portrait(float aspectRatio, float maxHeight);
-    void computeOutOfBounds_horizontal(unsigned int mIdx, unsigned int wIdx);
-    void computeOutOfBounds_vertical(unsigned int mIdx, unsigned int wIdx);
-    void addOutOfBoundsArea_horizontal(unsigned int wIdx, qreal bounds, qreal extent);
-    void addOutOfBoundsArea_vertical(unsigned int wIdx, qreal bounds, qreal extent);
     unsigned int _maxNumMonitors = 2;
     std::vector<QRect> _monitorResolution;
     //std::vector<QRectF> _monitorRendering;
     std::vector<QRectF> _monitorDimensionsScaled;
 
     std::vector<QRectF> _windowResolutions;
-    std::vector<std::vector<QRectF>> _outOfBoundsRect = {
-        {{0.0, 0.0, 0.0, 0.0}},
-        {{0.0, 0.0, 0.0, 0.0}},
-        {{0.0, 0.0, 0.0, 0.0}},
-        {{0.0, 0.0, 0.0, 0.0}}
-    };
     std::vector<QRectF> _windowRendering = {
         {0.0, 0.0, 0.0, 0.0},
         {0.0, 0.0, 0.0, 0.0},
