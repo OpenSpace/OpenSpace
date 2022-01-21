@@ -83,7 +83,7 @@ private:
     void setViewStatus(Peer& peer, ParallelConnection::ViewStatus viewStatus);
     void sendIndependentSessionOn();
     void sendIndependentSessionOff();
-    void sendViewStatusUpdate(Peer& peer);
+    void sendViewStatusChange(Peer& peer);
 
     bool _independentViewAllowed = false;
 

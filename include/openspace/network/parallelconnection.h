@@ -57,7 +57,7 @@ public:
         HostshipResignation,
         ViewRequest,
         ViewResignation,
-        ViewStatus,
+        ViewStatusChange,
         IndependentSessionOn,
         IndependentSessionOff,
         NConnections,

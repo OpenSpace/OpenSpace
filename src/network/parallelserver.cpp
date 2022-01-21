@@ -286,13 +286,15 @@ void ParallelServer::handleViewRequest(Peer& peer) {
         setViewStatus(peer, ParallelConnection::ViewStatus::IndependentView);
         LINFO(fmt::format("{} is now using host-independent viewpoint", peer.id));
 
-        sendViewStatusUpdate(peer);
+        sendViewStatusChange(peer);
     }
 }
 
 void ParallelServer::handleViewResignation(Peer& peer) {
     setViewStatus(peer, ParallelConnection::ViewStatus::HostView);
     LINFO(fmt::format("{} is now using the host's viewpoint", peer.id));
+
+    sendViewStatusChange(peer);
 }
 
 void ParallelServer::handleIndependentSessionOn(Peer& peer) {
@@ -488,7 +490,7 @@ void ParallelServer::sendIndependentSessionOff() {
 }
 
 // Sends ViewStatus information about the given peer to all clients.
-void ParallelServer::sendViewStatusUpdate(Peer& peer) {
+void ParallelServer::sendViewStatusChange(Peer& peer) {
     std::vector<char> data;
     const uint32_t outViewStatus = static_cast<uint32_t>(peer.viewStatus);
     data.insert(
@@ -510,7 +512,7 @@ void ParallelServer::sendViewStatusUpdate(Peer& peer) {
         peer.name.data() + outPeerNameSize
     );
 
-    sendMessageToAll(ParallelConnection::MessageType::ViewStatus, data);
+    sendMessageToAll(ParallelConnection::MessageType::ViewStatusChange, data);
 }
 
 size_t ParallelServer::nConnections() const {

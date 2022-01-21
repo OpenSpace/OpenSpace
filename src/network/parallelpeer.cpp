@@ -39,6 +39,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/fmt.h>
 
 #include "parallelpeer_lua.inl"
@@ -269,7 +270,7 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
         case ParallelConnection::MessageType::IndependentSessionOff:
             independentOffMessageReceived();
             break;
-        case ParallelConnection::MessageType::ViewStatus:
+        case ParallelConnection::MessageType::ViewStatusChange:
             viewStatusMessageReceived(message.content);
             break;
         default:
@@ -508,8 +509,57 @@ void ParallelPeer::independentOffMessageReceived() {
     LINFO(fmt::format("The host is now NOT allowing host-independent viewpoints"));
 }
 
-void viewStatusMessageReceived(const std::vector<char>& message) {
+// Receive message with name and viewStatus whenever someone changes to host or independent view
+void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
+    size_t pointer = 0;
+
+    uint32_t viewStatusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    const ParallelConnection::ViewStatus viewStatus = static_cast<ParallelConnection::ViewStatus>(
+        viewStatusIn
+    );
+
+    if (viewStatus == ParallelConnection::ViewStatus::Host) {
+        return; // Should never happen.
+    }
+
+    pointer += sizeof(uint32_t);
+
+    const size_t nameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    pointer += sizeof(uint32_t);
+
+    std::string name;
+    if (nameSize > 0) {
+        name = std::string(&message[pointer], nameSize);
+    }
+    pointer += nameSize;
+
+    std::string script;
     
+    if (viewStatus == ParallelConnection::ViewStatus::HostView) {
+        if (name == std::string(_name)) {
+            // Delete host node since you are now sharing the host's view.
+            script = "openspace.removeSceneGraphNode(" + std::string(_hostName) + ")";
+        }
+        else {
+            // Delete [name]'s node since they are now sharing the host's view.
+            script = "openspace.removeSceneGraphNode(" + std::string(name) + ")";
+        }
+    }
+    else { // viewStatus == IndependentView
+        std::string dictionary;
+
+        if (name == std::string(_name)) {
+            // Create host node since you now have your own view.
+            dictionary = ghoul::formatLua(viewerDictionary(_hostName));
+        }
+        else {
+            // Create node for [name] since they now have their own view.
+            dictionary = ghoul::formatLua(viewerDictionary(name));
+        }
+        script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
+    }
+
+    global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
 }
 
 void ParallelPeer::handleCommunication() {
@@ -730,7 +780,6 @@ void ParallelPeer::setSessionStatus() {
 void ParallelPeer::setViewStatus() {
     if (_independentView && !isHost()) {
         if (_independentViewAllowed) {
-            // create nodes for host and other ind.viewers
             _viewStatus = ParallelConnection::ViewStatus::IndependentView;
             
             std::vector<char> buffer;
@@ -924,36 +973,32 @@ void ParallelPeer::deleteNode() {
     );
 }
 
-// Create a node with identifier tied to the name of the peer belonging to the node
-ghoul::Dictionary ParallelPeer::createDictionary(std::string nodeName) {
-
-    ghoul::Dictionary identifier;
-    ghoul::Dictionary path;
+// Dictionary with identifier tied to the name of the peer belonging to the node
+ghoul::Dictionary ParallelPeer::viewerDictionary(std::string identifier) {
+    ghoul::Dictionary node;
     ghoul::Dictionary gui;
-    ghoul::Dictionary translationType;
-    ghoul::Dictionary body;
-    ghoul::Dictionary translation;
-    ghoul::Dictionary renderableType;
-    ghoul::Dictionary geometryFile;
-    ghoul::Dictionary renderable;
     ghoul::Dictionary transform;
+    ghoul::Dictionary translation;
+    ghoul::Dictionary renderable;
 
-    identifier.setValue<std::string>("Identifier", "Node_" + nodeName);
+    gui.setValue<std::string>("Name", "");
+    gui.setValue<std::string>("Path", ""); // where in the gui? new category: collab?
+    gui.setValue<std::string>("Description", "");
 
-        path.setValue<std::string>("Path", ""); // Insert path
-    gui.setValue<ghoul::Dictionary>("GUI", path);
+    translation.setValue<std::string>("Type", "StaticTranslation");
+    translation.setValue<std::string>("Body", "Node_" + std::string(_name));
 
-            translationType.setValue<std::string>("Type", "StaticTranslation");
-            body.setValue<std::string>("Body", "Node_" + std::string(_name));
-        translation.setValue<ghoul::Dictionary>("Translation", (translationType, body));
+    renderable.setValue<std::string>("Type", "RenderableModel");
+    renderable.setValue<std::string>("GeometryFile", ""); // Insert model path
 
-            renderableType.setValue<std::string>("Type", "RenderableModel");
-            geometryFile.setValue<std::string>("GeometryFile", ""); // Insert model path
-        renderable.setValue<ghoul::Dictionary>("Renderable", (renderableType, geometryFile));
+    transform.setValue<ghoul::Dictionary>("Translation", translation);
+    transform.setValue<ghoul::Dictionary>("Renderable", renderable);
 
-    transform.setValue<ghoul::Dictionary>("Transform", (translation, renderable));
+    node.setValue<std::string>("Identifier", "Node_" + identifier);
+    node.setValue<ghoul::Dictionary>("GUI", gui);
+    node.setValue<ghoul::Dictionary>("Transform", transform);
 
-    return (identifier, gui, transform);
+    return node;
 }
 
 scripting::LuaLibrary ParallelPeer::luaLibrary() {
