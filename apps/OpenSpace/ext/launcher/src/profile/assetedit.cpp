@@ -27,7 +27,9 @@
 #include "profile/horizonsdialog.h"
 #include "profile/line.h"
 #include <openspace/scene/asset.h>
+#include <QComboBox>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -42,10 +44,9 @@ AssetEdit::AssetEdit(const std::string& assetName, QWidget* parent)
 }
 
 void AssetEdit::createWidgets(const std::string& assetName) {
-    QBoxLayout* layout = new QVBoxLayout(this);
-    QBoxLayout* leftLayout = new QVBoxLayout;
+    _layout = new QVBoxLayout(this);
     {
-        QBoxLayout* container = new QHBoxLayout;
+        QBoxLayout* container = new QHBoxLayout(this);
         QLabel* assetLabel = new QLabel("Asset Name:");
         assetLabel->setObjectName("profile");
         container->addWidget(assetLabel);
@@ -53,28 +54,29 @@ void AssetEdit::createWidgets(const std::string& assetName) {
         _assetEdit = new QLineEdit(QString::fromStdString(assetName));
         container->addWidget(_assetEdit);
 
-        layout->addLayout(container);
+        _layout->addLayout(container);
     }
-    layout->addWidget(new Line);
+    _layout->addWidget(new Line);
     {
-        QGridLayout* container = new QGridLayout;
-        container->setColumnStretch(1, 1);
+        QBoxLayout* container = new QHBoxLayout(this);
+        _components = new QComboBox(this);
+        _components->addItems(_supportedComponents);
+        _components->setCurrentIndex(0);
+        container->addWidget(_components);
 
-        _horizonsLabel = new QLabel("Horizons");
-        _horizonsLabel->setObjectName("heading");
-        container->addWidget(_horizonsLabel, 0, 0);
-
-        QPushButton* editHorizons = new QPushButton("Edit");
+        QPushButton* addButton = new QPushButton("Add", this);
         connect(
-            editHorizons, &QPushButton::clicked,
-            this, &AssetEdit::openHorizons
+            addButton,
+            &QPushButton::clicked,
+            this,
+            &AssetEdit::openComponent
         );
-        container->addWidget(editHorizons, 0, 2);
+        addButton->setCursor(Qt::PointingHandCursor);
+        container->addWidget(addButton);
 
-        leftLayout->addLayout(container);
+        _layout->addLayout(container);
     }
-    layout->addLayout(leftLayout, 3);
-    layout->addWidget(new Line);
+    _layout->addWidget(new Line);
     {
         QBoxLayout* footer = new QHBoxLayout;
         _errorMsg = new QLabel;
@@ -87,13 +89,79 @@ void AssetEdit::createWidgets(const std::string& assetName) {
         connect(buttons, &QDialogButtonBox::accepted, this, &AssetEdit::approved);
         connect(buttons, &QDialogButtonBox::rejected, this, &AssetEdit::reject);
         footer->addWidget(buttons);
-        layout->addLayout(footer);
+        _layout->addLayout(footer);
     }
+}
+
+void AssetEdit::openComponent() {
+    switch (_components->currentIndex()) {
+        case 0:
+            _errorMsg->setText("Choose a component to add to the asset");
+            break;
+        case 1: {
+            QBoxLayout* horizonsLayout = new QVBoxLayout(this);
+            {
+                _horizonsFileLabel = new QLabel("Horizons Translation:", this);
+                _horizonsFileLabel->setObjectName("heading");
+                horizonsLayout->addWidget(_horizonsFileLabel);
+            }
+            {
+                QBoxLayout* container = new QHBoxLayout(this);
+                QLabel* fileLabel = new QLabel("File path:", this);
+                container->addWidget(fileLabel);
+
+                _horizonsFileEdit = new QLineEdit(this);
+                container->addWidget(_horizonsFileEdit);
+
+                QPushButton* fileButton = new QPushButton("Browse", this);
+                connect(
+                    fileButton,
+                    &QPushButton::released,
+                    this,
+                    &AssetEdit::openHorizonsFile
+                );
+                fileButton->setCursor(Qt::PointingHandCursor);
+                container->addWidget(fileButton);
+
+                QPushButton* generateButton = new QPushButton("Generate", this);
+                connect(
+                    generateButton,
+                    &QPushButton::released,
+                    this,
+                    &AssetEdit::openHorizons
+                );
+                generateButton->setCursor(Qt::PointingHandCursor);
+                container->addWidget(generateButton);
+
+                horizonsLayout->addLayout(container);
+            }
+            horizonsLayout->addWidget(new Line);
+            _layout->insertLayout(_layout->count() - 3, horizonsLayout);
+            break;
+        }
+        default:
+            _errorMsg->setText("Unkown component");
+            break;
+    }
+}
+
+void AssetEdit::openHorizonsFile() {
+    std::string filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Open Horizons file"),
+        "",
+        tr("Horiozons file (*.dat)")
+    ).toStdString();
+    _horizonsFile = std::filesystem::absolute(filePath);
+    _horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
 }
 
 void AssetEdit::openHorizons() {
     _errorMsg->clear();
-    HorizonsDialog(this).exec();
+    HorizonsDialog* horizonsDialog = new HorizonsDialog(this);
+    horizonsDialog->exec();
+    _horizonsFile = horizonsDialog->file();
+    _horizonsFileEdit->setText(QString(_horizonsFile.string().c_str()));
 }
 
 void AssetEdit::approved() {

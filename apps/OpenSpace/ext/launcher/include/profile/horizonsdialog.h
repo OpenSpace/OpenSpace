@@ -46,9 +46,10 @@ public:
      * Constructor for HorizonsDialog class
      */
     HorizonsDialog(QWidget* parent);
+    std::filesystem::path file() const;
 
 private slots:
-    void openHorizonsFile();
+    void openFile();
     void openDirectory();
     void approved();
 
@@ -63,9 +64,9 @@ private:
         ErrorSize,
         ErrorTimeRange,
         ErrorNoObserver,
-        IncorrectObserver,
+        IncorrectObserver, // Observer Stations
 
-        // Erros NOT caught by the error field in the json output
+        // Erros/problems NOT caught by the error field in the json output
         MultipleObserver,
         ErrorNoTarget,
         MultipleTarget,
@@ -87,7 +88,6 @@ private:
     QNetworkAccessManager* _manager;
 
     QLineEdit* _directoryEdit = nullptr;
-    QLineEdit* _fileEdit = nullptr;
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;
     QComboBox* _chooseTargetCombo = nullptr;
@@ -101,6 +101,7 @@ private:
     std::string _endTime;
     QLineEdit* _stepEdit = nullptr;
     QComboBox* _timeTypeCombo = nullptr;
+    QLabel* _downloadLabel = nullptr;
 
     QLabel* _errorMsg = nullptr;
 };

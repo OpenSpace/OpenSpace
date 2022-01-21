@@ -268,36 +268,14 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
     _timeTypeCombo->setCurrentIndex(1);
 }
 
+std::filesystem::path HorizonsDialog::file() const {
+    return _horizonsFile;
+}
+
 void HorizonsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QLabel* localLabel = new QLabel("Select a local Horizons file:", this);
-        localLabel->setObjectName("heading");
-        layout->addWidget(localLabel);
-    }
-    {
-        QBoxLayout* container = new QHBoxLayout(this);
-        QLabel* fileLabel = new QLabel("File:", this);
-        container->addWidget(fileLabel);
-
-        _fileEdit = new QLineEdit(this);
-        container->addWidget(_fileEdit);
-
-        QPushButton* fileButton = new QPushButton("Browse", this);
-        connect(
-            fileButton,
-            &QPushButton::released,
-            this,
-            &HorizonsDialog::openHorizonsFile
-        );
-        fileButton->setCursor(Qt::PointingHandCursor);
-        container->addWidget(fileButton);
-
-        layout->addLayout(container);
-    }
-    layout->addWidget(new Line);
-    {
-        QLabel* generateLabel = new QLabel("Or generate a new Horizons file:", this);
+        QLabel* generateLabel = new QLabel("Generate a new Horizons file:", this);
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
     }
@@ -398,6 +376,11 @@ void HorizonsDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
+        _downloadLabel = new QLabel("Downloading file...", this);
+        _downloadLabel->hide();
+        layout->addWidget(_downloadLabel);
+    }
+    {
         QBoxLayout* footer = new QHBoxLayout(this);
         _errorMsg = new QLabel(this);
         _errorMsg->setObjectName("error-message");
@@ -413,7 +396,7 @@ void HorizonsDialog::createWidgets() {
     }
 }
 
-void HorizonsDialog::openHorizonsFile() {
+void HorizonsDialog::openFile() {
     std::string filePath = QFileDialog::getOpenFileName(
         this,
         tr("Open Horizons file"),
@@ -421,7 +404,7 @@ void HorizonsDialog::openHorizonsFile() {
         tr("Horiozons file (*.dat)")
     ).toStdString();
     _horizonsFile = std::filesystem::absolute(filePath);
-    _fileEdit->setText(QString(_horizonsFile.string().c_str()));
+    //_fileEdit->setText(QString(_horizonsFile.string().c_str()));
 }
 
 void HorizonsDialog::openDirectory() {
@@ -449,64 +432,54 @@ bool HorizonsDialog::isValidInput() {
     bool isValid = true;
     std::string message;
 
-    // Local file
-    if (!_fileEdit->text().isEmpty()) {
-        if (!std::filesystem::is_regular_file(_horizonsFile))
-        {
-            isValid = false;
-            message = "The selected horizons file could not be found";
-        }
-    }
     // Request
-    else {
-        // Name
-        if (_nameEdit->text().isEmpty()) {
-            isValid = false;
-            message = "Filename not selected";
-        }
+    // Name
+    if (_nameEdit->text().isEmpty()) {
+        isValid = false;
+        message = "Filename not selected";
+    }
 
-        // Directory
-        else if (_directoryEdit->text().isEmpty()) {
-            isValid = false;
-            message = "Directory not selected";
-        }
-        else if(!std::filesystem::is_directory(_directoryEdit->text().toStdString()))
-        {
-            isValid = false;
-            message = "The selected directory could not be found";
-        }
+    // Directory
+    else if (_directoryEdit->text().isEmpty()) {
+        isValid = false;
+        message = "Directory not selected";
+    }
+    else if(!std::filesystem::is_directory(_directoryEdit->text().toStdString()))
+    {
+        isValid = false;
+        message = "The selected directory could not be found";
+    }
 
-        // Target field
-        else if (_targetEdit->text().isEmpty() &&
-                (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0))
-        {
-            isValid = false;
-            message = "Target not selected";
-        }
-        else if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0)
-        {
-            isValid = false;
-            message = "Target not selected";
-        }
+    // Target field
+    else if (_targetEdit->text().isEmpty() &&
+            (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0))
+    {
+        isValid = false;
+        message = "Target not selected";
+    }
+    else if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0)
+    {
+        isValid = false;
+        message = "Target not selected";
+    }
 
-        // Observer field
-        else if (_centerEdit->text().isEmpty() &&
-            (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0))
-        {
-            isValid = false;
-            message = "Observer not selected";
-        }
-        else if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0)
-        {
-            isValid = false;
-            message = "Observer not selected";
-        }
+    // Observer field
+    else if (_centerEdit->text().isEmpty() &&
+        (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0))
+    {
+        isValid = false;
+        message = "Observer not selected";
+    }
+    else if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0)
+    {
+        isValid = false;
+        message = "Observer not selected";
+    }
 
-        // Step size
-        else if (_stepEdit->text().isEmpty()) {
-            isValid = false;
-            message = "Step size not selected";
-        }
+    // Step size
+    else if (_stepEdit->text().isEmpty()) {
+        isValid = false;
+        message = "Step size not selected";
     }
 
     _errorMsg->setText(message.c_str());
@@ -888,8 +861,10 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
 
 // When the user presses the 'Save' button
 void HorizonsDialog::approved() {
-    // Send request of Horizon file if no local file has been specified
-    if (!std::filesystem::is_regular_file(_horizonsFile) && !handleRequest()) {
+    _downloadLabel->show();
+    bool result = handleRequest();
+    _downloadLabel->hide();
+    if (!result || !std::filesystem::is_regular_file(_horizonsFile)) {
         return;
     }
     accept();

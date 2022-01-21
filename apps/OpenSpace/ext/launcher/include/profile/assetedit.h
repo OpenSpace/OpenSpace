@@ -26,13 +26,16 @@
 #define __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
 
 #include <QDialog>
+#include <filesystem>
 #include <string>
 
 namespace openspace { class Asset; }
 
-class QWidget;
+class QBoxLayout;
+class QComboBox;
 class QLabel;
 class QLineEdit;
+class QWidget;
 
 class AssetEdit : public QDialog {
 Q_OBJECT
@@ -43,16 +46,32 @@ public:
     AssetEdit(const std::string& assetName, QWidget* parent);
 
 private slots:
+    void openComponent();
+
+    void openHorizonsFile();
     void openHorizons();
+
     void approved();
 
 private:
     void createWidgets(const std::string& assetName);
 
-    QLabel* _horizonsLabel = nullptr;
+    QBoxLayout* _layout = nullptr;
     QLineEdit* _assetEdit = nullptr;
+    QComboBox* _components = nullptr;
+
+    std::filesystem::path _horizonsFile;
+    QLabel* _horizonsLabel = nullptr;
+    QLabel* _horizonsFileLabel = nullptr;
+    QLineEdit* _horizonsFileEdit = nullptr;
 
     QLabel* _errorMsg = nullptr;
+
+    // List of all the supported components
+    QStringList _supportedComponents = {
+        "Choose Component",
+        "Horizons Translation"
+    };
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
