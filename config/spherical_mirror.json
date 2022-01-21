@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "masterAddress": "127.0.0.1",
+  "masteraddress": "127.0.0.1",
   "nodes": [
     {
       "address": "127.0.0.1",
@@ -33,7 +33,7 @@
   ],
   "users": [
     {
-      "eyeSeparation": 0.06,
+      "eyeseparation": 0.06,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "masterAddress": "localhost",
+  "masteraddress": "localhost",
   "nodes": [
     {
       "address": "localhost",
@@ -9,7 +9,7 @@
         {
           "name": "OpenSpace",
           "fullscreen": false,
-          "draw2D": false,
+          "draw2d": false,
           "stereo": "none",
           "size": { "x": 1024, "y": 1024 },
           "viewports": [
@@ -30,7 +30,7 @@
           "name": "GUI",
           "tags": [ "GUI" ],
           "fullscreen": false,
-          "draw3D": false,
+          "draw3d": false,
           "stereo": "none",
           "pos": { "x": 50, "y": 50 },
           "size": { "x": 1024, "y": 1024 },
@@ -41,10 +41,10 @@
               "projection": {
                 "type": "PlanarProjection",
                 "fov": {
-                  "hFov": 80.0,
-                  "vFov": 50.534015846724
+                  "hfov": 80.0,
+                  "vfov": 50.534015846724
                 },
-                "orientation": { "heading": 0.0, "pitch": 0.0, "roll": 0.0 }
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
               }
             }
           ]
@@ -54,7 +54,7 @@
   ],
   "users": [
     {
-      "eyeSeparation": 0.06,
+      "eyeseparation": 0.06,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]

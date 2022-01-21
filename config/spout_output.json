@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "masterAddress": "localhost",
+  "masteraddress": "localhost",
   "nodes": [
     {
       "address": "localhost",
@@ -18,7 +18,7 @@
               "projection": {
                 "type": "SpoutOutputProjection",
                 "quality": "1k",
-                "mappingSpoutName": "OpenSpace",
+                "mappingspoutname": "OpenSpace",
                 "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
               }
             }
@@ -29,7 +29,7 @@
   ],
   "users": [
     {
-      "eyeSeparation": 0.06,
+      "eyeseparation": 0.06,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]
