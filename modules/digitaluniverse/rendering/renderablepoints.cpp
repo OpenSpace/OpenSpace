@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,14 +90,14 @@ namespace {
         // Astronomical Object Color (r,g,b)
         glm::vec3 color [[codegen::color()]];
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
             Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -138,33 +138,10 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     _speckFile = absPath(p.file);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::Megaparsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderablePoints. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _pointColor = p.color;
@@ -425,26 +402,8 @@ std::vector<double> RenderablePoints::createDataSlice() {
     int colorIndex = 0;
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 p = e.position;
-
-        // Converting units
-        if (_unit == Kilometer) {
-            p *= 1E3;
-        }
-        else if (_unit == Parsec) {
-            p *= PARSEC;
-        }
-        else if (_unit == Kiloparsec) {
-            p *= 1E3 * PARSEC;
-        }
-        else if (_unit == Megaparsec) {
-            p *= 1E6 * PARSEC;
-        }
-        else if (_unit == Gigaparsec) {
-            p *= 1E9 * PARSEC;
-        }
-        else if (_unit == GigalightYears) {
-            p *= 306391534.73091 * PARSEC;
-        }
+        double scale = toMeter(_unit);
+        p *= scale;
 
         glm::dvec4 position(p, 1.0);
 

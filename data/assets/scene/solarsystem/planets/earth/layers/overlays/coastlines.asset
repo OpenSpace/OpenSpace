@@ -2,7 +2,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Coastlines",
-  FilePath = asset.localResource("../../map_service_configs/GIBS/overlays/Coastlines.wms")
+  FilePath = asset.localResource("coastlines.wms")
 }
 
 asset.onInitialize(function () 

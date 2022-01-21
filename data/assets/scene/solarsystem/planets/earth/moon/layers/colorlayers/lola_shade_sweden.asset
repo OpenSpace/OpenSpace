@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../moon").Moon.Identifier
 local layer = {
   Identifier = "Lola_Shade_Sweden",
   Name = "Lola Shade [Sweden]",
-  FilePath = asset.localResource("../../map_service_configs/LiU/Lola_Shade.wms")
+  FilePath = asset.localResource("lola_shade_sweden.wms")
 }
 
 asset.onInitialize(function () 

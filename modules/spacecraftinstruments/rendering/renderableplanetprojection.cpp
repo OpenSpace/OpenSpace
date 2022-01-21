@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,7 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlanetProjection::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_planetprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableplanetprojection");
 }
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)

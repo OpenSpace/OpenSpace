@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,25 +26,23 @@
 
 uniform sampler2D prevTexture;
 uniform sampler2D nextTexture;
-uniform sampler2D colormapTexture;
+uniform sampler1D colormapTexture;
 uniform float blendFactor;
 
 in vec2 texCoord;
 
 Fragment getFragment() {
-  vec4 texel0 = texture2D(prevTexture, texCoord);
-  vec4 texel1 = texture2D(nextTexture, texCoord);
+  vec4 texel0 = texture(prevTexture, texCoord);
+  vec4 texel1 = texture(nextTexture, texCoord);
 
   vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
   Fragment frag;  
   if (mixedTexture.r > 0.999) {
-    vec2 position = vec2(mixedTexture.r - 0.01, 0.5);
-    frag.color = texture2D(colormapTexture, position);
+    frag.color = texture(colormapTexture, mixedTexture.r - 0.01);
   }
   else {
-    vec2 position = vec2(mixedTexture.r , 0.5);
-    frag.color = texture2D(colormapTexture, position);
+    frag.color = texture(colormapTexture, mixedTexture.r);
   }
 
   frag.color.a = mixedTexture.a;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,8 +56,6 @@ namespace {
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
     };
-
-    constexpr double PARSEC = 0.308567756E17;
 
     enum BlendMode {
         BlendModeNormal = 0,
@@ -211,14 +209,14 @@ namespace {
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<BlendMode> blendMode;
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
             Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -286,33 +284,10 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     //_renderOption.set(1);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::Megaparsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderablePlanesCloud. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
@@ -522,7 +497,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
                                          const glm::dvec3& orthoRight,
                                          const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    double scale = unitToMeter(_unit);
+    double scale = toMeter(_unit);
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
@@ -551,7 +526,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
-    const double scale = unitToMeter(_unit);
+    const double scale = toMeter(_unit);
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
@@ -650,23 +625,10 @@ void RenderablePlanesCloud::loadTextures() {
     }
 }
 
-double RenderablePlanesCloud::unitToMeter(Unit unit) const {
-    switch (unit) {
-        case Meter:          return 1.0;
-        case Kilometer:      return 1e3;
-        case Parsec:         return PARSEC;
-        case Kiloparsec:     return 1000 * PARSEC;
-        case Megaparsec:     return 1e6 * PARSEC;
-        case Gigaparsec:     return 1e9 * PARSEC;
-        case GigalightYears: return 306391534.73091 * PARSEC;
-        default:             throw ghoul::MissingCaseException();
-    }
-}
-
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
         const int lumIdx = std::max(_dataset.index(_luminosityVar), 0);
-        const double scale = unitToMeter(_unit);
+        const double scale = toMeter(_unit);
 
         LDEBUG("Creating planes...");
         float maxSize = 0.f;

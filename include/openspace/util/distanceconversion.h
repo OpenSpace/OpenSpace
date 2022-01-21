@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,7 @@ enum class DistanceUnit {
     Kiloparsec,
     Megaparsec,
     Gigaparsec,
+    Gigalightyear,
 
     // Weird units
     Thou,
@@ -81,6 +82,7 @@ constexpr const char* DistanceUnitParsec = "parsec";
 constexpr const char* DistanceUnitKiloparsec = "kiloparsec";
 constexpr const char* DistanceUnitMegaparsec = "megaparsec";
 constexpr const char* DistanceUnitGigaparsec = "gigaparsec";
+constexpr const char* DistanceUnitGigalightyear = "gigalightyear";
 constexpr const char* DistanceUnitThou = "thou";
 constexpr const char* DistanceUnitInch = "inch";
 constexpr const char* DistanceUnitFoot = "foot";
@@ -108,6 +110,7 @@ constexpr const char* DistanceUnitParsecs = "parsecs";
 constexpr const char* DistanceUnitKiloparsecs = "kiloparsecs";
 constexpr const char* DistanceUnitMegaparsecs = "megaparsecs";
 constexpr const char* DistanceUnitGigaparsecs = "gigaparsecs";
+constexpr const char* DistanceUnitGigalightyears = "gigalightyears";
 constexpr const char* DistanceUnitThous = "thou";
 constexpr const char* DistanceUnitInches = "inches";
 constexpr const char* DistanceUnitFeet = "feet";
@@ -124,9 +127,9 @@ DistanceUnits = {
     DistanceUnit::Kilometer, DistanceUnit::AU, DistanceUnit::Lighthour,
     DistanceUnit::Lightday, DistanceUnit::Lightmonth, DistanceUnit::Lightyear,
     DistanceUnit::Parsec, DistanceUnit::Kiloparsec, DistanceUnit::Megaparsec,
-    DistanceUnit::Gigaparsec, DistanceUnit::Thou, DistanceUnit::Inch,
-    DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain, DistanceUnit::Furlong,
-    DistanceUnit::Mile, DistanceUnit::League
+    DistanceUnit::Gigaparsec, DistanceUnit::Gigalightyear, DistanceUnit::Thou,
+    DistanceUnit::Inch, DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain,
+    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
 };
 
 constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
@@ -136,9 +139,9 @@ DistanceUnitNamesSingular = {
     DistanceUnitKilometer, DistanceUnitAU, DistanceUnitLighthour,
     DistanceUnitLightday, DistanceUnitLightmonth, DistanceUnitLightyear,
     DistanceUnitParsec, DistanceUnitKiloparsec, DistanceUnitMegaparsec,
-    DistanceUnitGigaparsec, DistanceUnitThou, DistanceUnitInch, DistanceUnitFoot,
-    DistanceUnitYard, DistanceUnitChain, DistanceUnitFurlong, DistanceUnitMile,
-    DistanceUnitLeague
+    DistanceUnitGigaparsec, DistanceUnitGigalightyear, DistanceUnitThou, DistanceUnitInch,
+    DistanceUnitFoot, DistanceUnitYard, DistanceUnitChain, DistanceUnitFurlong,
+    DistanceUnitMile, DistanceUnitLeague
 };
 
 constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
@@ -148,9 +151,9 @@ DistanceUnitNamesPlural = {
     DistanceUnitKilometers, DistanceUnitAUs, DistanceUnitLighthours,
     DistanceUnitLightdays, DistanceUnitLightmonths, DistanceUnitLightyears,
     DistanceUnitParsecs, DistanceUnitKiloparsecs, DistanceUnitMegaparsecs,
-    DistanceUnitGigaparsecs, DistanceUnitThous, DistanceUnitInches, DistanceUnitFeet,
-    DistanceUnitYards, DistanceUnitChains, DistanceUnitFurlongs, DistanceUnitMile,
-    DistanceUnitLeague
+    DistanceUnitGigaparsecs, DistanceUnitGigalightyears, DistanceUnitThous,
+    DistanceUnitInches, DistanceUnitFeet, DistanceUnitYards, DistanceUnitChains,
+    DistanceUnitFurlongs, DistanceUnitMile, DistanceUnitLeague
 };
 
 constexpr bool isValidDistanceUnitName(const char* name) {
@@ -190,6 +193,7 @@ constexpr const char* nameForDistanceUnit(DistanceUnit unit, bool pluralForm = f
         case DistanceUnit::Kiloparsec:
         case DistanceUnit::Megaparsec:
         case DistanceUnit::Gigaparsec:
+        case DistanceUnit::Gigalightyear:
         case DistanceUnit::Thou:
         case DistanceUnit::Inch:
         case DistanceUnit::Foot:
@@ -277,6 +281,8 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
             return meters / (1e6 * distanceconstants::Parsec);
         case DistanceUnit::Gigaparsec:
             return meters / (1e9 * distanceconstants::Parsec);
+        case DistanceUnit::Gigalightyear:
+            return meters / (1e9 * distanceconstants::LightYear);
         case DistanceUnit::Thou:
             return meters / (1e-3 * distanceconstants::Inch);
         case DistanceUnit::Inch:
@@ -332,6 +338,8 @@ constexpr double toMeter(DistanceUnit unit) {
             return 1e6 * distanceconstants::Parsec;
         case DistanceUnit::Gigaparsec:
             return 1e9 * distanceconstants::Parsec;
+        case DistanceUnit::Gigalightyear:
+            return 1e9 * distanceconstants::LightYear;
         case DistanceUnit::Thou:
             return 1e-3 * distanceconstants::Inch;
         case DistanceUnit::Inch:

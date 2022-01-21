@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "MODIS_Water_Mask",
   Name = "MODIS Water Mask",
-  FilePath = asset.localResource("../../map_service_configs/GIBS/water/MODIS_Water_Mask.wms")
+  FilePath = asset.localResource("modis_water_mask.wms")
 }
 
 asset.onInitialize(function () 

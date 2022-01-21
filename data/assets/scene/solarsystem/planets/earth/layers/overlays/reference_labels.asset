@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local layer = {
   Identifier = "Reference_Labels",
   Name = "Reference Labels",
-  FilePath = asset.localResource("../../map_service_configs/GIBS/overlays/Reference_Labels.wms")
+  FilePath = asset.localResource("reference_labels.wms")
 }
 
 asset.onInitialize(function () 
