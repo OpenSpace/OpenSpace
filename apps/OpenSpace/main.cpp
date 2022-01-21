@@ -982,8 +982,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                             std::string windowConfiguration,
-                                            const std::string& labelFromCfgFile,
-                                            const std::string& xmlExt)
+                                            const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
@@ -1174,7 +1173,6 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
         hasSGCTConfig,
@@ -1222,8 +1220,7 @@ int main(int argc, char* argv[]) {
             win,
             hasSGCTConfig,
             windowConfiguration,
-            labelFromCfgFile,
-            xmlExt
+            labelFromCfgFile
         );
     } else {
         glfwInit();
