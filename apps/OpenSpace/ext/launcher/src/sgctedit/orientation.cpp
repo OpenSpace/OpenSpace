@@ -15,7 +15,6 @@ Orientation::Orientation()
     _layoutOrientationFull->addStretch(1);
     _layoutOrientationFull->addLayout(_layoutOrientationControls);
     _layoutOrientationFull->addStretch(1);
-    //_layoutOrientationFull->setSizeConstraint(QLayout::SetFixedSize);
 
     connect(_orientationButton, SIGNAL(released()), this,
             SLOT(orientationDialog()));

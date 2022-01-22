@@ -64,7 +64,6 @@ void Display::initializeLayout() {
     _layoutWindows = new QHBoxLayout();
     _layout->addStretch();
 
-    //_winCtrlLayouts.push_back(_windowControl[0]->initializeLayout(this));
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout(this));
         _layoutWindowWrappers.push_back(new QWidget());
@@ -79,9 +78,6 @@ void Display::initializeLayout() {
     _nWindowsDisplayed = 1;
     showWindows();
     _layout->addLayout(_layoutWindows);
-    //for (WindowControl* w : _windowControl) {
-    //    w->cleanupLayouts();
-    //}
 }
 
 std::vector<WindowControl*> Display::windowControls() {
@@ -148,9 +144,12 @@ void Display::initializeWindowControl() {
             }
         );
         _windowControl.back()->setWebGuiChangeCallback(
-            [this](unsigned int monIndex, unsigned int winIndex) {
-                _windowControl[(winIndex == 0)? 1 : 0]->uncheckWebGuiOption();
-                _webGuiCheckCallback(monIndex);
+            [this](unsigned int winIndex) {
+                for (unsigned int w = 0; w < _nMaxWindows; ++w) {
+                    if (w != winIndex) {
+                        _windowControl[w]->uncheckWebGuiOption();
+                    }
+                }
             }
         );
         _monBox->mapWindowResolutionToWidgetCoordinates(

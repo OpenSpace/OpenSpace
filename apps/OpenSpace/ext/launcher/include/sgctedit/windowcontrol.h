@@ -32,7 +32,7 @@ public:
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
-    void setWebGuiChangeCallback(std::function<void(unsigned int, unsigned int)> cb);
+    void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
     void showWindowLabel(bool show);
     void cleanupLayouts();
     QVBoxLayout* initializeLayout(QWidget* parentWidget);
@@ -86,12 +86,11 @@ private slots:
     void onWebGuiSelection(int selectionState);
 
 private:
-    void enableSpoutProjectionOptions(QComboBox* comboBox, bool enable);
     template <typename T>
     void enableProjectionOption(T* comboModel, int selectionIndex, bool enable);
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
-    std::function<void(unsigned int, unsigned int)> _windowGuiCheckCallback;
+    std::function<void(unsigned int)> _windowGuiCheckCallback;
     QRectF defaultWindowSizes[4] = {
         {50.0, 50.0, 1280.0, 720.0},
         {900.0, 250.0, 1280.0, 720.0},
@@ -152,6 +151,7 @@ private:
     QComboBox* _comboMonitorSelect = nullptr;
     QComboBox* _comboProjection = nullptr;
     QComboBox* _comboQuality = nullptr;
+    QLabel* _labelQuality = nullptr;
     QLabel* _labelFovH = nullptr;
     QLineEdit* _lineFovH = nullptr;
     QDoubleValidator* _validatorFovH = nullptr;
@@ -180,8 +180,8 @@ private:
     QHBoxLayout* _layoutFullscreenButton = nullptr;
     QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
     QHBoxLayout* _layoutCBoxWebGui = nullptr;
-    QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
     QHBoxLayout* _layoutComboProjection = nullptr;
+    QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
     QHBoxLayout* _layoutComboQuality = nullptr;
     QHBoxLayout* _layoutFovH = nullptr;
     QHBoxLayout* _layoutFovV = nullptr;

@@ -38,31 +38,26 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     _layoutPitch->addStretch(1);
     _layoutPitch->addWidget(_labelPitch);
     _layoutPitch->addWidget(_linePitch);
-    //_layoutPitch->addStretch(1);
     _layoutWindow->addLayout(_layoutPitch);
 
     _layoutRoll->addStretch(1);
     _layoutRoll->addWidget(_labelRoll);
     _layoutRoll->addWidget(_lineRoll);
-    //_layoutRoll->addStretch(1);
     _layoutWindow->addLayout(_layoutRoll);
 
     _layoutYaw->addStretch(1);
     _layoutYaw->addWidget(_labelYaw);
     _layoutYaw->addWidget(_lineYaw);
-    //_layoutYaw->addStretch(1);
     _layoutWindow->addLayout(_layoutYaw);
 
     _layoutButtonBox = new QHBoxLayout;
     _buttonSave = new QPushButton("OK");
     _buttonSave->setToolTip("Save global orientation changes");
-    //connect(_buttonSave, &QPushButton::clicked, this, &ModulesDialog::listItemSave);
     _layoutButtonBox->addStretch(1);
     _layoutButtonBox->addWidget(_buttonSave);
 
     _buttonCancel = new QPushButton("Cancel");
     _buttonCancel->setToolTip("Cancel global orientation changes");
-    //connect(_buttonCancel, &QPushButton::clicked, this, &ModulesDialog::listItemCancelSave);
     _layoutButtonBox->addWidget(_buttonCancel);
     _layoutButtonBox->addStretch(1);
 

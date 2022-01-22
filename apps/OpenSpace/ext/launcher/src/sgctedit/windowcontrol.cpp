@@ -180,6 +180,9 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutCBoxSpoutOutput->addStretch(1);
     _layoutProjectionGroup->addLayout(_layoutCBoxSpoutOutput);
     _layoutComboQuality = new QHBoxLayout();
+    _labelQuality = new QLabel();
+    _labelQuality->setText("Quality:");
+    _layoutComboQuality->addWidget(_labelQuality);
     _layoutComboQuality->addWidget(_comboQuality);
     _layoutComboQuality->addStretch(1);
     _layoutProjectionGroup->addLayout(_layoutComboQuality);
@@ -208,6 +211,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     _layoutCheckboxesFull1->addLayout(_layoutCheckboxesFull2);
     _layoutCheckboxesFull1->addStretch(1);
     _layoutWindowCtrl->addLayout(_layoutCheckboxesFull1);
+    _layoutWindowCtrl->addStretch(1);
     _layoutFullWindow->addLayout(_layoutWindowCtrl);
 
     _comboProjection->setCurrentIndex(0);
@@ -299,7 +303,7 @@ void WindowControl::enableGuiWindowSelection(bool enabled) {
 
 void WindowControl::onWebGuiSelection(int selectionState) {
     if (_windowGuiCheckCallback && (selectionState == Qt::Checked)) {
-        _windowGuiCheckCallback(_monIndex, _index);
+        _windowGuiCheckCallback(_index);
     }
 }
 
@@ -311,19 +315,6 @@ void WindowControl::onSpoutSelection(int selectionState) {
         {
             _comboProjection->setCurrentIndex(ProjectionIndeces::Equirectangular);
         }
-        enableSpoutProjectionOptions(_comboProjection, false);
-    }
-    else {
-        enableSpoutProjectionOptions(_comboProjection, true);
-    }
-}
-
-void WindowControl::enableSpoutProjectionOptions(QComboBox* comboBox, bool enable) {
-    auto * comboModel = qobject_cast<QStandardItemModel*>(comboBox->model());
-    if (comboModel) {
-        enableProjectionOption(comboModel, ProjectionIndeces::Planar, enable);
-        enableProjectionOption(comboModel, ProjectionIndeces::Spherical_Mirror, enable);
-        enableProjectionOption(comboModel, ProjectionIndeces::Cylindrical, enable);
     }
 }
 
@@ -346,58 +337,63 @@ void WindowControl::onMonitorChanged(int newSelection) {
 void WindowControl::onProjectionChanged(int newSelection) {
     switch (newSelection) {
     case ProjectionIndeces::Planar:
-        _comboQuality->setEnabled(false);
-        _labelFovH->setEnabled(true);
-        _lineFovH->setEnabled(true);
-        _labelFovV->setEnabled(true);
-        _lineFovV->setEnabled(true);
-        _labelHeightOffset->setEnabled(false);
-        _lineHeightOffset->setEnabled(false);
-        _checkBoxSpoutOutput->setEnabled(false);
+        _comboQuality->setVisible(false);
+        _labelQuality->setVisible(false);
+        _labelFovH->setVisible(true);
+        _lineFovH->setVisible(true);
+        _labelFovV->setVisible(true);
+        _lineFovV->setVisible(true);
+        _labelHeightOffset->setVisible(false);
+        _lineHeightOffset->setVisible(false);
+        _checkBoxSpoutOutput->setVisible(false);
         break;
 
     case ProjectionIndeces::Fisheye:
-        _comboQuality->setEnabled(true);
-        _labelFovH->setEnabled(false);
-        _lineFovH->setEnabled(false);
-        _labelFovV->setEnabled(false);
-        _lineFovV->setEnabled(false);
-        _labelHeightOffset->setEnabled(false);
-        _lineHeightOffset->setEnabled(false);
-        _checkBoxSpoutOutput->setEnabled(true);
+        _comboQuality->setVisible(true);
+        _labelQuality->setVisible(true);
+        _labelFovH->setVisible(false);
+        _lineFovH->setVisible(false);
+        _labelFovV->setVisible(false);
+        _lineFovV->setVisible(false);
+        _labelHeightOffset->setVisible(false);
+        _lineHeightOffset->setVisible(false);
+        _checkBoxSpoutOutput->setVisible(true);
         break;
 
     case ProjectionIndeces::Spherical_Mirror:
-        _comboQuality->setEnabled(true);
-        _labelFovH->setEnabled(false);
-        _lineFovH->setEnabled(false);
-        _labelFovV->setEnabled(false);
-        _lineFovV->setEnabled(false);
-        _labelHeightOffset->setEnabled(false);
-        _lineHeightOffset->setEnabled(false);
-        _checkBoxSpoutOutput->setEnabled(false);
+        _comboQuality->setVisible(true);
+        _labelQuality->setVisible(true);
+        _labelFovH->setVisible(false);
+        _lineFovH->setVisible(false);
+        _labelFovV->setVisible(false);
+        _lineFovV->setVisible(false);
+        _labelHeightOffset->setVisible(false);
+        _lineHeightOffset->setVisible(false);
+        _checkBoxSpoutOutput->setVisible(false);
         break;
 
     case ProjectionIndeces::Cylindrical:
-        _comboQuality->setEnabled(true);
-        _labelFovH->setEnabled(false);
-        _lineFovH->setEnabled(false);
-        _labelFovV->setEnabled(false);
-        _lineFovV->setEnabled(false);
-        _labelHeightOffset->setEnabled(true);
-        _lineHeightOffset->setEnabled(true);
-        _checkBoxSpoutOutput->setEnabled(false);
+        _comboQuality->setVisible(true);
+        _labelQuality->setVisible(true);
+        _labelFovH->setVisible(false);
+        _lineFovH->setVisible(false);
+        _labelFovV->setVisible(false);
+        _lineFovV->setVisible(false);
+        _labelHeightOffset->setVisible(true);
+        _lineHeightOffset->setVisible(true);
+        _checkBoxSpoutOutput->setVisible(false);
         break;
 
     case ProjectionIndeces::Equirectangular:
-        _comboQuality->setEnabled(true);
-        _labelFovH->setEnabled(false);
-        _lineFovH->setEnabled(false);
-        _labelFovV->setEnabled(false);
-        _lineFovV->setEnabled(false);
-        _labelHeightOffset->setEnabled(false);
-        _lineHeightOffset->setEnabled(false);
-        _checkBoxSpoutOutput->setEnabled(true);
+        _comboQuality->setVisible(true);
+        _labelQuality->setVisible(true);
+        _labelFovH->setVisible(false);
+        _lineFovH->setVisible(false);
+        _labelFovV->setVisible(false);
+        _lineFovV->setVisible(false);
+        _labelHeightOffset->setVisible(false);
+        _lineHeightOffset->setVisible(false);
+        _checkBoxSpoutOutput->setVisible(true);
         break;
     }
 }
@@ -413,7 +409,7 @@ void WindowControl::setWindowChangeCallback(
 }
 
 void WindowControl::setWebGuiChangeCallback(
-                        std::function<void(unsigned int, unsigned int)> cb)
+                        std::function<void(unsigned int)> cb)
 {
     _windowGuiCheckCallback = cb;
 }
@@ -547,6 +543,7 @@ WindowControl::~WindowControl()
     delete _labelHeightOffset;
     delete _lineHeightOffset;
     delete _validatorHeightOffset;
+    delete _labelQuality;
     delete _layoutFullscreenButton;
     delete _layoutCBoxWindowDecor;
     delete _layoutCBoxWebGui;
