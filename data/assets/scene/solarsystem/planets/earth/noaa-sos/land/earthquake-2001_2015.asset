@@ -14,45 +14,38 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
-
 local layer_allquakes = {
   Identifier = Identifier .. "-allquakes",
   Name = Name .. " (All Quakes)",
-  FilePath = syncedDirectory .. "/All_Quakes_2001-2015_4k.jpg",
+  FilePath = syncedDirectory .. "All_Quakes_2001-2015_4k.jpg",
   Description = Description
 }
 
 local layer_quake_basemap = {
   Identifier = Identifier .. "-quake-basemap",
   Name = Name .. " (Quake Basemap)",
-  FilePath = syncedDirectory .. "/quake_basemap_4k.jpg",
+  FilePath = syncedDirectory .. "quake_basemap_4k.jpg",
   Description = Description
 }
 
 local layer_tsunami_basemap = {
   Identifier = Identifier .. "-tsunami-basemap",
   Name = Name .. " (Tsunami Basemap)",
-  FilePath = syncedDirectory .. "/Tsunami_basemap_4k.jpg",
+  FilePath = syncedDirectory .. "Tsunami_basemap_4k.jpg",
   Description = Description
 }
 
 local layer_quakes_gte6_5 = {
   Identifier = Identifier .. "-gte6_5",
   Name = Name .. " (GTE 6.5)",
-  FilePath = syncedDirectory .. "/Quakes_gte6.5_2001-2015_4k.jpg",
+  FilePath = syncedDirectory .. "Quakes_gte6.5_2001-2015_4k.jpg",
   Description = Description
 }
 
 local layer_quakes_gte8 = {
   Identifier = Identifier .. "-gte8",
   Name = Name .. " (GTE 8.0)",
-  FilePath = syncedDirectory .. "/Quakes_gte8_2001-2015_4k.jpg",
+  FilePath = syncedDirectory .. "Quakes_gte8_2001-2015_4k.jpg",
   Description = Description
 }
 
@@ -60,7 +53,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "Earthquake_Legend.png"
+  TexturePath = syncedDirectory .. "Earthquake_Legend.png"
 }
 
 asset.onInitialize(function() 

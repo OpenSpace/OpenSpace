@@ -17,16 +17,25 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/2048.jpg",
+  FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
+}
+
+local colorbar = {
+  Identifier = Identifier,
+  Name = Name,
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = syncedDirectory .. "colorbar.jpg"
 }
 
 asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.addScreenSpaceRenderable(colorbar);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
 end)
 
 

@@ -7,19 +7,15 @@ local Description = [[ Hurricane Isaac formed as a tropical depression east of t
 local URL = "https://sos.noaa.gov/catalog/datasets/hurricane-isaac-2012/"
 
 
-local syncedDirectory_radar = asset.syncedResource({
+local syncedDirectory = asset.syncedResource({
 	Name = Name,
 	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-radar",
+	Identifier = Identifier,
 	Version = 1
 })
 
-local syncedDirectory_sat = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-sat",
-	Version = 1
-})
+local radarDestination = syncedDirectory .. "radar"
+local satDestination = syncedDirectory .. "sat"
 
 local layer_radar = {
   Identifier = Identifier .. "-radar",
@@ -27,7 +23,7 @@ local layer_radar = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = radarDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "%Y%j%H%M.png"
@@ -41,7 +37,7 @@ local layer_sat = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = satDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "linear_rgb_cyl_%Y%m%d_%H%M.jpg"
@@ -50,6 +46,16 @@ local layer_sat = {
 }
 
 asset.onInitialize(function() 
+  if not openspace.directoryExists(radarDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Radar")
+    openspace.unzipFile(syncedDirectory .. "radar.zip", radarDestination, true)
+  end
+
+  if not openspace.directoryExists(satDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Sat")
+    openspace.unzipFile(syncedDirectory .. "sat.zip", satDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_radar)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_sat)
 end)

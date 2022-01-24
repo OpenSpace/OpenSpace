@@ -14,18 +14,13 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
@@ -33,17 +28,22 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
 local colorbar2 = {
   Identifier = Identifier .."-1",
   Name = Name .. " (1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar2.png"
+  TexturePath = syncedDirectory .. "colorbar2.png"
 }
 
 asset.onInitialize(function ()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar);  
   openspace.addScreenSpaceRenderable(colorbar2);  

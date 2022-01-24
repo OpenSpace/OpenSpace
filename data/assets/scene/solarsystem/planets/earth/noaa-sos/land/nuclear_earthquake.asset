@@ -14,38 +14,33 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_images = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. '-images',
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
 
 local layer_base = {
   Identifier = Identifier .. "-base",
   Name = Name .. " (Base)",
-  FilePath = syncedDirectory .. "/2048.jpg",
+  FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
 }
 
 local layer_all = {
   Identifier = Identifier .. "-all",
   Name = Name .. "(All)",
-  FilePath = syncedDirectory .. "/all_earthquakes.png",
+  FilePath = syncedDirectory .. "all_earthquakes.png",
   Description = Description
 }
 
 local layer_new = {
   Identifier = Identifier .. "-new",
   Name = Name .. " (New)",
-  FilePath = syncedDirectory .. "/new.jpg",
+  FilePath = syncedDirectory .. "new.jpg",
   Description = Description
 }
 
 local layer_nuclear = {
   Identifier = Identifier .. "-nuclear",
   Name = Name .. " (Nuclear)",
-  FilePath = syncedDirectory .. "/nuclear_plants.png",
+  FilePath = syncedDirectory .. "nuclear_plants.png",
   Description = Description
 }
 
@@ -53,7 +48,7 @@ local layer_images = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
@@ -61,7 +56,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend.png"
+  TexturePath = syncedDirectory .. "legend.png"
 }
 
 asset.onInitialize(function() 

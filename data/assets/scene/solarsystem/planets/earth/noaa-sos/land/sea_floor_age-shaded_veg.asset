@@ -46,7 +46,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
 

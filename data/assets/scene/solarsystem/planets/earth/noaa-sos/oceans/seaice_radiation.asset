@@ -17,14 +17,14 @@ local syncedDirectory = asset.syncedResource({
 local layer_fraction = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/sea_ice_fraction.png",
+  FilePath = syncedDirectory .. "sea_ice_fraction.png",
   Description = Description
 }
 
 local layer_solar = {
   Identifier = Identifier .. "-solar",
   Name = Name .. " (Solar)",
-  FilePath = syncedDirectory .. "/solar.png",
+  FilePath = syncedDirectory .. "solar.png",
   Description = Description
 }
 

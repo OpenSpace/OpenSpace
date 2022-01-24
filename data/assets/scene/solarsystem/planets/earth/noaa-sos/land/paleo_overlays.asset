@@ -14,13 +14,6 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
-
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
@@ -67,7 +60,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend.jpg"
+  TexturePath = syncedDirectory .. "legend.jpg"
 }
 
 

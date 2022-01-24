@@ -17,14 +17,14 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier .. "-base",
   Name = Name .. " (Base)",
-  FilePath = syncedDirectory .. "/land.jpg",
+  FilePath = syncedDirectory .. "land.jpg",
   Description = Description
 }
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 

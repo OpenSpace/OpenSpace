@@ -17,14 +17,14 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
 local layer_countries = {
   Identifier = Identifier .. "-countries",
   Name = Name .. " (w/ countries)",
-  FilePath = syncedDirectory .. "/4096_countries.png",
+  FilePath = syncedDirectory .. "4096_countries.png",
   Description = Description
 }
 
@@ -32,7 +32,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend.png"
+  TexturePath = syncedDirectory .. "legend.png"
 }
 
 asset.onInitialize(function() 

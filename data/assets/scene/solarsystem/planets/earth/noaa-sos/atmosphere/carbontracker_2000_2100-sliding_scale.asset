@@ -14,20 +14,9 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_colorbar = asset.syncedResource({
-	Name = Name .. " (Colorbar)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-colorbar",
-	Version = 1
-})
-
-local syncedDirectory_obs = asset.syncedResource({
-	Name = Name .. " (OBS)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-obs",
-	Version = 1
-})
-
+local fieldDestination = syncedDirectory .. "field"
+local obsDestination = syncedDirectory .. "obs"
+local colorbarDestination = syncedDirectory .. "colorbar"
 
 local layer_field = {
   Identifier = Identifier .. "-field",
@@ -35,7 +24,7 @@ local layer_field = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = fieldDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co2wx_%Y%m%d.png"
@@ -49,7 +38,7 @@ local layer_obs = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = obsDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "co2wx_%Y%m%d.obs.png"
@@ -62,10 +51,25 @@ local colorbar = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
-  TexturePath = syncedDirectory_colorbar .. "co2wx_20000101.cpt.png"
+  TexturePath = colorbarDestination .. "co2wx_20000101.cpt.png"
 }
 
 asset.onInitialize(function() 
+  if not openspace.directoryExists(fieldDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Field")
+    openspace.unzipFile(syncedDirectory .. "field.zip", fieldDestination, true)
+  end
+
+  if not openspace.directoryExists(obsDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Observed")
+    openspace.unzipFile(syncedDirectory .. "obs.zip", obsDestination, true)
+  end
+
+  if not openspace.directoryExists(colorbarDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Colorbar")
+    openspace.unzipFile(syncedDirectory .. "colorbar.zip", colorbarDestination, true)
+  end
+     
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_field)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_obs)
   openspace.addScreenSpaceRenderable(colorbar);  

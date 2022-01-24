@@ -17,7 +17,7 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/5000.png",
+  FilePath = syncedDirectory .. "5000.png",
   Description = Description
 }
 
@@ -25,14 +25,14 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
 local colorbar_human_impact = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "HumanImpactColorbar.png"
+  TexturePath = syncedDirectory .. "HumanImpactColorbar.png"
 }
 
 asset.onInitialize(function() 

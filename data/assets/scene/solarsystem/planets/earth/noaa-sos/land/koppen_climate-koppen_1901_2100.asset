@@ -14,11 +14,13 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local imagesDestination = syncedDirectory .. "images"
+
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
@@ -26,17 +28,22 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend.jpg"
+  TexturePath = syncedDirectory .. "legend.jpg"
 }
 
 local legend1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. " (1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend2.png"
+  TexturePath = syncedDirectory .. "legend2.png"
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(legend);  
   openspace.addScreenSpaceRenderable(legend1);  

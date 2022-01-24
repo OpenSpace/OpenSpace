@@ -53,7 +53,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "Earthquake_Legend.png"
+  TexturePath = syncedDirectory .. "Earthquake_Legend.png"
 }
 
 asset.onInitialize(function() 

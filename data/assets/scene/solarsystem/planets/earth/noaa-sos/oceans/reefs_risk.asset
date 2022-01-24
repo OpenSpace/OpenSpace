@@ -21,31 +21,24 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
-
 local layer_2012 = {
   Identifier = Identifier .. "-2012",
   Name = Name .. " (2012)",
-  FilePath = syncedDirectory .. "/2012_2048.jpg",
+  FilePath = syncedDirectory .. "2012_2048.jpg",
   Description = Description
 }
 
 local layer_2030 = {
   Identifier = Identifier .. "-2030",
   Name = Name .. " (2030)",
-  FilePath = syncedDirectory .. "/2030_2048.jpg",
+  FilePath = syncedDirectory .. "2030_2048.jpg",
   Description = Description
 }
 
 local layer_2050 = {
   Identifier = Identifier .. "-2050",
   Name = Name .. " (2050)",
-  FilePath = syncedDirectory .. "/2050_2048.jpg",
+  FilePath = syncedDirectory .. "2050_2048.jpg",
   Description = Description
 }
 
@@ -53,7 +46,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
 asset.onInitialize(function() 

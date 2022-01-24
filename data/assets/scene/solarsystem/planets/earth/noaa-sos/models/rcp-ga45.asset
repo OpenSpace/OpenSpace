@@ -14,13 +14,6 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = "RCP Addons",
-	Type = "HttpSynchronization",
-	Identifier = "noaa-sos-models-rcp-addons",
-	Version = 1
-})
-
 local layer = {
   Identifier = Identifier,
   Name = Name,
@@ -39,7 +32,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "ANOM.colorbar.png"
+  TexturePath = syncedDirectory .. "ANOM.colorbar.png"
 }
 
 asset.onInitialize(function() 

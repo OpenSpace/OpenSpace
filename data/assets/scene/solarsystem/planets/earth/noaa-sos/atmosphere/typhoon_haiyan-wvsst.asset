@@ -14,29 +14,29 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
 local track = {
   Identifier = Identifier .. "-track",
   Name = Name .. " (Track)",
-  FilePath = syncedDirectory_addons .. "track.png",
+  FilePath = syncedDirectory .. "track.png",
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", track)
 end)

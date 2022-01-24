@@ -14,12 +14,7 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
@@ -27,7 +22,7 @@ local layer = {
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = imagesDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
     Format = "chem_%Y-%m-%d_%H-%M.png"
@@ -39,10 +34,15 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "geos-5-legend.jpg"
+  TexturePath = syncedDirectory .. "geos-5-legend.jpg"
 }
 
 asset.onInitialize(function() 
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(legend);  
 end)

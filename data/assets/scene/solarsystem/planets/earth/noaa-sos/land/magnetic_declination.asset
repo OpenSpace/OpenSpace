@@ -14,13 +14,15 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
+local imagesDestination = syncedDirectory .. "images"
+
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
-    Folder = syncedDirectory,
+    Folder = imagesDestination,
     -- @TODO: This dataset is not using equirectangular projection, so it will look
     -- strange on the planet right now
 
@@ -31,7 +33,17 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
+  openspace.printWarning(
+    "The 'Magnetic Declination' map currently has an unsupported projection and thus " ..
+    "will look strange when projected onto the spherical Earth"
+  )
+
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 

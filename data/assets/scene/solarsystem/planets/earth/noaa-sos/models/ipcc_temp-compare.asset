@@ -14,13 +14,6 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
-
 local layers_names = {
   "2025_gfdl_a1b",
   "2025_gfdl_b1",
@@ -37,7 +30,7 @@ for i,v in ipairs(layers_names) do
   local layer = {
     Identifier = Identifier,
     Name = Name,
-    FilePath = syncedDirectory .. "/" .. v,
+    FilePath = syncedDirectory .. v,
     Description = Description
   }
 
@@ -48,7 +41,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
 

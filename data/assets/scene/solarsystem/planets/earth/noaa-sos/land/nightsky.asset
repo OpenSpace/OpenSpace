@@ -25,7 +25,7 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "nightsky_lights_legend.jpg"
+  TexturePath = syncedDirectory .. "nightsky_lights_legend.jpg"
 }
 
 asset.onInitialize(function() 

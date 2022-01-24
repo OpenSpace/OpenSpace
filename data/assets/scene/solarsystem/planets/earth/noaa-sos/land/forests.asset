@@ -53,14 +53,14 @@ local label = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "forest_label.png"
+  TexturePath = syncedDirectory .. "forest_label.png"
 }
 
 local label1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. "(1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "forest_label1.png"
+  TexturePath = syncedDirectory .. "forest_label1.png"
 }
 
 asset.onInitialize(function() 

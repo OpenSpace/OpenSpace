@@ -17,14 +17,14 @@ local syncedDirectory = asset.syncedResource({
 local layer_8192 = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/8192.png",
+  FilePath = syncedDirectory .. "8192.png",
   Description = Description
 }
 
 local layer_with_background = {
   Identifier = Identifier .. "-background",
   Name = Name .. " (w/ Background)",
-  FilePath = syncedDirectory .. "/4096-background.png",
+  FilePath = syncedDirectory .. "4096-background.png",
   Description = Description
 }
 
@@ -32,7 +32,7 @@ local labels = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "labels.png"
+  TexturePath = syncedDirectory .. "labels.png"
 }
 
 asset.onInitialize(function ()

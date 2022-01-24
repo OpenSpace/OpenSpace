@@ -25,7 +25,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "etopo1_color_scale.png"
+  TexturePath = syncedDirectory .. "etopo1_color_scale.png"
 }
 
 asset.onInitialize(function() 

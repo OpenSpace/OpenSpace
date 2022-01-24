@@ -14,31 +14,20 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_images = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-images",
-	Version = 1
-})
-
-local syncedDirectory_pip = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-pips",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
+local pipsDestination = syncedDirectory .. "pips"
 
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/background.jpg",
+  FilePath = syncedDirectory .. "background.jpg",
   Description = Description
 }
 
 local layer_stations = {
   Identifier = Identifier .. "-stations",
   Name = Name .. " (Stations)",
-  FilePath = syncedDirectory .. "/station_names.png",
+  FilePath = syncedDirectory .. "station_names.png",
   Description = Description
 }
 
@@ -46,7 +35,7 @@ local layer_images = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
@@ -55,10 +44,20 @@ local pips = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
-  TexturePath = syncedDirectory_pip .. "0002.png"
+  TexturePath = pipsDestination .. "0002.png"
 }
 
 asset.onInitialize(function ()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Images")
+    openspace.unzipFile(syncedDirectory .. "2048.zip", imagesDestination, true)
+  end
+
+  if not openspace.directoryExists(pipsDestination) then
+    openspace.printInfo("Extracting " .. Name .. " Pips")
+    openspace.unzipFile(syncedDirectory .. "pips.zip", pipsDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_stations)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_images)

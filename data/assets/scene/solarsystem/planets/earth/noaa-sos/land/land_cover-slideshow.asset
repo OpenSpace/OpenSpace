@@ -14,17 +14,12 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_labels = asset.syncedResource({
-	Name = Name .. " (Labels)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-labels",
-	Version = 1
-})
+local labelsDestination = syncedDirectory .. "labels"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/2048.jpg",
+  FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
 }
 
@@ -32,112 +27,112 @@ local label_01 = {
   Identifier = Identifier .. "-01",
   Name = Name .. "(01)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_01.jpg"
+  TexturePath = labelsDestination .. "lcc_01.jpg"
 }
 
 local label_02 = {
   Identifier = Identifier .. "-02",
   Name = Name .. "(02)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_02.jpg"
+  TexturePath = labelsDestination .. "lcc_02.jpg"
 }
 
 local label_03 = {
   Identifier = Identifier .. "-03",
   Name = Name .. "(03)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_03.jpg"
+  TexturePath = labelsDestination .. "lcc_03.jpg"
 }
 
 local label_04 = {
   Identifier = Identifier .. "-04",
   Name = Name .. "(04)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_04.jpg"
+  TexturePath = labelsDestination .. "lcc_04.jpg"
 }
 
 local label_05 = {
   Identifier = Identifier .. "-05",
   Name = Name .. "(05)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_05.jpg"
+  TexturePath = labelsDestination .. "lcc_05.jpg"
 }
 
 local label_06 = {
   Identifier = Identifier .. "-06",
   Name = Name .. "(06)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_06.jpg"
+  TexturePath = labelsDestination .. "lcc_06.jpg"
 }
 
 local label_07 = {
   Identifier = Identifier .. "-07",
   Name = Name .. "(07)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_07.jpg"
+  TexturePath = labelsDestination .. "lcc_07.jpg"
 }
 
 local label_08 = {
   Identifier = Identifier .. "-08",
   Name = Name .. "(08)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_08.jpg"
+  TexturePath = labelsDestination .. "lcc_08.jpg"
 }
 
 local label_09 = {
   Identifier = Identifier .. "-09",
   Name = Name .. "(09)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_09.jpg"
+  TexturePath = labelsDestination .. "lcc_09.jpg"
 }
 
 local label_10 = {
   Identifier = Identifier .. "-10",
   Name = Name .. "(10)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_10.jpg"
+  TexturePath = labelsDestination .. "lcc_10.jpg"
 }
 
 local label_11 = {
   Identifier = Identifier .. "-11",
   Name = Name .. "(11)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_11.jpg"
+  TexturePath = labelsDestination .. "lcc_11.jpg"
 }
 
 local label_12 = {
   Identifier = Identifier .. "-12",
   Name = Name .. "(12)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_12.jpg"
+  TexturePath = labelsDestination .. "lcc_12.jpg"
 }
 
 local label_13 = {
   Identifier = Identifier .. "-13",
   Name = Name .. "(13)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_13.jpg"
+  TexturePath = labelsDestination .. "lcc_13.jpg"
 }
 
 local label_14 = {
   Identifier = Identifier .. "-14",
   Name = Name .. "(14)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_14.jpg"
+  TexturePath = labelsDestination .. "lcc_14.jpg"
 }
 
 local label_15 = {
   Identifier = Identifier .. "-15",
   Name = Name .. "(15)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_15.jpg"
+  TexturePath = labelsDestination .. "lcc_15.jpg"
 }
 
 local label_16 = {
   Identifier = Identifier .. "-16",
   Name = Name .. "(16)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "lcc_16.jpg"
+  TexturePath = labelsDestination .. "lcc_16.jpg"
 }
 
 asset.onInitialize(function() 

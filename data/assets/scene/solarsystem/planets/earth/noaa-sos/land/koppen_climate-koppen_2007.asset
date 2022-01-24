@@ -25,14 +25,14 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend.png"
+  TexturePath = syncedDirectory .. "legend.png"
 }
 
 local legend1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. "(1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "legend2.png"
+  TexturePath = syncedDirectory .. "legend2.png"
 }
 
 asset.onInitialize(function() 

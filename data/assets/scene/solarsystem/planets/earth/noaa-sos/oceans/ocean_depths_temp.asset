@@ -14,25 +14,22 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_by_depth = asset.syncedResource({
-	Name = Name .. " (By Depth)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-by_depth",
-	Version = 1
-})
-
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
+local imagesByDepthDestination = syncedDirectory .. "bydepth"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
+  Description = Description
+}
+
+local layerByDepth = {
+  Identifier = Identifier .. "-bydepth",
+  Name = Name .. " (by Depth)",
+  Type = "ImageSequenceTileLayer",
+  FolderPath = imagesByDepthDestination,
   Description = Description
 }
 
@@ -40,10 +37,20 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
+  end
+
+  if not openspace.directoryExists(imagesByDepthDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4096_by_depth.zip", imagesByDepthDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar);  
 end)

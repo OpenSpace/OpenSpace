@@ -32,7 +32,7 @@ local label = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "label.png"
+  TexturePath = syncedDirectory .. "label.png"
 }
 
 asset.onInitialize(function() 

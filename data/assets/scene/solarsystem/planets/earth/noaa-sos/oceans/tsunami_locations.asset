@@ -17,28 +17,28 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.jpg",
+  FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
 
 local layer_gray = {
   Identifier = Identifier .. "-gray",
   Name = Name .. " (Gray)",
-  FilePath = syncedDirectory .. "/gray_earth_with_countries_4096.png",
+  FilePath = syncedDirectory .. "gray_earth_with_countries_4096.png",
   Description = Description
 }
 
 local layer_neutral = {
   Identifier = Identifier .. "-neutral",
   Name = Name .. " (Neutral)",
-  FilePath = syncedDirectory .. "/natural_earth_with_countries_4096.png",
+  FilePath = syncedDirectory .. "natural_earth_with_countries_4096.png",
   Description = Description
 }
 
 local layer_events = {
   Identifier = Identifier .. "-events",
   Name = Name .. " (Events)",
-  FilePath = syncedDirectory .. "/tsunami_events.png",
+  FilePath = syncedDirectory .. "tsunami_events.png",
   Description = Description
 }
 

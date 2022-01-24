@@ -6,7 +6,6 @@ local Identifier = "noaa-sos-atmosphere-carbon_monoxide"
 local Description = [[ Carbon monoxide is known as "The Silent Killer" because it is a colorless, odorless, tasteless gas that is poisonous to humans and other oxygen breathing organisms. It is also naturally occurring in the atmosphere. Only in high concentrations is carbon monoxide deadly. At the Earth's surface the concentration of carbon monoxide is 100 ppb (parts per billion), however, in urban areas it can get up to 10 ppm (parts per million) or 100 times higher. One of the main anthropogenic sources of carbon monoxide in the atmosphere is emissions from automobiles. In areas with heavy traffic the carbon monoxide can be measured at 50 ppm. The natural sources of carbon monoxide include volcanoes and brush burning. Between the anthropogenic and natural sources, scientists estimate that the annual production of carbon monoxide is 2-5 gigatons.  ]]
 local URL = "https://sos.noaa.gov/catalog/datasets/carbon-monoxide-2000/"
 
-
 local syncedDirectory = asset.syncedResource({
 	Name = Name,
 	Type = "HttpSynchronization",
@@ -14,18 +13,13 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
+local imagesDestination = syncedDirectory .. "images"
 
 local layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileLayer",
-  FolderPath = syncedDirectory,
+  FolderPath = imagesDestination,
   Description = Description
 }
 
@@ -33,10 +27,15 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png"
 }
 
-asset.onInitialize(function() 
+asset.onInitialize(function()
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "1024.zip", imagesDestination, true)
+  end
+
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar);  
 end)

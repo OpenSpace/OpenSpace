@@ -14,45 +14,31 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local syncedDirectory_mat = asset.syncedResource({
-	Name = Name .. " (MAT)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-mat",
-	Version = 1
-})
-
-local syncedDirectory_addons = asset.syncedResource({
-	Name = Name .. " (Addons)",
-	Type = "HttpSynchronization",
-	Identifier = Identifier .. "-addons",
-	Version = 1
-})
-
 local layer_precip_2020 = {
   Identifier = Identifier .. "-2020",
   Name = Name .. " (2020)",
-  FilePath = syncedDirectory .. "/temp-precip-2020-current-4096.png",
+  FilePath = syncedDirectory .. "temp-precip-2020-current-4096.png",
   Description = Description
 }
 
 local layer_precip_2070 = {
   Identifier = Identifier .. "-2070",
   Name = Name .. " (2070)",
-  FilePath = syncedDirectory .. "/temp-precip-2070-rcp85-4096.png",
+  FilePath = syncedDirectory .. "temp-precip-2070-rcp85-4096.png",
   Description = Description
 }
 
 local layer_mat_2020 = {
   Identifier = Identifier .. "-mat2020",
   Name = Name .. " (MAT 2020)",
-  FilePath = syncedDirectory_mat .. "/MAT-29-2020-4096.png",
+  FilePath = syncedDirectory .. "MAT-29-2020-4096.png",
   Description = Description
 }
 
 local layer_mat_2070 = {
   Identifier = Identifier .. "-mat2070",
   Name = Name .. " (MAT 2070)",
-  FilePath = syncedDirectory_mat .. "/MAT-29-2070-4096.png",
+  FilePath = syncedDirectory .. "MAT-29-2070-4096.png",
   Description = Description
 }
 
@@ -60,7 +46,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "niche-scale.png"
+  TexturePath = syncedDirectory .. "niche-scale.png"
 }
 
 
