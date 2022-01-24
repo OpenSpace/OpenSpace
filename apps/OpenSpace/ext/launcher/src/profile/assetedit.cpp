@@ -51,8 +51,8 @@ void AssetEdit::createWidgets(const std::string& assetName) {
         assetLabel->setObjectName("profile");
         container->addWidget(assetLabel);
 
-        _assetEdit = new QLineEdit(QString::fromStdString(assetName));
-        container->addWidget(_assetEdit);
+        _nameEdit = new QLineEdit(QString::fromStdString(assetName));
+        container->addWidget(_nameEdit);
 
         _layout->addLayout(container);
     }
@@ -65,12 +65,7 @@ void AssetEdit::createWidgets(const std::string& assetName) {
         container->addWidget(_components);
 
         QPushButton* addButton = new QPushButton("Add", this);
-        connect(
-            addButton,
-            &QPushButton::clicked,
-            this,
-            &AssetEdit::openComponent
-        );
+        connect(addButton, &QPushButton::clicked, this, &AssetEdit::openComponent);
         addButton->setCursor(Qt::PointingHandCursor);
         container->addWidget(addButton);
 
@@ -101,9 +96,9 @@ void AssetEdit::openComponent() {
         case 1: {
             QBoxLayout* horizonsLayout = new QVBoxLayout(this);
             {
-                _horizonsFileLabel = new QLabel("Horizons Translation:", this);
-                _horizonsFileLabel->setObjectName("heading");
-                horizonsLayout->addWidget(_horizonsFileLabel);
+                QLabel* label = new QLabel("Horizons Translation:", this);
+                label->setObjectName("heading");
+                horizonsLayout->addWidget(label);
             }
             {
                 QBoxLayout* container = new QHBoxLayout(this);
@@ -165,7 +160,7 @@ void AssetEdit::openHorizons() {
 }
 
 void AssetEdit::approved() {
-    std::string assetName = _assetEdit->text().toStdString();
+    std::string assetName = _nameEdit->text().toStdString();
     if (assetName.empty()) {
         _errorMsg->setText("Asset name must be specified");
         return;

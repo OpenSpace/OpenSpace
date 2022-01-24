@@ -292,8 +292,8 @@ void HorizonsDialog::createWidgets() {
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
-        QLabel* nameLabel = new QLabel("Save directory:", this);
-        container->addWidget(nameLabel);
+        QLabel* directoryLabel = new QLabel("Save directory:", this);
+        container->addWidget(directoryLabel);
 
         _directoryEdit = new QLineEdit(this);
         _directoryEdit->setToolTip("Directory where the generated Horizons file is saved");
@@ -317,12 +317,14 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(targetLabel);
 
         _targetEdit = new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
+        _targetEdit->setToolTip("Which target or body would you like Horizons trajectery data for?");
         container->addWidget(_targetEdit);
 
         layout->addLayout(container);
 
         _chooseTargetCombo = new QComboBox(this);
         _chooseTargetCombo->hide();
+        _chooseTargetCombo->setToolTip("Choose a target from the search, or search again");
         layout->addWidget(_chooseTargetCombo);
     }
     {
@@ -331,12 +333,14 @@ void HorizonsDialog::createWidgets() {
         container->addWidget(centerLabel);
 
         _centerEdit = new QLineEdit(QString::fromStdString("500@499"), this);
+        _centerEdit->setToolTip("In which reference frame do you want the data in?");
         container->addWidget(_centerEdit);
 
         layout->addLayout(container);
 
         _chooseObserverCombo = new QComboBox(this);
         _chooseObserverCombo->hide();
+        _chooseObserverCombo->setToolTip("Choose an observer from the search, or search again");
         layout->addWidget(_chooseObserverCombo);
     }
     {
@@ -346,6 +350,7 @@ void HorizonsDialog::createWidgets() {
         _startEdit = new QDateTimeEdit(this);
         _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
         _startEdit->setDate(QDate::currentDate().addDays(-1));
+        _startEdit->setToolTip("Enter the start date and time for the data");
         container->addWidget(_startEdit);
         layout->addLayout(container);
     }
@@ -356,6 +361,7 @@ void HorizonsDialog::createWidgets() {
         _endEdit = new QDateTimeEdit(this);
         _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
         _endEdit->setDate(QDate::currentDate());
+        _endEdit->setToolTip("Enter the end date and time for the data");
         container->addWidget(_endEdit);
         layout->addLayout(container);
     }
@@ -367,9 +373,11 @@ void HorizonsDialog::createWidgets() {
         _stepEdit = new QLineEdit(this);
         _stepEdit->setValidator(new QIntValidator(this));
         _stepEdit->setText(QString::number(10));
+        _stepEdit->setToolTip("Enter the step size for the data");
         container->addWidget(_stepEdit);
 
         _timeTypeCombo = new QComboBox(this);
+        _timeTypeCombo->setToolTip("Choose unit of the step size");
         container->addWidget(_timeTypeCombo);
 
         layout->addLayout(container);
@@ -378,7 +386,7 @@ void HorizonsDialog::createWidgets() {
     {
         _downloadLabel = new QLabel("Downloading file...", this);
         _downloadLabel->hide();
-        layout->addWidget(_downloadLabel);
+        layout->addWidget(_downloadLabel, 0, Qt::AlignRight);
     }
     {
         QBoxLayout* footer = new QHBoxLayout(this);
@@ -444,34 +452,33 @@ bool HorizonsDialog::isValidInput() {
         isValid = false;
         message = "Directory not selected";
     }
-    else if(!std::filesystem::is_directory(_directoryEdit->text().toStdString()))
-    {
+    else if (!std::filesystem::is_directory(_directoryEdit->text().toStdString())) {
         isValid = false;
         message = "The selected directory could not be found";
     }
 
     // Target field
     else if (_targetEdit->text().isEmpty() &&
-            (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0))
+            (_chooseTargetCombo->count() > 0 &&
+             _chooseTargetCombo->currentIndex() == 0))
     {
         isValid = false;
         message = "Target not selected";
     }
-    else if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() == 0)
-    {
+    else if (_targetEdit->text().isEmpty() && _chooseTargetCombo->count() == 0) {
         isValid = false;
         message = "Target not selected";
     }
 
     // Observer field
     else if (_centerEdit->text().isEmpty() &&
-        (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0))
+            (_chooseObserverCombo->count() > 0 &&
+             _chooseObserverCombo->currentIndex() == 0))
     {
         isValid = false;
         message = "Observer not selected";
     }
-    else if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() == 0)
-    {
+    else if (_centerEdit->text().isEmpty() && _chooseObserverCombo->count() == 0) {
         isValid = false;
         message = "Observer not selected";
     }
@@ -634,7 +641,8 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
 
     // Write response into a new file
     std::ofstream file(filePath);
-    file << replaceAll(*result, "\n", "\r") << std::endl;
+    file << replaceAll(*result, "\\n", "\n") << std::endl;
+    //file << *result << std::endl;
     file.close();
 
     _horizonsFile = fullFilePath;
@@ -671,6 +679,22 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             foundTarget = true;
         }
 
+        // Selected time range too big and step size too small?
+        if (line.find("change step-size") != std::string::npos) {
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorSize;
+        }
+
+        // Outside valid time range?
+        if (line.find("No ephemeris for target") != std::string::npos) {
+            // Available time range is located several lines before this in the file
+            // The avalable time range is persed later
+            std::cout << "The selected time range is outside the valid range for the target"
+                << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
+        }
+
         // Valid Observer?
         if (line.find("No site matches") != std::string::npos ||
             line.find("Cannot find central body") != std::string::npos)
@@ -680,23 +704,29 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             return HorizonsDialog::HorizonsResult::ErrorNoObserver;
         }
 
+        // Are observer and target the same?
+        if (line.find("disallowed") != std::string::npos)
+        {
+            std::cout << "Observer and Target are the same" << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorObserverTargetSame;
+        }
+
+        // Enough data?
+        if (line.find("Insufficient ephemeris data") != std::string::npos)
+        {
+            std::cout << "Not enough data for the request" << std::endl;
+            fileStream.close();
+            return HorizonsDialog::HorizonsResult::ErrorNoData;
+        }
+
         // Incorrect Observer type?
         if (line.find("Multiple matching stations found") != std::string::npos) {
             // Stations are not supported
             // This message is only shown when a station is entered as observer
             std::cout << "Attempted to use an observer station, NOT supported" << std::endl;
             fileStream.close();
-            return HorizonsDialog::HorizonsResult::IncorrectObserver;
-        }
-
-        // Valid data?
-        if (line.find("No ephemeris for target") != std::string::npos) {
-            // Avalable time range is located several lines before this in the file
-            // The avalable time range is persed later
-            std::cout << "The selected time range is outside the valid range for the target"
-                << std::endl;
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
+            return HorizonsDialog::HorizonsResult::ErrorIncorrectObserver;
         }
 
         // Multiple matching major bodies?
@@ -730,12 +760,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             return HorizonsDialog::HorizonsResult::ErrorNoTarget;
         }
 
-        // Selected time range too big?
-        if (line.find("change step-size") != std::string::npos) {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorSize;
-        }
-
         std::getline(fileStream, line);
     }
 
@@ -766,17 +790,51 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
         case HorizonsDialog::HorizonsResult::ConnectionError:
             message = "Connection error";
             break;
+
+        case HorizonsDialog::HorizonsResult::ErrorSize:
+            message = "Time range '" + _startTime + "' to '" + _endTime +
+                "' with step size '" + _stepEdit->text().toStdString() +
+                "' is too big, try to increase the step size and/or decrease "
+                "the time range";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
+            std::pair<std::string, std::string> validTimeRange =
+                parseValidTimeRange(_horizonsFile);
+            if (validTimeRange.first.empty()) {
+                message = "Could not parse the valid time range";
+                break;
+            }
+            message = "Time range is outside the valid range for target '"
+                + _targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
+                validTimeRange.second + "'.";
+            break;
+        }
         case HorizonsDialog::HorizonsResult::ErrorNoObserver:
             message = "No match was found for observer '" + _observerName + "'. "
-                "Use '@" + _observerName + "' as observer to list possible matches";
+                "Use '@" + _observerName + "' as observer to list possible matches.";
             break;
+        case HorizonsDialog::HorizonsResult::ErrorObserverTargetSame:
+            message = "The observer '" + _observerName + "' and target '" + _targetName +
+                "' are the same. Please use another observer for the current target.";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorNoData:
+            message = "There is not enough data to compute the state of target '" +
+                _targetName + "' in relation to the observer '" + _observerName +
+                "' for the time range '" + _startTime + "' to '" + _endTime +
+                "'. Try to use another observer for the current target or another time range.";
+            break;
+        case HorizonsDialog::HorizonsResult::ErrorIncorrectObserver:
+            message = "Incorrect observer type for '" + _observerName + "'. "
+                "Use '@" + _observerName + "' as observer to search for alternatives.";
+            break;
+
         case HorizonsDialog::HorizonsResult::MultipleObserver: {
-            message = "Multiple matches was found for observer '" +
+            message = "Multiple matches were found for observer '" +
                 _observerName + "'";
             std::map<int, std::string> matchingObservers =
                 parseBodies(_horizonsFile);
             if (matchingObservers.empty()) {
-                message += ". Could not parse the matching observers";
+                message += ". Could not parse the matching observers.";
                 break;
             }
             _chooseObserverCombo->clear();
@@ -791,10 +849,6 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             _chooseObserverCombo->show();
             break;
         }
-        case HorizonsDialog::HorizonsResult::IncorrectObserver:
-            message = "Incorrect observer type for '" + _observerName + "'. "
-                "Use '@" + _observerName + "' as observer to list possible matches";
-            break;
         case HorizonsDialog::HorizonsResult::ErrorNoTarget:
             message = "No match was found for target '" + _targetName + "'";
             break;
@@ -828,24 +882,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             _chooseTargetCombo->show();
             break;
         }
-        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
-            std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(_horizonsFile);
-            if (validTimeRange.first.empty()) {
-                message = "Could not parse the valid time range";
-                break;
-            }
-            message = "Time range is outside the valid range for target '"
-                + _targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
-                validTimeRange.second + "'";
-            break;
-        }
-        case HorizonsDialog::HorizonsResult::ErrorSize:
-            message = "Time range '" + _startTime + "' to '" + _endTime +
-                "' with step size '" + _stepEdit->text().toStdString() +
-                "' is too big, try to increase the step size and/or decrease "
-                "the time range";
-            break;
+
         case HorizonsDialog::HorizonsResult::UnknownError:
             message = "An unknown error occured";
             break;

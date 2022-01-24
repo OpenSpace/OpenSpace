@@ -57,12 +57,10 @@ private:
     void createWidgets(const std::string& assetName);
 
     QBoxLayout* _layout = nullptr;
-    QLineEdit* _assetEdit = nullptr;
+    QLineEdit* _nameEdit = nullptr;
     QComboBox* _components = nullptr;
 
     std::filesystem::path _horizonsFile;
-    QLabel* _horizonsLabel = nullptr;
-    QLabel* _horizonsFileLabel = nullptr;
     QLineEdit* _horizonsFileEdit = nullptr;
 
     QLabel* _errorMsg = nullptr;
