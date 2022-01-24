@@ -2,14 +2,14 @@
 
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                         unsigned int nWindows, bool showMonitorLabel, QString* winColors)
+                         unsigned int nWindows, QString* winColors)
     : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
     , _nWindows(nWindows)
-    , _showLabel(showMonitorLabel)
     , _colorsForWindows(winColors)
 {
     _nMonitors = monitorResolution.size();
+    _showLabel = (_nMonitors > 1);
     mapMonitorResolutionToWidgetCoordinates();
 }
 

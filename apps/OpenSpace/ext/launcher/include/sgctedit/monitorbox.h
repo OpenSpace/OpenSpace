@@ -22,7 +22,7 @@ class MonitorBox : public QWidget
 Q_OBJECT
 public:
     explicit MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-        unsigned int nWindows, bool showMonitorLabel, QString* winColors);
+        unsigned int nWindows, QString* winColors);
     ~MonitorBox();
     void mapMonitorResolutionToWidgetCoordinates();
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,

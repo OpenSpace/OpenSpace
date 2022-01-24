@@ -44,17 +44,11 @@ void SgctEdit::createWidgets() {
     QHBoxLayout* layoutMainH = new QHBoxLayout;
     _orientationWidget = new Orientation();
 
-    if (_monitorSizeList.size() > 1) {
-        _monitorWidgetSize = QRect(0, 0, 600, 350);
-        _showMonitorLabel = true;
-    }
-
     {
         _monBox = new MonitorBox(
             _monitorWidgetSize,
             _monitorSizeList,
             _nMaxWindows,
-            _showMonitorLabel,
             _colorsForWindows
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout();

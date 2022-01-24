@@ -43,10 +43,9 @@ private:
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
     Display* _displayWidget = nullptr;
-    QRect _monitorWidgetSize = {0, 0, 400, 350};
+    QRect _monitorWidgetSize = {0, 0, 500, 500};
     FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
-    bool _showMonitorLabel = false;
     sgct::config::Cluster& _cluster;
     std::vector<sgct::config::Window>& _windowList;
     bool _saveSelected = false;
