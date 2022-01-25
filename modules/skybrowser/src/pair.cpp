@@ -207,6 +207,11 @@ namespace openspace {
         return _target->identifier();
     }
 
+    glm::vec2 Pair::size() const
+    {
+        return _browser->size();
+    }
+
     float Pair::verticalFov() const
     {
         return _browser->verticalFov();

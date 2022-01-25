@@ -266,7 +266,8 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize)
-    {
+    {   
+        _size = newSize;
         _scale = abs(newSize.y) * 0.5f;
         glm::vec2 newSizeRelToOld = abs((screenSpaceDimensions() + newSize) /
             screenSpaceDimensions());
@@ -283,5 +284,9 @@ namespace openspace {
 
     float ScreenSpaceSkyBrowser::opacity() const {
         return _opacity;
+    }
+    glm::vec2 ScreenSpaceSkyBrowser::size() const
+    {
+        return _size;
     }
 }

@@ -95,6 +95,7 @@ public:
     std::string browserGuiName() const;
     std::string browserId() const;
     std::string targetId() const;
+    glm::vec2 size() const;
 
     // Getters by reference
     ScreenSpaceSkyTarget* getTarget();

@@ -378,6 +378,10 @@ int getTargetData(lua_State* L) {
             glm::ivec3 color = pair->borderColor();
             std::vector<int> colorVec = { color.r, color.g, color.b };
 
+            // Convert color to vector so ghoul can read it
+            glm::vec2 size = pair->size();
+            std::vector<float> sizeVec = { size.x, size.y };
+
             ghoul::lua::push(L, id);
             lua_newtable(L);
             // Push ("Key", value)
@@ -398,6 +402,8 @@ int getTargetData(lua_State* L) {
             ghoul::lua::push(L, "color", colorVec);
             lua_settable(L, -3);
             ghoul::lua::push(L, "isLocked", pair->isLocked());
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "size", sizeVec);
             lua_settable(L, -3);
               
             // Set table for the current target

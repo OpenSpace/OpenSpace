@@ -33,6 +33,7 @@ namespace openspace {
 
         // Getters
         float opacity() const;
+        glm::vec2 size() const;
 
         // Setters
         void setVerticalFovWithScroll(float scroll);
