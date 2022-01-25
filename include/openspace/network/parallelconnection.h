@@ -51,7 +51,6 @@ public:
     enum class MessageType : uint32_t {
         Authentication = 0,
         Data,
-        IndependentData,
         ConnectionStatus,
         HostshipRequest,
         HostshipResignation,

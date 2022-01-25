@@ -93,7 +93,6 @@ private:
     void independentOnMessageReceived();
     void independentOffMessageReceived();
     void viewStatusMessageReceived(const std::vector<char>& message);
-    void deleteNode();
     ghoul::Dictionary viewerDictionary(std::string nodeName);
 
     void sendCameraKeyframe();
@@ -105,8 +104,6 @@ private:
     void setViewStatus();
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
-
-    bool independentView();
 
     double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
