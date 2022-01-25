@@ -52,7 +52,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QPlainTextEdit>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <fstream>
@@ -273,6 +275,7 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::createWidgets() {
+    QBoxLayout* wholeLayout = new QHBoxLayout(this);
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         QLabel* generateLabel = new QLabel("Generate a new Horizons file:", this);
@@ -402,6 +405,20 @@ void HorizonsDialog::createWidgets() {
         footer->addWidget(buttons);
         layout->addLayout(footer);
     }
+    wholeLayout->addLayout(layout);
+    {
+        _log = new QPlainTextEdit(this);
+        _log->setReadOnly(true);
+
+        QPalette p = _log->palette();
+        p.setColor(QPalette::All, QPalette::Base, Qt::black);
+        p.setColor(QPalette::All, QPalette::Text, Qt::white);
+
+        _log->setPalette(p);
+        wholeLayout->addWidget(_log);
+
+        appendLog("Horizons log messages:", HorizonsDialog::LogLevel::Info);
+    }
 }
 
 void HorizonsDialog::openFile() {
@@ -424,6 +441,7 @@ bool HorizonsDialog::handleRequest() {
     if (!isValidInput()) {
         return false;
     }
+    _errorMsg->clear();
 
     std::string url = constructUrl();
 
@@ -490,6 +508,7 @@ bool HorizonsDialog::isValidInput() {
     }
 
     _errorMsg->setText(message.c_str());
+    appendLog(message, HorizonsDialog::LogLevel::Info);
     return isValid;
 }
 
@@ -582,7 +601,10 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
     QEventLoop loop;
     auto status = QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     if (!status) {
-        std::cout << "Connection failed" << std::endl;
+        appendLog(
+            "Connection Failed",
+            HorizonsDialog::LogLevel::Error
+        );
         return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
@@ -593,18 +615,29 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
 
 HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply) {
     if (reply->error()) {
-        std::cout << reply->errorString().toStdString();
+        appendLog(
+            "Connection Error: " + reply->errorString().toStdString(),
+            HorizonsDialog::LogLevel::Error
+        );
         reply->deleteLater();
         return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (redirect.isValid() && reply->url() != redirect) {
-        std::cout << "Redirect has been requested" << std::endl;
+        appendLog(
+            "Redirect has been requested",
+            HorizonsDialog::LogLevel::Info
+        );
+        return sendRequest(redirect.toString().toStdString());
     }
     auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     if (statusCode.isValid() && statusCode != 200) {
-        std::cout << "HTTP status code '" << statusCode.toString().toStdString() << "' was returned" << std::endl;
+        appendLog(
+            "HTTP status code '" + statusCode.toString().toStdString() + "' was returned",
+            HorizonsDialog::LogLevel::Error
+        );
+        reply->deleteLater();
         return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
@@ -649,11 +682,11 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     return isValidHorizonsFile(filePath);
 }
 
-HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer) const {
+HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer) {
     auto it = answer.find("error");
     if (it != answer.end()) {
         // There was an error
-        std::cout << "Error: " << *it << std::endl;
+        appendLog(*it, HorizonsDialog::LogLevel::Error);
         return HorizonsDialog::HorizonsResult::UnknownError;
     }
     return HorizonsDialog::HorizonsResult::Valid;
@@ -777,18 +810,22 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 
 bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
     std::string message;
+    HorizonsDialog::LogLevel level;
     switch (result) {
         case HorizonsDialog::HorizonsResult::Valid:
             std::cout << "Valid result" << std::endl;
             return true;
         case HorizonsDialog::HorizonsResult::FileEmpty:
             message = "The received horizons file is empty";
+            level = HorizonsDialog::LogLevel::Warning;
             break;
         case HorizonsDialog::HorizonsResult::FileAlreadyExist:
             message = "File already exist, try another filename";
+            level = HorizonsDialog::LogLevel::Warning;
             break;
         case HorizonsDialog::HorizonsResult::ConnectionError:
             message = "Connection error";
+            level = HorizonsDialog::LogLevel::Error;
             break;
 
         case HorizonsDialog::HorizonsResult::ErrorSize:
@@ -796,10 +833,12 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
                 "' with step size '" + _stepEdit->text().toStdString() +
                 "' is too big, try to increase the step size and/or decrease "
                 "the time range";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
             std::pair<std::string, std::string> validTimeRange =
                 parseValidTimeRange(_horizonsFile);
+            level = HorizonsDialog::LogLevel::Error;
             if (validTimeRange.first.empty()) {
                 message = "Could not parse the valid time range";
                 break;
@@ -812,29 +851,35 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
         case HorizonsDialog::HorizonsResult::ErrorNoObserver:
             message = "No match was found for observer '" + _observerName + "'. "
                 "Use '@" + _observerName + "' as observer to list possible matches.";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         case HorizonsDialog::HorizonsResult::ErrorObserverTargetSame:
             message = "The observer '" + _observerName + "' and target '" + _targetName +
                 "' are the same. Please use another observer for the current target.";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         case HorizonsDialog::HorizonsResult::ErrorNoData:
             message = "There is not enough data to compute the state of target '" +
                 _targetName + "' in relation to the observer '" + _observerName +
                 "' for the time range '" + _startTime + "' to '" + _endTime +
                 "'. Try to use another observer for the current target or another time range.";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         case HorizonsDialog::HorizonsResult::ErrorIncorrectObserver:
             message = "Incorrect observer type for '" + _observerName + "'. "
                 "Use '@" + _observerName + "' as observer to search for alternatives.";
+            level = HorizonsDialog::LogLevel::Error;
             break;
 
         case HorizonsDialog::HorizonsResult::MultipleObserver: {
             message = "Multiple matches were found for observer '" +
                 _observerName + "'";
+            level = HorizonsDialog::LogLevel::Info;
             std::map<int, std::string> matchingObservers =
                 parseBodies(_horizonsFile);
             if (matchingObservers.empty()) {
                 message += ". Could not parse the matching observers.";
+                level = HorizonsDialog::LogLevel::Error;
                 break;
             }
             _chooseObserverCombo->clear();
@@ -851,6 +896,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
         }
         case HorizonsDialog::HorizonsResult::ErrorNoTarget:
             message = "No match was found for target '" + _targetName + "'";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         case HorizonsDialog::HorizonsResult::MultipleTarget: {
             // Case Small Bodies:
@@ -864,10 +910,12 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
             message = "Multiple matches was found for target '" + _targetName + "'";
+            level = HorizonsDialog::LogLevel::Info;
             std::map<int, std::string> matchingTargets =
                 parseBodies(_horizonsFile);
             if (matchingTargets.empty()) {
                 message += ". Could not parse the matching targets";
+                level = HorizonsDialog::LogLevel::Error;
                 break;
             }
             _chooseTargetCombo->clear();
@@ -885,15 +933,38 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
 
         case HorizonsDialog::HorizonsResult::UnknownError:
             message = "An unknown error occured";
+            level = HorizonsDialog::LogLevel::Error;
             break;
         default:
             message = "Unknown result type";
+            level = HorizonsDialog::LogLevel::Error;
             break;
     }
 
     _errorMsg->setText(message.c_str());
+    appendLog(message, level);
     std::filesystem::remove(_horizonsFile);
     return false;
+}
+
+void HorizonsDialog::appendLog(const std::string& message, const LogLevel level) {
+    std::string htmlText;
+    switch (level)
+    {
+        case HorizonsDialog::LogLevel::Error:
+            htmlText = "<font color=\"Red\">";
+            break;
+        case HorizonsDialog::LogLevel::Warning:
+            htmlText = "<font color=\"Yellow\">";
+            break;
+        case HorizonsDialog::LogLevel::Info:
+            htmlText = "<font color=\"White\">";
+            break;
+    }
+
+    htmlText += message + "</font>";
+    _log->appendHtml(htmlText.c_str());
+    _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
 }
 
 // When the user presses the 'Save' button

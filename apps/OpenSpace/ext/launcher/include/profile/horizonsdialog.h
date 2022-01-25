@@ -36,6 +36,7 @@ class QDateTimeEdit;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QLineEdit;
+class QPlainTextEdit;
 
 using json = nlohmann::json;
 
@@ -76,15 +77,22 @@ private:
         UnknownError
     };
 
+    enum class LogLevel {
+        Error,
+        Warning,
+        Info
+    };
+
     void createWidgets();
     bool handleRequest();
     bool isValidInput();
     std::string constructUrl();
     HorizonsResult sendRequest(const std::string url);
     HorizonsResult handleReply(QNetworkReply* reply);
-    HorizonsResult isValidAnswer(const json& answer) const;
+    HorizonsResult isValidAnswer(const json& answer);
     HorizonsResult isValidHorizonsFile(const std::string& file) const;
     bool handleResult(HorizonsDialog::HorizonsResult& result);
+    void appendLog(const std::string& message, const LogLevel level);
 
     std::filesystem::path _horizonsFile;
     QNetworkAccessManager* _manager;
@@ -104,6 +112,7 @@ private:
     QLineEdit* _stepEdit = nullptr;
     QComboBox* _timeTypeCombo = nullptr;
     QLabel* _downloadLabel = nullptr;
+    QPlainTextEdit* _log = nullptr;
 
     QLabel* _errorMsg = nullptr;
 };
