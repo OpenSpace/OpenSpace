@@ -1,10 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require("./../../venus_textures").TexturesPath
-local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../venus").Venus.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Venus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "venus_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/venus.jpg",
+  FilePath = texturesPath .. "venus.jpg",
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48

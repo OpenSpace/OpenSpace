@@ -1,8 +1,0 @@
-local modelFolder = asset.syncedResource({
-  Name = "Apollo Models",
-  Type = "HttpSynchronization",
-  Identifier = "apollo_11_models",
-  Version = 1
-})
-
-asset.export('models', modelFolder)

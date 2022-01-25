@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "WAC_Utah",
   Name = "WAC [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
+  FilePath = asset.localResource("wac_utah.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle
    Camera (WAC) aboard the Lunar Reconnaissance Orbiter (LRO) has

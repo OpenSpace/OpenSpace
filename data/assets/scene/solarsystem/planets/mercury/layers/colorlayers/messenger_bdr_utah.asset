@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
   Identifier = "Messenger_BDR_Utah",
   Name = "Messenger BDR [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/MessengerBDR.wms",
+  FilePath = asset.localResource("messenger_bdr_utah.wms"),
   TilePixelSize = 360,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global 
   monochrome map of reflectance at a resolution of 256 pixels per degree (~166 m/p). 

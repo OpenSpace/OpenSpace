@@ -1,16 +1,24 @@
-local assetHelper = asset.require('util/asset_helper')
-local textures = asset.require('./backgroundradiation_textures').textures
+local assetHelper = asset.require("util/asset_helper")
+
+
+
+local textures = asset.syncedResource({
+  Name = "Background Radiation Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_backgroundradiation_textures",
+  Version = 2
+})
 
 local multiverse_planck_1 = {
   Identifier = "PlanckMultiverse1",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { 0.0, 0.0, 2000E23}
+      Position = { 0.0, 0.0, 2000E23 }
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -19,7 +27,7 @@ local multiverse_planck_1 = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.3,
-    Texture = textures .. "/cmb4k.jpg",
+    Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
     UseAdditiveBlending = true,
@@ -40,7 +48,7 @@ local multiverse_planck_2 = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -49,7 +57,7 @@ local multiverse_planck_2 = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.3,
-    Texture = textures .. "/cmb4k.jpg",
+    Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
     UseAdditiveBlending = true,
@@ -70,7 +78,7 @@ local multiverse_planck_3 = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -79,7 +87,7 @@ local multiverse_planck_3 = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.3,
-    Texture = textures .. "/cmb4k.jpg",
+    Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
     UseAdditiveBlending = true,
@@ -100,7 +108,7 @@ local multiverse_planck_4 = {
     },
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0, 0, 3.14159265359 }
+      Rotation = { 0, 0, math.pi }
     }
   },
   Renderable = {
@@ -109,7 +117,7 @@ local multiverse_planck_4 = {
     Size = 3975.41417036064E23,
     Segments = 80,
     Opacity = 0.3,
-    Texture = textures .. "/cmb4k.jpg",
+    Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
     UseAdditiveBlending = true,

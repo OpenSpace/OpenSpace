@@ -1,6 +1,6 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local debugHelper = asset.require('util/debug_helper')
-local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local debugHelper = asset.require("util/debug_helper")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local sunRadius = 6.957E8
 local earthRadius = 6.371E6

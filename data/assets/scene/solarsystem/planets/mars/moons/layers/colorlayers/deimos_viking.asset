@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local globeIdentifier = asset.require("./../../deimos").Deimos.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../deimos").Deimos.Identifier
 
 local layer = {
   Identifier = "Deimos_Global_Mosaic_USGS",

@@ -4,7 +4,7 @@
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/debristasks/generate_debris_volume.task'
 
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local maxApogee = 2 * 10946320;

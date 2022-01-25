@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "LolaDem_Utah",
   Name = "Lola DEM [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
+  FilePath = asset.localResource("loladem_utah.wms"),
   TilePixelSize = 64,
   Settings = { Multiplier = 0.5 },
   Description = [[This digital elevation model (DEM) is based on data from the Lunar 

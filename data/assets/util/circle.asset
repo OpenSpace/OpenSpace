@@ -1,8 +1,0 @@
-local circle = asset.syncedResource({
-  Name = "Circle",
-  Type = "HttpSynchronization",
-  Identifier = "circle_image",
-  Version = 1
-})
-
-asset.export('circle', circle)

@@ -1,7 +1,7 @@
-local assetHelper = asset.require('util/asset_helper')
-local heliosphereTransforms = asset.require('scene/solarsystem/sun/transforms_heliosphere')
-local propertyHelper = asset.require('util/property_helper')
-local rot = asset.require('./carringtonToHEEQRotation.asset')
+local assetHelper = asset.require("util/asset_helper")
+local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local propertyHelper = asset.require("util/property_helper")
+local rot = asset.require("./carringtonToHEEQRotation.asset")
 
 local fieldlinesDirectory = asset.syncedResource({
   Name = "Bastille Day MAS Fieldlines",

@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
 
 local center = sunTransforms.SolarSystemBarycenter.Identifier;
 local LIGHTS = assetHelper.getDefaultLightSources(center);
@@ -59,7 +59,7 @@ local OrionNebulaModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orion_nebula.obj",
+    GeometryFile = sync .. "orion_nebula.obj",
     Opacity = 1.0,
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -87,7 +87,7 @@ local OrionNebulaShocksModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/orishocks.obj",
+    GeometryFile = sync .. "orishocks.obj",
     Opacity = 1.0, 
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,
@@ -116,7 +116,7 @@ local OrionNebulaProplydsModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = sync .. "/proplyds.obj",
+    GeometryFile = sync .. "proplyds.obj",
     Opacity = 1.0, 
     DisableFaceCulling = false,
     SpecularIntensity = 0.0,

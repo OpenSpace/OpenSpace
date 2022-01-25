@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,12 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
+    enum Type {
+        Node = 0,
+        Focus,
+        Camera
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -87,7 +93,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
-        enum class Type {
+        enum class [[codegen::map(Type)]] Type {
             Node,
             Focus,
             Camera
@@ -155,17 +161,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         );
     });
     if (p.sourceType.has_value()) {
-        switch (*p.sourceType) {
-            case Parameters::Type::Node:
-                _source.type = Type::Node;
-                break;
-            case Parameters::Type::Focus:
-                _source.type = Type::Focus;
-                break;
-            default:
-                _source.type = Type::Camera;
-                break;
-        }
+        _source.type = codegen::map<Type>(*p.sourceType);
     }
     else {
         _source.type = Type::Camera;
@@ -197,17 +193,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_reference.type == Type::Node)
         );
     });
-    switch (p.referenceType) {
-        case Parameters::Type::Node:
-            _reference.type = Type::Node;
-            break;
-        case Parameters::Type::Focus:
-            _reference.type = Type::Focus;
-            break;
-        default:
-            _reference.type = Type::Camera;
-            break;
-    }
+    _reference.type = codegen::map<Type>(p.referenceType);
     addProperty(_reference.type);
 
     _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
@@ -235,17 +221,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         );
     });
     if (p.destinationType.has_value()) {
-        switch (*p.destinationType) {
-            case Parameters::Type::Node:
-                _destination.type = Type::Node;
-                break;
-            case Parameters::Type::Focus:
-                _destination.type = Type::Focus;
-                break;
-            default:
-                _destination.type = Type::Camera;
-                break;
-        }
+        _destination.type = codegen::map<Type>(*p.destinationType);
     }
     else {
         _destination.type = Type::Focus;

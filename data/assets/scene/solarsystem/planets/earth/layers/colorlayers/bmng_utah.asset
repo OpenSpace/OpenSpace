@@ -1,11 +1,10 @@
 local assetHelper = asset.require("util/asset_helper")
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "BMNG_Utah",
   Name = "BMNG [Utah]",
-  FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms",
+  FilePath = asset.localResource("bmng_utah.wms"),
   Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
     This map is hosted on the OpenSpace servers in Utah]],    
 }

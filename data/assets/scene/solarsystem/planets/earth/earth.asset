@@ -1,6 +1,12 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-local labelsPath = asset.require('./earth_globelabels').LabelsPath
+local transforms = asset.require("./transforms")
+local assetHelper = asset.require("util/asset_helper")
+
+local labelsPath = asset.syncedResource({
+  Name = "Earth Labels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_labels",
+  Version = 1
+})
 
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
@@ -24,7 +30,7 @@ local Earth = {
     },
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/Earth.labels",
+      FileName = labelsPath .. "Earth.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 5.0,

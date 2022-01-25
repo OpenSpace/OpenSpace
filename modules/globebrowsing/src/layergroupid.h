@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,19 +53,20 @@ enum GroupID {
     Overlays,
     NightLayers,
     WaterMasks,
-    Unknown,
+    Unknown
 };
 
-static constexpr const int NUM_LAYER_TYPES = 8;
+static constexpr const int NUM_LAYER_TYPES = 9;
 static constexpr const char* LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
     "DefaultTileLayer",
     "SingleImageTileLayer",
+    "ImageSequenceTileLayer",
     "SizeReferenceTileLayer",
     "TemporalTileLayer",
     "TileIndexTileLayer",
     "ByIndexTileLayer",
     "ByLevelTileLayer",
-    "SolidColor",
+    "SolidColor"
 };
 
 /**
@@ -75,12 +76,13 @@ enum class TypeID {
     Unknown = -1,
     DefaultTileLayer = 0,
     SingleImageTileLayer = 1,
-    SizeReferenceTileLayer = 2,
-    TemporalTileLayer = 3,
-    TileIndexTileLayer = 4,
-    ByIndexTileLayer = 5,
-    ByLevelTileLayer = 6,
-    SolidColor = 7,
+    ImageSequenceTileLayer = 2,
+    SizeReferenceTileLayer = 3,
+    TemporalTileLayer = 4,
+    TileIndexTileLayer = 5,
+    ByIndexTileLayer = 6,
+    ByLevelTileLayer = 7,
+    SolidColor = 8
 };
 
 static constexpr int NUM_ADJUSTMENT_TYPES = 3;

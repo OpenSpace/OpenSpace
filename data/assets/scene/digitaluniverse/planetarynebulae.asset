@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -23,10 +23,10 @@ local object = {
     Enabled = false,
     Color = { 0.4, 0.4, 0.9 },
     Opacity = 0.65,
-    File = speck .. "/pn.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "pn.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 3,
-    LabelFile = speck .. "/pn.label",
+    LabelFile = speck .. "pn.label",
     Unit = "pc",
     TextColor = { 0.25, 0.25, 0.65 },
     ScaleFactor = 425.0,

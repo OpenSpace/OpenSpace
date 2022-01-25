@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -87,9 +87,11 @@ function (set_openspace_compile_settings target)
       "/GL" # Whole program optimization
     )
   else ()
-    set(MSVC_WARNINGS ${MSVC_WARNINGS}
-      "/ZI"       # Edit and continue support
-    )
+    if (GHOUL_ENABLE_EDIT_CONTINUE)
+      set(MSVC_WARNINGS ${MSVC_WARNINGS}
+        "/ZI"       # Edit and continue support
+      )
+    endif ()
   endif ()
 
   set(CLANG_WARNINGS

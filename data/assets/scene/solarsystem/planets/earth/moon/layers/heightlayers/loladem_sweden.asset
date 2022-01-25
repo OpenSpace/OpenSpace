@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "LolaDem_Sweden",
   Name = "Lola DEM [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Lola_DEM.wms",
+  FilePath = asset.localResource("loladem_sweden.wms"),
   TilePixelSize = 64,
   Settings = { Multiplier = 0.5 }
 }

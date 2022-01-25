@@ -1,18 +1,24 @@
 local assetHelper = asset.require("util/asset_helper")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "VIIRS_SNPP_Temporal",
   Name = "VIIRS SNPP (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-    "2015-11-24",
-    "Yesterday",
-    "1d",
-    "250m",
-    "jpg"
-  ),
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2015-11-24",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
   Description = [[ Temporal coverage: 11 November 2015 - Present. The imagery resolution
     is 0.25 km, and the temporal resolution is daily.]]
 }

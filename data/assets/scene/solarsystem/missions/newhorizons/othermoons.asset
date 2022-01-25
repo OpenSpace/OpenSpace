@@ -1,8 +1,8 @@
-local Hydra = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/hydra')
-local Kerberos = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/kerberos')
-local Nix = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/nix')
-local Styx = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/styx')
-local assetHelper = asset.require('util/asset_helper')
+local Hydra = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/hydra")
+local Kerberos = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerberos")
+local Nix = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
+local Styx = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
+local assetHelper = asset.require("util/asset_helper")
 
 local hydraTextures = asset.syncedResource({
   Name = "Hydra Textures",
@@ -25,7 +25,7 @@ local HydraText = {
     Size = 10.0^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = hydraTextures .. "/Hydra-Text.png",
+    Texture = hydraTextures .. "Hydra-Text.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -55,7 +55,7 @@ local KerberosText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = kerberosTextures .. "/Kerberos-Text.png",
+    Texture = kerberosTextures .. "Kerberos-Text.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -79,7 +79,7 @@ local NixText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = nixTextures .. "/Nix-Text.png",
+    Texture = nixTextures .. "Nix-Text.png",
     BlendMode = "Additive"
   },
   GUI = {
@@ -109,7 +109,7 @@ local StyxText = {
     Size = 10^6.3,
     Origin = "Center",
     Billboard = true,
-    Texture = styxTextures .. "/Styx-Text.png",
+    Texture = styxTextures .. "Styx-Text.png",
     BlendMode = "Additive"
   },
   GUI = {

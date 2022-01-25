@@ -1,35 +1,37 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
-local kernels = asset.require('./kernels').PlutoKernels
+local kernels = asset.require("./kernels").PlutoKernels
 local OneAU = 1.496e+8
+
+
 local PlutoKeplerianTrail = {
-    Identifier = "PlutoKeplerianTrail",
-    Parent = transforms.SunECLIPJ2000.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "KeplerTranslation",
-            Eccentricity = 2.543033082909471E-01,
-            SemiMajorAxis = 3.974407237841206E+01 * OneAU,
-            Inclination = 1.736609481151430E+01,
-            AscendingNode = 1.102099981996057E+02,
-            ArgumentOfPeriapsis = 1.142248569189779E+02,
-            MeanAnomaly = 14.53,
-            Epoch = '2000 01 01 00:00',
-            Period = 7.82438e+9
-        },
-        Color = { 0.2, 0.8, 0.3 },
-        Period = 90487.27692706819,
-        Resolution = 1000,
-        Enabled = false
+  Identifier = "PlutoKeplerianTrail",
+  Parent = transforms.SunECLIPJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "KeplerTranslation",
+      Eccentricity = 2.543033082909471E-01,
+      SemiMajorAxis = 3.974407237841206E+01 * OneAU,
+      Inclination = 1.736609481151430E+01,
+      AscendingNode = 1.102099981996057E+02,
+      ArgumentOfPeriapsis = 1.142248569189779E+02,
+      MeanAnomaly = 14.53,
+      Epoch = "2000 01 01 00:00",
+      Period = 7.82438e+9
     },
-    Tag = { "planetTrail_dwarf" },
-    GUI = {
-        Name = "Pluto Keplerian Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto",
-        Description = "Keplerian trail of Pluto. Contains full orbit."
-    }
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 90487.27692706819,
+    Resolution = 1000,
+    Enabled = false
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Pluto Keplerian Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = "Keplerian trail of Pluto. Contains full orbit."
+  }
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoKeplerianTrail })
 

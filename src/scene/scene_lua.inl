@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -591,14 +591,6 @@ int property_getProperty(lua_State* L) {
     return 1;
 }
 
-int loadScene(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
-    std::string sceneFile = ghoul::lua::value<std::string>(L);
-
-    global::openSpaceEngine->scheduleLoadSingleAsset(std::move(sceneFile));
-    return 0;
-}
-
 int addSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addSceneGraphNode");
     const ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
@@ -924,6 +916,40 @@ int setParent(lua_State* L) {
     global::renderEngine->scene()->markNodeRegistryDirty();
 
     return 0;
+}
+
+int boundingSphere(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::boundingSphere");
+    const std::string identifier = ghoul::lua::value<std::string>(L);
+
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    double bs = node->boundingSphere();
+    ghoul::lua::push(L, bs);
+    return 1;
+}
+
+int interactionSphere(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::interactionSphere");
+    const std::string identifier = ghoul::lua::value<std::string>(L);
+
+    SceneGraphNode* node = sceneGraphNode(identifier);
+    if (!node) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    double is = node->interactionSphere();
+    ghoul::lua::push(L, is);
+    return 1;
 }
 
 /**

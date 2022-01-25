@@ -1,8 +1,20 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
-local circle = asset.require('util/circle').circle
-local kernels = asset.require('scene/solarsystem/planets/earth/lagrange_points/lagrange_kernels').kernels
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local circle = asset.syncedResource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+local kernels = asset.syncedResource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
 
 local L5 = {
   Identifier = "L5",
@@ -12,7 +24,7 @@ local L5 = {
     RenderableType = "Opaque",
     Billboard = true,
     Size = 800E6,
-    Texture = circle .. "/circle.png",
+    Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
   Transform = {
@@ -20,7 +32,7 @@ local L5 = {
       Type = "SpiceTranslation",
       Target = "395", -- L5
       Observer = "SSB",
-      Kernels = kernels .. "/L5_de431.bsp"
+      Kernels = kernels .. "L5_de431.bsp"
     }
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },

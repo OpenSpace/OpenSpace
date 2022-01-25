@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -255,7 +255,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "addExoplanetSystem",
             &exoplanets::luascriptfunctions::addExoplanetSystem,
-            {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
@@ -263,14 +262,12 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "removeExoplanetSystem",
             &exoplanets::luascriptfunctions::removeExoplanetSystem,
-            {},
             "string",
             "Removes the nodes of the specified exoplanet system from the scene graph"
         },
         {
             "listAvailableExoplanetSystems",
             &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
-            {},
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
             "the scene graph to the OpenSpace Log"
@@ -278,7 +275,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "getListOfExoplanets",
             &exoplanets::luascriptfunctions::getListOfExoplanets,
-            {},
             "",
             "Gets a list with the names of all exoplanet systems"
         }

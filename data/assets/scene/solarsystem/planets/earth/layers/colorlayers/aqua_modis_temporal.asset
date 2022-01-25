@@ -1,18 +1,24 @@
 local assetHelper = asset.require("util/asset_helper")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Aqua_Modis_Temporal",
   Name = "Aqua Modis (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "MODIS_Aqua_CorrectedReflectance_TrueColor",
-    "2002-07-04",
-    "Yesterday",
-    "1d",
-    "250m",
-    "jpg"
-  ),
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2002-07-04",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Aqua_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
   Description = [[ Temporal coverage: 03 July 2002 - Present. True Color: Red = Band 1,
     Green = Band 4, Blue = Band 3. These images are called true-color or natural color
     because this combination of wavelengths is similar to what the human eye would see.

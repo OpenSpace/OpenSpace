@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "CTX_blended_01",
   Name = "CTX Blended beta01",
-  FilePath = mapServiceConfigs .. "/ESRI/CTX/CTXblended.vrt",
+  FilePath = asset.localResource("ctx_blended_01.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 2.14,

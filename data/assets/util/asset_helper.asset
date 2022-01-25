@@ -102,14 +102,14 @@ end
 
 local requireAll = function (sceneAsset, directory)
   function string.ends(String,End)
-    return End=='' or string.sub(String,-string.len(End))==End
+    return End == "" or string.sub(String,-string.len(End))==End
   end
 
   local result = {}
 
-  local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
+  local files = openspace.walkDirectoryFiles(sceneAsset.localResource("") .. directory, true)
   for _, file in pairs(files) do
-    if file:ends('.asset') then
+    if file:ends(".asset") then
       openspace.printDebug("Requiring: " .. file:sub(file:find(directory), -7))
       local exports = sceneAsset.require(file:sub(1, -7))
       table.insert(result, exports)

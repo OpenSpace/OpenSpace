@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local globeIdentifier = asset.require("./../../phobos").Phobos.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../phobos").Phobos.Identifier
 
 local layer = {
   Identifier = "Phobos_Global_Shaded_Relief_USGS",

@@ -1,11 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("./../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "Lola_Clr_Shade_Sweden",
   Name = "LRO LOLA Color Shaded Relief 388m v4 [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms",
   Description = [[This is a colorized shaded-relief of a original polar digital elevation 
   model (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an 
   instrument on the National Aeronautics and Space Agency (NASA) Lunar Reconnaissance 
@@ -13,7 +11,8 @@ local layer = {
   Moon at a resolution 100 meters per pixel (m) based on altimetry data acquired through 
   September, 2011 by the LOLA instrument. The ground tracks were interpolated using the 
   Generic Mapping Tools programs "surface" and "grdblend". Map values are referred to a 
-  radius of 1,737,400 m.]]
+  radius of 1,737,400 m.]],
+  FilePath = asset.localResource("lola_clr_shade_sweden.wms")
 }
 
 assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")

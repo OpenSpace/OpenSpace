@@ -1,11 +1,9 @@
-local assetHelper = asset.require('util/asset_helper')
-
-asset.require('./date')
-asset.require('./simulationincrement')
-asset.require('./distance')
-asset.require('./framerate')
-asset.require('./parallelconnection')
-asset.require('./globelocation')
+asset.require("./date")
+asset.require("./simulationincrement")
+asset.require("./distance")
+asset.require("./framerate")
+asset.require("./parallelconnection")
+asset.require("./globelocation")
 
 
 asset.meta = {

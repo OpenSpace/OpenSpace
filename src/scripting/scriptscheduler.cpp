@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -297,7 +297,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadFile",
                 &luascriptfunctions::loadFile,
-                {},
                 "string",
                 "Load timed scripts from a Lua script file that returns a list of "
                 "scheduled scripts."
@@ -305,7 +304,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadScheduledScript",
                 &luascriptfunctions::loadScheduledScript,
-                {},
                 "string, string, (string, string)",
                 "Load a single scheduled script. The first argument is the time at which "
                 "the scheduled script is triggered, the second argument is the script "
@@ -317,7 +315,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "setModeApplicationTime",
                 &luascriptfunctions::setModeApplicationTime,
-                {},
                 "",
                 "Sets the time reference for scheduled scripts to application time "
                 "(seconds since OpenSpace application started)."
@@ -325,7 +322,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "setModeRecordedTime",
                 &luascriptfunctions::setModeRecordedTime,
-                {},
                 "",
                 "Sets the time reference for scheduled scripts to the time since the "
                 "recording was started (the same relative time applies to playback)."
@@ -333,7 +329,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "setModeSimulationTime",
                 &luascriptfunctions::setModeSimulationTime,
-                {},
                 "",
                 "Sets the time reference for scheduled scripts to the simulated "
                 "date & time (J2000 epoch seconds)."
@@ -341,10 +336,9 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "clear",
                 &luascriptfunctions::clear,
-                {},
                 "",
                 "Clears all scheduled scripts."
-            },
+            }
         }
     };
 }
