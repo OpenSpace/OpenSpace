@@ -91,7 +91,9 @@ function satellites(title, file, color, group)
     },
     Tag = { "earth_satellites" },
     GUI = {
-      Path = "/Solar System/Planets/Earth/Satellites"
+      Name = group.Title,
+      Path = "/Solar System/Planets/Earth/Satellites",
+      Description = group.Description
     }
   }
 end
