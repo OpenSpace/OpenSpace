@@ -231,16 +231,18 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
 }
 
 void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
-    if (peer.id != _hostPeerId && peer.viewStatus != ParallelConnection::ViewStatus::IndependentView) {
+    if (peer.id == _hostPeerId) {
+        sendMessageToClients(ParallelConnection::MessageType::Data, data);
+    }
+    else if (peer.viewStatus == ParallelConnection::ViewStatus::IndependentView) {
+        sendMessageToAll(ParallelConnection::MessageType::Data, data); // Send to all, so host can also use the info
+    }
+    else {
         LINFO(fmt::format(
             "Ignoring connection {} trying to send data without being host"
             " or using independent view", peer.id
         ));
-
-        return;
     }
-
-    sendMessageToClients(ParallelConnection::MessageType::Data, data);
 }
 
 void ParallelServer::handleHostshipRequest(std::shared_ptr<Peer> peer,

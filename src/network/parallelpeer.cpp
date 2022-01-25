@@ -331,7 +331,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
     std::vector<char> buffer(message.begin() + offset, message.end());
 
+    std::string name; // TODO: receive name through message
+
     switch (static_cast<datamessagestructures::Type>(type)) {
+    // Camera data from host
     case datamessagestructures::Type::CameraData: {
 
         datamessagestructures::CameraKeyframe kf(buffer);
@@ -348,17 +351,31 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
 
+        // If you aren't independent, render host's view.
         if (_viewStatus != ParallelConnection::ViewStatus::IndependentView) {
             global::navigationHandler->keyframeNavigator().addKeyframe(
                 convertedTimestamp,
                 pose
             );
         }
-
-        //TODO: Ind. viewers render host's position
+        // If you are independent, update position of host's node.
+        else {
+            std::string script;
+            script = fmt::format(
+                "openspace.setPropertyValueSingle("
+                "Scene.Node_{}.Translation.StaticTranslation.Position, {})",
+                name,
+                pose.position
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting(false)
+            );
+        }
 
         break;
     }
+    // Camera data from independent viewer
     case datamessagestructures::Type::IndependentCameraData: {
         datamessagestructures::CameraKeyframe kf(buffer);
         const double convertedTimestamp = convertTimestamp(kf._timestamp);
@@ -372,8 +389,19 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
 
-        // Host and host viewers render all ind. viewers' positions
-        // Ind. viewers render other ind. viewers positions
+        if (name != std::string(_name)) {
+            std::string script;
+            script = fmt::format(
+                "openspace.setPropertyValueSingle("
+                "Scene.Node_{}.Translation.StaticTranslation.Position, {})",
+                name,
+                pose.position
+            );
+            global::scriptEngine->queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting(false)
+            );
+        }
 
         break;
     }
@@ -533,33 +561,33 @@ void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
     }
     pointer += nameSize;
 
-    std::string script;
-    
-    if (viewStatus == ParallelConnection::ViewStatus::HostView) {
-        if (name == std::string(_name)) {
-            // Delete host node since you are now sharing the host's view.
-            script = "openspace.removeSceneGraphNode(" + std::string(_hostName) + ")";
-        }
-        else {
-            // Delete [name]'s node since they are now sharing the host's view.
-            script = "openspace.removeSceneGraphNode(" + std::string(name) + ")";
-        }
-    }
-    else { // viewStatus == IndependentView
-        std::string dictionary;
+    //std::string script;
+    //
+    //if (viewStatus == ParallelConnection::ViewStatus::HostView) {
+    //    if (name == std::string(_name)) {
+    //        // Delete host node since you are now sharing the host's view.
+    //        script = "openspace.removeSceneGraphNode(" + std::string(_hostName) + ")";
+    //    }
+    //    else {
+    //        // Delete [name]'s node since they are now sharing the host's view.
+    //        script = "openspace.removeSceneGraphNode(" + std::string(name) + ")";
+    //    }
+    //}
+    //else { // viewStatus == IndependentView
+    //    std::string dictionary;
 
-        if (name == std::string(_name)) {
-            // Create host node since you now have your own view.
-            dictionary = ghoul::formatLua(viewerDictionary(_hostName));
-        }
-        else {
-            // Create node for [name] since they now have their own view.
-            dictionary = ghoul::formatLua(viewerDictionary(name));
-        }
-        script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
-    }
+    //    if (name == std::string(_name)) {
+    //        // Create host node since you now have your own view.
+    //        dictionary = ghoul::formatLua(viewerDictionary(_hostName));
+    //    }
+    //    else {
+    //        // Create node for [name] since they now have their own view.
+    //        dictionary = ghoul::formatLua(viewerDictionary(name));
+    //    }
+    //    script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
+    //}
 
-    global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+    //global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
 }
 
 void ParallelPeer::handleCommunication() {
@@ -833,10 +861,6 @@ bool ParallelPeer::isHost() {
     return _status == ParallelConnection::Status::Host;
 }
 
-bool ParallelPeer::independentView() { // TODO: remove if still unused
-    return _independentView;
-}
-
 void ParallelPeer::setHostName(const std::string& hostName) {
     if (_hostName != hostName) {
         _hostName = hostName;
@@ -964,41 +988,36 @@ ghoul::Event<>& ParallelPeer::connectionEvent() {
     return *_connectionEvent;
 }
 
-void ParallelPeer::deleteNode() {
-    std::string script = "removeSceneGraphNode('IDENTIFIER')"; // how to call for specific identifier?
-
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::RemoteScripting::No
-    );
-}
-
 // Dictionary with identifier tied to the name of the peer belonging to the node
-ghoul::Dictionary ParallelPeer::viewerDictionary(std::string identifier) {
-    ghoul::Dictionary node;
-    ghoul::Dictionary gui;
-    ghoul::Dictionary transform;
-    ghoul::Dictionary translation;
-    ghoul::Dictionary renderable;
+ghoul::Dictionary ParallelPeer::viewerDictionary(std::string name) {
+    ghoul::Dictionary Node;
+    ghoul::Dictionary GUI;
+    ghoul::Dictionary Translation;
+    ghoul::Dictionary Renderable;
+    ghoul::Dictionary Transform;
 
-    gui.setValue<std::string>("Name", "");
-    gui.setValue<std::string>("Path", ""); // where in the gui? new category: collab?
-    gui.setValue<std::string>("Description", "");
+    std::string identifier = "Viewer_" + name;
+    std::string modelPath; // Insert model path
 
-    translation.setValue<std::string>("Type", "StaticTranslation");
-    translation.setValue<std::string>("Body", "Node_" + std::string(_name));
+    GUI.setValue<std::string>("Name", "");
+    GUI.setValue<std::string>("Path", "/Collab/" + identifier);
+    GUI.setValue<std::string>("Description", "");
 
-    renderable.setValue<std::string>("Type", "RenderableModel");
-    renderable.setValue<std::string>("GeometryFile", ""); // Insert model path
+    Translation.setValue<std::string>("Type", "StaticTranslation");
+    Translation.setValue<std::string>("Body", identifier);
+    Translation.setValue<glm::vec3>("Position", { 0.0, 0.0, 0.0 });
 
-    transform.setValue<ghoul::Dictionary>("Translation", translation);
-    transform.setValue<ghoul::Dictionary>("Renderable", renderable);
+    Renderable.setValue<std::string>("Type", "RenderableModel");
+    Renderable.setValue<std::string>("GeometryFile", modelPath);
 
-    node.setValue<std::string>("Identifier", "Node_" + identifier);
-    node.setValue<ghoul::Dictionary>("GUI", gui);
-    node.setValue<ghoul::Dictionary>("Transform", transform);
+    Transform.setValue<ghoul::Dictionary>("Translation", Translation);
+    Transform.setValue<ghoul::Dictionary>("Renderable", Renderable);
 
-    return node;
+    Node.setValue<std::string>("Identifier", identifier);
+    Node.setValue<ghoul::Dictionary>("GUI", GUI);
+    Node.setValue<ghoul::Dictionary>("Transform", Transform);
+
+    return Node;
 }
 
 scripting::LuaLibrary ParallelPeer::luaLibrary() {
