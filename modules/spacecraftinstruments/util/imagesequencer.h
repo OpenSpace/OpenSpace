@@ -42,9 +42,9 @@ class SequenceParser;
  * large image data-sets across all openspace renderable instances, both for past and
  * future unmanned-spacecraft missions. To load the instance with data the client must
  * provide a parser inherited from the abstract base class SequenceParser. Hence, there is
- * no restriction imposed on data input, whether its data in the form of existing images or
- * in the form of a planned observation schedule. Notably, in order for the sequencer to
- * function the client must provide or write a parser that fills the ImageSequencers
+ * no restriction imposed on data input, whether its data in the form of existing images
+ * or in the form of a planned observation schedule. Notably, in order for the sequencer
+ * to function the client must provide or write a parser that fills the ImageSequencers
  * private members.
  *
  * \see SequenceParser
@@ -136,7 +136,7 @@ private:
     void sortData();
 
     /**
-     * This handles any types of ambiguities between the data and SPICE calls. This map is 
+     * This handles any types of ambiguities between the data and SPICE calls. This map is
      * composed of a key that is a string in the data to be translated and a Decoder that
      * holds the corresponding translation provided through as asset.
      * \see Decoder
@@ -179,7 +179,7 @@ private:
     std::string _defaultCaptureImage;
 
     std::map<std::string, Image> _latestImages;
-   
+
     // if no data, no run
     bool _hasData = false;
 };

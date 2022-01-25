@@ -46,9 +46,9 @@ public:
     glm::dvec3 positionAt(double relativeDistance) const;
 
     /**
-     * Get the intorlatied position along the spline, based on the given curve parameter 
-     * u in range [0, 1]. A curve parameter of 0 returns the start position and 1 the end 
-     * position. Note that u does not correspond to the relatively traveled distance. 
+     * Get the intorlatied position along the spline, based on the given curve parameter
+     * u in range [0, 1]. A curve parameter of 0 returns the start position and 1 the end
+     * position. Note that u does not correspond to the relatively traveled distance.
      */
     virtual glm::dvec3 interpolate(double u) const;
 

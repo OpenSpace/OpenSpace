@@ -406,7 +406,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
             // paths work really well close to surfaces
-            "flyToGeo", 
+            "flyToGeo",
             &globebrowsing::luascriptfunctions::flyToGeo,
             {},
             "[string], number, number, number [, bool, number]",

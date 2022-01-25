@@ -172,7 +172,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         if (startsWith(line, "datavar")) {
             // each datavar line is following the form:
             // datavar <idx> <description>
-            // with <idx> being the index of the data variable 
+            // with <idx> being the index of the data variable
 
             std::stringstream str(line);
             std::string dummy;
@@ -197,7 +197,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             std::stringstream str(line);
             std::string dummy;
             str >> dummy >> res.textureDataIndex;
-            
+
             continue;
         }
 
@@ -216,8 +216,8 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             std::stringstream str(line);
             std::string dummy;
             str >> dummy >> res.orientationDataIndex;
-            
-            // Ok.. this is kind of weird.  Speck unfortunately doesn't tell us in the 
+
+            // Ok.. this is kind of weird.  Speck unfortunately doesn't tell us in the
             // specification how many values a datavar has. Usually this is 1 value per
             // datavar, unless it is a polygon orientation thing. Now, the datavar name
             // for these can be anything (have seen 'orientation' and 'ori' before, so we
@@ -268,7 +268,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             return lhs.index < rhs.index;
         }
     );
-    
+
     std::sort(
         res.textures.begin(), res.textures.end(),
         [](const Dataset::Texture& lhs, const Dataset::Texture& rhs) {
@@ -292,7 +292,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
-        
+
         strip(line);
 
         if (line.empty()) {
@@ -357,7 +357,7 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     if (!file.good()) {
         return std::nullopt;
     }
-    
+
     Dataset result;
 
     int8_t fileVersion;
@@ -394,7 +394,7 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     result.textures.resize(nTextures);
     for (int i = 0; i < nTextures; i += 1) {
         Dataset::Texture tex;
-        
+
         int16_t idx;
         file.read(reinterpret_cast<char*>(&idx), sizeof(int16_t));
         tex.index = idx;
@@ -784,7 +784,7 @@ ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
         if (nColorLines == -1) {
             // This is the first time we get this far, it will have to be the first number
             // meaning that it is the number of color values
-            
+
             str >> nColorLines;
             res.entries.reserve(nColorLines);
         }

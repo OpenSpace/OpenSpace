@@ -46,7 +46,7 @@ int loadFile(lua_State* L) {
     for (size_t i = 1; i <= scriptsDict.size(); ++i) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
-        scripting::ScriptScheduler::ScheduledScript script = 
+        scripting::ScriptScheduler::ScheduledScript script =
             scripting::ScriptScheduler::ScheduledScript(d);
         scripts.push_back(script);
     }

@@ -53,7 +53,8 @@ public:
 private:
     CameraPose _pose;
     std::string _nodeIdentifier;
-    double _validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
+    // to be able to handle nodes with faulty bounding spheres
+    double _validBoundingSphere = 0.0;
 };
 
 } // namespace openspace::interaction

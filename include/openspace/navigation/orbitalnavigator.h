@@ -371,10 +371,10 @@ private:
 
     /**
      * Orbit the current anchor node, in a right-bound orbit, by updating the position
-     * and global rotation of the camera. 
-     * 
+     * and global rotation of the camera.
+     *
      * Used for IdleBehavior::Behavior::Orbit
-     * 
+     *
      * \param deltaTime The time step to use for the motion. Controls the rotation angle
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
@@ -384,15 +384,15 @@ private:
         glm::dquat& globalRotation, double speedScale);
 
     /**
-     * Orbit the current anchor node, by adding a rotation around the given axis. For 
-     * example, when the axis is the north vector, the camera will stay on the current 
-     * latitude band. Note that this creates a rolling motion if the camera's forward 
-     * vector coincides with the axis, and should be used with care. 
-     * 
+     * Orbit the current anchor node, by adding a rotation around the given axis. For
+     * example, when the axis is the north vector, the camera will stay on the current
+     * latitude band. Note that this creates a rolling motion if the camera's forward
+     * vector coincides with the axis, and should be used with care.
+     *
      * Used for:
      * IdleBehavior::Behavior::OrbitAtConstantLat ( axis = north = z-axis ) and
      * IdleBehavior::Behavior::OrbitAroundUp ( axis = up = y-axis )
-     * 
+     *
      * \param axis The axis to arbit around, given in model coordinates of the anchor
      * \param deltaTime The time step to use for the motion. Controls the rotation angle
      * \param position The position of the camera. Will be changed by the function

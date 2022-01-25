@@ -36,6 +36,7 @@ namespace openspace {
 class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
+class EventEngine;
 class LuaConsole;
 class MemoryManager;
 class MissionManager;
@@ -74,6 +75,7 @@ inline ghoul::fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
 inline DownloadManager* downloadManager;
+inline EventEngine* eventEngine;
 inline LuaConsole* luaConsole;
 inline MemoryManager* memoryManager;
 inline MissionManager* missionManager;

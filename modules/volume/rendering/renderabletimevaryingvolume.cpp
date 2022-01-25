@@ -134,7 +134,7 @@ namespace {
         // actual time. The default value is 0
         std::optional<float> secondsBefore;
 
-        // Specifies the number of seconds to show the the last timestep after its 
+        // Specifies the number of seconds to show the the last timestep after its
         // actual time
         float secondsAfter;
 

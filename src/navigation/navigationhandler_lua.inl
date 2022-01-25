@@ -217,7 +217,7 @@ int bindJoystickButton(lua_State* L) {
     actionStr = actionStr.value_or("Press");
     isRemote = isRemote.value_or(true);
 
-    interaction::JoystickAction action = 
+    interaction::JoystickAction action =
         ghoul::from_string<interaction::JoystickAction>(*actionStr);
 
     global::navigationHandler->bindJoystickButtonCommand(

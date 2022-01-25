@@ -58,7 +58,7 @@ int loadKernel(lua_State* L) {
  */
 int unloadKernel(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unloadKernel");
-    std::variant<std::string, unsigned int> argument = 
+    std::variant<std::string, unsigned int> argument =
         ghoul::lua::value<std::variant<std::string, unsigned int>>(L);
 
     if (std::holds_alternative<std::string>(argument)) {
@@ -161,7 +161,7 @@ int rotationMatrix(lua_State* L) {
 
 /**
  * position({string, string, string, string}):
- * Returns the position for a given body relative to another body, 
+ * Returns the position for a given body relative to another body,
  * in a given frame of reference, at a specific time.
  */
 int position(lua_State* L) {

@@ -93,9 +93,9 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
     std::string modifier;
     if (keyWithModifier.modifier != KeyModifier::None) {
         for (const openspace::KeyModifierInfo& kmi : openspace::KeyModifierInfos) {
-            // No need for an extra check for the empty modifier since that is mapped to 0,
-            // meaning that the `hasKeyModifier` will always fail for it since it checks
-            // internally against != 0
+            // No need for an extra check for the empty modifier since that is mapped
+            // to 0, meaning that the `hasKeyModifier` will always fail for it since it
+            // checks internally against != 0
 
             if (hasKeyModifier(keyWithModifier.modifier, kmi.modifier)) {
                 modifier += fmt::format("{}+", kmi.identifier);
@@ -126,7 +126,7 @@ std::string to_string(const openspace::Key& key) {
             return std::string(ki.name);
         }
     }
-    
+
     throw ghoul::MissingCaseException();
 }
 

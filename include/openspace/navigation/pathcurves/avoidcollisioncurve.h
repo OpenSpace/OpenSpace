@@ -45,4 +45,4 @@ private:
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
+#endif // __OPENSPACE_CORE___AVOIDCOLLISIONCURVE___H__
