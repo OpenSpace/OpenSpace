@@ -4,14 +4,20 @@ local layer =  {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "VIIRS_SNPP_DayNightBand_ENCC",
-    "2012-05-08",
-    "Yesterday",
-    "1d",
-    "500m",
-    "png"
-  ),
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2012-05-08",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_SNPP_DayNightBand_ENCC",
+      "500m",
+      "png"
+    )
+  },
   Description = [[ The VIIRS Nighttime Imagery (Day/Night Band, Enhanced Near Constant
     Contrast) layer shows the Earth's surface and atmosphere using a sensor designed
     to capture low-light emission sources, under varying illumination conditions. It

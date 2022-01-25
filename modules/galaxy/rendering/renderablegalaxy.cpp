@@ -55,7 +55,7 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* _loggerCat = "Renderable Galaxy";
+    constexpr const char* _loggerCat = "RenderableGalaxy";
 
     enum StarRenderingMethod {
         Points,
@@ -125,8 +125,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value sets the downscaling factor when rendering the current volume."
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
@@ -228,6 +227,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderableGalaxy::Documentation() {
+    return codegen::doc<Parameters>("galaxy_renderablegalaxy");
+}
 
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)

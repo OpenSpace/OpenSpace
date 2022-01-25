@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -177,6 +178,7 @@ private:
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
+    properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;

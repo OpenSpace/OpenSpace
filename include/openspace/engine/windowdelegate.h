@@ -76,7 +76,8 @@ struct WindowDelegate {
 
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    unsigned int (*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
+    unsigned int (*takeScreenshot)(bool applyWarping, std::vector<int> windowIds) =
+        [](bool, std::vector<int>) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 

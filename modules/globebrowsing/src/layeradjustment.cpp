@@ -74,7 +74,7 @@ documentation::Documentation LayerAdjustment::Documentation() {
 }
 
 LayerAdjustment::LayerAdjustment()
-    : properties::PropertyOwner({ "adjustment" })
+    : properties::PropertyOwner({ "Adjustment" })
     , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)

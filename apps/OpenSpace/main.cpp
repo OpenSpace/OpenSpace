@@ -865,11 +865,11 @@ void setSgctDelegateFunctions() {
             currentWindow->viewports().front()->nonLinearProjection()
         ) != nullptr;
     };
-    sgctDelegate.takeScreenshot = [](bool applyWarping) {
+    sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped
 
         Settings::instance().setCaptureFromBackBuffer(applyWarping);
-        Engine::instance().takeScreenshot();
+        Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
     sgctDelegate.swapBuffer = []() {

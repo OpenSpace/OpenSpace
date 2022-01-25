@@ -130,6 +130,14 @@ namespace {
         "shown on the screen"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
+        "ScreenshotWindowId",
+        "Screenshow Window Ids",
+        "The list of window identifiers whose screenshot will be taken the next time "
+        "anyone triggers a screenshot. If this list is empty (the default), all windows "
+        "will have their screenshot taken. Id's that do not exist are silently ignored."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply Warping to Screenshots",
@@ -277,6 +285,7 @@ RenderEngine::RenderEngine()
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
+    , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
@@ -342,6 +351,7 @@ RenderEngine::RenderEngine()
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
+    addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
     _screenshotUseDate.onChange([this]() {
@@ -1046,7 +1056,10 @@ void RenderEngine::takeScreenshot() {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
-    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(
+        _applyWarping,
+        _screenshotWindowIds
+    );
 }
 
 unsigned int RenderEngine::latestScreenshotNumber() const {

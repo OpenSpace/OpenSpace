@@ -27,6 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace openspace {
