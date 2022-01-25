@@ -39,15 +39,29 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     connect(_lineFilename, SIGNAL(textEdited(const QString&)), this,
         SLOT(filenameEdited(const QString&)));
     _saveButton->setEnabled(false);
-    _cluster.masterAddress = "127.0.0.1";
+    _cluster.masterAddress = "localhost";
 }
 
 void FileSupport::saveCluster() {
     if (_orientationWidget) {
         sgct::config::Scene initScene;
         initScene.orientation = _orientationWidget->orientationValue();
+        if (_cluster.nodes.size() == 0) {
+            _cluster.nodes.push_back(sgct::config::Node());
+        }
+        _cluster.nodes.back().address = "localhost";
+        _cluster.nodes.back().port = 20401;
         _cluster.scene = std::move(initScene);
         _cluster.firmSync = _orientationWidget->vsyncValue();
+    }
+}
+
+void FileSupport::saveUser() {
+    if (_orientationWidget) {
+        sgct::config::User user;
+        user.eyeSeparation = 0.065;
+        user.position = {0.0, 0.0, 4.0};
+        _cluster.users.push_back(user);
     }
 }
 
@@ -214,6 +228,7 @@ std::string FileSupport::saveFilename() {
 void FileSupport::save() {
     saveCluster();
     saveWindows();
+    saveUser();
     _finishedCallback(true);
 }
 

@@ -29,6 +29,7 @@ public:
     int findGuiWindow();
     void saveCluster();
     void saveWindows();
+    void saveUser();
     void saveProjectionInformation(bool isSpoutSelected, int projectionIndex,
         WindowControl* winControl, sgct::config::Viewport& viewport);
     std::string saveFilename();

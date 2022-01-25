@@ -143,13 +143,12 @@ namespace {
     }
 
     void saveWindowConfig(QWidget* parent, const std::string& path,
-                          std::vector<sgct::config::Window>& windowList,
                           sgct::config::Cluster& cluster)
     {
         std::ofstream outFile;
         try {
             outFile.open(path, std::ofstream::out);
-            outFile << sgct::serializeWindowConfig(windowList, cluster);
+            outFile << sgct::serializeConfig(cluster);
         }
         catch (const std::ofstream::failure& e) {
             QMessageBox::critical(
@@ -527,7 +526,13 @@ void LauncherWindow::openWindowEditor() {
     if (editor.wasSaved()) {
         std::string fullFilename = editor.saveFilename() + ".json";
         const std::string path = _userConfigPath + fullFilename;
-        saveWindowConfig(this, path, windowList, cluster);
+        if (cluster.nodes.size() == 0) {
+            cluster.nodes.push_back(sgct::config::Node());
+        }
+        for (auto w : windowList) {
+            cluster.nodes[0].windows.push_back(w);
+        }
+        saveWindowConfig(this, path, cluster);
         populateWindowConfigsList(fullFilename);
     }
     else {
