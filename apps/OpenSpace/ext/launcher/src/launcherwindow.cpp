@@ -397,7 +397,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
         if (p.path().extension() != ".xml" && p.path().extension() != ".json") {
             continue;
         }
-        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+        _windowConfigBox->addItem(QString::fromStdString(p.path().filename().string()));
          ++_userConfigCount;
     }
     _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
@@ -410,7 +410,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
             if (p.path().extension() != ".xml" && p.path().extension() != ".json") {
                 continue;
             }
-            _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+            _windowConfigBox->addItem(
+                QString::fromStdString(p.path().filename().string())
+            );
         }
     }
     else {
@@ -434,7 +436,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openProfileEditor(const std::string& profile, const bool isUserProfile) {
+void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserProfile) {
     std::optional<Profile> p;
     std::string saveProfilePath = isUserProfile ? _userProfilePath : _profilePath;
     if (profile.empty()) {
