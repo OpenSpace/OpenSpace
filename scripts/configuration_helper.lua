@@ -99,7 +99,7 @@ function generateSingleViewportFOV(down, up, left, right, tracked)
   table.insert(result,   [[                  "left": ]] .. left .. [[,]])
   table.insert(result,   [[                  "right": ]] .. right .. [[,]])
   table.insert(result,   [[                  "up": ]] .. up .. [[,]])
-  table.insert(result,   [[                  "down": ]] .. down .. [[ ]])
+  table.insert(result,   [[                  "down": ]] .. down)
   table.insert(result,   [[                }]])
   table.insert(result,   [[              }]])
   table.insert(result,   [[            }]])
@@ -115,7 +115,7 @@ function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, t
   table.insert(result,   [[           {]])
 
   if tracked then
-    table.insert(result, [[             "tracked": ]] .. tostring(tracked) .. ",")
+    table.insert(result, [[             "tracked": ]] .. tostring(tracked) .. [[,]])
   end
 
   table.insert(result,   [[             "projection": {]])
@@ -125,29 +125,29 @@ function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, t
     table.insert(result, [[               "fov": ]] .. fov .. [[,]])
   end
   table.insert(result,   [[               "quality": "]] .. quality .. [[",]])
-  table.insert(result,   [[               "tilt": ]] .. tilt .. ",")
+  table.insert(result,   [[               "tilt": ]] .. tilt .. [[,]])
 
   if crop then
     table.insert(result, [[               "crop": {]])
-    table.insert(result, [[                 "left": ]] .. crop["left"] .. ",")
-    table.insert(result, [[                 "right": ]] .. crop["right"] .. ",")
-    table.insert(result, [[                 "top": ]] .. crop["top"] .. ",")
+    table.insert(result, [[                 "left": ]] .. crop["left"] .. [[,]])
+    table.insert(result, [[                 "right": ]] .. crop["right"] .. [[,]])
+    table.insert(result, [[                 "top": ]] .. crop["top"] .. [[,]])
     table.insert(result, [[                 "bottom": ]] .. crop["bottom"])
     table.insert(result, [[               },]])
   end
 
   if offset then
     table.insert(result, [[               "offset": {]])
-    table.insert(result, [[                 "x": ]] .. offset["x"] .. ",")
-    table.insert(result, [[                 "y": ]] .. offset["y"] .. ",")
+    table.insert(result, [[                 "x": ]] .. offset["x"] .. [[,]])
+    table.insert(result, [[                 "y": ]] .. offset["y"] .. [[,]])
     table.insert(result, [[                 "z": ]] .. offset["z"])
     table.insert(result, [[               },]])
   end
 
   table.insert(result,   [[               "background": {]])
-  table.insert(result,   [[                 "r": ]] .. background["r"] .. ",")
-  table.insert(result,   [[                 "g": ]] .. background["g"] .. ",")
-  table.insert(result,   [[                 "b": ]] .. background["b"] .. ",")
+  table.insert(result,   [[                 "r": ]] .. background["r"] .. [[,]])
+  table.insert(result,   [[                 "g": ]] .. background["g"] .. [[,]])
+  table.insert(result,   [[                 "b": ]] .. background["b"] .. [[,]])
   table.insert(result,   [[                 "a": ]] .. background["a"])
   table.insert(result,   [[               }]])
   table.insert(result,   [[             }]])
@@ -163,23 +163,23 @@ function generateWindow(result, fullScreen, msaa, border, monitor, tags, stereo,
   table.insert(result,   [[          "name": "OpenSpace",]])
 
   if fullScreen then
-    table.insert(result, [[          "fullscreen": ]] .. tostring(fullScreen) .. ",")
+    table.insert(result, [[          "fullscreen": ]] .. tostring(fullScreen) .. [[,]])
   end
 
   if msaa then
-    table.insert(result, [[          "msaa": ]] .. msaa .. ",")
+    table.insert(result, [[          "msaa": ]] .. msaa .. [[,]])
   end
 
   if border then
-    table.insert(result, [[          "border": ]] .. tostring(border) .. ",")
+    table.insert(result, [[          "border": ]] .. tostring(border) .. [[,]])
   end
 
   if monitor then
-    table.insert(result, [[          "monitor": ]] .. monitor .. ",")
+    table.insert(result, [[          "monitor": ]] .. monitor .. [[,]])
   end
 
   if #(tags) > 0 then
-    local t = table.concat(arg["tags"], ",")
+    local t = table.concat(arg["tags"], [[,]])
     table.insert(result, [[          "tags": [ ]] .. t .. [[ ], ]])
   end
 
@@ -189,17 +189,17 @@ function generateWindow(result, fullScreen, msaa, border, monitor, tags, stereo,
 
   local px = pos[1]
   local py = pos[2]
-  table.insert(result,   [[          "pos": { "x": ]] .. px .. [[, "y": ]] .. py .. " },")
+  table.insert(result,   [[          "pos": { "x": ]] .. px .. [[, "y": ]] .. py .. [[ },]])
 
   local sx = size[1]
   local sy = size[2]
-  table.insert(result,   [[          "size": { "x": ]] .. sx .. [[, "y": ]] .. sy .. " },")
+  table.insert(result,   [[          "size": { "x": ]] .. sx .. [[, "y": ]] .. sy .. [[ },]])
 
   if res then
     res[1] = res[1] or size[1]
     res[2] = res[2] or size[2]
     table.insert(result, [[          "res": {]])
-    table.insert(result, [[            "x": ]] .. res[1] .. ",")
+    table.insert(result, [[            "x": ]] .. res[1] .. [[,]])
     table.insert(result, [[            "y": ]] .. res[2])
     table.insert(result, [[          },]])
   end
@@ -214,7 +214,7 @@ end
 
 function generateUser(result)
   table.insert(result, [[    {]])
-  table.insert(result, [[      "eyeSeparation": 0.06,]])
+  table.insert(result, [[      "eyeseparation": 0.06,]])
   table.insert(result, [[      "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }]])
   table.insert(result, [[    }]])
 end
@@ -232,14 +232,14 @@ function generateScene(result, scene)
 
   table.insert(result, [[{]])
   table.insert(result, [[  "offset": {]])
-  table.insert(result, [[    "x": ]] .. offset["x"] .. ",")
-  table.insert(result, [[    "y": ]] .. offset["y"] .. ",")
-  table.insert(result, [[    "z": ]] .. offset["z"] .. ",")
+  table.insert(result, [[    "x": ]] .. offset["x"] .. [[,]])
+  table.insert(result, [[    "y": ]] .. offset["y"] .. [[,]])
+  table.insert(result, [[    "z": ]] .. offset["z"] .. [[,]])
   table.insert(result, [[  },]])
   table.insert(result, [[  "orientation": {]])
-  table.insert(result, [[    "yaw": ]] .. orientation["yaw"] .. ",")
-  table.insert(result, [[    "pitch": ]] .. orientation["pitch"] .. ",")
-  table.insert(result, [[    "roll": ]] .. orientation["roll"] .. ",")
+  table.insert(result, [[    "yaw": ]] .. orientation["yaw"] .. [[,]])
+  table.insert(result, [[    "pitch": ]] .. orientation["pitch"] .. [[,]])
+  table.insert(result, [[    "roll": ]] .. orientation["roll"] .. [[,]])
   table.insert(result, [[  },]])
   table.insert(result, [[  "scale": ]] .. scale)
   table.insert(result, [[}]])
@@ -251,13 +251,13 @@ function generateSettings(result, refreshRate, vsync)
   table.insert(result,   [[    "display": {]])
 
   if (arg["refreshRate"]) then
-    table.insert(result, [[      "refreshRate": ]] .. arg["refreshRate"] .. ",")
+    table.insert(result, [[      "refreshrate": ]] .. arg["refreshRate"] .. [[,]])
   end
 
   if arg["vsync"] then
-    table.insert(result, [[      "swapInterval": 1]])
+    table.insert(result, [[      "swapinterval": 1]])
   else
-    table.insert(result, [[      "swapInterval": 0]])
+    table.insert(result, [[      "swapinterval": 0]])
   end
 
   table.insert(result,   [[    }]])
@@ -270,10 +270,10 @@ function generateCluster(arg, viewport)
 
   table.insert(result,   [[{]])
   table.insert(result,   [[  "version": 1,]])
-  table.insert(result,   [[  "masterAddress": "127.0.0.1",]])
+  table.insert(result,   [[  "masteraddress": "127.0.0.1",]])
 
   if arg["sgctDebug"] then
-    table.insert(result, [[  "debug": ]] .. tostring(arg["sgctDebug"]) .. ",")
+    table.insert(result, [[  "debug": ]] .. tostring(arg["sgctdebug"]) .. [[,]])
   end
 
   if (arg["settings"]) then
@@ -317,7 +317,7 @@ function check(type_str, arg, param, subparam_type)
   if type_str == "table" and subparam_type and arg[param] then
     for k, v in pairs(arg[param]) do
       assert(
-        type(v == subparam_type),
+        type(v) == subparam_type,
         param .. "[" .. k .. "] must be a " .. subparam_type
       )
     end    
