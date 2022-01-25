@@ -87,31 +87,32 @@ void FileSupport::saveWindows() {
 
     unsigned int windowIndex = 0;
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
+        WindowControl* wCtrl = _displayWidget->windowControls()[w];
         _windowList.push_back(sgct::config::Window());
         _windowList.back().viewports.push_back(sgct::config::Viewport());
         _windowList.back().viewports.back().isTracked = true;
         _windowList.back().viewports.back().position = {0.0, 0.0};
         _windowList.back().viewports.back().size = {1.0, 1.0};
         int projectionIdx
-            = _displayWidget->windowControls()[w]->projectionSelectedIndex();
+            = wCtrl->projectionSelectedIndex();
         bool isSpoutSelected
-            = _displayWidget->windowControls()[w]->isSpoutSelected();
+            = wCtrl->isSpoutSelected();
 
         saveProjectionInformation(
             isSpoutSelected,
             projectionIdx,
-            _displayWidget->windowControls()[w],
+            wCtrl,
             _windowList.back().viewports.back()
         );
-        _windowList.back().size
-            = _displayWidget->windowControls()[w]->windowSize();
-        _windowList.back().pos
-            = _displayWidget->windowControls()[w]->windowPos();
-        _windowList.back().isDecorated
-            = _displayWidget->windowControls()[w]->isDecorated();
+        _windowList.back().size = wCtrl->windowSize();
+        _windowList.back().pos = {
+            _monitors[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
+            _monitors[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
+        };
+        _windowList.back().isDecorated = wCtrl->isDecorated();
         bool isFullScreen = isWindowFullscreen(
-            _displayWidget->windowControls()[w]->monitorNum(),
-            _displayWidget->windowControls()[w]->windowSize()
+            wCtrl->monitorNum(),
+            wCtrl->windowSize()
         );
         if (isFullScreen) {
             _windowList.back().isFullScreen = true;
@@ -133,9 +134,8 @@ void FileSupport::saveWindows() {
             _windowList.back().draw3D = true;
             _windowList.back().viewports.back().isTracked = true;
         }
-        if (!_displayWidget->windowControls()[w]->windowName().empty()) {
-            _windowList.back().name
-                = _displayWidget->windowControls()[w]->windowName();
+        if (!wCtrl->windowName().empty()) {
+            _windowList.back().name = wCtrl->windowName();
         }
         _windowList.back().id = windowIndex++;
     }
