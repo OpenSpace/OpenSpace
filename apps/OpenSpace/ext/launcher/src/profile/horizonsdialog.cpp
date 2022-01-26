@@ -417,7 +417,7 @@ void HorizonsDialog::createWidgets() {
         _log->setPalette(p);
         wholeLayout->addWidget(_log);
 
-        appendLog("Horizons log messages:", HorizonsDialog::LogLevel::Info);
+        appendLog("Horizons log messages:", HorizonsDialog::LogLevel::None);
     }
 }
 
@@ -507,8 +507,10 @@ bool HorizonsDialog::isValidInput() {
         message = "Step size not selected";
     }
 
-    _errorMsg->setText(message.c_str());
-    appendLog(message, HorizonsDialog::LogLevel::Info);
+    if (!message.empty()) {
+        _errorMsg->setText(message.c_str());
+        appendLog(message, HorizonsDialog::LogLevel::Info);
+    }
     return isValid;
 }
 
@@ -941,8 +943,10 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             break;
     }
 
-    _errorMsg->setText(message.c_str());
-    appendLog(message, level);
+    if (!message.empty()) {
+        _errorMsg->setText(message.c_str());
+        appendLog(message, level);
+    }
     std::filesystem::remove(_horizonsFile);
     return false;
 }
@@ -952,12 +956,16 @@ void HorizonsDialog::appendLog(const std::string& message, const LogLevel level)
     switch (level)
     {
         case HorizonsDialog::LogLevel::Error:
-            htmlText = "<font color=\"Red\">";
+            htmlText = "<font color=\"Red\">(E)  ";
             break;
         case HorizonsDialog::LogLevel::Warning:
-            htmlText = "<font color=\"Yellow\">";
+            htmlText = "<font color=\"Yellow\">(W)  ";
             break;
         case HorizonsDialog::LogLevel::Info:
+            htmlText = "<font color=\"White\">(I)  ";
+            break;
+        case HorizonsDialog::LogLevel::None:
+        default:
             htmlText = "<font color=\"White\">";
             break;
     }

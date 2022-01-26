@@ -80,7 +80,8 @@ private:
     enum class LogLevel {
         Error,
         Warning,
-        Info
+        Info,
+        None
     };
 
     void createWidgets();
