@@ -460,6 +460,10 @@ void ScreenSpaceRenderable::update() {}
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
 }
+bool ScreenSpaceRenderable::isUsingRaeCoords() const
+{
+    return _useRadiusAzimuthElevation;
+}
 void ScreenSpaceRenderable::setEnabled(bool isEnabled)
 {
     _enabled = isEnabled;
@@ -550,9 +554,19 @@ void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position)
     _cartesianPosition = translationMatrix * origin;
 }
 
-void ScreenSpaceRenderable::setPosition(const glm::vec3& position)
+void ScreenSpaceRenderable::setCartesianPosition(const glm::vec3& position)
 {
     _cartesianPosition = position;
+}
+
+void ScreenSpaceRenderable::setRaeFromCartesianPosition(const glm::vec3& position)
+{
+    _raePosition = cartesianToRae(position);
+}
+
+glm::vec3 ScreenSpaceRenderable::raePosition() const
+{
+    return _raePosition;
 }
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {

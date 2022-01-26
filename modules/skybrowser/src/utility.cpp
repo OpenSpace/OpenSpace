@@ -99,14 +99,6 @@ namespace openspace::skybrowser {
         return glm::normalize(viewDirectionLocal);
     }
 
-    glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3& coords) {
-        // Transform equatorial J2000 to galactic coord with infinite radius    
-        glm::dvec3 galactic = equatorialToGalactic(coords);
-        glm::dvec3 localCameraSpace = galacticToLocalCamera(coords);
-        // Transform galactic coord to screen space
-        return localCameraToScreenSpace3d(localCameraSpace);
-    }
-
     double cameraRoll() {
         openspace::Camera* camera = global::navigationHandler->camera();
         glm::dvec3 upWorld = camera->lookUpVectorWorldSpace();
@@ -141,9 +133,10 @@ namespace openspace::skybrowser {
         return windowRatio.x / windowRatio.y;
     }
 
-    bool isCoordinateInView(const glm::dvec3&  equatorial) {
+    bool isCoordinateInView(const glm::dvec3& equatorial) {
         // Check if image coordinate is within current FOV
-        glm::dvec3 coordsScreen = equatorialToScreenSpace3d(equatorial);
+        glm::dvec3 localCamera = equatorialToLocalCamera(equatorial);
+        glm::dvec3 coordsScreen = localCameraToScreenSpace3d(localCamera);
         double r = static_cast<float>(windowRatio());
 
         bool isCoordInView = abs(coordsScreen.x) < r && abs(coordsScreen.y) < 1.f && 

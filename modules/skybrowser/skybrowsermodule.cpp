@@ -532,11 +532,18 @@ void SkyBrowserModule::moveHoverCircle(int i)
         // Make circle visible
         _hoverCircle->setEnabled(true);
 
-        // Calculate coords for the circle and translate
-        glm::vec3 coordsScreen = skybrowser::equatorialToScreenSpace3d(
-            image.equatorialCartesian
-        );
-        _hoverCircle->setPosition(coordsScreen);
+        // Set the exact target position 
+        glm::dvec3 localCamera = skybrowser::equatorialToLocalCamera(image.equatorialCartesian);
+
+        if (_hoverCircle->isUsingRaeCoords()) {
+            glm::vec3 position = _hoverCircle->raePosition().x * glm::vec3(localCamera);
+            _hoverCircle->setRaeFromCartesianPosition(position);
+        }
+        else {
+            _hoverCircle->setCartesianPosition(
+                skybrowser::localCameraToScreenSpace3d(localCamera)
+            );
+        }
     }
 }
 

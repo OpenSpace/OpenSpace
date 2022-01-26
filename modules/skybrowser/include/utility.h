@@ -28,8 +28,7 @@ namespace openspace {
         glm::dvec3 galacticToEquatorial(const glm::dvec3& coords);
         glm::dvec3 equatorialToGalactic(const glm::dvec3& coords);
 
-        // Conversion to screen space from J2000 equatorial / galactic / pixels
-        glm::dvec3 equatorialToScreenSpace3d(const glm::dvec3& coords);
+        // Conversion to screen space from local camera / pixels
         glm::dvec3 localCameraToScreenSpace3d(const glm::dvec3& coords);
         glm::vec2 pixelToScreenSpace2d(const glm::vec2& mouseCoordinate);
 

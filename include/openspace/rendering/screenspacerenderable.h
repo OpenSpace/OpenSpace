@@ -69,6 +69,7 @@ public:
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
+    bool isUsingRaeCoords() const;
     void setEnabled(bool isEnabled);
     float depth();
 
@@ -80,8 +81,9 @@ public:
     glm::vec2 lowerLeftCornerScreenSpace();
     bool intersection(glm::vec2 coord);
     void translate(glm::vec2 translation, glm::vec2 position);
-    void setPosition(const glm::vec3& position);
-
+    void setCartesianPosition(const glm::vec3& position);
+    void setRaeFromCartesianPosition(const glm::vec3& position);
+    glm::vec3 raePosition() const;
     // End of addition by skybrowser team
 
     static documentation::Documentation Documentation();
