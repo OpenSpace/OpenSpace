@@ -34,7 +34,7 @@
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "EnabledInfo",
+        "Enabled",
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
@@ -42,7 +42,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
-        "ShouldRunAllTimeJumpInfo",
+        "ShouldRunAllTimeJump",
         "Should Run All Time Jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
