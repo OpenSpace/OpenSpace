@@ -197,11 +197,16 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
+        DashboardItemParallelConnection::Documentation(),
+        DashboardItemPropertyValue::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
+        DashboardItemText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableCartesianAxes::Documentation(),
+        RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
@@ -210,8 +215,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
-        RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
@@ -241,8 +246,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
-        SceneGraphLightSource::Documentation(),
         CameraLightSource::Documentation(),
+        SceneGraphLightSource::Documentation()
     };
 }
 

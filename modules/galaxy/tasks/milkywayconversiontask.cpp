@@ -107,7 +107,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     rawWriter.write(sampleFunction, onProgress);
 }
 
-documentation::Documentation MilkywayConversionTask::documentation() {
+documentation::Documentation MilkywayConversionTask::Documentation() {
     return documentation::Documentation();
 }
 

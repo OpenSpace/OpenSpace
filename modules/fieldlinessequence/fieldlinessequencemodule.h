@@ -35,6 +35,8 @@ public:
 
     FieldlinesSequenceModule();
 
+    std::vector<documentation::Documentation> documentations() const override;
+
     static std::string DefaultTransferFunctionFile;
 
 private:

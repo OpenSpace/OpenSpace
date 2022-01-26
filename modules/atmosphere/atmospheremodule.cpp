@@ -25,6 +25,7 @@
 #include <modules/atmosphere/atmospheremodule.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
@@ -40,4 +41,9 @@ void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 
+std::vector<documentation::Documentation> AtmosphereModule::documentations() const {
+    return {
+        RenderableAtmosphere::Documentation()
+    };
+}
 } // namespace openspace
