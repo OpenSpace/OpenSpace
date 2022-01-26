@@ -8,25 +8,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <glm/gtx/color_space.hpp> // For hsv color
-#include <random> // For random color
 
 namespace {
 	constexpr const char _loggerCat[] = "SkyBrowserModule";
 } // namespace
-
-glm::ivec3 randomBorderColor() {
-    // Generate a random border color with sufficient lightness and a n
-    std::random_device rd;
-    // Hue is in the unit degrees [0, 360]
-    std::uniform_real_distribution<float> hue(0.f, 360.f);
-    // Value in saturation are in the unit percent [0,1]
-    float value = 0.95f; // Brightness
-    float saturation = 0.5f;
-    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-    return rgbColor;
-}
 
 namespace openspace::skybrowser::luascriptfunctions {
 
@@ -535,7 +520,6 @@ int createTargetBrowserPair(lua_State* L) {
     //std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
     std::string url = "http://localhost:8000"; // check webgl version
     //std::string url = "https://get.webgl.org";
-    glm::ivec3 color = randomBorderColor();
 
     const std::string browser = "{"
         "Identifier = '" + idBrowser + "',"
@@ -543,8 +527,7 @@ int createTargetBrowserPair(lua_State* L) {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
-        "BorderColor = " + ghoul::to_string(color) + ","
+        "CartesianPosition = " + ghoul::to_string(positionBrowser) +
         "}";
     const std::string target = "{"
         "Identifier = '" + idTarget + "',"

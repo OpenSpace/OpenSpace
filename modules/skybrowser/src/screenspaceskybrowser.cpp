@@ -10,24 +10,14 @@
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <ghoul/opengl/texture.h>
 #include <optional>
+#include <glm/gtx/color_space.hpp> // For hsv color
+#include <random> // For random color
 
 #include <glm/gtx/string_cast.hpp>
 #pragma optimize("", off)
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
-    constexpr const openspace::properties::Property::PropertyInfo BorderColorInfo =
-    {
-        "BorderColor",
-        "Border Color",
-        "The color of the border of the sky browser."
-    };
-    constexpr const openspace::properties::Property::PropertyInfo VerticalFovInfo =
-    {
-        "VerticalFieldOfView",
-        "Vertical Field Of View",
-        "The vertical field of view in degrees."
-    };
     constexpr const openspace::properties::Property::PropertyInfo AnimationSpeedInfo =
     {
         "AnimationSpeed",
@@ -42,34 +32,31 @@ namespace {
         "slower framerate. Lower value means lower resolution of texture and faster "
         "frame rate."
     };
-    constexpr const openspace::properties::Property::PropertyInfo SizeInfo =
-    {
-        "Size",
-        "Screen space size of the sky browser",
-        "The size of the sky browser determines how large is on screen. The y parameter "
-        "determines the percentage of the screen the browser will cover in the "
-        "y-direction. The x parameter determines how large the sky browser will be in "
-        "the x direction."
-    };
-
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
-
-        // [[codegen::verbatim(VerticalFovInfo.description)]]
-        std::optional<float> verticalFov;
-
-        // [[codegen::verbatim(BorderColorInfo.description)]]
-        std::optional<glm::ivec3> borderColor;
 
         // [[codegen::verbatim(AnimationSpeedInfo.description)]]
         std::optional<double> animationSpeed;
 
         // [[codegen::verbatim(TextureQualityInfo.description)]]
-        std::optional<double> textureQuality;
+        std::optional<float> textureQuality;
     };
 
 #include "ScreenSpaceSkyBrowser_codegen.cpp"
 } // namespace
+
+glm::ivec3 randomBorderColor() {
+    // Generate a random border color with sufficient lightness and a n
+    std::random_device rd;
+    // Hue is in the unit degrees [0, 360]
+    std::uniform_real_distribution<float> hue(0.f, 360.f);
+    // Value in saturation are in the unit percent [0,1]
+    float value = 0.95f; // Brightness
+    float saturation = 0.5f;
+    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+    return rgbColor;
+}
 
 namespace openspace {
 
@@ -78,7 +65,6 @@ namespace openspace {
         , WwtCommunicator(dictionary)
         , _animationSpeed(AnimationSpeedInfo, 5.0, 0.1, 10.0)
         , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
-        , _size(SizeInfo, glm::vec2(0.5f), glm::vec2(0.f), glm::vec2(2.f))
     {
         // Set a unique identifier
         std::string identifier;
@@ -91,35 +77,25 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-        // Make the color property display a color picker in the GUI
-        _borderColor.setViewOption(properties::Property::ViewOptions::Color, true);
-
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
-        _verticalFov = p.verticalFov.value_or(_verticalFov);
-        _borderColor = p.borderColor.value_or(_borderColor);
         _textureQuality = p.textureQuality.value_or(_textureQuality);
+        _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
 
         addProperty(_url);
         addProperty(_browserPixeldimensions);
         addProperty(_reload);
-        addProperty(_verticalFov);
-        addProperty(_borderColor);
-        addProperty(_equatorialAim);
         addProperty(_textureQuality);
-        addProperty(_size);
 
         _textureQuality.onChange([this]() {
             _textureDimensionsIsDirty = true;
             });        
-        _size.onChange([this]() {
-            _sizeIsDirty = true;
-            });
 
         // Ensure that the browser is placed at the z-coordinate of the screen space plane
         glm::vec2 screenPosition = _cartesianPosition.value();
-        _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ));
-        
+        _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ)); 
+
+        _borderColor = randomBorderColor();
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
@@ -165,7 +141,8 @@ namespace openspace {
            
         // If the scale is 1, it covers half the window. Hence multiplication with 2
         float newResY = pixels.y * 2.f * _scale; 
-        float newResX = newResY * (_browserPixeldimensions.value().x / _browserPixeldimensions.value().y);
+        float ratio = _size.x / _size.y;
+        float newResX = newResY * ratio;
         glm::vec2 newSize = glm::vec2(newResX , newResY) * _textureQuality.value();
 
         _browserPixeldimensions = glm::ivec2(newSize);
@@ -225,10 +202,9 @@ namespace openspace {
             _textureDimensionsIsDirty = false;
         }
         if (_sizeIsDirty) {
-            setScreenSpaceSize(_size);
+            updateScreenSpaceSize();
             _sizeIsDirty = false;
         }
-        _objectSize = _texture->dimensions();
 
         WwtCommunicator::update();
         ScreenSpaceRenderable::update();
@@ -267,20 +243,15 @@ namespace openspace {
 
     void ScreenSpaceSkyBrowser::setScreenSpaceSize(const glm::vec2& newSize)
     {   
-        
-        _scale = abs(newSize.y) * 0.5f;
-        glm::vec2 newSizeRelToOld = abs((screenSpaceDimensions() + newSize) /
-            screenSpaceDimensions());
-        glm::vec2 newDimensions = newSizeRelToOld * glm::vec2(_texture->dimensions());
-        // Scale the browser
-        // Scale on the y axis, this is to ensure that _scale = 1 is
-        // equal to the height of the window
-        _browserPixeldimensions = glm::ivec2(newDimensions);
-        _texture->setDimensions(glm::ivec3(newDimensions, 1));
-        _objectSize = _texture->dimensions();
-
-        updateTextureResolution();
         _size = newSize;
+        _sizeIsDirty = true;
+    }
+
+    void ScreenSpaceSkyBrowser::updateScreenSpaceSize()
+    {
+        _scale = abs(_size.y) * 0.5f;
+        updateTextureResolution();
+        _objectSize = _texture->dimensions();
     }
 
     float ScreenSpaceSkyBrowser::opacity() const {

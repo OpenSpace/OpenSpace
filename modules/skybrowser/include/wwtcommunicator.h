@@ -80,9 +80,9 @@ protected:
     // Web page communication
     void setIdInBrowser(const std::string& id);
 
-    properties::DVec2Property _equatorialAim;
-    properties::FloatProperty _verticalFov;
-    properties::IVec3Property _borderColor;
+    glm::dvec2 _equatorialAim;
+    float _verticalFov{ 10.f };
+    glm::ivec3 _borderColor;
 
     std::deque<int> _selectedImages;
     bool _hasLoadedImages{ false };

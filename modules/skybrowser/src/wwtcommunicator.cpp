@@ -37,41 +37,13 @@
 namespace {
     constexpr const char* _loggerCat = "WwtCommunicator";
 
-    constexpr const openspace::properties::Property::PropertyInfo BorderColorInfo =
-    {
-        "BorderColor",
-        "Border Color",
-        "The color of the border of the sky browser."
-    };
-    constexpr const openspace::properties::Property::PropertyInfo VerticalFovInfo =
-    {
-        "VerticalFieldOfView",
-        "Vertical Field Of View",
-        "The vertical field of view in degrees."
-    };
-    constexpr const openspace::properties::Property::PropertyInfo EquatorialAimInfo =
-    {
-        "EquatorialAim",
-        "Equatorial aim of the sky browser",
-        "The aim of the sky browser given in spherical equatorial coordinates right "
-        "ascension (RA) and declination (Dec) in epoch J2000. The unit is degrees."
-    };
 
 } // namespace
 
 namespace openspace {
 
     WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
-        : Browser(dictionary),
-        _verticalFov(VerticalFovInfo, 10.f, 0.01f, 70.0f),
-        _borderColor(BorderColorInfo, glm::ivec3(200), glm::ivec3(0), glm::ivec3(255)),
-        _equatorialAim(EquatorialAimInfo, glm::dvec2(0.0), glm::dvec2(0.0, -90.0), 
-            glm::dvec2(360.0, 90.0))
-    {
-        _borderColor.onChange([this]() {
-            _borderColorIsDirty = true;
-        });
-    }
+        : Browser(dictionary) {}
 
     WwtCommunicator::~WwtCommunicator() {
 
@@ -141,12 +113,12 @@ namespace openspace {
 
     void WwtCommunicator::highlight(glm::ivec3 addition)
     {
-        setWebpageBorderColor(_borderColor.value() + addition);
+        setWebpageBorderColor(_borderColor + addition);
     }
 
     void WwtCommunicator::removeHighlight(glm::ivec3 removal)
     {
-        setWebpageBorderColor(_borderColor.value() - removal);
+        setWebpageBorderColor(_borderColor - removal);
     }
 
     void WwtCommunicator::updateBorderColor()

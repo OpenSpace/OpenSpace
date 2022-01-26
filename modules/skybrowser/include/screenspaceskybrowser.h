@@ -39,6 +39,7 @@ namespace openspace {
         void setVerticalFovWithScroll(float scroll);
         void setOpacity(float opacity);
         void setScreenSpaceSize(const glm::vec2& newSize);
+        void updateScreenSpaceSize();
 
         glm::dvec2 fineTuneVector(glm::dvec2 drag);
         void setIdInBrowser();
@@ -48,7 +49,6 @@ namespace openspace {
     private:
         properties::DoubleProperty _animationSpeed;
         properties::FloatProperty _textureQuality;
-        properties::Vec2Property _size;
 
         void bindTexture() override;
 
@@ -60,6 +60,7 @@ namespace openspace {
 
         // Animation of fieldOfView
         float _endVfov{ 0.f };
+        glm::vec2 _size{ 0.5f };
     };
 }
 

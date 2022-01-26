@@ -74,9 +74,6 @@ namespace openspace {
         addProperty(_url);
         addProperty(_browserPixeldimensions);
         addProperty(_reload);
-        addProperty(_verticalFov);
-        addProperty(_borderColor);
-        addProperty(_equatorialAim);
     }
 
     RenderableSkyBrowser::~RenderableSkyBrowser() {
