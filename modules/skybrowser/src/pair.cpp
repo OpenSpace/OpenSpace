@@ -298,6 +298,11 @@ namespace openspace {
         _browser->setScreenSpaceSize(dimensions);
     }
 
+    void Pair::setVerticalFovWithScroll(float scroll)
+    {
+        _browser->setVerticalFovWithScroll(scroll);
+    }
+
     void Pair::incrementallyAnimateToCoordinate(double deltaTime) 
     {
         // Animate the target before the field of view starts to animate

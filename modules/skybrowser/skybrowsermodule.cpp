@@ -356,7 +356,7 @@ SkyBrowserModule::SkyBrowserModule()
                 return false;
             }
             // If mouse is on browser or target, apply zoom
-            _mouseOnPair->getBrowser()->setVerticalFovWithScroll(
+            _mouseOnPair->setVerticalFovWithScroll(
                 static_cast<float>(scroll)
             );
             return true;

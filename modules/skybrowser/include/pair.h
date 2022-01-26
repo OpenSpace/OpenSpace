@@ -86,6 +86,7 @@ public:
     void setEquatorialAim(const glm::dvec2& aim);
     void setBorderColor(const glm::ivec3& color);
     void setScreenSpaceSize(const glm::vec2& dimensions);
+    void setVerticalFovWithScroll(float scroll);
 
     // Getters by value 
     float verticalFov() const;
@@ -96,6 +97,7 @@ public:
     std::string browserId() const;
     std::string targetId() const;
     glm::vec2 size() const;
+
 
     // Getters by reference
     ScreenSpaceSkyTarget* getTarget();
