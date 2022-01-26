@@ -234,11 +234,12 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::setDimensions(glm::vec2 dimensions) {
-        _objectSize = dimensions;
+        // To avoid flooring of the size of the target, multiply by factor of 100
+        // Object size is really the pixel size so this calculation is not exact
+        _objectSize = glm::ivec2(dimensions * 100.f);
     }
 
     glm::dvec3 ScreenSpaceSkyTarget::directionGalactic() const {
-
 
         glm::vec3 localCamera = _cartesianPosition.value();
 

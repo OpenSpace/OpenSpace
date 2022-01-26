@@ -151,19 +151,18 @@ namespace openspace {
             _browserInstance->loadUrl(_url);
             _isUrlDirty = false;
         }
-
         if (_isDimensionsDirty) {
-            ghoul_assert(_browserPixeldimensions.value().x > 0 &&
-                _browserPixeldimensions.value().y > 0);
-
-            _browserInstance->reshape(_browserPixeldimensions.value());
-            _isDimensionsDirty = false;
+            if (_browserPixeldimensions.value().x > 0 &&
+                _browserPixeldimensions.value().y > 0) {
+                _browserInstance->reshape(_browserPixeldimensions.value());
+                _isDimensionsDirty = false;
+            }
         }
 
         if (_shouldReload) {
             _browserInstance->reloadBrowser();
             _shouldReload = false;
-        }
+        }  
     }
 
     bool Browser::isReady() const {

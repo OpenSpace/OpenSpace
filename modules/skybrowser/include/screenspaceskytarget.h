@@ -87,7 +87,6 @@ namespace openspace {
         float _verticalFov{ 70.0f };
         glm::dvec2 _equatorialAim{ 0.0 };
         glm::ivec3 _borderColor{ 255 };
-        glm::vec2 _dimensions{ 0.5f, 0.5f };
 
         // Lock target to a coordinate on the sky
         glm::dvec3 _lockedCoordinates;   // Cartesian equatorial coordinates
