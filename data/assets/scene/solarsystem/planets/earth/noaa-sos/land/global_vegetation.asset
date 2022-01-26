@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Vegetation: Seasonal Changes - Apr 2012 - Apr 2013"
@@ -14,20 +14,20 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local imagesDestination = syncedDirectory .. "images"
-local colorbarDestination = syncedDirectory .. "colorbar"
+local imagesDestination = syncedDirectory .. "images/"
+local colorbarDestination = syncedDirectory .. "colorbar/"
 
 local background1layer = {
   Identifier = Identifier .. "-background-14a",
   Name = Name .. " (Background Week 14a)",
-  FilePath = syncedDirectory .. "/2012_week14a.jpg",
+  FilePath = syncedDirectory .. "2012_week14a.png",
   Description = Description
 }
 
 local background2layer = {
   Identifier = Identifier .. "-background-14",
   Name = Name .. " (Background Week 14)",
-  FilePath = syncedDirectory .. "/2012_week14.jpg",
+  FilePath = syncedDirectory .. "2012week14.png",
   Description = Description
 }
 

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Dams and Reservoirs: Yangtze - 1800 - 2010"
@@ -27,7 +27,7 @@ local layer = {
 asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "yangtze.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Latitude Longitude Layers"
@@ -17,28 +17,28 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/2048-base.png",
+  FilePath = syncedDirectory .. "2048-base.png",
   Description = Description
 }
 
 local layer_combined = {
   Identifier = Identifier .. "-combined",
   Name = Name .. " (Combined)",
-  FilePath = syncedDirectory .. "/2048-flat-combined.png",
+  FilePath = syncedDirectory .. "2048-flat-combined.png",
   Description = Description
 }
 
 local layer_latitude = {
   Identifier = Identifier .. "-latitude",
   Name = Name .. " (Latitude)",
-  FilePath = syncedDirectory .. "/2048-layer-latitude.png",
+  FilePath = syncedDirectory .. "2048-layer-latitude.png",
   Description = Description
 }
 
 local layer_longitude = {
   Identifier = Identifier .. "-longitude",
   Name = Name .. " (Longitude)",
-  FilePath = syncedDirectory .. "/2048-layer-longitude.png",
+  FilePath = syncedDirectory .. "2048-layer-longitude.png",
   Description = Description
 }
 

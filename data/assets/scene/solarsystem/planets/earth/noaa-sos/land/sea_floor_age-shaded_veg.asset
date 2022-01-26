@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Age of the Seafloor (vegetation)"
@@ -17,28 +17,28 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
 local layer_aol = {
   Identifier = Identifier .. "-aol",
   Name = Name .. " (AOL)",
-  FilePath = syncedDirectory .. "/4096_aol.png",
+  FilePath = syncedDirectory .. "4096_aol.png",
   Description = Description
 }
 
 local layer_no_labels = {
   Identifier = Identifier .. "-no_labels",
   Name = Name .. " (No Labels)",
-  FilePath = syncedDirectory .. "/4096_nolabels.jpg",
+  FilePath = syncedDirectory .. "4096_nolabels.jpg",
   Description = Description
 }
 
 local layer_trans = {
   Identifier = Identifier .. "-trans",
   Name = Name .. " (Trans)",
-  FilePath = syncedDirectory .. "/4096_trans.png",
+  FilePath = syncedDirectory .. "4096_trans.png",
   Description = Description
 }
 

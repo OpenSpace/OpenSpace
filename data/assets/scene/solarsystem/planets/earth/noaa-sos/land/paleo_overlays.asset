@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Paleoclimate Proxies"
@@ -17,42 +17,42 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
 local layer_corals = {
   Identifier = Identifier .. "-corals",
   Name = Name .. " (Corals)",
-  FilePath = syncedDirectory .. "/corals.png",
+  FilePath = syncedDirectory .. "corals.png",
   Description = Description
 }
 
 local layer_icerings = {
   Identifier = Identifier .. "-icerings",
   Name = Name .. " (Icerings)",
-  FilePath = syncedDirectory .. "/icerings.png",
+  FilePath = syncedDirectory .. "icerings.png",
   Description = Description
 }
 
 local layer_ocean = {
   Identifier = Identifier .. "-ocean",
   Name = Name .. " (Ocean)",
-  FilePath = syncedDirectory .. "/ocean.png",
+  FilePath = syncedDirectory .. "ocean.png",
   Description = Description
 }
 
 local layer_speleothem = {
   Identifier = Identifier .. "-speleothem",
   Name = Name .. " (Speleothem)",
-  FilePath = syncedDirectory .. "/speleothem.png",
+  FilePath = syncedDirectory .. "speleothem.png",
   Description = Description
 }
 
 local layer_tree_rings = {
   Identifier = Identifier .. "-tree_rings",
   Name = Name .. " (Tree Rings)",
-  FilePath = syncedDirectory .. "/tree_rings.png",
+  FilePath = syncedDirectory .. "tree_rings.png",
   Description = Description
 }
 

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Seismic Waves: Northridge Earthquake - 1994"
@@ -14,8 +14,8 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local imagesDestination = syncedDirectory .. "images"
-local pipsDestination = syncedDirectory .. "pips"
+local imagesDestination = syncedDirectory .. "images/"
+local pipsDestination = syncedDirectory .. "pips/"
 
 local layer_base = {
   Identifier = Identifier,

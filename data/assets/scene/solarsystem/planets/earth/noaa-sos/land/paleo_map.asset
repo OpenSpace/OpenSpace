@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "PALEOMAP PaleoAtlas 0 - 750 Million Years Ago"
@@ -16,7 +16,7 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local imagesDestination = syncedDirectory .. "images"
+local imagesDestination = syncedDirectory .. "images/"
 
 local layers_names = {
   "Map01a_PALEOMAP_PaleoAtlas_000",
@@ -102,8 +102,8 @@ local layers_names = {
   "Map82a_EO_Tremadoc_480",
   "Map83a_Cambro-Ordovician_Boundary_490",
   "Map84a_LtC_Furongian_500",
-  "Map85a_early_Late_Cambrian Series 3_510",
-  "Map86a_Middle_Cambrian_Series 2_520",
+  "Map85a_early_Late_Cambrian_Series_3_510",
+  "Map86a_Middle_Cambrian_Series_2_520",
   "Map87a_Early_Cambrian_Terreneuvian_530",
   "Map88a_Precambrian-Cambrian_Boundary_540",
   "Map90a_Middle_Ediacaran_600",
@@ -116,7 +116,7 @@ for i,v in ipairs(layers_names) do
   local layer = {
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
-    FilePath = syncedDirectory .. v .. ".jpg",
+    FilePath = imagesDestination .. v .. ".jpg",
     Description = Description
   }
 

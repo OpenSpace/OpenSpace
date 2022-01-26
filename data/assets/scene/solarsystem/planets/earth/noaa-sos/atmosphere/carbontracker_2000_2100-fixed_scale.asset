@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "CarbonTracker: Fixed Scale"
@@ -14,9 +14,9 @@ local syncedDirectory = asset.syncedResource({
 	Version = 1
 })
 
-local fieldDestination = syncedDirectory .. "field"
-local obsDestination = syncedDirectory .. "obs"
-local colorbarDestination = syncedDirectory .. "colorbar"
+local fieldDestination = syncedDirectory .. "field/"
+local obsDestination = syncedDirectory .. "obs/"
+local colorbarDestination = syncedDirectory .. "colorbar/"
 
 
 local layer_field = {

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Age of the Seafloor (topography)"
@@ -17,21 +17,21 @@ local syncedDirectory = asset.syncedResource({
 local layer_base = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
 local layer_aol = {
   Identifier = Identifier .. "-aol",
   Name = Name .. " (AOL)",
-  FilePath = syncedDirectory .. "/4096_aol.png",
+  FilePath = syncedDirectory .. "4096_aol.png",
   Description = Description
 }
 
 local layer_orig = {
   Identifier = Identifier .. "-orig",
   Name = Name .. " (Original)",
-  FilePath = syncedDirectory .. "/4096_orig.png",
+  FilePath = syncedDirectory .. "4096_orig.png",
   Description = Description
 }
 

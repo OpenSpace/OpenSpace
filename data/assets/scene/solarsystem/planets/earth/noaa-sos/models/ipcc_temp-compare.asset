@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Climate Model: Temperature Change Comparison (GFDL a1b and b1)"
@@ -15,14 +15,14 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layers_names = {
-  "2025_gfdl_a1b",
-  "2025_gfdl_b1",
-  "2050_gfdl_a1b",
-  "2050_gfdl_b1",
-  "2075_gfdl_a1b",
-  "2075_gfdl_b1",
-  "2100_gfdl_a1b",
-  "2100_gfdl_b1"
+  "2025_gfdl_a1b.png",
+  "2025_gfdl_b1.png",
+  "2050_gfdl_a1b.png",
+  "2050_gfdl_b1.png",
+  "2075_gfdl_a1b.png",
+  "2075_gfdl_b1.png",
+  "2100_gfdl_a1b.png",
+  "2100_gfdl_b1.png"
 }
 
 local layers = {}

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Fisheries Species Richness"
@@ -25,7 +25,7 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory_addons .. "colorbar-speciesrichness.png"
+  TexturePath = syncedDirectory .. "colorbar-speciesrichness.png"
 }
 
 asset.onInitialize(function() 

@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Agriculture: Cropland Production Gap"
@@ -17,14 +17,14 @@ local syncedDirectory = asset.syncedResource({
 local layer = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/4096.png",
+  FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
 
 local layer_countries = {
   Identifier = Identifier .. "-countries",
   Name = Name .. " (w/ countries)",
-  FilePath = syncedDirectory .. "/4096_countries.png",
+  FilePath = syncedDirectory .. "4096_countries.png",
   Description = Description
 }
 

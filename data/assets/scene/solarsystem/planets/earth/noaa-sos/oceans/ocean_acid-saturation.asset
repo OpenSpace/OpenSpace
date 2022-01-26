@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Ocean Acidification: Saturation State"
@@ -31,7 +31,7 @@ local layer = {
 }
 
 local reefs = {
-  Identifier = Identifiers .. "-reefs",
+  Identifier = Identifier .. "-reefs",
   Name = Name .. " (Reefs)",
   FilePath = syncedDirectory .. "reefs.png",
   Description = Description,

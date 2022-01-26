@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Forest Change (Extent, Gain, and Loss) - 2000 - 2014"
@@ -17,35 +17,35 @@ local syncedDirectory = asset.syncedResource({
 local layer_combined = {
   Identifier = Identifier,
   Name = Name,
-  FilePath = syncedDirectory .. "/combined.png",
+  FilePath = syncedDirectory .. "combined.png",
   Description = Description
 }
 
 local layer_extent = {
   Identifier = Identifier .. "-extent",
   Name = Name .. " (Extent)",
-  FilePath = syncedDirectory .. "/extent.png",
+  FilePath = syncedDirectory .. "extent.png",
   Description = Description
 }
 
 local layer_gain = {
   Identifier = Identifier .. "-gain",
   Name = Name .. " (Gain)",
-  FilePath = syncedDirectory .. "/gain.png",
+  FilePath = syncedDirectory .. "gain.png",
   Description = Description
 }
 
 local layer_loss = {
   Identifier = Identifier .. "-loss",
   Name = Name .. " (Loss)",
-  FilePath = syncedDirectory .. "/loss.png",
+  FilePath = syncedDirectory .. "loss.png",
   Description = Description
 }
 
 local layer_map = {
   Identifier = Identifier .. "-map",
   Name = Name .. " (Map)",
-  FilePath = syncedDirectory .. "/map.png",
+  FilePath = syncedDirectory .. "map.png",
   Description = Description
 }
 

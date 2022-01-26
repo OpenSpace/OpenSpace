@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 
 local Name = "Tsunami Historical Series: Japan - 2011"
@@ -38,7 +38,7 @@ local layer_energy = {
 local layer_null = {
   Identifier = Identifier .. "-null",
   Name = Name .. " (Null)",
-  FilePath = syncedDirectory .. "/Tsunami_Null_Coastal_Map_Japan_2011_4k.jpg",
+  FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Japan_2011_4k.jpg",
   Description = Description
 }
 
