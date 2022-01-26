@@ -84,12 +84,21 @@ private:
         None
     };
 
+    enum class HTTPCodes {
+        Ok = 200,
+        BadRequest = 400,
+        MethodNotAllowed = 405,
+        InternalServerError = 500,
+        ServiceUnavailable = 503
+    };
+
     void createWidgets();
     bool handleRequest();
     bool isValidInput();
     std::string constructUrl();
     HorizonsResult sendRequest(const std::string url);
     HorizonsResult handleReply(QNetworkReply* reply);
+    bool checkHttpStatus(const QVariant& statusCode);
     HorizonsResult isValidAnswer(const json& answer);
     HorizonsResult isValidHorizonsFile(const std::string& file) const;
     bool handleResult(HorizonsDialog::HorizonsResult& result);

@@ -617,10 +617,14 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
 
 HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply) {
     if (reply->error()) {
-        appendLog(
-            "Connection Error: " + reply->errorString().toStdString(),
-            HorizonsDialog::LogLevel::Error
-        );
+        QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        if (!checkHttpStatus(statusCode)) {
+            appendLog(
+                "Connection Error: " + reply->errorString().toStdString(),
+                HorizonsDialog::LogLevel::Error
+            );
+        }
+
         reply->deleteLater();
         return HorizonsDialog::HorizonsResult::ConnectionError;
     }
@@ -632,15 +636,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
             HorizonsDialog::LogLevel::Info
         );
         return sendRequest(redirect.toString().toStdString());
-    }
-    auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-    if (statusCode.isValid() && statusCode != 200) {
-        appendLog(
-            "HTTP status code '" + statusCode.toString().toStdString() + "' was returned",
-            HorizonsDialog::LogLevel::Error
-        );
-        reply->deleteLater();
-        return HorizonsDialog::HorizonsResult::ConnectionError;
     }
 
     QString answer = reply->readAll();
@@ -682,6 +677,40 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
 
     _horizonsFile = fullFilePath;
     return isValidHorizonsFile(filePath);
+}
+
+bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
+    bool isKnown = true;
+    if (statusCode.isValid() && statusCode.toInt() != int(HorizonsDialog::HTTPCodes::Ok)) {
+        std::string message;
+        int code = statusCode.toInt();
+
+        switch (code) {
+            case int(HorizonsDialog::HTTPCodes::BadRequest):
+                message = "The request contained invalid keywords and/or content or used "
+                "a method other than GET or POST";
+                break;
+            case int(HorizonsDialog::HTTPCodes::MethodNotAllowed):
+                message = "The request used an incorrect method";
+                break;
+            case int(HorizonsDialog::HTTPCodes::InternalServerError):
+                message = "The database is currently not available";
+                break;
+            case int(HorizonsDialog::HTTPCodes::ServiceUnavailable):
+                message = "The server is currently unable to handle the request due to a "
+                "temporary overloading or maintenance of the server, try again at a "
+                "later time";
+                break;
+            default:
+                message = "HTTP status code '" + statusCode.toString().toStdString() +
+                    "' was returned";
+                isKnown = false;
+                break;
+        }
+
+        appendLog(message, HorizonsDialog::LogLevel::Error);
+    }
+    return isKnown;
 }
 
 HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer) {
