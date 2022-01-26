@@ -147,6 +147,7 @@ namespace openspace {
 
         _browserPixeldimensions = glm::ivec2(newSize);
         _texture->setDimensions(glm::ivec3(newSize, 1));
+        _objectSize = glm::ivec3(_texture->dimensions());
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -251,7 +252,6 @@ namespace openspace {
     {
         _scale = abs(_size.y) * 0.5f;
         updateTextureResolution();
-        _objectSize = _texture->dimensions();
     }
 
     float ScreenSpaceSkyBrowser::opacity() const {
