@@ -127,8 +127,8 @@ void AssetManager::deinitialize() {
     for (Asset* asset : _rootAssets) {
         if (!asset->hasInitializedParent()) {
             asset->deinitialize();
+            asset->unload();
         }
-        asset->unload();
     }
     _toBeDeleted.clear();
 }
