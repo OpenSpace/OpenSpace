@@ -239,14 +239,6 @@ void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType)
     _timeframeMode = refType;
 }
 
-void ScriptScheduler::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void ScriptScheduler::stopPlayback() {
-    _playbackModeEnabled = false;
-}
-
 double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
