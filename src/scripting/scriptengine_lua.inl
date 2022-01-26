@@ -300,6 +300,10 @@ int unzipFile(lua_State* L) {
     dest = absPath(dest).string();
     deleteSource = deleteSource.value_or(false);
 
+    if (!std::filesystem::exists(source)) {
+        return luaL_error(L, "Source file was not found");
+    }
+
     int arg = 2;
     zip_extract(source.c_str(), dest.c_str(), [](const char*, void*) { return 0; }, &arg);
 
