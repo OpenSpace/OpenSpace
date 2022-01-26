@@ -22,7 +22,7 @@ asset.meta = {
   Name = "Lola DEM [Utah]",
   Version = "1.1",
   Description = [[Moon LRO LOLA DEM 118m v1 layer for Moon globe. This map is hosted on
-    the OpenSpace server in Sweden.]],
+    the OpenSpace server in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LOLA/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014",
   License = "NASA/PDS"

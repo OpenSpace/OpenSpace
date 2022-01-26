@@ -14,7 +14,7 @@ end)
 
 
 asset.meta = {
-  Name = "Dashboard - date",
+  Name = "Dashboard - Date",
   Version = "1.0",
   Description = [[ This asset provides a Date dashboard item.]],
   Author = "OpenSpace Team",

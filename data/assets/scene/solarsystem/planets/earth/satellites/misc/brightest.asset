@@ -4,7 +4,7 @@ local group = {
   Title = "100 Brightest",
   Url = "http://www.celestrak.com/NORAD/elements/visual.txt",
   TrailColor = { 0.55, 0.25, 0.65 },
-  Description = [[The 100 (or so) satellites that will appear brighest when viewed 
+  Description = [[The 100 (or so) satellites that will appear brightest when viewed 
   from Earth.]]
 }
 

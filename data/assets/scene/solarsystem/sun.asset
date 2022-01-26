@@ -5,8 +5,8 @@ asset.require("./sun/glare")
 asset.meta = {
   Name = "Sun",
   Version = "1.0",
-  Description = [[ Meta asset for the sun in the solarsystem. Contains the sun globe and 
-  sun glare texture]],
+  Description = [[ Meta asset for the Sun in our solar system. Contains the Sun globe and
+  Sun glare texture]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -119,9 +119,9 @@ public:
 
 
     /**
-    * Register a SceneGraphNodeIdentifier with the asset
-    * (used to associate Nodes with asset meta)
-    */
+     * Register a SceneGraphNodeIdentifier with the asset
+     * (used to associate Nodes with asset meta)
+     */
     void addIdentifier(std::string identifier);
 
     /**

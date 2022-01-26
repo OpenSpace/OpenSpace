@@ -13,7 +13,7 @@ assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "WaterMasks")
 asset.meta = {
   Name = "MODIS Water Mask",
   Version = "1.0",
-  Description = [[ MODIS Water  Mask layer for Earth globe.]],
+  Description = [[ MODIS Water Mask layer for Earth globe.]],
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..
     "eosdis-components/gibs",

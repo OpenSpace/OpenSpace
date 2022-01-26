@@ -207,9 +207,8 @@ void Asset::startSynchronizations() {
 
 void Asset::addIdentifier(std::string identifier) {
     if (_metaInformation.has_value()) {
-        _metaInformation->identifiers.push_back(identifier);
+        _metaInformation->identifiers.push_back(std::move(identifier));
     }
-    return;
 }
 
 void Asset::load(Asset* parent) {

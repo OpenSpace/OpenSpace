@@ -91,10 +91,13 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
 end
 
 local registerLayerAndExport = function (sceneAsset, layer, globeIdentifier, layerGroup)
-
   sceneAsset.onInitialize(function () 
     openspace.globebrowsing.addLayer(globeIdentifier, layerGroup, layer)
     sceneAsset.registerIdentifierWithMeta(layer.Identifier)
+  end)
+
+  sceneAsset.onDeinitialize(function ()
+    openspace.globebrowsing.deleteLayer(globeIdentifier, layerGroup, layer)
   end)
 
   sceneAsset.export("layer", layer)

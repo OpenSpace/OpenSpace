@@ -90,10 +90,10 @@ end)
 
 
 asset.meta = {
-  Name = "Customization - globebrowsing",
+  Name = "Customization - GlobeBrowsing",
   Version = "1.0",
-  Description = [[ Include this asset to add downloaded layers to Mars, the Moon 
-  or Mercury]],
+  Description = [[ This asset adds planetary images that can be downloaded separately
+  and placed in the OpenSpaceData folder]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

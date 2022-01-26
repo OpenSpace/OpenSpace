@@ -23,7 +23,7 @@ assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 asset.meta = {
   Name = "Venus Texture",
   Version = "1.0",
-  Description = [[ This asset supplies a default texture for venus.]],
+  Description = [[ This asset supplies a default texture for Venus.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
