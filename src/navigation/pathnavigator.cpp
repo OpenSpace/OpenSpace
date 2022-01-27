@@ -267,7 +267,11 @@ void PathNavigator::startPath() {
     // moving. However, keep track of whether the time was running before the path
     // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        global::timeManager->setPause(true);
+        openspace::global::scriptEngine->queueScript(
+            "openspace.time.setPause(true)",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
         _startSimulationTimeOnFinish = true;
         LINFO(
             "Pausing time simulation during path traversal. "
@@ -337,7 +341,10 @@ void PathNavigator::handlePathEnd() {
     _isPlaying = false;
 
     if (_startSimulationTimeOnFinish) {
-        global::timeManager->setPause(false);
+        openspace::global::scriptEngine->queueScript(
+            "openspace.time.setPause(false)",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
     _startSimulationTimeOnFinish = false;
     clearPath();
