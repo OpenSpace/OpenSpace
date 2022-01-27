@@ -68,7 +68,6 @@ WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
             SLOT(onOffsetXChanged(const QString&)));
     connect(_offset_y, SIGNAL(textChanged(const QString&)), this,
             SLOT(onOffsetYChanged(const QString&)));
-
     connect(_comboMonitorSelect, SIGNAL(currentIndexChanged(int)),
             this, SLOT(onMonitorChanged(int)));
     connect(_comboProjection, SIGNAL(currentIndexChanged(int)),
@@ -77,7 +76,6 @@ WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
             this, SLOT(onSpoutSelection(int)));
     connect(_checkBoxWebGui, SIGNAL(stateChanged(int)),
             this, SLOT(onWebGuiSelection(int)));
-
     connect(_fullscreenButton, SIGNAL(released()), this, SLOT(onFullscreenClicked()));
 }
 
@@ -295,6 +293,7 @@ void WindowControl::onFullscreenClicked() {
     _offset_y->setText("0");
     _size_x->setText(QString::number(_monitorResolutions[_monIndex].width()));
     _size_y->setText(QString::number(_monitorResolutions[_monIndex].height()));
+    _checkBoxWindowDecor->setCheckState(Qt::Unchecked);
 }
 
 void WindowControl::enableGuiWindowSelection(bool enabled) {

@@ -15,8 +15,9 @@
 #include <QVector>
 #include <QWidget>
 
-#include <vector>
+#include <glm/gtc/constants.hpp>
 #include <iostream>
+#include <vector>
 #include <sgct/config.h>
 
 

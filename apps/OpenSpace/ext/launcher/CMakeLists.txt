@@ -136,6 +136,7 @@ target_include_directories(
   PUBLIC
   include
   ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/include
+  ${OPENSPACE_APPS_DIR}/OpenSpace/ext/sgct/sgct/ext/glm
 )
 target_link_libraries(
   openspace-ui-launcher

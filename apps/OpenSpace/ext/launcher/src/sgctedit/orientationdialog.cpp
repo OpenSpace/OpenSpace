@@ -70,9 +70,13 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
 }
 
 void OrientationDialog::ok() {
-    _orientationValue.x = QString(_linePitch->text()).toFloat();
-    _orientationValue.y = QString(_lineYaw->text()).toFloat();
-    _orientationValue.z = QString(_lineRoll->text()).toFloat();
+    _orientationValue.x = QString(_linePitch->text()).toFloat() / 180.0
+        * glm::pi<float>();
+    _orientationValue.y = QString(_lineYaw->text()).toFloat() / 180.0
+        * glm::pi<float>();
+    _orientationValue.z = QString(_lineRoll->text()).toFloat() / 180.0
+        * glm::pi<float>();
+    _orientationValue.w = 1.0;
     accept();
 }
 

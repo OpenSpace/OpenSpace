@@ -168,6 +168,8 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
                 {
                     sgct::config::FisheyeProjection projection;
                     projection.quality = winControl->qualitySelectedValue();
+                    projection.fov = 180.0;
+                    projection.tilt = 0.0;
                     viewport.projection = std::move(projection);
                 }
                 break;
@@ -200,11 +202,13 @@ void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projection
             case WindowControl::ProjectionIndeces::Planar:
             default:
                 {
+                    // The negative values for left & down are according to sgct's
+                    // convection for importing
                     sgct::config::PlanarProjection projection;
-                    projection.fov.left = winControl->fovH() / 2.0;
-                    projection.fov.right = projection.fov.left;
-                    projection.fov.down = winControl->fovV() / 2.0;
-                    projection.fov.up = projection.fov.down;
+                    projection.fov.right = winControl->fovH() / 2.0;
+                    projection.fov.left = -projection.fov.right;
+                    projection.fov.up = winControl->fovV() / 2.0;
+                    projection.fov.down = -projection.fov.up;
                     viewport.projection = std::move(projection);
                 }
                 break;
