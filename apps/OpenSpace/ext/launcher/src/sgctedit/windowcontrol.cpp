@@ -5,12 +5,12 @@
 WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
              unsigned int windowIndex, QRect& widgetDims, std::vector<QRect>& monitorDims,
                                                       QString* winColors, QWidget *parent)
-    : _nMonitors(nMonitors)
+    : QWidget(parent)
+    , _nMonitors(nMonitors)
     , _monIndex(monitorIndex)
     , _index(windowIndex)
     , _monitorResolutions(monitorDims)
     , _colorsForWindows(winColors)
-    , QWidget(parent)
 {
     _windowDims = defaultWindowSizes[windowIndex];
     _size_x = new QLineEdit(

@@ -9,11 +9,9 @@
 
 
 Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
-               std::function<void(unsigned int)> webGuiCallback, unsigned int nMaxWindows,
-                                                                        QString* winColors)
+                                             unsigned int nMaxWindows, QString* winColors)
     : _monBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
-    , _webGuiCheckCallback(webGuiCallback)
     , _nMaxWindows(nMaxWindows)
     , _winColors(winColors)
 {

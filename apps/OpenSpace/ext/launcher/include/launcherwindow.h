@@ -89,6 +89,7 @@ private:
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
 
+    QApplication& _qApp;
     const std::string _assetPath;
     const std::string _userAssetPath;
     const std::string _configPath;
@@ -101,7 +102,6 @@ private:
     int _userConfigCount = 0;
     const std::string _sgctConfigName;
 
-    QApplication& _qApp;
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
     QLabel* _backgroundImage = nullptr;

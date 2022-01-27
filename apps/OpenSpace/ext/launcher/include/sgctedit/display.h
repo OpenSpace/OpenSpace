@@ -27,8 +27,7 @@ class Display : public QWidget
 Q_OBJECT
 public:
     explicit Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
-        std::function<void(unsigned int)> webGuiCallback, unsigned int nMaxWindows,
-        QString* winColors);
+        unsigned int nMaxWindows, QString* winColors);
     ~Display();
     std::vector<WindowControl*> windowControls();
     unsigned int nWindows();
@@ -45,7 +44,6 @@ private:
     void initializeLayout();
     void showWindows();
     void addDisplayLayout(unsigned int column, MonitorBox* monBox, QVBoxLayout* layout);
-    std::function<void(unsigned int)> _webGuiCheckCallback;
     std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
     QString* _winColors;

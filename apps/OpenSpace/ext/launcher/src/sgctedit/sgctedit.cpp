@@ -8,9 +8,9 @@ namespace {
 
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
                    sgct::config::Cluster& cluster, QApplication& qtApp)
-    : _cluster(cluster)
+    : QDialog(parent)
+    , _cluster(cluster)
     , _windowList(windowList)
-    , QDialog(parent)
 {
     setWindowTitle("Display/Window Editor");
     systemMonitorConfiguration(qtApp);
@@ -23,8 +23,8 @@ void SgctEdit::systemMonitorConfiguration(QApplication& qtApp) {
         std::cerr << "Error: Qt reports no screens available." << std::endl;
         return;
     }
-
-    for (size_t s = 0; s < std::min(screenList.length(), 2); ++s) {
+    size_t nScreensManaged = std::min(screenList.length(), 2);
+    for (size_t s = 0; s < nScreensManaged; ++s) {
         int actualWidth = std::max(screenList[s]->size().width(),
             screenList[s]->availableGeometry().width());
         int actualHeight = std::max(screenList[s]->size().height(),
@@ -92,11 +92,6 @@ void SgctEdit::addDisplayLayout(MonitorBox* monBox, QHBoxLayout* layout)
     _displayWidget = new Display(
         monBox,
         _monitorSizeList,
-        [this](unsigned int monIndex) {
-            if (_monitorSizeList.size() > 1) {
-                _displayWidget->uncheckWebGuiOptions();
-            }
-        },
         _nMaxWindows,
         _colorsForWindows
     );

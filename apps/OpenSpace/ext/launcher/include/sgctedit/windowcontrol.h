@@ -122,6 +122,7 @@ private:
     unsigned int _nMonitors = 1;
     unsigned int _monIndex = 0;
     unsigned int _index = 0;
+    std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
     QString* _colorsForWindows = nullptr;
 
@@ -141,7 +142,6 @@ private:
     QIntValidator* _validatorOffset_x = nullptr;
     QIntValidator* _validatorOffset_y = nullptr;
 
-    std::vector<QRect>& _monitorResolutions;
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
