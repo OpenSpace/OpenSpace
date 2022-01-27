@@ -30,18 +30,18 @@ local JWSTTrailLaunch = {
   Parent = earthTransforms.EarthCenter.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 OCT 01 14:06:03",
-    End = "2018 NOV 01"
+    Start = "2021 DEC 25 12:50:00",
+    End = "2022 JAN 25"
   },
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
+      HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_launch.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
-    StartTime = "2018 OCT 01 14:06:00",
-    EndTime = "2018 NOV 01",
+    StartTime = "2021 DEC 25 12:50:00",
+    EndTime = "2022 JAN 25",
     SampleInterval = 60
   },
   GUI = {
@@ -61,14 +61,14 @@ local JWSTTrailOrbit = {
   Parent = transforms.L2.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2018 NOV 01 00:00:00",
-    End = "2024 OCT 01"
+    Start = "2021 DEC 25 12:50:00",
+    End = "2024 JAN 23"
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
+      HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_orbit.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
     Period = 182.621099, -- About 6 months

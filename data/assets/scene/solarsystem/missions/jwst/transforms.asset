@@ -18,13 +18,13 @@ local JWSTPosition = {
       Type = "TimelineTranslation",
       ShouldInterpolate = false,
       Keyframes = {
-        ["2018 OCT 01 14:06:03"] = {
+        ["2021 DEC 25 12:50:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
+          HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_launch.dat",
         },
-        ["2018 NOV 01 00:00:00"] = {
+        ["2022 JAN 25 00:00:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
+          HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_orbit.dat",
         }
       }
     },
@@ -66,7 +66,7 @@ local JWSTRotation = {
 -- Reparent the JWSTPosition node when the data changes at 01 Nov 2018
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
-    "2018 NOV 01 00:00:00",
+    "2022 JAN 25 00:00:00",
     [[openspace.setParent("JWSTPosition", "L2")]],
     [[openspace.setParent("JWSTPosition", "EarthCenter")]],
     "",
