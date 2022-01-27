@@ -1,9 +1,7 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
-local kernel = asset.require('../kernels').jup310
-
-
+local kernel = asset.require("../kernels").jup310
 
 local EuropaTrail = {
   Identifier = "EuropaTrail",
@@ -32,7 +30,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { EuropaTrail })
 
 asset.meta = {
   Name = "Europa Trail",
-  Version = "1.",
+  Version = "1.1",
   Description = [[ Trail of Europa as observed by the Jupiter. Data from NASA Spice (see
     base spice asset)]],
   Author = "OpenSpace Team",

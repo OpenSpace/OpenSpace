@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -138,7 +138,8 @@ public:
     *
     * \returns a vector of all scripts that has been loaded
     */
-    std::vector<ScheduledScript> allScripts(std::optional<int> group = std::nullopt) const;
+    std::vector<ScheduledScript> allScripts(
+        std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.

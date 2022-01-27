@@ -1,11 +1,10 @@
 local assetHelper = asset.require("util/asset_helper")
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Reference_Labels",
   Name = "Reference Labels",
-  FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
+  FilePath = asset.localResource("reference_labels.wms")
 }
 
 assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "Overlays")

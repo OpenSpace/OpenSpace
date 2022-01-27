@@ -1,6 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local model = asset.syncedResource({
   Name = "Animated Box",
@@ -20,7 +20,7 @@ local model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 3E7,
     LightSources = {
       {

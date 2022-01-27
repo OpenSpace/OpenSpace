@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "UvvisHybrid_Utah",
   Name = "Uvvis Hybrid [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms",
+  FilePath = asset.localResource("uvvishybrid_utah.wms"),
   Settings = {
     Gamma = 0.52,
     Multiplier = 0.65

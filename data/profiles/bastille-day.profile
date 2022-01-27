@@ -55,8 +55,7 @@
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
     "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
     "scene/solarsystem/planets/earth/satellites/satellites",
-    "scene/solarsystem/sun/euv_layer",
-    "scene/solarsystem/sun/sun_textures"
+    "scene/solarsystem/sun/euv_layer"
   ],
   "camera": {
     "altitude": 3400000000.0,

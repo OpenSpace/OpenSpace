@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -65,13 +65,11 @@ add_library(external-curl INTERFACE)
 if (WIN32)
   target_include_directories(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/include")
   target_link_libraries(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib")
-  target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
 else ()
   find_package(CURL)
   if (CURL_FOUND)
     target_include_directories(external-curl INTERFACE ${CURL_INCLUDE_DIRS})
     target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
-    target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED")
   endif ()
 endif ()
 end_dependency()

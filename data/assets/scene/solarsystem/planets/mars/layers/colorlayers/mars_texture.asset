@@ -1,11 +1,17 @@
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require("./../../mars_textures").TexturesPath
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mars_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
-  FilePath = texturesPath .. "/mars.jpg",
+  FilePath = texturesPath .. "mars.jpg",
   Description = [[ Default jpg texture for Mars]]
 }
 

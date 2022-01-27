@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "Indices",

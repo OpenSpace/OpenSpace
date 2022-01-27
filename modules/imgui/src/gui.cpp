@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -336,7 +336,8 @@ void GUI::initializeGL() {
         }
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
             texData,
-            glm::uvec3(texSize.x, texSize.y, 1)
+            glm::uvec3(texSize.x, texSize.y, 1),
+            GL_TEXTURE_2D
         );
         _fontTexture->setName("Gui Text");
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);

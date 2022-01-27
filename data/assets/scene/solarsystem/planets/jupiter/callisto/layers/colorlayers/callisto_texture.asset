@@ -1,10 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require("./../../callisto_textures").TexturesPath
-local globeIdentifier = asset.require("./../../callisto").Callisto.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../callisto").Callisto.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Callisto Textures",
+  Type = "HttpSynchronization",
+  Identifier = "callisto_textures",
+  Version = 2
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/callisto_os.tif",
+  FilePath = texturesPath .. "callisto_os.tif",
 }
 
 assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")

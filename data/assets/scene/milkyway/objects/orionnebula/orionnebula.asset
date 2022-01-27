@@ -1,5 +1,5 @@
-asset.require('./cluster')
-asset.require('./nebula')
+asset.require("./cluster")
+asset.require("./nebula")
 
 
 asset.meta = {

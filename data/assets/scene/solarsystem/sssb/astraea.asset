@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
   Name = "5 Astraea Trajectory",
@@ -15,7 +15,7 @@ local AstraeaTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2014 JAN 01 00:00:00",
@@ -35,7 +35,7 @@ local AstraeaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     }
   },
   GUI = {

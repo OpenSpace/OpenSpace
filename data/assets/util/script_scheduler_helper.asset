@@ -1,4 +1,4 @@
-local renderableHelper = asset.require('./renderable_helper')
+local renderableHelper = asset.require("./renderable_helper")
 
 -- Function that schedules scripts setting the enabled property 
 -- of <renderable> to <enabled> at time <time>.
@@ -20,5 +20,5 @@ local scheduleRenderableEnabledReversable = function(time, renderable, enabled)
   )
 end
 
-asset.export('scheduleRenderableEnabledReversable', scheduleRenderableEnabledReversable)
-asset.export('scheduleRenderableEnabled', scheduleRenderableEnabled)
+asset.export("scheduleRenderableEnabledReversable", scheduleRenderableEnabledReversable)
+asset.export("scheduleRenderableEnabled", scheduleRenderableEnabled)

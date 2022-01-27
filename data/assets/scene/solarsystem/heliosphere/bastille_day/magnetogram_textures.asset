@@ -1,15 +1,15 @@
-local assetHelper = asset.require('util/asset_helper')
-local sun = asset.require('scene/solarsystem/sun/sun')
+local assetHelper = asset.require("util/asset_helper")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 -- synced directories
-local magnetogramDirectory = asset.require('./magnetogram').TexturesPath;
+local magnetogramDirectory = asset.require("./magnetogram").TexturesPath;
 local magnetograms;
 
 local switch_color_layer = {
   Identifier = "magnetogram_texture.switch_color_layer",
   Name = "Next sun texture",
   Command = [[
-    local textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');
+    local textureList = openspace.globebrowsing.getLayers("Sun", "ColorLayers");
     if (magnetogramsTextureIndex == -1) then
       magnetogramsTextureIndex = 2;
     end;
@@ -35,8 +35,8 @@ asset.onInitialize(function ()
   rawset(_G, "magnetogramsTextureIndex", -1)
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.addLayer(
-      'Sun',
-      'ColorLayers',
+      "Sun",
+      "ColorLayers",
       {
         Identifier = "magnetogram-" .. i,
         Name = imagename,   --"Magnetogram-" .. i,
@@ -53,7 +53,7 @@ end)
 asset.onDeinitialize(function ()
   for i, imagename in ipairs(magnetograms) do
     openspace.globebrowsing.deleteLayer(
-      'Sun', 'ColorLayers', 'magnetogram-' .. i
+      "Sun", "ColorLayers", "magnetogram-" .. i
     )
   end
   openspace.action.removeAction(switch_color_layer.Identifier)
@@ -63,7 +63,7 @@ end)
 asset.meta = {
   Name = "Bastille Day magnetogram textures",
   Version = "1.0",
-  Description = [[ This asset adds multiple magnetogram textures to the sun. In addition
+  Description = [[ This asset adds multiple magnetogram textures to the Sun. In addition
   it provides an action to cycle through the textures. See magnetogram.asset for details 
   of the textures.]],
   Author = "OpenSpace Team",

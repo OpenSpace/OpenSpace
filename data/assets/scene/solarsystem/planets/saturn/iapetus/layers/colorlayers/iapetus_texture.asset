@@ -1,10 +1,16 @@
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require("./../../iapetus_textures").TexturesPath
-local globeIdentifier = asset.require("./../../iapetus").Iapetus.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Iapetus textures",
+  Type = "HttpSynchronization",
+  Identifier = "iapetus_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/iapetus.jpg",
+  FilePath = texturesPath .. "iapetus.jpg",
 }
 
 assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")

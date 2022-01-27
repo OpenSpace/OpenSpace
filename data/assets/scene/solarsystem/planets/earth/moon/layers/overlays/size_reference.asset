@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local moonAsset = asset.require("./../../moon").Moon
+local assetHelper = asset.require("util/asset_helper")
+local moonAsset = asset.require("../../moon").Moon
 local globeIdentifier = moonAsset.Identifier
 
 local layer = {

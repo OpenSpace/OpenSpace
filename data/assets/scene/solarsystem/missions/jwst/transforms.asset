@@ -1,8 +1,14 @@
-local assetHelper = asset.require('util/asset_helper')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local horizons = asset.require('./horizons').horizons
-asset.require('spice/base')
+local assetHelper = asset.require("util/asset_helper")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+asset.require("spice/base")
+
+local horizons = asset.syncedResource({
+  Name = "JWST Horizons",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_horizons",
+  Version = 2
+})
 
 local JWSTPosition = {
   Identifier = "JWSTPosition",
@@ -12,13 +18,13 @@ local JWSTPosition = {
       Type = "TimelineTranslation",
       ShouldInterpolate = false,
       Keyframes = {
-        ['2018 OCT 01 14:06:03'] = {
+        ["2018 OCT 01 14:06:03"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "/horizons_jwst_launch.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_launch.dat",
         },
-        ['2018 NOV 01 00:00:00'] = {
+        ["2018 NOV 01 00:00:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = horizons .. "/horizons_jwst_orbit.dat",
+          HorizonsTextFile = horizons .. "horizons_jwst_orbit.dat",
         }
       }
     },
@@ -61,8 +67,8 @@ local JWSTRotation = {
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
     "2018 NOV 01 00:00:00",
-    "openspace.setParent('JWSTPosition', 'L2')",
-    "openspace.setParent('JWSTPosition', 'EarthCenter')",
+    [[openspace.setParent("JWSTPosition", "L2")]],
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
     "",
     1 -- Not default group, never clear this script
   )

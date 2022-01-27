@@ -1,11 +1,17 @@
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require("./../../mercury_textures").TexturesPath
-local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mercury Textures",
+  Type = "HttpSynchronization",
+  Identifier = "mercury_abundance_textures",
+  Version = 1
+})
 
 local layer = {
   Name = "Magnesium Abundance",
   Identifier = "mgsimap_02122015",
-  FilePath = texturesPath .. "/mgsimap_02122015.png",
+  FilePath = texturesPath .. "mgsimap_02122015.png",
   Settings = { 
     Gamma = 1.33,
     Multiplier = 1.15

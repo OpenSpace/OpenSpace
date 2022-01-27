@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sun_transforms_asset = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
 local NeptuneBarycenter = {

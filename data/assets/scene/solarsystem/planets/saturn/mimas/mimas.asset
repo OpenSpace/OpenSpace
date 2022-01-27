@@ -1,8 +1,14 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Mimas = {
   Identifier = "Mimas",
@@ -27,7 +33,7 @@ local Mimas = {
     Layers = { },
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/mimas.labels",
+      FileName = labelsPath .. "mimas.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 7.7,

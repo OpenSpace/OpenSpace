@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "ClemUvvis_Sweden",
   Name = "Clem Uvvis [Sweden]",
-  FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms",
+  FilePath = asset.localResource("clemuvvis_sweden.wms"),
   Settings = {
     Gamma = 1.14,
     Multiplier = 1.4
@@ -23,7 +22,7 @@ asset.meta = {
   Name = "Clem Uvvis [Sweden]",
   Version = "1.1",
   Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map 
-  is hosted on the OpenSpace server in Utah.]],
+  is hosted on the OpenSpace server in Sweden.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Moon/Clementine/UVVIS/Lunar_Clementine_UVVIS_750nm_Global_Mosaic_118m_v2",
   License = "NASA/PDS"

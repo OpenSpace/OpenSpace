@@ -1,6 +1,4 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/cassini_iss_global_mosaic_4km_local")
+local colorLayer = asset.require("./layers/colorlayers/cassini_iss_global_mosaic_4km_local")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 

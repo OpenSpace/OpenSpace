@@ -1,4 +1,4 @@
-asset.export("webguiDevelopmentMode", true)
+asset.export("webguiDevelopmentMode", false)
 
 -- To make changes to the webgui:
 
@@ -9,7 +9,7 @@ asset.export("webguiDevelopmentMode", true)
 
 
 asset.meta = {
-  Name = "Customization - gui",
+  Name = "Customization - User Interface",
   Version = "1.0",
   Description = [[ This asset is used by developers working on the GUI.]],
   Author = "OpenSpace Team",

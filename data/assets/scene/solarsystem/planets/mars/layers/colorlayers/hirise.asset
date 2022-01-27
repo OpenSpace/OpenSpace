@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "HiRISE-PSP",
   Name = "HiRISE",
-  FilePath = mapServiceConfigs .. "/ESRI/HiRISE/HiRISE_PSP.vrt",
+  FilePath = asset.localResource("hirise.vrt"),
   BlendMode = "Color",
   Settings = {
     Gamma = 1.0,

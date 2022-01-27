@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -149,7 +149,6 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         {
             "convertFromRaDec",
             &space::luascriptfunctions::convertFromRaDec,
-            {},
             "string/double, string/double, double",
             "Returns the cartesian world position of a ra dec coordinate with distance. "
             "If the coordinate is given as strings the format should be ra 'XhYmZs' and "
@@ -159,7 +158,6 @@ scripting::LuaLibrary SpaceModule::luaLibrary() const {
         {
             "convertToRaDec",
             &space::luascriptfunctions::convertToRaDec,
-            {},
             "double, double, double",
             "Returns the formatted ra, dec strings and distance for a given cartesian "
             "world coordinate."

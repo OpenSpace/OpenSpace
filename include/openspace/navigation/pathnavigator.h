@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,6 +81,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    void handlePathEnd();
+
     /**
     * Populate list of nodes that are relevant for collision checks, etc
     */
@@ -90,6 +92,7 @@ private:
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;
+    bool _startSimulationTimeOnFinish = false;
 
     properties::OptionProperty _defaultPathType;
     properties::BoolProperty _includeRoll;

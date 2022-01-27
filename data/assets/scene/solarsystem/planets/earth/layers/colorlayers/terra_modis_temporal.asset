@@ -1,18 +1,24 @@
 local assetHelper = asset.require("util/asset_helper")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Terra_Modis_Temporal",
   Name = "Terra Modis (Temporal)",
   Type = "TemporalTileLayer",
-  FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
-    "MODIS_Terra_CorrectedReflectance_TrueColor",
-    "2000-02-24",
-    "Yesterday",
-    "1d",
-    "250m",
-    "jpg"
-  ),
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2000-02-24",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "MODIS_Terra_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
   Description = [[ Temporal coverage: 02 July 2013 - Present. The imagery resolution
     is 1 km, and the temporal resolution is daily.]]
 }

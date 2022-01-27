@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,9 @@
 namespace openspace::scripting {
 
 /**
-* This structure represents a Lua library, itself consisting of a unique #name and
-* an arbitrary number of #functions
-*/
+ * This structure represents a Lua library, itself consisting of a unique #name and
+ * an arbitrary number of #functions
+ */
 struct LuaLibrary {
     /**
     * This structure represents a Lua function with its #name, #function pointer
@@ -47,9 +47,7 @@ struct LuaLibrary {
         std::string name;
         /// The function pointer that is executed if the function is called
         lua_CFunction function;
-        /// A vector of light userdata to be passed into the function
-        std::vector<void*> userdata;
-        /// A text describing the arugments to this function
+        /// A text describing the arguments to this function
         std::string argumentText;
         /// A help text describing what the function does/
         std::string helpText;
@@ -60,6 +58,8 @@ struct LuaLibrary {
     std::vector<Function> functions;
     /// A list of script files that are executed for each Lua state
     std::vector<std::filesystem::path> scripts = std::vector<std::filesystem::path>();
+    /// A list of all libraries that are children for this library
+    std::vector<LuaLibrary> subLibraries;
 
     /// This struct contains information about a function or constant that is defined in
     /// a Lua script
@@ -77,6 +77,9 @@ struct LuaLibrary {
 
     /// Comparison function that compares two LuaLibrary%s name
     bool operator<(const LuaLibrary& rhs) const;
+
+    /// Merges the contents of a second LuaLibrary into this LuaLibrary
+    void merge(LuaLibrary rhs);
 };
 
 } // namespace openspace::scripting

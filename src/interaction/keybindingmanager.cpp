@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -149,14 +149,12 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
-                {},
                 "",
                 "Clear all key bindings"
             },
             {
                 "clearKey",
                 &luascriptfunctions::clearKey,
-                {},
                 "string or strings",
                 "Unbinds the key or keys that have been provided. This function can be "
                 "called with a single key or with an array of keys to remove all of the "
@@ -165,14 +163,12 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
-                {},
                 "string, string",
                 "Binds a key by name to the action identified by the second argument"
             },
             {
                 "getKeyBinding",
                 &luascriptfunctions::getKeyBindings,
-                {},
                 "string",
                 "Returns a list of information about the keybindings for the provided key"
             }

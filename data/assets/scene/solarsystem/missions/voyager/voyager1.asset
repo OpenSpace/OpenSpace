@@ -1,6 +1,12 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local models = asset.require("./model" ).modelFolder;
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+local models = asset.syncedResource({
+  Name = "Voyager Model",
+  Type = "HttpSynchronization",
+  Identifier = "voyager_model",
+  Version = 1
+})
 
 local kernels = asset.syncedResource({
   Name = "Voyager 1 Kernels",
@@ -10,14 +16,14 @@ local kernels = asset.syncedResource({
 })
 
 local Kernels = {
-  kernels .. '/vg1_v02.tf',
-  kernels .. '/vg100019.tsc',
-  kernels .. '/Voyager_1.a54206u_V0.2_merged.bsp',
-  kernels .. '/voyager_1.ST+1991_a54418u.merged.bsp',
-  kernels .. '/vgr1_jup230.bsp',
-  kernels .. '/vgr1_sat337.bsp',
-  kernels .. '/vgr1_super.bc',
-  kernels .. '/vgr1_super_v2.bc'
+  kernels .. "vg1_v02.tf",
+  kernels .. "vg100019.tsc",
+  kernels .. "Voyager_1.a54206u_V0.2_merged.bsp",
+  kernels .. "voyager_1.ST+1991_a54418u.merged.bsp",
+  kernels .. "vgr1_jup230.bsp",
+  kernels .. "vgr1_sat337.bsp",
+  kernels .. "vgr1_super.bc",
+  kernels .. "vgr1_super_v2.bc"
 }
 
 local RotationMatrix = {
@@ -72,7 +78,7 @@ local Voyager1Main = {
   Parent = Voyager1.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-main.obj",
+    GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },
@@ -87,7 +93,7 @@ local Voyager1Antenna = {
   Parent = Voyager1.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/voyager-antenna.obj",
+    GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
     LightSources = LightSources
   },

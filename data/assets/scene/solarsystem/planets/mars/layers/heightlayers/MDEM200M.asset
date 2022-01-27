@@ -1,11 +1,10 @@
-local assetHelper = asset.require('util/asset_helper')
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local assetHelper = asset.require("util/asset_helper")
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "MDEM200M",
   Name = "HRSC MOLA Blended DEM Global 200m v2",
-  FilePath = mapServiceConfigs .. "/ESRI/MDEM200M.tif",
+  FilePath = asset.localResource("mdem200m.wms"),
   Description = [[ Blend of data derived from the Mars Orbiter Laser Altimeter 
     (MOLA, an instrument aboard NASA’s
     Mars Global Surveyor spacecraft), and data derived from the High-Resolution
@@ -13,7 +12,7 @@ local layer = {
     Express spacecraft). The average accuracy is ~100 meters in horizontal 
     position and the elevation uncertainty is at least ±3 m. This
     tiled elevation layer, hosted by Esri, is made available using
-    lossless LERC compression.(Description from URL).]],
+    lossless LERC compression. (Description from URL).]],
 }
 
 assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")

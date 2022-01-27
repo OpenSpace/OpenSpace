@@ -1,5 +1,5 @@
-local transforms = asset.require('./titan')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./titan")
+local assetHelper = asset.require("util/asset_helper")
 
 local Atmosphere = {
   Identifier = "TitanAtmosphere",

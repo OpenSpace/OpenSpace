@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -141,14 +141,12 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     return res;
 }
 
-int LayerManager::update() {
+void LayerManager::update() {
     ZoneScoped
 
-    int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        res += layerGroup->update();
+        layerGroup->update();
     }
-    return res;
 }
 
 void LayerManager::reset(bool includeDisabled) {
@@ -157,7 +155,7 @@ void LayerManager::reset(bool includeDisabled) {
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
             if ((layer->enabled() || includeDisabled) && layer->tileProvider()) {
-                tileprovider::reset(*layer->tileProvider());
+                layer->tileProvider()->reset();
             }
         }
     }

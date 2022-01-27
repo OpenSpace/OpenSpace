@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
 
 local textures = asset.syncedResource({
   Name = "Bennu Textures",
@@ -31,7 +31,7 @@ local ImagePlane = {
     Spacecraft = "OSIRIS-REX",
     Instrument = "ORX_OCAMS_POLYCAM",
     Moving = false,
-    Texture = textures .. "/defaultProj.png"
+    Texture = textures .. "defaultProj.png"
   },
   GUI = {
     Name = "OsirisREx Image Plane",
