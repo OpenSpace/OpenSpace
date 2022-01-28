@@ -162,22 +162,22 @@ end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(label_01);  
-  openspace.removeScreenSpaceRenderable(label_02);  
-  openspace.removeScreenSpaceRenderable(label_03);  
-  openspace.removeScreenSpaceRenderable(label_04);  
-  openspace.removeScreenSpaceRenderable(label_05);  
-  openspace.removeScreenSpaceRenderable(label_06);  
-  openspace.removeScreenSpaceRenderable(label_07);  
-  openspace.removeScreenSpaceRenderable(label_08);  
-  openspace.removeScreenSpaceRenderable(label_09);  
-  openspace.removeScreenSpaceRenderable(label_10);  
-  openspace.removeScreenSpaceRenderable(label_11);  
-  openspace.removeScreenSpaceRenderable(label_12);  
-  openspace.removeScreenSpaceRenderable(label_13);  
-  openspace.removeScreenSpaceRenderable(label_14);  
-  openspace.removeScreenSpaceRenderable(label_15);  
-  openspace.removeScreenSpaceRenderable(label_16);  
+  openspace.removeScreenSpaceRenderable(label_01.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_02.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_03.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_04.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_05.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_06.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_07.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_08.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_09.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_10.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_11.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_12.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_13.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_14.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_15.Identifier);  
+  openspace.removeScreenSpaceRenderable(label_16.Identifier);  
 end)
 
 

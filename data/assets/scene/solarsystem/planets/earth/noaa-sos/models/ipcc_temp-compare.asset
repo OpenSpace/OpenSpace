@@ -15,22 +15,22 @@ local syncedDirectory = asset.syncedResource({
 })
 
 local layers_names = {
-  "2025_gfdl_a1b.png",
-  "2025_gfdl_b1.png",
-  "2050_gfdl_a1b.png",
-  "2050_gfdl_b1.png",
-  "2075_gfdl_a1b.png",
-  "2075_gfdl_b1.png",
-  "2100_gfdl_a1b.png",
-  "2100_gfdl_b1.png"
+  "2025_gfdl_a1b",
+  "2025_gfdl_b1",
+  "2050_gfdl_a1b",
+  "2050_gfdl_b1",
+  "2075_gfdl_a1b",
+  "2075_gfdl_b1",
+  "2100_gfdl_a1b",
+  "2100_gfdl_b1"
 }
 
 local layers = {}
 for i,v in ipairs(layers_names) do
   local layer = {
-    Identifier = Identifier,
+    Identifier = Identifier .. v,
     Name = Name,
-    FilePath = syncedDirectory .. v,
+    FilePath = syncedDirectory .. v .. ".png",
     Description = Description
   }
 
