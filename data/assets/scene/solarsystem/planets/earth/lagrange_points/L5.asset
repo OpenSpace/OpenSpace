@@ -16,17 +16,9 @@ local kernels = asset.syncedResource({
   Version = 1
 })
 
-local L5 = {
-  Identifier = "L5",
+local L5Position = {
+  Identifier = "L5Position",
   Parent = transforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    RenderableType = "Opaque",
-    Billboard = true,
-    Size = 800E6,
-    Texture = circle .. "circle.png",
-    BlendMode = "Additive"
-  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -37,6 +29,25 @@ local L5 = {
   },
   Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
   GUI = {
+    Name = "L5 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange points",
+    Hidden = true
+  }
+}
+
+local L5 = {
+  Identifier = "L5",
+  Parent = L5Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    RenderableType = "Opaque",
+    Billboard = true,
+    Size = 800E6,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
     Name = "L5",
     Path = "/Solar System/Planets/Earth/Lagrange points",
   }
@@ -44,7 +55,7 @@ local L5 = {
 
 local L5Label = {
   Identifier = "L5Label",
-  Parent = L5.Identifier,
+  Parent = L5Position.Identifier,
   Renderable = {
     Type = "RenderableLabels",
     Text = "L5",
@@ -64,6 +75,7 @@ local L5Label = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
+  L5Position,
   L5,
   L5Label
 })
