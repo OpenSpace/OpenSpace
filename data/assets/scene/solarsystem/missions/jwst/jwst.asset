@@ -35,7 +35,6 @@ local JWSTBand = {
     }
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderableSphere",
     Texture = band .. "JWST-band.png",
     Size = 9.2E15,
@@ -101,7 +100,6 @@ local JWSTFov = {
     End = "2024 JAN 23"
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderablePrism",
     Segments = 6,
     Lines = 3,

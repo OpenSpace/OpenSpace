@@ -77,11 +77,6 @@ local JWSTTrailOrbit = {
   }
 }
 
--- JPL Horizons doesn't have data of JWST relative to the Sun,
--- instead a SPICE kernel with data from 2020 to 2024 is used.
--- However, this SPICE kernel is (somehow) based on the horizons
--- data of the 2018 launch anyway. Which mean that this kernel doesn't
--- have any data of the launch, just the orbit.
 local JWSTSunTrail = {
   Identifier = "JWSTSunTrail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -91,7 +86,6 @@ local JWSTSunTrail = {
     End = "2024 JAN 23"
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",

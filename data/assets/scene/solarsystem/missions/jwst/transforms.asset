@@ -34,8 +34,7 @@ local JWSTPosition = {
     Path = "/Solar System/Missions/JWST",
     Hidden = true,
     Description = [[
-      James Webb Space Telescope Position relative to Earth based on Horizons data from the
-      2018 launch.
+      James Webb Space Telescope Position relative to Earth.
     ]],
   }
 }
@@ -63,7 +62,7 @@ local JWSTRotation = {
   }
 }
 
--- Reparent the JWSTPosition node when the data changes at 01 Nov 2018
+-- Reparent the JWSTPosition node when the data changes at 25 Jan 2022
 asset.onInitialize(function()
   openspace.scriptScheduler.loadScheduledScript(
     "2022 JAN 25 00:00:00",
@@ -83,9 +82,8 @@ asset.meta = {
   Name = "James Webb Space Telescope Transforms",
   Version = "1.0",
   Description = [[
-    JWST transforms: JWST position relative to Earth using horizons data from the planned
-    launch of 2018. JWST rotation, a fixed rotation so sunshield always points toward
-    the Sun.
+    JWST transforms: JWST position relative to Earth and JWST rotation,
+    a fixed rotation so sunshield always points toward the Sun.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

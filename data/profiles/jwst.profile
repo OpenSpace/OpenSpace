@@ -41,20 +41,20 @@
       "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
-      "documentation": "Set the time to the 2018 launch time of JWST",
+      "documentation": "Set the time to the launch time of JWST",
       "gui_path": "/JWST",
-      "identifier": "profile.set.2018_launch",
+      "identifier": "profile.set.jwst_launch",
       "is_local": false,
-      "name": "Set to 2018 launch time",
-      "script": "openspace.time.setTime('2018-10-01T14:06:03'); openspace.time.setDeltaTime(1)"
+      "name": "Set to JWST launch time",
+      "script": "openspace.time.setDeltaTime(1); openspace.time.setTime('2021-12-25T12:50:00');"
     },
     {
-      "documentation": "Set the time to 2021 where the JWST Sun trail has valid data (2020-2024)",
+      "documentation": "Toggle JWST trail relative to the Sun",
       "gui_path": "/JWST",
-      "identifier": "profile.set.2021_sun",
+      "identifier": "profile.toggle.sun_trail",
       "is_local": false,
-      "name": "Set to 2021 Sun trail",
-      "script": "openspace.time.setTime('2021-12-18T14:06:03'); openspace.time.setDeltaTime(1)"
+      "name": "Toggle JWST Sun trail",
+      "script": "local value = openspace.getPropertyValue('Scene.JWSTSunTrail.Renderable.Enabled'); openspace.setPropertyValueSingle('Scene.JWSTSunTrail.Renderable.Enabled', not value);"
     },
     {
       "documentation": "Toggle all planet and moon trails, except the Moon",
@@ -65,7 +65,7 @@
       "script": "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled') for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Enabled', true)"
     },
     {
-      "documentation": "Toggle JWST launch and orbit trails",
+      "documentation": "Toggle JWST launch and orbit trails, not the Sun trail",
       "gui_path": "/JWST",
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
@@ -149,11 +149,11 @@
       "key": "V"
     },
     {
-      "action": "profile.set.2018_launch",
+      "action": "profile.set.jwst_launch",
       "key": "J"
     },
     {
-      "action": "profile.set.2021_sun",
+      "action": "profile.toggle.sun_trail",
       "key": "K"
     },
     {
@@ -267,11 +267,36 @@
       "name": "Scene.L2SunLine.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "ScreenSpace.HUDFImage.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.HUDFJWSTLine.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTSunTrail.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTBand.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.JWSTFov.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
     }
   ],
   "time": {
     "type": "absolute",
-    "value": "2018-10-01T14:06:03"
+    "value": "2021-12-25T12:50:00"
   },
   "version": {
     "major": 1,
