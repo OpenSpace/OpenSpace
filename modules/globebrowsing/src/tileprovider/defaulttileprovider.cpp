@@ -76,6 +76,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation DefaultTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_defaulttileprovider");
+}
+
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)

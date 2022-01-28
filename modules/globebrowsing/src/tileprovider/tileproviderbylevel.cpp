@@ -41,6 +41,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation TileProviderByLevel::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_tileproviderbylevel");
+}
+
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 

@@ -90,7 +90,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_modelprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)

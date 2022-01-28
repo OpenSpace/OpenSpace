@@ -61,6 +61,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation ImageSequenceTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_imagesequencetileprovider");
+}
+
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
     : _index(IndexInfo, 0)
     , _currentImage(CurrentImageInfo)

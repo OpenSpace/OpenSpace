@@ -26,6 +26,7 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
@@ -46,7 +47,13 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
     auto tFactory = FactoryManager::ref().factory<Task>();
     ghoul_assert(tFactory, "No task factory existed");
     tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
+}
 
+std::vector<documentation::Documentation> VolumeModule::documentations() const {
+    return {
+        RenderableTimeVaryingVolume::Documentation(),
+        GenerateRawVolumeTask::Documentation()
+    };
 }
 
 } // namespace openspace

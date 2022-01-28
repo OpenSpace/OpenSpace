@@ -989,8 +989,7 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
 
 std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                             std::string windowConfiguration,
-                                            const std::string& labelFromCfgFile,
-                                            const std::string& xmlExt)
+                                            const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
@@ -1004,13 +1003,31 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            if (std::filesystem::path(config).extension() == ".xml") {
-                //user customzied sgct config
+            std::filesystem::path c = absPath(config);
+            
+            std::filesystem::path cj = c;
+            cj.replace_extension(".json");
+            
+            std::filesystem::path cx = c;
+            cx.replace_extension(".xml");
+
+            if (c.extension().empty()) {
+                if (std::filesystem::exists(cj)) {
+                    config += ".json";
+                }
+                else if (std::filesystem::exists(cx)) {
+                    config += ".xml";
+                }
+                else {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading configuration file {}. File could not be found",
+                        config
+                    ));
+                }
             }
             else {
-                config += xmlExt;
+                // user customzied sgct config
             }
-
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1163,7 +1180,6 @@ int main(int argc, char* argv[]) {
 
     // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
-    const std::string xmlExt = ".xml";
     std::string windowCfgPreset = setWindowConfigPresetForGui(
         labelFromCfgFile,
         hasSGCTConfig,
@@ -1211,8 +1227,7 @@ int main(int argc, char* argv[]) {
             win,
             hasSGCTConfig,
             windowConfiguration,
-            labelFromCfgFile,
-            xmlExt
+            labelFromCfgFile
         );
     } else {
         glfwInit();

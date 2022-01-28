@@ -20,7 +20,7 @@ asset.require("./layers/colorlayers/hirisels")
 -- Height layers
 asset.require("./layers/heightlayers/mola_sweden")
 asset.require("./layers/heightlayers/mola_utah")
-local heightLayer = asset.require("./layers/heightlayers/mdem200m")
+local heightLayer = asset.require("./layers/heightlayers/MDEM200M")
 asset.require("./layers/heightlayers/hirisels")
 
 -- Overlays

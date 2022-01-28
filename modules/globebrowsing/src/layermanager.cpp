@@ -106,6 +106,7 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
         for (const documentation::TestResult::Warning& w : e.result.warnings) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
+        return nullptr;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);

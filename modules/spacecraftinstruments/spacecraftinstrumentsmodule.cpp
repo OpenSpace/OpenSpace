@@ -61,12 +61,12 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
+    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
+    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
 
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
@@ -85,9 +85,12 @@ std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
     return {
+        RenderableCrawlingLine::Documentation(),
         RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),
+        RenderablePlaneProjection::Documentation(),
         RenderablePlanetProjection::Documentation(),
+        RenderableShadowCylinder::Documentation(),
         ProjectionComponent::Documentation()
     };
 }
