@@ -53,14 +53,21 @@ local label = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "forest_label.png"
+  TexturePath = syncedDirectory .. "forest_label.png",
+  FaceCamera = false,
+  Scale = 0.13,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
 }
 
 local label1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. "(1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "forest_label1.png"
+  Enabled = false,
+  TexturePath = syncedDirectory .. "forest_label1.png",
+  FaceCamera = false,
+  Scale = 0.13,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
 }
 
 asset.onInitialize(function() 

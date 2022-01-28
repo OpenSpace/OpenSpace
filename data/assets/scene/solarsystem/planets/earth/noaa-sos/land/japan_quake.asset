@@ -28,7 +28,9 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "legend_annotated.png"
+  TexturePath = syncedDirectory .. "legend_annotated.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function()

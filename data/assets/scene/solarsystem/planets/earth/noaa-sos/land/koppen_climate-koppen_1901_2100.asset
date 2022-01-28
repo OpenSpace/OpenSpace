@@ -28,14 +28,19 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "legend.jpg"
+  TexturePath = syncedDirectory .. "legend.jpg",
+  FaceCamera = false,
+  Scale = 0.375,
+  CartesianPosition = { -0.75, -0.5, -2.0 }
 }
 
 local legend1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. " (1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "legend2.png"
+  TexturePath = syncedDirectory .. "legend2.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.75, -0.5, -2.0 }
 }
 
 asset.onInitialize(function()

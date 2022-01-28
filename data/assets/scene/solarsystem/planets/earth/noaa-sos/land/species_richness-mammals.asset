@@ -32,7 +32,9 @@ local labels = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "labels.png"
+  TexturePath = syncedDirectory .. "labels.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function ()

@@ -28,14 +28,20 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png",
+  Enabled = false,
+  FaceCamera = false,
+  Scale = 0.07,
+  CartesianPosition = { 1.0, 0.0, -2.0 }
 }
 
 local colorbar2 = {
   Identifier = Identifier .."-1",
   Name = Name .. " (1)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "colorbar2.png"
+  TexturePath = syncedDirectory .. "colorbar2.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function ()

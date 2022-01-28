@@ -52,7 +52,9 @@ local colorbar = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
-  TexturePath = colorbarDestination .. "co2wx_20000101.cpt.png"
+  TexturePath = colorbarDestination .. "co2wx_20000101.cpt.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function() 

@@ -28,14 +28,18 @@ local colorbar_fire = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "fire_colorbar.png"
+  TexturePath = syncedDirectory .. "fire_colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { -0.5, -0.5, -2.0 }
 }
 
 local colorbar_veg = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "veg_colorbar.png"
+  TexturePath = syncedDirectory .. "veg_colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
 asset.onInitialize(function()

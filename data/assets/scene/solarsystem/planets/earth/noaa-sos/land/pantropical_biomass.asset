@@ -25,7 +25,9 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "legend.jpg"
+  TexturePath = syncedDirectory .. "legend.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 

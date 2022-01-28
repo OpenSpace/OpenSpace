@@ -53,7 +53,9 @@ local legend = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "Earthquake_Legend.png"
+  TexturePath = syncedDirectory .. "Earthquake_Legend.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function() 

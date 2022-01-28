@@ -28,7 +28,10 @@ local label = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "lcc_ribbon_label.jpg"
+  TexturePath = syncedDirectory .. "lcc_ribbon_label.jpg",
+  FaceCamera = false,
+  Scale = 0.75,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function()

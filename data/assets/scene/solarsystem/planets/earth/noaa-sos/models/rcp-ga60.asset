@@ -32,7 +32,9 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "ANOM.colorbar.png"
+  TexturePath = syncedDirectory .. "ANOM.colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 1.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function() 

@@ -34,14 +34,18 @@ local colorbar_rain = {
   Identifier = Identifier .. "-rain",
   Name = Name .. " (Rain)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "rainbar_white.png"
+  TexturePath = syncedDirectory .. "rainbar_white.png",
+  FaceCamera = false,
+  CartesianPosition = { -0.5, -0.5, -2.0 }
 }
 
 local colorbar_snow = {
   Identifier = Identifier .. "-snow",
   Name = Name ..  " (Snow)",
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "snowbar_white.png"
+  TexturePath = syncedDirectory .. "snowbar_white.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
 asset.onInitialize(function() 

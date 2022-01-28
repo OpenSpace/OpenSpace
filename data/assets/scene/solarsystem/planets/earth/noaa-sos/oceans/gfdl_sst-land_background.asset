@@ -34,14 +34,10 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "colorbar.png"
-}
-
-local gfdl_sst_colorbar = {
-  Identifier = Identifier,
-  Name = Name,
-  Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "gfdl_sst_colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  Scale = 0.04,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
 }
 
 asset.onInitialize(function()
@@ -52,13 +48,11 @@ asset.onInitialize(function()
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar);  
-  openspace.addScreenSpaceRenderable(gfdl_sst_colorbar);
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
   openspace.removeScreenSpaceRenderable(colorbar.Identifier)
-  openspace.removeScreenSpaceRenderable(gfdl_sst_colorbar.Identifier)
 end)
 
 

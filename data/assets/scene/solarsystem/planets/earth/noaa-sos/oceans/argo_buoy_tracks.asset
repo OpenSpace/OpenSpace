@@ -28,7 +28,9 @@ local buoy = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "argobuoy.jpg"
+  TexturePath = syncedDirectory .. "argobuoy.jpg",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.25, -2.0 }
 }
 
 asset.onInitialize(function()

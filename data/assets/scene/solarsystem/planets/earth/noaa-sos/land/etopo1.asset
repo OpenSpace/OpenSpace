@@ -25,7 +25,10 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "etopo1_color_scale.png"
+  TexturePath = syncedDirectory .. "etopo1_color_scale.png",
+  FaceCamera = false,
+  Scale = 0.1,
+  CartesianPosition = { 0.5, 0.0, -2.0 }
 }
 
 asset.onInitialize(function() 

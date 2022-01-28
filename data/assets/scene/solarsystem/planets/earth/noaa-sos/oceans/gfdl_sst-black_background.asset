@@ -34,14 +34,19 @@ local colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "colorbar.png"
+  TexturePath = syncedDirectory .. "colorbar.png",
+  FaceCamera = false,
+  Scale = 0.04,
+  CartesianPosition = { 0.85, 0.0, -2.0 }
 }
 
 local gfdl_sst_colorbar = {
   Identifier = Identifier,
   Name = Name,
   Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "gfdl_sst_colorbar.png"
+  TexturePath = syncedDirectory .. "gfdl_sst_colorbar.png",
+  FaceCamera = false,
+  CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
 asset.onInitialize(function()
