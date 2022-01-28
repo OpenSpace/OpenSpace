@@ -44,6 +44,7 @@ local colorbar = {
   TexturePath = syncedDirectory .. "colorbar.png",
   FaceCamera = false,
   Scale = 0.2,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
   CartesianPosition = { 1.0, -0.5, -2.0 }
 }
 

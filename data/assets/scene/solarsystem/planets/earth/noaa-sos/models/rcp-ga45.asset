@@ -34,6 +34,7 @@ local colorbar = {
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "ANOM.colorbar.png",
   FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
   CartesianPosition = { 1.0, -0.5, -2.0 }
 }
 

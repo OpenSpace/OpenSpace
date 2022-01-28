@@ -54,6 +54,7 @@ local colorbar = {
   -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
   TexturePath = colorbarDestination .. "co2wx_20000101.cpt.png",
   FaceCamera = false,
+  BackgroundColor = { 1.0, 1.0, 1.0, 1.0 },
   CartesianPosition = { 0.0, -0.5, -2.0 }
 }
 
