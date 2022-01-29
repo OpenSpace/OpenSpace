@@ -1,5 +1,29 @@
-#ifndef WINDOWCONTROL_H
-#define WINDOWCONTROL_H
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__
+#define __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__
 
 #include <QCheckBox>
 #include <QColor>
@@ -27,15 +51,15 @@ class WindowControl : public QWidget
 Q_OBJECT
 public:
     explicit WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
-        unsigned int windowIndex, QRect& widgetDims, std::vector<QRect>& monitorDims,
-        QString* winColors, QWidget *parent = nullptr);
+        unsigned int windowIndex, std::vector<QRect>& monitorDims,
+        const QString* winColors, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
     void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
-    void showWindowLabel(bool show);
+    void showWindowLabel(const bool show);
     void cleanupLayouts();
-    QVBoxLayout* initializeLayout(QWidget* parentWidget);
+    QVBoxLayout* initializeLayout();
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
     QLineEdit* lineEditSizeHeight();
@@ -124,7 +148,7 @@ private:
     unsigned int _index = 0;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
-    QString* _colorsForWindows = nullptr;
+    const QString* _colorsForWindows = nullptr;
 
     QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;
@@ -188,4 +212,4 @@ private:
     QHBoxLayout* _layoutHeightOffset = nullptr;
 };
 
-#endif // WINDOWCONTROL_H
+#endif // __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__

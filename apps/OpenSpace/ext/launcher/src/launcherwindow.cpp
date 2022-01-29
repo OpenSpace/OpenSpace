@@ -519,9 +519,17 @@ void LauncherWindow::openProfileEditor(const std::string& profile, const bool is
 }
 
 void LauncherWindow::openWindowEditor() {
+    QList<QScreen*> screenList = _qApp.screens();
+    if (screenList.length() == 0) {
+        LERRORC(
+            "LauncherWindow",
+            "Error: Qt reports no screens/monitors available"
+        );
+        return;
+    }
     sgct::config::Cluster cluster;
     std::vector<sgct::config::Window> windowList;
-    SgctEdit editor(this, windowList, cluster, _qApp);
+    SgctEdit editor(this, windowList, cluster, screenList);
     editor.exec();
     if (editor.wasSaved()) {
         std::string fullFilename = editor.saveFilename() + ".json";

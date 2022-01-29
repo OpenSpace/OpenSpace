@@ -1,28 +1,41 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include "sgctedit/sgctedit.h"
 
-/*using namespace openspace;
-
-namespace {
-
-}*/
-
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-                   sgct::config::Cluster& cluster, QApplication& qtApp)
+                   sgct::config::Cluster& cluster, const QList<QScreen*> screenList)
     : QDialog(parent)
     , _cluster(cluster)
     , _windowList(windowList)
 {
-    setWindowTitle("Display/Window Editor");
-    systemMonitorConfiguration(qtApp);
+    systemMonitorConfiguration(screenList);
+    setWindowTitle("Display/Window Configuration Editor");
     createWidgets();
 }
 
-void SgctEdit::systemMonitorConfiguration(QApplication& qtApp) {
-    QList<QScreen*> screenList = qtApp.screens();
-    if (screenList.length() == 0) {
-        std::cerr << "Error: Qt reports no screens available." << std::endl;
-        return;
-    }
+void SgctEdit::systemMonitorConfiguration(const QList<QScreen*> screenList) {
     size_t nScreensManaged = std::min(screenList.length(), 2);
     for (size_t s = 0; s < nScreensManaged; ++s) {
         int actualWidth = std::max(screenList[s]->size().width(),
@@ -56,16 +69,13 @@ void SgctEdit::createWidgets() {
         layoutMonBox->addWidget(_monBox);
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
-
         _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         _monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
-
         addDisplayLayout(_monBox, layoutMainH);
     }
     {
         layoutMainV->addLayout(layoutMainH);
         _orientationWidget->addButtonToLayout(layoutMainV);
-
         _fileSupportWidget = new FileSupport(
             layoutMainV,
             _monitorSizeList,
@@ -111,9 +121,19 @@ std::string SgctEdit::saveFilename() {
 }
 
 SgctEdit::~SgctEdit() {
-    delete _orientationWidget;
-    delete _fileSupportWidget;
-    delete _displayWidget;
-    delete _displayLayout;
-    delete _displayFrame;
+    if (_orientationWidget) {
+        delete _orientationWidget;
+    }
+    if (_fileSupportWidget) {
+        delete _fileSupportWidget;
+    }
+    if (_displayWidget) {
+        delete _displayWidget;
+    }
+    if (_displayLayout) {
+        delete _displayLayout;
+    }
+    if (_displayFrame) {
+        delete _displayFrame;
+    }
 }

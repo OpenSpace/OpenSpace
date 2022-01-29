@@ -1,35 +1,52 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <QApplication>
 #include <QMainWindow>
 #include <QScreen>
 #include <string>
-
 #include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
 #include "sgctedit/display.h"
 
-
 Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
-                                             unsigned int nMaxWindows, QString* winColors)
+                                 const unsigned int nMaxWindows, const QString* winColors)
     : _monBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
     , _nMaxWindows(nMaxWindows)
     , _winColors(winColors)
 {
-    _addWindowButton = new QPushButton("Add Window >", this);
-    _removeWindowButton = new QPushButton("< Remove Window", this);
-
+    _addWindowButton = new QPushButton("Add Window", this);
+    _removeWindowButton = new QPushButton("Remove Window", this);
     _nMonitors = _monitorResolutions.size();
-
     //Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
+    connect(_addWindowButton, SIGNAL(released()), this, SLOT(addWindow()));
+    connect(_removeWindowButton, SIGNAL(released()), this, SLOT(removeWindow()));
     initializeLayout();
-
-    connect(_addWindowButton, SIGNAL(released()), this,
-            SLOT(addWindow()));
-    connect(_removeWindowButton, SIGNAL(released()), this,
-            SLOT(removeWindow()));
 }
 
 Display::~Display() {
@@ -54,16 +71,15 @@ Display::~Display() {
 void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
     _layoutMonButton = new QHBoxLayout();
-    _layoutMonButton->addStretch(1);
     _layoutMonButton->addWidget(_removeWindowButton);
-    _layoutMonButton->addWidget(_addWindowButton);
     _layoutMonButton->addStretch(1);
+    _layoutMonButton->addWidget(_addWindowButton);
     _layout->addLayout(_layoutMonButton);
     _layoutWindows = new QHBoxLayout();
     _layout->addStretch();
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
-        _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout(this));
+        _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout());
         _layoutWindowWrappers.push_back(new QWidget());
         _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
         _layoutWindows->addWidget(_layoutWindowWrappers.back());
@@ -82,7 +98,7 @@ std::vector<WindowControl*> Display::windowControls() {
     return _windowControl;
 }
 
-unsigned int Display::nWindows() {
+unsigned int Display::nWindows() const {
     return _nWindowsDisplayed;
 }
 
@@ -105,17 +121,10 @@ void Display::showWindows() {
         _layoutWindowWrappers[i]->setVisible(i < _nWindowsDisplayed);
     }
     for (unsigned int i = 0; i < _frameBorderLines.size(); ++i) {
-        if (i < (_nWindowsDisplayed - 1)) {
-            _frameBorderLines[i]->setVisible(true);
-        }
-        else {
-            _frameBorderLines[i]->setVisible(false);
-        }
+        _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
-    _removeWindowButton->setVisible(_nWindowsDisplayed > 1);
     _addWindowButton->setEnabled(_nWindowsDisplayed != _nMaxWindows);
-    _addWindowButton->setVisible(_nWindowsDisplayed != _nMaxWindows);
     for (auto w : _windowControl) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
@@ -130,7 +139,6 @@ void Display::initializeWindowControl() {
                 _nMonitors,
                 monitorNumForThisWindow,
                 _nWindowsAllocated,
-                _widgetDims,
                 _monitorResolutions,
                 _winColors,
                 this
@@ -160,7 +168,7 @@ void Display::initializeWindowControl() {
 }
 
 void Display::uncheckWebGuiOptions() {
-    for (auto w : _windowControl) {
+    for (WindowControl* w : _windowControl) {
         w->uncheckWebGuiOption();
     }
 }

@@ -1,5 +1,28 @@
-#include "sgctedit/monitorbox.h"
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
+#include "sgctedit/monitorbox.h"
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
                          unsigned int nWindows, QString* winColors)
@@ -23,21 +46,20 @@ void MonitorBox::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     QPen pen = painter.pen();
     painter.setPen(pen);
-
     paintWidgetBorder(painter, width(), height());
-    //Draw window out-of-bounds region(s)
+    //Draw window out-of-bounds region(s) first
     for (unsigned int i = 0; i < _nWindows; ++i) {
         paintWindowBeyondBounds(painter, i);
     }
     //Draw & fill monitors over the out-of-bounds regions
     paintMonitorBackgrounds(painter);
-    //Draw window(s)
+    //Draw window(s) over both out-of-bounds and monitors
     for (unsigned int i = 0; i < _nWindows; ++i) {
         paintWindow(painter, i);
     }
 }
 
-void MonitorBox::paintWidgetBorder(QPainter& painter, int width, int height) {
+void MonitorBox::paintWidgetBorder(QPainter& painter, const int width, const int height) {
     painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width - 1, height - 1, 10, 10);
 }
@@ -61,7 +83,7 @@ void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
     }
 }
 
-void MonitorBox::paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx) {
+void MonitorBox::paintWindowBeyondBounds(QPainter& painter, const unsigned int winIdx) {
     painter.setBrush(Qt::BDiagPattern);
     setPenSpecificToWindow(painter, winIdx, false);
     if (winIdx <= _windowRendering.size()) {
@@ -71,7 +93,7 @@ void MonitorBox::paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx)
     painter.setBrush(Qt::NoBrush);
 }
 
-void MonitorBox::paintWindow(QPainter& painter, unsigned int winIdx) {
+void MonitorBox::paintWindow(QPainter& painter, const unsigned int winIdx) {
     setPenSpecificToWindow(painter, winIdx, true);
     if (winIdx <= _windowRendering.size()) {
         painter.drawRect(_windowRendering[winIdx]);
@@ -84,17 +106,15 @@ void MonitorBox::paintWindow(QPainter& painter, unsigned int winIdx) {
     }
 }
 
-void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int winIdx) {
+void MonitorBox::paintWindowNumber(QPainter& painter, const unsigned int winIdx) {
     QPointF textPos = QPointF(_windowRendering[winIdx].left() + 5,
         _windowRendering[winIdx].bottom() - 5);
-    textPos.setX(std::clamp(textPos.x(), 0.0,
-        _monitorWidgetSize.width() - 10));
-    textPos.setY(std::clamp(textPos.y(), 0.0,
-        _monitorWidgetSize.height() - 10));
+    textPos.setX(std::clamp(textPos.x(), 0.0, _monitorWidgetSize.width() - 10));
+    textPos.setY(std::clamp(textPos.y(), 0.0, _monitorWidgetSize.height() - 10));
     painter.drawText(textPos, QString::fromStdString(std::to_string(winIdx + 1)));
 }
 
-void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
+void MonitorBox::setPenSpecificToWindow(QPainter& painter, const unsigned int windowIdx,
                                                                        bool visibleBorder)
 {
     int penWidth = (visibleBorder) ? 1 : -1;
@@ -137,7 +157,9 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
     this->update();
 }
 
-void MonitorBox::computeScaledResolution_landscape(float aspectRatio, float maxWidth) {
+void MonitorBox::computeScaledResolution_landscape(const float aspectRatio,
+                                                                    const float maxWidth)
+{
     _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
     float virtualWidth = _monitorWidgetSize.width()
         * (1.0 - _marginFractionOfWidgetSize * 2.0);
@@ -152,7 +174,9 @@ void MonitorBox::computeScaledResolution_landscape(float aspectRatio, float maxW
     }
 }
 
-void MonitorBox::computeScaledResolution_portrait(float aspectRatio, float maxHeight) {
+void MonitorBox::computeScaledResolution_portrait(const float aspectRatio,
+                                                                    const float maxHeight)
+{
     _marginWidget = _monitorWidgetSize.height() * _marginFractionOfWidgetSize;
     float virtualHeight = _monitorWidgetSize.height()
         * (1.0 - _marginFractionOfWidgetSize * 2.0);
@@ -172,11 +196,6 @@ void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
         _nWindows = nWindows;
         this->update();
     }
-}
-
-void printWindowDims(QRectF& r) {
-    std::cout << r.width() << "x" << r.height() << " + " << r.x() << "," << r.y();
-    std::cout << std::endl;
 }
 
 void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,

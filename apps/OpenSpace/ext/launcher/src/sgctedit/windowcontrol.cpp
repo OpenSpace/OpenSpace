@@ -1,10 +1,34 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include "sgctedit/display.h"
 #include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
 
 WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
-             unsigned int windowIndex, QRect& widgetDims, std::vector<QRect>& monitorDims,
-                                                      QString* winColors, QWidget *parent)
+                          const unsigned int windowIndex, std::vector<QRect>& monitorDims,
+                                                const QString* winColors, QWidget *parent)
     : QWidget(parent)
     , _nMonitors(nMonitors)
     , _monIndex(monitorIndex)
@@ -21,14 +45,10 @@ WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
         QString::fromUtf8(std::to_string(int(_windowDims.x())).c_str()), parent);
     _offset_y = new QLineEdit(
         QString::fromUtf8(std::to_string(int(_windowDims.y())).c_str()), parent);
-    QIntValidator* _validatorSize_x
-        = new QIntValidator(10, _maxWindowSizePixels);
-    QIntValidator* _validatorSize_y
-        = new QIntValidator(10, _maxWindowSizePixels);
-    QIntValidator* _validatorOffset_x
-        = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
-    QIntValidator* _validatorOffset_y
-        = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
+    _validatorSize_x = new QIntValidator(10, _maxWindowSizePixels);
+    _validatorSize_y = new QIntValidator(10, _maxWindowSizePixels);
+    _validatorOffset_x = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
+    _validatorOffset_y = new QIntValidator(-_maxWindowSizePixels, _maxWindowSizePixels);
     _size_x->setValidator(_validatorSize_x);
     _size_y->setValidator(_validatorSize_y);
     _offset_x->setValidator(_validatorOffset_x);
@@ -41,7 +61,7 @@ WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
     _fullscreenButton = new QPushButton(this);
     _fullscreenButton->setText("Set to Fullscreen");
     _checkBoxWindowDecor = new QCheckBox("Window Decoration", this);
-    _checkBoxWindowDecor->setChecked(Qt::CheckState::Checked);
+    _checkBoxWindowDecor->setCheckState(Qt::CheckState::Checked);
     _checkBoxWebGui = new QCheckBox("WebGUI only this window", this);
     _checkBoxSpoutOutput = new QCheckBox("Spout Output", this);
     _comboProjection = new QComboBox(this);
@@ -79,7 +99,7 @@ WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
     connect(_fullscreenButton, SIGNAL(released()), this, SLOT(onFullscreenClicked()));
 }
 
-QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
+QVBoxLayout* WindowControl::initializeLayout() {
     _layoutFullWindow = new QVBoxLayout();
     //Window size
     _layoutWindowCtrl = new QVBoxLayout();
@@ -219,7 +239,7 @@ QVBoxLayout* WindowControl::initializeLayout(QWidget* parentWidget) {
     return _layoutFullWindow;
 }
 
-void WindowControl::showWindowLabel(bool show) {
+void WindowControl::showWindowLabel(const bool show) {
     _labelWinNum->setVisible(show);
 }
 
@@ -334,67 +354,16 @@ void WindowControl::onMonitorChanged(int newSelection) {
 }
 
 void WindowControl::onProjectionChanged(int newSelection) {
-    switch (newSelection) {
-    case ProjectionIndeces::Planar:
-        _comboQuality->setVisible(false);
-        _labelQuality->setVisible(false);
-        _labelFovH->setVisible(true);
-        _lineFovH->setVisible(true);
-        _labelFovV->setVisible(true);
-        _lineFovV->setVisible(true);
-        _labelHeightOffset->setVisible(false);
-        _lineHeightOffset->setVisible(false);
-        _checkBoxSpoutOutput->setVisible(false);
-        break;
-
-    case ProjectionIndeces::Fisheye:
-        _comboQuality->setVisible(true);
-        _labelQuality->setVisible(true);
-        _labelFovH->setVisible(false);
-        _lineFovH->setVisible(false);
-        _labelFovV->setVisible(false);
-        _lineFovV->setVisible(false);
-        _labelHeightOffset->setVisible(false);
-        _lineHeightOffset->setVisible(false);
-        _checkBoxSpoutOutput->setVisible(true);
-        break;
-
-    case ProjectionIndeces::Spherical_Mirror:
-        _comboQuality->setVisible(true);
-        _labelQuality->setVisible(true);
-        _labelFovH->setVisible(false);
-        _lineFovH->setVisible(false);
-        _labelFovV->setVisible(false);
-        _lineFovV->setVisible(false);
-        _labelHeightOffset->setVisible(false);
-        _lineHeightOffset->setVisible(false);
-        _checkBoxSpoutOutput->setVisible(false);
-        break;
-
-    case ProjectionIndeces::Cylindrical:
-        _comboQuality->setVisible(true);
-        _labelQuality->setVisible(true);
-        _labelFovH->setVisible(false);
-        _lineFovH->setVisible(false);
-        _labelFovV->setVisible(false);
-        _lineFovV->setVisible(false);
-        _labelHeightOffset->setVisible(true);
-        _lineHeightOffset->setVisible(true);
-        _checkBoxSpoutOutput->setVisible(false);
-        break;
-
-    case ProjectionIndeces::Equirectangular:
-        _comboQuality->setVisible(true);
-        _labelQuality->setVisible(true);
-        _labelFovH->setVisible(false);
-        _lineFovH->setVisible(false);
-        _labelFovV->setVisible(false);
-        _lineFovV->setVisible(false);
-        _labelHeightOffset->setVisible(false);
-        _lineHeightOffset->setVisible(false);
-        _checkBoxSpoutOutput->setVisible(true);
-        break;
-    }
+    _comboQuality->setVisible(newSelection != ProjectionIndeces::Planar);
+    _labelQuality->setVisible(newSelection != ProjectionIndeces::Planar);
+    _labelFovH->setVisible(newSelection == ProjectionIndeces::Planar);
+    _lineFovH->setVisible(newSelection == ProjectionIndeces::Planar);
+    _labelFovV->setVisible(newSelection == ProjectionIndeces::Planar);
+    _lineFovV->setVisible(newSelection == ProjectionIndeces::Planar);
+    _labelHeightOffset->setVisible(newSelection == ProjectionIndeces::Cylindrical);
+    _lineHeightOffset->setVisible(newSelection == ProjectionIndeces::Cylindrical);
+    _checkBoxSpoutOutput->setVisible(newSelection == ProjectionIndeces::Fisheye
+        || newSelection == ProjectionIndeces::Equirectangular);
 }
 
 void WindowControl::setDimensions(const QRectF& dimensions) {

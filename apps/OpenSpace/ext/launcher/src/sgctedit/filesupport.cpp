@@ -1,12 +1,36 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2022                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include "sgctedit/filesupport.h"
 
 FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
                          Display* display, Orientation* orientation,
                          std::vector<sgct::config::Window>& windowList,
                          sgct::config::Cluster& cluster, std::function<void(bool)> cb)
-    : _monitors(monitorList)
-    , _displayWidget(display)
+    : _displayWidget(display)
     , _orientationWidget(orientation)
+    , _monitors(monitorList)
     , _cluster(cluster)
     , _windowList(windowList)
     , _finishedCallback(cb)
@@ -21,13 +45,11 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     layoutFilename->addWidget(labelFilename);
     layoutFilename->addWidget(_lineFilename);
     layoutFilename->addStretch(1);
-
     _layoutButtonBox = new QHBoxLayout;
     _saveButton = new QPushButton("Save");
     _saveButton->setToolTip("Save global orientation changes");
     _layoutButtonBox->addStretch(1);
     _layoutButtonBox->addWidget(_saveButton);
-
     _cancelButton = new QPushButton("Cancel");
     _cancelButton->setToolTip("Cancel global orientation changes");
     _layoutButtonBox->addWidget(_cancelButton);
@@ -70,70 +92,34 @@ bool FileSupport::isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims)
     return ((mDims.x == wDims.x) && (mDims.y == wDims.y));
 }
 
-int FileSupport::findGuiWindow() {
+bool FileSupport::findGuiWindow(unsigned int& foundWindowIndex) {
     unsigned int windowIndex = 0;
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
         if (_displayWidget->windowControls()[w]->isGuiWindow()) {
-            return windowIndex;
+            foundWindowIndex = windowIndex;
+            return true;
         }
         windowIndex++;
     }
-    return -1;
+    return false;
 }
 
 void FileSupport::saveWindows() {
-    int webGuiWindowIndex = findGuiWindow();
-    bool isOneOfWindowsSetAsWebGui = (webGuiWindowIndex >= 0);
-
     unsigned int windowIndex = 0;
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
         WindowControl* wCtrl = _displayWidget->windowControls()[w];
         _windowList.push_back(sgct::config::Window());
-        _windowList.back().viewports.push_back(sgct::config::Viewport());
-        _windowList.back().viewports.back().isTracked = true;
-        _windowList.back().viewports.back().position = {0.0, 0.0};
-        _windowList.back().viewports.back().size = {1.0, 1.0};
-        int projectionIdx
-            = wCtrl->projectionSelectedIndex();
-        bool isSpoutSelected
-            = wCtrl->isSpoutSelected();
-
+        saveWindowsViewports();
         saveProjectionInformation(
-            isSpoutSelected,
-            projectionIdx,
+            wCtrl->isSpoutSelected(),
+            wCtrl->projectionSelectedIndex(),
             wCtrl,
             _windowList.back().viewports.back()
         );
-        _windowList.back().size = wCtrl->windowSize();
-        _windowList.back().pos = {
-            _monitors[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
-            _monitors[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
-        };
+        saveWindowsDimensions(wCtrl);
         _windowList.back().isDecorated = wCtrl->isDecorated();
-        bool isFullScreen = isWindowFullscreen(
-            wCtrl->monitorNum(),
-            wCtrl->windowSize()
-        );
-        if (isFullScreen) {
-            _windowList.back().isFullScreen = true;
-        }
-        if (isOneOfWindowsSetAsWebGui) {
-            if (windowIndex == webGuiWindowIndex) {
-                _windowList.back().draw2D = true;
-                _windowList.back().draw3D = false;
-                _windowList.back().viewports.back().isTracked = false;
-                _windowList.back().tags.push_back("GUI");
-            }
-            else {
-                _windowList.back().draw2D = false;
-                _windowList.back().draw3D = true;
-            }
-        }
-        else {
-            _windowList.back().draw2D = true;
-            _windowList.back().draw3D = true;
-            _windowList.back().viewports.back().isTracked = true;
-        }
+        saveWindowsFullScreen(wCtrl);
+        saveWindowsWebGui(windowIndex);
         if (!wCtrl->windowName().empty()) {
             _windowList.back().name = wCtrl->windowName();
         }
@@ -141,88 +127,135 @@ void FileSupport::saveWindows() {
     }
 }
 
+void FileSupport::saveWindowsViewports() {
+    _windowList.back().viewports.push_back(sgct::config::Viewport());
+    _windowList.back().viewports.back().isTracked = true;
+    _windowList.back().viewports.back().position = {0.0, 0.0};
+    _windowList.back().viewports.back().size = {1.0, 1.0};
+}
+
+void FileSupport::saveWindowsDimensions(WindowControl* wCtrl) {
+    _windowList.back().size = wCtrl->windowSize();
+    _windowList.back().pos = {
+        _monitors[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
+        _monitors[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
+    };
+}
+
+void FileSupport::saveWindowsWebGui(unsigned int wIdx) {
+    _windowList.back().draw2D = true;
+    _windowList.back().draw3D = true;
+    _windowList.back().viewports.back().isTracked = true;
+    unsigned int webGuiWindowIndex;
+    bool isOneOfWindowsSetAsWebGui = findGuiWindow(webGuiWindowIndex);
+    if (isOneOfWindowsSetAsWebGui) {
+        if (wIdx == webGuiWindowIndex) {
+            _windowList.back().viewports.back().isTracked = false;
+            _windowList.back().tags.push_back("GUI");
+        }
+        _windowList.back().draw2D = (wIdx == webGuiWindowIndex);
+        _windowList.back().draw3D = !_windowList.back().draw2D;
+    }
+}
+
+void FileSupport::saveWindowsFullScreen(WindowControl* wCtrl) {
+    bool isFullScreen = isWindowFullscreen(
+        wCtrl->monitorNum(),
+        wCtrl->windowSize()
+    );
+    if (isFullScreen) {
+        _windowList.back().isFullScreen = true;
+    }
+}
+
 void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projectionIndex,
                              WindowControl* winControl, sgct::config::Viewport& viewport)
 {
     if (isSpoutSelected) {
-        sgct::config::SpoutOutputProjection projection;
-        switch(projectionIndex) {
-            case WindowControl::ProjectionIndeces::Fisheye:
-                projection.mapping
-                    = sgct::config::SpoutOutputProjection::Mapping::Fisheye;
-                break;
-
-            case WindowControl::ProjectionIndeces::Equirectangular:
-            default:
-                projection.mapping
-                    = sgct::config::SpoutOutputProjection::Mapping::Equirectangular;
-                break;
-        }
-        projection.quality = winControl->qualitySelectedValue();
-        projection.mappingSpoutName = "OpenSpace";
-        viewport.projection = std::move(projection);
+        saveProjection_Spout(projectionIndex, winControl, viewport);
     }
     else {
-        switch(projectionIndex) {
-            case WindowControl::ProjectionIndeces::Fisheye:
-                {
-                    sgct::config::FisheyeProjection projection;
-                    projection.quality = winControl->qualitySelectedValue();
-                    projection.fov = 180.0;
-                    projection.tilt = 0.0;
-                    viewport.projection = std::move(projection);
-                }
-                break;
+        saveProjection_NonSpout(projectionIndex, winControl, viewport);
+    }
+}
 
-            case WindowControl::ProjectionIndeces::Spherical_Mirror:
-                {
-                    sgct::config::SphericalMirrorProjection projection;
-                    projection.quality = winControl->qualitySelectedValue();
-                    viewport.projection = std::move(projection);
-                }
-                break;
+void FileSupport::saveProjection_Spout(int projectionIndex, WindowControl* winControl,
+                                                         sgct::config::Viewport& viewport)
+{
+    sgct::config::SpoutOutputProjection projection;
+    switch(projectionIndex) {
+        case WindowControl::ProjectionIndeces::Fisheye:
+            projection.mapping
+                = sgct::config::SpoutOutputProjection::Mapping::Fisheye;
+            break;
 
-            case WindowControl::ProjectionIndeces::Cylindrical:
-                {
-                    sgct::config::CylindricalProjection projection;
-                    projection.quality = winControl->qualitySelectedValue();
-                    projection.heightOffset = winControl->heightOffset();
-                    viewport.projection = std::move(projection);
-                }
-                break;
+        case WindowControl::ProjectionIndeces::Equirectangular:
+        default:
+            projection.mapping
+                = sgct::config::SpoutOutputProjection::Mapping::Equirectangular;
+            break;
+    }
+    projection.quality = winControl->qualitySelectedValue();
+    projection.mappingSpoutName = "OpenSpace";
+    viewport.projection = std::move(projection);
+}
 
-            case WindowControl::ProjectionIndeces::Equirectangular:
-                {
-                    sgct::config::EquirectangularProjection projection;
-                    projection.quality = winControl->qualitySelectedValue();
-                    viewport.projection = std::move(projection);
-                }
-                break;
+void FileSupport::saveProjection_NonSpout(int projectionIndex, WindowControl* winControl,
+                                                         sgct::config::Viewport& viewport)
+{
+    switch(projectionIndex) {
+        case WindowControl::ProjectionIndeces::Fisheye:
+            {
+                sgct::config::FisheyeProjection projection;
+                projection.quality = winControl->qualitySelectedValue();
+                projection.fov = 180.0;
+                projection.tilt = 0.0;
+                viewport.projection = std::move(projection);
+            }
+            break;
 
-            case WindowControl::ProjectionIndeces::Planar:
-            default:
-                {
-                    // The negative values for left & down are according to sgct's
-                    // convection for importing
-                    sgct::config::PlanarProjection projection;
-                    projection.fov.right = winControl->fovH() / 2.0;
-                    projection.fov.left = -projection.fov.right;
-                    projection.fov.up = winControl->fovV() / 2.0;
-                    projection.fov.down = -projection.fov.up;
-                    viewport.projection = std::move(projection);
-                }
-                break;
-        }
+        case WindowControl::ProjectionIndeces::Spherical_Mirror:
+            {
+                sgct::config::SphericalMirrorProjection projection;
+                projection.quality = winControl->qualitySelectedValue();
+                viewport.projection = std::move(projection);
+            }
+            break;
+
+        case WindowControl::ProjectionIndeces::Cylindrical:
+            {
+                sgct::config::CylindricalProjection projection;
+                projection.quality = winControl->qualitySelectedValue();
+                projection.heightOffset = winControl->heightOffset();
+                viewport.projection = std::move(projection);
+            }
+            break;
+
+        case WindowControl::ProjectionIndeces::Equirectangular:
+            {
+                sgct::config::EquirectangularProjection projection;
+                projection.quality = winControl->qualitySelectedValue();
+                viewport.projection = std::move(projection);
+            }
+            break;
+
+        case WindowControl::ProjectionIndeces::Planar:
+        default:
+            {
+                // The negative values for left & down are according to sgct's convention
+                sgct::config::PlanarProjection projection;
+                projection.fov.right = winControl->fovH() / 2.0;
+                projection.fov.left = -projection.fov.right;
+                projection.fov.up = winControl->fovV() / 2.0;
+                projection.fov.down = -projection.fov.up;
+                viewport.projection = std::move(projection);
+            }
+            break;
     }
 }
 
 void FileSupport::filenameEdited(const QString& newString) {
-    if (newString.isEmpty()) {
-        _saveButton->setEnabled(false);
-    }
-    else {
-        _saveButton->setEnabled(true);
-    }
+    _saveButton->setEnabled(!newString.isEmpty());
 }
 
 std::string FileSupport::saveFilename() {
