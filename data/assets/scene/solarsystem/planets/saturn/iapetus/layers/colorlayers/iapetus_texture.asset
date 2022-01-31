@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../iapetus").Iapetus.Identifier
 
 local texturesPath = asset.syncedResource({
@@ -12,11 +13,7 @@ local layer = {
   FilePath = texturesPath .. "iapetus.jpg",
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {

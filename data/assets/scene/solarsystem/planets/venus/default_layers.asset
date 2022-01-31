@@ -15,7 +15,7 @@ end)
 
 asset.meta = {
   Name = "Default Venus Layers",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Default Venus layers are: Venus Magellan Mosaic and Venus Magellan
     DEM]],
   Author = "OpenSpace Team",

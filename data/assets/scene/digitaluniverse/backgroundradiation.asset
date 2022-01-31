@@ -130,7 +130,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 asset.meta = {
   Name = "Background Radiation",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Various AllSky images for the Milky Way and observable Universe.
       Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
       Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
@@ -138,6 +138,5 @@ asset.meta = {
       Finkbeiner (Princeton)]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"WMAP", "CBE", "Planck", "HAlpha"}
+  License = "AMNH Digital Universe"
 }

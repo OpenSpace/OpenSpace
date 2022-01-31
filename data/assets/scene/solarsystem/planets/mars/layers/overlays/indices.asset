@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
@@ -5,8 +6,13 @@ local layer = {
   Type = "TileIndexTileLayer"
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "Overlays")
 
-asset.export("layer", layer)
+asset.meta = {
+  Name = "Mars Indices",
+  Version = "1.0",
+  Description = [[ This asset supplies a tile index layer for the Mars globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -205,6 +205,12 @@ void Asset::startSynchronizations() {
     }
 }
 
+void Asset::addIdentifier(std::string identifier) {
+    if (_metaInformation.has_value()) {
+        _metaInformation->identifiers.push_back(std::move(identifier));
+    }
+}
+
 void Asset::load(Asset* parent) {
     if (!isLoaded()) {
         const bool loaded = _manager.loadAsset(this, parent);

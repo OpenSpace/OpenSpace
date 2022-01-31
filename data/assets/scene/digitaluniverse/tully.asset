@@ -115,11 +115,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { tullyPoints, tullyImages }
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "3.0",
+  Version = "3.1",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images.]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"TullyGalaxies" , "TullyGalaxiesImages"}
+  License = "AMNH Digital Universe"
 }

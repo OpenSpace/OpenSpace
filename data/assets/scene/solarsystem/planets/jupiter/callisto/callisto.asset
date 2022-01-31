@@ -58,10 +58,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Callisto })
 
 asset.meta = {
   Name = "Callisto",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Callisto globe with labels.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Callisto"}
+  License = "MIT license"
 }

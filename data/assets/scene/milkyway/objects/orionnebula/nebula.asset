@@ -72,7 +72,6 @@ local OrionNebulaModel = {
   GUI = {
     Name = "Orion Nebula Model",
     Path = "/Milky Way/Orion",
-    Hidden = true,
     Description = "Orion Nebula 3D model. See Orion Nebula for description."
   }
 }
@@ -145,13 +144,11 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 asset.meta = {
   Name = "Orion Nebula Model",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Digital Universe asset for the Orion nebula 3D model. This asset
     contains seperate models for the nebula, proplyds and shocks. To be used in
     conjunction with orion star cluster. Use orionnebula.asset to include both.]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OrionNebulaHolder", "OrionNebulaModel", "OrionNebulaProplydsModel",
-    "OrionNebulaShocksModel"}
+  License = "AMNH Digital Universe"
 }

@@ -31,11 +31,10 @@ assetHelper.registerSceneGraphNodesAndExport(
 
 asset.meta = {
   Name = "Triton",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Procedural Globe asset containing Neptune's moon: Triton.
     A blank globe and SPICE trail are generated for the moon.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Triton"}
+  License = "MIT license"
 }

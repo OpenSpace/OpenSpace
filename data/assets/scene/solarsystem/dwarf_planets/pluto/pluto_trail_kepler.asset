@@ -43,8 +43,7 @@ asset.meta = {
     JPL Horizons.]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=pluto",
-  License = "JPL/NASA",
-  Identifiers = {"PlutoKeplerianTrail"}
+  License = "JPL/NASA"
 }
 
 

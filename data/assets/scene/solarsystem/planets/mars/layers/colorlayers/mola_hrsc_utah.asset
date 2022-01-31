@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
@@ -10,20 +11,15 @@ local layer = {
     https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "MOLA HRSC [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Colorzied elevation data for Mars. This map is hosted on the
     OpenSpace server in Sweden.]],
   Author = "OpenSpace Team",
   URL = "http://www.openspaceproject.com",
-  License = "NASA/PDS",
-  Identifiers = {"MOLA_HRSC_Sweden"}
+  License = "NASA/PDS"
 }

@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
@@ -8,20 +9,15 @@ local layer = {
     This map is hosted on the OpenSpace servers in Sweden]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "Blue Marble Next Generation (Sweden)",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
     This map is hosted on the OpenSpace servers in Sweden]],
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
-  License = "NASA",
-  Identifiers = {"BMNG_Sweden"}
+  License = "NASA"
 }

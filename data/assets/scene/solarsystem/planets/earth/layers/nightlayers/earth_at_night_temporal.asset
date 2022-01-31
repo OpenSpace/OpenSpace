@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer =  {
@@ -38,20 +39,15 @@ local layer =  {
     temporal resolution is daily. (Description from NASA Worldview)]],
 }
 
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "NightLayers")
 
 
 asset.meta = {
   Name = "Earth at Night (Temporal)",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Temporal layer for earth with daily night image. This layer is a GIBS
     hosted layer created with openspace.globebrowsing.createTemporalGibsGdalXml ]],
   Author = "OpenSpace Team",
   URL = "https://worldview.earthdata.nasa.gov/?l=VIIRS_SNPP_DayNightBand_ENCC",
-  License = "NASA",
-  Identifiers = {"Earth_at_Night_Temporal"}
+  License = "NASA"
 }

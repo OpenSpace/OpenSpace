@@ -65,10 +65,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalacti
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Digital Universe asset for constellation lines]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Constellations", "ConstellationsExtragalactic"}
+  License = "AMNH Digital Universe"
 }

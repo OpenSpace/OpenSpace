@@ -58,10 +58,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "2dF Galaxies",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for the The Two-degree Field (2dF) Survey.]],
   Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"2dF"}
+  License = "AMNH Digital Universe"
 }

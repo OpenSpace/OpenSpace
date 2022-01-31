@@ -62,10 +62,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Moon globe with labels. ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Moon"}
+  License = "MIT license"
 }

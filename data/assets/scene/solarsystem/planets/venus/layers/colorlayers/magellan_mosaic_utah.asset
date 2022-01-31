@@ -1,3 +1,4 @@
+local assetHelper = asset.require('util/asset_helper')
 local globeIdentifier = asset.require("../../venus").Venus.Identifier
 
 local layer = {
@@ -26,11 +27,7 @@ local layer = {
   }
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
@@ -41,6 +38,5 @@ asset.meta = {
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
     "Venus_Magellan_LeftLook_mosaic_global_75m",
-  License = "NASA/PDS",
-  Identifiers = {"Magellan_Mosaic_Utah"}
+  License = "NASA/PDS"
 }

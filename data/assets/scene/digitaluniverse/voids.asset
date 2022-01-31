@@ -45,10 +45,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "Voids",
-  Version = "2.0",
+  Version = "2.1",
   Author = "Brian Abbott (AMNH)",
   Description = [[Digital Universe asset for Cosmic voids.]],
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Voids"}
+  License = "AMNH Digital Universe"
 }

@@ -31,11 +31,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrail })
 
 asset.meta = {
   Name = "Mercury Trail",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Main trail for Mercury. Data from NASA Spice (see
     base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MercuryTrail"}
+  License = "MIT license"
 }

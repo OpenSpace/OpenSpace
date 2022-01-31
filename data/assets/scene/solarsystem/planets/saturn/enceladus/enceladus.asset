@@ -57,10 +57,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
 
 asset.meta = {
     Name = "Enceladus",
-    Version = "1.0",
+    Version = "1.1",
     Description = [[ Enceladus globe with labels and map layers]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Enceladus"}
+    License = "MIT license"
 }

@@ -50,10 +50,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 asset.meta = {
   Name = "Quasars",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for Quasars.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Quasars"}
+  License = "AMNH Digital Universe"
 }

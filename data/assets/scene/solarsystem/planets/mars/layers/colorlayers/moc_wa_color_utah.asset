@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local fallbackLayer = asset.require("./fallbacks/mars_texture").layer
@@ -17,20 +18,15 @@ local layer = {
     https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "MOC WA Color [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Main color map layer for Mars. This map is hosted
     on the OpenSpace server in Utah.]],
   Author = "OpenSpace Team",
   URL = "http://www.openspaceproject.com",
-  License = "NASA/PDS",
-  Identifiers = {"MOC_WA_Color_Utah"}
+  License = "NASA/PDS"
 }
