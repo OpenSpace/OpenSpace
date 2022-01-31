@@ -40,15 +40,6 @@ local colorbar = {
   CartesianPosition = { 0.85, 0.0, -2.0 }
 }
 
-local gfdl_sst_colorbar = {
-  Identifier = Identifier,
-  Name = Name,
-  Type = "ScreenSpaceImageLocal",
-  TexturePath = syncedDirectory .. "gfdl_sst_colorbar.png",
-  FaceCamera = false,
-  CartesianPosition = { 0.0, -0.5, -2.0 }
-}
-
 asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
@@ -57,13 +48,11 @@ asset.onInitialize(function()
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
   openspace.addScreenSpaceRenderable(colorbar);  
-  openspace.addScreenSpaceRenderable(gfdl_sst_colorbar);  
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
   openspace.removeScreenSpaceRenderable(colorbar.Identifier)
-  openspace.removeScreenSpaceRenderable(gfdl_sst_colorbar.Identifier)
 end)
 
 
