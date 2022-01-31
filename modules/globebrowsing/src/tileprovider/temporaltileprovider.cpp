@@ -165,6 +165,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation TemporalTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
+}
+
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
     , _useFixedTime(UseFixedTimeInfo, false)

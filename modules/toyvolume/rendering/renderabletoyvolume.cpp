@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable ToyVolume";
+    constexpr const char* _loggerCat = "RenderableToyVolume";
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",

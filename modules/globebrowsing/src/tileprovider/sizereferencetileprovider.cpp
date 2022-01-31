@@ -40,6 +40,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation SizeReferenceTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_sizereferencetileprovider");
+}
+
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {

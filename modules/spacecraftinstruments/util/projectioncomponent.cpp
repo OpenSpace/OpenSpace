@@ -162,7 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ProjectionComponent::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_projectioncomponent");
+    return codegen::doc<Parameters>("spacecraftinstruments_projectioncomponent");
 }
 
 ProjectionComponent::ProjectionComponent()

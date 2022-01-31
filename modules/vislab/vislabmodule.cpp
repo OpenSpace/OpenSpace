@@ -25,6 +25,7 @@
 #include <modules/vislab/vislabmodule.h>
 
 #include <modules/vislab/rendering/renderabledistancelabel.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
@@ -38,6 +39,12 @@ void VisLabModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(renderableFactory, "No renderable factory existed");
 
     renderableFactory->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
+}
+
+std::vector<documentation::Documentation>VisLabModule::documentations() const {
+    return {
+        RenderableDistanceLabel::Documentation()
+    };
 }
 
 } // namespace openspace

@@ -44,6 +44,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation SingleImageProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_singleimageprovider");
+}
+
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _filePath(FilePathInfo)
 {

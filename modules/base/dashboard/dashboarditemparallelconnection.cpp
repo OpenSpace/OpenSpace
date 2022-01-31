@@ -38,6 +38,12 @@
 
 namespace openspace {
 
+documentation::Documentation DashboardItemParallelConnection::Documentation() {
+    documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.id = "base_dashboarditem_parallelconnection";
+    return doc;
+}
+
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)

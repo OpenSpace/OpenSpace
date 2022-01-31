@@ -37,8 +37,8 @@ public:
 
      void update(const UpdateData& data) override;
      static documentation::Documentation Documentation();
-private:
 
+private:
      properties::StringProperty _nodelineId;
      properties::IntProperty _distanceUnit;
      properties::StringProperty _customUnitDescriptor;

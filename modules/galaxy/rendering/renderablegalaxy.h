@@ -54,6 +54,8 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void renderPoints(const RenderData& data);
     void renderBillboards(const RenderData& data);

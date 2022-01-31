@@ -185,7 +185,6 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
-            _layers.erase(it);
             properties::PropertyOwner* layerGroup = it->get()->owner();
             properties::PropertyOwner* layerManager = layerGroup->owner();
             properties::PropertyOwner* globe = layerManager->owner();
@@ -195,6 +194,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
                 layerGroup->identifier(),
                 it->get()->identifier()
             );
+            _layers.erase(it);
             update();
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);

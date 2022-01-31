@@ -40,6 +40,8 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
+    static documentation::Documentation Documentation();
+
 private:
     Ellipsoid _ellipsoid;
 };

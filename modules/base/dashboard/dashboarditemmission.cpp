@@ -55,6 +55,12 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation DashboardItemMission::Documentation() {
+    documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.id = "base_dashboarditem_mission";
+    return doc;
+}
+
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
 {}

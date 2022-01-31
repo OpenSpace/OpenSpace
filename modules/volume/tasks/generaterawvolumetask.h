@@ -38,7 +38,7 @@ public:
     GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
+    static documentation::Documentation Documentation();
 
 private:
     std::filesystem::path _rawVolumeOutputPath;

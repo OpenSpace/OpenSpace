@@ -148,6 +148,7 @@ private:
     // Reset camera direction to the aim node.
     properties::TriggerProperty _retargetAim;
 
+    properties::BoolProperty _followAnchorNodeRotation;
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
 
