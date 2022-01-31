@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
 -- synced directories

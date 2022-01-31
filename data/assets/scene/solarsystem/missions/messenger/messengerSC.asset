@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
@@ -58,7 +57,19 @@ local RotationMatrix = {
 }
 
 
-local LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+local LightSources = {
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
+}
 
 local Messenger = {
   Identifier = "Messenger",
@@ -187,12 +198,37 @@ local MessengerTrail = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Messenger,
-  MessengerProbeBlack,
-  MessengerProbeFoil,
-  MessengerProbeHeatShield,
-  MessengerProbeMetal,
-  MessengerProbePanels,
-  MessengerTrail
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Messenger)
+  asset.registerIdentifierWithMeta(Messenger.Identifier)
+  openspace.addSceneGraphNode(MessengerProbeBlack)
+  asset.registerIdentifierWithMeta(MessengerProbeBlack.Identifier)
+  openspace.addSceneGraphNode(MessengerProbeFoil)
+  asset.registerIdentifierWithMeta(MessengerProbeFoil.Identifier)
+  openspace.addSceneGraphNode(MessengerProbeHeatShield)
+  asset.registerIdentifierWithMeta(MessengerProbeHeatShield.Identifier)
+  openspace.addSceneGraphNode(MessengerProbeMetal)
+  asset.registerIdentifierWithMeta(MessengerProbeMetal.Identifier)
+  openspace.addSceneGraphNode(MessengerProbePanels)
+  asset.registerIdentifierWithMeta(MessengerProbePanels.Identifier)
+  openspace.addSceneGraphNode(MessengerTrail)
+  asset.registerIdentifierWithMeta(MessengerTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MessengerTrail.Identifier)
+  openspace.removeSceneGraphNode(MessengerProbePanels.Identifier)
+  openspace.removeSceneGraphNode(MessengerProbeMetal.Identifier)
+  openspace.removeSceneGraphNode(MessengerProbeHeatShield.Identifier)
+  openspace.removeSceneGraphNode(MessengerProbeFoil.Identifier)
+  openspace.removeSceneGraphNode(MessengerProbeBlack.Identifier)
+  openspace.removeSceneGraphNode(Messenger.Identifier)
+end)
+    
+asset.export(Messenger.Identifier, Messenger)
+asset.export(MessengerProbeBlack.Identifier, MessengerProbeBlack)
+asset.export(MessengerProbeFoil.Identifier, MessengerProbeFoil)
+asset.export(MessengerProbeHeatShield.Identifier, MessengerProbeHeatShield)
+asset.export(MessengerProbeMetal.Identifier, MessengerProbeMetal)
+asset.export(MessengerProbePanels.Identifier, MessengerProbePanels)
+asset.export(MessengerTrail.Identifier, MessengerTrail)

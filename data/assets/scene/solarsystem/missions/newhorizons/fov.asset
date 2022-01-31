@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 
 
@@ -368,7 +367,7 @@ local Rex = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Lorri,
   RalphLeisa,
   RalphMvicPan1,
@@ -381,4 +380,22 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   AliceAirglow,
   AliceSoc,
   Rex
-})
+}
+
+asset.onInitialize(function ()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier);
+  end
+end)
+
+asset.onDeinitialize(function ()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
+
+end)
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

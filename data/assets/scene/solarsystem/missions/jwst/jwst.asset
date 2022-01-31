@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
@@ -152,12 +151,28 @@ local JWSTLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTBand,
-  JWSTModel,
-  JWSTFov,
-  JWSTLabel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTBand)
+  asset.registerIdentifierWithMeta(JWSTBand.Identifier)
+  openspace.addSceneGraphNode(JWSTModel)
+  asset.registerIdentifierWithMeta(JWSTModel.Identifier)
+  openspace.addSceneGraphNode(JWSTFov)
+  asset.registerIdentifierWithMeta(JWSTFov.Identifier)
+  openspace.addSceneGraphNode(JWSTLabel)
+  asset.registerIdentifierWithMeta(JWSTLabel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTLabel.Identifier)
+  openspace.removeSceneGraphNode(JWSTFov.Identifier)
+  openspace.removeSceneGraphNode(JWSTModel.Identifier)
+  openspace.removeSceneGraphNode(JWSTBand.Identifier)
+end)
+    
+asset.export(JWSTBand.Identifier, JWSTBand)
+asset.export(JWSTModel.Identifier, JWSTModel)
+asset.export(JWSTFov.Identifier, JWSTFov)
+asset.export(JWSTLabel.Identifier, JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",

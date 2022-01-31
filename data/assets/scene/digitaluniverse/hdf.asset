@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
 local circle = asset.syncedResource({
   Name = "Circle",
   Type = "HttpSynchronization",
@@ -48,7 +46,17 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+  asset.registerIdentifierWithMeta(object.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object.Identifier)
+end)
+  
+asset.export(object.Identifier, object)
+
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",

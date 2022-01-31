@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
@@ -156,10 +155,29 @@ local PolyCamFov = {
 --   }
 -- }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  OsirisRex,
-  PolyCam,
-  Rexis,
-  PolyCamFov,
-  -- RexisFov
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OsirisRex)
+  asset.registerIdentifierWithMeta(OsirisRex.Identifier)
+  openspace.addSceneGraphNode(PolyCam)
+  asset.registerIdentifierWithMeta(PolyCam.Identifier)
+  openspace.addSceneGraphNode(Rexis)
+  asset.registerIdentifierWithMeta(Rexis.Identifier)
+  openspace.addSceneGraphNode(PolyCamFov)
+  asset.registerIdentifierWithMeta(PolyCamFov.Identifier)
+  -- openspace.addSceneGraphNode(RexisFov)
+  -- asset.registerIdentifierWithMeta(RexisFov.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(RexisFov.Identifier)
+  openspace.removeSceneGraphNode(PolyCamFov.Identifier)
+  openspace.removeSceneGraphNode(Rexis.Identifier)
+  openspace.removeSceneGraphNode(PolyCam.Identifier)
+  openspace.removeSceneGraphNode(OsirisRex.Identifier)
+end)
+    
+asset.export(OsirisRex.Identifier, OsirisRex)
+asset.export(PolyCam.Identifier, PolyCam)
+asset.export(Rexis.Identifier, Rexis)
+asset.export(PolyCamFov.Identifier, PolyCamFov)
+-- asset.export(RexisFov.Identifier, RexisFov)

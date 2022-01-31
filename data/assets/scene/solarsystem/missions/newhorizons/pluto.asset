@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local NewHorizonsKernels = asset.require("./kernels").NewHorizonsKernels
@@ -243,9 +242,25 @@ local PlutoShadow = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PlutoProjection,
-  PlutoBarycenterLabel,
-  PlutoText,
-  PlutoShadow
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoProjection)
+  asset.registerIdentifierWithMeta(PlutoProjection.Identifier)
+  openspace.addSceneGraphNode(PlutoBarycenterLabel)
+  asset.registerIdentifierWithMeta(PlutoBarycenterLabel.Identifier)
+  openspace.addSceneGraphNode(PlutoText)
+  asset.registerIdentifierWithMeta(PlutoText.Identifier)
+  openspace.addSceneGraphNode(PlutoShadow)
+  asset.registerIdentifierWithMeta(PlutoShadow.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoShadow.Identifier)
+  openspace.removeSceneGraphNode(PlutoText.Identifier)
+  openspace.removeSceneGraphNode(PlutoBarycenterLabel.Identifier)
+  openspace.removeSceneGraphNode(PlutoProjection.Identifier)
+end)
+    
+asset.export(PlutoProjection.Identifier, PlutoProjection)
+asset.export(PlutoBarycenterLabel.Identifier, PlutoBarycenterLabel)
+asset.export(PlutoText.Identifier, PlutoText)
+asset.export(PlutoShadow.Identifier, PlutoShadow)

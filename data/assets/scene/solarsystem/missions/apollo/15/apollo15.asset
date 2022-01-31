@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
@@ -102,6 +101,17 @@ local Apollo15Trail = {
   }
 }
 
-local list = { Apollo15, Apollo15Trail }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, list)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo15)
+  asset.registerIdentifierWithMeta(Apollo15.Identifier)
+  openspace.addSceneGraphNode(Apollo15Trail)
+  asset.registerIdentifierWithMeta(Apollo15Trail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo15Trail.Identifier)
+  openspace.removeSceneGraphNode(Apollo15.Identifier)
+end)
+    
+asset.export(Apollo15.Identifier, Apollo15)
+asset.export(Apollo15Trail.Identifier, Apollo15Trail)

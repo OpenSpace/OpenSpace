@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local speck = asset.syncedResource({
   Name = "Apogee Speck Files",
   Type = "HttpSynchronization",
@@ -58,7 +54,17 @@ local gaia_abundance_apogee = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_apogee })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(gaia_abundance_apogee)
+  asset.registerIdentifierWithMeta(gaia_abundance_apogee.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(gaia_abundance_apogee.Identifier)
+end)
+  
+asset.export(gaia_abundance_apogee.Identifier, gaia_abundance_apogee)
+
 
 
 asset.meta = {

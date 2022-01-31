@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
@@ -42,4 +41,13 @@ local model = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { model })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(model)
+  asset.registerIdentifierWithMeta(model.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(model.Identifier)
+end)
+  
+asset.export(model.Identifier, model)

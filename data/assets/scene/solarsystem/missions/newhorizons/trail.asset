@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 
 
@@ -29,6 +28,13 @@ local TrailAtPluto = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  TrailAtPluto
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TrailAtPluto)
+  asset.registerIdentifierWithMeta(TrailAtPluto.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TrailAtPluto.Identifier)
+end)
+  
+asset.export(TrailAtPluto.Identifier, TrailAtPluto)

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 
@@ -46,7 +45,17 @@ local NewHorizonsPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PlutoBarycenterAccurate,
-  NewHorizonsPosition 
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoBarycenterAccurate)
+  asset.registerIdentifierWithMeta(PlutoBarycenterAccurate.Identifier)
+  openspace.addSceneGraphNode(NewHorizonsPosition)
+  asset.registerIdentifierWithMeta(NewHorizonsPosition.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NewHorizonsPosition.Identifier)
+  openspace.removeSceneGraphNode(PlutoBarycenterAccurate.Identifier)
+end)
+    
+asset.export(PlutoBarycenterAccurate.Identifier, PlutoBarycenterAccurate)
+asset.export(NewHorizonsPosition.Identifier, NewHorizonsPosition)

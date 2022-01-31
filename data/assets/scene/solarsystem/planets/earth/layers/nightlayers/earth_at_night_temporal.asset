@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer =  {
@@ -39,7 +38,17 @@ local layer =  {
     temporal resolution is daily. (Description from NASA Worldview)]],
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "NightLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+end)
+
+asset.export(node.Identifier, node)
+
 
 
 asset.meta = {

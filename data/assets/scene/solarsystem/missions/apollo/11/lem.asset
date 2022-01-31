@@ -1,5 +1,4 @@
 -- a11_lem.asset
-local asset_helper = asset.require("util/asset_helper")
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
@@ -43,7 +42,19 @@ local Apollo11LemModel = {
     Type = "RenderableModel",
     GeometryFile = lem_model .. "LM-2_ver2clean.obj",
     RotationVector = { 91.044090, 171.229706, 111.666664 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Lem",
@@ -51,4 +62,17 @@ local Apollo11LemModel = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, { Apollo11Lem, Apollo11LemModel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo11Lem)
+  asset.registerIdentifierWithMeta(Apollo11Lem.Identifier)
+  openspace.addSceneGraphNode(Apollo11LemModel)
+  asset.registerIdentifierWithMeta(Apollo11LemModel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo11LemModel.Identifier)
+  openspace.removeSceneGraphNode(Apollo11Lem.Identifier)
+end)
+    
+asset.export(Apollo11Lem.Identifier, Apollo11Lem)
+asset.export(Apollo11LemModel.Identifier, Apollo11LemModel)

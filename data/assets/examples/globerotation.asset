@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -44,4 +43,13 @@ local Example_GlobeRotation = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Example_GlobeRotation })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Example_GlobeRotation)
+  asset.registerIdentifierWithMeta(Example_GlobeRotation.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Example_GlobeRotation.Identifier)
+end)
+
+asset.export(Example_GlobeRotation.Identifier, Example_GlobeRotation)

@@ -1,5 +1,4 @@
 asset.require("spice/base")
-local assetHelper = asset.require("util/asset_helper")
 
 local TexturesPath = asset.syncedResource({
   Type = "HttpSynchronization",

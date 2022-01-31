@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../ganymede").Ganymede.Identifier
 
 local texturesPath = asset.syncedResource({
@@ -13,7 +12,17 @@ local layer = {
   FilePath = texturesPath .. "ganymede.jpg",
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

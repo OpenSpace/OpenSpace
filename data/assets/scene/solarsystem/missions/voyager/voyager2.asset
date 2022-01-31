@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -316,17 +315,57 @@ local VoyagerTrailCruiseNeptuneInf = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Voyager2,
-  Voyager2Main,
-  Voyager2Antenna,
-  VoyagerTrailCruiseEarthJupiter,
-  VoyagerTrailEncounterJupiter,
-  VoyagerTrailCruiseJupiterSaturn,
-  VoyagerTrailEncounterSaturn,
-  VoyagerTrailCruiseSaturnUranus,
-  VoyagerTrailEncounterUranus,
-  VoyagerTrailCruiseUranusNeptune,
-  VoyagerTrailEncounterNeptune,
-  VoyagerTrailCruiseNeptuneInf
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Voyager2)
+  asset.registerIdentifierWithMeta(Voyager2.Identifier)
+  openspace.addSceneGraphNode(Voyager2Main)
+  asset.registerIdentifierWithMeta(Voyager2Main.Identifier)
+  openspace.addSceneGraphNode(Voyager2Antenna)
+  asset.registerIdentifierWithMeta(Voyager2Antenna.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseEarthJupiter.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterJupiter)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterJupiter.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseJupiterSaturn.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterSaturn)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterSaturn.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseSaturnUranus)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseSaturnUranus.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterUranus)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterUranus.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseUranusNeptune)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseUranusNeptune.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterNeptune)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterNeptune.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseNeptuneInf)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseNeptuneInf.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseNeptuneInf.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterNeptune.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseUranusNeptune.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterUranus.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseSaturnUranus.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterSaturn.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseJupiterSaturn.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterJupiter.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseEarthJupiter.Identifier)
+  openspace.removeSceneGraphNode(Voyager2Antenna.Identifier)
+  openspace.removeSceneGraphNode(Voyager2Main.Identifier)
+  openspace.removeSceneGraphNode(Voyager2.Identifier)
+end)
+    
+asset.export(Voyager2.Identifier, Voyager2)
+asset.export(Voyager2Main.Identifier, Voyager2Main)
+asset.export(Voyager2Antenna.Identifier, Voyager2Antenna)
+asset.export(VoyagerTrailCruiseEarthJupiter.Identifier, VoyagerTrailCruiseEarthJupiter)
+asset.export(VoyagerTrailEncounterJupiter.Identifier, VoyagerTrailEncounterJupiter)
+asset.export(VoyagerTrailCruiseJupiterSaturn.Identifier, VoyagerTrailCruiseJupiterSaturn)
+asset.export(VoyagerTrailEncounterSaturn.Identifier, VoyagerTrailEncounterSaturn)
+asset.export(VoyagerTrailCruiseSaturnUranus.Identifier, VoyagerTrailCruiseSaturnUranus)
+asset.export(VoyagerTrailEncounterUranus.Identifier, VoyagerTrailEncounterUranus)
+asset.export(VoyagerTrailCruiseUranusNeptune.Identifier, VoyagerTrailCruiseUranusNeptune)
+asset.export(VoyagerTrailEncounterNeptune.Identifier, VoyagerTrailEncounterNeptune)
+asset.export(VoyagerTrailCruiseNeptuneInf.Identifier, VoyagerTrailCruiseNeptuneInf)

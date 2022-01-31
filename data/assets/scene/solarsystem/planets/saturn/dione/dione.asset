@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -50,7 +49,17 @@ local Dione = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Dione })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Dione)
+  asset.registerIdentifierWithMeta(Dione.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Dione.Identifier)
+end)
+  
+asset.export(Dione.Identifier, Dione)
+
 
 
 asset.meta = {

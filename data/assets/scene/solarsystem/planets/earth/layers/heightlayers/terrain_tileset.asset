@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local fallBackLayer = asset.require("./fallbacks/blue_marble_height").layer
 
@@ -15,7 +14,17 @@ local layer = {
     data from the USGS elsewhere. Vertical units are measured in meters.]],
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export(node.Identifier, node)
+
 
 
 asset.meta = {

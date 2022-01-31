@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local fallbackLayer = asset.require("./fallbacks/mars_texture").layer
@@ -18,7 +17,17 @@ local layer = {
     https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA03467]],
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

@@ -1,5 +1,4 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 function downloadTLEFile(sceneAsset, url, name, filename)
   local identifier = name
@@ -105,7 +104,17 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
   local path = tleFolder .. "/" .. filename
 
   local SatelliteBatch = satellites(filenameSansExt, path, group.TrailColor, group)
-  assetHelper.registerSceneGraphNodesAndExport(containingAsset, { SatelliteBatch })
+
+  containingAsset.onInitialize(function()
+    openspace.addSceneGraphNode(SatelliteBatch)
+    sceneAsset.registerIdentifierWithMeta(SatelliteBatch.Identifier);
+  end)
+
+  containingAsset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(SatelliteBatch.Identifier)
+  end)
+
+  containingAsset.export(SatelliteBatch.Identifier, SatelliteBatch)
 end
 
 asset.export("downloadTLEFile", downloadTLEFile)

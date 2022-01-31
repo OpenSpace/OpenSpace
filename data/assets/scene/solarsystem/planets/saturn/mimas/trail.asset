@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 
 
@@ -27,7 +26,17 @@ local MimasTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MimasTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MimasTrail)
+  asset.registerIdentifierWithMeta(MimasTrail.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MimasTrail.Identifier)
+end)
+  
+asset.export(MimasTrail.Identifier, MimasTrail)
+
 
 
 asset.meta = {

@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local textures = asset.syncedResource({
   Name = "Background Radiation Textures",
   Type = "HttpSynchronization",
@@ -130,9 +126,29 @@ local multiverse_planck_4 = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  multiverse_planck_1, multiverse_planck_2, multiverse_planck_3, multiverse_planck_4
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(multiverse_planck_1)
+  openspace.addSceneGraphNode(multiverse_planck_2)
+  openspace.addSceneGraphNode(multiverse_planck_3)
+  openspace.addSceneGraphNode(multiverse_planck_4)
+  asset.registerIdentifierWithMeta(multiverse_planck_1.Identifier)
+  asset.registerIdentifierWithMeta(multiverse_planck_2.Identifier)
+  asset.registerIdentifierWithMeta(multiverse_planck_3.Identifier)
+  asset.registerIdentifierWithMeta(multiverse_planck_4.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(multiverse_planck_4.Identifier)
+  openspace.removeSceneGraphNode(multiverse_planck_3.Identifier)
+  openspace.removeSceneGraphNode(multiverse_planck_2.Identifier)
+  openspace.removeSceneGraphNode(multiverse_planck_1.Identifier)
+end)
+  
+asset.export(multiverse_planck_1.Identifier, multiverse_planck_1)
+asset.export(multiverse_planck_2.Identifier, multiverse_planck_2)
+asset.export(multiverse_planck_3.Identifier, multiverse_planck_3)
+asset.export(multiverse_planck_4.Identifier, multiverse_planck_4)
+
 
 
 asset.meta = {

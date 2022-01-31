@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("../transforms")
 asset.require("spice/base")
 asset.require("../trail")
@@ -51,7 +50,17 @@ local Charon = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Charon)
+  asset.registerIdentifierWithMeta(Charon.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Charon.Identifier)
+end)
+  
+asset.export(Charon.Identifier, Charon)
+
 
 
 asset.meta = {

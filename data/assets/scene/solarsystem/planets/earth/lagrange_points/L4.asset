@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -63,10 +62,21 @@ local L4Label = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  L4,
-  L4Label
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L4)
+  asset.registerIdentifierWithMeta(L4.Identifier)
+  openspace.addSceneGraphNode(L4Label)
+  asset.registerIdentifierWithMeta(L4Label.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L4Label.Identifier)
+  openspace.removeSceneGraphNode(L4.Identifier)
+end)
+    
+asset.export(L4.Identifier, L4)
+asset.export(L4Label.Identifier, L4Label)
+
 
 
 asset.meta = {

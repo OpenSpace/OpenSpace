@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local fallBackLayer = asset.require("./fallbacks/blue_marble").layer
@@ -47,7 +46,17 @@ local layer = {
     Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

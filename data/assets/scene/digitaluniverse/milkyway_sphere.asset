@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local sphereTextures = asset.syncedResource({
   Name = "Milky Way Sphere Textures",
   Type = "HttpSynchronization",
@@ -38,7 +34,17 @@ local sphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { sphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(sphere)
+  asset.registerIdentifierWithMeta(sphere.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sphere.Identifier)
+end)
+  
+asset.export(sphere.Identifier, sphere)
+
 
 
 asset.meta = {

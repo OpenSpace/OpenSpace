@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
 
@@ -22,7 +21,17 @@ local GSMReferenceFrame = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GSMReferenceFrame })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GSMReferenceFrame)
+  asset.registerIdentifierWithMeta(GSMReferenceFrame.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GSMReferenceFrame.Identifier)
+end)
+  
+asset.export(GSMReferenceFrame.Identifier, GSMReferenceFrame)
+
 
 asset.meta = {
   Name = "Earth magnetosphere transforms",

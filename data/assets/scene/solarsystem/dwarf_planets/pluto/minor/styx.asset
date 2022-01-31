@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels").PlutoKernels
 
@@ -51,7 +50,21 @@ local StyxTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Styx)
+  asset.registerIdentifierWithMeta(Styx.Identifier)
+  openspace.addSceneGraphNode(StyxTrail)
+  asset.registerIdentifierWithMeta(StyxTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxTrail.Identifier)
+  openspace.removeSceneGraphNode(Styx.Identifier)
+end)
+    
+asset.export(Styx.Identifier, Styx)
+asset.export(StyxTrail.Identifier, StyxTrail)
+
 
 
 asset.meta = {

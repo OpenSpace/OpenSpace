@@ -1,5 +1,4 @@
 local transforms = asset.require("./transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 asset.require("./trail")
 
@@ -61,7 +60,21 @@ local JupiterLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Jupiter)
+  asset.registerIdentifierWithMeta(Jupiter.Identifier)
+  openspace.addSceneGraphNode(JupiterLabel)
+  asset.registerIdentifierWithMeta(JupiterLabel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterLabel.Identifier)
+  openspace.removeSceneGraphNode(Jupiter.Identifier)
+end)
+    
+asset.export(Jupiter.Identifier, Jupiter)
+asset.export(JupiterLabel.Identifier, JupiterLabel)
+
 
 
 asset.meta = {

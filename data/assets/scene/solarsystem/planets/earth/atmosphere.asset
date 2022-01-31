@@ -1,5 +1,4 @@
 local transforms = asset.require("./earth")
-local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -89,7 +88,17 @@ local Atmosphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Atmosphere)
+  asset.registerIdentifierWithMeta(Atmosphere.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Atmosphere.Identifier)
+end)
+  
+asset.export(Atmosphere.Identifier, Atmosphere)
+
 
 
 asset.meta = {

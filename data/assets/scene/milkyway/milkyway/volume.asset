@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -52,8 +51,17 @@ local MilkyWayVolumeGalaxy = {
   }
 }
 
-local objects = { MilkyWayVolumeGalaxy }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
+  asset.registerIdentifierWithMeta(MilkyWayVolumeGalaxy.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy.Identifier)
+end)
+  
+asset.export(MilkyWayVolumeGalaxy.Identifier, MilkyWayVolumeGalaxy)
+
 
 
 asset.meta = {

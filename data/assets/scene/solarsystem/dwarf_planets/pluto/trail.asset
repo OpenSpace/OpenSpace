@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 local kernels = asset.require("./kernels").PlutoKernels
@@ -29,7 +28,17 @@ local PlutoBarycenterTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenterTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoBarycenterTrail)
+  asset.registerIdentifierWithMeta(PlutoBarycenterTrail.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoBarycenterTrail.Identifier)
+end)
+  
+asset.export(PlutoBarycenterTrail.Identifier, PlutoBarycenterTrail)
+
 
 
 asset.meta = {

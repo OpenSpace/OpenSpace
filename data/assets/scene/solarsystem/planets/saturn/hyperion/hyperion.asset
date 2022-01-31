@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -51,7 +50,17 @@ local Hyperion = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Hyperion })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Hyperion)
+  asset.registerIdentifierWithMeta(Hyperion.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Hyperion.Identifier)
+end)
+  
+asset.export(Hyperion.Identifier, Hyperion)
+
 
 
 asset.meta = {

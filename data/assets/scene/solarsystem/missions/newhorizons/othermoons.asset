@@ -2,7 +2,6 @@ local Hydra = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/hydra")
 local Kerberos = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/kerberos")
 local Nix = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/nix")
 local Styx = asset.require("scene/solarsystem/dwarf_planets/pluto/minor/styx")
-local assetHelper = asset.require("util/asset_helper")
 
 local hydraTextures = asset.syncedResource({
   Name = "Hydra Textures",
@@ -118,9 +117,25 @@ local StyxText = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  HydraText,
-  KerberosText,
-  NixText,
-  StyxText
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HydraText)
+  asset.registerIdentifierWithMeta(HydraText.Identifier)
+  openspace.addSceneGraphNode(KerberosText)
+  asset.registerIdentifierWithMeta(KerberosText.Identifier)
+  openspace.addSceneGraphNode(NixText)
+  asset.registerIdentifierWithMeta(NixText.Identifier)
+  openspace.addSceneGraphNode(StyxText)
+  asset.registerIdentifierWithMeta(StyxText.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StyxText.Identifier)
+  openspace.removeSceneGraphNode(NixText.Identifier)
+  openspace.removeSceneGraphNode(KerberosText.Identifier)
+  openspace.removeSceneGraphNode(HydraText.Identifier)
+end)
+    
+asset.export(HydraText.Identifier, HydraText)
+asset.export(KerberosText.Identifier, KerberosText)
+asset.export(NixText.Identifier, NixText)
+asset.export(StyxText.Identifier, StyxText)

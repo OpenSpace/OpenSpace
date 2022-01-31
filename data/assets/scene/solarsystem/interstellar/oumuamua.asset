@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
@@ -48,7 +47,21 @@ local OumuamuaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OumuamuaPosition)
+  asset.registerIdentifierWithMeta(OumuamuaPosition.Identifier)
+  openspace.addSceneGraphNode(OumuamuaTrail)
+  asset.registerIdentifierWithMeta(OumuamuaTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaTrail.Identifier)
+  openspace.removeSceneGraphNode(OumuamuaPosition.Identifier)
+end)
+    
+asset.export(OumuamuaPosition.Identifier, OumuamuaPosition)
+asset.export(mode.Identifier, OumuamuaTrail)
+
 
 
 asset.meta = {

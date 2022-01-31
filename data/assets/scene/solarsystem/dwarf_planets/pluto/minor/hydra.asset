@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("../transforms")
 local kernels = asset.require("../kernels").PlutoKernels
 
@@ -53,7 +52,21 @@ local HydraTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Hydra, HydraTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Hydra)
+  asset.registerIdentifierWithMeta(Hydra.Identifier)
+  openspace.addSceneGraphNode(HydraTrail)
+  asset.registerIdentifierWithMeta(HydraTrail.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HydraTrail.Identifier)
+  openspace.removeSceneGraphNode(Hydra.Identifier)
+end)
+  
+asset.export(Hydra.Identifier, Hydra)
+asset.export(HydraTrail.Identifier, HydraTrail)
+
 
 
 asset.meta = {

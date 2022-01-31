@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local bookmarkHelper = asset.require("util/generate_bookmarks")
 
 local dataProvider = "http://data.openspaceproject.com/files/bookmarks/v1/bookmarks.csv"

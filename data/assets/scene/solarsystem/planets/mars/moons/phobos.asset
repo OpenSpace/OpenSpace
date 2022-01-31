@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 local kernels = asset.syncedResource({
   Name = "Mars Spice Kernels",
@@ -61,7 +60,21 @@ local PhobosTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Phobos, PhobosTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Phobos)
+  asset.registerIdentifierWithMeta(Phobos.Identifier)
+  openspace.addSceneGraphNode(PhobosTrail)
+  asset.registerIdentifierWithMeta(PhobosTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PhobosTrail.Identifier)
+  openspace.removeSceneGraphNode(Phobos.Identifier)
+end)
+    
+asset.export(Phobos.Identifier, Phobos)
+asset.export(PhobosTrail.Identifier, PhobosTrail)
+
 
 
 asset.meta = {

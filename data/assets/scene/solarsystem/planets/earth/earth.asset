@@ -1,5 +1,4 @@
 local transforms = asset.require("./transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 local labelsPath = asset.syncedResource({
   Name = "Earth Labels",
@@ -74,7 +73,21 @@ local EarthLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Earth)
+  asset.registerIdentifierWithMeta(Earth.Identifier)
+  openspace.addSceneGraphNode(EarthLabel)
+  asset.registerIdentifierWithMeta(EarthLabel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthLabel.Identifier)
+  openspace.removeSceneGraphNode(Earth.Identifier)
+end)
+    
+asset.export(Earth.Identifier, Earth)
+asset.export(EarthLabel.Identifier, EarthLabel)
+
 
 
 asset.meta = {

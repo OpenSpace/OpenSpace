@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -20,7 +19,17 @@ local NeptuneBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NeptuneBarycenter)
+  asset.registerIdentifierWithMeta(NeptuneBarycenter.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneBarycenter.Identifier)
+end)
+  
+asset.export(NeptuneBarycenter.Identifier, NeptuneBarycenter)
+
 
 
 asset.meta = {

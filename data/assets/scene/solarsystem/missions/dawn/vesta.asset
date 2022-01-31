@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -138,4 +137,17 @@ local VestaTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Vesta, VestaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Vesta)
+  asset.registerIdentifierWithMeta(Vesta.Identifier)
+  openspace.addSceneGraphNode(VestaTrail)
+  asset.registerIdentifierWithMeta(VestaTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VestaTrail.Identifier)
+  openspace.removeSceneGraphNode(Vesta.Identifier)
+end)
+    
+asset.export(Vesta.Identifier, Vesta)
+asset.export(VestaTrail.Identifier, VestaTrail)

@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 asset.require("./trail")
 local kernel = asset.require("../kernels").jup310
@@ -52,7 +51,17 @@ local Ganymede = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Ganymede })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Ganymede)
+  asset.registerIdentifierWithMeta(Ganymede.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Ganymede.Identifier)
+end)
+  
+asset.export(Ganymede.Identifier, Ganymede)
+
 
 
 asset.meta = {

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 
 
@@ -51,7 +50,17 @@ local OrionClusterStars = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OrionClusterStars })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OrionClusterStars)
+  asset.registerIdentifierWithMeta(OrionClusterStars.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionClusterStars.Identifier)
+end)
+  
+asset.export(OrionClusterStars.Identifier, OrionClusterStars)
+
 
 
 asset.meta = {

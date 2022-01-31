@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
@@ -220,13 +219,41 @@ local VoyagerTrailCruiseSaturnInf = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Voyager1,
-  Voyager1Main,
-  Voyager1Antenna,
-  VoyagerTrailCruiseEarthJupiter,
-  VoyagerTrailEncounterJupiter,
-  VoyagerTrailCruiseJupiterSaturn,
-  VoyagerTrailEncounterSaturn,
-  VoyagerTrailCruiseSaturnInf
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Voyager1)
+  asset.registerIdentifierWithMeta(Voyager1.Identifier)
+  openspace.addSceneGraphNode(Voyager1Main)
+  asset.registerIdentifierWithMeta(Voyager1Main.Identifier)
+  openspace.addSceneGraphNode(Voyager1Antenna)
+  asset.registerIdentifierWithMeta(Voyager1Antenna.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseEarthJupiter.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterJupiter)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterJupiter.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseJupiterSaturn.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailEncounterSaturn)
+  asset.registerIdentifierWithMeta(VoyagerTrailEncounterSaturn.Identifier)
+  openspace.addSceneGraphNode(VoyagerTrailCruiseSaturnInf)
+  asset.registerIdentifierWithMeta(VoyagerTrailCruiseSaturnInf.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseSaturnInf.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterSaturn.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseJupiterSaturn.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailEncounterJupiter.Identifier)
+  openspace.removeSceneGraphNode(VoyagerTrailCruiseEarthJupiter.Identifier)
+  openspace.removeSceneGraphNode(Voyager1Antenna.Identifier)
+  openspace.removeSceneGraphNode(Voyager1Main.Identifier)
+  openspace.removeSceneGraphNode(Voyager1.Identifier)
+end)
+    
+asset.export(Voyager1.Identifier, Voyager1)
+asset.export(Voyager1Main.Identifier, Voyager1Main)
+asset.export(Voyager1Antenna.Identifier, Voyager1Antenna)
+asset.export(VoyagerTrailCruiseEarthJupiter.Identifier, VoyagerTrailCruiseEarthJupiter)
+asset.export(VoyagerTrailEncounterJupiter.Identifier, VoyagerTrailEncounterJupiter)
+asset.export(VoyagerTrailCruiseJupiterSaturn.Identifier, VoyagerTrailCruiseJupiterSaturn)
+asset.export(VoyagerTrailEncounterSaturn.Identifier, VoyagerTrailEncounterSaturn)
+asset.export(VoyagerTrailCruiseSaturnInf.Identifier, VoyagerTrailCruiseSaturnInf)

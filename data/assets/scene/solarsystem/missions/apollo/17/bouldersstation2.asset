@@ -1,5 +1,4 @@
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
-local asset_helper = asset.require("util/asset_helper")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
@@ -149,8 +148,33 @@ local Station2Boulder3Model = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, {
-  Station2Boulder1Holder, Station2Boulder1Model,
-  Station2Boulder2Holder, Station2Boulder2Model,
-  Station2Boulder3Holder, Station2Boulder3Model
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Station2Boulder1Holder)
+  asset.registerIdentifierWithMeta(Station2Boulder1Holder.Identifier)
+  openspace.addSceneGraphNode(Station2Boulder1Model)
+  asset.registerIdentifierWithMeta(Station2Boulder1Model.Identifier)
+  openspace.addSceneGraphNode(Station2Boulder2Holder)
+  asset.registerIdentifierWithMeta(Station2Boulder2Holder.Identifier)
+  openspace.addSceneGraphNode(Station2Boulder2Model)
+  asset.registerIdentifierWithMeta(Station2Boulder2Model.Identifier)
+  openspace.addSceneGraphNode(Station2Boulder3Holder)
+  asset.registerIdentifierWithMeta(Station2Boulder3Holder.Identifier)
+  openspace.addSceneGraphNode(Station2Boulder3Model)
+  asset.registerIdentifierWithMeta(Station2Boulder3Model.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Station2Boulder3Model.Identifier)
+  openspace.removeSceneGraphNode(Station2Boulder3Holder.Identifier)
+  openspace.removeSceneGraphNode(Station2Boulder2Model.Identifier)
+  openspace.removeSceneGraphNode(Station2Boulder2Holder.Identifier)
+  openspace.removeSceneGraphNode(Station2Boulder1Model.Identifier)
+  openspace.removeSceneGraphNode(Station2Boulder1Holder.Identifier)
+end)
+    
+asset.export(Station2Boulder1Holder.Identifier, Station2Boulder1Holder)
+asset.export(Station2Boulder1Model.Identifier, Station2Boulder1Model)
+asset.export(Station2Boulder2Holder.Identifier, Station2Boulder2Holder)
+asset.export(Station2Boulder2Model.Identifier, Station2Boulder2Model)
+asset.export(Station2Boulder3Holder.Identifier, Station2Boulder3Holder)
+asset.export(Station2Boulder3Model.Identifier, Station2Boulder3Model)

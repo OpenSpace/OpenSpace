@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -789,11 +788,33 @@ local DawnFramingCamera2 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Dawn,
-  DawnSolarArray1,
-  DawnSolarArray2,
-  DawnTrail,
-  DawnFramingCamera1,
-  DawnFramingCamera2
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Dawn)
+  asset.registerIdentifierWithMeta(Dawn.Identifier)
+  openspace.addSceneGraphNode(DawnSolarArray1)
+  asset.registerIdentifierWithMeta(DawnSolarArray1.Identifier)
+  openspace.addSceneGraphNode(DawnSolarArray2)
+  asset.registerIdentifierWithMeta(DawnSolarArray2.Identifier)
+  openspace.addSceneGraphNode(DawnTrail)
+  asset.registerIdentifierWithMeta(DawnTrail.Identifier)
+  openspace.addSceneGraphNode(DawnFramingCamera1)
+  asset.registerIdentifierWithMeta(DawnFramingCamera1.Identifier)
+  openspace.addSceneGraphNode(DawnFramingCamera2)
+  asset.registerIdentifierWithMeta(DawnFramingCamera2.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DawnFramingCamera2.Identifier)
+  openspace.removeSceneGraphNode(DawnFramingCamera1.Identifier)
+  openspace.removeSceneGraphNode(DawnTrail.Identifier)
+  openspace.removeSceneGraphNode(DawnSolarArray2.Identifier)
+  openspace.removeSceneGraphNode(DawnSolarArray1.Identifier)
+  openspace.removeSceneGraphNode(Dawn.Identifier)
+end)
+    
+asset.export(Dawn.Identifier, Dawn)
+asset.export(DawnSolarArray1.Identifier, DawnSolarArray1)
+asset.export(DawnSolarArray2.Identifier, DawnSolarArray2)
+asset.export(DawnTrail.Identifier, DawnTrail)
+asset.export(DawnFramingCamera1.Identifier, DawnFramingCamera1)
+asset.export(DawnFramingCamera2.Identifier, DawnFramingCamera2)

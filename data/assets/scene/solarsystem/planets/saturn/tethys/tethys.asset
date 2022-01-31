@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -50,7 +49,17 @@ local Tethys = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Tethys)
+  asset.registerIdentifierWithMeta(Tethys.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Tethys.Identifier)
+end)
+  
+asset.export(Tethys.Identifier, Tethys)
+
 
 
 asset.meta = {

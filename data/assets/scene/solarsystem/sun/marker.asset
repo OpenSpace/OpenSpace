@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
@@ -29,7 +28,17 @@ local SunMarker = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunMarker)
+  asset.registerIdentifierWithMeta(SunMarker.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunMarker.Identifier)
+end)
+  
+asset.export(SunMarker.Identifier, SunMarker)
+
 
 
 asset.meta = {

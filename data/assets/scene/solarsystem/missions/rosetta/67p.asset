@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -140,11 +139,23 @@ end)
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Barycenter,
-  Comet67P,
-  Trail67P
-})
-
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Barycenter)
+  asset.registerIdentifierWithMeta(Barycenter.Identifier)
+  openspace.addSceneGraphNode(Comet67P)
+  asset.registerIdentifierWithMeta(Comet67P.Identifier)
+  openspace.addSceneGraphNode(Trail67P)
+  asset.registerIdentifierWithMeta(Trail67P.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail67P.Identifier)
+  openspace.removeSceneGraphNode(Comet67P.Identifier)
+  openspace.removeSceneGraphNode(Barycenter.Identifier)
+end)
+    
 asset.export("Barycenter", Barycenter)
+asset.export(Barycenter.Identifier, Barycenter)
 asset.export("Comet67P", Comet67P)
+asset.export(Comet67P.Identifier, Comet67P)
+asset.export(Trail67P.Identifier, Trail67P)

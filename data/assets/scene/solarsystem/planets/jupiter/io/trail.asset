@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 local kernel = asset.require("../kernels").jup310
 
@@ -27,7 +26,17 @@ local IoTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { IoTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IoTrail)
+  asset.registerIdentifierWithMeta(IoTrail.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IoTrail.Identifier)
+end)
+  
+asset.export(IoTrail.Identifier, IoTrail)
+
 
 
 asset.meta = {

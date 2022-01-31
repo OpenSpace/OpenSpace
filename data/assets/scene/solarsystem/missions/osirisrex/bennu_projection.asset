@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -106,4 +105,17 @@ local BennuTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { BennuProjection, BennuTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BennuProjection)
+  asset.registerIdentifierWithMeta(BennuProjection.Identifier)
+  openspace.addSceneGraphNode(BennuTrail)
+  asset.registerIdentifierWithMeta(BennuTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BennuTrail.Identifier)
+  openspace.removeSceneGraphNode(BennuProjection.Identifier)
+end)
+    
+asset.export(BennuProjection.Identifier, BennuProjection)
+asset.export(BennuTrail.Identifier, BennuTrail)

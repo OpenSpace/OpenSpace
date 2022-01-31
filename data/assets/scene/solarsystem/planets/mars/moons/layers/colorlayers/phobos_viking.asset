@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../phobos").Phobos.Identifier
 
 local layer = {
@@ -9,7 +8,17 @@ local layer = {
   Description = [[ Viking-base Phobos shaded relief created by USGS.]]
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

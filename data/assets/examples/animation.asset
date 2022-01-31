@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
@@ -181,13 +180,26 @@ local animationBounce = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  animationLoop,
-  animationLoopInf,
-  animationOnce,
-  animationBounceInf,
-  animationBounce
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(animationLoop)
+  openspace.addSceneGraphNode(animationLoopInf)
+  openspace.addSceneGraphNode(animationOnce)
+  openspace.addSceneGraphNode(animationBounceInf)
+  openspace.addSceneGraphNode(animationBounce)
+  asset.registerIdentifierWithMeta(animationLoop.Identifier)
+  asset.registerIdentifierWithMeta(animationLoopInf.Identifier)
+  asset.registerIdentifierWithMeta(animationOnce.Identifier)
+  asset.registerIdentifierWithMeta(animationBounceInf.Identifier)
+  asset.registerIdentifierWithMeta(animationBounce.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(animationBounce.Identifier)
+  openspace.removeSceneGraphNode(animationBounceInf.Identifier)
+  openspace.removeSceneGraphNode(animationOnce.Identifier)
+  openspace.removeSceneGraphNode(animationLoopInf.Identifier)
+  openspace.removeSceneGraphNode(animationLoop.Identifier)
+end)
 
 -- Asset
 asset.meta = {
@@ -196,17 +208,11 @@ asset.meta = {
   Description = "Simple animation example asset with an animated box model",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {
-    "animationLoop",
-    "animationLoopInf",
-    "animationOnce",
-    "animationBounceInf",
-    "animationBounce"
-  }
+  License = "MIT license"
 }
 
 -- Model
+-- @TODO: At the moment, this overwrites the previous meta description. Probably needs a way to specify multiple meta's per file?
 asset.meta = {
   Name = "Animated Box Model",
   Version = "1.0",
@@ -216,12 +222,5 @@ asset.meta = {
   License = [[
     Creative Commons Attribution 4.0 International License,
     https://creativecommons.org/licenses/by/4.0/
-  ]],
-  Identifiers = {
-    "animationLoop",
-    "animationLoopInf",
-    "animationOnce",
-    "animationBounceInf",
-    "animationBounce"
-  }
+  ]]
 }

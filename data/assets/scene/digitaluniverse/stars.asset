@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local speck = asset.syncedResource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
@@ -98,7 +94,21 @@ local sunstar = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { stars, sunstar })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(stars)
+  asset.registerIdentifierWithMeta(stars.Identifier)
+  openspace.addSceneGraphNode(sunstar)
+  asset.registerIdentifierWithMeta(sunstar.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(sunstar.Identifier)
+  openspace.removeSceneGraphNode(stars.Identifier)
+end)
+  
+asset.export(stars.Identifier, stars)
+asset.export(sunstar.Identifier, sunstar)
+
 
 
 asset.meta = {

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
@@ -44,7 +43,21 @@ local AstraeaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { AstraeaPosition, AstraeaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AstraeaPosition)
+  asset.registerIdentifierWithMeta(AstraeaPosition.Identifier)
+  openspace.addSceneGraphNode(AstraeaTrail)
+  asset.registerIdentifierWithMeta(AstraeaTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AstraeaTrail.Identifier)
+  openspace.removeSceneGraphNode(AstraeaPosition.Identifier)
+end)
+    
+asset.export(AstraeaPosition.Identifier, AstraeaPosition)
+asset.export(AstraeaTrail.Identifier, AstraeaTrail)
+
 
 
 asset.meta = {

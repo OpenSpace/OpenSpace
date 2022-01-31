@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
@@ -28,6 +27,19 @@ local JupiterTrailEarth = {
   }
 }
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JupiterTrailEarth)
+  asset.registerIdentifierWithMeta(JupiterTrailEarth.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JupiterTrailEarth.Identifier)
+end)
+  
+asset.export(JupiterTrailEarth.Identifier, JupiterTrailEarth)
+
+
+
 asset.meta = {
   Name = "Jupiter Trail from Earth",
   Version = "1.1",
@@ -37,5 +49,3 @@ asset.meta = {
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrailEarth })

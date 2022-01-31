@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
@@ -25,7 +24,17 @@ local PlutoTrailBarycentric = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoTrailBarycentric })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoTrailBarycentric)
+  asset.registerIdentifierWithMeta(PlutoTrailBarycentric.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoTrailBarycentric.Identifier)
+end)
+  
+asset.export(PlutoTrailBarycentric.Identifier, PlutoTrailBarycentric)
+
 
 
 asset.meta = {

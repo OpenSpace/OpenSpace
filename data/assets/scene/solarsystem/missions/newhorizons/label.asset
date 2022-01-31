@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 local NewHorizonsModel = asset.require("./model")
@@ -22,4 +21,13 @@ local Labels = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Labels)
+  asset.registerIdentifierWithMeta(Labels.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Labels.Identifier)
+end)
+  
+asset.export(Labels.Identifier, Labels)

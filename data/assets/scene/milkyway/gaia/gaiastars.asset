@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
   Name = "Gaia Stars RV",
@@ -60,7 +56,17 @@ local GaiaStars = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaStars })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaStars)
+  asset.registerIdentifierWithMeta(GaiaStars.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaStars.Identifier)
+end)
+  
+asset.export(GaiaStars.Identifier, GaiaStars)
+
 
 
 asset.meta = {

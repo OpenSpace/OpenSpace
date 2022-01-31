@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper)
-
 local scale = 149597870700 -- 1 AU
 
 local radialGrid = {
@@ -90,9 +88,25 @@ local boxGrid = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  radialGrid,
-  planarGrid,
-  sphericalGrid,
-  boxGrid
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(radialGrid)
+  openspace.addSceneGraphNode(planarGrid)
+  openspace.addSceneGraphNode(sphericalGrid)
+  openspace.addSceneGraphNode(boxGrid)
+  asset.registerIdentifierWithMeta(radialGrid.Identifier)
+  asset.registerIdentifierWithMeta(planarGrid.Identifier)
+  asset.registerIdentifierWithMeta(sphericalGrid.Identifier)
+  asset.registerIdentifierWithMeta(boxGrid.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(boxGrid.Identifier)
+  openspace.removeSceneGraphNode(sphericalGrid.Identifier)
+  openspace.removeSceneGraphNode(planarGrid.Identifier)
+  openspace.removeSceneGraphNode(radialGrid.Identifier)
+end)
+  
+asset.export(radialGrid.Identifier, radialGrid)
+asset.export(sphericalGrid.Identifier, sphericalGrid)
+asset.export(planarGrid.Identifier, planarGrid)
+asset.export(boxGrid.Identifier, boxGrid)

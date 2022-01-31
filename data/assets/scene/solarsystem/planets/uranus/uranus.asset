@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
@@ -53,7 +52,21 @@ local UranusLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Uranus)
+  asset.registerIdentifierWithMeta(Uranus.Identifier)
+  openspace.addSceneGraphNode(UranusLabel)
+  asset.registerIdentifierWithMeta(UranusLabel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(UranusLabel.Identifier)
+  openspace.removeSceneGraphNode(Uranus.Identifier)
+end)
+    
+asset.export(Uranus.Identifier, Uranus)
+asset.export(UranusLabel.Identifier, UranusLabel)
+
 
 
 asset.meta = {

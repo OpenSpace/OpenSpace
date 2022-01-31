@@ -4,7 +4,6 @@
 -- the volume data itself needs to be generated,
 -- using the task 'data/tasks/volume/generate_cartesian.task'
 
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local sunRadius = 695508000
@@ -34,5 +33,13 @@ local volume = {
     }
 }
 
-local objects = { volume }
-assetHelper.registerSceneGraphNodes(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(volume)
+  asset.registerIdentifierWithMeta(volume.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(volume.Identifier)
+end)
+    
+asset.export(volume.Identifier, volume)

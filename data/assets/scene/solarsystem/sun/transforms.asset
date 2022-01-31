@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 
 
@@ -85,7 +84,29 @@ local SunECLIPJ2000 = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunCenter, SunIAU, SunECLIPJ2000 })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SolarSystemBarycenter)
+  asset.registerIdentifierWithMeta(SolarSystemBarycenter.Identifier)
+  openspace.addSceneGraphNode(SunCenter)
+  asset.registerIdentifierWithMeta(SunCenter.Identifier)
+  openspace.addSceneGraphNode(SunIAU)
+  asset.registerIdentifierWithMeta(SunIAU.Identifier)
+  openspace.addSceneGraphNode(SunECLIPJ2000)
+  asset.registerIdentifierWithMeta(SunECLIPJ2000.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunECLIPJ2000.Identifier)
+  openspace.removeSceneGraphNode(SunIAU.Identifier)
+  openspace.removeSceneGraphNode(SunCenter.Identifier)
+  openspace.removeSceneGraphNode(SolarSystemBarycenter.Identifier)
+end)
+    
+asset.export(SolarSystemBarycenter.Identifier, SolarSystemBarycenter)
+asset.export(SunCenter.Identifier, SunCenter)
+asset.export(SunIAU.Identifier, SunIAU)
+asset.export(SunECLIPJ2000.Identifier, SunECLIPJ2000)
+
 
 
 asset.meta = {

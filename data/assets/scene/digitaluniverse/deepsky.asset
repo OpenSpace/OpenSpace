@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
 local textures = asset.syncedResource({
   Name = "Deep Sky Objects Textures",
   Type = "HttpSynchronization",
@@ -92,7 +90,21 @@ local deepSkyImages = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { deepSkyPoints, deepSkyImages })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(deepSkyPoints)
+  openspace.addSceneGraphNode(deepSkyImages)
+  asset.registerIdentifierWithMeta(deepSkyPoints.Identifier)
+  asset.registerIdentifierWithMeta(deepSkyImages.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(deepSkyImages.Identifier)
+  openspace.removeSceneGraphNode(deepSkyPoints.Identifier)
+end)
+  
+asset.export(deepSkyPoints.Identifier, deepSkyPoints)
+asset.export(deepSkyImages.Identifier, deepSkyImages)
+
 
 
 asset.meta = {

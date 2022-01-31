@@ -1,6 +1,5 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
-local assetHelper = asset.require("util/asset_helper")
 local propertyHelper = asset.require("util/property_helper")
 
 -- Specifying which other assets should be loaded in this scene

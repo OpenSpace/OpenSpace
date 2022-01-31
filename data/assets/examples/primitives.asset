@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
 local scale = 149597870700 -- 1 AU
 
 local circle = {
@@ -46,7 +44,17 @@ local ellipse = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  circle,
-  ellipse
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(circle)
+  openspace.addSceneGraphNode(ellipse)
+  asset.registerIdentifierWithMeta(circle.Identifier)
+  asset.registerIdentifierWithMeta(ellipse.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ellipse.Identifier)
+  openspace.removeSceneGraphNode(circle.Identifier)
+end)
+  
+asset.export(circle.Identifier, circle)
+asset.export(ellipse.Identifier, ellipse)

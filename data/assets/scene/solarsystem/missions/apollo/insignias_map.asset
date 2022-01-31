@@ -2,8 +2,6 @@
 -- The insignias are invisible by default, but can be enabled using shown or hidden using
 -- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
-local asset_helper = asset.require("util/asset_helper")
-
 local insigniasPath =  asset.syncedResource({
   Name = "Apollo Insignias",
   Type = "HttpSynchronization",
@@ -106,18 +104,31 @@ local hide_apollo_labels = {
 asset.onInitialize(function () 
   openspace.action.registerAction(show_apollo_labels)
   openspace.action.registerAction(hide_apollo_labels)
+  for _, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    sceneAsset.registerIdentifierWithMeta(node.Identifier);
+  end
 end)
 
 asset.onDeinitialize(function ()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
+
   openspace.action.removeAction(show_apollo_labels.Identifier)
   openspace.action.removeAction(hide_apollo_labels.Identifier)
 end)
 
-asset.export("showInsignia", function (missinNumber, interpolationDuration)
+for _, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end
+
+asset.export("showInsignia", function (missionNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)
 end)
 
-asset.export("hideInsignia", function (missinNumber, interpolationDuration)
+asset.export("hideInsignia", function (missionNumber, interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
 
@@ -128,5 +139,3 @@ end)
 asset.export("hideInsignias", function (interpolationDuration)
   openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
 end)
-
-asset_helper.registerSceneGraphNodesAndExport(asset, nodes)

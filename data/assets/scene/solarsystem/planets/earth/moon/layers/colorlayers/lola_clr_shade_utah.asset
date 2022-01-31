@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("./../../moon").Moon.Identifier
 
 local layer = {
@@ -15,7 +14,17 @@ local layer = {
   FilePath = asset.localResource("lola_clr_shade_utah.wms")
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  asset.registerIdentifierWithMeta(layer.Identifier)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

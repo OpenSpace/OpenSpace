@@ -1,5 +1,4 @@
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
-local asset_helper = asset.require("util/asset_helper")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
@@ -150,6 +149,29 @@ local Station6Frag3Model = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, {
-  Station6Frag1Holder, Station6Frag1Model, Station6Frag23Holder, Station6Frag2Model, Station6Frag3Model,
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Station6Frag1Holder)
+  asset.registerIdentifierWithMeta(Station6Frag1Holder.Identifier)
+  openspace.addSceneGraphNode(Station6Frag1Model)
+  asset.registerIdentifierWithMeta(Station6Frag1Model.Identifier)
+  openspace.addSceneGraphNode(Station6Frag23Holder)
+  asset.registerIdentifierWithMeta(Station6Frag23Holder.Identifier)
+  openspace.addSceneGraphNode(Station6Frag2Model)
+  asset.registerIdentifierWithMeta(Station6Frag2Model.Identifier)
+  openspace.addSceneGraphNode(Station6Frag3Model)
+  asset.registerIdentifierWithMeta(Station6Frag3Model.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Station6Frag3Model.Identifier)
+  openspace.removeSceneGraphNode(Station6Frag2Model.Identifier)
+  openspace.removeSceneGraphNode(Station6Frag23Holder.Identifier)
+  openspace.removeSceneGraphNode(Station6Frag1Model.Identifier)
+  openspace.removeSceneGraphNode(Station6Frag1Holder.Identifier)
+end)
+    
+asset.export(Station6Frag1Holder.Identifier, Station6Frag1Holder)
+asset.export(Station6Frag1Model.Identifier, Station6Frag1Model)
+asset.export(Station6Frag23Holder.Identifier, Station6Frag23Holder)
+asset.export(Station6Frag2Model.Identifier, Station6Frag2Model)
+asset.export(Station6Frag3Model.Identifier, Station6Frag3Model)

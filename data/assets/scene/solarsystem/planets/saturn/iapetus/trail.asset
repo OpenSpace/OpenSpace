@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 
 
@@ -27,7 +26,17 @@ local IapetusTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { IapetusTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(IapetusTrail)
+  asset.registerIdentifierWithMeta(IapetusTrail.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IapetusTrail.Identifier)
+end)
+  
+asset.export(IapetusTrail.Identifier, IapetusTrail)
+
 
 
 asset.meta = {

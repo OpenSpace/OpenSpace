@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sharedSssb = asset.require("./sssb_shared")
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset, "encke-type_comet",
@@ -13,7 +12,17 @@ object.GUI.Description = [[ Comets with a Tisserand's parameter with respect to 
   greater than 3 and a semi-major axis less than that of Jupiter. ]]
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+  asset.registerIdentifierWithMeta(object.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object.Identifier)
+end)
+  
+asset.export(object.Identifier, object)
+  
 
 
 asset.meta = {

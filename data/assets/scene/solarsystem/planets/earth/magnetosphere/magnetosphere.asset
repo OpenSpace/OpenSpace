@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms_magnetosphere")
 local transferFunction = asset.localResource("./CMR-illuminance2.txt")
 
@@ -37,7 +36,17 @@ local earthMagnetosphere = {
   },
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(earthMagnetosphere)
+  asset.registerIdentifierWithMeta(earthMagnetosphere.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(earthMagnetosphere.Identifier)
+end)
+  
+asset.export(earthMagnetosphere.Identifier, earthMagnetosphere)
+
 
 asset.meta = {
   Name = "Static generic magnetosphere of fieldlines",

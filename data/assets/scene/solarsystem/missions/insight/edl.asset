@@ -1,6 +1,5 @@
 asset.require("spice/base")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 local models = asset.syncedResource({
   Name = "Insight Models Chutes",
@@ -796,7 +795,7 @@ local Insight_Trail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local objects = {
   InsightParent, Insight, Insight_Entry_CapsuleA, Insight_Entry_Capsule_Ring,
   Insight_Entry_Capsule_Plugs, Insight_Entry_Heatshield, Insight_Parachute_0,
   Insight_Parachute_Cords_0, Insight_Parachute_20, Insight_Parachute_Cords_20,
@@ -808,4 +807,22 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   Insight_Panels_Stowed_tex, Insight_Panels_Stowed_tex2, Insight_Panels_Stowed_AO01,
   Insight_Panels_Deployed_tex, Insight_Panels_Deployed_tex2,
   Insight_Panels_Deployed_AO06, Insight_Trail
-})
+}
+
+asset.onInitialize(function()
+  for _, node in ipairs(objects) do
+    openspace.addSceneGraphNode(node)
+    sceneAsset.registerIdentifierWithMeta(node.Identifier);
+  end
+end)
+    
+asset.onDeinitialize(function()
+  for i = #objects, 1, -1 do
+    local node = objects[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
+end)
+
+for _, node in ipairs(objects) do
+  asset.export(node.Identifier, node)
+end

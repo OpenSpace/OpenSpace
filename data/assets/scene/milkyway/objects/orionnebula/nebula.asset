@@ -1,9 +1,19 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
-local center = sunTransforms.SolarSystemBarycenter.Identifier;
-local LIGHTS = assetHelper.getDefaultLightSources(center);
+local LIGHTS = {
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
+}
 
 local sync = asset.syncedResource({
   Name = "Orion Nebula Model",
@@ -134,12 +144,29 @@ local OrionNebulaProplydsModel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  NebulaHolder,
-  OrionNebulaModel,
-  OrionNebulaShocksModel,
-  OrionNebulaProplydsModel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NebulaHolder)
+  asset.registerIdentifierWithMeta(NebulaHolder.Identifier)
+  openspace.addSceneGraphNode(OrionNebulaModel)
+  asset.registerIdentifierWithMeta(OrionNebulaModel.Identifier)
+  openspace.addSceneGraphNode(OrionNebulaShocksModel)
+  asset.registerIdentifierWithMeta(OrionNebulaShocksModel.Identifier)
+  openspace.addSceneGraphNode(OrionNebulaProplydsModel)
+  asset.registerIdentifierWithMeta(OrionNebulaProplydsModel.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionNebulaProplydsModel.Identifier)
+  openspace.removeSceneGraphNode(OrionNebulaShocksModel.Identifier)
+  openspace.removeSceneGraphNode(OrionNebulaModel.Identifier)
+  openspace.removeSceneGraphNode(NebulaHolder.Identifier)
+end)
+  
+asset.export(NebulaHolder.Identifier, NebulaHolder)
+asset.export(OrionNebulaModel.Identifier, OrionNebulaModel)
+asset.export(OrionNebulaShocksModel.Identifier, OrionNebulaShocksModel)
+asset.export(OrionNebulaProplydsModel.Identifier, OrionNebulaProplydsModel)
+
 
 
 asset.meta = {

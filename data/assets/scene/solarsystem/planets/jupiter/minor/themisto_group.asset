@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local proceduralGlobes = asset.require("util/procedural_globe")
 local transforms = asset.require("../transforms")
 local kernel = asset.require("../kernels").jup341
@@ -35,10 +34,25 @@ local themistoGroup = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(
-  asset,
-  proceduralGlobes.createGlobes(themistoGroup)
-)
+local nodes = proceduralGlobes.createGlobes(themistoGroup)
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier);
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
+end)
+  
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end
 
 
 asset.meta = {

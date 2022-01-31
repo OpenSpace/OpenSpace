@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -20,7 +19,17 @@ local MarsBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsBarycenter })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MarsBarycenter)
+  asset.registerIdentifierWithMeta(MarsBarycenter.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsBarycenter.Identifier)
+end)
+  
+asset.export(MarsBarycenter.Identifier, MarsBarycenter)
+
 
 
 asset.meta = {

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures").TexturesPath
 
@@ -21,7 +20,17 @@ local HabitableZone = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HabitableZone })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HabitableZone)
+  asset.registerIdentifierWithMeta(HabitableZone.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HabitableZone.Identifier)
+end)
+  
+asset.export(HabitableZone.Identifier, HabitableZone)
+
 
 asset.meta = {
   Name = "Sun Habitable Zone",

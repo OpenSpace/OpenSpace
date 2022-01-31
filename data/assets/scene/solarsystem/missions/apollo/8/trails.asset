@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local kernels = asset.require("./kernels").kernels
@@ -79,4 +77,21 @@ local EarthBarycenterTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { LaunchTrail, MoonTrail, EarthBarycenterTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(LaunchTrail)
+  asset.registerIdentifierWithMeta(LaunchTrail.Identifier)
+  openspace.addSceneGraphNode(MoonTrail)
+  asset.registerIdentifierWithMeta(MoonTrail.Identifier)
+  openspace.addSceneGraphNode(EarthBarycenterTrail)
+  asset.registerIdentifierWithMeta(EarthBarycenterTrail.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthBarycenterTrail.Identifier)
+  openspace.removeSceneGraphNode(MoonTrail.Identifier)
+  openspace.removeSceneGraphNode(LaunchTrail.Identifier)
+end)
+    
+asset.export(LaunchTrail.Identifier, LaunchTrail)
+asset.export(MoonTrail.Identifier, MoonTrail)
+asset.export(EarthBarycenterTrail.Identifier, EarthBarycenterTrail)

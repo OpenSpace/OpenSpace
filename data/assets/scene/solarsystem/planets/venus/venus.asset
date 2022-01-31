@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
@@ -78,7 +77,21 @@ local VenusLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Venus)
+  asset.registerIdentifierWithMeta(Venus.Identifier)
+  openspace.addSceneGraphNode(VenusLabel)
+  asset.registerIdentifierWithMeta(VenusLabel.Identifier)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusLabel.Identifier)
+  openspace.removeSceneGraphNode(Venus.Identifier)
+end)
+    
+asset.export(Venus.Identifier, Venus)
+asset.export(VenusLabel.Identifier, VenusLabel)
+
 
 
 asset.meta = {

@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -52,7 +51,17 @@ local Rhea = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Rhea)
+  asset.registerIdentifierWithMeta(Rhea.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Rhea.Identifier)
+end)
+  
+asset.export(Rhea.Identifier, Rhea)
+
 
 
 asset.meta = {

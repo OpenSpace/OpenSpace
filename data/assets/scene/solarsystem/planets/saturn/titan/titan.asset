@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -52,7 +51,17 @@ local Titan = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Titan)
+  asset.registerIdentifierWithMeta(Titan.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Titan.Identifier)
+end)
+  
+asset.export(Titan.Identifier, Titan)
+
 
 
 asset.meta = {

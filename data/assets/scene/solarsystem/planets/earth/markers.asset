@@ -1,5 +1,4 @@
 local transforms = asset.require("./transforms")
-local assetHelper = asset.require("util/asset_helper")
 
 
 local texturesPath = asset.syncedResource({
@@ -27,7 +26,17 @@ local EarthMarker = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthMarker)
+  asset.registerIdentifierWithMeta(EarthMarker.Identifier)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMarker.Identifier)
+end)
+  
+asset.export(EarthMarker.Identifier, EarthMarker)
+
 
 
 asset.meta = {
