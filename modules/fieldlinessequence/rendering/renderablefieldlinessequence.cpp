@@ -343,20 +343,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             sourcePath.string()
         ));
     }
-    else {
-        _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
-    }
-
-    _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
-    if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
-        _outputFolderPath.clear();
-        LERROR(fmt::format(
-            "The specified output path: '{}', does not exist", _outputFolderPath
-        ));
-    }
-
-    _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
-}
 
     // Extract all file paths from the provided folder
     namespace fs = std::filesystem;

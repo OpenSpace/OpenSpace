@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/rendering/renderablemovingfieldlines.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>

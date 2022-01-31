@@ -35,6 +35,7 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+#pragma optimize("", off)
 
 constexpr const char* _loggerCat = "MovingFiledlinesHelper[ Kameleon ]";
 
