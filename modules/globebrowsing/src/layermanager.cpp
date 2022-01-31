@@ -98,6 +98,16 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
     try {
         return _layerGroups[groupId]->addLayer(layerDict);
     }
+    catch (const documentation::SpecificationError& e) {
+        LERRORC(e.component, e.message);
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, ghoul::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        }
+        return nullptr;
+    }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
         return nullptr;

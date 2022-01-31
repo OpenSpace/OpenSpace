@@ -124,6 +124,9 @@ void SpaceModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
+        HorizonsTranslation::Documentation(),
+        KeplerTranslation::Documentation(),
+        planetgeometry::PlanetGeometry::Documentation(),
         RenderableConstellationBounds::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
@@ -132,13 +135,10 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableSmallBody::Documentation(),
         RenderableStars::Documentation(),
         RenderableTravelSpeed::Documentation(),
+        planetgeometry::SimpleSphereGeometry::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        KeplerTranslation::Documentation(),
-        TLETranslation::Documentation(),
-        HorizonsTranslation::Documentation(),
-        planetgeometry::PlanetGeometry::Documentation(),
-        planetgeometry::SimpleSphereGeometry::Documentation()
+        TLETranslation::Documentation()
     };
 }
 

@@ -43,6 +43,8 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
+    static documentation::Documentation Documentation();
+
 private:
     std::unique_ptr<DefaultTileProvider> _currentTileProvider = nullptr;
 

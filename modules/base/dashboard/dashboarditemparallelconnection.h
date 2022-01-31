@@ -39,6 +39,8 @@ public:
     void render(glm::vec2& penPosition) override;
 
     glm::vec2 size() const override;
+
+    static documentation::Documentation Documentation();
 };
 
 } // namespace openspace

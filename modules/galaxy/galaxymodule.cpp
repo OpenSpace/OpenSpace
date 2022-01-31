@@ -50,7 +50,9 @@ void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> GalaxyModule::documentations() const {
     return {
-        RenderableGalaxy::Documentation()
+        RenderableGalaxy::Documentation(),
+        MilkywayConversionTask::Documentation(),
+        MilkywayPointsConversionTask::Documentation()
     };
 }
 

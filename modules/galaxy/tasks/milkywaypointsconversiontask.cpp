@@ -90,7 +90,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     out.close();
 }
 
-documentation::Documentation MilkywayPointsConversionTask::documentation() {
+documentation::Documentation MilkywayPointsConversionTask::Documentation() {
     return documentation::Documentation();
 }
 
