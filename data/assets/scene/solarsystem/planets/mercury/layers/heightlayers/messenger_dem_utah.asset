@@ -1,0 +1,14 @@
+local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+
+local layer = {
+  Identifier = "Messenger_DEM_Utah",
+  Name = "Messenger DEM [Utah]",
+  FilePath = asset.localResource("messenger_dem_utah.wms"),
+  TilePixelSize = 64
+}
+
+asset.onInitialize(function () 
+  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)

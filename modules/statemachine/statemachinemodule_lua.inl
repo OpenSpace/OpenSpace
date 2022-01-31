@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,15 @@ int createStateMachine(lua_State* L) {
         std::move(transitions),
         std::move(startState)
     );
+    return 0;
+}
+
+
+int destroyStateMachine(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::destroyStateMachine");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    module->deinitializeStateMachine();
     return 0;
 }
 

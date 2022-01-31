@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,8 @@ namespace {
     constexpr const double AvoidCollisionDistanceRadiusMultiplier = 3.0;
     constexpr const double CollisionBufferSizeRadiusMultiplier = 1.0;
     constexpr const int MaxAvoidCollisionSteps = 10;
+
+    constexpr const double Epsilon = 1e-5;
 } // namespace
 
 namespace openspace::interaction {
@@ -76,20 +78,26 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
         _points.push_back(newPos);
     }
 
-    // Add point for moving out if the end state is in opposite direction
-    glm::dvec3 startToEnd = end.position() - start.position();
-    double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
-    bool targetInOppositeDirection = cosAngleToTarget > 0.7;
+    const glm::dvec3 startToEnd = end.position() - start.position();
 
-    if (targetInOppositeDirection) {
-        const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
-        const glm::dvec3 middleViewDir = ghoul::viewDirection(midleRot);
-        const double stepOutDistance = 0.4 * glm::length(startToEnd);
+    // Add point for moving out if the end state is far away and in opposite direction.
+    // This helps with avoiding fast rotation in the center of the path
+    const double maxRadius = std::max(startNodeRadius, endNodeRadius);
+    bool nodesAreDifferent = start.nodeIdentifier() != end.nodeIdentifier();
+    if (glm::length(startToEnd) >  0.5 * maxRadius && nodesAreDifferent) {
+        double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
+        bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
-        glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
-            stepOutDistance * glm::normalize(middleViewDir);
+        if (targetInOppositeDirection) {
+            const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
+            const glm::dvec3 middleViewDir = ghoul::viewDirection(midleRot);
+            const double stepOutDistance = 0.4 * glm::length(startToEnd);
 
-        _points.push_back(newPos);
+            glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
+                stepOutDistance * glm::normalize(middleViewDir);
+
+            _points.push_back(newPos);
+        }
     }
 
     // Add an extra point to approach target
@@ -119,10 +127,14 @@ void AvoidCollisionCurve::removeCollisions(int step) {
         return;
     }
 
-    const int nSegments = static_cast<int>( _points.size() - 3);
+    const int nSegments = static_cast<int>(_points.size() - 3);
     for (int i = 0; i < nSegments; ++i) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];
+
+        if (glm::distance(lineEnd, lineStart) - Epsilon < 0.0) {
+            continue; // Start and end position are the same. Go to next segment
+        }
 
         for (SceneGraphNode* node : _relevantNodes) {
             // Do collision check in relative coordinates, to avoid huge numbers

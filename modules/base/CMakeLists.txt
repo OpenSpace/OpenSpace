@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -50,8 +50,10 @@ set(HEADER_FILES
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
+  rendering/renderableplanetimevaryingimage.h
   rendering/renderableprism.h
   rendering/renderablesphere.h
+  rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
   rendering/renderabletrailtrajectory.h
@@ -102,8 +104,10 @@ set(SOURCE_FILES
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
+  rendering/renderableplanetimevaryingimage.cpp
   rendering/renderableprism.cpp
   rendering/renderablesphere.cpp
+  rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
   rendering/renderabletrailtrajectory.cpp

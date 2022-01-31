@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
@@ -405,6 +406,7 @@ void TimeManager::setTimeNextFrame(Time t) {
     _shouldSetTime = true;
     _timeNextFrame = std::move(t);
     clearKeyframes();
+    global::scriptScheduler->setCurrentTime(t.j2000Seconds());
 }
 
 void TimeManager::setDeltaTime(double deltaTime) {

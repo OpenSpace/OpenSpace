@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
   Identifier = "ClemUvvis_Utah",
   Name = "Clem Uvvis [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms",
+  FilePath = asset.localResource("clemuvvis_utah.wms"),
   Settings = {
     Gamma = 1.14,
     Multiplier = 1.4

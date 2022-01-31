@@ -1,5 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
 
@@ -11,8 +11,8 @@ local kernelsFolder = asset.syncedResource({
 })
 
 local kernelsList = {
-  kernelsFolder .. '/p11-a.bsp',
-  kernelsFolder .. '/p11_sat336.bsp'
+  kernelsFolder .. "p11-a.bsp",
+  kernelsFolder .. "p11_sat336.bsp"
 }
 
 local Pioneer11NAIF = "-24"

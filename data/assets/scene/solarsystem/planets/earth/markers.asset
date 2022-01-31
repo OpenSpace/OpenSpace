@@ -1,8 +1,13 @@
-local transforms = asset.require('./transforms')
-local assetHelper = asset.require('util/asset_helper')
-local texturesPath = asset.require('./earth_textures').TexturesPath
+local transforms = asset.require("./transforms")
+local assetHelper = asset.require("util/asset_helper")
 
 
+local texturesPath = asset.syncedResource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 2
+})
 
 local EarthMarker = {
   Identifier = "EarthMarker",
@@ -13,7 +18,7 @@ local EarthMarker = {
     Size = 3.0E11,
     Origin = "Center",
     Billboard = true,
-    Texture = texturesPath .. "/marker.png",
+    Texture = texturesPath .. "marker.png",
     BlendMode = "Additive"
   },
   GUI = {

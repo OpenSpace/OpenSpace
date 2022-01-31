@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,6 +67,11 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
         LERROR(ghoul::to_string(e.result));
         LERROR(fmt::format("Error loading state machine: {}", e.what()));
     }
+}
+
+void StateMachineModule::deinitializeStateMachine() {
+    _machine.reset();
+    _machine = nullptr;
 }
 
 bool StateMachineModule::hasStateMachine() const {
@@ -141,7 +146,6 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
          {
             "createStateMachine",
             &luascriptfunctions::createStateMachine,
-            {},
             "table, table, [string]",
             "Creates a state machine from a list of states and transitions. See State "
             "and Transition documentation for details. The optional thrid argument is "
@@ -149,9 +153,14 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "in the list will be used."
         },
         {
+            "destroyStateMachine",
+            &luascriptfunctions::destroyStateMachine,
+            "",
+            "Destroys the current state machine and deletes all the memory."
+        },
+        {
             "goToState",
             &luascriptfunctions::goToState,
-            {},
             "string",
             "Triggers a transition from the current state to the state with the given "
             "identifier. Requires that the specified string corresponds to an existing "
@@ -160,7 +169,6 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "setInitialState",
             &luascriptfunctions::setInitialState,
-            {},
             "string",
             "Immediately sets the current state to the state with the given name, if "
             "it exists. This is done without doing a transition and completely ignores "
@@ -169,14 +177,12 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "currentState",
             &luascriptfunctions::currentState,
-            {},
             "",
             "Returns the string name of the current state that the statemachine is in."
         },
         {
             "possibleTransitions",
             &luascriptfunctions::possibleTransitions,
-            {},
             "",
             "Returns a list with the identifiers of all the states that can be "
             "transitioned to from the current state."
@@ -184,7 +190,6 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "canGoToState",
             &luascriptfunctions::canGoToState,
-            {},
             "string",
             "Returns true if there is a defined transition between the current state and "
             "the given string name of a state, otherwise false"
@@ -192,7 +197,6 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "printCurrentStateInfo",
             &luascriptfunctions::printCurrentStateInfo,
-            {},
             "",
             "Prints information about the current state and possible transitions to the "
             "log."
@@ -200,7 +204,6 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
         {
             "saveToDotFile",
             &luascriptfunctions::saveToDotFile,
-            {},
             "string, [string]",
             "Saves the current state machine to a .dot file as a directed graph. The "
             "resulting graph can be rendered using external tools such as Graphviz. "

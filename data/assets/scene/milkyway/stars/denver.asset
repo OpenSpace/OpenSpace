@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+local assetHelper = asset.require("util/asset_helper")
 
 
 
@@ -27,9 +27,9 @@ local object = {
   Identifier = "Stars-Denver",
   Renderable = {
     Type = "RenderableStars",
-    File = speck .. "/denver_stars.speck",
-    Texture = textures .. "/halo.png",
-    ColorMap = colorLUT .. "/denver_colorbv.cmap",
+    File = speck .. "denver_stars.speck",
+    Texture = textures .. "halo.png",
+    ColorMap = colorLUT .. "denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based", -- or PSF

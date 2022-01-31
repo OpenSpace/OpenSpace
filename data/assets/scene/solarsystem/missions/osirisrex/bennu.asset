@@ -1,7 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local models = asset.require('./models').models
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+local models = asset.syncedResource({
+  Name = "Bennu Models",
+  Type = "HttpSynchronization",
+  Identifier = "bennu_models",
+  Version = 2
+})
 
 local BENNU_BODY = "2101955"
 
@@ -28,7 +34,7 @@ local Bennu = {
     Enabled = false,
     Type = "RenderableModel",
     Body = BENNU_BODY,
-    GeometryFile = models .. "/Bennu_v20_200k_an.obj",
+    GeometryFile = models .. "Bennu_v20_200k_an.obj",
     LightSources = LightSources,
     SpecularIntensity = 0.0
   },

@@ -1,9 +1,16 @@
-local texturesPath = asset.require("./../../sun_textures").TexturesPath
-local globeIdentifier = asset.require("./../../sun").Sun.Identifier
+local globeIdentifier = asset.require("../../sun").Sun.Identifier
+
+
+local texturesPath = asset.syncedResource({
+  Type = "HttpSynchronization",
+  Name = "Sun textures",
+  Identifier = "sun_textures",
+  Version = 4
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/sun.jpg",
+  FilePath = texturesPath .. "sun.jpg",
 }
 
 asset.onInitialize(function () 

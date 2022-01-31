@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@ in vec2 vs_st;
 uniform sampler2D texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
+uniform bool mirrorBackside = true;
 uniform vec3 multiplyColor;
 
 Fragment getFragment() {
@@ -40,7 +41,12 @@ Fragment getFragment() {
         frag.color = texture(texture1, vs_st);
     }
     else {
-        frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+        if (mirrorBackside) {
+            frag.color = texture(texture1, vec2(1.0 - vs_st.s, vs_st.t));
+        }
+        else {
+            frag.color = texture(texture1, vs_st);
+        }
     }
 
     frag.color.rgb *= multiplyColor;

@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "HiRISE-LS",
   Name = "HiRISE Local Set",
-  FilePath = mapServiceConfigs .. "/ESRI/HiRISE/HiRISELS.vrt",
+  FilePath = asset.localResource("hirisels.vrt"),
   BlendMode = "Color",
   Description = [[ HiRISE (High Resolution Imaging Science Experiment) is the most
     powerful camera ever sent to another planet, one of six instruments onboard the

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_modelprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)

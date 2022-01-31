@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -185,7 +185,7 @@ namespace {
 
         // Extra variables such as rho, p or t
         std::optional<std::vector<std::string>> extraVariables;
-        
+
         // Which variable in CDF file to trace. b is default for fieldline
         std::optional<std::string> tracingVariable;
 
@@ -343,6 +343,20 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             sourcePath.string()
         ));
     }
+    else {
+        _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
+    }
+
+    _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
+    if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
+        _outputFolderPath.clear();
+        LERROR(fmt::format(
+            "The specified output path: '{}', does not exist", _outputFolderPath
+        ));
+    }
+
+    _scalingFactor = p.scaleToMeters.value_or(_scalingFactor);
+}
 
     // Extract all file paths from the provided folder
     namespace fs = std::filesystem;

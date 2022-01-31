@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -134,7 +134,7 @@ void create() {
     ghoul_assert(eventEngine, "No eventEngine");
     currentPos += sizeof(EventEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
-    downloadManager = new EventEngine;
+    eventEngine = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -391,6 +391,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
+    rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);

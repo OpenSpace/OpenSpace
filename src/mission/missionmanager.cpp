@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,28 +111,24 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
             {
                 "loadMission",
                 &luascriptfunctions::loadMission,
-                {},
                 "string",
                 "Load mission phases from file"
             },
             {
                 "unloadMission",
                 &luascriptfunctions::unloadMission,
-                {},
                 "string",
                 "Unloads a previously loaded mission"
             },
             {
                 "hasMission",
                 &luascriptfunctions::hasMission,
-                {},
                 "string",
                 "Returns whether a mission with the provided name has been loaded"
             },
             {
                 "setCurrentMission",
                 &luascriptfunctions::setCurrentMission,
-                {},
                 "string",
                 "Set the currnet mission"
             },

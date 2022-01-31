@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -299,6 +299,10 @@ int unzipFile(lua_State* L) {
     source = absPath(source).string();
     dest = absPath(dest).string();
     deleteSource = deleteSource.value_or(false);
+
+    if (!std::filesystem::exists(source)) {
+        return luaL_error(L, "Source file was not found");
+    }
 
     int arg = 2;
     zip_extract(source.c_str(), dest.c_str(), [](const char*, void*) { return 0; }, &arg);

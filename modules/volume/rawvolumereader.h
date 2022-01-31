@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ public:
     void setDimensions(const glm::uvec3& dimensions);
     //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
     //VoxelType get(const size_t index) const; // TODO: Implement this
-    std::unique_ptr<RawVolume<VoxelType>> read();
+    std::unique_ptr<RawVolume<VoxelType>> read(bool invertZ = false);
 
 private:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;

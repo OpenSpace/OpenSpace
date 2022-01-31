@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,16 +56,22 @@ int loadFile(lua_State* L) {
 }
 
 int loadScheduledScript(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::loadScheduledScript");
-    auto [time, forwardScript, backwardScript, universalScript] = ghoul::lua::values<
-        std::string, std::string, std::optional<std::string>, std::optional<std::string>
-    >(L);
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::loadScheduledScript");
+    auto [time, forwardScript, backwardScript, universalScript, group] =
+        ghoul::lua::values<
+            std::string,
+            std::string,
+            std::optional<std::string>,
+            std::optional<std::string>,
+            std::optional<int>
+        >(L);
 
     scripting::ScriptScheduler::ScheduledScript script;
     script.time = Time::convertTime(time);
     script.forwardScript = std::move(forwardScript);
     script.backwardScript = backwardScript.value_or(script.backwardScript);
     script.universalScript = universalScript.value_or(script.universalScript);
+    script.group = group.value_or(script.group);
 
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
@@ -92,8 +98,10 @@ int setModeSimulationTime(lua_State* L) {
 }
 
 int clear(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
-    global::scriptScheduler->clearSchedule();
+    ghoul::lua::checkArgumentsAndThrow(L, { 0, 1 }, "lua::clear");
+    std::optional<int> group = ghoul::lua::value<std::optional<int>>(L);
+
+    global::scriptScheduler->clearSchedule(group);
     return 0;
 }
 

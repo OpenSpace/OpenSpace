@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,6 +89,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
         global::timeManager->time().j2000Seconds(),
         _timeFormat.value().c_str()
     );
+
     try {
         RenderFont(*_font, penPosition, fmt::format(_formatString.value().c_str(), time));
     }

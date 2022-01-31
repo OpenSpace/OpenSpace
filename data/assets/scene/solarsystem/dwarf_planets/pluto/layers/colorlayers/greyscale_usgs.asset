@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../pluto").Pluto.Identifier
+local globeIdentifier = asset.require("../../pluto").Pluto.Identifier
 
 local layer = {
   Identifier = "Greyscale_USGS",

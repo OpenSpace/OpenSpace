@@ -1,10 +1,15 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
-local labelsPath = asset.require('./pluto_globelabels').LabelsPath
+asset.require("./trail")
 
 
+local labelsPath = asset.syncedResource({
+  Name = "Pluto Labels",
+  Type = "HttpSynchronization",
+  Identifier = "pluto_labels",
+  Version = 1
+})
 
 local Pluto = {
   Identifier = "Pluto",
@@ -28,7 +33,7 @@ local Pluto = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/pluto.labels",
+      FileName = labelsPath .. "pluto.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 8.5,

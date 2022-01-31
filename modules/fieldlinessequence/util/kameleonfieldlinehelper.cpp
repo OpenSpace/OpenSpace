@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,7 +75,7 @@ namespace openspace::fls {
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
                    const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap,
                    double manualTimeOffset, const std::string& tracingVar,
-                   std::vector<std::string>& extraVars, 
+                   std::vector<std::string>& extraVars,
                    std::vector<std::string>& extraMagVars)
 {
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -83,7 +83,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = 
+    std::unique_ptr<ccmc::Kameleon> kameleon =
         kameleonHelper::createKameleonObject(cdfPath);
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
@@ -91,7 +91,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     state.setTriggerTime(cdfDoubleTime);
 
     // get time as string.
-    std::string cdfStringTime = 
+    std::string cdfStringTime =
         SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime, "YYYYMMDDHRMNSC::RND");
 
     // use time as string for picking seedpoints from seedm
@@ -289,7 +289,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && 
+            (model == fls::Model::Batsrus &&
                 (str == TAsPOverRho || str == "T" || str == "t"))
             )
         {

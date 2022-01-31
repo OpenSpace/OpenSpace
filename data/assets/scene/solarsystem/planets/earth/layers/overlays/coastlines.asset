@@ -1,9 +1,8 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
   Identifier = "Coastlines",
-  FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
+  FilePath = asset.localResource("coastlines.wms")
 }
 
 asset.onInitialize(function () 

@@ -1,6 +1,6 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
+local transforms = asset.require("../transforms")
+local assetHelper = asset.require("util/asset_helper")
+local kernel = asset.require("../kernels").sat375
 
 
 

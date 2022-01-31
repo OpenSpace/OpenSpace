@@ -1,7 +1,0 @@
-local TexturesPath = asset.syncedResource({
-  Name = "Enceladus textures",
-  Type = "HttpSynchronization",
-  Identifier = "enceladus_textures",
-  Version = 1
-})
-asset.export("TexturesPath", TexturesPath)

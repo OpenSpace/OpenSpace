@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -136,6 +136,7 @@ bool DataCygnet::updateTexture() {
             std::unique_ptr<Texture> texture = std::make_unique<Texture>(
                 values,
                 _textureDimensions,
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::Red,
                 GL_RED,
                 GL_FLOAT,
