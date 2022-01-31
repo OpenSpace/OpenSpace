@@ -58,7 +58,6 @@ public:
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
     void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
     void showWindowLabel(const bool show);
-    void cleanupLayouts();
     QVBoxLayout* initializeLayout();
     QRectF& dimensions();
     QLineEdit* lineEditSizeWidth();
@@ -110,6 +109,7 @@ private slots:
     void onWebGuiSelection(int selectionState);
 
 private:
+    void createWidgets(QWidget* parent);
     template <typename T>
     void enableProjectionOption(T* comboModel, int selectionIndex, bool enable);
     void updateScaledWindowDimensions();
@@ -149,67 +149,28 @@ private:
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
     const QString* _colorsForWindows = nullptr;
-
-    QVBoxLayout* _layoutWindowCtrl = nullptr;
     QVBoxLayout* _layoutFullWindow = nullptr;
-
-    QHBoxLayout* _layoutWinNum = nullptr;
     QLabel* _labelWinNum = nullptr;
-
     QLineEdit* _size_x = nullptr;
     QLineEdit* _size_y = nullptr;
     QLineEdit* _offset_x = nullptr;
     QLineEdit* _offset_y = nullptr;
-
-    QIntValidator* _validatorSize_x = nullptr;
-    QIntValidator* _validatorSize_y = nullptr;
-    QIntValidator* _validatorOffset_x = nullptr;
-    QIntValidator* _validatorOffset_y = nullptr;
-
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;
     QCheckBox* _checkBoxWebGui = nullptr;
     QCheckBox* _checkBoxSpoutOutput = nullptr;
-
     QComboBox* _comboMonitorSelect = nullptr;
     QComboBox* _comboProjection = nullptr;
     QComboBox* _comboQuality = nullptr;
     QLabel* _labelQuality = nullptr;
     QLabel* _labelFovH = nullptr;
     QLineEdit* _lineFovH = nullptr;
-    QDoubleValidator* _validatorFovH = nullptr;
     QLabel* _labelFovV = nullptr;
     QLineEdit* _lineFovV = nullptr;
-    QDoubleValidator* _validatorFovV = nullptr;
     QLabel* _labelHeightOffset = nullptr;
     QLineEdit* _lineHeightOffset = nullptr;
-    QDoubleValidator* _validatorHeightOffset = nullptr;
-
-    QHBoxLayout* _layoutName = nullptr;
-    QLabel* _labelName = nullptr;
     QLineEdit* _windowName = nullptr;
-    QHBoxLayout* _layoutMonitorNum = nullptr;
-    QLabel* _labelSize = nullptr;
-    QLabel* _labelDelim = nullptr;
-    QHBoxLayout* _layoutSize = nullptr;
-    QWidget* _widgetSize = nullptr;
-    QHBoxLayout* _layoutOffset = nullptr;
-    QLabel* _labelOffset = nullptr;
-    QLabel* _labelComma = nullptr;
-    QHBoxLayout* _layoutCheckboxesFull1 = nullptr;
-    QVBoxLayout* _layoutCheckboxesFull2 = nullptr;
-    QVBoxLayout* _layoutProjectionGroup = nullptr;
-    QFrame* _borderProjectionGroup = nullptr;
-    QHBoxLayout* _layoutFullscreenButton = nullptr;
-    QHBoxLayout* _layoutCBoxWindowDecor = nullptr;
-    QHBoxLayout* _layoutCBoxWebGui = nullptr;
-    QHBoxLayout* _layoutComboProjection = nullptr;
-    QHBoxLayout* _layoutCBoxSpoutOutput = nullptr;
-    QHBoxLayout* _layoutComboQuality = nullptr;
-    QHBoxLayout* _layoutFovH = nullptr;
-    QHBoxLayout* _layoutFovV = nullptr;
-    QHBoxLayout* _layoutHeightOffset = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__

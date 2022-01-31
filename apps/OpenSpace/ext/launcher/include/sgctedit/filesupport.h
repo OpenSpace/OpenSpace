@@ -47,7 +47,6 @@ public:
         Display* display, Orientation* orientation,
         std::vector<sgct::config::Window>& windowList, sgct::config::Cluster& cluster,
         std::function<void(bool)> cb);
-    ~FileSupport();
     std::string saveFilename();
 
 private slots:

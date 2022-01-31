@@ -50,48 +50,39 @@ Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeLi
 }
 
 Display::~Display() {
-    delete _addWindowButton;
-    delete _removeWindowButton;
     delete _monBox;
-    for (auto f : _frameBorderLines) {
-        delete f;
-    }
     for (auto w : _windowControl) {
         delete w;
     }
-    delete _layoutMonBox;
-    delete _layoutMonButton;
-    for (auto w : _layoutWindowWrappers) {
-        delete w;
-    }
-    delete _layoutWindows;
     delete _layout;
 }
 
 void Display::initializeLayout() {
     _layout = new QVBoxLayout(this);
-    _layoutMonButton = new QHBoxLayout();
-    _layoutMonButton->addWidget(_removeWindowButton);
-    _layoutMonButton->addStretch(1);
-    _layoutMonButton->addWidget(_addWindowButton);
-    _layout->addLayout(_layoutMonButton);
-    _layoutWindows = new QHBoxLayout();
+    {
+        QHBoxLayout* layoutMonButton = new QHBoxLayout();
+        layoutMonButton->addWidget(_removeWindowButton);
+        layoutMonButton->addStretch(1);
+        layoutMonButton->addWidget(_addWindowButton);
+        _layout->addLayout(layoutMonButton);
+    }
+    QHBoxLayout* layoutWindows = new QHBoxLayout();
     _layout->addStretch();
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout());
         _layoutWindowWrappers.push_back(new QWidget());
         _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
-        _layoutWindows->addWidget(_layoutWindowWrappers.back());
+        layoutWindows->addWidget(_layoutWindowWrappers.back());
         if (i < (_nMaxWindows - 1)) {
             _frameBorderLines.push_back(new QFrame());
             _frameBorderLines.back()->setFrameShape(QFrame::VLine);
-            _layoutWindows->addWidget(_frameBorderLines.back());
+            layoutWindows->addWidget(_frameBorderLines.back());
         }
     }
     _nWindowsDisplayed = 1;
     showWindows();
-    _layout->addLayout(_layoutWindows);
+    _layout->addLayout(layoutWindows);
 }
 
 std::vector<WindowControl*> Display::windowControls() {

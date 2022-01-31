@@ -30,17 +30,7 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     , _orientationValue(orientation)
 {
     setWindowTitle("Global Orientation");
-    _layoutWindow = new QVBoxLayout(this);
-    _layoutPitch = new QHBoxLayout();
-    _layoutRoll = new QHBoxLayout();
-    _layoutYaw = new QHBoxLayout();
-
-    _labelPitch = new QLabel(this);
-    _labelRoll = new QLabel(this);
-    _labelYaw = new QLabel(this);
-    _labelPitch->setText("Pitch: ");
-    _labelRoll ->setText("Roll: ");
-    _labelYaw ->setText("Yaw: ");
+    QVBoxLayout* layoutWindow = new QVBoxLayout(this);
 
     _linePitch = new QLineEdit(this);
     _lineRoll = new QLineEdit(this);
@@ -48,46 +38,54 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     _linePitch->setText(QString::number(_orientationValue.x));
     _lineRoll->setText(QString::number(_orientationValue.z));
     _lineYaw->setText(QString::number(_orientationValue.y));
-    _validatorPitch = new QDoubleValidator(-90.0, 90.0, 15);
-    _validatorPitch->setNotation(QDoubleValidator::StandardNotation);
-    _validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
-    _validatorRoll->setNotation(QDoubleValidator::StandardNotation);
-    _validatorYaw = new QDoubleValidator(-180.0, 180.0, 15);
-    _validatorYaw->setNotation(QDoubleValidator::StandardNotation);
-    _linePitch->setValidator(_validatorPitch);
-    _lineRoll->setValidator(_validatorRoll);
-    _lineYaw->setValidator(_validatorYaw);
-
-    _layoutPitch->addStretch(1);
-    _layoutPitch->addWidget(_labelPitch);
-    _layoutPitch->addWidget(_linePitch);
-    _layoutWindow->addLayout(_layoutPitch);
-
-    _layoutRoll->addStretch(1);
-    _layoutRoll->addWidget(_labelRoll);
-    _layoutRoll->addWidget(_lineRoll);
-    _layoutWindow->addLayout(_layoutRoll);
-
-    _layoutYaw->addStretch(1);
-    _layoutYaw->addWidget(_labelYaw);
-    _layoutYaw->addWidget(_lineYaw);
-    _layoutWindow->addLayout(_layoutYaw);
-
-    _layoutButtonBox = new QHBoxLayout;
-    _buttonSave = new QPushButton("OK");
-    _buttonSave->setToolTip("Save global orientation changes");
-    _layoutButtonBox->addStretch(1);
-    _layoutButtonBox->addWidget(_buttonSave);
-
-    _buttonCancel = new QPushButton("Cancel");
-    _buttonCancel->setToolTip("Cancel global orientation changes");
-    _layoutButtonBox->addWidget(_buttonCancel);
-    _layoutButtonBox->addStretch(1);
-
-    connect(_buttonSave, SIGNAL(released()), this, SLOT(ok()));
-    connect(_buttonCancel, SIGNAL(released()), this, SLOT(cancel()));
-
-    _layoutWindow->addLayout(_layoutButtonBox);
+    {
+        QDoubleValidator* validatorPitch = new QDoubleValidator(-90.0, 90.0, 15);
+        QDoubleValidator* validatorRoll = new QDoubleValidator(-360.0, 360.0, 15);
+        QDoubleValidator* validatorYaw = new QDoubleValidator(-180.0, 180.0, 15);
+        validatorPitch->setNotation(QDoubleValidator::StandardNotation);
+        validatorRoll->setNotation(QDoubleValidator::StandardNotation);
+        validatorYaw->setNotation(QDoubleValidator::StandardNotation);
+        _linePitch->setValidator(validatorPitch);
+        _lineRoll->setValidator(validatorRoll);
+        _lineYaw->setValidator(validatorYaw);
+    }
+    {
+        QLabel* labelPitch = new QLabel(this);
+        labelPitch->setText("Pitch: ");
+        QHBoxLayout* layoutPitch = new QHBoxLayout();
+        layoutPitch->addStretch(1);
+        layoutPitch->addWidget(labelPitch);
+        layoutPitch->addWidget(_linePitch);
+        layoutWindow->addLayout(layoutPitch);
+        QLabel* labelRoll = new QLabel(this);
+        labelRoll ->setText("Roll: ");
+        QHBoxLayout* layoutRoll = new QHBoxLayout();
+        layoutRoll->addStretch(1);
+        layoutRoll->addWidget(labelRoll);
+        layoutRoll->addWidget(_lineRoll);
+        layoutWindow->addLayout(layoutRoll);
+        QLabel* labelYaw = new QLabel(this);
+        labelYaw ->setText("Yaw: ");
+        QHBoxLayout* layoutYaw = new QHBoxLayout();
+        layoutYaw->addStretch(1);
+        layoutYaw->addWidget(labelYaw);
+        layoutYaw->addWidget(_lineYaw);
+        layoutWindow->addLayout(layoutYaw);
+    }
+    {
+        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
+        QPushButton* buttonSave = new QPushButton("OK");
+        buttonSave->setToolTip("Save global orientation changes");
+        layoutButtonBox->addStretch(1);
+        layoutButtonBox->addWidget(buttonSave);
+        QPushButton* buttonCancel = new QPushButton("Cancel");
+        buttonCancel->setToolTip("Cancel global orientation changes");
+        layoutButtonBox->addWidget(buttonCancel);
+        layoutButtonBox->addStretch(1);
+        connect(buttonSave, SIGNAL(released()), this, SLOT(ok()));
+        connect(buttonCancel, SIGNAL(released()), this, SLOT(cancel()));
+        layoutWindow->addLayout(layoutButtonBox);
+    }
 }
 
 void OrientationDialog::ok() {
@@ -101,24 +99,3 @@ void OrientationDialog::ok() {
 void OrientationDialog::cancel() {
     reject();
 }
-
-OrientationDialog::~OrientationDialog()
-{
-    delete _labelPitch;
-    delete _labelRoll;
-    delete _labelYaw;
-    delete _validatorPitch;
-    delete _validatorRoll;
-    delete _validatorYaw;
-    delete _linePitch;
-    delete _lineRoll;
-    delete _lineYaw;
-    delete _buttonSave;
-    delete _buttonCancel;
-    delete _layoutPitch;
-    delete _layoutRoll;
-    delete _layoutYaw;
-    delete _layoutButtonBox;
-    delete _layoutWindow;
-}
-

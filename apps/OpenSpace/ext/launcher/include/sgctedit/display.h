@@ -81,9 +81,6 @@ private:
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
     QVBoxLayout* _layout = nullptr;
-    QHBoxLayout* _layoutMonBox = nullptr;
-    QHBoxLayout* _layoutMonButton = nullptr;
-    QHBoxLayout* _layoutWindows = nullptr;
     std::vector<QVBoxLayout*> _winCtrlLayouts;
     std::vector<QWidget*> _layoutWindowWrappers;
     std::vector<QFrame*> _frameBorderLines;

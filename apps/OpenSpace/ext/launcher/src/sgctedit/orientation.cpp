@@ -30,18 +30,18 @@ Orientation::Orientation()
 {
     _orientationDialog = new OrientationDialog(_orientationValue, this);
     _layoutOrientationFull = new QHBoxLayout();
-    _layoutOrientationControls = new QVBoxLayout();
-    _orientationButton = new QPushButton("Global Orientation");
-    _checkBoxVsync = new QCheckBox("VSync All Windows", this);
-    _layoutOrientationControls->addWidget(_checkBoxVsync);
-    _layoutOrientationControls->addWidget(_orientationButton);
-
-    _layoutOrientationFull->addStretch(1);
-    _layoutOrientationFull->addLayout(_layoutOrientationControls);
-    _layoutOrientationFull->addStretch(1);
-
-    connect(_orientationButton, SIGNAL(released()), this,
-            SLOT(orientationDialog()));
+    {
+        QVBoxLayout* layoutOrientationControls = new QVBoxLayout();
+        QPushButton* orientationButton = new QPushButton("Global Orientation");
+        _checkBoxVsync = new QCheckBox("VSync All Windows", this);
+        layoutOrientationControls->addWidget(_checkBoxVsync);
+        layoutOrientationControls->addWidget(orientationButton);
+        _layoutOrientationFull->addStretch(1);
+        _layoutOrientationFull->addLayout(layoutOrientationControls);
+        _layoutOrientationFull->addStretch(1);
+        connect(orientationButton, SIGNAL(released()), this,
+                SLOT(orientationDialog()));
+    }
 }
 
 void Orientation::addButtonToLayout(QVBoxLayout* parentLayout) {
@@ -63,7 +63,5 @@ bool Orientation::vsyncValue() {
 Orientation::~Orientation()
 {
     delete _orientationDialog;
-    delete _orientationButton;
-    delete _checkBoxVsync;
-    delete _layoutOrientationControls;
+    delete _layoutOrientationFull;
 }

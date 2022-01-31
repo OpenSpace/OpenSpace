@@ -36,32 +36,35 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     , _finishedCallback(cb)
 {
     QVBoxLayout* layoutFullVertical = new QVBoxLayout();
-    QHBoxLayout* layoutFilename = new QHBoxLayout();
     _lineFilename = new QLineEdit();
     _lineFilename->setFixedWidth(190);
-    QLabel* labelFilename = new QLabel();
-    labelFilename->setText("Filename: ");
-    layoutFilename->addStretch(1);
-    layoutFilename->addWidget(labelFilename);
-    layoutFilename->addWidget(_lineFilename);
-    layoutFilename->addStretch(1);
-    _layoutButtonBox = new QHBoxLayout;
+    {
+        QHBoxLayout* layoutFilename = new QHBoxLayout();
+        QLabel* labelFilename = new QLabel();
+        labelFilename->setText("Filename: ");
+        layoutFilename->addStretch(1);
+        layoutFilename->addWidget(labelFilename);
+        layoutFilename->addWidget(_lineFilename);
+        layoutFilename->addStretch(1);
+        layoutFullVertical->addLayout(layoutFilename);
+    }
     _saveButton = new QPushButton("Save");
     _saveButton->setToolTip("Save global orientation changes");
-    _layoutButtonBox->addStretch(1);
-    _layoutButtonBox->addWidget(_saveButton);
+    connect(_saveButton, SIGNAL(released()), this, SLOT(save()));
+    _saveButton->setEnabled(false);
     _cancelButton = new QPushButton("Cancel");
     _cancelButton->setToolTip("Cancel global orientation changes");
-    _layoutButtonBox->addWidget(_cancelButton);
-    layoutFullVertical->addLayout(layoutFilename);
-    layoutFullVertical->addLayout(_layoutButtonBox);
-    parentLayout->addLayout(layoutFullVertical);
-    connect(_saveButton, SIGNAL(released()), this, SLOT(save()));
     connect(_cancelButton, SIGNAL(released()), this, SLOT(cancel()));
+    {
+        QHBoxLayout* layoutButtonBox = new QHBoxLayout;
+        layoutButtonBox->addStretch(1);
+        layoutButtonBox->addWidget(_saveButton);
+        layoutButtonBox->addWidget(_cancelButton);
+        layoutFullVertical->addLayout(layoutButtonBox);
+    }
+    parentLayout->addLayout(layoutFullVertical);
     connect(_lineFilename, SIGNAL(textEdited(const QString&)), this,
         SLOT(filenameEdited(const QString&)));
-    _saveButton->setEnabled(false);
-    _cluster.masterAddress = "localhost";
 }
 
 void FileSupport::saveCluster() {
@@ -71,6 +74,7 @@ void FileSupport::saveCluster() {
         if (_cluster.nodes.size() == 0) {
             _cluster.nodes.push_back(sgct::config::Node());
         }
+        _cluster.masterAddress = "localhost";
         _cluster.nodes.back().address = "localhost";
         _cluster.nodes.back().port = 20401;
         _cluster.scene = std::move(initScene);
@@ -154,7 +158,7 @@ void FileSupport::saveWindowsWebGui(unsigned int wIdx) {
             _windowList.back().tags.push_back("GUI");
         }
         _windowList.back().draw2D = (wIdx == webGuiWindowIndex);
-        _windowList.back().draw3D = !_windowList.back().draw2D;
+        _windowList.back().draw3D = !(_windowList.back().draw2D.value());
     }
 }
 
@@ -272,12 +276,3 @@ void FileSupport::save() {
 void FileSupport::cancel() {
     _finishedCallback(false);
 }
-
-FileSupport::~FileSupport()
-{
-    delete _saveButton;
-    delete _cancelButton;
-    delete _lineFilename;
-    delete _layoutButtonBox;
-}
-
