@@ -3,9 +3,12 @@ local transforms = asset.require("./transforms")
 local NewHorizonsModel = asset.require("./model")
 
 
-
-local textures = NewHorizonsModel.NewHorizonsTextures
-local models = NewHorizonsModel.NewHorizonsModels
+local models = asset.syncedResource({
+  Name = "New Horizons Model",
+  Type = "HttpSynchronization",
+  Identifier = "newhorizons_model",
+  Version = 2
+})
 
 local Labels = {
   Identifier = "Labels",

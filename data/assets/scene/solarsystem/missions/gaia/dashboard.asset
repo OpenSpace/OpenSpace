@@ -8,10 +8,10 @@ local distance = {
   DestinationNodeName = "Earth"
 }
 
-dashboardAsset.onInitialize(function ()
+asset.onInitialize(function ()
   openspace.dashboard.addDashboardItem(distance)
 end)
 
-dashboardAsset.onDeinitialize(function ()
+asset.onDeinitialize(function ()
   openspace.dashboard.removeDashboardItem(distance.Identifier)
 end)

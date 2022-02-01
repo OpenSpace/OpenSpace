@@ -397,12 +397,10 @@ local togglePlayDirection = {
 }
 
 local text = {
-  {
-    Type = "DashboardItemText",
-    Identifier = "JWSTStateText",
-    GuiName = "JWST State Dashboard Text",
-    Text = ""
-  }
+  Type = "DashboardItemText",
+  Identifier = "JWSTStateText",
+  GuiName = "JWST State Dashboard Text",
+  Text = ""
 }
 
 asset.onInitialize(function()

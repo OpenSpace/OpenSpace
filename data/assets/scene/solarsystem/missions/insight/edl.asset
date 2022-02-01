@@ -824,5 +824,5 @@ end)
 
 for _, node in ipairs(nodes) do
   asset.export(node.Identifier, node)
-  sceneAsset.registerIdentifierWithMeta(node.Identifier);
+  asset.registerIdentifierWithMeta(node.Identifier);
 end
