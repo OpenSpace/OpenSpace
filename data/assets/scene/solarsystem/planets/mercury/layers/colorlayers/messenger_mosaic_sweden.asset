@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
 
 local layer = {
@@ -6,8 +7,15 @@ local layer = {
   FilePath = asset.localResource("messenger_mosaic_sweden.wms")
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Messenger Mosaic [Sweden]",
+  Version = "1.0",
+  Description = [[ Mercury Messenger Mosaic layer for Mercury globe.
+  This map is hosted on the OpenSpace server in Sweden.]],
+  Author = "USGS",
+  URL = "",
+  License = "NASA/PDS"
+}

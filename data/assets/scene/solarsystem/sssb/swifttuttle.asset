@@ -50,13 +50,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 asset.meta = {
   Name = "Swift Tuttle",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Position and Trail of Swift Tuttle from 1879 JUN 27
     to 1879 JUN 27. Data from JPL Horizons]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
   License = [[ JPL-authored documents are sponsored by NASA under Contract
     NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws."]],
-  Identifiers = {"SwiftTuttlePosition", "SwiftTuttleTrail"}
+    under the U.S. and Foreign Copyright Laws."]]
 }

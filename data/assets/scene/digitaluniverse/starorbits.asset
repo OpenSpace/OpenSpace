@@ -171,14 +171,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 asset.meta = {
   Name = "Star Orbits",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Select Star Orbital paths that delineate their trajectory around the
     Milky Way over 1 billion years into the future. Included: Sun, Barnards, Kapteyns,
     Lacaille 9352, LSR1826+3014, LSRJ0822+1700, PM_J13420-3415. <br><br> Data 
     Reference: Sebastien Lepine (AMNH)]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"SunOrbit", "BarnardsOrbit", "KapteynsOrbit", "pM_J13420Orbit", 
-    "LSR1826Orbit", "LSRJ0822Orbit", "lacaille9352Orbit"}
+  License = "AMNH Digital Universe"
 }

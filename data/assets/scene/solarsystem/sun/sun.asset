@@ -50,10 +50,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
 
 asset.meta = {
   Name = "Sun",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ The Sun and label]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Sun" , "SunLabel"}
+  License = "MIT license"
 }

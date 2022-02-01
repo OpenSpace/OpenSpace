@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local earthAsset = asset.require("../../earth").Earth
 local globeIdentifier = earthAsset.Identifier
 
@@ -8,8 +9,14 @@ local layer ={
   Radii = earthAsset.Renderable.Radii
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
-end)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "Overlays")
 
-asset.export("layer", layer)
+
+asset.meta = {
+  Name = "Earth Size Reference",
+  Version = "1.0",
+  Description = [[ Size reference layer for Earth globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

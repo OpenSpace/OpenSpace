@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
@@ -26,20 +27,15 @@ local layer = {
     to prevent misinterpretation. (Description from URL)]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "CTX Blended beta01",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
     hosted by ESRI.]],
   Author = "Caltech Murray Lab",
   URL = "http://murray-lab.caltech.edu/CTX/",
-  License = "Esri Master License Agreement",
-  Identifiers = {"CTX_blended_01"}
+  License = "Esri Master License Agreement"
 }

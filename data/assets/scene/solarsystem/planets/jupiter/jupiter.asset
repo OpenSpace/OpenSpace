@@ -66,10 +66,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Jupiter, JupiterLabel })
 
 asset.meta = {
   Name = "Jupiter",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Jupiter globe, and main planet label.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Jupiter", "JupiterLabel"}
+  License = "MIT license"
 }

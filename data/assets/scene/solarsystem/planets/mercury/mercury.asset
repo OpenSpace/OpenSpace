@@ -77,10 +77,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Mercury globe with labels, and main planet label.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Mercury" , "MercuryLabel"}
+  License = "MIT license"
 }

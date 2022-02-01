@@ -410,6 +410,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     // |  |- require
     // |  |- exists
     // |  |- export
+    // |  |- registerIdentifierWithMeta
     // |  |- onInitialize
     // |  |- onDeinitialize
     // |  |- directory
@@ -621,6 +622,27 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         2
     );
     lua_setfield(*_luaState, assetTableIndex, "export");
+
+    // Register registerIdentifierWithMeta function to add meta at runtime
+    // registerIdentifierWithMeta(string identifier)
+    ghoul::lua::push(*_luaState, this, asset);
+    lua_pushcclosure(
+        *_luaState,
+        [](lua_State* L) {
+            ZoneScoped
+
+            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerIdentifierWithMeta");
+
+            std::string identifier = luaL_checkstring(L, 1);
+            asset->addIdentifier(identifier);
+
+            lua_settop(L, 0);
+            return 0;
+        },
+        2
+    );
+    lua_setfield(*_luaState, assetTableIndex, "registerIdentifierWithMeta");
 
     // Register onInitialize function to be called upon asset initialization
     // void onInitialize(function<void()> initializationFunction)

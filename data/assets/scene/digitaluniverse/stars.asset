@@ -103,10 +103,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { stars, sunstar })
 
 asset.meta = {
   Name = "Stars",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for the stars.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Stars"}
+  License = "AMNH Digital Universe"
 }

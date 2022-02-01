@@ -87,3 +87,14 @@ asset.onInitialize(function ()
     end
   end
 end)
+
+
+asset.meta = {
+  Name = "Customization - GlobeBrowsing",
+  Version = "1.0",
+  Description = [[ This asset adds planetary images that can be downloaded separately
+  and placed in the OpenSpaceData folder]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

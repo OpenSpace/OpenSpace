@@ -35,6 +35,5 @@ asset.meta = {
   Description = [[Speed of light indicator from sun to earth]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
-  License = "MIT",
-  Identifier = {"TravelSpeedIndicator-2000"}
+  License = "MIT"
 }

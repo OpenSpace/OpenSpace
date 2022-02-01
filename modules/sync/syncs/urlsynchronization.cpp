@@ -31,6 +31,7 @@
 #include <numeric>
 #include <mutex>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 
 namespace {

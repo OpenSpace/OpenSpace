@@ -1,3 +1,4 @@
+local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
@@ -15,19 +16,14 @@ local layer = {
     (Description from URL)]],
 }
 
-asset.onInitialize(function () 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
+assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "ColorLayers")
 
 
 asset.meta = {
   Name = "ESRI Imagery World 2D",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Older 2D imager map layer for Earth. This layer is hosted by ESRI.]],
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=21b4ba14d9e5472d97afcbb819f7368e",
-  License = "Esri Master License Agreement",
-  Identifiers = {"ESRI_Imagery_World_2D"}
+  License = "Esri Master License Agreement"
 }

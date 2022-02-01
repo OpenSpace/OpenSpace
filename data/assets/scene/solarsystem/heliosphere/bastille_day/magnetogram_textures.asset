@@ -58,3 +58,15 @@ asset.onDeinitialize(function ()
   end
   openspace.action.removeAction(switch_color_layer.Identifier)
 end)
+
+
+asset.meta = {
+  Name = "Bastille Day magnetogram textures",
+  Version = "1.0",
+  Description = [[ This asset adds multiple magnetogram textures to the Sun. In addition
+  it provides an action to cycle through the textures. See magnetogram.asset for details 
+  of the textures.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
