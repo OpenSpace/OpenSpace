@@ -393,8 +393,8 @@ asset.onDeinitialize(function ()
     local node = nodes[i]
     openspace.removeSceneGraphNode(node.Identifier)
   end
-
 end)
+
 for i, node in ipairs(nodes) do
   asset.export(node.Identifier, node)
   asset.registerIdentifierWithMeta(node.Identifier);

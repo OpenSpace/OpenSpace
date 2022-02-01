@@ -638,7 +638,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             asset->addIdentifier(identifier);
             return 0;
         },
-        2
+        1
     );
     lua_setfield(*_luaState, assetTableIndex, "registerIdentifierWithMeta");
 

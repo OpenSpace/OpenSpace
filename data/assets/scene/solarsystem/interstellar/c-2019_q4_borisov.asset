@@ -58,7 +58,7 @@ end)
     
 asset.export(C2019Q4BorisovPosition.Identifier, C2019Q4BorisovPosition)
 asset.registerIdentifierWithMeta(C2019Q4BorisovPosition.Identifier)
-asset.export(mode.Identifier, C2019Q4BorisovTrail)
+asset.export(C2019Q4BorisovTrail.Identifier, C2019Q4BorisovTrail)
 asset.registerIdentifierWithMeta(C2019Q4BorisovTrail.Identifier)
 
 

@@ -53,7 +53,6 @@ local Io = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Io)
-  asset.registerIdentifierWithMeta(Io.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -61,6 +60,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Io.Identifier, Io)
+asset.registerIdentifierWithMeta(Io.Identifier)
 
 
 

@@ -59,7 +59,7 @@ end)
     
 asset.export(OumuamuaPosition.Identifier, OumuamuaPosition)
 asset.registerIdentifierWithMeta(OumuamuaPosition.Identifier)
-asset.export(mode.Identifier, OumuamuaTrail)
+asset.export(OumuamuaTrail.Identifier, OumuamuaTrail)
 asset.registerIdentifierWithMeta(OumuamuaTrail.Identifier)
 
 

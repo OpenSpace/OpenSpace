@@ -14,7 +14,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
 end)
 
-asset.export(layer.Identifier, layer)
+asset.export("layer", layer)
 asset.registerIdentifierWithMeta(layer.Identifier)
 
 
