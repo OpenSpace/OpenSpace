@@ -507,10 +507,16 @@ bool HorizonsDialog::isValidInput() {
         isValid = false;
         message = "Step size not selected";
     }
+    // In the case of arcseconds, first option
+    else if (_timeTypeCombo->currentIndex() == 0) {
+        if (60 > _stepEdit->text().toInt() || _stepEdit->text().toInt() > 3600) {
+            isValid = false;
+            message = "Angular step size need to be in range 60 to 3600";
+        }
+    }
 
     if (!message.empty()) {
         _errorMsg->setText(message.c_str());
-        appendLog(message, HorizonsDialog::LogLevel::Info);
     }
     return isValid;
 }
@@ -605,7 +611,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
     auto status = QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     if (!status) {
         appendLog(
-            "Connection Failed",
+            "Could not connect to Horizons API",
             HorizonsDialog::LogLevel::Error
         );
         return HorizonsDialog::HorizonsResult::ConnectionError;
@@ -633,7 +639,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (redirect.isValid() && reply->url() != redirect) {
         appendLog(
-            "Redirect has been requested",
+            "Redirecting request to: " + redirect.toString().toStdString(),
             HorizonsDialog::LogLevel::Info
         );
         return sendRequest(redirect.toString().toStdString());
@@ -695,7 +701,8 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
                 message = "The request used an incorrect method";
                 break;
             case int(HorizonsDialog::HTTPCodes::InternalServerError):
-                message = "The database is currently not available";
+                message = "The database is currently not available, try again at a "
+                "later time";
                 break;
             case int(HorizonsDialog::HTTPCodes::ServiceUnavailable):
                 message = "The server is currently unable to handle the request due to a "
@@ -718,8 +725,41 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer)
     auto it = answer.find("error");
     if (it != answer.end()) {
         // There was an error
-        appendLog(*it, HorizonsDialog::LogLevel::Error);
-        return HorizonsDialog::HorizonsResult::UnknownError;
+        std::string errorMessage = *it;
+
+        // Projected output length (~X) exceeds 90024 line max -- change step-size
+        if (errorMessage.find("Projected output length") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::ErrorSize;
+        }
+        // No ephemeris for target "X" after A.D. Y UT
+        else if (errorMessage.find("No ephemeris for target") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
+        }
+        // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help.
+        else if (errorMessage.find("No site matches") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::ErrorNoObserver;
+        }
+        // Observer table for X / Y->Y disallowed.
+        else if (errorMessage.find("disallowed") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::ErrorObserverTargetSame;
+        }
+        // Insufficient ephemeris data has been loaded to compute the state of X
+        // relative to Y at the ephemeris epoch Z;
+        else if (errorMessage.find("Insufficient ephemeris data") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::ErrorNoData;
+        }
+        // #   E. Lon    DXY      DZ    Observatory Name;
+        // -- - -------- ------ - ------ - ----------------;
+        // * Observer station *
+        // Multiple matching stations found.
+        else if (errorMessage.find("Multiple matching stations found") != std::string::npos) {
+            return HorizonsDialog::HorizonsResult::MultipleObserverStations;
+        }
+        // Unknown error
+        else {
+            appendLog(errorMessage, HorizonsDialog::LogLevel::Error);
+            return  HorizonsDialog::HorizonsResult::UnknownError;
+        }
     }
     return HorizonsDialog::HorizonsResult::Valid;
 }
@@ -754,8 +794,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
         if (line.find("No ephemeris for target") != std::string::npos) {
             // Available time range is located several lines before this in the file
             // The avalable time range is persed later
-            std::cout << "The selected time range is outside the valid range for the target"
-                << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorTimeRange;
         }
@@ -764,7 +802,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
         if (line.find("No site matches") != std::string::npos ||
             line.find("Cannot find central body") != std::string::npos)
         {
-            std::cout << "No matching observer found" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorNoObserver;
         }
@@ -772,7 +809,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
         // Are observer and target the same?
         if (line.find("disallowed") != std::string::npos)
         {
-            std::cout << "Observer and Target are the same" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorObserverTargetSame;
         }
@@ -780,16 +816,12 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
         // Enough data?
         if (line.find("Insufficient ephemeris data") != std::string::npos)
         {
-            std::cout << "Not enough data for the request" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorNoData;
         }
 
-        // Incorrect Observer type?
+        // Multiple Observer stations?
         if (line.find("Multiple matching stations found") != std::string::npos) {
-            // Stations are not supported
-            // This message is only shown when a station is entered as observer
-            std::cout << "Attempted to use an observer station, NOT supported" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::MultipleObserverStations;
         }
@@ -799,13 +831,11 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             // Target
             if (!foundTarget) {
                 // If target was not found then it is the target that has multiple matches
-                std::cout << "Target has multiple matches" << std::endl;
                 fileStream.close();
                 return HorizonsDialog::HorizonsResult::MultipleTarget;
             }
             // Observer
             else {
-                std::cout << "Observer has multiple matches" << std::endl;
                 fileStream.close();
                 return HorizonsDialog::HorizonsResult::MultipleObserver;
             }
@@ -820,7 +850,6 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 
         // No Target?
         if (line.find("No matches found") != std::string::npos) {
-            std::cout << "No matches found for target" << std::endl;
             fileStream.close();
             return HorizonsDialog::HorizonsResult::ErrorNoTarget;
         }
@@ -841,77 +870,96 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
 }
 
 bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
-    std::string message;
-    HorizonsDialog::LogLevel level;
     switch (result) {
         case HorizonsDialog::HorizonsResult::Valid:
-            std::cout << "Valid result" << std::endl;
             return true;
+
         case HorizonsDialog::HorizonsResult::FileEmpty:
-            message = "The received horizons file is empty";
-            level = HorizonsDialog::LogLevel::Warning;
-            break;
-        case HorizonsDialog::HorizonsResult::FileAlreadyExist:
-            message = "File already exist, try another filename";
-            level = HorizonsDialog::LogLevel::Warning;
-            break;
-        case HorizonsDialog::HorizonsResult::ConnectionError:
-            message = "Connection error";
-            level = HorizonsDialog::LogLevel::Error;
+            _errorMsg->setText("The horizons file is empty");
             break;
 
-        case HorizonsDialog::HorizonsResult::ErrorSize:
-            message = "Time range '" + _startTime + "' to '" + _endTime +
-                "' with step size '" + _stepEdit->text().toStdString() +
-                "' is too big, try to increase the step size and/or decrease "
-                "the time range";
-            level = HorizonsDialog::LogLevel::Error;
+        case HorizonsDialog::HorizonsResult::FileAlreadyExist:
+            _errorMsg->setText("File already exist, try another filename");
             break;
-        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
-            std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(_horizonsFile);
-            level = HorizonsDialog::LogLevel::Error;
-            if (validTimeRange.first.empty()) {
-                message = "Could not parse the valid time range";
-                break;
-            }
-            message = "Time range is outside the valid range for target '"
-                + _targetName + "'. Valid time range '" + validTimeRange.first + "' to '" +
-                validTimeRange.second + "'.";
+
+        case HorizonsDialog::HorizonsResult::ConnectionError:
+            _errorMsg->setText("Connection error");
+            break;
+
+        case HorizonsDialog::HorizonsResult::ErrorSize: {
+            std::string message = "Time range '" + _startTime + "' to '" + _endTime +
+                "' with step size '" + _stepEdit->text().toStdString() +
+                "' " + _timeTypeCombo->currentText().toStdString() +
+                " is too big, try to increase the step size and/or decrease "
+                "the time range";
+            appendLog(message, HorizonsDialog::LogLevel::Error);
             break;
         }
+
+        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
+            appendLog("Time range is outside the valid range for target '"
+                + _targetName + "'.", HorizonsDialog::LogLevel::Error);
+
+            std::pair<std::string, std::string> validTimeRange =
+                parseValidTimeRange(_horizonsFile);
+            if (validTimeRange.first.empty()) {
+                appendLog(
+                    "Could not parse the valid time range from file",
+                    HorizonsDialog::LogLevel::Error
+                );
+                break;
+            }
+
+            appendLog("Valid time range is '" + validTimeRange.first + "' to '" +
+                validTimeRange.second + "'", HorizonsDialog::LogLevel::Info);
+            break;
+        }
+
         case HorizonsDialog::HorizonsResult::ErrorNoObserver:
-            message = "No match was found for observer '" + _observerName + "'. "
-                "Use '@" + _observerName + "' as observer to list possible matches.";
-            level = HorizonsDialog::LogLevel::Error;
+            appendLog("No match was found for observer '" + _observerName + "'. "
+                "Use '@" + _observerName + "' as observer to list possible matches.",
+                HorizonsDialog::LogLevel::Error
+            );
             break;
+
         case HorizonsDialog::HorizonsResult::ErrorObserverTargetSame:
-            message = "The observer '" + _observerName + "' and target '" + _targetName +
-                "' are the same. Please use another observer for the current target.";
-            level = HorizonsDialog::LogLevel::Error;
+            appendLog("The observer '" + _observerName + "' and target '" + _targetName +
+                "' are the same. Please use another observer for the current target.",
+                HorizonsDialog::LogLevel::Error
+            );
             break;
+
         case HorizonsDialog::HorizonsResult::ErrorNoData:
-            message = "There is not enough data to compute the state of target '" +
+            appendLog("There is not enough data to compute the state of target '" +
                 _targetName + "' in relation to the observer '" + _observerName +
                 "' for the time range '" + _startTime + "' to '" + _endTime +
-                "'. Try to use another observer for the current target or another time range.";
-            level = HorizonsDialog::LogLevel::Error;
+                "'. Try to use another observer for the current target or another time range.",
+                HorizonsDialog::LogLevel::Error
+            );
             break;
+
         case HorizonsDialog::HorizonsResult::MultipleObserverStations:
-            message = "Incorrect observer type for '" + _observerName + "'. "
-                "Use '@" + _observerName + "' as observer to search for alternatives.";
-            level = HorizonsDialog::LogLevel::Error;
+            appendLog("Multiple observer stations was found for observer '" +
+                _observerName + "'. ", HorizonsDialog::LogLevel::Warning
+            );
+            appendLog("Did not find what you were looking for? Use '@" + _observerName +
+                "' as observer to search for alternatives.",
+                HorizonsDialog::LogLevel::Info
+            );
             break;
 
         case HorizonsDialog::HorizonsResult::MultipleObserver: {
-            message = "Multiple matches were found for observer '" +
-                _observerName + "'";
-            level = HorizonsDialog::LogLevel::Info;
+            appendLog("Multiple matches were found for observer '" +
+                _observerName + "'",
+                HorizonsDialog::LogLevel::Warning
+            );
+
             std::map<int, std::string> matchingObservers =
                 parseBodies(_horizonsFile);
             if (matchingObservers.empty()) {
-                message += ". Could not parse the matching observers.";
-                level = HorizonsDialog::LogLevel::Error;
+                appendLog("Could not parse the matching observers",
+                    HorizonsDialog::LogLevel::Error
+                );
                 break;
             }
             _chooseObserverCombo->clear();
@@ -926,10 +974,13 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             _chooseObserverCombo->show();
             break;
         }
+
         case HorizonsDialog::HorizonsResult::ErrorNoTarget:
-            message = "No match was found for target '" + _targetName + "'";
-            level = HorizonsDialog::LogLevel::Error;
+            appendLog("No match was found for target '" + _targetName + "'",
+                HorizonsDialog::LogLevel::Error
+            );
             break;
+
         case HorizonsDialog::HorizonsResult::MultipleTarget: {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
@@ -941,13 +992,16 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             // Format: ID#, Name, Designation, IAU/aliases/other
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
-            message = "Multiple matches was found for target '" + _targetName + "'";
-            level = HorizonsDialog::LogLevel::Info;
+            appendLog("Multiple matches was found for target '" + _targetName + "'",
+                HorizonsDialog::LogLevel::Warning
+            );
+
             std::map<int, std::string> matchingTargets =
                 parseBodies(_horizonsFile);
             if (matchingTargets.empty()) {
-                message += ". Could not parse the matching targets";
-                level = HorizonsDialog::LogLevel::Error;
+                appendLog("Could not parse the matching targets",
+                    HorizonsDialog::LogLevel::Error
+                );
                 break;
             }
             _chooseTargetCombo->clear();
@@ -964,19 +1018,14 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
         }
 
         case HorizonsDialog::HorizonsResult::UnknownError:
-            message = "An unknown error occured";
-            level = HorizonsDialog::LogLevel::Error;
+            _errorMsg->setText("An unknown error occured");
             break;
+
         default:
-            message = "Unknown result type";
-            level = HorizonsDialog::LogLevel::Error;
+            _errorMsg->setText("Unknown result type");
             break;
     }
 
-    if (!message.empty()) {
-        _errorMsg->setText(message.c_str());
-        appendLog(message, level);
-    }
     std::filesystem::remove(_horizonsFile);
     return false;
 }
