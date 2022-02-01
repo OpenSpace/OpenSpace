@@ -281,6 +281,17 @@ void HorizonsDialog::createWidgets() {
         QLabel* generateLabel = new QLabel("Generate a new Horizons file:", this);
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
+
+        QUrl website("https://ssd.jpl.nasa.gov/horizons/");
+        QLabel* infoLabel = new QLabel("<p>For more information about the Horizons system"
+            "please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
+            "https://ssd.jpl.nasa.gov/horizons/</a></p>",
+            this
+        );
+        infoLabel->setWordWrap(true);
+        infoLabel->setObjectName("url");
+        infoLabel->setOpenExternalLinks(true);
+        layout->addWidget(infoLabel);
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
