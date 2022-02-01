@@ -795,7 +795,7 @@ local Insight_Trail = {
   }
 }
 
-local objects = {
+local nodes = {
   InsightParent, Insight, Insight_Entry_CapsuleA, Insight_Entry_Capsule_Ring,
   Insight_Entry_Capsule_Plugs, Insight_Entry_Heatshield, Insight_Parachute_0,
   Insight_Parachute_Cords_0, Insight_Parachute_20, Insight_Parachute_Cords_20,
@@ -810,19 +810,19 @@ local objects = {
 }
 
 asset.onInitialize(function()
-  for _, node in ipairs(objects) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
     sceneAsset.registerIdentifierWithMeta(node.Identifier);
   end
 end)
     
 asset.onDeinitialize(function()
-  for i = #objects, 1, -1 do
-    local node = objects[i]
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
     openspace.removeSceneGraphNode(node.Identifier)
   end
 end)
 
-for _, node in ipairs(objects) do
+for _, node in ipairs(nodes) do
   asset.export(node.Identifier, node)
 end
