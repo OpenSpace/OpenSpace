@@ -67,7 +67,7 @@ private:
         ErrorNoObserver,
         ErrorObserverTargetSame,
         ErrorNoData,
-        ErrorIncorrectObserver, // Observer Stations
+        MultipleObserverStations,
 
         // Erros/problems NOT caught by the error field in the json output
         MultipleObserver,

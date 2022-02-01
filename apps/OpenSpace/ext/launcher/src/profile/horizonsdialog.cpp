@@ -409,6 +409,7 @@ void HorizonsDialog::createWidgets() {
     {
         _log = new QPlainTextEdit(this);
         _log->setReadOnly(true);
+        _log->setObjectName("log");
 
         QPalette p = _log->palette();
         p.setColor(QPalette::All, QPalette::Base, Qt::black);
@@ -790,7 +791,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::st
             // This message is only shown when a station is entered as observer
             std::cout << "Attempted to use an observer station, NOT supported" << std::endl;
             fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorIncorrectObserver;
+            return HorizonsDialog::HorizonsResult::MultipleObserverStations;
         }
 
         // Multiple matching major bodies?
@@ -896,7 +897,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
                 "'. Try to use another observer for the current target or another time range.";
             level = HorizonsDialog::LogLevel::Error;
             break;
-        case HorizonsDialog::HorizonsResult::ErrorIncorrectObserver:
+        case HorizonsDialog::HorizonsResult::MultipleObserverStations:
             message = "Incorrect observer type for '" + _observerName + "'. "
                 "Use '@" + _observerName + "' as observer to search for alternatives.";
             level = HorizonsDialog::LogLevel::Error;
