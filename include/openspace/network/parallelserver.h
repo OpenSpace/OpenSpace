@@ -102,6 +102,8 @@ private:
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
 
+    std::string getViewerModel();
+
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
 

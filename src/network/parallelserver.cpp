@@ -517,6 +517,10 @@ void ParallelServer::sendViewStatusChange(Peer& peer) {
     sendMessageToAll(ParallelConnection::MessageType::ViewStatusChange, data);
 }
 
+std::string getViewerModel() {
+    return ""; // use std::pair
+}
+
 size_t ParallelServer::nConnections() const {
     return _nConnections;
 }

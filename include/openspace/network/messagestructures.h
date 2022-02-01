@@ -58,11 +58,21 @@ struct CameraKeyframe {
         , _focusNode(focusNode)
         , _scale(scale)
     {}
+    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
+        bool&& followNodeRot, float&& scale, std::string&& name)
+        : _position(pos)
+        , _rotation(rot)
+        , _followNodeRotation(followNodeRot)
+        , _focusNode(focusNode)
+        , _scale(scale)
+        , _name(name)
+    {}
 
     glm::dvec3 _position = glm::dvec3(0.0);
     glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
     bool _followNodeRotation = false;
     std::string _focusNode;
+    std::string _name;
     float _scale = 0.f;
 
     double _timestamp = 0.0;
@@ -104,6 +114,21 @@ struct CameraKeyframe {
             _focusNode.data() + nodeNameLength
         );
 
+        int32_t nameLength = static_cast<int32_t>(_name.size());
+
+        // Add name of sender
+        buffer.insert(
+            buffer.end(),
+            reinterpret_cast<const char*>(&nameLength),
+            reinterpret_cast<const char*>(&nameLength) + sizeof(nameLength)
+        );
+        buffer.insert(
+            buffer.end(),
+            _name.data(),
+            _name.data() + nameLength
+        );
+
+        // Add scale
         buffer.insert(
             buffer.end(),
             reinterpret_cast<const char*>(&_scale),
@@ -143,6 +168,15 @@ struct CameraKeyframe {
         offset += size;
         size = nodeNameLength;
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
+        offset += size;
+
+        // Name
+        int32_t nameLength;
+        size = sizeof(int32_t);
+        std::memcpy(&nameLength, buffer.data() + offset, size);
+        offset += size;
+        size = nameLength;
+        _name = std::string(buffer.data() + offset, buffer.data() + offset + size);
         offset += size;
 
         // Scale

@@ -93,7 +93,7 @@ private:
     void independentOnMessageReceived();
     void independentOffMessageReceived();
     void viewStatusMessageReceived(const std::vector<char>& message);
-    ghoul::Dictionary viewerDictionary(std::string nodeName);
+    ghoul::Dictionary viewerDictionary(std::string name);
 
     void sendCameraKeyframe();
     void sendTimeTimeline();

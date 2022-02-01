@@ -32,6 +32,8 @@
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
@@ -155,12 +157,11 @@ ParallelPeer::ParallelPeer()
             LERROR("This option requires a connection.");
         }
     });
-
     _independentView.onChange([this]() {
         if (_isConnected) {
             setViewStatus();
         }
-        else {
+        else if (_independentView) {
             _independentView = false;
             LERROR("This option requires a connection.");
         }
@@ -331,8 +332,6 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
     std::vector<char> buffer(message.begin() + offset, message.end());
 
-    std::string name; // TODO: receive name through message
-
     switch (static_cast<datamessagestructures::Type>(type)) {
     // Camera data from host
     case datamessagestructures::Type::CameraData: {
@@ -350,6 +349,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.rotation = kf._rotation;
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
+        std::string name = kf._name; // Sender's name
 
         // If you aren't independent, render host's view.
         if (_viewStatus != ParallelConnection::ViewStatus::IndependentView) {
@@ -363,7 +363,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             std::string script;
             script = fmt::format(
                 "openspace.setPropertyValueSingle("
-                "Scene.Node_{}.Translation.StaticTranslation.Position, {})",
+                "'Scene.Viewer_{}.Translation.Position', {})",
                 name,
                 pose.position
             );
@@ -371,6 +371,21 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
                 script,
                 scripting::ScriptEngine::RemoteScripting(false)
             );
+
+            // Reparent
+            SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode("Viewer_" + name);
+            if (node->parent() == nullptr || node->parent()->identifier() != pose.focusNode) {
+
+                script = fmt::format(
+                    "openspace.setParent('Viewer_{}', '{}')",
+                    name,
+                    pose.focusNode
+                );
+                global::scriptEngine->queueScript(
+                    script,
+                    scripting::ScriptEngine::RemoteScripting(false)
+                );
+            }
         }
 
         break;
@@ -388,12 +403,13 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.rotation = kf._rotation;
         pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
+        std::string name = kf._name; // Sender's name
 
         if (name != std::string(_name)) {
             std::string script;
             script = fmt::format(
                 "openspace.setPropertyValueSingle("
-                "Scene.Node_{}.Translation.StaticTranslation.Position, {})",
+                "'Scene.Viewer_{}.Translation.Position', {})",
                 name,
                 pose.position
             );
@@ -401,6 +417,20 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
                 script,
                 scripting::ScriptEngine::RemoteScripting(false)
             );
+
+            // Reparent
+            SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode("Viewer_" + name);
+            if (node->parent() == nullptr || node->parent()->identifier() != pose.focusNode) {
+                script = fmt::format(
+                    "openspace.setParent('Viewer_{}', '{}')",
+                    name,
+                    pose.focusNode
+                );
+                global::scriptEngine->queueScript(
+                    script,
+                    scripting::ScriptEngine::RemoteScripting(false)
+                );
+            }
         }
 
         break;
@@ -528,6 +558,7 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
 
 void ParallelPeer::independentOnMessageReceived() {
     _independentViewAllowed = true;
+
     LINFO(fmt::format("The host is now allowing host-independent viewpoints"));
 }
 
@@ -547,6 +578,7 @@ void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
     );
 
     if (viewStatus == ParallelConnection::ViewStatus::Host) {
+        LERROR("Faulty view status in viewStatusMessageReceived().");
         return; // Should never happen.
     }
 
@@ -560,34 +592,42 @@ void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
         name = std::string(&message[pointer], nameSize);
     }
     pointer += nameSize;
+    
+    if (viewStatus == ParallelConnection::ViewStatus::HostView) {
+        std::string script;
 
-    //std::string script;
-    //
-    //if (viewStatus == ParallelConnection::ViewStatus::HostView) {
-    //    if (name == std::string(_name)) {
-    //        // Delete host node since you are now sharing the host's view.
-    //        script = "openspace.removeSceneGraphNode(" + std::string(_hostName) + ")";
-    //    }
-    //    else {
-    //        // Delete [name]'s node since they are now sharing the host's view.
-    //        script = "openspace.removeSceneGraphNode(" + std::string(name) + ")";
-    //    }
-    //}
-    //else { // viewStatus == IndependentView
-    //    std::string dictionary;
+        if (name == std::string(_name)) {
+            // Delete host node since you are now sharing the host's view.
+            LINFO(fmt::format("1a"));
+            if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + _hostName) != nullptr) {
+                LINFO(fmt::format("1b"));
+                script = "openspace.removeSceneGraphNode('Viewer_" + _hostName + "')"; // TODO: not properly deleting node
+            }
+        }
+        else {
+            // Delete [name]'s node since they are now sharing the host's view.
+            LINFO(fmt::format("2a"));
+            if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name) != nullptr) {
+                LINFO(fmt::format("2b"));
+                script = "openspace.removeSceneGraphNode('Viewer_" + name + "')";
+            }
+        }
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+    }
+    else { // viewStatus == IndependentView
+        std::string dictionary;
 
-    //    if (name == std::string(_name)) {
-    //        // Create host node since you now have your own view.
-    //        dictionary = ghoul::formatLua(viewerDictionary(_hostName));
-    //    }
-    //    else {
-    //        // Create node for [name] since they now have their own view.
-    //        dictionary = ghoul::formatLua(viewerDictionary(name));
-    //    }
-    //    script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
-    //}
-
-    //global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+        if (name == std::string(_name)) {
+            // Create host node since you now have your own view.
+            dictionary = ghoul::formatLua(viewerDictionary(_hostName));
+        }
+        else {
+            // Create node for [name] since they now have their own view.
+            dictionary = ghoul::formatLua(viewerDictionary(name));
+        }
+        std::string script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+    }
 }
 
 void ParallelPeer::handleCommunication() {
@@ -817,15 +857,17 @@ void ParallelPeer::setViewStatus() {
             ));
 
             global::navigationHandler->keyframeNavigator().clearKeyframes();
-            global::scriptEngine->queueScript("openspace.setPropertyValueSingle('NavigationHandler.UseKeyFrameInteraction', false)"
-                , scripting::ScriptEngine::RemoteScripting(false));
+            global::scriptEngine->queueScript(
+                "openspace.setPropertyValueSingle('NavigationHandler.UseKeyFrameInteraction', false)",
+                scripting::ScriptEngine::RemoteScripting(false)
+            );
         }
-        else {
+        else if (_independentView) {
             _independentView = false;
             LERROR("The host is not currently allowing host-independent viewpoints.");
         }
     }
-    else if (!isHost()) {
+    else if (!_independentView && !isHost()) {
         _viewStatus = ParallelConnection::ViewStatus::HostView;
 
         std::vector<char> buffer;
@@ -837,7 +879,7 @@ void ParallelPeer::setViewStatus() {
         global::scriptEngine->queueScript("openspace.setPropertyValueSingle('NavigationHandler.UseKeyFrameInteraction', true)"
             , scripting::ScriptEngine::RemoteScripting(false));
     }
-    else {
+    else { // if host
         LERROR("This option is exclusive to non-host peers.");
     }
 }
@@ -895,6 +937,7 @@ void ParallelPeer::sendCameraKeyframe() {
     }
 
     kf._focusNode = focusNode->identifier();
+    kf._name = _name;
     kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
@@ -997,18 +1040,19 @@ ghoul::Dictionary ParallelPeer::viewerDictionary(std::string name) {
     ghoul::Dictionary Transform;
 
     std::string identifier = "Viewer_" + name;
-    std::string modelPath; // Insert model path
+    std::string modelPath = "src/network/avatarmodels/";
+    std::string modelName = "diamond";
 
     GUI.setValue<std::string>("Name", "");
-    GUI.setValue<std::string>("Path", "/Collab/" + identifier);
+    GUI.setValue<std::string>("Path", "/Collab" + identifier);
     GUI.setValue<std::string>("Description", "");
 
     Translation.setValue<std::string>("Type", "StaticTranslation");
     Translation.setValue<std::string>("Body", identifier);
-    Translation.setValue<glm::vec3>("Position", { 0.0, 0.0, 0.0 });
+    Translation.setValue<glm::dvec3>("Position", { 0.0, 0.0, 0.0 });
 
     Renderable.setValue<std::string>("Type", "RenderableModel");
-    Renderable.setValue<std::string>("GeometryFile", modelPath);
+    Renderable.setValue<std::string>("GeometryFile", modelPath + modelName + ".fpx");
 
     Transform.setValue<ghoul::Dictionary>("Translation", Translation);
     Transform.setValue<ghoul::Dictionary>("Renderable", Renderable);
