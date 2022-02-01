@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,20 @@
 #include "filesystemaccess.h"
 
 FileSystemAccess::FileSystemAccess(std::string fileExtension,
-                                   std::vector<std::string> approvedPaths,
                                    bool hideFileExtensions, bool useCheckboxes)
     : _fileExtension(std::move(fileExtension))
-    , _approvedPaths(std::move(approvedPaths))
     , _hideFileExtensions(hideFileExtensions)
     , _useCheckboxes(useCheckboxes)
 {}
 
-std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir) {
+std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir,
+                                                                bool userAssets) {
     _filesystemModel.setRootPath(QString::fromStdString(dir));
     QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
     QFileInfo fileInfo = _filesystemModel.fileInfo(index);
     std::vector<std::string> dirsNested;
     std::vector<std::string> out;
-    parseChildDirElements(fileInfo, "", 0, dirsNested, out);
+    parseChildDirElements(fileInfo, "", 0, dirsNested, out, userAssets);
     std::string combined;
     for (const std::string& o : out) {
         combined += o + "\n";
@@ -48,8 +47,10 @@ std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir)
 }
 
 void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
-                                         int level, std::vector<std::string>& dirNames,
-                                         std::vector<std::string>& output)
+                                             int level,
+                                             std::vector<std::string>& dirNames,
+                                             std::vector<std::string>& output,
+                                             bool userAssets)
 {
     QDir dir(fileInfo.filePath());
     bool hasDirHeaderBeenAdded = false;
@@ -58,12 +59,12 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     for (int i = 0; i < fileList.size(); i++) {
         QFileInfo fi = fileList[i];
         std::string res = space + fi.fileName().toStdString();
-
+        if (level == 0 && userAssets) {
+            res = "${USER_ASSETS}/" + res;
+        }
         if (fi.isDir()) {
-            if (level != 0 || (level == 0 && isApprovedPath(res))) {
-                dirNames.push_back(res);
-                parseChildDirElements(fi, (space + " "), level + 1, dirNames, output);
-            }
+            dirNames.push_back(res);
+            parseChildDirElements(fi, (space + " "), level + 1, dirNames, output, userAssets);
         }
         else {
             parseChildFile(res, hasDirHeaderBeenAdded, dirNames, output);
@@ -73,19 +74,6 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     if (isThisDirAnEmptyDeadEnd && (dirNames.size() != 0)) {
         dirNames.pop_back();
     }
-}
-
-bool FileSystemAccess::isApprovedPath(std::string path) {
-    bool approvedMatch = false;
-    path.erase(0, path.find_first_not_of(" "));
-
-    for (const std::string& p : _approvedPaths) {
-        if (path.substr(0, p.length()).compare(p) == 0) {
-            approvedMatch = true;
-            break;
-        }
-    }
-    return approvedMatch;
 }
 
 void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -300,199 +300,121 @@ namespace {
         "Report GL Errors",
         "If set to true, any OpenGL errors will be reported if encountered"
     };
+
+    struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
+        // [[codegen::verbatim(FilePathInfo.description)]]
+        std::string file;
+
+        enum class [[codegen::map(openspace::gaia::FileReaderOption)]] FileReader {
+            Fits,
+            Speck,
+            BinaryRaw,
+            BinaryOctree,
+            StreamOctree
+        };
+        // [[codegen::verbatim(FileReaderOptionInfo.description)]]
+        FileReader fileReaderOption;
+
+        enum class [[codegen::map(openspace::gaia::RenderOption)]] RenderOption {
+            Static,
+            Color,
+            Motion
+        };
+        // [[codegen::verbatim(RenderOptionInfo.description)]]
+        std::optional<RenderOption> renderOption;
+
+        enum class [[codegen::map(openspace::gaia::ShaderOption)]] ShaderOption {
+            PointSSBO [[codegen::key("Point_SSBO")]],
+            PointVBO [[codegen::key("Point_VBO")]],
+            BillboardSSBO [[codegen::key("Billboard_SSBO")]],
+            BillboardVBO [[codegen::key("Billboard_VBO")]],
+            BillboardSSBONoFBO [[codegen::key("Billboard_SSBO_noFBO")]]
+        };
+        // [codegen::verbatim(ShaderOptionInfo.description)]]
+        std::optional<ShaderOption> shaderOption;
+
+        // [codegen::verbatim(PsfTextureInfo.description)]]
+        std::string texture;
+
+        // [codegen::verbatim(ColorTextureInfo.description)]]
+        std::string colorMap;
+
+        // [codegen::verbatim(LuminosityMultiplierInfo.description)]]
+        std::optional<float> luminosityMultiplier;
+
+        // [codegen::verbatim(MagnitudeBoostInfo.description)]]
+        std::optional<float> magnitudeBoost;
+
+        // [codegen::verbatim(CutOffThresholdInfo.description)]]
+        std::optional<float> cutOffThreshold;
+
+        // [codegen::verbatim(SharpnessInfo.description)]]
+        std::optional<float> sharpness;
+
+        // [codegen::verbatim(BillboardSizeInfo.description)]]
+        std::optional<float> billboardSize;
+
+        // [codegen::verbatim(CloseUpBoostDistInfo.description)]]
+        std::optional<float> closeUpBoostDist;
+
+        // [codegen::verbatim(TmPointFilterSizeInfo.description)]]
+        std::optional<int> filterSize;
+
+        // [codegen::verbatim(TmPointSigmaInfo.description)]]
+        std::optional<float> sigma;
+
+        // [codegen::verbatim(AdditionalNodesInfo.description)]]
+        std::optional<glm::ivec2> additionalNodes;
+
+        // [codegen::verbatim(TmPointPxThresholdInfo.description)]]
+        std::optional<float> pixelWeightThreshold;
+
+        // [codegen::verbatim(FirstRowInfo.description)]]
+        std::optional<int> firstRow;
+
+        // [codegen::verbatim(LastRowInfo.description)]]
+        std::optional<int> lastRow;
+
+        // [codegen::verbatim(ColumnNamesInfo.description)]]
+        std::optional<std::vector<std::string>> columnNames;
+
+        // [codegen::verbatim(LodPixelThresholdInfo.description)]]
+        std::optional<float> lodPixelThreshold;
+
+        // [codegen::verbatim(MaxGpuMemoryPercentInfo.description)]]
+        std::optional<float> maxGpuMemoryPercent;
+
+        // [codegen::verbatim(MaxCpuMemoryPercentInfo.description)]]
+        std::optional<float> maxCpuMemoryPercent;
+
+        // [codegen::verbatim(FilterPosXInfo.description)]]
+        std::optional<glm::vec2> filterPosX;
+
+        // [codegen::verbatim(FilterPosYInfo.description)]]
+        std::optional<glm::vec2> filterPosY;
+
+        // [codegen::verbatim(FilterPosZInfo.description)]]
+        std::optional<glm::vec2> filterPosZ;
+
+        // [codegen::verbatim(FilterGMagInfo.description)]]
+        std::optional<glm::vec2> filterGMag;
+
+        // [codegen::verbatim(FilterBpRpInfo.description)]]
+        std::optional<glm::vec2> filterBpRp;
+
+        // [codegen::verbatim(FilterDistInfo.description)]]
+        std::optional<glm::vec2> filterDist;
+
+        // [codegen::verbatim(ReportGlErrorsInfo.description)]]
+        std::optional<bool> reportGlErrors;
+    };
+#include "renderablegaiastars_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableGaiaStars::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableGaiaStars",
-        "gaiamission_renderablegaiastars",
-        {
-            {
-                FilePathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                FilePathInfo.description
-            },
-            {
-                FileReaderOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Fits", "Speck", "BinaryRaw", "BinaryOctree", "StreamOctree"
-                }),
-                Optional::No,
-                FileReaderOptionInfo.description
-            },
-            {
-                RenderOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Static", "Color", "Motion"
-                }),
-                Optional::Yes,
-                RenderOptionInfo.description
-            },
-            {
-                ShaderOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Point_SSBO", "Point_VBO", "Billboard_SSBO", "Billboard_VBO",
-                    "Billboard_SSBO_noFBO"
-                }),
-                Optional::Yes,
-                ShaderOptionInfo.description
-            },
-            {
-                PsfTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PsfTextureInfo.description
-            },
-            {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ColorTextureInfo.description
-            },
-            {
-                LuminosityMultiplierInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LuminosityMultiplierInfo.description
-            },
-            {
-                MagnitudeBoostInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MagnitudeBoostInfo.description
-            },
-            {
-                CutOffThresholdInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CutOffThresholdInfo.description
-            },
-            {
-                SharpnessInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SharpnessInfo.description
-            },
-            {
-                BillboardSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardSizeInfo.description
-            },
-            {
-                CloseUpBoostDistInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CloseUpBoostDistInfo.description
-            },
-            {
-                TmPointFilterSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                TmPointFilterSizeInfo.description
-            },
-            {
-                TmPointSigmaInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TmPointSigmaInfo.description
-            },
-            {
-                AdditionalNodesInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                AdditionalNodesInfo.description
-            },
-            {
-                TmPointPxThresholdInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TmPointPxThresholdInfo.description
-            },
-            {
-                FirstRowInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FirstRowInfo.description
-            },
-            {
-                LastRowInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                LastRowInfo.description
-            },
-            {
-                ColumnNamesInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                ColumnNamesInfo.description
-            },
-            {
-                LodPixelThresholdInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LodPixelThresholdInfo.description
-            },
-            {
-                MaxGpuMemoryPercentInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MaxGpuMemoryPercentInfo.description
-            },
-            {
-                MaxCpuMemoryPercentInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MaxCpuMemoryPercentInfo.description
-            },
-            {
-                FilterPosXInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterPosXInfo.description
-            },
-            {
-                FilterPosYInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterPosYInfo.description
-            },
-            {
-                FilterPosZInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterPosZInfo.description
-            },
-            {
-                FilterGMagInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterGMagInfo.description
-            },
-            {
-                FilterBpRpInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterBpRpInfo.description
-            },
-            {
-                FilterDistInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FilterDistInfo.description
-            },
-            {
-                ReportGlErrorsInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ReportGlErrorsInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
@@ -536,17 +458,13 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 {
     using File = ghoul::filesystem::File;
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableGaiaStars"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = absPath(dictionary.value<std::string>(FilePathInfo.identifier));
-    _dataFile = std::make_unique<File>(_filePath);
-    _dataFile->setCallback([&](const File&) { _dataIsDirty = true; });
+    _filePath = absPath(p.file).string();
+    _dataFile = std::make_unique<File>(_filePath.value());
+    _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([&]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() { _dataIsDirty = true; });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
@@ -556,90 +474,39 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::FileReaderOption::BinaryOctree, "BinaryOctree" },
         { gaia::FileReaderOption::StreamOctree, "StreamOctree" }
     });
-    if (dictionary.hasKey(FileReaderOptionInfo.identifier)) {
-        const std::string fileReaderOption = dictionary.value<std::string>(
-            FileReaderOptionInfo.identifier
-        );
-        if (fileReaderOption == "Fits") {
-            _fileReaderOption = gaia::FileReaderOption::Fits;
-        }
-        else if (fileReaderOption == "Speck") {
-            _fileReaderOption = gaia::FileReaderOption::Speck;
-        }
-        else if (fileReaderOption == "BinaryRaw") {
-            _fileReaderOption = gaia::FileReaderOption::BinaryRaw;
-        }
-        else if (fileReaderOption == "BinaryOctree") {
-            _fileReaderOption = gaia::FileReaderOption::BinaryOctree;
-        }
-        else {
-            _fileReaderOption = gaia::FileReaderOption::StreamOctree;
-        }
-    }
+    _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
 
     _renderOption.addOptions({
         { gaia::RenderOption::Static, "Static" },
         { gaia::RenderOption::Color, "Color" },
         { gaia::RenderOption::Motion, "Motion" }
     });
-    if (dictionary.hasKey(RenderOptionInfo.identifier)) {
-        const std::string renderOption = dictionary.value<std::string>(
-            RenderOptionInfo.identifier
-        );
-        if (renderOption == "Static") {
-            _renderOption = gaia::RenderOption::Static;
-        }
-        else if (renderOption == "Color") {
-            _renderOption = gaia::RenderOption::Color;
-        }
-        else {
-            _renderOption = gaia::RenderOption::Motion;
-        }
+    if (p.renderOption.has_value()) {
+        _renderOption = codegen::map<gaia::RenderOption>(*p.renderOption);
     }
     _renderOption.onChange([&]() { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
-#ifndef __APPLE__
     _shaderOption.addOptions({
-        { gaia::ShaderOption::Point_SSBO, "Point_SSBO" },
-        { gaia::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaia::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
-        { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-        { gaia::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
+        { gaia::ShaderOption::PointSSBO, "Point_SSBO" },
+        { gaia::ShaderOption::PointVBO, "Point_VBO" },
+        { gaia::ShaderOption::BillboardSSBO, "Billboard_SSBO" },
+        { gaia::ShaderOption::BillboardVBO, "Billboard_VBO" },
+        { gaia::ShaderOption::BillboardSSBONoFBO, "Billboard_SSBO_noFBO" }
     });
-#else // __APPLE__
-    _shaderOption.addOptions({
-        { gaia::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-    });
-#endif // __APPLE__
 
-    if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
-        // Default shader option:
-        _shaderOption = gaia::ShaderOption::Billboard_VBO;
+    if (p.shaderOption.has_value()) {
+        _shaderOption = codegen::map<gaia::ShaderOption>(*p.shaderOption);
 
-        const std::string shaderOption = dictionary.value<std::string>(
-            ShaderOptionInfo.identifier
-        );
-
-#ifndef __APPLE__
-        if (shaderOption == "Point_SSBO") {
-            _shaderOption = gaia::ShaderOption::Point_SSBO;
-        }
-        else if (shaderOption == "Billboard_SSBO") {
-            _shaderOption = gaia::ShaderOption::Billboard_SSBO;
-        }
-        else if (shaderOption == "Billboard_SSBO_noFBO") {
-            _shaderOption = gaia::ShaderOption::Billboard_SSBO_noFBO;
+#ifdef __APPLE__
+        switch (_shaderOption) {
+            case gaia::ShaderOption::PointSSBO:
+            case gaia::ShaderOption::BillboardSSBO:
+            case gaia::ShaderOption::BillboardSSBONoFBO:
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::PointVBO;
         }
 #endif // __APPLE__
-
-        if (shaderOption == "Point_VBO") {
-            _shaderOption = gaia::ShaderOption::Point_VBO;
-        }
-        else if (shaderOption == "Billboard_VBO") {
-            _shaderOption = gaia::ShaderOption::Billboard_VBO;
-        }
     }
     _shaderOption.onChange([&]() {
         _buffersAreDirty = true;
@@ -647,95 +514,36 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
     addProperty(_shaderOption);
 
-    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
-        PsfTextureInfo.identifier
-    ));
-    _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
-
+    _pointSpreadFunctionTexturePath = absPath(p.texture).string();
     _pointSpreadFunctionTexturePath.onChange(
-        [&](){ _pointSpreadFunctionTextureIsDirty = true; }
+        [this](){ _pointSpreadFunctionTextureIsDirty = true; }
+    );
+    _pointSpreadFunctionFile = std::make_unique<File>(
+        _pointSpreadFunctionTexturePath.value()
     );
     _pointSpreadFunctionFile->setCallback(
-        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+        [this]() { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
-    _colorTexturePath = absPath(dictionary.value<std::string>(
-        ColorTextureInfo.identifier
-    ));
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
-    _colorTexturePath.onChange([&]() { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
+    _colorTexturePath = absPath(p.colorMap).string();
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
 
-    if (dictionary.hasKey(LuminosityMultiplierInfo.identifier)) {
-        _luminosityMultiplier = static_cast<float>(
-            dictionary.value<double>(LuminosityMultiplierInfo.identifier)
-        );
-    }
+    _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
+    _magnitudeBoost = p.magnitudeBoost.value_or(_magnitudeBoost);
+    _cutOffThreshold = p.cutOffThreshold.value_or(_cutOffThreshold);
+    _sharpness = p.sharpness.value_or(_sharpness);
+    _billboardSize = p.billboardSize.value_or(_billboardSize);
+    _closeUpBoostDist = p.closeUpBoostDist.value_or(_closeUpBoostDist);
+    _tmPointFilterSize = p.filterSize.value_or(_tmPointFilterSize);
+    _tmPointSigma = p.sigma.value_or(_tmPointSigma);
+    _tmPointPixelWeightThreshold =
+        p.pixelWeightThreshold.value_or(_tmPointPixelWeightThreshold);
+    _additionalNodes = p.additionalNodes.value_or(_additionalNodes);
+    _lodPixelThreshold = p.lodPixelThreshold.value_or(_lodPixelThreshold);
 
-    if (dictionary.hasKey(MagnitudeBoostInfo.identifier)) {
-        _magnitudeBoost = static_cast<float>(
-            dictionary.value<double>(MagnitudeBoostInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(CutOffThresholdInfo.identifier)) {
-        _cutOffThreshold = static_cast<float>(
-            dictionary.value<double>(CutOffThresholdInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(SharpnessInfo.identifier)) {
-        _sharpness = static_cast<float>(
-            dictionary.value<double>(SharpnessInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
-        _billboardSize = static_cast<float>(
-            dictionary.value<double>(BillboardSizeInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(CloseUpBoostDistInfo.identifier)) {
-        _closeUpBoostDist = static_cast<float>(
-            dictionary.value<double>(CloseUpBoostDistInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(TmPointFilterSizeInfo.identifier)) {
-        _tmPointFilterSize = static_cast<int>(
-            dictionary.value<double>(TmPointFilterSizeInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(TmPointSigmaInfo.identifier)) {
-        _tmPointSigma = static_cast<float>(
-            dictionary.value<double>(TmPointSigmaInfo.identifier)
-        );
-    }
-    if (dictionary.hasKey(TmPointPxThresholdInfo.identifier)) {
-        _tmPointPixelWeightThreshold = static_cast<float>(
-            dictionary.value<double>(TmPointPxThresholdInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(AdditionalNodesInfo.identifier)) {
-        _additionalNodes = static_cast<glm::ivec2>(
-            dictionary.value<glm::dvec2>(AdditionalNodesInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(LodPixelThresholdInfo.identifier)) {
-        _lodPixelThreshold = static_cast<float>(
-            dictionary.value<double>(LodPixelThresholdInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(MaxGpuMemoryPercentInfo.identifier)) {
-        _maxGpuMemoryPercent = static_cast<float>(
-            dictionary.value<double>(MaxGpuMemoryPercentInfo.identifier)
-        );
-    }
+    _maxGpuMemoryPercent = p.maxGpuMemoryPercent.value_or(_maxGpuMemoryPercent);
     _maxGpuMemoryPercent.onChange([&]() {
         if (_ssboData != 0) {
             glDeleteBuffers(1, &_ssboData);
@@ -761,59 +569,36 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         _maxStreamingBudgetInBytes = 0;
     });
 
-    if (dictionary.hasKey(MaxCpuMemoryPercentInfo.identifier)) {
-        _maxCpuMemoryPercent = static_cast<float>(
-            dictionary.value<double>(MaxCpuMemoryPercentInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKey(FilterPosXInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosXInfo.identifier);
-    }
+    _maxCpuMemoryPercent = p.maxCpuMemoryPercent.value_or(_maxCpuMemoryPercent);
+    _posXThreshold = p.filterPosX.value_or(_posXThreshold);
     addProperty(_posXThreshold);
 
-    if (dictionary.hasKey(FilterPosYInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosYInfo.identifier);
-    }
+    _posYThreshold = p.filterPosY.value_or(_posYThreshold);
     addProperty(_posYThreshold);
 
-    if (dictionary.hasKey(FilterPosZInfo.identifier)) {
-        _posZThreshold = dictionary.value<glm::dvec2>(FilterPosZInfo.identifier);
-    }
+    _posZThreshold = p.filterPosZ.value_or(_posZThreshold);
     addProperty(_posZThreshold);
 
-    if (dictionary.hasKey(FilterGMagInfo.identifier)) {
-        _gMagThreshold = dictionary.value<glm::dvec2>(FilterGMagInfo.identifier);
-    }
+    _gMagThreshold = p.filterGMag.value_or(_gMagThreshold);
     addProperty(_gMagThreshold);
 
-    if (dictionary.hasKey(FilterBpRpInfo.identifier)) {
-        _bpRpThreshold = dictionary.value<glm::dvec2>(FilterBpRpInfo.identifier);
-    }
+    _bpRpThreshold = p.filterBpRp.value_or(_bpRpThreshold);
     addProperty(_bpRpThreshold);
 
-    if (dictionary.hasKey(FilterDistInfo.identifier)) {
-        _distThreshold = dictionary.value<glm::dvec2>(FilterDistInfo.identifier);
-    }
+    _distThreshold = p.filterDist.value_or(_distThreshold);
     addProperty(_distThreshold);
 
     // Only add properties correlated to fits files if we're reading from a fits file.
     if (_fileReaderOption == gaia::FileReaderOption::Fits) {
-        if (dictionary.hasKey(FirstRowInfo.identifier)) {
-            _firstRow = static_cast<int>(
-                dictionary.value<double>(FirstRowInfo.identifier)
-            );
-        }
+        _firstRow = p.firstRow.value_or(_firstRow);
         _firstRow.onChange([&]() { _dataIsDirty = true; });
         addProperty(_firstRow);
 
-        if (dictionary.hasKey(LastRowInfo.identifier)) {
-            _lastRow = static_cast<int>(dictionary.value<double>(LastRowInfo.identifier));
-        }
+        _lastRow = p.lastRow.value_or(_lastRow);
         _lastRow.onChange([&]() { _dataIsDirty = true; });
         addProperty(_lastRow);
 
-        if (dictionary.hasKey(ColumnNamesInfo.identifier)) {
+        if (p.columnNames.has_value()) {
             ghoul::Dictionary tmpDict = dictionary.value<ghoul::Dictionary>(
                 ColumnNamesInfo.identifier
             );
@@ -834,13 +619,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
 
         if (_firstRow > _lastRow) {
-            throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow.");
+            throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow");
         }
     }
 
-    if (dictionary.hasKey(ReportGlErrorsInfo.identifier)) {
-        _reportGlErrors = dictionary.value<bool>(ReportGlErrorsInfo.identifier);
-    }
+    _reportGlErrors = p.reportGlErrors.value_or(_reportGlErrors);
     addProperty(_reportGlErrors);
 
     // Add a read-only property for the number of rendered stars per frame.
@@ -872,7 +655,7 @@ void RenderableGaiaStars::initializeGL() {
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
     switch (option) {
-        case gaia::ShaderOption::Point_SSBO: {
+        case gaia::ShaderOption::PointSSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
@@ -900,7 +683,7 @@ void RenderableGaiaStars::initializeGL() {
             addProperty(_tmPointPixelWeightThreshold);
             break;
         }
-        case gaia::ShaderOption::Point_VBO: {
+        case gaia::ShaderOption::PointVBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
@@ -924,7 +707,7 @@ void RenderableGaiaStars::initializeGL() {
             addProperty(_tmPointPixelWeightThreshold);
             break;
         }
-        case gaia::ShaderOption::Billboard_SSBO: {
+        case gaia::ShaderOption::BillboardSSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
@@ -958,7 +741,7 @@ void RenderableGaiaStars::initializeGL() {
             //addProperty(_pointSpreadFunctionTexturePath);
             break;
         }
-        case gaia::ShaderOption::Billboard_SSBO_noFBO: {
+        case gaia::ShaderOption::BillboardSSBONoFBO: {
             _program = global::renderEngine->buildRenderProgram("GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_billboard_nofbo_fs.glsl"),
@@ -984,7 +767,7 @@ void RenderableGaiaStars::initializeGL() {
             addProperty(_closeUpBoostDist);
             break;
         }
-        case gaia::ShaderOption::Billboard_VBO: {
+        case gaia::ShaderOption::BillboardVBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
@@ -1192,9 +975,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Switch rendering technique depending on user-defined shader option.
     const int shaderOption = _shaderOption;
-    if (shaderOption == gaia::ShaderOption::Billboard_SSBO ||
-        shaderOption == gaia::ShaderOption::Point_SSBO ||
-        shaderOption == gaia::ShaderOption::Billboard_SSBO_noFBO)
+    if (shaderOption == gaia::ShaderOption::BillboardSSBO ||
+        shaderOption == gaia::ShaderOption::PointSSBO ||
+        shaderOption == gaia::ShaderOption::BillboardSSBONoFBO)
     {
 #ifndef __APPLE__
         //------------------------ RENDER WITH SSBO ---------------------------
@@ -1405,19 +1188,19 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit psfUnit;
     switch (shaderOption) {
-        case gaia::ShaderOption::Point_SSBO: {
+        case gaia::ShaderOption::PointSSBO: {
             _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
             _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
             _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
             break;
         }
-        case gaia::ShaderOption::Point_VBO: {
+        case gaia::ShaderOption::PointVBO: {
             // Specify how many potential stars we have to render.
             nShaderCalls = maxStarsPerNode * nChunksToRender;
             break;
         }
-        case gaia::ShaderOption::Billboard_SSBO:
-        case gaia::ShaderOption::Billboard_SSBO_noFBO: {
+        case gaia::ShaderOption::BillboardSSBO:
+        case gaia::ShaderOption::BillboardSSBONoFBO: {
             _program->setUniform(
                 _uniformCache.cameraPos,
                 data.camera.positionVec3()
@@ -1442,7 +1225,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.psfTexture, psfUnit);
             break;
         }
-        case gaia::ShaderOption::Billboard_VBO: {
+        case gaia::ShaderOption::BillboardVBO: {
             _program->setUniform(
                 _uniformCache.cameraPos,
                 data.camera.positionVec3()
@@ -1468,7 +1251,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         }
     }
 
-    if (shaderOption != gaia::ShaderOption::Billboard_SSBO_noFBO) {
+    if (shaderOption != gaia::ShaderOption::BillboardSSBONoFBO) {
         // Render to FBO.
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1488,7 +1271,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
 
-    if (shaderOption != gaia::ShaderOption::Billboard_SSBO_noFBO) {
+    if (shaderOption != gaia::ShaderOption::BillboardSSBONoFBO) {
         // Use ToneMapping shaders and render to default FBO again!
         _programTM->activate();
 
@@ -1501,8 +1284,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
         }
 
-        if (shaderOption == gaia::ShaderOption::Point_SSBO ||
-            shaderOption == gaia::ShaderOption::Point_VBO)
+        if (shaderOption == gaia::ShaderOption::PointSSBO ||
+            shaderOption == gaia::ShaderOption::PointVBO)
         {
             _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
             _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
@@ -1578,7 +1361,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_program->isDirty() || _shadersAreDirty) {
         switch (shaderOption) {
-            case gaia::ShaderOption::Point_SSBO: {
+            case gaia::ShaderOption::PointSSBO: {
 #ifndef __APPLE__
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
@@ -1642,7 +1425,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     #endif // !__APPLE__
                 break;
             }
-            case gaia::ShaderOption::Point_VBO: {
+            case gaia::ShaderOption::PointVBO: {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
@@ -1681,11 +1464,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 }
                 break;
             }
-            case gaia::ShaderOption::Billboard_SSBO:
-            case gaia::ShaderOption::Billboard_SSBO_noFBO: {
+            case gaia::ShaderOption::BillboardSSBO:
+            case gaia::ShaderOption::BillboardSSBONoFBO: {
     #ifndef __APPLE__
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                if (shaderOption == gaia::ShaderOption::Billboard_SSBO) {
+                if (shaderOption == gaia::ShaderOption::BillboardSSBO) {
                     program = ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
                         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
@@ -1767,7 +1550,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     #endif // !__APPLE__
                 break;
             }
-            case gaia::ShaderOption::Billboard_VBO: {
+            case gaia::ShaderOption::BillboardVBO: {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
@@ -1843,8 +1626,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_programTM->isDirty() || _shadersAreDirty) {
         switch (shaderOption) {
-            case gaia::ShaderOption::Point_SSBO:
-            case gaia::ShaderOption::Point_VBO: {
+            case gaia::ShaderOption::PointSSBO:
+            case gaia::ShaderOption::PointVBO: {
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
                     global::renderEngine->buildRenderProgram(
                         "ToneMapping",
@@ -1865,12 +1648,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 );
                 break;
             }
-            case gaia::ShaderOption::Billboard_SSBO:
-            case gaia::ShaderOption::Billboard_VBO: {
-                std::string vs = absPath(
+            case gaia::ShaderOption::BillboardSSBO:
+            case gaia::ShaderOption::BillboardVBO: {
+                std::filesystem::path vs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
-                std::string fs = absPath(
+                std::filesystem::path fs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
@@ -1930,9 +1713,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         ));
 
         // ------------------ RENDER WITH SSBO -----------------------
-        if (shaderOption == gaia::ShaderOption::Billboard_SSBO ||
-            shaderOption == gaia::ShaderOption::Point_SSBO ||
-            shaderOption == gaia::ShaderOption::Billboard_SSBO_noFBO)
+        if (shaderOption == gaia::ShaderOption::BillboardSSBO ||
+            shaderOption == gaia::ShaderOption::PointSSBO ||
+            shaderOption == gaia::ShaderOption::BillboardSSBONoFBO)
         {
 #ifndef __APPLE__
             _useVBO = false;
@@ -2234,6 +2017,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA32F,
                 GL_FLOAT
@@ -2267,12 +2051,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _pointSpreadFunctionTexture = nullptr;
         if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
+                absPath(_pointSpreadFunctionTexturePath).string(),
+                2
             );
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2281,12 +2066,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
+                _pointSpreadFunctionTexturePath.value()
             );
             _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
+                [this]() { _pointSpreadFunctionTextureIsDirty = true; }
             );
         }
         _pointSpreadFunctionTextureIsDirty = false;
@@ -2297,21 +2080,18 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath).string(),
+                1
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_colorTexturePath)
-                ));
+                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _colorTexturePath
+                _colorTexturePath.value()
             );
-            _colorTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
-            );
+            _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
         }
         _colorTextureIsDirty = false;
     }
@@ -2326,6 +2106,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         if (hasChanged) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA32F,
                 GL_FLOAT
@@ -2359,28 +2140,29 @@ bool RenderableGaiaStars::readDataFile() {
 
     _octreeManager.initOctree(_cpuRamBudgetInBytes);
 
-    LINFO("Loading data file: " + _filePath.value());
+    std::filesystem::path file = absPath(_filePath.value());
+    LINFO(fmt::format("Loading data file: {}", file));
 
     switch (fileReaderOption) {
         case gaia::FileReaderOption::Fits:
             // Read raw fits file and construct Octree.
-            nReadStars = readFitsFile(_filePath);
+            nReadStars = readFitsFile(file);
             break;
         case gaia::FileReaderOption::Speck:
             // Read raw speck file and construct Octree.
-            nReadStars = readSpeckFile(_filePath);
+            nReadStars = readSpeckFile(file);
             break;
         case gaia::FileReaderOption::BinaryRaw:
             // Stars are stored in an ordered binary file.
-            nReadStars = readBinaryRawFile(_filePath);
+            nReadStars = readBinaryRawFile(file);
             break;
         case gaia::FileReaderOption::BinaryOctree:
             // Octree already constructed and stored as a binary file.
-            nReadStars = readBinaryOctreeFile(_filePath);
+            nReadStars = readBinaryOctreeFile(file);
             break;
         case gaia::FileReaderOption::StreamOctree:
             // Read Octree structure from file, without data.
-            nReadStars = readBinaryOctreeStructureFile(_filePath);
+            nReadStars = readBinaryOctreeStructureFile(file.string());
             break;
         default:
             LERROR("Wrong FileReaderOption - no data file loaded!");
@@ -2389,13 +2171,13 @@ bool RenderableGaiaStars::readDataFile() {
 
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
-    LINFO("Dataset contains a total of " + std::to_string(nReadStars) + " stars.");
+    LINFO(fmt::format("Dataset contains a total of {} stars", nReadStars));
     _totalDatasetSizeInBytes = nReadStars * (PositionSize + ColorSize + VelocitySize) * 4;
 
     return nReadStars > 0;
 }
 
-int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
+int RenderableGaiaStars::readFitsFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
@@ -2419,7 +2201,7 @@ int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
+int RenderableGaiaStars::readSpeckFile(const std::filesystem::path& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
@@ -2437,7 +2219,7 @@ int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
     return static_cast<int>(fullData.size() / nReadValuesPerStar);
 }
 
-int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryRawFile(const std::filesystem::path& filePath) {
     std::vector<float> fullData;
     int nReadStars = 0;
 
@@ -2470,14 +2252,14 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading raw binary file!", filePath
+            "Error opening file '{}' for loading raw binary file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
+int RenderableGaiaStars::readBinaryOctreeFile(const std::filesystem::path& filePath) {
     int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
@@ -2488,26 +2270,28 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", filePath
+            "Error opening file '{}' for loading binary Octree file", filePath
         ));
         return nReadStars;
     }
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeStructureFile(const std::string& folderPath) {
+int RenderableGaiaStars::readBinaryOctreeStructureFile(
+                                                  const std::filesystem::path& folderPath)
+{
     int nReadStars = 0;
-    std::string indexFile = folderPath + "index.bin";
+    std::string indexFile = folderPath.string() + "index.bin";
 
     std::ifstream fileStream(indexFile, std::ifstream::binary);
     if (fileStream.good()) {
-        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath);
+        nReadStars = _octreeManager.readFromFile(fileStream, false, folderPath.string());
 
         fileStream.close();
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading binary Octree file!", indexFile
+            "Error opening file '{}' for loading binary Octree file", indexFile
         ));
         return nReadStars;
     }

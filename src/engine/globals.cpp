@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,22 +24,23 @@
 
 #include <openspace/engine/globals.h>
 
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
@@ -71,12 +72,13 @@ namespace {
     // in some random global randoms
 #ifdef WIN32
     constexpr const int TotalSize =
+        sizeof(MemoryManager) +
+        sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
         sizeof(LuaConsole) +
-        sizeof(MemoryManager) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
         sizeof(OpenSpaceEngine) +
@@ -90,12 +92,12 @@ namespace {
         sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
+        sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
-        sizeof(interaction::ShortcutManager) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(scripting::ScriptEngine) +
@@ -117,6 +119,22 @@ void create() {
 #ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
     std::byte* currentPos = DataStorage.data();
+#endif // WIN32
+
+#ifdef WIN32
+    memoryManager = new (currentPos) MemoryManager;
+    ghoul_assert(memoryManager, "No memoryManager");
+    currentPos += sizeof(MemoryManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    memoryManager = new MemoryManager;
+#endif // WIN32
+
+#ifdef WIN32
+    eventEngine = new (currentPos) EventEngine;
+    ghoul_assert(eventEngine, "No eventEngine");
+    currentPos += sizeof(EventEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    eventEngine = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -157,14 +175,6 @@ void create() {
     currentPos += sizeof(LuaConsole);
 #else // ^^^ WIN32 / !WIN32 vvv
     luaConsole = new LuaConsole;
-#endif // WIN32
-
-#ifdef WIN32
-    memoryManager = new (currentPos) MemoryManager;
-    ghoul_assert(memoryManager, "No memoryManager");
-    currentPos += sizeof(MemoryManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    memoryManager = new MemoryManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -273,6 +283,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    actionManager = new (currentPos) interaction::ActionManager;
+    ghoul_assert(actionManager, "No action manager");
+    currentPos += sizeof(interaction::ActionManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    actionManager = new interaction::ActionManager;
+#endif // WIN32
+
+#ifdef WIN32
     interactionMonitor = new (currentPos) interaction::InteractionMonitor;
     ghoul_assert(interactionMonitor, "No interactionMonitor");
     currentPos += sizeof(interaction::InteractionMonitor);
@@ -318,14 +336,6 @@ void create() {
     currentPos += sizeof(interaction::SessionRecording);
 #else // ^^^ WIN32 / !WIN32 vvv
     sessionRecording = new interaction::SessionRecording(true);
-#endif // WIN32
-
-#ifdef WIN32
-    shortcutManager = new (currentPos) interaction::ShortcutManager;
-    ghoul_assert(shortcutManager, "No shortcutManager");
-    currentPos += sizeof(interaction::ShortcutManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    shortcutManager = new interaction::ShortcutManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -381,6 +391,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
+    rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
@@ -433,13 +444,6 @@ void destroy() {
     delete rootPropertyOwner;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'ShortcutManager'");
-#ifdef WIN32
-    shortcutManager->~ShortcutManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete shortcutManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'SessionRecording'");
 #ifdef WIN32
     sessionRecording->~SessionRecording();
@@ -480,6 +484,13 @@ void destroy() {
     interactionMonitor->~InteractionMonitor();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete interactionMonitor;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destorying 'ActionManager'");
+#ifdef WIN32
+    actionManager->~ActionManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete actionManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Configuration'");
@@ -573,13 +584,6 @@ void destroy() {
     delete missionManager;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'MemoryManager'");
-#ifdef WIN32
-    memoryManager->~MemoryManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete memoryManager;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'LuaConsole'");
 #ifdef WIN32
     luaConsole->~LuaConsole();
@@ -613,6 +617,20 @@ void destroy() {
     fontManager->~FontManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete fontManager;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'EventEngine'");
+#ifdef WIN32
+    eventEngine->~EventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'MemoryManager'");
+#ifdef WIN32
+    memoryManager->~MemoryManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete memoryManager;
 #endif // WIN32
 
     callback::destroy();

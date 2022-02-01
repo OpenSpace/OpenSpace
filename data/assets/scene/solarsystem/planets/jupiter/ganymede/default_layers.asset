@@ -5,16 +5,16 @@ local colorLayer = asset.require(colorLayersPath .. "/ganymede_texture")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Ganymede.Renderable.Layers.ColorLayers." ..
-        colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Ganymede.Renderable.Layers.ColorLayers." ..
+   colorLayer.layer.Identifier .. ".Enabled", true)
 end)
 
 
 asset.meta = {
-    Name = "Default Ganymede Layers",
-    Version = "1.0",
-    Description = [[ Default Ganymede layers are: Ganymede Texture]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Default Ganymede Layers",
+  Version = "1.0",
+  Description = [[ Default Ganymede layers are: Ganymede Texture]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

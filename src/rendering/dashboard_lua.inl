@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,70 +28,61 @@
 namespace openspace::luascriptfunctions {
 
 /**
-* \ingroup LuaScripts
-* addDashboardItem(table):
-*/
+ * \ingroup LuaScripts
+ * addDashboardItem(table):
+ */
 int addDashboardItem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
+    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-    const int type = lua_type(L, -1);
-    if (type == LUA_TTABLE) {
-        ghoul::Dictionary d;
-        try {
-            ghoul::lua::luaDictionaryFromState(L, d);
-        }
-        catch (const ghoul::lua::LuaFormatException& e) {
-            LERRORC("addDashboardItem", e.what());
-            lua_settop(L, 0);
-            return 0;
-        }
-        lua_settop(L, 0);
-
-        try {
-            global::dashboard->addDashboardItem(DashboardItem::createFromDictionary(d));
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC("addDashboardItem", e.what());
-            return ghoul::lua::luaError(L, "Error adding dashboard item");
-        }
-
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+    try {
+        global::dashboard->addDashboardItem(
+            DashboardItem::createFromDictionary(std::move(d))
+        );
     }
-    else {
-        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC("addDashboardItem", e.what());
+        return ghoul::lua::luaError(L, "Error adding dashboard item");
     }
-}
 
-/**
-* \ingroup LuaScripts
-* removeDashboardItem(string):
-*/
-int removeDashboardItem(lua_State* L) {
-    using ghoul::lua::errorLocation;
-
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
-
-    std::string identifier = luaL_checkstring(L, -1);
-
-    global::dashboard->removeDashboardItem(identifier);
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
+/**
+ * \ingroup LuaScripts
+ * removeDashboardItem(string):
+ */
+int removeDashboardItem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
+    std::variant v = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
+
+    std::string identifier;
+    if (std::holds_alternative<std::string>(v)) {
+        identifier = std::get<std::string>(v);
+    }
+    else {
+        ghoul_assert(std::holds_alternative<ghoul::Dictionary>(v), "Missing case");
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(v);
+        if (!d.hasValue<std::string>("Identifier")) {
+            return ghoul::lua::luaError(
+                L,
+                "Table passed to removeDashbordItem does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    global::dashboard->removeDashboardItem(identifier);
+    return 0;
+}
 
 /**
-* \ingroup LuaScripts
-* removeDashboardItems():
-*/
+ * \ingroup LuaScripts
+ * removeDashboardItems():
+ */
 int clearDashboardItems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
-
     global::dashboard->clearDashboardItems();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -166,23 +166,23 @@ void IswaDataGroup::registerProperties() {
     _dataOptions.onChange([this]() {
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
-        dict.setValue("dataOptions", _dataOptions.value());
+        std::set<std::string> set = _dataOptions;
+        std::vector<std::string> vec(set.begin(), set.end());
+        dict.setValue("dataOptions", vec);
         _groupEvent.publish("dataOptionsChanged", dict);
     });
 }
 
-void IswaDataGroup::registerOptions(
-                        const std::vector<properties::SelectionProperty::Option>& options)
-{
+void IswaDataGroup::registerOptions(const std::vector<std::string>& options) {
     if (!_registered) {
         registerProperties();
     }
 
     if (_dataOptions.options().empty()) {
-        for (properties::SelectionProperty::Option option : options) {
-            _dataOptions.addOption({ option.value, option.description });
+        for (const std::string& option : options) {
+            _dataOptions.addOption(option);
         }
-        _dataOptions.setValue(std::vector<int>(1, 0));
+        _dataOptions.setValue({ options.front() });
     }
 }
 
@@ -198,7 +198,7 @@ void IswaDataGroup::createDataProcessor() {
     }
 }
 
-std::vector<int> IswaDataGroup::dataOptionsValue() const {
+std::set<std::string> IswaDataGroup::dataOptionsValue() const {
     return _dataOptions;
 }
 

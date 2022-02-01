@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
 #include <mutex>
-#include <queue>
 #include <optional>
+#include <queue>
 #include <functional>
 
 namespace openspace { class SyncBuffer; }
@@ -82,7 +83,7 @@ public:
     bool hasLibrary(const std::string& name);
 
     bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
-    bool runScriptFile(const std::string& filename);
+    bool runScriptFile(const std::filesystem::path& filename);
 
     bool writeLog(const std::string& script);
 
@@ -125,7 +126,6 @@ private:
     // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logType;
     std::string _logFilename;
 };
 

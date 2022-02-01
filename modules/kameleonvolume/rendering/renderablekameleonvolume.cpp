@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableKameleonVolume";
@@ -172,7 +173,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     if (dictionary.hasValue<std::string>(KeySource)) {
-        _sourcePath = absPath(dictionary.value<std::string>(KeySource));
+        _sourcePath = absPath(dictionary.value<std::string>(KeySource)).string();
     }
 
     if (dictionary.hasValue<std::string>(KeyVariable)) {
@@ -323,7 +324,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 }
 
 void RenderableKameleonVolume::load() {
-    if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
+    if (!std::filesystem::is_regular_file(_sourcePath.value())) {
         LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
@@ -331,13 +332,11 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    ghoul::filesystem::File sourceFile(_sourcePath);
-    std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        sourceFile.baseName(),
-        cacheSuffix(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+    std::filesystem::path cachePath = FileSys.cacheManager()->cachedFilename(
+        std::filesystem::path(_sourcePath.value()).stem(),
+        cacheSuffix()
     );
-    if (FileSys.fileExists(cachePath)) {
+    if (std::filesystem::is_regular_file(cachePath)) {
         loadRaw(cachePath);
     }
     else {
@@ -352,15 +351,8 @@ std::string RenderableKameleonVolume::cacheSuffix() const {
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
-    ghoul::filesystem::File file(path);
-    std::string extension = file.fileExtension();
-    std::transform(
-        extension.begin(),
-        extension.end(),
-        extension.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    if (extension == "cdf") {
+    std::filesystem::path extension = std::filesystem::path(path).extension();
+    if (extension == ".cdf" || extension == ".CDF") {
         loadCdf(path);
     }
     else {
@@ -368,7 +360,7 @@ void RenderableKameleonVolume::loadFromPath(const std::string& path) {
     }
 }
 
-void RenderableKameleonVolume::loadRaw(const std::string& path) {
+void RenderableKameleonVolume::loadRaw(const std::filesystem::path& path) {
     volume::RawVolumeReader<float> reader(path, _dimensions);
     _rawVolume = reader.read();
     updateTextureFromVolume();
@@ -430,6 +422,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
         _dimensions,
+        GL_TEXTURE_3D,
         ghoul::opengl::Texture::Format::Red,
         GL_RED,
         GL_FLOAT,
@@ -441,7 +434,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
 }
 
-void RenderableKameleonVolume::storeRaw(const std::string& path) {
+void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }

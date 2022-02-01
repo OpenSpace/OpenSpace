@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/memorypool.h>
+#include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -43,6 +46,15 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
+
+enum class PropertyValueType {
+    Boolean = 0,
+    Float,
+    String,
+    Table,
+    Nil
+};
+using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
 
 class SceneInitializer;
 
@@ -233,12 +245,75 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
+    /**
+     * Sets a property using the 'properties' contents of a profile. The function will
+     * loop through each setProperty command. A property may be set to a bool, float,
+     * or string value (which must be converted because a Profile stores all values
+     * as strings)
+     *
+     * \param p The Profile to be read.
+     */
+    void setPropertiesFromProfile(const Profile& p);
+
 private:
+    /**
+     * Accepts string version of a property value from a profile, converts it to the
+     * appropriate type, and then pushes the value onto the lua state.
+     *
+     * \param L the lua state to push value to
+     * \param value string representation of the value with which to set property
+     */
+    void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
+
+    /**
+     * Accepts string version of a property value from a profile, and processes it
+     * according to the data type of the value
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     * \param didPushToLua Bool reference that represents the lua push state at the end
+     *        of this function call. This will be set to true if the value (e.g. table)
+     *        has already been pushed to the lua stack
+     * \return The ProfilePropertyLua variant type translated from string representation
+     */
+    ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
+        const std::string& value);
+
+    /**
+     * Accepts string version of a property value from a profile, and returns the
+     * supported data types that can be pushed to a lua state. Currently, the full
+     * range of possible lua values is not supported.
+     *
+     * \param value string representation of the value with which to set property
+     */
+    PropertyValueType propertyValueType(const std::string& value);
+
+    /**
+     * Accepts string version of a property value from a profile, and adds it to a vector
+     * which will later be used to push as a lua table containing values of type T
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     * \param table the std::vector container which has elements of type T for a lua table
+     */
+    template <typename T>
+    void processPropertyValueTableEntries(ghoul::lua::LuaState& L,
+        const std::string& value, std::vector<T>& table);
+
+    /**
+     * Handles a lua table entry, creating a vector of the correct variable type based
+     * on the profile string, and pushes this vector to the lua stack.
+     *
+     * \param L the lua state to (eventually) push to
+     * \param value string representation of the value with which to set property
+     */
+    void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value);
+
     /**
      * Update dependencies.
      */
     void updateNodeRegistry();
-
+    std::chrono::steady_clock::time_point currentTimeForInterpolation();
     void sortTopologically();
 
     std::unique_ptr<Camera> _camera;
@@ -248,8 +323,9 @@ private:
     bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
-
+    std::string _profilePropertyName;
     std::vector<InterestingTime> _interestingTimes;
+    bool _valueIsTable = false;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

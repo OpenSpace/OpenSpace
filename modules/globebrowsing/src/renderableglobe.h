@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -123,9 +123,6 @@ private:
 
     struct {
         properties::BoolProperty showChunkEdges;
-        properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showHeightResolution;
-        properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
@@ -138,11 +135,11 @@ private:
         properties::BoolProperty  eclipseShadowsEnabled;
         properties::BoolProperty  eclipseHardShadows;
         properties::BoolProperty  shadowMapping;
+        properties::BoolProperty  renderAtDistance;
         properties::FloatProperty zFightingPercentage;
         properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;

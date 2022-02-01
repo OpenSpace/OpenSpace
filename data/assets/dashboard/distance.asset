@@ -1,0 +1,25 @@
+local item = {
+  Type = "DashboardItemDistance",
+  Identifier = "Distance",
+  GuiName = "Distance"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(item)
+end)
+
+asset.export(item)
+
+
+asset.meta = {
+  Name = "Dashboard - Distance",
+  Version = "1.0",
+  Description = [[ This asset provides a Distance dashboard item.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

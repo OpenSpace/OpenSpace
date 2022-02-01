@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -90,7 +90,7 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
     return success;
 }
 
-bool TransferFunction::envelopesToLua(lua_State* state) {
+void TransferFunction::envelopesToLua(lua_State* state) const {
     lua_newtable(state);
     for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
         lua_newtable(state);
@@ -101,7 +101,6 @@ bool TransferFunction::envelopesToLua(lua_State* state) {
             ("[\"" + std::to_string(iter - _envelopes.begin() + 1) + "\"]").c_str()
         );
     }
-    return true;
 }
 
 void TransferFunction::loadEnvelopesFromFile(const std::string& path) {

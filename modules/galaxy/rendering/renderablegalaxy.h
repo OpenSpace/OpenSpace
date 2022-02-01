@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,18 +54,19 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void renderPoints(const RenderData& data);
     void renderBillboards(const RenderData& data);
-    float safeLength(const glm::vec3& vector) const;
 
     struct Result {
         bool success;
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> color;
     };
-    Result loadPointFile(const std::string& file);
-    Result loadCachedFile(const std::string& file);
+    Result loadPointFile();
+    Result loadCachedFile(const std::filesystem::path& file);
 
     glm::vec3 _volumeSize = glm::vec3(0.f);
     glm::vec3 _pointScaling = glm::vec3(0.f);
@@ -76,7 +77,6 @@ private:
     properties::FloatProperty _emissionMultiply;
     properties::OptionProperty _starRenderingMethod;
     properties::FloatProperty _enabledPointsRatio;
-    properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::FloatProperty _downScaleVolumeRendering;
     properties::FloatProperty _numberOfRayCastingSteps;

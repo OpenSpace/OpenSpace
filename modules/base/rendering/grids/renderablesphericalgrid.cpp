@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         std::optional<int> segments;
@@ -73,9 +73,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphericalGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_sphericalgrid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_sphericalgrid");
 }
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
@@ -83,7 +81,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -232,11 +230,11 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                     normal = glm::normalize(normal);
                 }
 
-                glm::vec4 tmp(x, y, z, 1);
+                glm::vec4 tmp(x, y, z, 1.f);
                 glm::mat4 rot = glm::rotate(
-                    glm::mat4(1),
+                    glm::mat4(1.f),
                     glm::half_pi<float>(),
-                    glm::vec3(1, 0, 0)
+                    glm::vec3(1.f, 0.f, 0.f)
                 );
                 tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
 

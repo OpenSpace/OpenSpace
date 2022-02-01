@@ -1,4 +1,134 @@
 {
+  "actions": [
+    {
+      "documentation": "Sets the focus of the camera on 'NewHorizons'.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.focus.newhorizons",
+      "is_local": false,
+      "name": "Focus on New Horizons",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Anchor at New Horizons, Aim at Pluto",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.focus.anchor_nh|aim_pluto",
+      "is_local": false,
+      "name": "Anchor NH, Aim  Pluto",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
+    },
+    {
+      "documentation": "Sets the focus of the camera on 'Pluto'",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.focus.pluto",
+      "is_local": false,
+      "name": "Focus on Pluto",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection') ;openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Sets the focus of the camera on 'Charon'.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.focus.charon",
+      "is_local": false,
+      "name": "Focus on Charon",
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Charon');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+    },
+    {
+      "documentation": "Toggles New Horizons image projection",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle_nh_image_projections",
+      "is_local": false,
+      "name": "Toggle NH Image Projection",
+      "script": "local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection'); openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);"
+    },
+    {
+      "documentation": "Removes all image projections from Pluto and Charon.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.clear_image_projections",
+      "is_local": false,
+      "name": "Clear image projections",
+      "script": "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
+    },
+    {
+      "documentation": "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.setup.approach",
+      "is_local": false,
+      "name": "Reset time and projections",
+      "script": "openspace.time.setTime('2015-07-14T09:00:00.00');openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
+    },
+    {
+      "documentation": "Increases the height map exaggeration on Pluto.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.pluto.increase_height_exaggeration",
+      "is_local": false,
+      "name": "Pluto HeightExaggeration +",
+      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") + 5000);"
+    },
+    {
+      "documentation": "Decreases the height map exaggeration on Pluto.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.pluto.decrease_height_exaggeration",
+      "is_local": false,
+      "name": "Pluto HeightExaggeration -",
+      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") - 5000);"
+    },
+    {
+      "documentation": "Increases the height map exaggeration on Charon.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.charon.increase_height_exaggeration",
+      "is_local": false,
+      "name": "Charon HeightExaggeration +",
+      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") + 5000);"
+    },
+    {
+      "documentation": "Decreases the height map exaggeration on Charon.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.charon.decrease_height_exaggeration",
+      "is_local": false,
+      "name": "Charon HeightExaggeration -",
+      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") - 5000);"
+    },
+    {
+      "documentation": "Toggles the visibility of the trail behind Pluto.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle.pluto_trail",
+      "is_local": false,
+      "name": "Toggle Pluto Trail",
+      "script": "openspace.setPropertyValueSingle('Scene.PlutoBarycentricTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoBarycentricTrail.Renderable.Enabled'));"
+    },
+    {
+      "documentation": "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle.pluto_labels",
+      "is_local": false,
+      "name": "Toggle Pluto Labels",
+      "script": "local list = {\"Scene.PlutoText.Renderable.Enabled\", \"Scene.CharonText.Renderable.Enabled\", \"Scene.HydraText.Renderable.Enabled\", \"Scene.NixText.Renderable.Enabled\", \"Scene.KerberosText.Renderable.Enabled\", \"Scene.StyxText.Renderable.Enabled\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggles the visibility of the labels for the New Horizons instruments.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle_nh_labels",
+      "is_local": false,
+      "name": "Toggle New Horizons Labels",
+      "script": "local v = openspace.getPropertyValue(\"Scene.Labels.Renderable.Opacity\"); if v <= 0.5 then openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",1.0,2.0) else openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",0.0,2.0) end"
+    },
+    {
+      "documentation": "Toggles the visibility of the shadow visualization of Pluto and Charon.",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle_shadows",
+      "is_local": false,
+      "name": "Toggle Shadows",
+      "script": "openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));openspace.setPropertyValueSingle('Scene.CharonShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.CharonShadow.Renderable.Enabled'));"
+    },
+    {
+      "documentation": "Toggles the trail of New Horizons",
+      "gui_path": "/Missions/New Horizons",
+      "identifier": "profile.toggle.nh_trail",
+      "is_local": false,
+      "name": "Toggle NH Trail",
+      "script": "openspace.setPropertyValueSingle('Scene.NewHorizonsTrailPluto.Renderable.Enabled', not openspace.getPropertyValue('Scene.NewHorizonsTrailPluto.Renderable.Enabled'));"
+    }
+  ],
   "assets": [
     "base",
     "scene/solarsystem/missions/newhorizons/dashboard",
@@ -37,172 +167,84 @@
   ],
   "keybindings": [
     {
-      "documentation": "Sets the focus of the camera on 'NewHorizons'.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "A",
-      "name": "Focus on New Horizons",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.focus.newhorizons",
+      "key": "A"
     },
     {
-      "documentation": "Anchor at New Horizons, Aim at Pluto",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "SHIFT+A",
-      "name": "Anchor NH, Aim  Pluto",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
+      "action": "profile.focus.anchor_nh|aim_pluto",
+      "key": "SHIFT+A"
     },
     {
-      "documentation": "Sets the focus of the camera on 'Pluto'",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "S",
-      "name": "Focus on Pluto",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'PlutoProjection') ;openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', ''); openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.focus.pluto",
+      "key": "S"
     },
     {
-      "documentation": "Sets the focus of the camera on 'Charon'.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "D",
-      "name": "Focus on Charon",
-      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Charon');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "action": "profile.focus.charon",
+      "key": "D"
     },
     {
-      "documentation": "Toggles New Horizons image projection",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "F7",
-      "name": "Toggle NH Image Projection",
-      "script": "local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection'); openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection', not enabled);"
+      "action": "profile.toggle_nh_image_projections",
+      "key": "F7"
     },
     {
-      "documentation": "Removes all image projections from Pluto and Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "F8",
-      "name": "Clear image projections",
-      "script": "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true); openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
+      "action": "profile.clear_image_projections",
+      "key": "F8"
     },
     {
-      "documentation": "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "F9",
-      "name": "Reset time and projections",
-      "script": "openspace.time.setTime('2015-07-14T09:00:00.00');openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);"
+      "action": "profile.setup.approach",
+      "key": "F9"
     },
     {
-      "documentation": "Increases the height map exaggeration on Pluto.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "KP8",
-      "name": "Pluto HeightExaggeration + (KP)",
-      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") + 5000);"
+      "action": "profile.pluto.increase_height_exaggeration",
+      "key": "KP_8"
     },
     {
-      "documentation": "Increases the height map exaggeration on Pluto.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "CTRL+I",
-      "name": "Pluto HeightExaggeration +",
-      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") + 5000);"
+      "action": "profile.pluto.increase_height_exaggeration",
+      "key": "CTRL+I"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Pluto.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "CTRL+K",
-      "name": "Pluto HeightExaggeration -",
-      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") - 5000);"
+      "action": "profile.pluto.decrease_height_exaggeration",
+      "key": "CTRL+K"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Pluto.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "KP2",
-      "name": "Pluto HeightExaggeration - (KP)",
-      "script": "openspace.setPropertyValueSingle(\"Scene.PlutoProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.PlutoProjection.Renderable.HeightExaggeration\") - 5000);"
+      "action": "profile.pluto.decrease_height_exaggeration",
+      "key": "KP_2"
     },
     {
-      "documentation": "Increases the height map exaggeration on Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "KP9",
-      "name": "Charon HeightExaggeration + (KP)",
-      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") + 5000);"
+      "action": "profile.charon.increase_height_exaggeration",
+      "key": "KP_9"
     },
     {
-      "documentation": "Increases the height map exaggeration on Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "CTRL+O",
-      "name": "Charon HeightExaggeration +",
-      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") + 5000);"
+      "action": "profile.charon.increase_height_exaggeration",
+      "key": "CTRL+O"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "KP3",
-      "name": "Charon HeightExaggeration - (KP)",
-      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") - 5000);"
+      "action": "profile.charon.decrease_height_exaggeration",
+      "key": "KP_3"
     },
     {
-      "documentation": "Decreases the height map exaggeration on Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "CTRL+L",
-      "name": "Charon HeightExaggeration -",
-      "script": "openspace.setPropertyValueSingle(\"Scene.CharonProjection.Renderable.HeightExaggeration\", openspace.getPropertyValue(\"Scene.CharonProjection.Renderable.HeightExaggeration\") - 5000);"
+      "action": "profile.charon.decrease_height_exaggeration",
+      "key": "CTRL+L"
     },
     {
-      "documentation": "Toggles the visibility of the trail behind Pluto.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "O",
-      "name": "Toggle Pluto Trail",
-      "script": "openspace.setPropertyValueSingle('Scene.PlutoBarycentricTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoBarycentricTrail.Renderable.Enabled'));"
+      "action": "profile.toggle.pluto_trail",
+      "key": "O"
     },
     {
-      "documentation": "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "J",
-      "name": "Toggle Pluto Labels",
-      "script": "local list = {\"Scene.PlutoText.Enabled\", \"Scene.CharonText.Enabled\", \"Scene.HydraText.Enabled\", \"Scene.NixText.Enabled\", \"Scene.KerberosText.Enabled\", \"Scene.StyxText.Enabled\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle.pluto_labels",
+      "key": "J"
     },
     {
-      "documentation": "Toggles the visibility of the labels for the New Horizons instruments.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "I",
-      "name": "Toggle New Horizons Labels",
-      "script": "local v = openspace.getPropertyValue(\"Scene.Labels.Renderable.Opacity\"); if v <= 0.5 then openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",1.0,2.0) else openspace.setPropertyValueSingle(\"Scene.Labels.Renderable.Opacity\",0.0,2.0) end"
+      "action": "profile.toggle_nh_labels",
+      "key": "I"
     },
     {
-      "documentation": "Draws the instrument field of views in a solid color or as lines.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "M",
-      "name": "Toggle instrument FOVs",
-      "script": "local list = {\"Scene.PlutoText.Enabled\", \"Scene.NH_LORRI.Renderable.SolidDraw\", \"Scene.NH_RALPH_LEISA.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_PAN1.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_PAN2.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_RED.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_BLUE.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_FT.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_METHANE.Renderable.SolidDraw\", \"Scene.NH_RALPH_MVIC_NIR.Renderable.SolidDraw\", \"Scene.NH_ALICE_AIRGLOW.Renderable.SolidDraw\", \"Scene.NH_ALICE_SOC.Renderable.SolidDraw\"}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "action": "profile.toggle_shadows",
+      "key": "SHIFT+T"
     },
     {
-      "documentation": "Toggles the visibility of the shadow visualization of Pluto and Charon.",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "SHIFT+T",
-      "name": "Toggle Shadows",
-      "script": "openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));openspace.setPropertyValueSingle('Scene.CharonShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.CharonShadow.Renderable.Enabled'));"
-    },
-    {
-      "documentation": "Toggles the trail of New Horizons",
-      "gui_path": "/Missions/New Horizons",
-      "is_local": false,
-      "key": "T",
-      "name": "Toggle NH Trail",
-      "script": "openspace.setPropertyValueSingle('Scene.NewHorizonsTrailPluto.Renderable.Enabled', not openspace.getPropertyValue('Scene.NewHorizonsTrailPluto.Renderable.Enabled'));"
+      "action": "profile.toggle.nh_trail",
+      "key": "T"
     }
   ],
   "mark_nodes": [
@@ -216,7 +258,7 @@
     "license": "MIT License",
     "name": "New Horizons",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {
@@ -233,6 +275,11 @@
       "name": "Scene.PlutoBarycenterTrail.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.PlutoProjection.Renderable.ColorTexturePaths",
+      "type": "setPropertyValue",
+      "value": "1.000000"
     }
   ],
   "time": {
@@ -241,6 +288,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 0
+    "minor": 1
   }
 }

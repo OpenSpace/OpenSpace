@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -129,7 +129,7 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        enum class Orientation {
+        enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
             Inside,
             Both
@@ -162,16 +162,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_sphere";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_sphere");
 }
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _size(SizeInfo, 1.f, 0.f, 1e35f)
+    , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
@@ -196,27 +194,19 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
 
     if (p.orientation.has_value()) {
-        switch (*p.orientation) {
-            case Parameters::Orientation::Inside:
-                _orientation = static_cast<int>(Orientation::Inside);
-                break;
-            case Parameters::Orientation::Outside:
-                _orientation = static_cast<int>(Orientation::Outside);
-                break;
-            case Parameters::Orientation::Both:
-                _orientation = static_cast<int>(Orientation::Both);
-                break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
+        _orientation = static_cast<int>(codegen::map<Orientation>(*p.orientation));
     }
     else {
         _orientation = static_cast<int>(Orientation::Outside);
     }
     addProperty(_orientation);
 
+    _size.setExponent(15.f);
+    _size.onChange([this]() {
+        setBoundingSphere(_size);
+        _sphereIsDirty = true;
+    });
     addProperty(_size);
-    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
     _segments.onChange([this]() { _sphereIsDirty = true; });
@@ -257,6 +247,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         setRenderBin(Renderable::RenderBin::Background);
     }
 
+    setBoundingSphere(_size);
     setRenderBinFromOpacity();
 }
 
@@ -395,24 +386,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
-                                    RenderEngine::RendererImplementation::Framebuffer;
-
-    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
-                                RenderEngine::RendererImplementation::ABuffer;
-
-    if (usingABufferRenderer && _useAdditiveBlending) {
-        _shader->setUniform("additiveBlending", true);
-    }
-
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (usingFramebufferRenderer && _useAdditiveBlending) {
+    if (_useAdditiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }
@@ -444,12 +425,12 @@ void RenderableSphere::update(const UpdateData&) {
 void RenderableSphere::loadTexture() {
     if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+            ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
 
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

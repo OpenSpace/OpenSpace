@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,21 +162,20 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
 }
 
 std::string BasicVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath);
+    return absPath(GlslBoundsVsPath).string();
 }
 
 std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath);
+    return absPath(GlslBoundsFsPath).string();
 }
 
 std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath);
+    return absPath(GlslRaycastPath).string();
 }
 
 std::string BasicVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelperPath);
+    return absPath(GlslHelperPath).string();
 }
-
 
 void BasicVolumeRaycaster::setTransferFunction(
                             std::shared_ptr<openspace::TransferFunction> transferFunction)

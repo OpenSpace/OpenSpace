@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
+#include <filesystem>
 #include <functional>
 #include <unordered_map>
 
@@ -50,7 +51,6 @@ namespace ghoul::opengl {
 namespace openspace {
 
 // (x, y, z, w, s, t) * 6 = 36
-const int PLANES_VERTEX_DATA_SIZE = 36;
 
 namespace documentation { struct Documentation; }
 
@@ -71,16 +71,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
-
     struct PlaneAggregate {
         int textureIndex;
         int numberOfPlanes;
@@ -97,12 +87,7 @@ private:
         const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp, float fadeInVariable);
 
-    bool loadData();
-    bool loadTextures();
-    bool readSpeckFile();
-    bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    void loadTextures();
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -112,8 +97,6 @@ private:
 
     int _textMinSize = 0;
     int _textMaxSize = 200;
-    int _planeStartingIndexPos = 0;
-    int _textureVariableIndex = 0;
 
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _textColor;
@@ -121,39 +104,34 @@ private:
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::OptionProperty _blendMode;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _planeMinSize;
-
-    // DEBUG:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, alphaValue, fadeInValue,
-        galaxyTexture) _uniformCache;
+    UniformCache(
+        modelViewProjectionTransform, alphaValue, fadeInValue, galaxyTexture
+    ) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
     std::unordered_map<int, std::string> _textureFileMap;
     std::unordered_map<int, PlaneAggregate> _planesMap;
 
-    std::string _speckFile;
-    std::string _labelFile;
-    std::string _texturesPath;
+    std::filesystem::path _speckFile;
+    std::filesystem::path _labelFile;
+    std::filesystem::path _texturesPath;
     std::string _luminosityVar;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
-    std::vector<float> _fullData;
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
-    std::unordered_map<std::string, int> _variableDataPositionMap;
-
-    int _nValuesPerAstronomicalObject = 0;
+    speck::Dataset _dataset;
+    speck::Labelset _labelset;
 
     float _sluminosity = 1.f;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 };
-
 
 } // namespace openspace
 

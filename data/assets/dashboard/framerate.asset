@@ -1,0 +1,25 @@
+local item = {
+  Type = "DashboardItemFramerate",
+  Identifier = "Framerate",
+  GuiName = "Framerate"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(item)
+end)
+
+asset.export(item)
+
+
+asset.meta = {
+  Name = "Dashboard - Framerate",
+  Version = "1.0",
+  Description = [[ This asset provides a Framerate dashboard item.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

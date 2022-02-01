@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,7 +93,7 @@ struct TestResult {
 
 
     /// Is \c true if the TestResult is positive, \c false otherwise
-    bool success;
+    bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
     /// TestResult::Success is \c true
     std::vector<Offense> offenses;

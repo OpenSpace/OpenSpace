@@ -1,11 +1,21 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local shared = asset.require("util/tle_helper")
 
 local group = {
-    Title = "ARGOS",
-    Url = "http://www.celestrak.com/NORAD/elements/argos.txt",
-    TrailColor = { 0.75, 0.75, 0.35 }
+  Title = "ARGOS",
+  Url = "http://www.celestrak.com/NORAD/elements/argos.txt",
+  TrailColor = { 0.75, 0.75, 0.35 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+
+asset.meta = {
+  Name = "Satellites Weather - ARGOS",
+  Version = "1.0",
+  Description = [[ Satellites asset for Weather - ARGOS. Data from 
+  Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

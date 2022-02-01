@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@ namespace openspace {
 class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
+class EventEngine;
 class LuaConsole;
 class MemoryManager;
 class MissionManager;
@@ -54,6 +55,7 @@ namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
+    class ActionManager;
     class InteractionMonitor;
     class KeybindingManager;
     class NavigationHandler;
@@ -73,6 +75,7 @@ inline ghoul::fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
 inline DownloadManager* downloadManager;
+inline EventEngine* eventEngine;
 inline LuaConsole* luaConsole;
 inline MemoryManager* memoryManager;
 inline MissionManager* missionManager;
@@ -88,6 +91,7 @@ inline VersionChecker* versionChecker;
 inline VirtualPropertyManager* virtualPropertyManager;
 inline WindowDelegate* windowDelegate;
 inline configuration::Configuration* configuration;
+inline interaction::ActionManager* actionManager;
 inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;

@@ -3,7 +3,7 @@ return {{
 	Dimensions = {45, 30, 40},
 	LowerDomainBound = {0, 0, 0},
 	UpperDomainBound = {1, math.pi, 2 * math.pi},
-    InputPath = "${SYNC}/url/satellite_tle_data_DebrisAll/files/allDebrisInOneTLE.txt",
+  InputPath = "${SYNC}/url/satellite_tle_data_DebrisAll/files/allDebrisInOneTLE.txt",
 	StartTime = "2019-07-27T10:00:00",
 	TimeStep = "2",
 	EndTime = "2019-07-27T12:00:00",

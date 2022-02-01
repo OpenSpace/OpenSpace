@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ public:
     TransferFunction() = default;
     TransferFunction(const std::string& string);
 
-    bool envelopesToLua(lua_State* state);
+    void envelopesToLua(lua_State* state) const;
 
     bool setEnvelopesFromString(const std::string& s);
     bool setEnvelopesFromLua(lua_State* lua);

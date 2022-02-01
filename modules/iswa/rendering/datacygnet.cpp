@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,9 +115,17 @@ bool DataCygnet::updateTexture() {
     }
 
     bool texturesReady = false;
-    const std::vector<int>& selectedOptions = _dataOptions.value();
+    const std::set<std::string>& selectedOptions = _dataOptions;
+    const std::vector<std::string>& options = _dataOptions.options();
+    std::vector<int> selectedOptionsIndices;
+    for (const std::string& option : selectedOptions) {
+        auto it = std::find(options.begin(), options.end(), option);
+        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        int idx = static_cast<int>(std::distance(options.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+    }
 
-    for (int option : selectedOptions) {
+    for (int option : selectedOptionsIndices) {
         float* values = data[option];
         if (!values) {
             continue;
@@ -128,6 +136,7 @@ bool DataCygnet::updateTexture() {
             std::unique_ptr<Texture> texture = std::make_unique<Texture>(
                 values,
                 _textureDimensions,
+                GL_TEXTURE_2D,
                 ghoul::opengl::Texture::Format::Red,
                 GL_RED,
                 GL_FLOAT,
@@ -191,7 +200,16 @@ bool DataCygnet::readyToRender() const {
  * ghoul::TextureUnit needs to be passed as an argument to both.
  */
 void DataCygnet::setTextureUniforms() {
-    const std::vector<int>& selectedOptions = _dataOptions.value();
+    const std::set<std::string>& selectedOptions = _dataOptions;
+    const std::vector<std::string>& options = _dataOptions.options();
+    std::vector<int> selectedOptionsIndices;
+    for (const std::string& option : selectedOptions) {
+        auto it = std::find(options.begin(), options.end(), option);
+        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        int idx = static_cast<int>(std::distance(options.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+    }
+
     int activeTextures = std::min(static_cast<int>(selectedOptions.size()), MaxTextures);
     int activeTransferfunctions = std::min(
         static_cast<int>(_transferFunctions.size()),
@@ -201,7 +219,7 @@ void DataCygnet::setTextureUniforms() {
     // Set Textures
     ghoul::opengl::TextureUnit txUnits[MaxTextures];
     int j = 0;
-    for (int option : selectedOptions) {
+    for (int option : selectedOptionsIndices) {
         if (_textures[option]) {
             txUnits[j].activate();
             _textures[option]->bind();
@@ -215,7 +233,7 @@ void DataCygnet::setTextureUniforms() {
     }
 
     if (activeTextures > 0 &&
-        selectedOptions.back() >= static_cast<int>(_transferFunctions.size()))
+        selectedOptionsIndices.back() >= static_cast<int>(_transferFunctions.size()))
         {
             activeTransferfunctions = 1;
         }
@@ -230,7 +248,7 @@ void DataCygnet::setTextureUniforms() {
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
     }
     else {
-        for (int option : selectedOptions) {
+        for (int option : selectedOptionsIndices) {
             if (static_cast<int>(_transferFunctions.size()) >= option) {
                 tfUnits[j].activate();
                 _transferFunctions[option].bind();
@@ -259,7 +277,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath) {
     if (tfFile.is_open()) {
         std::string line;
         while (getline(tfFile, line)) {
-            tfs.emplace_back(absPath(line));
+            tfs.emplace_back(absPath(line).string());
         }
 
         tfFile.close();
@@ -277,7 +295,7 @@ void DataCygnet::fillOptions(const std::string& source) {
     );
 
     for (int i = 0; i < static_cast<int>(options.size()); i++) {
-        _dataOptions.addOption({ i, options[i] });
+        _dataOptions.addOption(options[i]);
         _textures.push_back(nullptr);
     }
 
@@ -288,7 +306,7 @@ void DataCygnet::fillOptions(const std::string& source) {
         _dataOptions.setValue(g->dataOptionsValue());
     }
     else {
-        _dataOptions.setValue(std::vector<int>(1, 0));
+        _dataOptions.setValue({ options.front() });
     }
 }
 
@@ -332,7 +350,13 @@ void DataCygnet::subscribeToGroup() {
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event dataOptionsChanged");
             if (dict.hasValue<std::vector<int>>("dataOptions")) {
-                _dataOptions = dict.value<std::vector<int>>("dataOptions");
+                std::vector<int> idx = dict.value<std::vector<int>>("dataOptions");
+                std::vector<std::string> opts = _dataOptions.options();
+                std::set<std::string> selected;
+                for (int i : idx) {
+                    selected.insert(opts[i]);
+                }
+                _dataOptions = selected;
             }
         }
     );

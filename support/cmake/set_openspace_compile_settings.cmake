@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -55,12 +55,10 @@ function (set_openspace_compile_settings target)
     # This is disabled until GLM is updated to version 0.9.9 that removes occurrance of this warning
     # "/w44574"   # 'identifier' is defined to be '0': did you mean to use '#if identifier'?
     "/w44608"   # 'symbol1' has already been initialized by another union member in the initializer list, 'symbol2'
-    "/w44619"   # #pragma warning: there is no warning number 'number'
     "/w44628"   # digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
     "/w44640"   # 'instance': construction of local static object is not thread-safe
     "/w44905"   # wide string literal cast to 'LPSTR'
     "/w44906"   # string literal cast to 'LPWSTR'
-    "/w44946"   # reinterpret_cast used between related classes: 'class1' and 'class2'
     "/w44986"   # 'symbol': exception specification does not match previous declaration
     "/w44988"   # 'symbol': variable declared outside class/function scope
     "/std:c++latest"
@@ -89,9 +87,11 @@ function (set_openspace_compile_settings target)
       "/GL" # Whole program optimization
     )
   else ()
-    set(MSVC_WARNINGS ${MSVC_WARNINGS}
-      "/ZI"       # Edit and continue support
-    )
+    if (GHOUL_ENABLE_EDIT_CONTINUE)
+      set(MSVC_WARNINGS ${MSVC_WARNINGS}
+        "/ZI"       # Edit and continue support
+      )
+    endif ()
   endif ()
 
   set(CLANG_WARNINGS
@@ -174,7 +174,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-length-array"
     "-Wno-missing-braces"
-    "-Wno-unknown-attributes"
+    "-Wno-ignored-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
@@ -188,9 +188,6 @@ function (set_openspace_compile_settings target)
     "-Wpedantic"
     "-Wunused-parameter"
     "-Wuninitialized"
-    "-Wsuggest-attribute=const"
-    "-Wsuggest-final-types"
-    "-Wsuggest-final-methods"
     "-Wsuggest-override"
     "-Walloc-zero"
     "-Wduplicated-cond"

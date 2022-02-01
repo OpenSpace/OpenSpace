@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,10 @@
 
 #include "assettreemodel.h"
 
-namespace openspace { class Profile; }
-
 class QTextEdit;
 class QTreeView;
 
-class AssetsDialog : public QDialog {
+class AssetsDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -43,10 +41,12 @@ public:
      * \param profile The #openspace::Profile object containing all data of the
      *                new or imported profile.
      * \param assetBasePath The path to the folder in which all of the assets are living
+     * \param userAssetBasePath The path to the folder in which the users' assets are
+     *        living
      * \param parent Pointer to parent Qt widget
      */
-    AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-        QWidget* parent);
+    AssetsDialog(QWidget* parent, openspace::Profile* profile,
+        const std::string& assetBasePath, const std::string& userAssetBasePath);
 
 private slots:
     void parseSelections();
@@ -61,7 +61,7 @@ private:
      */
     QString createTextSummary();
 
-    openspace::Profile& _profile;
+    openspace::Profile* _profile = nullptr;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;
     QTextEdit* _summary = nullptr;

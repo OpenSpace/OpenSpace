@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
 {}
 
 bool ParallelConnection::isConnectedOrConnecting() const {
-    return _socket->isConnected() || _socket->isConnecting();
+    return _socket != nullptr && (_socket->isConnected() || _socket->isConnecting());
 }
 
 void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {

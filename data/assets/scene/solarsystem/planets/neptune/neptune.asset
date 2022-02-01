@@ -1,63 +1,77 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 asset.require("spice/base")
-asset.require('./trail')
+asset.require("./trail")
 
 local Neptune = {
-    Identifier = "Neptune",
-    Parent = transforms.NeptuneBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_NEPTUNE",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Neptune",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEPTUNE",
+      Observer = "NEPTUNE BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 24764000.0, 24764000.0, 24314000.0 },
-        SegmentsPerPatch = 64,
-        Layers = {}
-    },
-    Tag = { "planet_solarSystem", "planet_giants" },
-    GUI = {
-        Name = "Neptune",
-        Path = "/Solar System/Planets/Neptune",
-        Description = [[Neptune globe]]
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_NEPTUNE",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 24764000.0, 24764000.0, 24314000.0 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "planet_solarSystem", "planet_giants" },
+  GUI = {
+    Name = "Neptune",
+    Path = "/Solar System/Planets/Neptune",
+    Description = [[Neptune globe]]
+  }
 }
 
 local NeptuneLabel = {
-    Identifier = "NeptuneLabel",
-    Parent = Neptune.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Neptune",
-        FontSize = 100.0,
-        LabelSize = 8.8,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive"
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Neptune Label",
-        Path = "/Solar System/Planets/Neptune",
-        Description = [[ Main planet label for Neptune.]],
-    }
+  Identifier = "NeptuneLabel",
+  Parent = Neptune.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    Text = "Neptune",
+    FontSize = 70.0,
+    Size = 8.96,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive"
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Neptune Label",
+    Path = "/Solar System/Planets/Neptune",
+    Description = [[ Main planet label for Neptune.]],
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Neptune)
+  openspace.addSceneGraphNode(NeptuneLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneLabel)
+  openspace.removeSceneGraphNode(Neptune)
+end)
+    
+asset.export(Neptune)
+asset.export(NeptuneLabel)
+
 
 
 asset.meta = {
-    Name = "Neptune",
-    Version = "1.0",
-    Description = [[ Neptune globe, and main planet label.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Neptune"}
+  Name = "Neptune",
+  Version = "1.1",
+  Description = [[ Neptune globe, and main planet label.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

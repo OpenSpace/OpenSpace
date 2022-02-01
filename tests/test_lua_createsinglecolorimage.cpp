@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
+#include <filesystem>
 
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
@@ -38,7 +39,7 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
     ghoul::lua::push(L, "colorFile");
     ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
-    int res = openspace::luascriptfunctions::createSingeColorImage(L);
+    int res = openspace::luascriptfunctions::createSingleColorImage(L);
 
     // One return value
     CHECK(res == 1);
@@ -58,8 +59,10 @@ TEST_CASE("CreateSingleColorImage: Faulty 1st input type", "[createsinglecolorim
     ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingeColorImage(L),
-        Catch::Matchers::Contains("parameter 1 was not the expected type")
+        openspace::luascriptfunctions::createSingleColorImage(L),
+        Catch::Matchers::Contains(
+            "Expected type 'String' for parameter 1 but got wrong type 'Table'"
+        )
     );
 }
 
@@ -69,8 +72,10 @@ TEST_CASE("CreateSingleColorImage: Faulty 2nd input type", "[createsinglecolorim
     ghoul::lua::push(L, "not a vector");
 
     CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingeColorImage(L),
-        Catch::Matchers::Contains("parameter 2 was not the expected type")
+        openspace::luascriptfunctions::createSingleColorImage(L),
+        Catch::Matchers::Contains(
+            "Expected type 'Table' for parameter 2 but got wrong type 'String'"
+        )
     );
 }
 
@@ -80,7 +85,7 @@ TEST_CASE("CreateSingleColorImage: Invalid number of inputs", "[createsinglecolo
     ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingeColorImage(L),
+        openspace::luascriptfunctions::createSingleColorImage(L),
         Catch::Matchers::Contains("Expected 2 arguments, got 1")
     );
 }
@@ -93,7 +98,7 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (vec4)",
     ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
-        openspace::luascriptfunctions::createSingeColorImage(L),
+        openspace::luascriptfunctions::createSingleColorImage(L),
         Catch::Matchers::Contains(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         )
@@ -105,18 +110,14 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 });
+    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 }); // not a valid color
 
-    // @TODO (emmbr 2020-02-04) This test case should be here, but as of now this case is
-    // not handled. Finish it up when we have a better way of verifying that a dictionary
-    // is a color
-
-    //CHECK_THROWS_WITH(
-    //    openspace::luascriptfunctions::createSingeColorImage(L),
-    //    Catch::Matchers::Contains(
-    //        "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
-    //    )
-    //);
+    CHECK_THROWS_WITH(
+        openspace::luascriptfunctions::createSingleColorImage(L),
+        Catch::Matchers::Contains(
+            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
+        )
+    );
 }
 
 TEST_CASE("CreateSingleColorImage: Check if file was created",
@@ -126,11 +127,11 @@ TEST_CASE("CreateSingleColorImage: Check if file was created",
     ghoul::lua::push(L, "colorFile2");
     ghoul::lua::push(L, std::vector{ 0.0, 1.0, 0.0 });
 
-    int res = openspace::luascriptfunctions::createSingeColorImage(L);
+    int res = openspace::luascriptfunctions::createSingleColorImage(L);
 
     CHECK(res == 1);
     std::string path = ghoul::lua::value<std::string>(L, 1);
-    CHECK(FileSys.fileExists(path));
+    CHECK(std::filesystem::is_regular_file(path));
 }
 
 TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
@@ -139,7 +140,7 @@ TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage
     ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     // Loads the same file that was created in a previous test case
-    int res = openspace::luascriptfunctions::createSingeColorImage(L);
+    int res = openspace::luascriptfunctions::createSingleColorImage(L);
     CHECK(res == 1);
     CHECK(lua_gettop(L) == 1);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -178,8 +178,8 @@ private:
                  pointSize, renderPhase) _uniformCache;
 #else
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase,
-        resolution, lineWidth) _uniformCache;
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, viewport,
+        lineWidth) _uniformCache;
 #endif
 };
 

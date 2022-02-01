@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,186 +32,112 @@
 #include <ghoul/logging/textlog.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyFilename = "File";
-    constexpr const char* KeyAppend = "Append";
-    constexpr const char* KeyTimeStamping = "TimeStamping";
-    constexpr const char* KeyDateStamping = "DateStamping";
-    constexpr const char* KeyCategoryStamping = "CategoryStamping";
-    constexpr const char* KeyLogLevelStamping = "LogLevelStamping";
-    constexpr const char* KeyLogLevel = "LogLevel";
-
-    constexpr const char* ValueHtmlLog = "html";
-    constexpr const char* ValueTextLog = "Text";
-
     constexpr const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
     constexpr const char* CssPath = "${WEB}/log/style.css";
     constexpr const char* JsPath = "${WEB}/log/script.js";
+
+    struct [[codegen::Dictionary(LogFactory)]] Parameters {
+        enum class Type {
+            Html [[codegen::key("html")]],
+            Text
+        };
+        // The type of the new log to be generated
+        Type type;
+
+        // The filename to which the log will be written
+        std::string file;
+
+        // Determines whether the file will be cleared at startup or if the contents will
+        // be appended to previous runs
+        std::optional<bool> append;
+
+        // Determines whether the log entires should be stamped with the time at which the
+        // message was logged
+        std::optional<bool> timeStamping;
+
+        // Determines whether the log entries should be stamped with the date at which the
+        // message was logged
+        std::optional<bool> dateStamping;
+
+        // Determines whether the log entries should be stamped with the category that
+        // creates the log message
+        std::optional<bool> categoryStamping;
+
+        // Determines whether the log entries should be stamped with the log level that
+        // was used to create the log message
+        std::optional<bool> logLevelStamping;
+
+        enum class [[codegen::map(ghoul::logging::LogLevel)]] LogLevel {
+            AllLogging,
+            Trace,
+            Debug,
+            Info,
+            Warning,
+            Error,
+            Fatal,
+            NoLogging
+        };
+        // The log level for this specific text-based log
+        std::optional<LogLevel> logLevel;
+    };
+#include "logfactory_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LogFactoryDocumentation() {
-    using namespace documentation;
-
-    return {
-        "LogFactory",
-        "core_logfactory",
-        {
-            {
-                KeyType,
-                new StringInListVerifier({
-                    // List from createLog
-                    ValueTextLog, ValueHtmlLog
-                }),
-                Optional::No,
-                "The type of the new log to be generated."
-            },
-            {
-                KeyFilename,
-                new StringVerifier,
-                Optional::No,
-                "The filename to which the log will be written."
-            },
-            {
-                KeyAppend,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the file will be cleared at startup or if the "
-                "contents will be appended to previous runs."
-            },
-            {
-                KeyTimeStamping,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the log entires should be stamped with the time at "
-                "which the message was logged."
-            },
-            {
-                KeyDateStamping,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the log entries should be stamped with the date at "
-                "which the message was logged."
-            },
-            {
-                KeyCategoryStamping,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the log entries should be stamped with the "
-                "category that creates the log message."
-            },
-            {
-                KeyLogLevelStamping,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the log entries should be stamped with the log level "
-                "that was used to create the log message."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_logfactory");
 }
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        LogFactoryDocumentation(),
-        dictionary,
-        "LogFactory"
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    std::filesystem::path filename = absPath(p.file);
+    bool append = p.append.value_or(true);
+    bool timeStamp = p.timeStamping.value_or(true);
+    bool dateStamp = p.dateStamping.value_or(true);
+    bool categoryStamp = p.categoryStamping.value_or(true);
+    bool logLevelStamp = p.logLevelStamping.value_or(true);
+    ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
+        p.logLevel.value_or(Parameters::LogLevel::AllLogging)
     );
 
-    // 'type' and 'filename' are required keys
-    const std::string& type = dictionary.value<std::string>(KeyType);
-    const std::string& filename = absPath(dictionary.value<std::string>(KeyFilename));
+    switch (p.type) {
+        case Parameters::Type::Html:
+        {
+            std::vector<std::string> cssFiles{
+                absPath(BootstrapPath).string(),
+                absPath(CssPath).string()
+            };
+            std::vector<std::string> jsFiles{ absPath(JsPath).string() };
 
-    // the rest are optional
-    bool append = true;
-    if (dictionary.hasValue<bool>(KeyAppend)) {
-        append = dictionary.value<bool>(KeyAppend);
-    }
-    bool timeStamp = true;
-    if (dictionary.hasValue<bool>(KeyTimeStamping)) {
-        timeStamp = dictionary.value<bool>(KeyTimeStamping);
-    }
-    bool dateStamp = true;
-    if (dictionary.hasValue<bool>(KeyDateStamping)) {
-        dateStamp = dictionary.value<bool>(KeyDateStamping);
-    }
-    bool categoryStamp = true;
-    if (dictionary.hasValue<bool>(KeyCategoryStamping)) {
-        categoryStamp = dictionary.value<bool>(KeyCategoryStamping);
-    }
-    bool logLevelStamp = true;
-    if (dictionary.hasValue<bool>(KeyLogLevelStamping)) {
-        logLevelStamp = dictionary.value<bool>(KeyLogLevelStamping);
-    }
-    std::string logLevel;
-    if (dictionary.hasValue<std::string>(KeyLogLevel)) {
-        logLevel = dictionary.value<std::string>(KeyLogLevel);
-    }
-
-    using Append = ghoul::logging::TextLog::Append;
-    using TimeStamping = ghoul::logging::Log::TimeStamping;
-    using DateStamping = ghoul::logging::Log::DateStamping;
-    using CategoryStamping = ghoul::logging::Log::CategoryStamping;
-    using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
-
-    if (type == ValueHtmlLog) {
-        std::vector<std::string> cssFiles{absPath(BootstrapPath), absPath(CssPath)};
-        std::vector<std::string> jsFiles{absPath(JsPath)};
-
-        if (logLevel.empty()) {
             return std::make_unique<ghoul::logging::HTMLLog>(
-                filename,
-                Append(append),
-                TimeStamping(timeStamp),
-                DateStamping(dateStamp),
-                CategoryStamping(categoryStamp),
-                LogLevelStamping(logLevelStamp),
-                cssFiles,
-                jsFiles
-            );
-        }
-        else {
-            return std::make_unique<ghoul::logging::HTMLLog>(
-                filename,
-                Append(append),
-                TimeStamping(timeStamp),
-                DateStamping(dateStamp),
-                CategoryStamping(categoryStamp),
-                LogLevelStamping(logLevelStamp),
+                filename.string(),
+                ghoul::logging::TextLog::Append(append),
+                ghoul::logging::Log::TimeStamping(timeStamp),
+                ghoul::logging::Log::DateStamping(dateStamp),
+                ghoul::logging::Log::CategoryStamping(categoryStamp),
+                ghoul::logging::Log::LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles,
-                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
-            );
+                level
+                );
         }
-    }
-    else if (type == ValueTextLog) {
-        if (logLevel.empty()) {
+        case Parameters::Type::Text:
             return std::make_unique<ghoul::logging::TextLog>(
-                filename,
-                Append(append),
-                TimeStamping(timeStamp),
-                DateStamping(dateStamp),
-                CategoryStamping(categoryStamp),
-                LogLevelStamping(logLevelStamp)
+                filename.string(),
+                ghoul::logging::TextLog::Append(append),
+                ghoul::logging::Log::TimeStamping(timeStamp),
+                ghoul::logging::Log::DateStamping(dateStamp),
+                ghoul::logging::Log::CategoryStamping(categoryStamp),
+                ghoul::logging::Log::LogLevelStamping(logLevelStamp),
+                level
             );
-        }
-        else {
-            return std::make_unique<ghoul::logging::TextLog>(
-                filename,
-                Append(append),
-                TimeStamping(timeStamp),
-                DateStamping(dateStamp),
-                CategoryStamping(categoryStamp),
-                LogLevelStamping(logLevelStamp),
-                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
-            );
-        }
-    }
-    else {
-        throw ghoul::MissingCaseException();
+        default:
+            throw new ghoul::MissingCaseException();
     }
 }
 

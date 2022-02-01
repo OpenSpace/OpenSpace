@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -63,7 +64,6 @@ void ModuleEngine::initialize(
             m->initialize(configuration);
         }
         catch (const documentation::SpecificationError& e) {
-            //LFATALC(e.component, e.message); 
             for (const documentation::TestResult::Offense& o : e.result.offenses) {
                 LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
             }
@@ -171,7 +171,6 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
             {
                 "isLoaded",
                 &luascriptfunctions::isLoaded,
-                {},
                 "string",
                 "Checks whether a specific module is loaded"
             }

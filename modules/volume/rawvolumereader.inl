@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,10 @@
 namespace openspace::volume {
 
 template <typename VoxelType>
-RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
+RawVolumeReader<VoxelType>::RawVolumeReader(const std::filesystem::path& path,
                                             const glm::uvec3& dimensions)
     : _dimensions(dimensions)
-    , _path(path)
+    , _path(std::move(path))
 {}
 
 template <typename VoxelType>
@@ -45,15 +45,14 @@ void RawVolumeReader<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
 }
 
 template <typename VoxelType>
-std::string RawVolumeReader<VoxelType>::path() const {
+std::filesystem::path RawVolumeReader<VoxelType>::path() const {
     return _path;
 }
 
 template <typename VoxelType>
-void RawVolumeReader<VoxelType>::setPath(const std::string& path) {
-    _path = path;
+void RawVolumeReader<VoxelType>::setPath(std::filesystem::path path) {
+    _path = std::move(path);
 }
-
 
 /*
 TODO: Implement these methods for random access in raw volume file
@@ -78,9 +77,8 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
     return indexToCoords(linear, dimensions());
 }
 
-
 template <typename VoxelType>
-std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
+std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
     std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
         dims
@@ -104,7 +102,24 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
         throw ghoul::RuntimeError("Error reading volume file");
     }
 
-    return volume;
+    if (invertZ) {
+        std::unique_ptr<RawVolume<VoxelType>> newVolume =
+            std::make_unique<RawVolume<VoxelType>>(dims);
+
+        for (int i = 0; i < volume->nCells(); ++i) {
+            const glm::uvec3& coords = volume->indexToCoords(i);
+            glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
+
+            size_t newIndex = volume->coordsToIndex(newcoords);
+            size_t oldIndex = volume->coordsToIndex(coords);
+
+            newVolume->set(newcoords, volume->get(coords));
+        }
+        return newVolume;
+    }
+    else {
+        return volume;
+    }
 }
 
 } // namespace openspace::volume

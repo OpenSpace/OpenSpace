@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                            *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/vislab/vislabmodule.h>
 
 #include <modules/vislab/rendering/renderabledistancelabel.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
@@ -38,6 +39,12 @@ void VisLabModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(renderableFactory, "No renderable factory existed");
 
     renderableFactory->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
+}
+
+std::vector<documentation::Documentation>VisLabModule::documentations() const {
+    return {
+        RenderableDistanceLabel::Documentation()
+    };
 }
 
 } // namespace openspace

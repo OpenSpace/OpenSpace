@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@
 
 #include <modules/gaia/rendering/octreemanager.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -78,28 +78,28 @@ private:
      *
      * \return the number of stars read.
      */
-    int readFitsFile(const std::string& filePath);
+    int readFitsFile(const std::filesystem::path& filePath);
 
     /**
      * Read a SPECK file by using FitsFileReader.readSpeckFile() and constructs an octree.
      *
      * \return the number of stars read.
      */
-    int readSpeckFile(const std::string& filePath);
+    int readSpeckFile(const std::filesystem::path& filePath);
 
     /**
      * Reads a preprocessed binary file and constructs an octree.
      *
      * \return the number of stars read.
      */
-    int readBinaryRawFile(const std::string& filePath);
+    int readBinaryRawFile(const std::filesystem::path& filePath);
 
     /**
      * Reads a pre-constructed octree, with all data, from a binary file.
      *
      * \return the number of stars read.
      */
-    int readBinaryOctreeFile(const std::string& filePath);
+    int readBinaryOctreeFile(const std::filesystem::path& filePath);
 
     /**
      * Reads the structure of a pre-constructed octree from a binary file, without any
@@ -107,7 +107,7 @@ private:
      *
      * \return the number of stars read.
      */
-    int readBinaryOctreeStructureFile(const std::string& folderPath);
+    int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
     /**
      * Checks for any OpenGL errors and reports these to the log if _reportGlErrors is

@@ -1,23 +1,34 @@
-local texturesPath = asset.require("./../../mimas_textures").TexturesPath
-local globeIdentifier = asset.require("./../../mimas").Mimas.Identifier
+local globeIdentifier = asset.require("../../mimas").Mimas.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Mimas textures",
+  Type = "HttpSynchronization",
+  Identifier = "mimas_textures",
+  Version = 1
+})
 
 local layer = {
-    Identifier = "Texture",
-    FilePath = texturesPath .. "/mimas.jpg",
+  Identifier = "Texture",
+  FilePath = texturesPath .. "mimas.jpg",
 }
 
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
-    Name = "Mimas Texutre",
-    Version = "1.0",
-    Description = [[ Default jpg texture for Mimas]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Mimas Texutre",
+  Version = "1.0",
+  Description = [[ Default jpg texture for Mimas]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

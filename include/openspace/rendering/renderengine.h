@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,12 +28,16 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
+#include <filesystem>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -53,7 +57,6 @@ namespace scripting { struct LuaLibrary; }
 class Camera;
 class RaycasterManager;
 class DeferredcasterManager;
-class Renderer;
 class Scene;
 class SceneManager;
 class ScreenLog;
@@ -62,12 +65,6 @@ struct ShutdownInformation;
 
 class RenderEngine : public properties::PropertyOwner {
 public:
-    enum class RendererImplementation {
-        Framebuffer = 0,
-        ABuffer,
-        Invalid
-    };
-
     RenderEngine();
     ~RenderEngine();
 
@@ -78,9 +75,6 @@ public:
     void setScene(Scene* scene);
     Scene* scene();
     void updateScene();
-
-    const Renderer& renderer() const;
-    RendererImplementation rendererImplementation() const;
 
     ghoul::opengl::OpenGLStateCache& openglStateCache();
 
@@ -109,32 +103,20 @@ public:
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        const std::string& csPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    void preRaycast(ghoul::opengl::ProgramObject& programObject);
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    void postRaycast(ghoul::opengl::ProgramObject& programObject);
 
     /**
      * Set the camera to use for rendering
      */
     void setCamera(Camera* camera);
-
-
-    void setRendererFromString(const std::string& renderingMethod);
 
     /**
      * Lets the renderer update the data to be brought into the rendererer programs
@@ -174,9 +156,6 @@ public:
     uint64_t frameNumber() const;
 
 private:
-    void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& renderingMethod) const;
-
     void renderScreenLog();
     void renderVersionInformation();
     void renderCameraInformation();
@@ -186,13 +165,12 @@ private:
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
 
-    std::unique_ptr<Renderer> _renderer;
-    RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
+    FramebufferRenderer _renderer;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
-    ghoul::opengl::OpenGLStateCache* _openglStateCache;
+    ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
@@ -200,7 +178,9 @@ private:
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
 
+    properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
+    properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 
@@ -230,8 +210,9 @@ private:
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
@@ -241,6 +222,9 @@ private:
     } _cameraButtonLocations;
 
     std::string _versionString;
+
+    properties::Vec4Property _enabledFontColor;
+    properties::Vec4Property _disabledFontColor;
 };
 
 } // namespace openspace

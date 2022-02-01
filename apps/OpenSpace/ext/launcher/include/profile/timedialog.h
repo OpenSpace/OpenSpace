@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@ class QDateTimeEdit;
 class QLabel;
 class QLineEdit;
 
-class TimeDialog : public QDialog {
+class TimeDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -44,7 +44,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    TimeDialog(openspace::Profile& profile, QWidget* parent);
+    TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time);
 
 private slots:
     void enableAccordingToType(int);
@@ -54,8 +54,8 @@ private:
     void createWidgets();
     void enableFormatForAbsolute(bool enableAbs);
 
-    openspace::Profile& _profile;
-    openspace::Profile::Time _data;
+    std::optional<openspace::Profile::Time>* _time = nullptr;
+    openspace::Profile::Time _timeData;
     bool _initializedAsAbsolute = true;
 
     QComboBox* _typeCombo = nullptr;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -176,7 +176,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
-void LuaScriptTopic::runScript(const std::string& script, bool shouldReturn) {
+void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,16 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scene.h>
+
 #include <ghoul/opengl/programobject.h>
 #include <numeric>
+#include <optional>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
@@ -104,36 +112,33 @@ namespace {
        "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
     };
 
+    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        int resolution;
+
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
+            Background,
+            Opaque,
+            PreDeferredTransparent,
+            PostDeferredTransparent,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderableTypeInfo.description)]]
+        std::optional<RenderableType> renderableType;
+    };
+#include "renderabletrailorbit_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    using namespace documentation;
-    documentation::Documentation doc {
-        "RenderableTrailOrbit",
-        "base_renderable_renderabletrailorbit",
-        {
-            {
-                PeriodInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                PeriodInfo.description
-            },
-            {
-                ResolutionInfo.identifier,
-                new IntVerifier,
-                Optional::No,
-                ResolutionInfo.description
-            },
-            {
-                RenderableTypeInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                RenderableTypeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
@@ -152,47 +157,27 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     , _period(PeriodInfo, 0.0, 0.0, 1e9)
     , _resolution(ResolutionInfo, 10000, 1, 1000000)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTrailOrbit"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _translation->onParameterChange([this]() { _needsFullSweep = true; });
 
     // Period is in days
     using namespace std::chrono;
-    const long long sph = duration_cast<seconds>(hours(24)).count();
-    _period = dictionary.value<double>(PeriodInfo.identifier) * sph;
+    _period = p.period * duration_cast<seconds>(hours(24)).count();
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _period.setExponent(5.f);
     addProperty(_period);
 
-    _resolution = static_cast<int>(dictionary.value<double>(ResolutionInfo.identifier));
+    _resolution = p.resolution;
     _resolution.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
+    _resolution.setExponent(3.5f);
     addProperty(_resolution);
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 
-    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        std::string renderType = dictionary.value<std::string>(
-            RenderableTypeInfo.identifier
-            );
-        if (renderType == "Background") {
-            setRenderBin(Renderable::RenderBin::Background);
-        }
-        else if (renderType == "Opaque") {
-            setRenderBin(Renderable::RenderBin::Opaque);
-        }
-        else if (renderType == "PreDeferredTransparent") {
-            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-        }
-        else if (renderType == "PostDeferredTransparent") {
-            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        }
-        else if (renderType == "Overlay") {
-            setRenderBin(Renderable::RenderBin::Overlay);
-        }
+    if (p.renderableType.has_value()) {
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Overlay);

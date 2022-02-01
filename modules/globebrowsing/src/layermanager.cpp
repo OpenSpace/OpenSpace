@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -98,6 +98,16 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
     try {
         return _layerGroups[groupId]->addLayer(layerDict);
     }
+    catch (const documentation::SpecificationError& e) {
+        LERRORC(e.component, e.message);
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, ghoul::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        }
+        return nullptr;
+    }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
         return nullptr;
@@ -141,14 +151,12 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     return res;
 }
 
-int LayerManager::update() {
+void LayerManager::update() {
     ZoneScoped
 
-    int res = 0;
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        res += layerGroup->update();
+        layerGroup->update();
     }
-    return res;
 }
 
 void LayerManager::reset(bool includeDisabled) {
@@ -156,8 +164,8 @@ void LayerManager::reset(bool includeDisabled) {
 
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
-            if (layer->enabled() || includeDisabled) {
-                tileprovider::reset(*layer->tileProvider());
+            if ((layer->enabled() || includeDisabled) && layer->tileProvider()) {
+                layer->tileProvider()->reset();
             }
         }
     }

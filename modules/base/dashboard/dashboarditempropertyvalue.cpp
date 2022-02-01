@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,9 +62,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_propertyvalue";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_propertyvalue");
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(

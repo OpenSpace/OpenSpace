@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #include <modules/base/dashboard/dashboarditemdistance.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
@@ -41,6 +41,13 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
+    enum Type {
+        Node = 0,
+        NodeSurface,
+        Focus,
+        Camera
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -106,7 +113,7 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
-        enum class TypeInfo {
+        enum class [[codegen::map(Type)]] TypeInfo {
             Node,
             NodeSurface [[codegen::key("Node Surface")]],
             Focus,
@@ -140,9 +147,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDistance::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_distance";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_distance");
 }
 
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
@@ -183,20 +188,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         );
     });
     if (p.sourceType.has_value()) {
-        switch (*p.sourceType) {
-            case Parameters::TypeInfo::Node:
-                _source.type = Type::Node;
-                break;
-            case Parameters::TypeInfo::NodeSurface:
-                _source.type = Type::NodeSurface;
-                break;
-            case Parameters::TypeInfo::Focus:
-                _source.type = Type::Focus;
-                break;
-            case Parameters::TypeInfo::Camera:
-                _source.type = Type::Camera;
-                break;
-        }
+        _source.type = codegen::map<Type>(*p.sourceType);
     }
     else {
         _source.type = Type::Camera;
@@ -231,20 +223,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         );
     });
     if (p.destinationType.has_value()) {
-        switch (*p.destinationType) {
-            case Parameters::TypeInfo::Node:
-                _destination.type = Type::Node;
-                break;
-            case Parameters::TypeInfo::NodeSurface:
-                _destination.type = Type::NodeSurface;
-                break;
-            case Parameters::TypeInfo::Focus:
-                _destination.type = Type::Focus;
-                break;
-            case Parameters::TypeInfo::Camera:
-                _destination.type = Type::Camera;
-                break;
-        }
+        _destination.type = codegen::map<Type>(*p.destinationType);
     }
     else {
         _destination.type = Type::Focus;
@@ -368,7 +347,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertDistance(d, unit);
+        const double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
@@ -399,7 +378,7 @@ glm::vec2 DashboardItemDistance::size() const {
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 

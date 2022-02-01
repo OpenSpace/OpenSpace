@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +28,11 @@
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
-#include <thread>
-#include <chrono>
+#include <filesystem>
 
 #include "exoplanetsmodule_lua.inl"
 
@@ -45,10 +43,23 @@ namespace {
         "The path to the folder containing the exoplanets data and lookup table"
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo BvColorMapInfo = {
+        "BvColormap",
+        "B-V Colormap",
+        "The path to a cmap file that maps a B-V color index to an RGB color"
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo StarTextureInfo = {
         "StarTexture",
         "Star Texture",
         "The path to a grayscale image that is used for the host star surfaces"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo StarGlareTextureInfo = {
+        "StarGlareTexture",
+        "Star Glare Texture",
+        "The path to a grayscale image that is used for the glare effect of the "
+        "host stars"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
@@ -115,19 +126,25 @@ namespace {
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
         // [[codegen::verbatim(DataFolderInfo.description)]]
-        std::optional<std::string> dataFolder;
+        std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
+
+        // [[codegen::verbatim(BvColorMapInfo.description)]]
+        std::optional<std::filesystem::path> bvColormap;
 
        // [[codegen::verbatim(StarTextureInfo.description)]]
-       std::optional<std::string> starTexture;
+       std::optional<std::filesystem::path> starTexture;
+
+       // [[codegen::verbatim(StarGlareTextureInfo.description)]]
+       std::optional<std::filesystem::path> starGlareTexture;
 
        // [[codegen::verbatim(NoDataTextureInfo.description)]]
-       std::optional<std::string> noDataTexture;
+       std::optional<std::filesystem::path> noDataTexture;
 
        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-       std::optional<std::string> orbitDiscTexture;
+       std::optional<std::filesystem::path> orbitDiscTexture;
 
        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-       std::optional<std::string> habitableZoneTexture;
+       std::optional<std::filesystem::path> habitableZoneTexture;
 
        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
        std::optional<bool> showComparisonCircle;
@@ -151,7 +168,9 @@ using namespace exoplanets;
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
     , _exoplanetsDataFolder(DataFolderInfo)
+    , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
+    , _starGlareTexturePath(StarGlareTextureInfo)
     , _noDataTexturePath(NoDataTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
@@ -163,30 +182,50 @@ ExoplanetsModule::ExoplanetsModule()
     _exoplanetsDataFolder.setReadOnly(true);
 
     addProperty(_exoplanetsDataFolder);
+    addProperty(_bvColorMapPath);
     addProperty(_starTexturePath);
+    addProperty(_starGlareTexturePath);
     addProperty(_noDataTexturePath);
     addProperty(_orbitDiscTexturePath);
     addProperty(_habitableZoneTexturePath);
+
     addProperty(_showComparisonCircle);
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
+
     addProperty(_habitableZoneOpacity);
 }
 
+bool ExoplanetsModule::hasDataFiles() const {
+    return !_exoplanetsDataFolder.value().empty();
+}
+
 std::string ExoplanetsModule::exoplanetsDataPath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, ExoplanetsDataFileName)
-    );
-};
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
+    ).string();
+}
 
 std::string ExoplanetsModule::lookUpTablePath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
-    );
-};
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
+    ).string();
+}
+
+std::string ExoplanetsModule::bvColormapPath() const {
+    return _bvColorMapPath;
+}
 
 std::string ExoplanetsModule::starTexturePath() const {
     return _starTexturePath;
+}
+
+std::string ExoplanetsModule::starGlareTexturePath() const {
+    return _starGlareTexturePath;
 }
 
 std::string ExoplanetsModule::noDataTexturePath() const {
@@ -224,7 +263,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "addExoplanetSystem",
             &exoplanets::luascriptfunctions::addExoplanetSystem,
-            {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
@@ -232,14 +270,12 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "removeExoplanetSystem",
             &exoplanets::luascriptfunctions::removeExoplanetSystem,
-            {},
             "string",
             "Removes the nodes of the specified exoplanet system from the scene graph"
         },
         {
             "listAvailableExoplanetSystems",
             &exoplanets::luascriptfunctions::listAvailableExoplanetSystems,
-            {},
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
             "the scene graph to the OpenSpace Log"
@@ -247,7 +283,6 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
         {
             "getListOfExoplanets",
             &exoplanets::luascriptfunctions::getListOfExoplanets,
-            {},
             "",
             "Gets a list with the names of all exoplanet systems"
         }
@@ -258,15 +293,40 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    _exoplanetsDataFolder = p.dataFolder.value_or(_exoplanetsDataFolder);
-    _starTexturePath = p.starTexture.value_or(_starTexturePath);
-    _noDataTexturePath = p.noDataTexture.value_or(_noDataTexturePath);
-    _orbitDiscTexturePath = p.orbitDiscTexture.value_or(_orbitDiscTexturePath);
-    _habitableZoneTexturePath = p.habitableZoneTexture.value_or(_habitableZoneTexturePath);
+
+    if (p.dataFolder.has_value()) {
+        _exoplanetsDataFolder = p.dataFolder.value().string();
+    }
+
+    if (p.bvColormap.has_value()) {
+        _bvColorMapPath = p.bvColormap.value().string();
+    }
+
+    if (p.starTexture.has_value()) {
+        _starTexturePath = p.starTexture.value().string();
+    }
+
+    if (p.starGlareTexture.has_value()) {
+        _starGlareTexturePath = p.starGlareTexture.value().string();
+    }
+
+    if (p.noDataTexture.has_value()) {
+        _noDataTexturePath = p.noDataTexture.value().string();
+    }
+
+    if (p.orbitDiscTexture.has_value()) {
+        _orbitDiscTexturePath = p.orbitDiscTexture.value().string();
+    }
+
+    if (p.habitableZoneTexture.has_value()) {
+        _habitableZoneTexturePath = p.habitableZoneTexture.value().string();
+    }
 
     _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
+
+    _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -139,21 +139,6 @@ std::string to_string(const openspace::documentation::TestResult::Warning::Reaso
 namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
-
-//std::string concatenate(const std::vector<TestResult::Offense>& offenses) {
-//    std::string result = "Error in specification (";
-//    for (const TestResult::Offense& o : offenses) {
-//        if (o.explanation.empty()) {
-//            result += fmt::format("{} ({}), ", o.offender, ghoul::to_string(o.reason));
-//        }
-//        else {
-//            result += fmt::format("{} ({}: {}), ", o.offender, ghoul::to_string(o.reason), o.explanation);
-//        }
-//    }
-//    result.pop_back();
-//    result.back() = ')';
-//    return result;
-//}
 
 SpecificationError::SpecificationError(TestResult res, std::string comp)
     : ghoul::RuntimeError("Error in specification", std::move(comp))

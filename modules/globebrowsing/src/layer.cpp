@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -108,13 +108,14 @@ namespace {
         std::optional<std::string> description;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // Specifies the type of layer that is to be added. If this value is not
         // specified, the layer is a DefaultTileLayer
         std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
-            "SingleImageTileLayer", "SizeReferenceTileLayer", "TemporalTileLayer",
-            "TileIndexTileLayer", "ByIndexTileLayer", "ByLevelTileLayer", "SolidColor")]];
+            "SingleImageTileLayer", "ImageSequenceTileLayer", "SizeReferenceTileLayer",
+            "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
+            "ByLevelTileLayer", "SolidColor")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -172,16 +173,14 @@ namespace {
         std::optional<BlendMode> blendMode;
 
         // If the primary layer creation fails, this layer is used as a fallback
-        std::optional<std::monostate>
+        std::optional<ghoul::Dictionary>
             fallback [[codegen::reference("globebrowsing_layer")]];
     };
 #include "layer_codegen.cpp"
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_layer";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
@@ -287,13 +286,13 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     _reset.onChange([&]() {
         if (_tileProvider) {
-            tileprovider::reset(*_tileProvider);
+            _tileProvider->reset();
         }
     });
 
     _remove.onChange([&]() {
         if (_tileProvider) {
-            tileprovider::reset(*_tileProvider);
+            _tileProvider->reset();
             _parent.deleteLayer(identifier());
         }
     });
@@ -303,6 +302,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
             case layergroupid::TypeID::TileIndexTileLayer:
@@ -316,7 +316,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
                 removeProperty(_solidColor);
                 break;
             default:
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
@@ -360,13 +360,13 @@ void Layer::initialize() {
     ZoneScoped
 
     if (_tileProvider) {
-        tileprovider::initialize(*_tileProvider);
+        _tileProvider->initialize();
     }
 }
 
 void Layer::deinitialize() {
     if (_tileProvider) {
-        tileprovider::deinitialize(*_tileProvider);
+        _tileProvider->deinitialize();
     }
 }
 
@@ -374,7 +374,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
     ZoneScoped
 
     if (_tileProvider) {
-        return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
+        return _tileProvider->chunkTilePile(tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
@@ -390,7 +390,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
 
 Tile::Status Layer::tileStatus(const TileIndex& index) const {
     return _tileProvider ?
-        tileprovider::tileStatus(*_tileProvider, index) :
+        _tileProvider->tileStatus(index) :
         Tile::Status::Unavailable;
 }
 
@@ -404,7 +404,7 @@ layergroupid::BlendModeID Layer::blendMode() const {
 
 TileDepthTransform Layer::depthTransform() const {
     return _tileProvider ?
-        tileprovider::depthTransform(*_tileProvider) :
+        _tileProvider->depthTransform() :
         TileDepthTransform{ 1.f, 0.f };
 }
 
@@ -416,7 +416,7 @@ bool Layer::enabled() const {
     return _enabled;
 }
 
-tileprovider::TileProvider* Layer::tileProvider() const {
+TileProvider* Layer::tileProvider() const {
     return _tileProvider.get();
 }
 
@@ -436,14 +436,11 @@ void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-int Layer::update() {
+void Layer::update() {
     ZoneScoped
 
     if (_tileProvider) {
-        return tileprovider::update(*_tileProvider);
-    }
-    else {
-        return 0;
+        _tileProvider->update();
     }
 }
 
@@ -473,6 +470,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
@@ -485,7 +483,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = tileprovider::createFromDictionary(id, std::move(initDict));
+            _tileProvider = TileProvider::createFromDictionary(id, std::move(initDict));
             break;
         }
         case layergroupid::TypeID::SolidColor: {
@@ -504,6 +502,7 @@ void Layer::addVisibleProperties() {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::ImageSequenceTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
         case layergroupid::TypeID::TemporalTileLayer:
         case layergroupid::TypeID::TileIndexTileLayer:
@@ -519,7 +518,7 @@ void Layer::addVisibleProperties() {
             break;
         }
         default:
-            break;
+            throw ghoul::MissingCaseException();
     }
 }
 

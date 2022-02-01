@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,13 @@
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
@@ -104,7 +103,7 @@ namespace {
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
-    }; 
+    };
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
@@ -114,14 +113,14 @@ namespace {
         std::optional<float> shadowLength;
 
         // [[codegen::verbatim(ShadowColorInfo.description)]]
-        std::optional<glm::vec3> shadowColor;
+        std::optional<glm::vec3> shadowColor [[codegen::color()]];
 
-        enum class TerminatorType {
+        enum class [[codegen::map(openspace::SpiceManager::TerminatorType)]] Terminator {
             Umbral [[codegen::key("UMBRAL")]],
             Penumbral [[codegen::key("PENUMBRAL")]]
         };
         // [[codegen::verbatim(TerminatorTypeInfo.description)]]
-        TerminatorType terminatorType;
+        Terminator terminatorType;
 
         // [[codegen::verbatim(LightSourceInfo.description)]]
         std::string lightSource;
@@ -144,9 +143,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableShadowCylinder::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_shadowcylinder";
-    return doc;
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
@@ -179,19 +176,12 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
 
-
     _terminatorType.addOptions({
         { static_cast<int>(SpiceManager::TerminatorType::Umbral), "Umbral" },
         { static_cast<int>(SpiceManager::TerminatorType::Penumbral), "Penumbral" }
     });
-    switch (p.terminatorType) {
-        case Parameters::TerminatorType::Umbral:
-            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Umbral);
-            break;
-        case Parameters::TerminatorType::Penumbral:
-            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Penumbral);
-            break;
-    }
+    _terminatorType =
+        static_cast<int>(codegen::map<SpiceManager::TerminatorType>(p.terminatorType));
     addProperty(_terminatorType);
 
 
@@ -321,9 +311,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
-        [](const glm::dvec3& p) {
-            return p * 1000.0;
-        }
+        [](const glm::dvec3& p) { return p * 1000.0; }
     );
 
     double lt;
@@ -364,7 +352,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         GL_ARRAY_BUFFER,
         0,
         _vertices.size() * sizeof(CylinderVBOLayout),
-        &_vertices[0]
+        _vertices.data()
     );
 
     glEnableVertexAttribArray(0);

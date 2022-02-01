@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
@@ -88,12 +89,13 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                                 const std::vector<glm::vec3>& seedPoints,
+                                 const std::unordered_map<std::string, 
+                                 std::vector<glm::vec3>>& seedMap,
+                                 double manualTimeOffset,
                                  const std::string& tracingVar,
                                  std::vector<std::string>& extraVars,
                                  std::vector<std::string>& extraMagVars)
 {
-
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
     LERROR("CDF inputs provided but Kameleon module is deactivated");
     return false;
@@ -104,9 +106,18 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    state.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
+    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
+    state.setTriggerTime(cdfDoubleTime);
 
-    if (addLinesToState(kameleon.get(), seedPoints, tracingVar, state)) {
+    // get time as string.
+    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
+        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
+    );
+
+    // use time as string for picking seedpoints from seedm
+    std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
+    bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
+    if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical)
         // Before we scale to meters (and maybe cartesian) we must extract
         // the extraQuantites, as the iterpolator needs the unaltered positions
@@ -301,10 +312,14 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T")))
+            (model == fls::Model::Batsrus && 
+                (str == TAsPOverRho || str == "T" || str == "t"))
+            )
         {
-            LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
-                   "calculate it using the ideal gas law: T = pressure/density");
+            LDEBUG(
+                "BATSRUS doesn't contain variable T for temperature. Trying to calculate "
+                "it using the ideal gas law: T = pressure/density"
+            );
             constexpr const char* p = "p";
             constexpr const char* r = "rho";
             success = kameleon->doesVariableExist(p) && kameleon->loadVariable(p) &&
@@ -312,9 +327,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format(
-                "Failed to load extra variable: '{}'. Ignoring", str
-            ));
+            LWARNING(fmt::format("Failed to load extra variable: '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }

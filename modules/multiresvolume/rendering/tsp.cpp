@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 #include <numeric>
 #include <queue>
 
@@ -506,11 +507,9 @@ bool TSP::readCache() {
     if (!FileSys.cacheManager())
         return false;
 
-    ghoul::filesystem::File f = _filename;
-    std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        f.baseName(),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+    std::filesystem::path cacheFilename = FileSys.cacheManager()->cachedFilename(
+        std::filesystem::path(_filename).stem(),
+        ""
     );
 
     std::ifstream file(cacheFilename, std::ios::in | std::ios::binary);
@@ -546,11 +545,9 @@ bool TSP::writeCache() {
         return false;
     }
 
-    ghoul::filesystem::File f = _filename;
-    std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        f.baseName(),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+    std::filesystem::path cacheFilename = FileSys.cacheManager()->cachedFilename(
+        std::filesystem::path(_filename).stem(),
+        ""
     );
 
     std::ofstream file(cacheFilename, std::ios::out | std::ios::binary);

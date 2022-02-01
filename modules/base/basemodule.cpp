@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,8 +51,9 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
-#include <modules/base/rendering/modelgeometry.h>
-#include <modules/base/rendering/multimodelgeometry.h>
+#include <modules/base/rendering/renderableplanetimevaryingimage.h>
+#include <modules/base/rendering/renderableprism.h>
+#include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -87,10 +88,6 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
-        "ModelGeometry"
-    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
         "ScreenSpaceRenderable"
@@ -137,6 +134,13 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
+        "RenderablePlaneTimeVaryingImage"
+    );
+    fRenderable->registerClass<RenderablePrism>("RenderablePrism");
+    fRenderable->registerClass<RenderableTimeVaryingSphere>(
+        "RenderableTimeVaryingSphere"
+    );
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
@@ -179,10 +183,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fLightSource->registerClass<CameraLightSource>("CameraLightSource");
     fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
-
-    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fGeometry, "Model geometry factory was not created");
-    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -197,11 +197,16 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
+        DashboardItemParallelConnection::Documentation(),
+        DashboardItemPropertyValue::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
+        DashboardItemText::Documentation(),
         DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
+        RenderableCartesianAxes::Documentation(),
+        RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
         RenderableLabels::Documentation(),
         RenderableModel::Documentation(),
@@ -209,10 +214,12 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlane::Documentation(),
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
+        RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
-        RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
+        RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 
@@ -221,6 +228,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
 
+        ConstantRotation::Documentation(),
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),
@@ -238,10 +246,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
 
-        SceneGraphLightSource::Documentation(),
         CameraLightSource::Documentation(),
-
-        modelgeometry::ModelGeometry::Documentation(),
+        SceneGraphLightSource::Documentation()
     };
 }
 

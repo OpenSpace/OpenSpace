@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,13 @@
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
+#include <openspace/scene/profile.h>
+#include <optional>
 
 class QLineEdit;
 class QTextEdit;
 
-class MetaDialog : public QDialog {
+class MetaDialog final : public QDialog {
 Q_OBJECT
 public:
    /**
@@ -42,7 +43,7 @@ public:
     *                new or imported profile.
     * \param parent Pointer to parent Qt widget
     */
-    MetaDialog(openspace::Profile& profile, QWidget* parent);
+    MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta);
 
 private slots:
     void save();
@@ -50,7 +51,7 @@ private slots:
 private:
     void createWidgets();
 
-    openspace::Profile& _profile;
+    std::optional<openspace::Profile::Meta>* _meta = nullptr;
 
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _versionEdit = nullptr;

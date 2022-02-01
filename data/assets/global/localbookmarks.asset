@@ -1,5 +1,20 @@
-local assetHelper = asset.require('util/asset_helper')
-local bookmarkHelper = asset.require('util/generate_bookmarks')
+local bookmarkHelper = asset.require("util/generate_bookmarks")
 
-local nodes = bookmarkHelper.getBookmarks('Local Bookmarks', '${ASSETS}/customization/localbookmarks.csv')
-assetHelper.registerSceneGraphNodesAndExport(asset, nodes);
+local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customization/localbookmarks.csv")
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(nodes) do
+    openspace.addSceneGraphNode(n)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for _, n in ipairs(nodes) do
+    openspace.removeSceneGraphNode(n)
+  end
+end)
+  
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end

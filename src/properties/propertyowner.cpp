@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -35,32 +39,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "PropertyOwner";
-
-    std::string escapedJson(const std::string& text) {
-        std::string jsonString;
-        for (const char& c : text) {
-            switch (c) {
-                case '\t':
-                    jsonString += "\\t"; // Replace tab with \t.
-                    break;
-                case '"':
-                    jsonString += "\\\""; // Replace " with \".
-                    break;
-                case '\\':
-                    jsonString += "\\\\"; // Replace \ with \\.
-                    break;
-                case '\n':
-                    jsonString += "\\\\n"; // Replace newline with \n.
-                    break;
-                case '\r':
-                    jsonString += "\\r"; // Replace carriage return with \r.
-                    break;
-                default:
-                    jsonString += c;
-            }
-        }
-        return jsonString;
-    }
 
     void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
         ZoneScoped
@@ -421,11 +399,11 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 void PropertyOwner::setIdentifier(std::string identifier) {
     ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any whitespaces"
     );
     ghoul_precondition(
         _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any dots"
     );
 
     _identifier = std::move(identifier);

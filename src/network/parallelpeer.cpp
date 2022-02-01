@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,16 @@
 
 #include <openspace/network/parallelpeer.h>
 
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
@@ -199,7 +201,7 @@ void ParallelPeer::sendAuthentication() {
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
-    std::lock_guard<std::mutex> unqlock(_receiveBufferMutex);
+    std::lock_guard unqlock(_receiveBufferMutex);
     _receiveBuffer.push_back(message);
 }
 
@@ -215,13 +217,13 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
             nConnectionsMessageReceived(message.content);
             break;
         default:
-            //unknown message type
+            // unknown message type
             break;
     }
 }
 
 void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    std::lock_guard latencyLock(_latencyMutex);
 
     const double timeDiff = global::windowDelegate->applicationTime() - messageTimestamp;
     if (_latencyDiffs.empty()) {
@@ -235,7 +237,7 @@ void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
 }
 
 double ParallelPeer::convertTimestamp(double messageTimestamp) {
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    std::lock_guard latencyLock(_latencyMutex);
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
@@ -259,8 +261,7 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
-{
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     size_t offset = 0;
 
     // The type of data message received
@@ -290,8 +291,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            global::navigationHandler->keyframeNavigator().addKeyframe(convertedTimestamp,
-                                                                      pose);
+            global::navigationHandler->keyframeNavigator().addKeyframe(
+                convertedTimestamp,
+                pose
+            );
             break;
         }
         case datamessagestructures::Type::TimelineData: {
@@ -359,10 +362,9 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
- {
+void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
     if (message.size() < 2 * sizeof(uint32_t)) {
-        LERROR("Malformed connection status message.");
+        LERROR("Malformed connection status message");
         return;
     }
     size_t pointer = 0;
@@ -376,7 +378,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     pointer += sizeof(uint32_t);
 
     if (hostNameSize > message.size() - pointer) {
-        LERROR("Malformed connection status message.");
+        LERROR("Malformed connection status message");
         return;
     }
 
@@ -387,7 +389,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     pointer += hostNameSize;
 
     if (status > ParallelConnection::Status::Host) {
-        LERROR("Invalid status.");
+        LERROR("Invalid status");
         return;
     }
 
@@ -410,7 +412,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
 void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
 {
     if (message.size() < sizeof(uint32_t)) {
-        LERROR("Malformed host info message.");
+        LERROR("Malformed host info message");
         return;
     }
     const uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(&message[0]));
@@ -495,7 +497,7 @@ void ParallelPeer::sendScript(std::string script) {
 void ParallelPeer::resetTimeOffset() {
     global::navigationHandler->keyframeNavigator().clearKeyframes();
     global::timeManager->clearKeyframes();
-    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    std::lock_guard latencyLock(_latencyMutex);
     _latencyDiffs.clear();
 }
 
@@ -532,9 +534,54 @@ void ParallelPeer::preSynchronization() {
 
 void ParallelPeer::setStatus(ParallelConnection::Status status) {
     if (_status != status) {
+        ParallelConnection::Status prevStatus = _status;
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
+
+
+        EventEngine* ee = global::eventEngine;
+        const bool isConnected =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost ||
+            status == ParallelConnection::Status::Host;
+        const bool wasConnected =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost ||
+            prevStatus == ParallelConnection::Status::Host;
+        const bool isDisconnected = status == ParallelConnection::Status::Disconnected;
+        const bool wasDisconnected =
+            prevStatus == ParallelConnection::Status::Disconnected;
+        const bool isHost = status == ParallelConnection::Status::Host;
+        const bool wasHost = prevStatus == ParallelConnection::Status::Host;
+        const bool isClient =
+            status == ParallelConnection::Status::ClientWithoutHost ||
+            status == ParallelConnection::Status::ClientWithHost;
+        const bool wasClient =
+            prevStatus == ParallelConnection::Status::ClientWithoutHost ||
+            prevStatus == ParallelConnection::Status::ClientWithHost;
+
+
+        if (isDisconnected && wasConnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Lost
+            );
+        }
+        if (isConnected && wasDisconnected) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::Established
+            );
+        }
+        if (isHost && (wasClient || wasDisconnected)) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipGained
+            );
+        }
+        if ((isClient || isDisconnected) && wasHost) {
+            ee->publishEvent<events::EventParallelConnection>(
+                events::EventParallelConnection::State::HostshipLost
+            );
+        }
     }
     if (isHost()) {
         global::timeManager->addTimeJumpCallback([this]() {
@@ -689,28 +736,24 @@ scripting::LuaLibrary ParallelPeer::luaLibrary() {
             {
                 "connect",
                 &luascriptfunctions::connect,
-                {},
                 "",
                 "Connect to parallel"
             },
             {
                 "disconnect",
                 &luascriptfunctions::disconnect,
-                {},
                 "",
                 "Disconnect from parallel"
             },
             {
                 "requestHostship",
                 &luascriptfunctions::requestHostship,
-                {},
                 "",
                 "Request to be the host for this session"
             },
             {
                 "resignHostship",
                 &luascriptfunctions::resignHostship,
-                {},
                 "",
                 "Resign hostship"
             },

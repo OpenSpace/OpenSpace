@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,16 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
@@ -67,17 +70,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
 
-    void createDataSlice();
+    std::vector<float> createDataSlice();
     void createPolygonTexture();
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
@@ -87,15 +81,6 @@ private:
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
-
-    bool loadData();
-    bool loadSpeckData();
-    bool loadLabelData();
-    bool readSpeckFile();
-    bool readColorMapFile();
-    bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -118,24 +103,20 @@ private:
     properties::Vec3Property _textColor;
     properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
-    properties::FloatProperty _textMinSize;
-    properties::FloatProperty _textMaxSize;
+    properties::IVec2Property _textMinMaxSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
     properties::Vec2Property _optionColorRangeData;
     properties::OptionProperty _datavarSizeOption;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
-    properties::FloatProperty _billboardMaxSize;
-    properties::FloatProperty _billboardMinSize;
+    properties::Vec2Property _billboardMinMaxSize;
     properties::FloatProperty _correctionSizeEndDistance;
     properties::FloatProperty _correctionSizeFactor;
     properties::BoolProperty _useLinearFiltering;
     properties::TriggerProperty _setRangeFromData;
-
-    // DEBUG:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::Texture* _polygonTexture = nullptr;
@@ -143,8 +124,9 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
-    UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
-        renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
+    UniformCache(
+        cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption,
+        minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;
@@ -157,18 +139,15 @@ private:
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-    std::vector<glm::vec4> _colorMapData;
+    speck::Dataset _dataset;
+    speck::Labelset _labelset;
+    speck::ColorMap _colorMap;
+
     std::vector<glm::vec2> _colorRangeData;
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
-    std::unordered_map<std::string, int> _variableDataPositionMap;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::unordered_map<int, std::string> _optionConversionSizeMap;
-
-    int _nValuesPerAstronomicalObject = 0;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 

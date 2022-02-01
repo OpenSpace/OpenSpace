@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,21 +30,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
-#include <chrono>
-#include <thread>
-
-#ifdef OPENSPACE_CURL_ENABLED
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable: 4574) // 'INCL_WINSOCK_API_TYPEDEFS' is defined to be '0'
-#endif // WIN32
-
 #include <curl/curl.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
+#include <chrono>
+#include <filesystem>
+#include <thread>
 
 namespace {
     constexpr const char* _loggerCat = "DownloadManager";
@@ -133,36 +122,36 @@ DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                                    const std::string& url,
-                                                      const ghoul::filesystem::File& file,
+                                                        const std::filesystem::path& file,
                                                                 OverrideFile overrideFile,
                                                                   FailOnError failOnError,
                                                                 unsigned int timeout_secs,
                                                 DownloadFinishedCallback finishedCallback,
                                                 DownloadProgressCallback progressCallback)
 {
-    if (!overrideFile && FileSys.fileExists(file)) {
+    if (!overrideFile && std::filesystem::is_regular_file(file)) {
         return nullptr;
     }
 
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
+    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
+        file.filename().string()
+    );
     errno = 0;
 #ifdef WIN32
     FILE* fp;
-    errno_t error = fopen_s(&fp, file.path().c_str(), "wb");
+    errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
     if (error != 0) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file, errno
+        ));
     }
 #else
-    FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
+    FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file, errno
+        ));
     }
 
     auto downloadFunction = [url, failOnError, timeout_secs,
@@ -172,9 +161,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, "OpenSpace"); // NOLINT
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); // NOLINT
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeData); // NOLINT
             if (timeout_secs) {
                 curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs); // NOLINT
             }
@@ -203,7 +193,11 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 future->isFinished = true;
             }
             else {
-                future->errorMessage = curl_easy_strerror(res);
+                long rescode;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
+                future->errorMessage = fmt::format(
+                    "{}. HTTP code: {}", curl_easy_strerror(res), rescode
+                );
             }
 
             if (finishedCb) {

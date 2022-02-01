@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <math.h>
 #include <vector>
@@ -97,8 +98,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablesmallbody";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablesmallbody"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
@@ -113,8 +115,8 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
-    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
     , _contiguousMode(ContiguousModeInfo, false)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
     codegen::bake<Parameters>(dictionary);
 
@@ -132,8 +134,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasValue<bool>(ContiguousModeInfo.identifier)) {
-        _contiguousMode = static_cast<bool>(
-            dictionary.value<bool>(ContiguousModeInfo.identifier));
+        _contiguousMode = dictionary.value<bool>(ContiguousModeInfo.identifier);
     }
     else {
         _contiguousMode = false;
@@ -142,7 +143,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     _updateStartRenderIdxSelect = std::function<void()>([this] {
         if (_contiguousMode) {
             if ((_numObjects - _startRenderIdx) < _sizeRender) {
-                _sizeRender = _numObjects - _startRenderIdx;
+                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -150,7 +151,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     _updateRenderSizeSelect = std::function<void()>([this] {
         if (_contiguousMode) {
             if (_sizeRender > (_numObjects - _startRenderIdx)) {
-                _startRenderIdx = _numObjects - _sizeRender;
+                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -172,7 +173,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSmallBody::readDataFile(const std::string& filename) {
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(fmt::format(
             "JPL SBDB file {} does not exist.", filename
         ));
@@ -221,7 +222,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         else {
             lineSkipFraction = static_cast<float>(_upperLimit)
                 / static_cast<float>(_numObjects);
-            endElement = _numObjects - 1;
+            endElement = static_cast<unsigned int>(_numObjects - 1);
         }
 
         if (line.compare(expectedHeaderLine) != 0) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,11 +56,11 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        enum class RenderType {
+        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
             Background,
             Opaque,
-            PreDeferredTransparency,
-            PostDeferredTransparency,
+            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
+            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
             Overlay
         };
 
@@ -78,8 +78,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane_image_local";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_plane_image_local"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
@@ -101,33 +102,15 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 
     addProperty(_blendMode);
 
-    _texturePath = absPath(p.texture);
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+    _texturePath = absPath(p.texture).string();
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
-    _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-    );
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     if (p.renderType.has_value()) {
-        switch (*p.renderType) {
-            case Parameters::RenderType::Background:
-                setRenderBin(Renderable::RenderBin::Background);
-                break;
-            case Parameters::RenderType::Opaque:
-                setRenderBin(Renderable::RenderBin::Opaque);
-                break;
-            case Parameters::RenderType::PreDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-                break;
-            case Parameters::RenderType::PostDeferredTransparency:
-                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-                break;
-            case Parameters::RenderType::Overlay:
-                setRenderBin(Renderable::RenderBin::Overlay);
-                break;
-        }
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
     }
     else {
         setRenderBin(Renderable::RenderBin::Opaque);
@@ -193,11 +176,14 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        absPath(path).string(),
+                        2
+                    );
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from '{}'", absPath(path))
+                    fmt::format("Loaded texture from {}", absPath(path))
                 );
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
@@ -209,10 +195,8 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         BaseModule::TextureManager.release(t);
 
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-        _textureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-        );
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 }
 

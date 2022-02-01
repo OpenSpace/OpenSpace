@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/helper.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -78,8 +79,7 @@ protected:
     properties::IVec2Property _gridSegments;
     properties::IntProperty _circleSegments;
     properties::FloatProperty _lineWidth;
-    properties::FloatProperty _maxRadius;
-    properties::FloatProperty _minRadius;
+    properties::Vec2Property _radii;
 
     bool _gridIsDirty = true;
 

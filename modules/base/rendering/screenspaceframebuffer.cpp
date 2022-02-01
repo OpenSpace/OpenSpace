@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,7 +80,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
     glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
-    _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
+    _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {} // NOLINT
@@ -175,11 +175,10 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
-    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(
-        resolution.x,
-        resolution.y,
-        1
-    ));
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(resolution.x, resolution.y, 1),
+        GL_TEXTURE_2D
+    );
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();

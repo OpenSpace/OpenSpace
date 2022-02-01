@@ -1,13 +1,27 @@
-local mapServiceConfigsPath = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local layer = {
-    Identifier = "Coastlines",
-    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
+  Identifier = "Coastlines",
+  FilePath = asset.localResource("coastlines.wms")
 }
 
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Earth Coastlines Layer",
+  Version = "1.0",
+  Description = [[ Coastlines layer for Earth globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

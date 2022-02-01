@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,9 +45,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_static";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_static");
 }
 
 glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {
