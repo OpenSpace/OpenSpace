@@ -28,7 +28,6 @@ local travelSpeedIndicator = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(travelSpeedIndicator)
-  asset.registerIdentifierWithMeta(travelSpeedIndicator.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(travelSpeedIndicator.Identifier, travelSpeedIndicator)
+asset.registerIdentifierWithMeta(travelSpeedIndicator.Identifier)
 
 
 asset.meta = {

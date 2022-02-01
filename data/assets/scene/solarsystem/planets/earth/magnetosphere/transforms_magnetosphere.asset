@@ -23,7 +23,6 @@ local GSMReferenceFrame = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GSMReferenceFrame)
-  asset.registerIdentifierWithMeta(GSMReferenceFrame.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -31,6 +30,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(GSMReferenceFrame.Identifier, GSMReferenceFrame)
+asset.registerIdentifierWithMeta(GSMReferenceFrame.Identifier)
 
 
 asset.meta = {

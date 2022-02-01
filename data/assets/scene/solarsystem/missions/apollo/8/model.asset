@@ -100,11 +100,8 @@ local Apollo8Pivot = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8)
-  asset.registerIdentifierWithMeta(Apollo8.Identifier)
   openspace.addSceneGraphNode(Apollo8Model)
-  asset.registerIdentifierWithMeta(Apollo8Model.Identifier)
   openspace.addSceneGraphNode(Apollo8Pivot)
-  asset.registerIdentifierWithMeta(Apollo8Pivot.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -114,5 +111,8 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Apollo8.Identifier, Apollo8)
+asset.registerIdentifierWithMeta(Apollo8.Identifier)
 asset.export(Apollo8Model.Identifier, Apollo8Model)
+asset.registerIdentifierWithMeta(Apollo8Model.Identifier)
 asset.export(Apollo8Pivot.Identifier, Apollo8Pivot)
+asset.registerIdentifierWithMeta(Apollo8Pivot.Identifier)

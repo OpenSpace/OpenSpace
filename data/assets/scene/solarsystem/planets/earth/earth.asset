@@ -75,9 +75,7 @@ local EarthLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Earth)
-  asset.registerIdentifierWithMeta(Earth.Identifier)
   openspace.addSceneGraphNode(EarthLabel)
-  asset.registerIdentifierWithMeta(EarthLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -86,7 +84,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Earth.Identifier, Earth)
+asset.registerIdentifierWithMeta(Earth.Identifier)
 asset.export(EarthLabel.Identifier, EarthLabel)
+asset.registerIdentifierWithMeta(EarthLabel.Identifier)
 
 
 

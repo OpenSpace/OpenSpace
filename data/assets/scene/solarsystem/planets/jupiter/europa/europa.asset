@@ -53,7 +53,6 @@ local Europa = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Europa)
-  asset.registerIdentifierWithMeta(Europa.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -61,6 +60,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Europa.Identifier, Europa)
+asset.registerIdentifierWithMeta(Europa.Identifier)
 
 
 

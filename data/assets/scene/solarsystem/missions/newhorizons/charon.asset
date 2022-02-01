@@ -115,11 +115,8 @@ local CharonShadow = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CharonProjection)
-  asset.registerIdentifierWithMeta(CharonProjection.Identifier)
   openspace.addSceneGraphNode(CharonText)
-  asset.registerIdentifierWithMeta(CharonText.Identifier)
   openspace.addSceneGraphNode(CharonShadow)
-  asset.registerIdentifierWithMeta(CharonShadow.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -129,5 +126,8 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(CharonProjection.Identifier, CharonProjection)
+asset.registerIdentifierWithMeta(CharonProjection.Identifier)
 asset.export(CharonText.Identifier, CharonText)
+asset.registerIdentifierWithMeta(CharonText.Identifier)
 asset.export(CharonShadow.Identifier, CharonShadow)
+asset.registerIdentifierWithMeta(CharonShadow.Identifier)

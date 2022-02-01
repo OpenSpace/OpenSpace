@@ -73,9 +73,7 @@ local MercuryLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
-  asset.registerIdentifierWithMeta(Mercury.Identifier)
   openspace.addSceneGraphNode(MercuryLabel)
-  asset.registerIdentifierWithMeta(MercuryLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -84,7 +82,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Mercury.Identifier, Mercury)
+asset.registerIdentifierWithMeta(Mercury.Identifier)
 asset.export(MercuryLabel.Identifier, MercuryLabel)
+asset.registerIdentifierWithMeta(MercuryLabel.Identifier)
 
 
 

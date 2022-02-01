@@ -46,9 +46,7 @@ local ellipse = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(circle)
-  asset.registerIdentifierWithMeta(circle.Identifier)
   openspace.addSceneGraphNode(ellipse)
-  asset.registerIdentifierWithMeta(ellipse.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -57,4 +55,6 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(circle.Identifier, circle)
+asset.registerIdentifierWithMeta(circle.Identifier)
 asset.export(ellipse.Identifier, ellipse)
+asset.registerIdentifierWithMeta(ellipse.Identifier)

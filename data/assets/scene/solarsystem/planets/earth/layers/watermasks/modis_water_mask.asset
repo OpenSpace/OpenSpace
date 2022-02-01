@@ -8,14 +8,14 @@ local layer = {
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "WaterMasks", layer)
-  asset.registerIdentifierWithMeta(layer.Identifier)
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "WaterMasks", layer)
 end)
 
-asset.export(node.Identifier, node)
+asset.export(layer.Identifier, layer)
+asset.registerIdentifierWithMeta(layer.Identifier)
 
 
 

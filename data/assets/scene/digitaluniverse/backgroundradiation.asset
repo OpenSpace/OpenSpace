@@ -121,13 +121,9 @@ local Halpha = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(wmap)
-  asset.registerIdentifierWithMeta(wmap.Identifier)
   openspace.addSceneGraphNode(cbe)
-  asset.registerIdentifierWithMeta(cbe.Identifier)
   openspace.addSceneGraphNode(planck)
-  asset.registerIdentifierWithMeta(planck.Identifier)
   openspace.addSceneGraphNode(Halpha)
-  asset.registerIdentifierWithMeta(Halpha.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -138,9 +134,13 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(wmap.Identifier, wmap)
+asset.registerIdentifierWithMeta(wmap.Identifier)
 asset.export(cbe.Identifier, cbe)
+asset.registerIdentifierWithMeta(cbe.Identifier)
 asset.export(planck.Identifier, planck)
+asset.registerIdentifierWithMeta(planck.Identifier)
 asset.export(Halpha.Identifier, Halpha)
+asset.registerIdentifierWithMeta(Halpha.Identifier)
 
 
 

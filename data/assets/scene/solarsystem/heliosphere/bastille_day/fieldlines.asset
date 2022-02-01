@@ -59,7 +59,6 @@ local toggle_fieldlines = {
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_fieldlines)
   openspace.addSceneGraphNode(fieldlines)
-  asset.registerIdentifierWithMeta(fieldlines.Identifier)
 end)
 
 asset.onDeinitialize(function ()
@@ -68,6 +67,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(fieldlines.Identifier, fieldlines)
+asset.registerIdentifierWithMeta(fieldlines.Identifier)
 
 
 asset.meta = {

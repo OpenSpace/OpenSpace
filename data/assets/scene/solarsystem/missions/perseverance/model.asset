@@ -67,11 +67,8 @@ local Body = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Perseverance)
-  asset.registerIdentifierWithMeta(Perseverance.Identifier)
   openspace.addSceneGraphNode(PerseveranceModel)
-  asset.registerIdentifierWithMeta(PerseveranceModel.Identifier)
   openspace.addSceneGraphNode(Body)
-  asset.registerIdentifierWithMeta(Body.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -81,5 +78,8 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Perseverance.Identifier, Perseverance)
+asset.registerIdentifierWithMeta(Perseverance.Identifier)
 asset.export(PerseveranceModel.Identifier, PerseveranceModel)
+asset.registerIdentifierWithMeta(PerseveranceModel.Identifier)
 asset.export(Body.Identifier, Body)
+asset.registerIdentifierWithMeta(Body.Identifier)

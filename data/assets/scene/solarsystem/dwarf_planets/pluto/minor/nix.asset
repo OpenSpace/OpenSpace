@@ -53,9 +53,7 @@ local NixTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Nix)
-  asset.registerIdentifierWithMeta(Nix.Identifier)
   openspace.addSceneGraphNode(NixTrail)
-  asset.registerIdentifierWithMeta(NixTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -64,7 +62,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Nix.Identifier, Nix)
+asset.registerIdentifierWithMeta(Nix.Identifier)
 asset.export(NixTrail.Identifier, NixTrail)
+asset.registerIdentifierWithMeta(NixTrail.Identifier)
 
 
 

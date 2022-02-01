@@ -47,9 +47,7 @@ local NewHorizonsPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterAccurate)
-  asset.registerIdentifierWithMeta(PlutoBarycenterAccurate.Identifier)
   openspace.addSceneGraphNode(NewHorizonsPosition)
-  asset.registerIdentifierWithMeta(NewHorizonsPosition.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -58,4 +56,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(PlutoBarycenterAccurate.Identifier, PlutoBarycenterAccurate)
+asset.registerIdentifierWithMeta(PlutoBarycenterAccurate.Identifier)
 asset.export(NewHorizonsPosition.Identifier, NewHorizonsPosition)
+asset.registerIdentifierWithMeta(NewHorizonsPosition.Identifier)

@@ -26,7 +26,6 @@ local UranusTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusTrail)
-  asset.registerIdentifierWithMeta(UranusTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(UranusTrail.Identifier, UranusTrail)
+asset.registerIdentifierWithMeta(UranusTrail.Identifier)
 
 
 

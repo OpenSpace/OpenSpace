@@ -41,7 +41,6 @@ local toggle_fluxnodes = {
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_fluxnodes)
   openspace.addSceneGraphNode(fluxNodes)
-  asset.registerIdentifierWithMeta(fluxNodes.Identifier)
 end)
 
 asset.onDeinitialize(function ()
@@ -50,6 +49,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(fluxNodes.Identifier, fluxNodes)
+asset.registerIdentifierWithMeta(fluxNodes.Identifier)
 
 
 asset.meta = {

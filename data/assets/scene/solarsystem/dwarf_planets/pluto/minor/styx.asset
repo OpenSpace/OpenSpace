@@ -52,9 +52,7 @@ local StyxTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Styx)
-  asset.registerIdentifierWithMeta(Styx.Identifier)
   openspace.addSceneGraphNode(StyxTrail)
-  asset.registerIdentifierWithMeta(StyxTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -63,7 +61,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Styx.Identifier, Styx)
+asset.registerIdentifierWithMeta(Styx.Identifier)
 asset.export(StyxTrail.Identifier, StyxTrail)
+asset.registerIdentifierWithMeta(StyxTrail.Identifier)
 
 
 

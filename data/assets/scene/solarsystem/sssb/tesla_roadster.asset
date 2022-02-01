@@ -47,9 +47,7 @@ local TeslaPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TeslaPosition)
-  asset.registerIdentifierWithMeta(TeslaPosition.Identifier)
   openspace.addSceneGraphNode(TeslaRoadsterTrail)
-  asset.registerIdentifierWithMeta(TeslaRoadsterTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -58,7 +56,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(TeslaPosition.Identifier, TeslaPosition)
+asset.registerIdentifierWithMeta(TeslaPosition.Identifier)
 asset.export(TeslaRoadsterTrail.Identifier, TeslaRoadsterTrail)
+asset.registerIdentifierWithMeta(TeslaRoadsterTrail.Identifier)
 
 
 

@@ -72,11 +72,8 @@ local OsirisRexTrailBennu = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OsirisRexTrailEarth)
-  asset.registerIdentifierWithMeta(OsirisRexTrailEarth.Identifier)
   openspace.addSceneGraphNode(OsirisRexTrailSolarSystem)
-  asset.registerIdentifierWithMeta(OsirisRexTrailSolarSystem.Identifier)
   openspace.addSceneGraphNode(OsirisRexTrailBennu)
-  asset.registerIdentifierWithMeta(OsirisRexTrailBennu.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -86,5 +83,8 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(OsirisRexTrailEarth.Identifier, OsirisRexTrailEarth)
+asset.registerIdentifierWithMeta(OsirisRexTrailEarth.Identifier)
 asset.export(OsirisRexTrailSolarSystem.Identifier, OsirisRexTrailSolarSystem)
+asset.registerIdentifierWithMeta(OsirisRexTrailSolarSystem.Identifier)
 asset.export(OsirisRexTrailBennu.Identifier, OsirisRexTrailBennu)
+asset.registerIdentifierWithMeta(OsirisRexTrailBennu.Identifier)

@@ -146,13 +146,9 @@ local OrionNebulaProplydsModel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NebulaHolder)
-  asset.registerIdentifierWithMeta(NebulaHolder.Identifier)
   openspace.addSceneGraphNode(OrionNebulaModel)
-  asset.registerIdentifierWithMeta(OrionNebulaModel.Identifier)
   openspace.addSceneGraphNode(OrionNebulaShocksModel)
-  asset.registerIdentifierWithMeta(OrionNebulaShocksModel.Identifier)
   openspace.addSceneGraphNode(OrionNebulaProplydsModel)
-  asset.registerIdentifierWithMeta(OrionNebulaProplydsModel.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -163,9 +159,13 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(NebulaHolder.Identifier, NebulaHolder)
+asset.registerIdentifierWithMeta(NebulaHolder.Identifier)
 asset.export(OrionNebulaModel.Identifier, OrionNebulaModel)
+asset.registerIdentifierWithMeta(OrionNebulaModel.Identifier)
 asset.export(OrionNebulaShocksModel.Identifier, OrionNebulaShocksModel)
+asset.registerIdentifierWithMeta(OrionNebulaShocksModel.Identifier)
 asset.export(OrionNebulaProplydsModel.Identifier, OrionNebulaProplydsModel)
+asset.registerIdentifierWithMeta(OrionNebulaProplydsModel.Identifier)
 
 
 

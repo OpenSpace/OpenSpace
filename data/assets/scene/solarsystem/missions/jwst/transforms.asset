@@ -75,9 +75,7 @@ end)
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTPosition)
-  asset.registerIdentifierWithMeta(JWSTPosition.Identifier)
   openspace.addSceneGraphNode(JWSTRotation)
-  asset.registerIdentifierWithMeta(JWSTRotation.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -86,7 +84,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(JWSTPosition.Identifier, JWSTPosition)
+asset.registerIdentifierWithMeta(JWSTPosition.Identifier)
 asset.export(JWSTRotation.Identifier, JWSTRotation)
+asset.registerIdentifierWithMeta(JWSTRotation.Identifier)
 
 
 asset.meta = {

@@ -86,9 +86,7 @@ local CeresTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Ceres)
-  asset.registerIdentifierWithMeta(Ceres.Identifier)
   openspace.addSceneGraphNode(CeresTrail)
-  asset.registerIdentifierWithMeta(CeresTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -97,4 +95,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Ceres.Identifier, Ceres)
+asset.registerIdentifierWithMeta(Ceres.Identifier)
 asset.export(CeresTrail.Identifier, CeresTrail)
+asset.registerIdentifierWithMeta(CeresTrail.Identifier)

@@ -22,7 +22,6 @@ local JupiterBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterBarycenter)
-  asset.registerIdentifierWithMeta(JupiterBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -30,6 +29,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(JupiterBarycenter.Identifier, JupiterBarycenter)
+asset.registerIdentifierWithMeta(JupiterBarycenter.Identifier)
 
 
 

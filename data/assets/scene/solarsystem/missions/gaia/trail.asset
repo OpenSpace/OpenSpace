@@ -61,9 +61,7 @@ local GaiaTrailEclip = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaTrail)
-  asset.registerIdentifierWithMeta(GaiaTrail.Identifier)
   openspace.addSceneGraphNode(GaiaTrailEclip)
-  asset.registerIdentifierWithMeta(GaiaTrailEclip.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -72,4 +70,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(GaiaTrail.Identifier, GaiaTrail)
+asset.registerIdentifierWithMeta(GaiaTrail.Identifier)
 asset.export(GaiaTrailEclip.Identifier, GaiaTrailEclip)
+asset.registerIdentifierWithMeta(GaiaTrailEclip.Identifier)

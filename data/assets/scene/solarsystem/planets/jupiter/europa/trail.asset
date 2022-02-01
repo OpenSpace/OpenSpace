@@ -26,7 +26,6 @@ local EuropaTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EuropaTrail)
-  asset.registerIdentifierWithMeta(EuropaTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(EuropaTrail.Identifier, EuropaTrail)
+asset.registerIdentifierWithMeta(EuropaTrail.Identifier)
 
 
 

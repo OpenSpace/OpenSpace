@@ -103,9 +103,7 @@ local Apollo15Trail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
-  asset.registerIdentifierWithMeta(Apollo15.Identifier)
   openspace.addSceneGraphNode(Apollo15Trail)
-  asset.registerIdentifierWithMeta(Apollo15Trail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -114,4 +112,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Apollo15.Identifier, Apollo15)
+asset.registerIdentifierWithMeta(Apollo15.Identifier)
 asset.export(Apollo15Trail.Identifier, Apollo15Trail)
+asset.registerIdentifierWithMeta(Apollo15Trail.Identifier)

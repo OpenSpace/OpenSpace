@@ -62,9 +62,7 @@ local DeimosTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Deimos)
-  asset.registerIdentifierWithMeta(Deimos.Identifier)
   openspace.addSceneGraphNode(DeimosTrail)
-  asset.registerIdentifierWithMeta(DeimosTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -73,7 +71,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Deimos.Identifier, Deimos)
+asset.registerIdentifierWithMeta(Deimos.Identifier)
 asset.export(DeimosTrail.Identifier, DeimosTrail)
+asset.registerIdentifierWithMeta(DeimosTrail.Identifier)
 
 
 

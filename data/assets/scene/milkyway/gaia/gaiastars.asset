@@ -58,7 +58,6 @@ local GaiaStars = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaStars)
-  asset.registerIdentifierWithMeta(GaiaStars.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -66,6 +65,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(GaiaStars.Identifier, GaiaStars)
+asset.registerIdentifierWithMeta(GaiaStars.Identifier)
 
 
 

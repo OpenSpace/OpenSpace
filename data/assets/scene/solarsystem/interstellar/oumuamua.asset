@@ -49,9 +49,7 @@ local OumuamuaPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OumuamuaPosition)
-  asset.registerIdentifierWithMeta(OumuamuaPosition.Identifier)
   openspace.addSceneGraphNode(OumuamuaTrail)
-  asset.registerIdentifierWithMeta(OumuamuaTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -60,7 +58,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(OumuamuaPosition.Identifier, OumuamuaPosition)
+asset.registerIdentifierWithMeta(OumuamuaPosition.Identifier)
 asset.export(mode.Identifier, OumuamuaTrail)
+asset.registerIdentifierWithMeta(OumuamuaTrail.Identifier)
 
 
 

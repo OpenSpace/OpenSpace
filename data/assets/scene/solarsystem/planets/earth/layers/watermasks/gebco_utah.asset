@@ -15,7 +15,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "WaterMasks", layer)
 end)
 
-asset.export(node.Identifier, node)
+asset.export(layer.Identifier, layer)
 
 
 

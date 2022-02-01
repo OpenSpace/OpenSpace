@@ -72,9 +72,7 @@ local Apollo8LaunchModel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8Launch)
-  asset.registerIdentifierWithMeta(Apollo8Launch.Identifier)
   openspace.addSceneGraphNode(Apollo8LaunchModel)
-  asset.registerIdentifierWithMeta(Apollo8LaunchModel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -83,4 +81,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Apollo8Launch.Identifier, Apollo8Launch)
+asset.registerIdentifierWithMeta(Apollo8Launch.Identifier)
 asset.export(Apollo8LaunchModel.Identifier, Apollo8LaunchModel)
+asset.registerIdentifierWithMeta(Apollo8LaunchModel.Identifier)

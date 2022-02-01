@@ -128,13 +128,9 @@ local multiverse_planck_4 = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(multiverse_planck_1)
-  asset.registerIdentifierWithMeta(multiverse_planck_1.Identifier)
   openspace.addSceneGraphNode(multiverse_planck_2)
-  asset.registerIdentifierWithMeta(multiverse_planck_2.Identifier)
   openspace.addSceneGraphNode(multiverse_planck_3)
-  asset.registerIdentifierWithMeta(multiverse_planck_3.Identifier)
   openspace.addSceneGraphNode(multiverse_planck_4)
-  asset.registerIdentifierWithMeta(multiverse_planck_4.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -145,9 +141,13 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(multiverse_planck_1.Identifier, multiverse_planck_1)
+asset.registerIdentifierWithMeta(multiverse_planck_1.Identifier)
 asset.export(multiverse_planck_2.Identifier, multiverse_planck_2)
+asset.registerIdentifierWithMeta(multiverse_planck_2.Identifier)
 asset.export(multiverse_planck_3.Identifier, multiverse_planck_3)
+asset.registerIdentifierWithMeta(multiverse_planck_3.Identifier)
 asset.export(multiverse_planck_4.Identifier, multiverse_planck_4)
+asset.registerIdentifierWithMeta(multiverse_planck_4.Identifier)
 
 
 

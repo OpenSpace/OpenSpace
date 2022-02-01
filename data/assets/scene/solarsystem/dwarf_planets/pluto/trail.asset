@@ -30,7 +30,6 @@ local PlutoBarycenterTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoBarycenterTrail)
-  asset.registerIdentifierWithMeta(PlutoBarycenterTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -38,6 +37,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(PlutoBarycenterTrail.Identifier, PlutoBarycenterTrail)
+asset.registerIdentifierWithMeta(PlutoBarycenterTrail.Identifier)
 
 
 

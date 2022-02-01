@@ -92,9 +92,7 @@ local deepSkyImages = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(deepSkyPoints)
-  asset.registerIdentifierWithMeta(deepSkyPoints.Identifier)
   openspace.addSceneGraphNode(deepSkyImages)
-  asset.registerIdentifierWithMeta(deepSkyImages.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -103,7 +101,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(deepSkyPoints.Identifier, deepSkyPoints)
+asset.registerIdentifierWithMeta(deepSkyPoints.Identifier)
 asset.export(deepSkyImages.Identifier, deepSkyImages)
+asset.registerIdentifierWithMeta(deepSkyImages.Identifier)
 
 
 

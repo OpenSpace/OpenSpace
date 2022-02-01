@@ -22,7 +22,6 @@ local BennuBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuBarycenter)
-  asset.registerIdentifierWithMeta(BennuBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -30,3 +29,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(BennuBarycenter.Identifier, BennuBarycenter)
+asset.registerIdentifierWithMeta(BennuBarycenter.Identifier)

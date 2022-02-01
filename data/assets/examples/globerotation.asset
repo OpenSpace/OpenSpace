@@ -45,7 +45,6 @@ local Example_GlobeRotation = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Example_GlobeRotation)
-  asset.registerIdentifierWithMeta(Example_GlobeRotation.Identifier)
 end)
 
 asset.onDeinitialize(function()
@@ -53,3 +52,4 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Example_GlobeRotation.Identifier, Example_GlobeRotation)
+asset.registerIdentifierWithMeta(Example_GlobeRotation.Identifier)

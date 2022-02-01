@@ -12,16 +12,16 @@ object.GUI.Description = [[ Asteroids with either a perihelion or a semi-major a
   between those of the four outer planets. ]]
 
 
-  asset.onInitialize(function()
-    openspace.addSceneGraphNode(object)
-    asset.registerIdentifierWithMeta(object.Identifier)
-  end)
-    
-  asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(object.Identifier)
-  end)
-    
-  asset.export(object.Identifier, object)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object.Identifier)
+end)
+  
+asset.export(object.Identifier, object)
+asset.registerIdentifierWithMeta(object.Identifier)
   
 
 

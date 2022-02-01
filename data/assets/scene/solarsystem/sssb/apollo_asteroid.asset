@@ -13,7 +13,6 @@ object.GUI.Description = [[ Earth-crossing Near-Earth-Asteroids with semi-major 
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
-  asset.registerIdentifierWithMeta(object.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -21,6 +20,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(object.Identifier, object)
+asset.registerIdentifierWithMeta(object.Identifier)
 
 
 

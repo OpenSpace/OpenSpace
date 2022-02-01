@@ -27,7 +27,6 @@ local HyperionTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HyperionTrail)
-  asset.registerIdentifierWithMeta(HyperionTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -35,6 +34,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(HyperionTrail.Identifier, HyperionTrail)
+asset.registerIdentifierWithMeta(HyperionTrail.Identifier)
 
 
 

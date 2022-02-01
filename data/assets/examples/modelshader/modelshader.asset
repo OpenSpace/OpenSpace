@@ -43,7 +43,6 @@ local model = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(model)
-  asset.registerIdentifierWithMeta(model.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -51,3 +50,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(model.Identifier, model)
+asset.registerIdentifierWithMeta(model.Identifier)

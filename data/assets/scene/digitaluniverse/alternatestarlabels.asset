@@ -35,7 +35,6 @@ local object = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
-  asset.registerIdentifierWithMeta(object.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -43,6 +42,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(object.Identifier, object)
+asset.registerIdentifierWithMeta(object.Identifier)
 
 
 

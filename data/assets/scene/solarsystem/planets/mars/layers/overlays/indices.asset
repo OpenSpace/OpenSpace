@@ -7,7 +7,6 @@ local layer = {
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
-  asset.registerIdentifierWithMeta(layer.Identifier)
 end)
 
 asset.onDeinitialize(function()
@@ -15,6 +14,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("layer", layer)
+asset.registerIdentifierWithMeta(layer.Identifier)
 
 
 asset.meta = {

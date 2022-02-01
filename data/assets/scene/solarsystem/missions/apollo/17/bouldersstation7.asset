@@ -66,9 +66,7 @@ local Station7BoulderModel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Station7BoulderHolder)
-  asset.registerIdentifierWithMeta(Station7BoulderHolder.Identifier)
   openspace.addSceneGraphNode(Station7BoulderModel)
-  asset.registerIdentifierWithMeta(Station7BoulderModel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -77,4 +75,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Station7BoulderHolder.Identifier, Station7BoulderHolder)
+asset.registerIdentifierWithMeta(Station7BoulderHolder.Identifier)
 asset.export(Station7BoulderModel.Identifier, Station7BoulderModel)
+asset.registerIdentifierWithMeta(Station7BoulderModel.Identifier)

@@ -30,14 +30,14 @@ local CharonTrailBarycentric = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CharonTrailBarycentric)
-  asset.registerIdentifierWithMeta(CharonTrailBarycentric.Identifier)
 end)
   
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(CharonTrailBarycentric.Identifier)
 end)
   
-asset.export(node.Identifier, CharonTrailBarycentric)
+asset.export(CharonTrailBarycentric.Identifier, CharonTrailBarycentric)
+asset.registerIdentifierWithMeta(CharonTrailBarycentric.Identifier)
 
 
 

@@ -56,7 +56,6 @@ local toggle_volume = {
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_volume)
   openspace.addSceneGraphNode(densityVolume)
-  asset.registerIdentifierWithMeta(densityVolume.Identifier)
 end)
 
 asset.onDeinitialize(function ()
@@ -65,6 +64,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(densityVolume.Identifier, densityVolume)
+asset.registerIdentifierWithMeta(densityVolume.Identifier)
 
 
 asset.meta = {

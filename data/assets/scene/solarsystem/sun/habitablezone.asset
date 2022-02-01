@@ -22,7 +22,6 @@ local HabitableZone = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HabitableZone)
-  asset.registerIdentifierWithMeta(HabitableZone.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -30,6 +29,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(HabitableZone.Identifier, HabitableZone)
+asset.registerIdentifierWithMeta(HabitableZone.Identifier)
 
 
 asset.meta = {

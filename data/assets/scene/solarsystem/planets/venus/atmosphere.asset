@@ -54,7 +54,6 @@ local Atmosphere = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)
-  asset.registerIdentifierWithMeta(Atmosphere.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -62,6 +61,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Atmosphere.Identifier, Atmosphere)
+asset.registerIdentifierWithMeta(Atmosphere.Identifier)
 
 
 

@@ -64,9 +64,7 @@ local L1Label = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(L1)
-  asset.registerIdentifierWithMeta(L1.Identifier)
   openspace.addSceneGraphNode(L1Label)
-  asset.registerIdentifierWithMeta(L1Label.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -75,7 +73,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(L1.Identifier, L1)
+asset.registerIdentifierWithMeta(L1.Identifier)
 asset.export(L1Label.Identifier, L1Label)
+asset.registerIdentifierWithMeta(L1Label.Identifier)
 
 
 

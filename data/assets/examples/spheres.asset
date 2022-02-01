@@ -37,7 +37,6 @@ end
 asset.onInitialize(function()
   for _, n in ipairs(spheres) do
     openspace.addSceneGraphNode(n)
-    asset.registerIdentifierWithMeta(n.Identifier)
   end
 end)
   
@@ -50,4 +49,5 @@ end)
 
 for _, n in ipairs(spheres) do
   asset.export(n.Identifier, n)
+  asset.registerIdentifierWithMeta(n.Identifier)
 end

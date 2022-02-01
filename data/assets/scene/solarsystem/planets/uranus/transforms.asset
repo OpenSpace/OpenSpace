@@ -23,7 +23,6 @@ local UranusBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(UranusBarycenter)
-  asset.registerIdentifierWithMeta(UranusBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -31,6 +30,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(UranusBarycenter.Identifier, UranusBarycenter)
+asset.registerIdentifierWithMeta(UranusBarycenter.Identifier)
 
 
 

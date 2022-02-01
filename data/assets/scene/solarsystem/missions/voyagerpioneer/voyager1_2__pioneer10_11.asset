@@ -102,13 +102,9 @@ local pioneer11 ={
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(voyager1)
-  asset.registerIdentifierWithMeta(voyager1.Identifier)
   openspace.addSceneGraphNode(voyager2)
-  asset.registerIdentifierWithMeta(voyager2.Identifier)
   openspace.addSceneGraphNode(pioneer10)
-  asset.registerIdentifierWithMeta(pioneer10.Identifier)
   openspace.addSceneGraphNode(pioneer11)
-  asset.registerIdentifierWithMeta(pioneer11.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -119,9 +115,13 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(voyager1.Identifier, voyager1)
+asset.registerIdentifierWithMeta(voyager1.Identifier)
 asset.export(voyager2.Identifier, voyager2)
+asset.registerIdentifierWithMeta(voyager2.Identifier)
 asset.export(pioneer10.Identifier, pioneer10)
+asset.registerIdentifierWithMeta(pioneer10.Identifier)
 asset.export(pioneer11.Identifier, pioneer11)
+asset.registerIdentifierWithMeta(pioneer11.Identifier)
 
 
 

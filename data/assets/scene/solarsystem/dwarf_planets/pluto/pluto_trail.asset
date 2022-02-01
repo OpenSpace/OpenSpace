@@ -26,7 +26,6 @@ local PlutoTrailBarycentric = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlutoTrailBarycentric)
-  asset.registerIdentifierWithMeta(PlutoTrailBarycentric.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(PlutoTrailBarycentric.Identifier, PlutoTrailBarycentric)
+asset.registerIdentifierWithMeta(PlutoTrailBarycentric.Identifier)
 
 
 

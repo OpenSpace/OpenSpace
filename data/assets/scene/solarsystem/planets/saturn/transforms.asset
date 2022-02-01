@@ -21,7 +21,6 @@ local SaturnBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnBarycenter)
-  asset.registerIdentifierWithMeta(SaturnBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -29,6 +28,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(SaturnBarycenter.Identifier, SaturnBarycenter)
+asset.registerIdentifierWithMeta(SaturnBarycenter.Identifier)
 
 
 

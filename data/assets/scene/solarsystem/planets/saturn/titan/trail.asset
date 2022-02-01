@@ -28,7 +28,6 @@ local TitanTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TitanTrail)
-  asset.registerIdentifierWithMeta(TitanTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(TitanTrail.Identifier, TitanTrail)
+asset.registerIdentifierWithMeta(TitanTrail.Identifier)
 
 
 

@@ -25,7 +25,6 @@ local GaiaPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GaiaPosition)
-  asset.registerIdentifierWithMeta(GaiaPosition.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -33,3 +32,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(GaiaPosition.Identifier, GaiaPosition)
+asset.registerIdentifierWithMeta(GaiaPosition.Identifier)

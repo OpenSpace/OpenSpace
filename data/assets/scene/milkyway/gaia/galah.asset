@@ -56,7 +56,6 @@ local gaia_abundance_galah = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(gaia_abundance_galah)
-  asset.registerIdentifierWithMeta(gaia_abundance_galah.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -64,6 +63,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(gaia_abundance_galah.Identifier, gaia_abundance_galah)
+asset.registerIdentifierWithMeta(gaia_abundance_galah.Identifier)
 
 
 

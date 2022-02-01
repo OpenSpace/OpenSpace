@@ -6,7 +6,6 @@ local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customiz
 asset.onInitialize(function()
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n)
-    asset.registerIdentifierWithMeta(n.Identifier)
   end
 end)
   
@@ -18,4 +17,5 @@ end)
   
 for _, n in ipairs(nodes) do
   asset.export(n.Identifier, n)
+  asset.registerIdentifierWithMeta(n.Identifier)
 end

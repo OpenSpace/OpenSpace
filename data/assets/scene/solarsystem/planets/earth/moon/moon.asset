@@ -58,7 +58,6 @@ local Moon = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Moon)
-  asset.registerIdentifierWithMeta(Moon.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -66,6 +65,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Moon.Identifier, Moon)
+asset.registerIdentifierWithMeta(Moon.Identifier)
 
 
 

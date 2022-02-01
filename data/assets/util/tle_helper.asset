@@ -107,7 +107,6 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
 
   containingAsset.onInitialize(function()
     openspace.addSceneGraphNode(SatelliteBatch)
-    sceneAsset.registerIdentifierWithMeta(SatelliteBatch.Identifier);
   end)
 
   containingAsset.onDeinitialize(function()
@@ -115,6 +114,7 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
   end)
 
   containingAsset.export(SatelliteBatch.Identifier, SatelliteBatch)
+  containingAsset.registerIdentifierWithMeta(SatelliteBatch.Identifier);
 end
 
 asset.export("downloadTLEFile", downloadTLEFile)

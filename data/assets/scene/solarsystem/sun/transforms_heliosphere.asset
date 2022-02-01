@@ -27,7 +27,6 @@ local HEEQ180ReferenceFrame = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
-  asset.registerIdentifierWithMeta(HEEQ180ReferenceFrame.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -35,6 +34,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(HEEQ180ReferenceFrame.Identifier, HEEQ180ReferenceFrame)
+asset.registerIdentifierWithMeta(HEEQ180ReferenceFrame.Identifier)
 
 
 asset.meta = {

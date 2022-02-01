@@ -109,7 +109,6 @@ local nodes = proceduralGlobes.createGlobes(himaliaGroup)
 asset.onInitialize(function()
   for i, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
-    asset.registerIdentifierWithMeta(node.Identifier);
   end
 end)
   
@@ -122,6 +121,7 @@ end)
   
 for i, node in ipairs(nodes) do
   asset.export(node.Identifier, node)
+  asset.registerIdentifierWithMeta(node.Identifier);
 end
 
 

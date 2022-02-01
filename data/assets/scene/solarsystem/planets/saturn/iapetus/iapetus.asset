@@ -53,7 +53,6 @@ local Iapetus = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Iapetus)
-  asset.registerIdentifierWithMeta(Iapetus.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -61,6 +60,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Iapetus.Identifier, Iapetus)
+asset.registerIdentifierWithMeta(Iapetus.Identifier)
 
 
 

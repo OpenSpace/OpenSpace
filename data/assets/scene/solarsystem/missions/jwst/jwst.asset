@@ -153,13 +153,9 @@ local JWSTLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTBand)
-  asset.registerIdentifierWithMeta(JWSTBand.Identifier)
   openspace.addSceneGraphNode(JWSTModel)
-  asset.registerIdentifierWithMeta(JWSTModel.Identifier)
   openspace.addSceneGraphNode(JWSTFov)
-  asset.registerIdentifierWithMeta(JWSTFov.Identifier)
   openspace.addSceneGraphNode(JWSTLabel)
-  asset.registerIdentifierWithMeta(JWSTLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -170,9 +166,13 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(JWSTBand.Identifier, JWSTBand)
+asset.registerIdentifierWithMeta(JWSTBand.Identifier)
 asset.export(JWSTModel.Identifier, JWSTModel)
+asset.registerIdentifierWithMeta(JWSTModel.Identifier)
 asset.export(JWSTFov.Identifier, JWSTFov)
+asset.registerIdentifierWithMeta(JWSTFov.Identifier)
 asset.export(JWSTLabel.Identifier, JWSTLabel)
+asset.registerIdentifierWithMeta(JWSTLabel.Identifier)
 
 asset.meta = {
   Name = "James Webb Space Telescope",

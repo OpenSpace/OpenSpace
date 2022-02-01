@@ -45,7 +45,6 @@ local plane = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(plane)
-  asset.registerIdentifierWithMeta(plane.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -53,6 +52,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(plane.Identifier, plane)
+asset.registerIdentifierWithMeta(plane.Identifier)
 
 
 

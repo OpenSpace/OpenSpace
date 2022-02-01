@@ -96,9 +96,7 @@ local sunstar = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(stars)
-  asset.registerIdentifierWithMeta(stars.Identifier)
   openspace.addSceneGraphNode(sunstar)
-  asset.registerIdentifierWithMeta(sunstar.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -107,7 +105,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(stars.Identifier, stars)
+asset.registerIdentifierWithMeta(stars.Identifier)
 asset.export(sunstar.Identifier, sunstar)
+asset.registerIdentifierWithMeta(sunstar.Identifier)
 
 
 

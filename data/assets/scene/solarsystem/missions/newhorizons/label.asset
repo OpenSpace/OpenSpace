@@ -23,7 +23,6 @@ local Labels = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Labels)
-  asset.registerIdentifierWithMeta(Labels.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -31,3 +30,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Labels.Identifier, Labels)
+asset.registerIdentifierWithMeta(Labels.Identifier)

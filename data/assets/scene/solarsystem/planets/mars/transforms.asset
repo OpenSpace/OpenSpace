@@ -21,7 +21,6 @@ local MarsBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsBarycenter)
-  asset.registerIdentifierWithMeta(MarsBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -29,6 +28,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MarsBarycenter.Identifier, MarsBarycenter)
+asset.registerIdentifierWithMeta(MarsBarycenter.Identifier)
 
 
 

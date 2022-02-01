@@ -29,7 +29,6 @@ local VenusTrailEarth = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusTrailEarth)
-  asset.registerIdentifierWithMeta(VenusTrailEarth.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -37,6 +36,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(VenusTrailEarth.Identifier, VenusTrailEarth)
+asset.registerIdentifierWithMeta(VenusTrailEarth.Identifier)
 
 
 

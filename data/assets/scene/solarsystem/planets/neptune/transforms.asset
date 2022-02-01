@@ -21,7 +21,6 @@ local NeptuneBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneBarycenter)
-  asset.registerIdentifierWithMeta(NeptuneBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -29,6 +28,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(NeptuneBarycenter.Identifier, NeptuneBarycenter)
+asset.registerIdentifierWithMeta(NeptuneBarycenter.Identifier)
 
 
 

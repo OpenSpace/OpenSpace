@@ -44,9 +44,7 @@ local SwiftTuttlePosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SwiftTuttlePosition)
-  asset.registerIdentifierWithMeta(SwiftTuttlePosition.Identifier)
   openspace.addSceneGraphNode(SwiftTuttleTrail)
-  asset.registerIdentifierWithMeta(SwiftTuttleTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -55,7 +53,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(SwiftTuttlePosition.Identifier, SwiftTuttlePosition)
+asset.registerIdentifierWithMeta(SwiftTuttlePosition.Identifier)
 asset.export(SwiftTuttleTrail.Identifier, SwiftTuttleTrail)
+asset.registerIdentifierWithMeta(SwiftTuttleTrail.Identifier)
 
 
 

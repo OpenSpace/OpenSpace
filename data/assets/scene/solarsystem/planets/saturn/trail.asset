@@ -26,7 +26,6 @@ local SaturnTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SaturnTrail)
-  asset.registerIdentifierWithMeta(SaturnTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(SaturnTrail.Identifier, SaturnTrail)
+asset.registerIdentifierWithMeta(SaturnTrail.Identifier)
 
 
 

@@ -51,7 +51,6 @@ local Dione = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Dione)
-  asset.registerIdentifierWithMeta(Dione.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -59,6 +58,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Dione.Identifier, Dione)
+asset.registerIdentifierWithMeta(Dione.Identifier)
 
 
 

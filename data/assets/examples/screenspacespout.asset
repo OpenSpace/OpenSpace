@@ -22,7 +22,6 @@ local Spout = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Spout)
-  asset.registerIdentifierWithMeta(Spout.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -30,3 +29,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Spout.Identifier, Spout)
+asset.registerIdentifierWithMeta(Spout.Identifier)

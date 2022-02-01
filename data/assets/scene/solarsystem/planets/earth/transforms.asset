@@ -74,13 +74,9 @@ local EarthIAU = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenter)
-  asset.registerIdentifierWithMeta(EarthBarycenter.Identifier)
   openspace.addSceneGraphNode(EarthCenter)
-  asset.registerIdentifierWithMeta(EarthCenter.Identifier)
   openspace.addSceneGraphNode(EarthInertial)
-  asset.registerIdentifierWithMeta(EarthInertial.Identifier)
   openspace.addSceneGraphNode(EarthIAU)
-  asset.registerIdentifierWithMeta(EarthIAU.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -91,9 +87,13 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(EarthBarycenter.Identifier, EarthBarycenter)
+asset.registerIdentifierWithMeta(EarthBarycenter.Identifier)
 asset.export(EarthCenter.Identifier, EarthCenter)
+asset.registerIdentifierWithMeta(EarthCenter.Identifier)
 asset.export(EarthInertial.Identifier, EarthInertial)
+asset.registerIdentifierWithMeta(EarthInertial.Identifier)
 asset.export(EarthIAU.Identifier, EarthIAU)
+asset.registerIdentifierWithMeta(EarthIAU.Identifier)
 
 
 

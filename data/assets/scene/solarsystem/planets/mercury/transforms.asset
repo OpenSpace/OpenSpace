@@ -21,7 +21,6 @@ local MercuryBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenter)
-  asset.registerIdentifierWithMeta(MercuryBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -29,6 +28,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MercuryBarycenter.Identifier, MercuryBarycenter)
+asset.registerIdentifierWithMeta(MercuryBarycenter.Identifier)
 
 
 

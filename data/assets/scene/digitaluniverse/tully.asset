@@ -108,9 +108,7 @@ local tullyImages = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(tullyPoints)
-  asset.registerIdentifierWithMeta(tullyPoints.Identifier)
   openspace.addSceneGraphNode(tullyImages)
-  asset.registerIdentifierWithMeta(tullyImages.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -119,7 +117,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(tullyPoints.Identifier, tullyPoints)
+asset.registerIdentifierWithMeta(tullyPoints.Identifier)
 asset.export(tullyImages.Identifier, tullyImages)
+asset.registerIdentifierWithMeta(tullyImages.Identifier)
 
 
 

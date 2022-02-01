@@ -92,11 +92,8 @@ local PerseveranceTrailMars = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PerseveranceNode)
-  asset.registerIdentifierWithMeta(PerseveranceNode.Identifier)
   openspace.addSceneGraphNode(PerseveranceTrailSun)
-  asset.registerIdentifierWithMeta(PerseveranceTrailSun.Identifier)
   openspace.addSceneGraphNode(PerseveranceTrailMars)
-  asset.registerIdentifierWithMeta(PerseveranceTrailMars.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -106,5 +103,8 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(PerseveranceNode.Identifier, PerseveranceNode)
+asset.registerIdentifierWithMeta(PerseveranceNode.Identifier)
 asset.export(PerseveranceTrailSun.Identifier, PerseveranceTrailSun)
+asset.registerIdentifierWithMeta(PerseveranceTrailSun.Identifier)
 asset.export(PerseveranceTrailMars.Identifier, PerseveranceTrailMars)
+asset.registerIdentifierWithMeta(PerseveranceTrailMars.Identifier)

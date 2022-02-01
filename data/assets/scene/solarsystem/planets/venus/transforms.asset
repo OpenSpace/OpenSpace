@@ -21,7 +21,6 @@ local VenusBarycenter = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(VenusBarycenter)
-  asset.registerIdentifierWithMeta(VenusBarycenter.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -29,6 +28,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(VenusBarycenter.Identifier, VenusBarycenter)
+asset.registerIdentifierWithMeta(VenusBarycenter.Identifier)
 
 
 

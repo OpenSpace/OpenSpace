@@ -625,19 +625,17 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
     // Register registerIdentifierWithMeta function to add meta at runtime
     // registerIdentifierWithMeta(string identifier)
-    ghoul::lua::push(*_luaState, this, asset);
+    ghoul::lua::push(*_luaState, asset);
     lua_pushcclosure(
         *_luaState,
         [](lua_State* L) {
             ZoneScoped
 
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
+            Asset* asset = ghoul::lua::userData<Asset>(L, 1);
             ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerIdentifierWithMeta");
 
-            std::string identifier = luaL_checkstring(L, 1);
+            std::string identifier = ghoul::lua::value<std::string>(L);
             asset->addIdentifier(identifier);
-
-            lua_settop(L, 0);
             return 0;
         },
         2

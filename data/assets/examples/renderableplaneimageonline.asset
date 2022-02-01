@@ -23,7 +23,6 @@ local RenderablePlaneImageOnline = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RenderablePlaneImageOnline)
-  asset.registerIdentifierWithMeta(RenderablePlaneImageOnline.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -31,3 +30,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(RenderablePlaneImageOnline.Identifier, RenderablePlaneImageOnline)
+asset.registerIdentifierWithMeta(RenderablePlaneImageOnline.Identifier)

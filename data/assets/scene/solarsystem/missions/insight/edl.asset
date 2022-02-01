@@ -812,7 +812,6 @@ local nodes = {
 asset.onInitialize(function()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
-    sceneAsset.registerIdentifierWithMeta(node.Identifier);
   end
 end)
     
@@ -825,4 +824,5 @@ end)
 
 for _, node in ipairs(nodes) do
   asset.export(node.Identifier, node)
+  sceneAsset.registerIdentifierWithMeta(node.Identifier);
 end

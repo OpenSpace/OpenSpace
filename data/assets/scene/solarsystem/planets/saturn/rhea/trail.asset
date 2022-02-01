@@ -28,7 +28,6 @@ local RheaTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RheaTrail)
-  asset.registerIdentifierWithMeta(RheaTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(RheaTrail.Identifier, RheaTrail)
+asset.registerIdentifierWithMeta(RheaTrail.Identifier)
 
 
 

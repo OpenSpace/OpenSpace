@@ -54,7 +54,6 @@ local Callisto = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Callisto)
-  asset.registerIdentifierWithMeta(Callisto.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -62,6 +61,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Callisto.Identifier, Callisto)
+asset.registerIdentifierWithMeta(Callisto.Identifier)
 
 
 

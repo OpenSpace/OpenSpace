@@ -54,9 +54,7 @@ local HydraTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hydra)
-  asset.registerIdentifierWithMeta(Hydra.Identifier)
   openspace.addSceneGraphNode(HydraTrail)
-  asset.registerIdentifierWithMeta(HydraTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -65,7 +63,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Hydra.Identifier, Hydra)
+asset.registerIdentifierWithMeta(Hydra.Identifier)
 asset.export(HydraTrail.Identifier, HydraTrail)
+asset.registerIdentifierWithMeta(HydraTrail.Identifier)
 
 
 

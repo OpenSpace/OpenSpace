@@ -26,7 +26,6 @@ local EarthTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthTrail)
-  asset.registerIdentifierWithMeta(EarthTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(EarthTrail.Identifier, EarthTrail)
+asset.registerIdentifierWithMeta(EarthTrail.Identifier)
 
 
 

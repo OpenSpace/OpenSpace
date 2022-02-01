@@ -14,7 +14,6 @@ object.GUI.Description = [[ Asteroids with a semi-major axis less than 2.0 au an
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(object)
-  asset.registerIdentifierWithMeta(object.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -22,6 +21,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(object.Identifier, object)
+asset.registerIdentifierWithMeta(object.Identifier)
 
 
 

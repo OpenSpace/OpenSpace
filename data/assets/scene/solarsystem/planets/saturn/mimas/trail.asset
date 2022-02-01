@@ -28,7 +28,6 @@ local MimasTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MimasTrail)
-  asset.registerIdentifierWithMeta(MimasTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MimasTrail.Identifier, MimasTrail)
+asset.registerIdentifierWithMeta(MimasTrail.Identifier)
 
 
 

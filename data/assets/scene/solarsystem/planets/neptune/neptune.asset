@@ -54,9 +54,7 @@ local NeptuneLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Neptune)
-  asset.registerIdentifierWithMeta(Neptune.Identifier)
   openspace.addSceneGraphNode(NeptuneLabel)
-  asset.registerIdentifierWithMeta(NeptuneLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -65,7 +63,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Neptune.Identifier, Neptune)
+asset.registerIdentifierWithMeta(Neptune.Identifier)
 asset.export(NeptuneLabel.Identifier, NeptuneLabel)
+asset.registerIdentifierWithMeta(NeptuneLabel.Identifier)
 
 
 

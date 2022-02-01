@@ -52,7 +52,6 @@ local Hyperion = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hyperion)
-  asset.registerIdentifierWithMeta(Hyperion.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -60,6 +59,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Hyperion.Identifier, Hyperion)
+asset.registerIdentifierWithMeta(Hyperion.Identifier)
 
 
 

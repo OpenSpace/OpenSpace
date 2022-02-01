@@ -48,9 +48,7 @@ local C2019Q4BorisovPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(C2019Q4BorisovPosition)
-  asset.registerIdentifierWithMeta(C2019Q4BorisovPosition.Identifier)
   openspace.addSceneGraphNode(C2019Q4BorisovTrail)
-  asset.registerIdentifierWithMeta(C2019Q4BorisovTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -59,7 +57,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(C2019Q4BorisovPosition.Identifier, C2019Q4BorisovPosition)
+asset.registerIdentifierWithMeta(C2019Q4BorisovPosition.Identifier)
 asset.export(mode.Identifier, C2019Q4BorisovTrail)
+asset.registerIdentifierWithMeta(C2019Q4BorisovTrail.Identifier)
 
 
 

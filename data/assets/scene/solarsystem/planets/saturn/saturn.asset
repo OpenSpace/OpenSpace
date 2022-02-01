@@ -82,9 +82,7 @@ local SaturnLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
-  asset.registerIdentifierWithMeta(Saturn.Identifier)
   openspace.addSceneGraphNode(SaturnLabel)
-  asset.registerIdentifierWithMeta(SaturnLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -93,7 +91,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Saturn.Identifier, Saturn)
+asset.registerIdentifierWithMeta(Saturn.Identifier)
 asset.export(SaturnLabel.Identifier, SaturnLabel)
+asset.registerIdentifierWithMeta(SaturnLabel.Identifier)
 
 
 

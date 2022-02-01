@@ -107,9 +107,7 @@ local BennuTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuProjection)
-  asset.registerIdentifierWithMeta(BennuProjection.Identifier)
   openspace.addSceneGraphNode(BennuTrail)
-  asset.registerIdentifierWithMeta(BennuTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -118,4 +116,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(BennuProjection.Identifier, BennuProjection)
+asset.registerIdentifierWithMeta(BennuProjection.Identifier)
 asset.export(BennuTrail.Identifier, BennuTrail)
+asset.registerIdentifierWithMeta(BennuTrail.Identifier)

@@ -46,9 +46,7 @@ local SunLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
-  asset.registerIdentifierWithMeta(Sun.Identifier)
   openspace.addSceneGraphNode(SunLabel)
-  asset.registerIdentifierWithMeta(SunLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -57,7 +55,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Sun.Identifier, Sun)
+asset.registerIdentifierWithMeta(Sun.Identifier)
 asset.export(SunLabel.Identifier, SunLabel)
+asset.registerIdentifierWithMeta(SunLabel.Identifier)
 
 
 

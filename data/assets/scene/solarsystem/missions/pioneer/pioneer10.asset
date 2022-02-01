@@ -60,9 +60,7 @@ local Pioneer10Trail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Pioneer10)
-  asset.registerIdentifierWithMeta(Pioneer10.Identifier)
   openspace.addSceneGraphNode(Pioneer10Trail)
-  asset.registerIdentifierWithMeta(Pioneer10Trail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -71,7 +69,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Pioneer10.Identifier, Pioneer10)
+asset.registerIdentifierWithMeta(Pioneer10.Identifier)
 asset.export(Pioneer10Trail.Identifier, Pioneer10Trail)
+asset.registerIdentifierWithMeta(Pioneer10Trail.Identifier)
 
 
 

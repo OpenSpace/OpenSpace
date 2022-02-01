@@ -199,9 +199,7 @@ local JunoTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Juno)
-  asset.registerIdentifierWithMeta(Juno.Identifier)
   openspace.addSceneGraphNode(JunoTrail)
-  asset.registerIdentifierWithMeta(JunoTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -210,4 +208,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Juno.Identifier, Juno)
+asset.registerIdentifierWithMeta(Juno.Identifier)
 asset.export(JunoTrail.Identifier, JunoTrail)
+asset.registerIdentifierWithMeta(JunoTrail.Identifier)

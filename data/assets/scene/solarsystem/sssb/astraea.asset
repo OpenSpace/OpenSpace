@@ -45,9 +45,7 @@ local AstraeaPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AstraeaPosition)
-  asset.registerIdentifierWithMeta(AstraeaPosition.Identifier)
   openspace.addSceneGraphNode(AstraeaTrail)
-  asset.registerIdentifierWithMeta(AstraeaTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -56,7 +54,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(AstraeaPosition.Identifier, AstraeaPosition)
+asset.registerIdentifierWithMeta(AstraeaPosition.Identifier)
 asset.export(AstraeaTrail.Identifier, AstraeaTrail)
+asset.registerIdentifierWithMeta(AstraeaTrail.Identifier)
 
 
 

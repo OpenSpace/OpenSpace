@@ -31,7 +31,6 @@ local SunGlare = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(SunGlare)
-  asset.registerIdentifierWithMeta(SunGlare.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -39,6 +38,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(SunGlare.Identifier, SunGlare)
+asset.registerIdentifierWithMeta(SunGlare.Identifier)
 
 
 

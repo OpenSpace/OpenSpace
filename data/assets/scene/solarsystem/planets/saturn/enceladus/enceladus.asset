@@ -53,7 +53,6 @@ local Enceladus = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Enceladus)
-  asset.registerIdentifierWithMeta(Enceladus.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -61,6 +60,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Enceladus.Identifier, Enceladus)
+asset.registerIdentifierWithMeta(Enceladus.Identifier)
 
 
 

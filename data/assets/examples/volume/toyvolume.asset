@@ -19,7 +19,6 @@ local ToyVolume = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ToyVolume)
-  asset.registerIdentifierWithMeta(ToyVolume.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -27,3 +26,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(ToyVolume.Identifier, ToyVolume)
+asset.registerIdentifierWithMeta(ToyVolume.Identifier)

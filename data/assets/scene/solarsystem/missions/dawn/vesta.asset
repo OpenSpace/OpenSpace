@@ -139,9 +139,7 @@ local VestaTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Vesta)
-  asset.registerIdentifierWithMeta(Vesta.Identifier)
   openspace.addSceneGraphNode(VestaTrail)
-  asset.registerIdentifierWithMeta(VestaTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -150,4 +148,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Vesta.Identifier, Vesta)
+asset.registerIdentifierWithMeta(Vesta.Identifier)
 asset.export(VestaTrail.Identifier, VestaTrail)
+asset.registerIdentifierWithMeta(VestaTrail.Identifier)

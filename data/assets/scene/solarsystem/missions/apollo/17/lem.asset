@@ -63,9 +63,7 @@ local Apollo17LemModel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo17Lem)
-  asset.registerIdentifierWithMeta(Apollo17Lem.Identifier)
   openspace.addSceneGraphNode(Apollo17LemModel)
-  asset.registerIdentifierWithMeta(Apollo17LemModel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -74,4 +72,6 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Apollo17Lem.Identifier, Apollo17Lem)
+asset.registerIdentifierWithMeta(Apollo17Lem.Identifier)
 asset.export(Apollo17LemModel.Identifier, Apollo17LemModel)
+asset.registerIdentifierWithMeta(Apollo17LemModel.Identifier)

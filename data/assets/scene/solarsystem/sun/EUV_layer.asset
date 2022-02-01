@@ -39,7 +39,6 @@ local toggle_EUV_layer = {
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_EUV_layer)
   openspace.addSceneGraphNode(EUVLayer)
-  asset.registerIdentifierWithMeta(EUVLayer.Identifier)
 end)
 
 asset.onDeinitialize(function ()
@@ -48,6 +47,7 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(EUVLayer.Identifier, EUVLayer)
+asset.registerIdentifierWithMeta(EUVLayer.Identifier)
 
 
 asset.meta = {

@@ -24,14 +24,14 @@ local layer = {
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  asset.registerIdentifierWithMeta(layer.Identifier)
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
-asset.export(node.Identifier, node)
+asset.export(layer.Identifier, layer)
+asset.registerIdentifierWithMeta(layer.Identifier)
 
 
 

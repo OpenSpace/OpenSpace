@@ -54,9 +54,7 @@ local Example_Adaptive_Height = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Example_Fixed_Height)
-  asset.registerIdentifierWithMeta(Example_Fixed_Height.Identifier)
   openspace.addSceneGraphNode(Example_Adaptive_Height)
-  asset.registerIdentifierWithMeta(Example_Adaptive_Height.Identifier)
 end)
 
 asset.onDeinitialize(function()
@@ -65,4 +63,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Example_Fixed_Height.Identifier, Example_Fixed_Height)
+asset.registerIdentifierWithMeta(Example_Fixed_Height.Identifier)
 asset.export(Example_Adaptive_Height.Identifier, Example_Adaptive_Height)
+asset.registerIdentifierWithMeta(Example_Adaptive_Height.Identifier)

@@ -30,7 +30,6 @@ local MercuryTrailEarth = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryTrailEarth)
-  asset.registerIdentifierWithMeta(MercuryTrailEarth.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -38,6 +37,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MercuryTrailEarth.Identifier, MercuryTrailEarth)
+asset.registerIdentifierWithMeta(MercuryTrailEarth.Identifier)
 
 
 

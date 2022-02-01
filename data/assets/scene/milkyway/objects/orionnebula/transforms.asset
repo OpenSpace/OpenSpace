@@ -25,7 +25,6 @@ local NebulaPosition = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NebulaPosition)
-  asset.registerIdentifierWithMeta(NebulaPosition.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -33,6 +32,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(NebulaPosition.Identifier, NebulaPosition)
+asset.registerIdentifierWithMeta(NebulaPosition.Identifier)
 
 
 

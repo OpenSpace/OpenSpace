@@ -29,7 +29,6 @@ local JupiterTrailEarth = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JupiterTrailEarth)
-  asset.registerIdentifierWithMeta(JupiterTrailEarth.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -37,6 +36,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(JupiterTrailEarth.Identifier, JupiterTrailEarth)
+asset.registerIdentifierWithMeta(JupiterTrailEarth.Identifier)
 
 
 

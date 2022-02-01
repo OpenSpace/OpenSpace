@@ -82,9 +82,7 @@ local MarsLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)
-  asset.registerIdentifierWithMeta(Mars.Identifier)
   openspace.addSceneGraphNode(MarsLabel)
-  asset.registerIdentifierWithMeta(MarsLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -93,7 +91,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Mars.Identifier, Mars)
+asset.registerIdentifierWithMeta(Mars.Identifier)
 asset.export(MarsLabel.Identifier, MarsLabel)
+asset.registerIdentifierWithMeta(MarsLabel.Identifier)
 
 
 

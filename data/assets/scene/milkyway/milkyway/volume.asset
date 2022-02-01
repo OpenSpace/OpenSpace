@@ -53,7 +53,6 @@ local MilkyWayVolumeGalaxy = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
-  asset.registerIdentifierWithMeta(MilkyWayVolumeGalaxy.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -61,6 +60,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MilkyWayVolumeGalaxy.Identifier, MilkyWayVolumeGalaxy)
+asset.registerIdentifierWithMeta(MilkyWayVolumeGalaxy.Identifier)
 
 
 

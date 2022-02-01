@@ -62,9 +62,7 @@ local JupiterLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Jupiter)
-  asset.registerIdentifierWithMeta(Jupiter.Identifier)
   openspace.addSceneGraphNode(JupiterLabel)
-  asset.registerIdentifierWithMeta(JupiterLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -73,7 +71,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Jupiter.Identifier, Jupiter)
+asset.registerIdentifierWithMeta(Jupiter.Identifier)
 asset.export(JupiterLabel.Identifier, JupiterLabel)
+asset.registerIdentifierWithMeta(JupiterLabel.Identifier)
 
 
 

@@ -116,11 +116,8 @@ local JWSTSunTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailLaunch)
-  asset.registerIdentifierWithMeta(JWSTTrailLaunch.Identifier)
   openspace.addSceneGraphNode(JWSTTrailOrbit)
-  asset.registerIdentifierWithMeta(JWSTTrailOrbit.Identifier)
   openspace.addSceneGraphNode(JWSTSunTrail)
-  asset.registerIdentifierWithMeta(JWSTSunTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -130,8 +127,11 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(JWSTTrailLaunch.Identifier, JWSTTrailLaunch)
+asset.registerIdentifierWithMeta(JWSTTrailLaunch.Identifier)
 asset.export(JWSTTrailOrbit.Identifier, JWSTTrailOrbit)
+asset.registerIdentifierWithMeta(JWSTTrailOrbit.Identifier)
 asset.export(JWSTSunTrail.Identifier, JWSTSunTrail)
+asset.registerIdentifierWithMeta(JWSTSunTrail.Identifier)
 
 
 asset.meta = {

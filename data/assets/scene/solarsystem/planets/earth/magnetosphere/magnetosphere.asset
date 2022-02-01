@@ -38,7 +38,6 @@ local earthMagnetosphere = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(earthMagnetosphere)
-  asset.registerIdentifierWithMeta(earthMagnetosphere.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -46,6 +45,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(earthMagnetosphere.Identifier, earthMagnetosphere)
+asset.registerIdentifierWithMeta(earthMagnetosphere.Identifier)
 
 
 asset.meta = {

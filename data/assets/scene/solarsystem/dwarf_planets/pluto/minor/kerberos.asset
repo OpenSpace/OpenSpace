@@ -53,9 +53,7 @@ local KerberosTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Kerberos)
-  asset.registerIdentifierWithMeta(Kerberos.Identifier)
   openspace.addSceneGraphNode(KerberosTrail)
-  asset.registerIdentifierWithMeta(KerberosTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -64,7 +62,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Kerberos.Identifier, Kerberos)
+asset.registerIdentifierWithMeta(Kerberos.Identifier)
 asset.export(KerberosTrail.Identifier, KerberosTrail)
+asset.registerIdentifierWithMeta(KerberosTrail.Identifier)
 
 
 

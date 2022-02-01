@@ -72,9 +72,7 @@ local PlutoLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Pluto)
-  asset.registerIdentifierWithMeta(Pluto.Identifier)
   openspace.addSceneGraphNode(PlutoLabel)
-  asset.registerIdentifierWithMeta(PlutoLabel.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -83,7 +81,9 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Pluto.Identifier, Pluto)
+asset.registerIdentifierWithMeta(Pluto.Identifier)
 asset.export(PlutoLabel.Identifier, PlutoLabel)
+asset.registerIdentifierWithMeta(PlutoLabel.Identifier)
 
 
 

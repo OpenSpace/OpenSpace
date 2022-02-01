@@ -26,7 +26,6 @@ local MoonTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MoonTrail)
-  asset.registerIdentifierWithMeta(MoonTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -34,6 +33,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MoonTrail.Identifier, MoonTrail)
+asset.registerIdentifierWithMeta(MoonTrail.Identifier)
 
 
 

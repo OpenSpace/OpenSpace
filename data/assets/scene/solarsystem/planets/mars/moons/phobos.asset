@@ -62,9 +62,7 @@ local PhobosTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Phobos)
-  asset.registerIdentifierWithMeta(Phobos.Identifier)
   openspace.addSceneGraphNode(PhobosTrail)
-  asset.registerIdentifierWithMeta(PhobosTrail.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -73,7 +71,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Phobos.Identifier, Phobos)
+asset.registerIdentifierWithMeta(Phobos.Identifier)
 asset.export(PhobosTrail.Identifier, PhobosTrail)
+asset.registerIdentifierWithMeta(PhobosTrail.Identifier)
 
 
 

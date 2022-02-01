@@ -79,9 +79,7 @@ local VenusLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Venus)
-  asset.registerIdentifierWithMeta(Venus.Identifier)
   openspace.addSceneGraphNode(VenusLabel)
-  asset.registerIdentifierWithMeta(VenusLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -90,7 +88,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Venus.Identifier, Venus)
+asset.registerIdentifierWithMeta(Venus.Identifier)
 asset.export(VenusLabel.Identifier, VenusLabel)
+asset.registerIdentifierWithMeta(VenusLabel.Identifier)
 
 
 

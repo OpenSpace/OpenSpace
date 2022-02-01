@@ -51,7 +51,6 @@ local Tethys = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Tethys)
-  asset.registerIdentifierWithMeta(Tethys.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -59,6 +58,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(Tethys.Identifier, Tethys)
+asset.registerIdentifierWithMeta(Tethys.Identifier)
 
 
 

@@ -54,9 +54,7 @@ local UranusLabel = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Uranus)
-  asset.registerIdentifierWithMeta(Uranus.Identifier)
   openspace.addSceneGraphNode(UranusLabel)
-  asset.registerIdentifierWithMeta(UranusLabel.Identifier)
 end)
     
 asset.onDeinitialize(function()
@@ -65,7 +63,9 @@ asset.onDeinitialize(function()
 end)
     
 asset.export(Uranus.Identifier, Uranus)
+asset.registerIdentifierWithMeta(Uranus.Identifier)
 asset.export(UranusLabel.Identifier, UranusLabel)
+asset.registerIdentifierWithMeta(UranusLabel.Identifier)
 
 
 

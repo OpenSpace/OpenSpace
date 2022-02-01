@@ -28,7 +28,6 @@ local DioneTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DioneTrail)
-  asset.registerIdentifierWithMeta(DioneTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(DioneTrail.Identifier, DioneTrail)
+asset.registerIdentifierWithMeta(DioneTrail.Identifier)
 
 
 

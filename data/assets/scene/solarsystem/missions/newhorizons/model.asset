@@ -35,7 +35,6 @@ local NewHorizons = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NewHorizons)
-  asset.registerIdentifierWithMeta(NewHorizons.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -43,3 +42,4 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(NewHorizons.Identifier, NewHorizons)
+asset.registerIdentifierWithMeta(NewHorizons.Identifier)

@@ -28,7 +28,6 @@ local MarsTrail = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MarsTrail)
-  asset.registerIdentifierWithMeta(MarsTrail.Identifier)
 end)
   
 asset.onDeinitialize(function()
@@ -36,6 +35,7 @@ asset.onDeinitialize(function()
 end)
   
 asset.export(MarsTrail.Identifier, MarsTrail)
+asset.registerIdentifierWithMeta(MarsTrail.Identifier)
 
 
 

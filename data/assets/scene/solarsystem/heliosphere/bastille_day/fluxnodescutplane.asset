@@ -84,9 +84,7 @@ asset.onInitialize(function ()
   openspace.action.registerAction(toggle_equatorial)
   openspace.action.registerAction(toggle_meridial)
   openspace.addSceneGraphNode(EquatorialCutplane)
-  asset.registerIdentifierWithMeta(EquatorialCutplane.Identifier)
   openspace.addSceneGraphNode(MeridialCutplane)
-  asset.registerIdentifierWithMeta(MeridialCutplane.Identifier)
 end)
 
 asset.onDeinitialize(function ()
@@ -97,7 +95,9 @@ asset.onDeinitialize(function ()
 end)
 
 asset.export(EquatorialCutplane.Identifier, EquatorialCutplane)
+asset.registerIdentifierWithMeta(EquatorialCutplane.Identifier)
 asset.export(MeridialCutplane.Identifier, MeridialCutplane)
+asset.registerIdentifierWithMeta(MeridialCutplane.Identifier)
 
 
 asset.meta = {
