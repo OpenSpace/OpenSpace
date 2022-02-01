@@ -121,12 +121,12 @@ local Halpha = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(wmap)
-  openspace.addSceneGraphNode(cbe)
-  openspace.addSceneGraphNode(planck)
-  openspace.addSceneGraphNode(Halpha)
   asset.registerIdentifierWithMeta(wmap.Identifier)
+  openspace.addSceneGraphNode(cbe)
   asset.registerIdentifierWithMeta(cbe.Identifier)
+  openspace.addSceneGraphNode(planck)
   asset.registerIdentifierWithMeta(planck.Identifier)
+  openspace.addSceneGraphNode(Halpha)
   asset.registerIdentifierWithMeta(Halpha.Identifier)
 end)
   

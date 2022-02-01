@@ -149,29 +149,25 @@ local Station6Frag3Model = {
   }
 }
 
+local nodes = {
+  Station6Frag1Holder, Station6Frag1Model, Station6Frag23Holder, Station6Frag2Model,
+  Station6Frag3Model,
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station6Frag1Holder)
-  asset.registerIdentifierWithMeta(Station6Frag1Holder.Identifier)
-  openspace.addSceneGraphNode(Station6Frag1Model)
-  asset.registerIdentifierWithMeta(Station6Frag1Model.Identifier)
-  openspace.addSceneGraphNode(Station6Frag23Holder)
-  asset.registerIdentifierWithMeta(Station6Frag23Holder.Identifier)
-  openspace.addSceneGraphNode(Station6Frag2Model)
-  asset.registerIdentifierWithMeta(Station6Frag2Model.Identifier)
-  openspace.addSceneGraphNode(Station6Frag3Model)
-  asset.registerIdentifierWithMeta(Station6Frag3Model.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station6Frag3Model.Identifier)
-  openspace.removeSceneGraphNode(Station6Frag2Model.Identifier)
-  openspace.removeSceneGraphNode(Station6Frag23Holder.Identifier)
-  openspace.removeSceneGraphNode(Station6Frag1Model.Identifier)
-  openspace.removeSceneGraphNode(Station6Frag1Holder.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(Station6Frag1Holder.Identifier, Station6Frag1Holder)
-asset.export(Station6Frag1Model.Identifier, Station6Frag1Model)
-asset.export(Station6Frag23Holder.Identifier, Station6Frag23Holder)
-asset.export(Station6Frag2Model.Identifier, Station6Frag2Model)
-asset.export(Station6Frag3Model.Identifier, Station6Frag3Model)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

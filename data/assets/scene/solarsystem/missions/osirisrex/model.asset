@@ -155,29 +155,28 @@ local PolyCamFov = {
 --   }
 -- }
 
+local nodes =  {
+  OsirisRex,
+  PolyCam,
+  Rexis,
+  PolyCamFov,
+  -- RexisFov
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(OsirisRex)
-  asset.registerIdentifierWithMeta(OsirisRex.Identifier)
-  openspace.addSceneGraphNode(PolyCam)
-  asset.registerIdentifierWithMeta(PolyCam.Identifier)
-  openspace.addSceneGraphNode(Rexis)
-  asset.registerIdentifierWithMeta(Rexis.Identifier)
-  openspace.addSceneGraphNode(PolyCamFov)
-  asset.registerIdentifierWithMeta(PolyCamFov.Identifier)
-  -- openspace.addSceneGraphNode(RexisFov)
-  -- asset.registerIdentifierWithMeta(RexisFov.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(RexisFov.Identifier)
-  openspace.removeSceneGraphNode(PolyCamFov.Identifier)
-  openspace.removeSceneGraphNode(Rexis.Identifier)
-  openspace.removeSceneGraphNode(PolyCam.Identifier)
-  openspace.removeSceneGraphNode(OsirisRex.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(OsirisRex.Identifier, OsirisRex)
-asset.export(PolyCam.Identifier, PolyCam)
-asset.export(Rexis.Identifier, Rexis)
-asset.export(PolyCamFov.Identifier, PolyCamFov)
--- asset.export(RexisFov.Identifier, RexisFov)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

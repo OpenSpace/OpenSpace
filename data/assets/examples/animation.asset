@@ -182,14 +182,14 @@ local animationBounce = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(animationLoop)
-  openspace.addSceneGraphNode(animationLoopInf)
-  openspace.addSceneGraphNode(animationOnce)
-  openspace.addSceneGraphNode(animationBounceInf)
-  openspace.addSceneGraphNode(animationBounce)
   asset.registerIdentifierWithMeta(animationLoop.Identifier)
+  openspace.addSceneGraphNode(animationLoopInf)
   asset.registerIdentifierWithMeta(animationLoopInf.Identifier)
+  openspace.addSceneGraphNode(animationOnce)
   asset.registerIdentifierWithMeta(animationOnce.Identifier)
+  openspace.addSceneGraphNode(animationBounceInf)
   asset.registerIdentifierWithMeta(animationBounceInf.Identifier)
+  openspace.addSceneGraphNode(animationBounce)
   asset.registerIdentifierWithMeta(animationBounce.Identifier)
 end)
 
@@ -200,6 +200,13 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(animationLoopInf.Identifier)
   openspace.removeSceneGraphNode(animationLoop.Identifier)
 end)
+
+
+asset.export(animationLoop.Identifier, animationLoop)
+asset.export(animationLoopInf.Identifier, animationLoopInf)
+asset.export(animationOnce.Identifier, animationOnce)
+asset.export(animationBounceInf.Identifier, animationBounceInf)
+asset.export(animationBounce.Identifier, animationBounce)
 
 -- Asset
 asset.meta = {

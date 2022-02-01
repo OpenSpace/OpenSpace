@@ -254,37 +254,30 @@ local Apollo11LemLandedModel = {
   }
 }
 
+local nodes = {
+  Apollo11Position,
+  Apollo11LemPosition,
+  Apollo11Model,
+  Apollo11LemDescentModel,
+  Apollo11LemLandedModel,
+  Apollo11MoonTrail,
+  Apollo11LemTrail,
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Apollo11Position)
-  asset.registerIdentifierWithMeta(Apollo11Position.Identifier)
-  openspace.addSceneGraphNode(Apollo11LemPosition)
-  asset.registerIdentifierWithMeta(Apollo11LemPosition.Identifier)
-  openspace.addSceneGraphNode(Apollo11Model)
-  asset.registerIdentifierWithMeta(Apollo11Model.Identifier)
-  openspace.addSceneGraphNode(Apollo11LemDescentModel)
-  asset.registerIdentifierWithMeta(Apollo11LemDescentModel.Identifier)
-  openspace.addSceneGraphNode(Apollo11LemLandedModel)
-  asset.registerIdentifierWithMeta(Apollo11LemLandedModel.Identifier)
-  openspace.addSceneGraphNode(Apollo11MoonTrail)
-  asset.registerIdentifierWithMeta(Apollo11MoonTrail.Identifier)
-  openspace.addSceneGraphNode(Apollo11LemTrail)
-  asset.registerIdentifierWithMeta(Apollo11LemTrail.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Apollo11LemTrail.Identifier)
-  openspace.removeSceneGraphNode(Apollo11MoonTrail.Identifier)
-  openspace.removeSceneGraphNode(Apollo11LemLandedModel.Identifier)
-  openspace.removeSceneGraphNode(Apollo11LemDescentModel.Identifier)
-  openspace.removeSceneGraphNode(Apollo11Model.Identifier)
-  openspace.removeSceneGraphNode(Apollo11LemPosition.Identifier)
-  openspace.removeSceneGraphNode(Apollo11Position.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(Apollo11Position.Identifier, Apollo11Position)
-asset.export(Apollo11LemPosition.Identifier, Apollo11LemPosition)
-asset.export(Apollo11Model.Identifier, Apollo11Model)
-asset.export(Apollo11LemDescentModel.Identifier, Apollo11LemDescentModel)
-asset.export(Apollo11LemLandedModel.Identifier, Apollo11LemLandedModel)
-asset.export(Apollo11MoonTrail.Identifier, Apollo11MoonTrail)
-asset.export(Apollo11LemTrail.Identifier, Apollo11LemTrail)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

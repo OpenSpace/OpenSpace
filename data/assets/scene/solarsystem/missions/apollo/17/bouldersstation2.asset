@@ -148,33 +148,26 @@ local Station2Boulder3Model = {
   }
 }
 
+local nodes = {
+  Station2Boulder1Holder, Station2Boulder1Model,
+  Station2Boulder2Holder, Station2Boulder2Model,
+  Station2Boulder3Holder, Station2Boulder3Model
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Station2Boulder1Holder)
-  asset.registerIdentifierWithMeta(Station2Boulder1Holder.Identifier)
-  openspace.addSceneGraphNode(Station2Boulder1Model)
-  asset.registerIdentifierWithMeta(Station2Boulder1Model.Identifier)
-  openspace.addSceneGraphNode(Station2Boulder2Holder)
-  asset.registerIdentifierWithMeta(Station2Boulder2Holder.Identifier)
-  openspace.addSceneGraphNode(Station2Boulder2Model)
-  asset.registerIdentifierWithMeta(Station2Boulder2Model.Identifier)
-  openspace.addSceneGraphNode(Station2Boulder3Holder)
-  asset.registerIdentifierWithMeta(Station2Boulder3Holder.Identifier)
-  openspace.addSceneGraphNode(Station2Boulder3Model)
-  asset.registerIdentifierWithMeta(Station2Boulder3Model.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Station2Boulder3Model.Identifier)
-  openspace.removeSceneGraphNode(Station2Boulder3Holder.Identifier)
-  openspace.removeSceneGraphNode(Station2Boulder2Model.Identifier)
-  openspace.removeSceneGraphNode(Station2Boulder2Holder.Identifier)
-  openspace.removeSceneGraphNode(Station2Boulder1Model.Identifier)
-  openspace.removeSceneGraphNode(Station2Boulder1Holder.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(Station2Boulder1Holder.Identifier, Station2Boulder1Holder)
-asset.export(Station2Boulder1Model.Identifier, Station2Boulder1Model)
-asset.export(Station2Boulder2Holder.Identifier, Station2Boulder2Holder)
-asset.export(Station2Boulder2Model.Identifier, Station2Boulder2Model)
-asset.export(Station2Boulder3Holder.Identifier, Station2Boulder3Holder)
-asset.export(Station2Boulder3Model.Identifier, Station2Boulder3Model)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

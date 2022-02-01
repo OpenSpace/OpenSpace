@@ -41,8 +41,8 @@ local FullEllipticDisc = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BasicDisc)
-  openspace.addSceneGraphNode(FullEllipticDisc)
   asset.registerIdentifierWithMeta(BasicDisc.Identifier)
+  openspace.addSceneGraphNode(FullEllipticDisc)
   asset.registerIdentifierWithMeta(FullEllipticDisc.Identifier)
 end)
 

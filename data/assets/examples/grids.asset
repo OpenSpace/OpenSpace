@@ -90,12 +90,12 @@ local boxGrid = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(radialGrid)
-  openspace.addSceneGraphNode(planarGrid)
-  openspace.addSceneGraphNode(sphericalGrid)
-  openspace.addSceneGraphNode(boxGrid)
   asset.registerIdentifierWithMeta(radialGrid.Identifier)
+  openspace.addSceneGraphNode(planarGrid)
   asset.registerIdentifierWithMeta(planarGrid.Identifier)
+  openspace.addSceneGraphNode(sphericalGrid)
   asset.registerIdentifierWithMeta(sphericalGrid.Identifier)
+  openspace.addSceneGraphNode(boxGrid)
   asset.registerIdentifierWithMeta(boxGrid.Identifier)
 end)
   

@@ -92,8 +92,8 @@ local deepSkyImages = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(deepSkyPoints)
-  openspace.addSceneGraphNode(deepSkyImages)
   asset.registerIdentifierWithMeta(deepSkyPoints.Identifier)
+  openspace.addSceneGraphNode(deepSkyImages)
   asset.registerIdentifierWithMeta(deepSkyImages.Identifier)
 end)
   

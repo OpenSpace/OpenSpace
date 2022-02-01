@@ -58,8 +58,8 @@ local constellations = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(constellationsExtragalactic)
-  openspace.addSceneGraphNode(constellations)
   asset.registerIdentifierWithMeta(constellationsExtragalactic.Identifier)
+  openspace.addSceneGraphNode(constellations)
   asset.registerIdentifierWithMeta(constellations.Identifier)
 end)
   

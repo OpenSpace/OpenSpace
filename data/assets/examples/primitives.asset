@@ -46,8 +46,8 @@ local ellipse = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(circle)
-  openspace.addSceneGraphNode(ellipse)
   asset.registerIdentifierWithMeta(circle.Identifier)
+  openspace.addSceneGraphNode(ellipse)
   asset.registerIdentifierWithMeta(ellipse.Identifier)
 end)
   

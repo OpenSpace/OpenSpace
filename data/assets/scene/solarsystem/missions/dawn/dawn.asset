@@ -788,33 +788,29 @@ local DawnFramingCamera2 = {
   }
 }
 
+local nodes = {
+  Dawn,
+  DawnSolarArray1,
+  DawnSolarArray2,
+  DawnTrail,
+  DawnFramingCamera1,
+  DawnFramingCamera2
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Dawn)
-  asset.registerIdentifierWithMeta(Dawn.Identifier)
-  openspace.addSceneGraphNode(DawnSolarArray1)
-  asset.registerIdentifierWithMeta(DawnSolarArray1.Identifier)
-  openspace.addSceneGraphNode(DawnSolarArray2)
-  asset.registerIdentifierWithMeta(DawnSolarArray2.Identifier)
-  openspace.addSceneGraphNode(DawnTrail)
-  asset.registerIdentifierWithMeta(DawnTrail.Identifier)
-  openspace.addSceneGraphNode(DawnFramingCamera1)
-  asset.registerIdentifierWithMeta(DawnFramingCamera1.Identifier)
-  openspace.addSceneGraphNode(DawnFramingCamera2)
-  asset.registerIdentifierWithMeta(DawnFramingCamera2.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(DawnFramingCamera2.Identifier)
-  openspace.removeSceneGraphNode(DawnFramingCamera1.Identifier)
-  openspace.removeSceneGraphNode(DawnTrail.Identifier)
-  openspace.removeSceneGraphNode(DawnSolarArray2.Identifier)
-  openspace.removeSceneGraphNode(DawnSolarArray1.Identifier)
-  openspace.removeSceneGraphNode(Dawn.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(Dawn.Identifier, Dawn)
-asset.export(DawnSolarArray1.Identifier, DawnSolarArray1)
-asset.export(DawnSolarArray2.Identifier, DawnSolarArray2)
-asset.export(DawnTrail.Identifier, DawnTrail)
-asset.export(DawnFramingCamera1.Identifier, DawnFramingCamera1)
-asset.export(DawnFramingCamera2.Identifier, DawnFramingCamera2)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end

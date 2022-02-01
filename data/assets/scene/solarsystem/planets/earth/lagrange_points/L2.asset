@@ -126,32 +126,31 @@ local L2SunLine = {
   }
 }
 
+local nodes = {
+  L2Small,
+  L2,
+  L2SunLine,
+  L2SmallLabel,
+  L2Label
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(L2Small)
-  asset.registerIdentifierWithMeta(L2Small.Identifier)
-  openspace.addSceneGraphNode(L2)
-  asset.registerIdentifierWithMeta(L2.Identifier)
-  openspace.addSceneGraphNode(L2SunLine)
-  asset.registerIdentifierWithMeta(L2SunLine.Identifier)
-  openspace.addSceneGraphNode(L2SmallLabel)
-  asset.registerIdentifierWithMeta(L2SmallLabel.Identifier)
-  openspace.addSceneGraphNode(L2Label)
-  asset.registerIdentifierWithMeta(L2Label.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
-    
+  
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(L2Label.Identifier)
-  openspace.removeSceneGraphNode(L2SmallLabel.Identifier)
-  openspace.removeSceneGraphNode(L2SunLine.Identifier)
-  openspace.removeSceneGraphNode(L2.Identifier)
-  openspace.removeSceneGraphNode(L2Small.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-    
-asset.export(L2Small.Identifier, L2Small)
-asset.export(L2.Identifier, L2)
-asset.export(L2SunLine.Identifier, L2SunLine)
-asset.export(L2SmallLabel.Identifier, L2SmallLabel)
-asset.export(L2Label.Identifier, L2Label)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end
 
 
 

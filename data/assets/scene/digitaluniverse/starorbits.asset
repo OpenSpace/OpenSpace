@@ -162,40 +162,28 @@ local pM_J13420Orbit = {
   }
 }
 
+local nodes = {
+  sunOrbit, barnardsOrbit, pM_J13420Orbit, lSRJ0822Orbit, lSR1826Orbit,
+  lacaille9352Orbit, kapteynsOrbit
+}
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(sunOrbit)
-  asset.registerIdentifierWithMeta(sunOrbit.Identifier)
-  openspace.addSceneGraphNode(barnardsOrbit)
-  asset.registerIdentifierWithMeta(barnardsOrbit.Identifier)
-  openspace.addSceneGraphNode(pM_J13420Orbit)
-  asset.registerIdentifierWithMeta(pM_J13420Orbit.Identifier)
-  openspace.addSceneGraphNode(lSRJ0822Orbit)
-  asset.registerIdentifierWithMeta(lSRJ0822Orbit.Identifier)
-  openspace.addSceneGraphNode(lSR1826Orbit)
-  asset.registerIdentifierWithMeta(lSR1826Orbit.Identifier)
-  openspace.addSceneGraphNode(lacaille9352Orbit)
-  asset.registerIdentifierWithMeta(lacaille9352Orbit.Identifier)
-  openspace.addSceneGraphNode(kapteynsOrbit)
-  asset.registerIdentifierWithMeta(kapteynsOrbit.Identifier)
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+    asset.registerIdentifierWithMeta(node.Identifier)
+  end
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(kapteynsOrbit.Identifier)
-  openspace.removeSceneGraphNode(barnardsOrbit.Identifier)
-  openspace.removeSceneGraphNode(lSR1826Orbit.Identifier)
-  openspace.removeSceneGraphNode(lSRJ0822Orbit.Identifier)
-  openspace.removeSceneGraphNode(pM_J13420Orbit.Identifier)
-  openspace.removeSceneGraphNode(lacaille9352Orbit.Identifier)
-  openspace.removeSceneGraphNode(sunOrbit.Identifier)
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node.Identifier)
+  end
 end)
-  
-asset.export(sunOrbit.Identifier, sunOrbit)
-asset.export(barnardsOrbit.Identifier, barnardsOrbit)
-asset.export(pM_J13420Orbit.Identifier, pM_J13420Orbit)
-asset.export(lSRJ0822Orbit.Identifier, lSRJ0822Orbit)
-asset.export(lSR1826Orbit.Identifier, lSR1826Orbit)
-asset.export(lacaille9352Orbit.Identifier, lacaille9352Orbit)
-asset.export(kapteynsOrbit.Identifier, kapteynsOrbit)
+
+for i, node in ipairs(nodes) do
+  asset.export(node.Identifier, node)
+end
 
 
 
