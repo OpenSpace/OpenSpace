@@ -817,8 +817,7 @@ end)
     
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
+    openspace.removeSceneGraphNode(nodes[i])
   end
 end)
 

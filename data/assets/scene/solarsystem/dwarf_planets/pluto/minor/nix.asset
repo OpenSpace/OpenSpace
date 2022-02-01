@@ -57,14 +57,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NixTrail.Identifier)
-  openspace.removeSceneGraphNode(Nix.Identifier)
+  openspace.removeSceneGraphNode(NixTrail)
+  openspace.removeSceneGraphNode(Nix)
 end)
     
-asset.export(Nix.Identifier, Nix)
-asset.registerIdentifierWithMeta(Nix.Identifier)
-asset.export(NixTrail.Identifier, NixTrail)
-asset.registerIdentifierWithMeta(NixTrail.Identifier)
+asset.export(Nix)
+asset.export(NixTrail)
 
 
 

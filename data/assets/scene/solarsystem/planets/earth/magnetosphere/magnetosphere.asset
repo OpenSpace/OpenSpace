@@ -41,11 +41,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(earthMagnetosphere.Identifier)
+  openspace.removeSceneGraphNode(earthMagnetosphere)
 end)
   
-asset.export(earthMagnetosphere.Identifier, earthMagnetosphere)
-asset.registerIdentifierWithMeta(earthMagnetosphere.Identifier)
+asset.export(earthMagnetosphere)
 
 
 asset.meta = {

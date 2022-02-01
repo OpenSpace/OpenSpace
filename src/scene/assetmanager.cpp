@@ -601,7 +601,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             int n = ghoul::lua::checkArgumentsAndThrow(L, { 1 , 2 }, "lua::exportAsset");
             std::string exportName;
             std::string identifier;
-            int tableLocation;
+            int targetLocation;
             if (n == 1) {
                 ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
                     L,
@@ -617,7 +617,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 }
                 identifier = d.value<std::string>("Identifier");
                 exportName = identifier;
-                tableLocation = 1;
+                targetLocation = 1;
             }
             
             if (n == 2) {
@@ -626,16 +626,22 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                     1,
                     ghoul::lua::PopValue::No
                 );
-                tableLocation = 2;
+                targetLocation = 2;
 
-                ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
-                    L,
-                    2,
-                    ghoul::lua::PopValue::No
-                );
+                if (lua_type(L, targetLocation) == LUA_TTABLE) {
+                    // The second argument might be anything and we only try to extract
+                    // the identifier if it actually is a table *and* if that table
+                    // contains the 'Identifier' key
 
-                if (d.hasValue<std::string>("Identifier")) {
-                    identifier = d.value<std::string>("Identifier");
+                    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
+                        L,
+                        2,
+                        ghoul::lua::PopValue::No
+                    );
+
+                    if (d.hasValue<std::string>("Identifier")) {
+                        identifier = d.value<std::string>("Identifier");
+                    }
                 }
             }
 
@@ -647,7 +653,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             const int exportsTableIndex = lua_gettop(L);
 
             // push the second argument
-            lua_pushvalue(L, tableLocation);
+            lua_pushvalue(L, targetLocation);
             lua_setfield(L, exportsTableIndex, exportName.c_str());
 
             // Register registerIdentifierWithMeta function to add meta at runtime

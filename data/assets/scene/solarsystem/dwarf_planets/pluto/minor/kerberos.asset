@@ -57,14 +57,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(KerberosTrail.Identifier)
-  openspace.removeSceneGraphNode(Kerberos.Identifier)
+  openspace.removeSceneGraphNode(KerberosTrail)
+  openspace.removeSceneGraphNode(Kerberos)
 end)
   
-asset.export(Kerberos.Identifier, Kerberos)
-asset.registerIdentifierWithMeta(Kerberos.Identifier)
-asset.export(KerberosTrail.Identifier, KerberosTrail)
-asset.registerIdentifierWithMeta(KerberosTrail.Identifier)
+asset.export(Kerberos)
+asset.export(KerberosTrail)
 
 
 

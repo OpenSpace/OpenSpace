@@ -56,14 +56,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(StyxTrail.Identifier)
-  openspace.removeSceneGraphNode(Styx.Identifier)
+  openspace.removeSceneGraphNode(StyxTrail)
+  openspace.removeSceneGraphNode(Styx)
 end)
     
-asset.export(Styx.Identifier, Styx)
-asset.registerIdentifierWithMeta(Styx.Identifier)
-asset.export(StyxTrail.Identifier, StyxTrail)
-asset.registerIdentifierWithMeta(StyxTrail.Identifier)
+asset.export(Styx)
+asset.export(StyxTrail)
 
 
 

@@ -58,14 +58,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HydraTrail.Identifier)
-  openspace.removeSceneGraphNode(Hydra.Identifier)
+  openspace.removeSceneGraphNode(HydraTrail)
+  openspace.removeSceneGraphNode(Hydra)
 end)
   
-asset.export(Hydra.Identifier, Hydra)
-asset.registerIdentifierWithMeta(Hydra.Identifier)
-asset.export(HydraTrail.Identifier, HydraTrail)
-asset.registerIdentifierWithMeta(HydraTrail.Identifier)
+asset.export(Hydra)
+asset.export(HydraTrail)
 
 
 

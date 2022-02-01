@@ -158,7 +158,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(NebulaHolder)
 end)
   
-asset.export(NebulaHolder
+asset.export(NebulaHolder)
 asset.export(OrionNebulaModel)
 asset.export(OrionNebulaShocksModel)
 asset.export(OrionNebulaProplydsModel)
