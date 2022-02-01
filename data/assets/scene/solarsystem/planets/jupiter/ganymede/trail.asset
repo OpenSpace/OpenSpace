@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(GanymedeTrail.Identifier)
+  openspace.removeSceneGraphNode(GanymedeTrail)
 end)
   
-asset.export(GanymedeTrail.Identifier, GanymedeTrail)
-asset.registerIdentifierWithMeta(GanymedeTrail.Identifier)
+asset.export(GanymedeTrail)
 
 
 

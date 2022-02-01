@@ -49,14 +49,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(AstraeaTrail.Identifier)
-  openspace.removeSceneGraphNode(AstraeaPosition.Identifier)
+  openspace.removeSceneGraphNode(AstraeaTrail)
+  openspace.removeSceneGraphNode(AstraeaPosition)
 end)
     
-asset.export(AstraeaPosition.Identifier, AstraeaPosition)
-asset.registerIdentifierWithMeta(AstraeaPosition.Identifier)
-asset.export(AstraeaTrail.Identifier, AstraeaTrail)
-asset.registerIdentifierWithMeta(AstraeaTrail.Identifier)
+asset.export(AstraeaPosition)
+asset.export(AstraeaTrail)
 
 
 

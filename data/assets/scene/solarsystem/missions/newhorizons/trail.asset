@@ -33,8 +33,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(TrailAtPluto.Identifier)
+  openspace.removeSceneGraphNode(TrailAtPluto)
 end)
   
-asset.export(TrailAtPluto.Identifier, TrailAtPluto)
-asset.registerIdentifierWithMeta(TrailAtPluto.Identifier)
+asset.export(TrailAtPluto)

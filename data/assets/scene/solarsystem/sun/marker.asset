@@ -33,11 +33,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunMarker.Identifier)
+  openspace.removeSceneGraphNode(SunMarker)
 end)
   
-asset.export(SunMarker.Identifier, SunMarker)
-asset.registerIdentifierWithMeta(SunMarker.Identifier)
+asset.export(SunMarker)
 
 
 

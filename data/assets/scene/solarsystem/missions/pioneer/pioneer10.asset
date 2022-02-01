@@ -64,14 +64,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Pioneer10Trail.Identifier)
-  openspace.removeSceneGraphNode(Pioneer10.Identifier)
+  openspace.removeSceneGraphNode(Pioneer10Trail)
+  openspace.removeSceneGraphNode(Pioneer10)
 end)
     
-asset.export(Pioneer10.Identifier, Pioneer10)
-asset.registerIdentifierWithMeta(Pioneer10.Identifier)
-asset.export(Pioneer10Trail.Identifier, Pioneer10Trail)
-asset.registerIdentifierWithMeta(Pioneer10Trail.Identifier)
+asset.export(Pioneer10)
+asset.export(Pioneer10Trail)
 
 
 

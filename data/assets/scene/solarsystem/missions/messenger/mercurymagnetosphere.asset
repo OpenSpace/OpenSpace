@@ -58,8 +58,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Magnetosphere.Identifier)
+  openspace.removeSceneGraphNode(Magnetosphere)
 end)
   
-asset.export(Magnetosphere.Identifier, Magnetosphere)
-asset.registerIdentifierWithMeta(Magnetosphere.Identifier)
+asset.export(Magnetosphere)

@@ -62,6 +62,6 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(obj.Identifier)
-  openspace.action.removeAction(generic_action.Identifier)
+  openspace.removeSceneGraphNode(obj)
+  openspace.action.removeAction(generic_action)
 end)

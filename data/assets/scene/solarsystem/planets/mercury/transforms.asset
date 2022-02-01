@@ -24,11 +24,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MercuryBarycenter.Identifier)
+  openspace.removeSceneGraphNode(MercuryBarycenter)
 end)
   
-asset.export(MercuryBarycenter.Identifier, MercuryBarycenter)
-asset.registerIdentifierWithMeta(MercuryBarycenter.Identifier)
+asset.export(MercuryBarycenter)
 
 
 

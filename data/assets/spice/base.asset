@@ -13,15 +13,14 @@ local kernels = {
 }
 
 asset.onInitialize(function()
-  for i, kernel in ipairs(kernels) do
+  for _, kernel in ipairs(kernels) do
     openspace.spice.loadKernel(kernel)
   end
 end)
   
 asset.onDeinitialize(function()
   for i = #kernels, 1, -1 do
-    local kernel = kernels[i]
-    openspace.spice.unloadKernel(kernel) 
+    openspace.spice.unloadKernel(kernels[i]) 
   end
 end)
 

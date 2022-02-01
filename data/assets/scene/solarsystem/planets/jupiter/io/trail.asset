@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(IoTrail.Identifier)
+  openspace.removeSceneGraphNode(IoTrail)
 end)
   
-asset.export(IoTrail.Identifier, IoTrail)
-asset.registerIdentifierWithMeta(IoTrail.Identifier)
+asset.export(IoTrail)
 
 
 

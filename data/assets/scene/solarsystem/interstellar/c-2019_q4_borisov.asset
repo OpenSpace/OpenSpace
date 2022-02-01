@@ -52,14 +52,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(C2019Q4BorisovTrail.Identifier)
-  openspace.removeSceneGraphNode(C2019Q4BorisovPosition.Identifier)
+  openspace.removeSceneGraphNode(C2019Q4BorisovTrail)
+  openspace.removeSceneGraphNode(C2019Q4BorisovPosition)
 end)
     
-asset.export(C2019Q4BorisovPosition.Identifier, C2019Q4BorisovPosition)
-asset.registerIdentifierWithMeta(C2019Q4BorisovPosition.Identifier)
-asset.export(C2019Q4BorisovTrail.Identifier, C2019Q4BorisovTrail)
-asset.registerIdentifierWithMeta(C2019Q4BorisovTrail.Identifier)
+asset.export(C2019Q4BorisovPosition)
+asset.export(C2019Q4BorisovTrail)
 
 
 

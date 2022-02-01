@@ -55,11 +55,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Charon.Identifier)
+  openspace.removeSceneGraphNode(Charon)
 end)
   
-asset.export(Charon.Identifier, Charon)
-asset.registerIdentifierWithMeta(Charon.Identifier)
+asset.export(Charon)
 
 
 

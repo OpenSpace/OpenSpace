@@ -53,14 +53,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OumuamuaTrail.Identifier)
-  openspace.removeSceneGraphNode(OumuamuaPosition.Identifier)
+  openspace.removeSceneGraphNode(OumuamuaTrail)
+  openspace.removeSceneGraphNode(OumuamuaPosition)
 end)
     
-asset.export(OumuamuaPosition.Identifier, OumuamuaPosition)
-asset.registerIdentifierWithMeta(OumuamuaPosition.Identifier)
-asset.export(OumuamuaTrail.Identifier, OumuamuaTrail)
-asset.registerIdentifierWithMeta(OumuamuaTrail.Identifier)
+asset.export(OumuamuaPosition)
+asset.export(OumuamuaTrail)
 
 
 

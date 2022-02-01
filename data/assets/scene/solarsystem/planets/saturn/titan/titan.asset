@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Titan.Identifier)
+  openspace.removeSceneGraphNode(Titan)
 end)
   
-asset.export(Titan.Identifier, Titan)
-asset.registerIdentifierWithMeta(Titan.Identifier)
+asset.export(Titan)
 
 
 

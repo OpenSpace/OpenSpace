@@ -29,11 +29,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EuropaTrail.Identifier)
+  openspace.removeSceneGraphNode(EuropaTrail)
 end)
   
-asset.export(EuropaTrail.Identifier, EuropaTrail)
-asset.registerIdentifierWithMeta(EuropaTrail.Identifier)
+asset.export(EuropaTrail)
 
 
 

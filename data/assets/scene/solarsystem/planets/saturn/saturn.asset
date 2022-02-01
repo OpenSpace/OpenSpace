@@ -86,14 +86,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SaturnLabel.Identifier)
-  openspace.removeSceneGraphNode(Saturn.Identifier)
+  openspace.removeSceneGraphNode(SaturnLabel)
+  openspace.removeSceneGraphNode(Saturn)
 end)
     
-asset.export(Saturn.Identifier, Saturn)
-asset.registerIdentifierWithMeta(Saturn.Identifier)
-asset.export(SaturnLabel.Identifier, SaturnLabel)
-asset.registerIdentifierWithMeta(SaturnLabel.Identifier)
+asset.export(Saturn)
+asset.export(SaturnLabel)
 
 
 

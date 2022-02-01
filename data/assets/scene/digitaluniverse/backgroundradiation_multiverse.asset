@@ -134,20 +134,16 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(multiverse_planck_4.Identifier)
-  openspace.removeSceneGraphNode(multiverse_planck_3.Identifier)
-  openspace.removeSceneGraphNode(multiverse_planck_2.Identifier)
-  openspace.removeSceneGraphNode(multiverse_planck_1.Identifier)
+  openspace.removeSceneGraphNode(multiverse_planck_4)
+  openspace.removeSceneGraphNode(multiverse_planck_3)
+  openspace.removeSceneGraphNode(multiverse_planck_2)
+  openspace.removeSceneGraphNode(multiverse_planck_1)
 end)
   
-asset.export(multiverse_planck_1.Identifier, multiverse_planck_1)
-asset.registerIdentifierWithMeta(multiverse_planck_1.Identifier)
-asset.export(multiverse_planck_2.Identifier, multiverse_planck_2)
-asset.registerIdentifierWithMeta(multiverse_planck_2.Identifier)
-asset.export(multiverse_planck_3.Identifier, multiverse_planck_3)
-asset.registerIdentifierWithMeta(multiverse_planck_3.Identifier)
-asset.export(multiverse_planck_4.Identifier, multiverse_planck_4)
-asset.registerIdentifierWithMeta(multiverse_planck_4.Identifier)
+asset.export(multiverse_planck_1)
+asset.export(multiverse_planck_2)
+asset.export(multiverse_planck_3)
+asset.export(multiverse_planck_4)
 
 
 

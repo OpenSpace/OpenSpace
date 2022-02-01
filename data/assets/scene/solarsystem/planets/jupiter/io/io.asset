@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Io.Identifier)
+  openspace.removeSceneGraphNode(Io)
 end)
   
-asset.export(Io.Identifier, Io)
-asset.registerIdentifierWithMeta(Io.Identifier)
+asset.export(Io)
 
 
 

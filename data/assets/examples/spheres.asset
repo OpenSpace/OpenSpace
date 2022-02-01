@@ -42,12 +42,11 @@ end)
   
 asset.onDeinitialize(function()
   for _, n in ipairs(spheres) do
-    openspace.removeSceneGraphNode(n.Identifier)
+    openspace.removeSceneGraphNode(n)
   end
 end)
 
 
 for _, n in ipairs(spheres) do
-  asset.export(n.Identifier, n)
-  asset.registerIdentifierWithMeta(n.Identifier)
+  asset.export(n)
 end

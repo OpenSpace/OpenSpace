@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(CallistoTrail.Identifier)
+  openspace.removeSceneGraphNode(CallistoTrail)
 end)
   
-asset.export(CallistoTrail.Identifier, CallistoTrail)
-asset.registerIdentifierWithMeta(CallistoTrail.Identifier)
+asset.export(CallistoTrail)
 
 
 

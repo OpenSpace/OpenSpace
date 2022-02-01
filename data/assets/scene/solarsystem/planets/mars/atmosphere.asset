@@ -57,11 +57,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Atmosphere.Identifier)
+  openspace.removeSceneGraphNode(Atmosphere)
 end)
   
-asset.export(Atmosphere.Identifier, Atmosphere)
-asset.registerIdentifierWithMeta(Atmosphere.Identifier)
+asset.export(Atmosphere)
 
 
 

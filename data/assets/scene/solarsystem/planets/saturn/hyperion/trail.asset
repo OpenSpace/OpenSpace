@@ -30,11 +30,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HyperionTrail.Identifier)
+  openspace.removeSceneGraphNode(HyperionTrail)
 end)
   
-asset.export(HyperionTrail.Identifier, HyperionTrail)
-asset.registerIdentifierWithMeta(HyperionTrail.Identifier)
+asset.export(HyperionTrail)
 
 
 

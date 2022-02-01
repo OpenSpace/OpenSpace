@@ -59,11 +59,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_galah.Identifier)
+  openspace.removeSceneGraphNode(gaia_abundance_galah)
 end)
   
-asset.export(gaia_abundance_galah.Identifier, gaia_abundance_galah)
-asset.registerIdentifierWithMeta(gaia_abundance_galah.Identifier)
+asset.export(gaia_abundance_galah)
 
 
 

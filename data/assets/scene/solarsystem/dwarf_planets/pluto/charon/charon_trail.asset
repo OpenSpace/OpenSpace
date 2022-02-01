@@ -33,11 +33,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(CharonTrailBarycentric.Identifier)
+  openspace.removeSceneGraphNode(CharonTrailBarycentric)
 end)
   
-asset.export(CharonTrailBarycentric.Identifier, CharonTrailBarycentric)
-asset.registerIdentifierWithMeta(CharonTrailBarycentric.Identifier)
+asset.export(CharonTrailBarycentric)
 
 
 

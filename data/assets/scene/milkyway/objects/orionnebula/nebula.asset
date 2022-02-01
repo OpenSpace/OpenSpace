@@ -152,20 +152,16 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OrionNebulaProplydsModel.Identifier)
-  openspace.removeSceneGraphNode(OrionNebulaShocksModel.Identifier)
-  openspace.removeSceneGraphNode(OrionNebulaModel.Identifier)
-  openspace.removeSceneGraphNode(NebulaHolder.Identifier)
+  openspace.removeSceneGraphNode(OrionNebulaProplydsModel)
+  openspace.removeSceneGraphNode(OrionNebulaShocksModel)
+  openspace.removeSceneGraphNode(OrionNebulaModel)
+  openspace.removeSceneGraphNode(NebulaHolder)
 end)
   
-asset.export(NebulaHolder.Identifier, NebulaHolder)
-asset.registerIdentifierWithMeta(NebulaHolder.Identifier)
-asset.export(OrionNebulaModel.Identifier, OrionNebulaModel)
-asset.registerIdentifierWithMeta(OrionNebulaModel.Identifier)
-asset.export(OrionNebulaShocksModel.Identifier, OrionNebulaShocksModel)
-asset.registerIdentifierWithMeta(OrionNebulaShocksModel.Identifier)
-asset.export(OrionNebulaProplydsModel.Identifier, OrionNebulaProplydsModel)
-asset.registerIdentifierWithMeta(OrionNebulaProplydsModel.Identifier)
+asset.export(NebulaHolder
+asset.export(OrionNebulaModel)
+asset.export(OrionNebulaShocksModel)
+asset.export(OrionNebulaProplydsModel)
 
 
 

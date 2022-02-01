@@ -38,11 +38,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PlutoKeplerianTrail.Identifier)
+  openspace.removeSceneGraphNode(PlutoKeplerianTrail)
 end)
   
-asset.export(PlutoKeplerianTrail.Identifier, PlutoKeplerianTrail)
-asset.registerIdentifierWithMeta(PlutoKeplerianTrail.Identifier)
+asset.export(PlutoKeplerianTrail)
 
 
 

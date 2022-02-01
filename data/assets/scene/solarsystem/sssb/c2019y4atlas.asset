@@ -51,14 +51,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(C2019Y4AtlasTrail.Identifier)
-  openspace.removeSceneGraphNode(C2019Y4AtlasPosition.Identifier)
+  openspace.removeSceneGraphNode(C2019Y4AtlasTrail)
+  openspace.removeSceneGraphNode(C2019Y4AtlasPosition)
 end)
     
-asset.export(C2019Y4AtlasPosition.Identifier, C2019Y4AtlasPosition)
-asset.registerIdentifierWithMeta(C2019Y4AtlasPosition.Identifier)
-asset.export(C2019Y4AtlasTrail.Identifier, C2019Y4AtlasTrail)
-asset.registerIdentifierWithMeta(C2019Y4AtlasTrail.Identifier)
+asset.export(C2019Y4AtlasPosition)
+asset.export(C2019Y4AtlasTrail)
 
 
 

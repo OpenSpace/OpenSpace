@@ -62,12 +62,11 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(fieldlines.Identifier)
-  openspace.action.removeAction(toggle_fieldlines.Identifier)
+  openspace.removeSceneGraphNode(fieldlines)
+  openspace.action.removeAction(toggle_fieldlines)
 end)
 
-asset.export(fieldlines.Identifier, fieldlines)
-asset.registerIdentifierWithMeta(fieldlines.Identifier)
+asset.export(fieldlines)
 
 
 asset.meta = {

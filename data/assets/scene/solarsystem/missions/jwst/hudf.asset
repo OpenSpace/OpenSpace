@@ -83,19 +83,16 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HUDFJWSTLine)
 end)
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HUDFPosition.Identifier)
-  openspace.removeSceneGraphNode(HUDFImage.Identifier)
-  openspace.removeSceneGraphNode(HUDFJWSTLine.Identifier)
+  openspace.removeSceneGraphNode(HUDFPosition)
+  openspace.removeSceneGraphNode(HUDFImage)
+  openspace.removeSceneGraphNode(HUDFJWSTLine)
 
-  openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
+  openspace.removeScreenSpaceRenderable(HUDFImage)
 end)
 
-asset.export(HUDFJWSTLine.Identifier, HUDFJWSTLine)
-asset.registerIdentifierWithMeta(HUDFPosition.Identifier)
-asset.export(HUDFImage.Identifier, HUDFImage)
-asset.registerIdentifierWithMeta(HUDFImage.Identifier)
-asset.export(HUDFPosition.Identifier, HUDFPosition)
-asset.registerIdentifierWithMeta(HUDFJWSTLine.Identifier)
+asset.export(HUDFJWSTLine)
+asset.export(HUDFImage)
+asset.export(HUDFPosition)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",

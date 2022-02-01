@@ -46,8 +46,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(model.Identifier)
+  openspace.removeSceneGraphNode(model)
 end)
   
-asset.export(model.Identifier, model)
-asset.registerIdentifierWithMeta(model.Identifier)
+asset.export(model)

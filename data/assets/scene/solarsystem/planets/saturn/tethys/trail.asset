@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(TethysTrail.Identifier)
+  openspace.removeSceneGraphNode(TethysTrail)
 end)
   
-asset.export(TethysTrail.Identifier, TethysTrail)
-asset.registerIdentifierWithMeta(TethysTrail.Identifier)
+asset.export(TethysTrail)
 
 
 

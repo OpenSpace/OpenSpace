@@ -24,11 +24,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SaturnBarycenter.Identifier)
+  openspace.removeSceneGraphNode(SaturnBarycenter)
 end)
   
-asset.export(SaturnBarycenter.Identifier, SaturnBarycenter)
-asset.registerIdentifierWithMeta(SaturnBarycenter.Identifier)
+asset.export(SaturnBarycenter)
 
 
 

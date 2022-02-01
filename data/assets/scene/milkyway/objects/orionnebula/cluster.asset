@@ -55,11 +55,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OrionClusterStars.Identifier)
+  openspace.removeSceneGraphNode(OrionClusterStars)
 end)
   
-asset.export(OrionClusterStars.Identifier, OrionClusterStars)
-asset.registerIdentifierWithMeta(OrionClusterStars.Identifier)
+asset.export(OrionClusterStars)
 
 
 

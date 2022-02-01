@@ -57,11 +57,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Callisto.Identifier)
+  openspace.removeSceneGraphNode(Callisto)
 end)
   
-asset.export(Callisto.Identifier, Callisto)
-asset.registerIdentifierWithMeta(Callisto.Identifier)
+asset.export(Callisto)
 
 
 

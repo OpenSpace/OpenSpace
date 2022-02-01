@@ -33,11 +33,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(UranusTrailEarth.Identifier)
+  openspace.removeSceneGraphNode(UranusTrailEarth)
 end)
   
-asset.export(UranusTrailEarth.Identifier, UranusTrailEarth)
-asset.registerIdentifierWithMeta(UranusTrailEarth.Identifier)
+asset.export(UranusTrailEarth)
 
 
 

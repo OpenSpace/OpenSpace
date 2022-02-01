@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(TitanTrail.Identifier)
+  openspace.removeSceneGraphNode(TitanTrail)
 end)
   
-asset.export(TitanTrail.Identifier, TitanTrail)
-asset.registerIdentifierWithMeta(TitanTrail.Identifier)
+asset.export(TitanTrail)
 
 
 

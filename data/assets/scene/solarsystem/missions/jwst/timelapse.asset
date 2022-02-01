@@ -414,11 +414,11 @@ end)
 asset.onDeinitialize(function ()
   openspace.scriptScheduler.clear()
 
-  openspace.dashboard.removeDashboardItem(text.Identifier)
-  openspace.action.removeAction(playForwards.Identifier)
-  openspace.action.removeAction(playBackwards.Identifier)
-  openspace.action.removeAction(clearPlay.Identifier)
-  openspace.action.removeAction(togglePlayDirection.Identifier)
+  openspace.dashboard.removeDashboardItem(text)
+  openspace.action.removeAction(playForwards)
+  openspace.action.removeAction(playBackwards)
+  openspace.action.removeAction(clearPlay)
+  openspace.action.removeAction(togglePlayDirection)
 end)
 
 

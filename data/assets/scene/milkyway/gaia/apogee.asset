@@ -59,11 +59,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_apogee.Identifier)
+  openspace.removeSceneGraphNode(gaia_abundance_apogee)
 end)
   
-asset.export(gaia_abundance_apogee.Identifier, gaia_abundance_apogee)
-asset.registerIdentifierWithMeta(gaia_abundance_apogee.Identifier)
+asset.export(gaia_abundance_apogee)
 
 
 

@@ -88,16 +88,14 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(MeridialCutplane.Identifier)
-  openspace.removeSceneGraphNode(EquatorialCutplane.Identifier)
-  openspace.action.removeAction(toggle_equatorial.Identifier)
-  openspace.action.removeAction(toggle_meridial.Identifier)
+  openspace.removeSceneGraphNode(MeridialCutplane)
+  openspace.removeSceneGraphNode(EquatorialCutplane)
+  openspace.action.removeAction(toggle_equatorial)
+  openspace.action.removeAction(toggle_meridial)
 end)
 
-asset.export(EquatorialCutplane.Identifier, EquatorialCutplane)
-asset.registerIdentifierWithMeta(EquatorialCutplane.Identifier)
-asset.export(MeridialCutplane.Identifier, MeridialCutplane)
-asset.registerIdentifierWithMeta(MeridialCutplane.Identifier)
+asset.export(EquatorialCutplane)
+asset.export(MeridialCutplane)
 
 
 asset.meta = {

@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Europa.Identifier)
+  openspace.removeSceneGraphNode(Europa)
 end)
   
-asset.export(Europa.Identifier, Europa)
-asset.registerIdentifierWithMeta(Europa.Identifier)
+asset.export(Europa)
 
 
 

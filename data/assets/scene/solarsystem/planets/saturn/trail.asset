@@ -29,11 +29,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SaturnTrail.Identifier)
+  openspace.removeSceneGraphNode(SaturnTrail)
 end)
   
-asset.export(SaturnTrail.Identifier, SaturnTrail)
-asset.registerIdentifierWithMeta(SaturnTrail.Identifier)
+asset.export(SaturnTrail)
 
 
 

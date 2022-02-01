@@ -74,21 +74,19 @@ local irregularRetrogradeMoons = {
 local nodes = proceduralGlobes.createGlobes(irregularRetrogradeMoons)
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
+  for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
 end)
   
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node.Identifier)
+    openspace.removeSceneGraphNode(nodes[i])
   end
 end)
   
-for i, node in ipairs(nodes) do
-  asset.export(node.Identifier, node)
-  asset.registerIdentifierWithMeta(node.Identifier);
+for _, node in ipairs(nodes) do
+  asset.export(node)
 end
 
 

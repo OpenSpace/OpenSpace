@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(IapetusTrail.Identifier)
+  openspace.removeSceneGraphNode(IapetusTrail)
 end)
   
-asset.export(IapetusTrail.Identifier, IapetusTrail)
-asset.registerIdentifierWithMeta(IapetusTrail.Identifier)
+asset.export(IapetusTrail)
 
 
 

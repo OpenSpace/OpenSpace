@@ -39,11 +39,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sphere.Identifier)
+  openspace.removeSceneGraphNode(sphere)
 end)
   
-asset.export(sphere.Identifier, sphere)
-asset.registerIdentifierWithMeta(sphere.Identifier)
+asset.export(sphere)
 
 
 

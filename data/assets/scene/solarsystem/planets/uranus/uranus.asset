@@ -58,14 +58,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(UranusLabel.Identifier)
-  openspace.removeSceneGraphNode(Uranus.Identifier)
+  openspace.removeSceneGraphNode(UranusLabel)
+  openspace.removeSceneGraphNode(Uranus)
 end)
     
-asset.export(Uranus.Identifier, Uranus)
-asset.registerIdentifierWithMeta(Uranus.Identifier)
-asset.export(UranusLabel.Identifier, UranusLabel)
-asset.registerIdentifierWithMeta(UranusLabel.Identifier)
+asset.export(Uranus)
+asset.export(UranusLabel)
 
 
 

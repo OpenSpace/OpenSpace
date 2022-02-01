@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(travelSpeedIndicator.Identifier)
+  openspace.removeSceneGraphNode(travelSpeedIndicator)
 end)
   
-asset.export(travelSpeedIndicator.Identifier, travelSpeedIndicator)
-asset.registerIdentifierWithMeta(travelSpeedIndicator.Identifier)
+asset.export(travelSpeedIndicator)
 
 
 asset.meta = {

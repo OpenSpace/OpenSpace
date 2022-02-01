@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(VenusTrail.Identifier)
+  openspace.removeSceneGraphNode(VenusTrail)
 end)
   
-asset.export(VenusTrail.Identifier, VenusTrail)
-asset.registerIdentifierWithMeta(VenusTrail.Identifier)
+asset.export(VenusTrail)
 
 
 

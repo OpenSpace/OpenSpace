@@ -51,14 +51,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(TeslaRoadsterTrail.Identifier)
-  openspace.removeSceneGraphNode(TeslaPosition.Identifier)
+  openspace.removeSceneGraphNode(TeslaRoadsterTrail)
+  openspace.removeSceneGraphNode(TeslaPosition)
 end)
     
-asset.export(TeslaPosition.Identifier, TeslaPosition)
-asset.registerIdentifierWithMeta(TeslaPosition.Identifier)
-asset.export(TeslaRoadsterTrail.Identifier, TeslaRoadsterTrail)
-asset.registerIdentifierWithMeta(TeslaRoadsterTrail.Identifier)
+asset.export(TeslaPosition)
+asset.export(TeslaRoadsterTrail)
 
 
 

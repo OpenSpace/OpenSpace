@@ -86,14 +86,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MarsLabel.Identifier)
-  openspace.removeSceneGraphNode(Mars.Identifier)
+  openspace.removeSceneGraphNode(MarsLabel)
+  openspace.removeSceneGraphNode(Mars)
 end)
     
-asset.export(Mars.Identifier, Mars)
-asset.registerIdentifierWithMeta(Mars.Identifier)
-asset.export(MarsLabel.Identifier, MarsLabel)
-asset.registerIdentifierWithMeta(MarsLabel.Identifier)
+asset.export(Mars)
+asset.export(MarsLabel)
 
 
 

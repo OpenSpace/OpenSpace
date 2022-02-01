@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EarthMarker.Identifier)
+  openspace.removeSceneGraphNode(EarthMarker)
 end)
   
-asset.export(EarthMarker.Identifier, EarthMarker)
-asset.registerIdentifierWithMeta(EarthMarker.Identifier)
+asset.export(EarthMarker)
 
 
 

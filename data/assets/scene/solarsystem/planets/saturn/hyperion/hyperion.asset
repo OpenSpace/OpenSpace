@@ -55,11 +55,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Hyperion.Identifier)
+  openspace.removeSceneGraphNode(Hyperion)
 end)
   
-asset.export(Hyperion.Identifier, Hyperion)
-asset.registerIdentifierWithMeta(Hyperion.Identifier)
+asset.export(Hyperion)
 
 
 

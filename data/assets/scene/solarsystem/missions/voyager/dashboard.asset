@@ -24,6 +24,6 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(distance_voyager2.Identifier)
-  openspace.dashboard.removeDashboardItem(distance_voyager1.Identifier)
+  openspace.dashboard.removeDashboardItem(distance_voyager2)
+  openspace.dashboard.removeDashboardItem(distance_voyager1)
 end)

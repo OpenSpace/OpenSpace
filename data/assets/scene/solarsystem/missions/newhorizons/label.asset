@@ -29,8 +29,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Labels.Identifier)
+  openspace.removeSceneGraphNode(Labels)
 end)
   
-asset.export(Labels.Identifier, Labels)
-asset.registerIdentifierWithMeta(Labels.Identifier)
+asset.export(Labels)

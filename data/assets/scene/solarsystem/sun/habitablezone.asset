@@ -25,11 +25,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HabitableZone.Identifier)
+  openspace.removeSceneGraphNode(HabitableZone)
 end)
   
-asset.export(HabitableZone.Identifier, HabitableZone)
-asset.registerIdentifierWithMeta(HabitableZone.Identifier)
+asset.export(HabitableZone)
 
 
 asset.meta = {

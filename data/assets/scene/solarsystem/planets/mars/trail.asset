@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MarsTrail.Identifier)
+  openspace.removeSceneGraphNode(MarsTrail)
 end)
   
-asset.export(MarsTrail.Identifier, MarsTrail)
-asset.registerIdentifierWithMeta(MarsTrail.Identifier)
+asset.export(MarsTrail)
 
 
 

@@ -157,13 +157,13 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 
-  openspace.action.removeAction(show_art.Identifier)
-  openspace.action.removeAction(hide_art.Identifier)
-  openspace.action.removeAction(disable_art.Identifier)
+  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(hide_art)
+  openspace.action.removeAction(disable_art)
 end)
 
 for _, n in ipairs(nodes) do
-  asset.registerIdentifierWithMeta(n.Identifier)
+  asset.export(n)
 end
 
 asset.meta = {

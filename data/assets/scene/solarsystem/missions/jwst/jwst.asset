@@ -159,20 +159,16 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JWSTLabel.Identifier)
-  openspace.removeSceneGraphNode(JWSTFov.Identifier)
-  openspace.removeSceneGraphNode(JWSTModel.Identifier)
-  openspace.removeSceneGraphNode(JWSTBand.Identifier)
+  openspace.removeSceneGraphNode(JWSTLabel)
+  openspace.removeSceneGraphNode(JWSTFov)
+  openspace.removeSceneGraphNode(JWSTModel)
+  openspace.removeSceneGraphNode(JWSTBand)
 end)
     
-asset.export(JWSTBand.Identifier, JWSTBand)
-asset.registerIdentifierWithMeta(JWSTBand.Identifier)
-asset.export(JWSTModel.Identifier, JWSTModel)
-asset.registerIdentifierWithMeta(JWSTModel.Identifier)
-asset.export(JWSTFov.Identifier, JWSTFov)
-asset.registerIdentifierWithMeta(JWSTFov.Identifier)
-asset.export(JWSTLabel.Identifier, JWSTLabel)
-asset.registerIdentifierWithMeta(JWSTLabel.Identifier)
+asset.export(JWSTBand)
+asset.export(JWSTModel)
+asset.export(JWSTFov)
+asset.export(JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",

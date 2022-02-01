@@ -127,20 +127,16 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Halpha.Identifier)
-  openspace.removeSceneGraphNode(planck.Identifier)
-  openspace.removeSceneGraphNode(cbe.Identifier)
-  openspace.removeSceneGraphNode(wmap.Identifier)
+  openspace.removeSceneGraphNode(Halpha)
+  openspace.removeSceneGraphNode(planck)
+  openspace.removeSceneGraphNode(cbe)
+  openspace.removeSceneGraphNode(wmap)
 end)
   
-asset.export(wmap.Identifier, wmap)
-asset.registerIdentifierWithMeta(wmap.Identifier)
-asset.export(cbe.Identifier, cbe)
-asset.registerIdentifierWithMeta(cbe.Identifier)
-asset.export(planck.Identifier, planck)
-asset.registerIdentifierWithMeta(planck.Identifier)
-asset.export(Halpha.Identifier, Halpha)
-asset.registerIdentifierWithMeta(Halpha.Identifier)
+asset.export(wmap)
+asset.export(cbe)
+asset.export(planck)
+asset.export(Halpha)
 
 
 

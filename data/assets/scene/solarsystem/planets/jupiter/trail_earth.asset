@@ -32,11 +32,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JupiterTrailEarth.Identifier)
+  openspace.removeSceneGraphNode(JupiterTrailEarth)
 end)
   
-asset.export(JupiterTrailEarth.Identifier, JupiterTrailEarth)
-asset.registerIdentifierWithMeta(JupiterTrailEarth.Identifier)
+asset.export(JupiterTrailEarth)
 
 
 

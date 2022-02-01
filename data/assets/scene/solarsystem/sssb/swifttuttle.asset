@@ -48,14 +48,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SwiftTuttleTrail.Identifier)
-  openspace.removeSceneGraphNode(SwiftTuttlePosition.Identifier)
+  openspace.removeSceneGraphNode(SwiftTuttleTrail)
+  openspace.removeSceneGraphNode(SwiftTuttlePosition)
 end)
     
-asset.export(SwiftTuttlePosition.Identifier, SwiftTuttlePosition)
-asset.registerIdentifierWithMeta(SwiftTuttlePosition.Identifier)
-asset.export(SwiftTuttleTrail.Identifier, SwiftTuttleTrail)
-asset.registerIdentifierWithMeta(SwiftTuttleTrail.Identifier)
+asset.export(SwiftTuttlePosition)
+asset.export(SwiftTuttleTrail)
 
 
 

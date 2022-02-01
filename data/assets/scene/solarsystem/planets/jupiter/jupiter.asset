@@ -66,14 +66,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JupiterLabel.Identifier)
-  openspace.removeSceneGraphNode(Jupiter.Identifier)
+  openspace.removeSceneGraphNode(JupiterLabel)
+  openspace.removeSceneGraphNode(Jupiter)
 end)
     
-asset.export(Jupiter.Identifier, Jupiter)
-asset.registerIdentifierWithMeta(Jupiter.Identifier)
-asset.export(JupiterLabel.Identifier, JupiterLabel)
-asset.registerIdentifierWithMeta(JupiterLabel.Identifier)
+asset.export(Jupiter)
+asset.export(JupiterLabel)
 
 
 

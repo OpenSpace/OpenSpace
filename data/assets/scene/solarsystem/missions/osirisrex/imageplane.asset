@@ -44,8 +44,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(ImagePlane.Identifier)
+  openspace.removeSceneGraphNode(ImagePlane)
 end)
   
-asset.export(ImagePlane.Identifier, ImagePlane)
-asset.registerIdentifierWithMeta(ImagePlane.Identifier)
+asset.export(ImagePlane)

@@ -83,14 +83,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(VenusLabel.Identifier)
-  openspace.removeSceneGraphNode(Venus.Identifier)
+  openspace.removeSceneGraphNode(VenusLabel)
+  openspace.removeSceneGraphNode(Venus)
 end)
     
-asset.export(Venus.Identifier, Venus)
-asset.registerIdentifierWithMeta(Venus.Identifier)
-asset.export(VenusLabel.Identifier, VenusLabel)
-asset.registerIdentifierWithMeta(VenusLabel.Identifier)
+asset.export(Venus)
+asset.export(VenusLabel)
 
 
 

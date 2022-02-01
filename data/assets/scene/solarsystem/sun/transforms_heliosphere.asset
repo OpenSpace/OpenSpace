@@ -30,11 +30,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HEEQ180ReferenceFrame.Identifier)
+  openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
 end)
   
-asset.export(HEEQ180ReferenceFrame.Identifier, HEEQ180ReferenceFrame)
-asset.registerIdentifierWithMeta(HEEQ180ReferenceFrame.Identifier)
+asset.export(HEEQ180ReferenceFrame)
 
 
 asset.meta = {

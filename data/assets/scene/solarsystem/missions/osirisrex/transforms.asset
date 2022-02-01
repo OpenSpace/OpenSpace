@@ -25,8 +25,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(BennuBarycenter.Identifier)
+  openspace.removeSceneGraphNode(BennuBarycenter)
 end)
   
-asset.export(BennuBarycenter.Identifier, BennuBarycenter)
-asset.registerIdentifierWithMeta(BennuBarycenter.Identifier)
+asset.export(BennuBarycenter)

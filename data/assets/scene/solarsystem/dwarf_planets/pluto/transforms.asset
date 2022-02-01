@@ -26,11 +26,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PlutoBarycenter.Identifier)
+  openspace.removeSceneGraphNode(PlutoBarycenter)
 end)
   
-asset.export(PlutoBarycenter.Identifier, PlutoBarycenter)
-asset.registerIdentifierWithMeta(PlutoBarycenter.Identifier)
+asset.export(PlutoBarycenter)
 
 
 

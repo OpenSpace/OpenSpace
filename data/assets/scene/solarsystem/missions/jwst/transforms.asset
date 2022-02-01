@@ -79,14 +79,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JWSTRotation.Identifier)
-  openspace.removeSceneGraphNode(JWSTPosition.Identifier)
+  openspace.removeSceneGraphNode(JWSTRotation)
+  openspace.removeSceneGraphNode(JWSTPosition)
 end)
     
-asset.export(JWSTPosition.Identifier, JWSTPosition)
-asset.registerIdentifierWithMeta(JWSTPosition.Identifier)
-asset.export(JWSTRotation.Identifier, JWSTRotation)
-asset.registerIdentifierWithMeta(JWSTRotation.Identifier)
+asset.export(JWSTPosition)
+asset.export(JWSTRotation)
 
 
 asset.meta = {

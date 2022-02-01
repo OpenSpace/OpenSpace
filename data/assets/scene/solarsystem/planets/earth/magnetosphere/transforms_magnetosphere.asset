@@ -26,11 +26,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(GSMReferenceFrame.Identifier)
+  openspace.removeSceneGraphNode(GSMReferenceFrame)
 end)
   
-asset.export(GSMReferenceFrame.Identifier, GSMReferenceFrame)
-asset.registerIdentifierWithMeta(GSMReferenceFrame.Identifier)
+asset.export(GSMReferenceFrame)
 
 
 asset.meta = {

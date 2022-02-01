@@ -121,17 +121,14 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JWSTSunTrail.Identifier)
-  openspace.removeSceneGraphNode(JWSTTrailOrbit.Identifier)
-  openspace.removeSceneGraphNode(JWSTTrailLaunch.Identifier)
+  openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailLaunch)
 end)
     
-asset.export(JWSTTrailLaunch.Identifier, JWSTTrailLaunch)
-asset.registerIdentifierWithMeta(JWSTTrailLaunch.Identifier)
-asset.export(JWSTTrailOrbit.Identifier, JWSTTrailOrbit)
-asset.registerIdentifierWithMeta(JWSTTrailOrbit.Identifier)
-asset.export(JWSTSunTrail.Identifier, JWSTSunTrail)
-asset.registerIdentifierWithMeta(JWSTSunTrail.Identifier)
+asset.export(JWSTTrailLaunch)
+asset.export(JWSTTrailOrbit)
+asset.export(JWSTSunTrail)
 
 
 asset.meta = {

@@ -25,11 +25,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JupiterBarycenter.Identifier)
+  openspace.removeSceneGraphNode(JupiterBarycenter)
 end)
   
-asset.export(JupiterBarycenter.Identifier, JupiterBarycenter)
-asset.registerIdentifierWithMeta(JupiterBarycenter.Identifier)
+asset.export(JupiterBarycenter)
 
 
 

@@ -29,11 +29,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PlutoTrailBarycentric.Identifier)
+  openspace.removeSceneGraphNode(PlutoTrailBarycentric)
 end)
   
-asset.export(PlutoTrailBarycentric.Identifier, PlutoTrailBarycentric)
-asset.registerIdentifierWithMeta(PlutoTrailBarycentric.Identifier)
+asset.export(PlutoTrailBarycentric)
 
 
 

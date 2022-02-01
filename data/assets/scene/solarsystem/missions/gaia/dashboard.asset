@@ -13,5 +13,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.dashboard.removeDashboardItem(distance.Identifier)
+  openspace.dashboard.removeDashboardItem(distance)
 end)

@@ -66,14 +66,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PhobosTrail.Identifier)
-  openspace.removeSceneGraphNode(Phobos.Identifier)
+  openspace.removeSceneGraphNode(PhobosTrail)
+  openspace.removeSceneGraphNode(Phobos)
 end)
     
-asset.export(Phobos.Identifier, Phobos)
-asset.registerIdentifierWithMeta(Phobos.Identifier)
-asset.export(PhobosTrail.Identifier, PhobosTrail)
-asset.registerIdentifierWithMeta(PhobosTrail.Identifier)
+asset.export(Phobos)
+asset.export(PhobosTrail)
 
 
 

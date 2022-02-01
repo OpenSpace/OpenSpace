@@ -28,11 +28,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NebulaPosition.Identifier)
+  openspace.removeSceneGraphNode(NebulaPosition)
 end)
   
-asset.export(NebulaPosition.Identifier, NebulaPosition)
-asset.registerIdentifierWithMeta(NebulaPosition.Identifier)
+asset.export(NebulaPosition)
 
 
 

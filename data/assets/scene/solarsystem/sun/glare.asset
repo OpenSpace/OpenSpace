@@ -34,11 +34,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunGlare.Identifier)
+  openspace.removeSceneGraphNode(SunGlare)
 end)
   
-asset.export(SunGlare.Identifier, SunGlare)
-asset.registerIdentifierWithMeta(SunGlare.Identifier)
+asset.export(SunGlare)
 
 
 

@@ -61,11 +61,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Moon.Identifier)
+  openspace.removeSceneGraphNode(Moon)
 end)
   
-asset.export(Moon.Identifier, Moon)
-asset.registerIdentifierWithMeta(Moon.Identifier)
+asset.export(Moon)
 
 
 

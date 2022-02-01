@@ -80,20 +80,16 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EarthIAU.Identifier)
-  openspace.removeSceneGraphNode(EarthInertial.Identifier)
-  openspace.removeSceneGraphNode(EarthCenter.Identifier)
-  openspace.removeSceneGraphNode(EarthBarycenter.Identifier)
+  openspace.removeSceneGraphNode(EarthIAU)
+  openspace.removeSceneGraphNode(EarthInertial)
+  openspace.removeSceneGraphNode(EarthCenter)
+  openspace.removeSceneGraphNode(EarthBarycenter)
 end)
     
-asset.export(EarthBarycenter.Identifier, EarthBarycenter)
-asset.registerIdentifierWithMeta(EarthBarycenter.Identifier)
-asset.export(EarthCenter.Identifier, EarthCenter)
-asset.registerIdentifierWithMeta(EarthCenter.Identifier)
-asset.export(EarthInertial.Identifier, EarthInertial)
-asset.registerIdentifierWithMeta(EarthInertial.Identifier)
-asset.export(EarthIAU.Identifier, EarthIAU)
-asset.registerIdentifierWithMeta(EarthIAU.Identifier)
+asset.export(EarthBarycenter)
+asset.export(EarthCenter)
+asset.export(EarthInertial)
+asset.export(EarthIAU)
 
 
 

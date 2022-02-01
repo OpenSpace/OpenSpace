@@ -59,12 +59,11 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(densityVolume.Identifier)
-  openspace.action.removeAction(toggle_volume.Identifier)
+  openspace.removeSceneGraphNode(densityVolume)
+  openspace.action.removeAction(toggle_volume)
 end)
 
-asset.export(densityVolume.Identifier, densityVolume)
-asset.registerIdentifierWithMeta(densityVolume.Identifier)
+asset.export(densityVolume)
 
 
 asset.meta = {

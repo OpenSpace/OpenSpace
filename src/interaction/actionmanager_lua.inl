@@ -51,7 +51,23 @@ int hasAction(lua_State* L) {
 */
 int removeAction(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeAction");
-    const std::string identifier = ghoul::lua::value<std::string>(L);
+    std::variant v = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
+
+    std::string identifier;
+    if (std::holds_alternative<std::string>(v)) {
+        identifier = std::get<std::string>(v);
+    }
+    else {
+        ghoul_assert(std::holds_alternative<ghoul::Dictionary>(v), "Missing case");
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(v);
+        if (!d.hasValue<std::string>("Identifier")) {
+            return ghoul::lua::luaError(
+                L,
+                "Table passed to removeAction does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
 
     if (identifier.empty()) {
         return ghoul::lua::luaError(L, "Identifier must not be empty");

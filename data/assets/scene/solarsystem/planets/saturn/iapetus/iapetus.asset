@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Iapetus.Identifier)
+  openspace.removeSceneGraphNode(Iapetus)
 end)
   
-asset.export(Iapetus.Identifier, Iapetus)
-asset.registerIdentifierWithMeta(Iapetus.Identifier)
+asset.export(Iapetus)
 
 
 

@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Ganymede.Identifier)
+  openspace.removeSceneGraphNode(Ganymede)
 end)
   
-asset.export(Ganymede.Identifier, Ganymede)
-asset.registerIdentifierWithMeta(Ganymede.Identifier)
+asset.export(Ganymede)
 
 
 

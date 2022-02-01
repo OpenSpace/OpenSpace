@@ -29,11 +29,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MoonTrail.Identifier)
+  openspace.removeSceneGraphNode(MoonTrail)
 end)
   
-asset.export(MoonTrail.Identifier, MoonTrail)
-asset.registerIdentifierWithMeta(MoonTrail.Identifier)
+asset.export(MoonTrail)
 
 
 

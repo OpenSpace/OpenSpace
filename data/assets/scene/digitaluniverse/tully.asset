@@ -112,14 +112,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(tullyImages.Identifier)
-  openspace.removeSceneGraphNode(tullyPoints.Identifier)
+  openspace.removeSceneGraphNode(tullyImages)
+  openspace.removeSceneGraphNode(tullyPoints)
 end)
   
-asset.export(tullyPoints.Identifier, tullyPoints)
-asset.registerIdentifierWithMeta(tullyPoints.Identifier)
-asset.export(tullyImages.Identifier, tullyImages)
-asset.registerIdentifierWithMeta(tullyImages.Identifier)
+asset.export(tullyPoints)
+asset.export(tullyImages)
 
 
 

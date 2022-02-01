@@ -30,11 +30,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MercuryTrail.Identifier)
+  openspace.removeSceneGraphNode(MercuryTrail)
 end)
   
-asset.export(MercuryTrail.Identifier, MercuryTrail)
-asset.registerIdentifierWithMeta(MercuryTrail.Identifier)
+asset.export(MercuryTrail)
 
 
 

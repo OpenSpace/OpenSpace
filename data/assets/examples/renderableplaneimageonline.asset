@@ -26,8 +26,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RenderablePlaneImageOnline.Identifier)
+  openspace.removeSceneGraphNode(RenderablePlaneImageOnline)
 end)
   
-asset.export(RenderablePlaneImageOnline.Identifier, RenderablePlaneImageOnline)
-asset.registerIdentifierWithMeta(RenderablePlaneImageOnline.Identifier)
+asset.export(RenderablePlaneImageOnline)

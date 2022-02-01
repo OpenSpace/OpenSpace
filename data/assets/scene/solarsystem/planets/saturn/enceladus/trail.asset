@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EnceladusTrail.Identifier)
+  openspace.removeSceneGraphNode(EnceladusTrail)
 end)
   
-asset.export(EnceladusTrail.Identifier, EnceladusTrail)
-asset.registerIdentifierWithMeta(EnceladusTrail.Identifier)
+asset.export(EnceladusTrail)
 
 
 

@@ -77,14 +77,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MercuryLabel.Identifier)
-  openspace.removeSceneGraphNode(Mercury.Identifier)
+  openspace.removeSceneGraphNode(MercuryLabel)
+  openspace.removeSceneGraphNode(Mercury)
 end)
     
-asset.export(Mercury.Identifier, Mercury)
-asset.registerIdentifierWithMeta(Mercury.Identifier)
-asset.export(MercuryLabel.Identifier, MercuryLabel)
-asset.registerIdentifierWithMeta(MercuryLabel.Identifier)
+asset.export(Mercury)
+asset.export(MercuryLabel)
 
 
 

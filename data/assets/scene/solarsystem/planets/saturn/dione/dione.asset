@@ -54,11 +54,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Dione.Identifier)
+  openspace.removeSceneGraphNode(Dione)
 end)
   
-asset.export(Dione.Identifier, Dione)
-asset.registerIdentifierWithMeta(Dione.Identifier)
+asset.export(Dione)
 
 
 

@@ -92,20 +92,16 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunECLIPJ2000.Identifier)
-  openspace.removeSceneGraphNode(SunIAU.Identifier)
-  openspace.removeSceneGraphNode(SunCenter.Identifier)
-  openspace.removeSceneGraphNode(SolarSystemBarycenter.Identifier)
+  openspace.removeSceneGraphNode(SunECLIPJ2000)
+  openspace.removeSceneGraphNode(SunIAU)
+  openspace.removeSceneGraphNode(SunCenter)
+  openspace.removeSceneGraphNode(SolarSystemBarycenter)
 end)
     
-asset.export(SolarSystemBarycenter.Identifier, SolarSystemBarycenter)
-asset.registerIdentifierWithMeta(SolarSystemBarycenter.Identifier)
-asset.export(SunCenter.Identifier, SunCenter)
-asset.registerIdentifierWithMeta(SunCenter.Identifier)
-asset.export(SunIAU.Identifier, SunIAU)
-asset.registerIdentifierWithMeta(SunIAU.Identifier)
-asset.export(SunECLIPJ2000.Identifier, SunECLIPJ2000)
-asset.registerIdentifierWithMeta(SunECLIPJ2000.Identifier)
+asset.export(SolarSystemBarycenter)
+asset.export(SunCenter)
+asset.export(SunIAU)
+asset.export(SunECLIPJ2000)
 
 
 

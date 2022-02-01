@@ -76,14 +76,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(PlutoLabel.Identifier)
-  openspace.removeSceneGraphNode(Pluto.Identifier)
+  openspace.removeSceneGraphNode(PlutoLabel)
+  openspace.removeSceneGraphNode(Pluto)
 end)
   
-asset.export(Pluto.Identifier, Pluto)
-asset.registerIdentifierWithMeta(Pluto.Identifier)
-asset.export(PlutoLabel.Identifier, PlutoLabel)
-asset.registerIdentifierWithMeta(PlutoLabel.Identifier)
+asset.export(Pluto)
+asset.export(PlutoLabel)
 
 
 

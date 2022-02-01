@@ -56,8 +56,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Gaia.Identifier)
+  openspace.removeSceneGraphNode(Gaia)
 end)
   
-asset.export(Gaia.Identifier, Gaia)
-asset.registerIdentifierWithMeta(Gaia.Identifier)
+asset.export(Gaia)

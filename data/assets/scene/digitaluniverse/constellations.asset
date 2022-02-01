@@ -62,14 +62,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(constellations.Identifier)
-  openspace.removeSceneGraphNode(constellationsExtragalactic.Identifier)
+  openspace.removeSceneGraphNode(constellations)
+  openspace.removeSceneGraphNode(constellationsExtragalactic)
 end)
   
-asset.export(constellationsExtragalactic.Identifier, constellationsExtragalactic)
-asset.registerIdentifierWithMeta(constellationsExtragalactic.Identifier)
-asset.export(constellations.Identifier, constellations)
-asset.registerIdentifierWithMeta(constellations.Identifier)
+asset.export(constellationsExtragalactic)
+asset.export(constellations)
 
 
 

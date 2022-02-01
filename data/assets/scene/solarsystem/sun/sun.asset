@@ -50,14 +50,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SunLabel.Identifier)
-  openspace.removeSceneGraphNode(Sun.Identifier)
+  openspace.removeSceneGraphNode(SunLabel)
+  openspace.removeSceneGraphNode(Sun)
 end)
     
-asset.export(Sun.Identifier, Sun)
-asset.registerIdentifierWithMeta(Sun.Identifier)
-asset.export(SunLabel.Identifier, SunLabel)
-asset.registerIdentifierWithMeta(SunLabel.Identifier)
+asset.export(Sun)
+asset.export(SunLabel)
 
 
 

@@ -112,16 +112,15 @@ end)
 asset.onDeinitialize(function ()
   for i = #nodes, 1, -1 do
     local node = nodes[i]
-    openspace.removeSceneGraphNode(node.Identifier)
+    openspace.removeSceneGraphNode(node)
   end
 
-  openspace.action.removeAction(show_apollo_labels.Identifier)
-  openspace.action.removeAction(hide_apollo_labels.Identifier)
+  openspace.action.removeAction(show_apollo_labels)
+  openspace.action.removeAction(hide_apollo_labels)
 end)
 
 for _, node in ipairs(nodes) do
-  asset.export(node.Identifier, node)
-  asset.registerIdentifierWithMeta(node.Identifier);
+  asset.export(node)
 end
 
 asset.export("showInsignia", function (missionNumber, interpolationDuration)

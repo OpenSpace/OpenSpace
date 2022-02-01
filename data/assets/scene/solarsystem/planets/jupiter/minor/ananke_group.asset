@@ -217,14 +217,12 @@ end)
   
 asset.onDeinitialize(function()
   for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node.Identifier)
+    openspace.removeSceneGraphNode(nodes[i])
   end
 end)
   
 for i, node in ipairs(nodes) do
-  asset.export(node.Identifier, node)
-  asset.registerIdentifierWithMeta(node.Identifier);
+  asset.export( node)
 end
 
 

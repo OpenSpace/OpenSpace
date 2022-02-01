@@ -58,14 +58,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(NeptuneLabel.Identifier)
-  openspace.removeSceneGraphNode(Neptune.Identifier)
+  openspace.removeSceneGraphNode(NeptuneLabel)
+  openspace.removeSceneGraphNode(Neptune)
 end)
     
-asset.export(Neptune.Identifier, Neptune)
-asset.registerIdentifierWithMeta(Neptune.Identifier)
-asset.export(NeptuneLabel.Identifier, NeptuneLabel)
-asset.registerIdentifierWithMeta(NeptuneLabel.Identifier)
+asset.export(Neptune)
+asset.export(NeptuneLabel)
 
 
 

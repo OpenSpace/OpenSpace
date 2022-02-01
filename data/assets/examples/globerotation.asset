@@ -48,8 +48,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Example_GlobeRotation.Identifier)
+  openspace.removeSceneGraphNode(Example_GlobeRotation)
 end)
 
-asset.export(Example_GlobeRotation.Identifier, Example_GlobeRotation)
-asset.registerIdentifierWithMeta(Example_GlobeRotation.Identifier)
+asset.export(Example_GlobeRotation)

@@ -47,10 +47,10 @@ asset.onInitialize(function ()
   webGui.setCefRoute("onscreen")
 
   openspace.action.registerAction(toggle_trails)
-  openspace.bindKey(toggle_trails.Key, toggle_trails.Identifier)
+  openspace.bindKey(toggle_trails.Key, toggle_trails)
 
   openspace.action.registerAction(toggle_planet_labels)
-  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
+  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels)
 
   openspace.setDefaultGuiSorting()
 
@@ -58,9 +58,9 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_trails.Identifier)
+  openspace.action.removeAction(toggle_trails)
   openspace.clearKey(toggle_trails.Key)
 
-  openspace.action.removeAction(toggle_planet_labels.Identifier)
+  openspace.action.removeAction(toggle_planet_labels)
   openspace.clearKey(toggle_planet_labels.Key)
 end)

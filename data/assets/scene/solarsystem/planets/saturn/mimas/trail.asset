@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MimasTrail.Identifier)
+  openspace.removeSceneGraphNode(MimasTrail)
 end)
   
-asset.export(MimasTrail.Identifier, MimasTrail)
-asset.registerIdentifierWithMeta(MimasTrail.Identifier)
+asset.export(MimasTrail)
 
 
 

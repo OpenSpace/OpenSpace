@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(DioneTrail.Identifier)
+  openspace.removeSceneGraphNode(DioneTrail)
 end)
   
-asset.export(DioneTrail.Identifier, DioneTrail)
-asset.registerIdentifierWithMeta(DioneTrail.Identifier)
+asset.export(DioneTrail)
 
 
 

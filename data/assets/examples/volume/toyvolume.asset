@@ -22,8 +22,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(ToyVolume.Identifier)
+  openspace.removeSceneGraphNode(ToyVolume)
 end)
   
-asset.export(ToyVolume.Identifier, ToyVolume)
-asset.registerIdentifierWithMeta(ToyVolume.Identifier)
+asset.export(ToyVolume)

@@ -45,11 +45,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(plane.Identifier)
+  openspace.removeSceneGraphNode(plane)
 end)
   
-asset.export(plane.Identifier, plane)
-asset.registerIdentifierWithMeta(plane.Identifier)
+asset.export(plane)
 
 
 

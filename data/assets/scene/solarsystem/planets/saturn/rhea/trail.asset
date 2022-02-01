@@ -31,11 +31,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RheaTrail.Identifier)
+  openspace.removeSceneGraphNode(RheaTrail)
 end)
   
-asset.export(RheaTrail.Identifier, RheaTrail)
-asset.registerIdentifierWithMeta(RheaTrail.Identifier)
+asset.export(RheaTrail)
 
 
 

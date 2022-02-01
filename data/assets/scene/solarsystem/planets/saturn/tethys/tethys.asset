@@ -54,11 +54,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Tethys.Identifier)
+  openspace.removeSceneGraphNode(Tethys)
 end)
   
-asset.export(Tethys.Identifier, Tethys)
-asset.registerIdentifierWithMeta(Tethys.Identifier)
+asset.export(Tethys)
 
 
 

@@ -79,14 +79,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EarthLabel.Identifier)
-  openspace.removeSceneGraphNode(Earth.Identifier)
+  openspace.removeSceneGraphNode(EarthLabel)
+  openspace.removeSceneGraphNode(Earth)
 end)
     
-asset.export(Earth.Identifier, Earth)
-asset.registerIdentifierWithMeta(Earth.Identifier)
-asset.export(EarthLabel.Identifier, EarthLabel)
-asset.registerIdentifierWithMeta(EarthLabel.Identifier)
+asset.export(Earth)
+asset.export(EarthLabel)
 
 
 

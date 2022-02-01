@@ -24,11 +24,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MarsBarycenter.Identifier)
+  openspace.removeSceneGraphNode(MarsBarycenter)
 end)
   
-asset.export(MarsBarycenter.Identifier, MarsBarycenter)
-asset.registerIdentifierWithMeta(MarsBarycenter.Identifier)
+asset.export(MarsBarycenter)
 
 
 

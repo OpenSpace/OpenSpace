@@ -42,12 +42,11 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(EUVLayer.Identifier)
-  openspace.action.removeAction(toggle_EUV_layer.Identifier)
+  openspace.removeSceneGraphNode(EUVLayer)
+  openspace.action.removeAction(toggle_EUV_layer)
 end)
 
-asset.export(EUVLayer.Identifier, EUVLayer)
-asset.registerIdentifierWithMeta(EUVLayer.Identifier)
+asset.export(EUVLayer)
 
 
 asset.meta = {

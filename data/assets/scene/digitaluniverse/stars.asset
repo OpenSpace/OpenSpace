@@ -100,14 +100,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(sunstar.Identifier)
-  openspace.removeSceneGraphNode(stars.Identifier)
+  openspace.removeSceneGraphNode(sunstar)
+  openspace.removeSceneGraphNode(stars)
 end)
   
-asset.export(stars.Identifier, stars)
-asset.registerIdentifierWithMeta(stars.Identifier)
-asset.export(sunstar.Identifier, sunstar)
-asset.registerIdentifierWithMeta(sunstar.Identifier)
+asset.export(stars)
+asset.export(sunstar)
 
 
 

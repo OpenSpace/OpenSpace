@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy.Identifier)
+  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy)
 end)
   
-asset.export(MilkyWayVolumeGalaxy.Identifier, MilkyWayVolumeGalaxy)
-asset.registerIdentifierWithMeta(MilkyWayVolumeGalaxy.Identifier)
+asset.export(MilkyWayVolumeGalaxy)
 
 
 

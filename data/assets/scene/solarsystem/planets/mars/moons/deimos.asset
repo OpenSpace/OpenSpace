@@ -66,14 +66,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(DeimosTrail.Identifier)
-  openspace.removeSceneGraphNode(Deimos.Identifier)
+  openspace.removeSceneGraphNode(DeimosTrail)
+  openspace.removeSceneGraphNode(Deimos)
 end)
     
-asset.export(Deimos.Identifier, Deimos)
-asset.registerIdentifierWithMeta(Deimos.Identifier)
-asset.export(DeimosTrail.Identifier, DeimosTrail)
-asset.registerIdentifierWithMeta(DeimosTrail.Identifier)
+asset.export(Deimos)
+asset.export(DeimosTrail)
 
 
 

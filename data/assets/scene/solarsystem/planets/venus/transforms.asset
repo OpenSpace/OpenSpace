@@ -24,11 +24,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(VenusBarycenter.Identifier)
+  openspace.removeSceneGraphNode(VenusBarycenter)
 end)
   
-asset.export(VenusBarycenter.Identifier, VenusBarycenter)
-asset.registerIdentifierWithMeta(VenusBarycenter.Identifier)
+asset.export(VenusBarycenter)
 
 
 

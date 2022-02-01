@@ -23,7 +23,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("layer", layer)
-asset.registerIdentifierWithMeta(layer.Identifier)
 
 
 

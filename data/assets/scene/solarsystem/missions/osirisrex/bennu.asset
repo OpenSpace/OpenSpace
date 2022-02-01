@@ -47,8 +47,7 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Bennu.Identifier)
+  openspace.removeSceneGraphNode(Bennu)
 end)
   
-asset.export(Bennu.Identifier, Bennu)
-asset.registerIdentifierWithMeta(Bennu.Identifier)
+asset.export(Bennu)

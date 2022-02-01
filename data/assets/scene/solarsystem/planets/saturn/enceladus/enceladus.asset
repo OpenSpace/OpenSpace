@@ -56,11 +56,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Enceladus.Identifier)
+  openspace.removeSceneGraphNode(Enceladus)
 end)
   
-asset.export(Enceladus.Identifier, Enceladus)
-asset.registerIdentifierWithMeta(Enceladus.Identifier)
+asset.export(Enceladus)
 
 
 

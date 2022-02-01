@@ -26,11 +26,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(UranusBarycenter.Identifier)
+  openspace.removeSceneGraphNode(UranusBarycenter)
 end)
   
-asset.export(UranusBarycenter.Identifier, UranusBarycenter)
-asset.registerIdentifierWithMeta(UranusBarycenter.Identifier)
+asset.export(UranusBarycenter)
 
 
 

@@ -96,14 +96,12 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(deepSkyImages.Identifier)
-  openspace.removeSceneGraphNode(deepSkyPoints.Identifier)
+  openspace.removeSceneGraphNode(deepSkyImages)
+  openspace.removeSceneGraphNode(deepSkyPoints)
 end)
   
-asset.export(deepSkyPoints.Identifier, deepSkyPoints)
-asset.registerIdentifierWithMeta(deepSkyPoints.Identifier)
-asset.export(deepSkyImages.Identifier, deepSkyImages)
-asset.registerIdentifierWithMeta(deepSkyImages.Identifier)
+asset.export(deepSkyPoints)
+asset.export(deepSkyImages)
 
 
 

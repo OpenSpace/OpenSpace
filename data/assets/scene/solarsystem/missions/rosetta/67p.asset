@@ -146,16 +146,13 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Trail67P.Identifier)
-  openspace.removeSceneGraphNode(Comet67P.Identifier)
-  openspace.removeSceneGraphNode(Barycenter.Identifier)
+  openspace.removeSceneGraphNode(Trail67P)
+  openspace.removeSceneGraphNode(Comet67P)
+  openspace.removeSceneGraphNode(Barycenter)
 end)
     
 asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
-asset.export(Barycenter.Identifier, Barycenter)
-asset.registerIdentifierWithMeta(Barycenter.Identifier)
+asset.export(Barycenter)
 asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear
-asset.export(Comet67P.Identifier, Comet67P)
-asset.registerIdentifierWithMeta(Comet67P.Identifier)
-asset.export(Trail67P.Identifier, Trail67P)
-asset.registerIdentifierWithMeta(Trail67P.Identifier)
+asset.export(Comet67P)
+asset.export(Trail67P)

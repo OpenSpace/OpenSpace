@@ -68,14 +68,12 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(L5Label.Identifier)
-  openspace.removeSceneGraphNode(L5.Identifier)
+  openspace.removeSceneGraphNode(L5Label)
+  openspace.removeSceneGraphNode(L5)
 end)
     
-asset.export(L5.Identifier, L5)
-asset.registerIdentifierWithMeta(L5.Identifier)
-asset.export(L5Label.Identifier, L5Label)
-asset.registerIdentifierWithMeta(L5Label.Identifier)
+asset.export(L5)
+asset.export(L5Label)
 
 
 

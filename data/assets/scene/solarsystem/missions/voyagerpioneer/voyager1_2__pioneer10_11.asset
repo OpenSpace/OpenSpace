@@ -108,20 +108,16 @@ asset.onInitialize(function()
 end)
     
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(pioneer11.Identifier)
-  openspace.removeSceneGraphNode(pioneer10.Identifier)
-  openspace.removeSceneGraphNode(voyager2.Identifier)
-  openspace.removeSceneGraphNode(voyager1.Identifier)
+  openspace.removeSceneGraphNode(pioneer11)
+  openspace.removeSceneGraphNode(pioneer10)
+  openspace.removeSceneGraphNode(voyager2)
+  openspace.removeSceneGraphNode(voyager1)
 end)
     
-asset.export(voyager1.Identifier, voyager1)
-asset.registerIdentifierWithMeta(voyager1.Identifier)
-asset.export(voyager2.Identifier, voyager2)
-asset.registerIdentifierWithMeta(voyager2.Identifier)
-asset.export(pioneer10.Identifier, pioneer10)
-asset.registerIdentifierWithMeta(pioneer10.Identifier)
-asset.export(pioneer11.Identifier, pioneer11)
-asset.registerIdentifierWithMeta(pioneer11.Identifier)
+asset.export(voyager1)
+asset.export(voyager2)
+asset.export(pioneer10)
+asset.export(pioneer11)
 
 
 

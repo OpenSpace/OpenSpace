@@ -29,11 +29,10 @@ asset.onInitialize(function()
 end)
   
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(EarthTrail.Identifier)
+  openspace.removeSceneGraphNode(EarthTrail)
 end)
   
-asset.export(EarthTrail.Identifier, EarthTrail)
-asset.registerIdentifierWithMeta(EarthTrail.Identifier)
+asset.export(EarthTrail)
 
 
 

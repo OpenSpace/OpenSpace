@@ -44,12 +44,11 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(fluxNodes.Identifier)
-  openspace.action.removeAction(toggle_fluxnodes.Identifier)
+  openspace.removeSceneGraphNode(fluxNodes)
+  openspace.action.removeAction(toggle_fluxnodes)
 end)
 
-asset.export(fluxNodes.Identifier, fluxNodes)
-asset.registerIdentifierWithMeta(fluxNodes.Identifier)
+asset.export(fluxNodes)
 
 
 asset.meta = {
