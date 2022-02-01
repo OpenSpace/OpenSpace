@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 local HEEQ180Kernel = asset.localResource("./kernels/HEEQ180.tf")
@@ -26,7 +25,16 @@ local HEEQ180ReferenceFrame = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HEEQ180ReferenceFrame })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
+end)
+  
+asset.export(HEEQ180ReferenceFrame)
+
 
 asset.meta = {
   Name = "Sun Transform, HEEQ180",

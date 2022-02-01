@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -60,4 +59,15 @@ local GaiaTrailEclip = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaTrail, GaiaTrailEclip } )
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaTrail)
+  openspace.addSceneGraphNode(GaiaTrailEclip)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaTrailEclip)
+  openspace.removeSceneGraphNode(GaiaTrail)
+end)
+    
+asset.export(GaiaTrail)
+asset.export(GaiaTrailEclip)

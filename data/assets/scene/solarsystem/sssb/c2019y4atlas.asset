@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local orbit = asset.syncedResource({
@@ -46,9 +45,19 @@ local C2019Y4AtlasPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  C2019Y4AtlasPosition, C2019Y4AtlasTrail
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(C2019Y4AtlasPosition)
+  openspace.addSceneGraphNode(C2019Y4AtlasTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(C2019Y4AtlasTrail)
+  openspace.removeSceneGraphNode(C2019Y4AtlasPosition)
+end)
+    
+asset.export(C2019Y4AtlasPosition)
+asset.export(C2019Y4AtlasTrail)
+
 
 
 asset.meta = {

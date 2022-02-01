@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../../earth").Earth.Identifier
 
 local texturesPath = asset.syncedResource({

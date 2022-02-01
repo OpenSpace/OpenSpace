@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 local kernel = asset.require("../kernels").jup310
 
@@ -27,7 +26,16 @@ local CallistoTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CallistoTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CallistoTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CallistoTrail)
+end)
+  
+asset.export(CallistoTrail)
+
 
 
 asset.meta = {

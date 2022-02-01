@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -52,7 +51,16 @@ local Enceladus = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Enceladus)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Enceladus)
+end)
+  
+asset.export(Enceladus)
+
 
 
 asset.meta = {

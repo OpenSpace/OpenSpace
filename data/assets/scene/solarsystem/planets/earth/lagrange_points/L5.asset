@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -63,10 +62,19 @@ local L5Label = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  L5,
-  L5Label
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L5)
+  openspace.addSceneGraphNode(L5Label)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L5Label)
+  openspace.removeSceneGraphNode(L5)
+end)
+    
+asset.export(L5)
+asset.export(L5Label)
+
 
 
 asset.meta = {

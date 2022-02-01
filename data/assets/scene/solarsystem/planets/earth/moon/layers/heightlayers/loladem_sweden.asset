@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../moon").Moon.Identifier
 
 local layer = {
@@ -9,7 +8,16 @@ local layer = {
   Settings = { Multiplier = 0.5 }
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "HeightLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

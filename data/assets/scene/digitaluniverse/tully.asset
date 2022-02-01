@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local textures = asset.syncedResource({
   Name = "Tully Textures",
   Type = "HttpSynchronization",
@@ -110,7 +106,19 @@ local tullyImages = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { tullyPoints, tullyImages })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(tullyPoints)
+  openspace.addSceneGraphNode(tullyImages)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(tullyImages)
+  openspace.removeSceneGraphNode(tullyPoints)
+end)
+  
+asset.export(tullyPoints)
+asset.export(tullyImages)
+
 
 
 asset.meta = {

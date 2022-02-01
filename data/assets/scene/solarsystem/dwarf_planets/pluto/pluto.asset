@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
@@ -71,7 +70,19 @@ local PlutoLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto, PlutoLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pluto)
+  openspace.addSceneGraphNode(PlutoLabel)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoLabel)
+  openspace.removeSceneGraphNode(Pluto)
+end)
+  
+asset.export(Pluto)
+asset.export(PlutoLabel)
+
 
 
 asset.meta = {

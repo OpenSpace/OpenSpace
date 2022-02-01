@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local sync = asset.syncedResource({
@@ -43,9 +42,19 @@ local SwiftTuttlePosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  SwiftTuttlePosition, SwiftTuttleTrail 
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SwiftTuttlePosition)
+  openspace.addSceneGraphNode(SwiftTuttleTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SwiftTuttleTrail)
+  openspace.removeSceneGraphNode(SwiftTuttlePosition)
+end)
+    
+asset.export(SwiftTuttlePosition)
+asset.export(SwiftTuttleTrail)
+
 
 
 asset.meta = {

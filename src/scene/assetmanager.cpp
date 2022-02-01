@@ -410,7 +410,6 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
     // |  |- require
     // |  |- exists
     // |  |- export
-    // |  |- registerIdentifierWithMeta
     // |  |- onInitialize
     // |  |- onDeinitialize
     // |  |- directory
@@ -590,6 +589,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
     // Register export-dependency function
     // export(string key, any value)
+    // or export(table value) with table.Identifier being defined and a string
     ghoul::lua::push(*_luaState, this, asset);
     lua_pushcclosure(
         *_luaState,
@@ -598,13 +598,53 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             AssetManager* manager = ghoul::lua::userData<AssetManager>(L, 1);
             Asset* asset = ghoul::lua::userData<Asset>(L, 2);
-            ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::exportAsset");
+            int n = ghoul::lua::checkArgumentsAndThrow(L, { 1 , 2 }, "lua::exportAsset");
+            std::string exportName;
+            std::string identifier;
+            int targetLocation;
+            if (n == 1) {
+                ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
+                    L,
+                    1,
+                    ghoul::lua::PopValue::No
+                );
+                if (!d.hasValue<std::string>("Identifier")) {
+                    return ghoul::lua::luaError(
+                        L,
+                        "Table being exported does not have an Identifier necessary to "
+                        "generate the export key automatically"
+                    );
+                }
+                identifier = d.value<std::string>("Identifier");
+                exportName = identifier;
+                targetLocation = 1;
+            }
+            
+            if (n == 2) {
+                exportName = ghoul::lua::value<std::string>(
+                    L,
+                    1,
+                    ghoul::lua::PopValue::No
+                );
+                targetLocation = 2;
 
-            const std::string exportName = ghoul::lua::value<std::string>(
-                L,
-                1,
-                ghoul::lua::PopValue::No
-            );
+                if (lua_type(L, targetLocation) == LUA_TTABLE) {
+                    // The second argument might be anything and we only try to extract
+                    // the identifier if it actually is a table *and* if that table
+                    // contains the 'Identifier' key
+
+                    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(
+                        L,
+                        2,
+                        ghoul::lua::PopValue::No
+                    );
+
+                    if (d.hasValue<std::string>("Identifier")) {
+                        identifier = d.value<std::string>("Identifier");
+                    }
+                }
+            }
+
 
             lua_rawgeti(L, LUA_REGISTRYINDEX, manager->_assetsTableRef);
             std::string path = asset->path().string();
@@ -613,8 +653,13 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
             const int exportsTableIndex = lua_gettop(L);
 
             // push the second argument
-            lua_pushvalue(L, 2);
+            lua_pushvalue(L, targetLocation);
             lua_setfield(L, exportsTableIndex, exportName.c_str());
+
+            // Register registerIdentifierWithMeta function to add meta at runtime
+            if (!identifier.empty()) {
+                asset->addIdentifier(identifier);
+            }
 
             lua_settop(L, 0);
             return 0;
@@ -622,27 +667,6 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         2
     );
     lua_setfield(*_luaState, assetTableIndex, "export");
-
-    // Register registerIdentifierWithMeta function to add meta at runtime
-    // registerIdentifierWithMeta(string identifier)
-    ghoul::lua::push(*_luaState, this, asset);
-    lua_pushcclosure(
-        *_luaState,
-        [](lua_State* L) {
-            ZoneScoped
-
-            Asset* asset = ghoul::lua::userData<Asset>(L, 2);
-            ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::registerIdentifierWithMeta");
-
-            std::string identifier = luaL_checkstring(L, 1);
-            asset->addIdentifier(identifier);
-
-            lua_settop(L, 0);
-            return 0;
-        },
-        2
-    );
-    lua_setfield(*_luaState, assetTableIndex, "registerIdentifierWithMeta");
 
     // Register onInitialize function to be called upon asset initialization
     // void onInitialize(function<void()> initializationFunction)

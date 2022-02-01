@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local PARSEC_CONSTANT = 3.0856776E16;
@@ -24,7 +23,16 @@ local NebulaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NebulaPosition })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NebulaPosition)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NebulaPosition)
+end)
+  
+asset.export(NebulaPosition)
+
 
 
 asset.meta = {

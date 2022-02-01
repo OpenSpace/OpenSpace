@@ -24,7 +24,6 @@ asset.require("util/launcher_images")
 asset.require("scene/milkyway/exoplanets/exoplanets_data")
 asset.require("scene/milkyway/exoplanets/exoplanets_textures")
 
-local assetHelper = asset.require("util/asset_helper")
 asset.require("scene/digitaluniverse/2dF")
 asset.require("scene/digitaluniverse/2mass")
 asset.require("scene/digitaluniverse/6dF")

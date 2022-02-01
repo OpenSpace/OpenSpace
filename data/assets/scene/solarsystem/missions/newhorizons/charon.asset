@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -114,8 +113,18 @@ local CharonShadow = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  CharonProjection,
-  CharonText,
-  CharonShadow
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(CharonProjection)
+  openspace.addSceneGraphNode(CharonText)
+  openspace.addSceneGraphNode(CharonShadow)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CharonShadow)
+  openspace.removeSceneGraphNode(CharonText)
+  openspace.removeSceneGraphNode(CharonProjection)
+end)
+    
+asset.export(CharonProjection)
+asset.export(CharonText)
+asset.export(CharonShadow)
