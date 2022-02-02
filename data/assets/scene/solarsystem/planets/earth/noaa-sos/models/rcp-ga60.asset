@@ -3,7 +3,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Climate Model: Temperature Change (RCP 6.0) - 2006 - 2100"
 local Identifier = "noaa-sos-models-rcp-ga60"
-local Description = [[ Climate models are used for a variety of purposes from the study of dynamics of the weather and climate system to projections of future climate.]]
+local Description = [[ Climate models are used for a variety of purposes from the study 
+of dynamics of the weather and climate system to projections of future climate.   ]]
 local URL = "https://sos.noaa.gov/catalog/datasets/climate-model-temperature-change-rcp-60-2006-2100/"
 
 

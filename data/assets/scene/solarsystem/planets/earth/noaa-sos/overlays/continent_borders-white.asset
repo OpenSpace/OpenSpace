@@ -3,7 +3,9 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Continent Borders (white)"
 local Identifier = "noaa-sos-overlays-continent_borders-white"
-local Description = [[ Overlays are datasets with transparent backgrounds that contain foreground data used to augment other SOS datasets.This particular dataset overlays continent borders in white onto any dataset that you are viewing. ]]
+local Description = [[ Overlays are datasets with transparent backgrounds that contain 
+foreground data used to augment other SOS datasets.This particular dataset overlays 
+continent borders in white onto any dataset that you are viewing.   ]]
 local URL = "https://sos.noaa.gov/catalog/datasets/continent-borders-white/"
 
 

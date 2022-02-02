@@ -3,7 +3,10 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local Name = "Railroads"
 local Identifier = "noaa-sos-overlays-railroad"
-local Description = [[ Overlays are datasets with transparent backgrounds that contain foreground data used to augment other SOS datasets.This particular dataset overlays railroads onto any dataset that you are viewing. The data was found at Natural Earth Data. ]]
+local Description = [[ Overlays are datasets with transparent backgrounds that contain 
+foreground data used to augment other SOS datasets.This particular dataset overlays 
+railroads onto any dataset that you are viewing. The data was found at Natural Earth 
+Data.   ]]
 local URL = "https://sos.noaa.gov/catalog/datasets/railroads/"
 
 
