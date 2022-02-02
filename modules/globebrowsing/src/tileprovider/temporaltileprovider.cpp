@@ -257,15 +257,33 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             std::tm tm = {};
             ss >> std::get_time(&tm, p.folder->format.c_str());
             if (!ss.fail()) {
-                std::string date = fmt::format(
-                    "{}-{}-{} {}:{}:{}",
-                    tm.tm_year + 1900,
-                    tm.tm_mon + 1,
-                    tm.tm_mday,
-                    tm.tm_hour,
-                    tm.tm_min,
-                    tm.tm_sec
-                );
+                std::string date;
+                if (p.folder->format.find("%j") != std::string::npos) {
+                    // If the user asked for a day-of-year, the day-of-month and the month
+                    // fields will not be set and calls to std::asctime will assert
+                    // unfortunately.  Luckily, Spice understands DOY date formats, so
+                    // we can specify those directly and noone would use a DOY and a DOM
+                    // time string in the same format string, right?  Right?!
+                    date = fmt::format(
+                        "{}-{}T{}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_yday,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
+                else {
+                    std::string date = fmt::format(
+                        "{}-{}-{} {}:{}:{}",
+                        tm.tm_year + 1900,
+                        tm.tm_mon + 1,
+                        tm.tm_mday + 1,
+                        tm.tm_hour,
+                        tm.tm_min,
+                        tm.tm_sec
+                    );
+                }
 
                 double et = SpiceManager::ref().ephemerisTimeFromDate(date);
                 _folder.files.push_back({ et, path.path().string() });
