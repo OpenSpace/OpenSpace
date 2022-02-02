@@ -19,10 +19,10 @@ local URL = "https://sos.noaa.gov/catalog/datasets/gray-earth/"
 
 
 local syncedDirectory = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier,
-	Version = 1
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
 })
 
 local layer = {

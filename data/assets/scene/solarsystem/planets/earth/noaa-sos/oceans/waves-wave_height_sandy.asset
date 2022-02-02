@@ -8,10 +8,10 @@ local URL = "https://sos.noaa.gov/catalog/datasets/wave-heights-hurricane-sandy-
 
 
 local syncedDirectory = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier,
-	Version = 1
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
 })
 
 local imagesDestination = syncedDirectory .. "images"

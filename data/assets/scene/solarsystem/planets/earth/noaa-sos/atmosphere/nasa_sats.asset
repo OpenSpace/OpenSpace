@@ -7,10 +7,10 @@ local Description = [[ In order to enable coordinated science observations, the 
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-nasa-a-train-satellites/"
 
 local syncedDirectory = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier,
-	Version = 1
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
 })
 
 local imagesDestination = syncedDirectory .. "images"

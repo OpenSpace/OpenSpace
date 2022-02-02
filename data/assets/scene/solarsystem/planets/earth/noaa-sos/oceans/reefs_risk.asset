@@ -15,10 +15,10 @@ local URL = "https://sos.noaa.gov/catalog/datasets/coral-reef-risk-outlook/"
 
 
 local syncedDirectory = asset.syncedResource({
-	Name = Name,
-	Type = "HttpSynchronization",
-	Identifier = Identifier,
-	Version = 1
+  Name = Name,
+  Type = "HttpSynchronization",
+  Identifier = Identifier,
+  Version = 1
 })
 
 local layer_2012 = {
