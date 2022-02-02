@@ -53,9 +53,12 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(buoy.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(buoy)
 end)
+
+asset.export(layer)
+asset.export(buoy)
 
 
 asset.meta = {

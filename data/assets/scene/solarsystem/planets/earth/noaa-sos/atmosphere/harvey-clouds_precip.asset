@@ -66,10 +66,14 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar_rain.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar_snow.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar_rain)
+  openspace.removeScreenSpaceRenderable(colorbar_snow)
 end)
+
+asset.export(layer)
+asset.export(colorbar_rain)
+asset.export(colorbar_snow)
 
 
 asset.meta = {

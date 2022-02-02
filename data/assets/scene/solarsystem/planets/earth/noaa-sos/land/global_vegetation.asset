@@ -78,11 +78,16 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", background2layer.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", background1layer.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", background2layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", background1layer)
+  openspace.removeScreenSpaceRenderable(colorbar)
 end)
+
+asset.export(layer)
+asset.export(background2layer)
+asset.export(background1layer)
+asset.export(colorbar)
 
 
 asset.meta = {

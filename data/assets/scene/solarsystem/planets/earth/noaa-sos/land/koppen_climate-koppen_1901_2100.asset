@@ -61,10 +61,14 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(legend.Identifier)
-  openspace.removeScreenSpaceRenderable(legend1.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(legend1)
 end)
+
+asset.export(layer)
+asset.export(legend)
+asset.export(legend1)
 
 
 asset.meta = {

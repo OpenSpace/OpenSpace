@@ -80,11 +80,16 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(legend.Identifier)
-  openspace.removeScreenSpaceRenderable(quakebar.Identifier)
-  openspace.removeScreenSpaceRenderable(quakebar_combined.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(legend)
+  openspace.removeScreenSpaceRenderable(quakebar)
+  openspace.removeScreenSpaceRenderable(quakebar_combined)
 end)
+
+asset.export(layer)
+asset.export(legend)
+asset.export(quakebar)
+asset.export(quakebar_combined)
 
 
 asset.meta = {

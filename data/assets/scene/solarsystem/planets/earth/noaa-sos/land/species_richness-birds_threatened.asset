@@ -52,10 +52,14 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4096.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background.Identifier)
-  openspace.removeScreenSpaceRenderable(labels.Identifier);  
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_4096)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_with_background)
+  openspace.removeScreenSpaceRenderable(labels);  
 end)
+
+asset.export(layer_4096)
+asset.export(layer_with_background)
+asset.export(labels)
 
 
 asset.meta = {

@@ -68,9 +68,12 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_radar.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_radar)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_sat)
 end)
+
+asset.export(layer_radar)
+asset.export(layer_sat)
 
 
 asset.meta = {

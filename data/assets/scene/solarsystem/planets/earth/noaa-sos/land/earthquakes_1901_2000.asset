@@ -79,13 +79,19 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_allquakes.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quake_basemap.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_plate_boundaries.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5.Identifier)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8.Identifier)
-  openspace.removeScreenSpaceRenderable(legend.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_allquakes)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quake_basemap)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_plate_boundaries)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte6_5)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_quakes_gte8)
+  openspace.removeScreenSpaceRenderable(legend)
 end)
+
+asset.export(layer_allquakes)
+asset.export(layer_quake_basemap)
+asset.export(layer_plate_boundaries)
+asset.export(layer_quakes_gte6_5)
+asset.export(layer_quakes_gte8)
 
 
 asset.meta = {

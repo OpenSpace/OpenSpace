@@ -74,11 +74,16 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar_2007_2009.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar_2008_minimum.Identifier)
-  openspace.removeScreenSpaceRenderable(colorbar_2009_iceconcentration.Identifier)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.removeScreenSpaceRenderable(colorbar_2007_2009)
+  openspace.removeScreenSpaceRenderable(colorbar_2008_minimum)
+  openspace.removeScreenSpaceRenderable(colorbar_2009_iceconcentration)
 end)
+
+asset.export(layer)
+asset.export(colorbar_2007_2009)
+asset.export(colorbar_2008_minimum)
+asset.export(colorbar_2009_iceconcentration)
 
 
 asset.meta = {

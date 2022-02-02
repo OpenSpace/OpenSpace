@@ -67,10 +67,15 @@ end)
 
 asset.onDeinitialize(function()
   for i,v in ipairs(layers) do
-    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v.Identifier)
+    openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", v)
   end
-  openspace.removeScreenSpaceRenderable(colorbar.Identifier)
+  openspace.removeScreenSpaceRenderable(colorbar)
 end)
+
+for _,v in ipairs(layers) do
+  asset.export(v)
+end
+
 
 asset.meta = {
   Name = Name,
