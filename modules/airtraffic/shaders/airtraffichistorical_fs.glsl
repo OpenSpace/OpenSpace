@@ -26,27 +26,28 @@
 #include "floatoperations.glsl"
 #include "airtraffic_utilities.glsl"
 
-uniform vec3 cameraPosition;
-uniform mat4 modelTransform;
-uniform bool clipping;
-
 in vec4 ge_position;
 in vec4 ge_interpColor;
 in vec4 position;
 
+uniform vec3 cameraPosition;
+uniform mat4 modelTransform;
+uniform bool clipping;
+
 Fragment getFragment() {
-    Fragment frag;
-    frag.blend = BLEND_MODE_ADDITIVE;
+  Fragment frag;
+  frag.blend = BLEND_MODE_ADDITIVE;
 
-    frag.gPosition = ge_position;
-    frag.depth = ge_position.w;
-    frag.color = ge_interpColor;
+  frag.gPosition = ge_position;
+  frag.depth = ge_position.w;
+  frag.color = ge_interpColor;
 
-    frag.gNormal = vec4(1.0, 1.0, 1.0, 1.0);
+  frag.gNormal = vec4(1.0, 1.0, 1.0, 1.0);
 
-    // Discard lines hidden by Earth
-    if(clipping && !visible(position, modelTransform, cameraPosition)) {  discard;  }
-
+  // Discard lines hidden by Earth
+  if (clipping && !visible(position, modelTransform, cameraPosition)) {
+    discard;
+  }
     
-    return frag;
+  return frag;
 }

@@ -29,6 +29,12 @@
 layout (location = 0) in vec3 vertexPosition; // lat, long, alt
 layout (binding = 5, offset = 0) uniform atomic_uint counter;
 
+noperspective out vec2 mathLine;
+out vec4 vs_position;
+out vec4 vs_interpColor;
+out vec2 vs_latlon;
+out float vs_vertexID;
+
 uniform mat4 modelViewProjection;
 uniform float trailSize;
 uniform ivec2 resolution;
@@ -37,38 +43,30 @@ uniform float opacity;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;
 
-noperspective out vec2 mathLine;
-out vec4 vs_position;
-out vec4 vs_interpColor;
-out vec2 vs_latlon;
-out float vs_vertexID;
-
 void main() {
-    vs_vertexID = float(gl_VertexID);
-    vs_interpColor = vec4(color, opacity * pow(1.0 - mod(vs_vertexID, trailSize)/(trailSize-1), 2.0));
-    vec4 position;
+  vs_vertexID = float(gl_VertexID);
+  vs_interpColor = vec4(color, opacity * pow(1.0 - mod(vs_vertexID, trailSize)/(trailSize-1), 2.0));
+  vec4 position;
 
-    if(latitudeThreshold.x < vertexPosition.x && vertexPosition.x < latitudeThreshold.y 
-        && longitudeThreshold.x < vertexPosition.y && vertexPosition.y < longitudeThreshold.y
-        && vertexPosition.z > -EPSILON)
-    {
-        position = geoToCartConversion(radians(vertexPosition.x), radians(vertexPosition.y), vertexPosition.z);
-    }
-    else 
-    {
-        position = vec4(0.0);
-    }
+  if (latitudeThreshold.x < vertexPosition.x &&
+      vertexPosition.x < latitudeThreshold.y &&
+      longitudeThreshold.x < vertexPosition.y &&
+      vertexPosition.y < longitudeThreshold.y &&
+      vertexPosition.z > -EPSILON)
+  {
+    position = geoToCartConversion(radians(vertexPosition.x), radians(vertexPosition.y), vertexPosition.z);
+  }
+  else {
+    position = vec4(0.0);
+  }
 
-    atomicCounterIncrement(counter);
+  atomicCounterIncrement(counter);
     
-    vs_latlon = vec2(radians(vertexPosition.x), radians(vertexPosition.y));
+  vs_latlon = vec2(radians(vertexPosition.x), radians(vertexPosition.y));
 
-    vs_position = modelViewProjection * position;
-    vec4 vs_positionNDC = vs_position / vs_position.w;
-    gl_Position = vs_position;
+  vs_position = modelViewProjection * position;
+  vec4 vs_positionNDC = vs_position / vs_position.w;
+  gl_Position = vs_position;
     
-    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * vec2(resolution);
+  mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * vec2(resolution);
 }
-
-
-

@@ -24,43 +24,40 @@
 
 #include "fragment.glsl"
 #include "floatoperations.glsl"
+
 #define PI 3.1415926538
 
 const float RADII = 6378137.0;
 const float EPSILON = 1e-5;
 
 bool visible(vec4 pos, mat4 modelTransform, vec3 cameraPosition) {
-    
-    vec3 earthPosition = vec3(0.0); // Earth it positioned at 0,0,0 in its local coordinate system
+  vec3 earthPosition = vec3(0.0); // Earth it positioned at 0,0,0 in its local coordinate system
 
-    vec3 cameraInLocal = vec3(inverse(modelTransform) * vec4(cameraPosition, 1.0));
+  vec3 cameraInLocal = vec3(inverse(modelTransform) * vec4(cameraPosition, 1.0));
 
-    float cameraToFrag = length(vec3(vec3(pos) - cameraInLocal));
-    float cameraToEarth = length(cameraInLocal);
-    float L = sqrt(cameraToEarth * cameraToEarth - RADII * RADII);
+  float cameraToFrag = length(vec3(vec3(pos) - cameraInLocal));
+  float cameraToEarth = length(cameraInLocal);
+  float L = sqrt(cameraToEarth * cameraToEarth - RADII * RADII);
 
-    return cameraToFrag < L;
+  return cameraToFrag < L;
 }
 
 float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
-    // distance between latitudes 
-    // and longitudes 
-    float dLat = (lat2 - lat1); 
-    float dLon = (lon2 - lon1);
+  // distance between latitudes and longitudes 
+  float dLat = (lat2 - lat1); 
+  float dLon = (lon2 - lon1);
   
-    // apply formulae 
-    float a = pow(sin(dLat / 2.f), 2.f) +  pow(sin(dLon / 2.f), 2.f) *  cos(lat1) * cos(lat2); 
+  // apply formulae 
+  float a = pow(sin(dLat / 2.f), 2.f) +  pow(sin(dLon / 2.f), 2.f) *  cos(lat1) * cos(lat2); 
      
-    float c = 2 * asin(sqrt(a)); 
- 
-    return RADII * c; 
+  float c = 2 * asin(sqrt(a)); 
+  return RADII * c; 
 }
 
-vec4 geoToCartConversion(float lat, float lon, float alt){
+vec4 geoToCartConversion(float lat, float lon, float alt) {
+  float x = (RADII + alt) * cos(lat) * cos(lon);
+  float y = (RADII + alt) * cos(lat) * sin(lon);
+  float z = (RADII + alt) * sin(lat);
 
-    float x = (RADII + alt) * cos(lat) * cos(lon);
-    float y = (RADII + alt) * cos(lat) * sin(lon);
-    float z = (RADII + alt) * sin(lat);
-
-    return vec4(x, y, z, 1.0);
+  return vec4(x, y, z, 1.0);
 }

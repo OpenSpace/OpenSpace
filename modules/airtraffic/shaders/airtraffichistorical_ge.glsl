@@ -27,17 +27,9 @@
 
 layout (lines) in;
 layout (line_strip, max_vertices = 88) out;
-layout(std430, binding = 5) buffer buf
-{
+layout(std430, binding = 5) buffer buf {
     int nFlights;
 };
-
-
-uniform mat4 modelViewProjection;
-uniform float opacity;
-uniform vec2 latitudeThreshold;
-uniform vec2 longitudeThreshold;
-uniform int time;
 
 //in float vs_vertexID[];
 in vec4 vs_position[];
@@ -50,75 +42,79 @@ out vec4 ge_position;
 out vec4 ge_interpColor;
 out vec4 position;
 
+uniform mat4 modelViewProjection;
+uniform float opacity;
+uniform vec2 latitudeThreshold;
+uniform vec2 longitudeThreshold;
+uniform int time;
+
 vec2 findIntermediatePoint(vec2 latlon1, vec2 latlon2, float f) {
+  float phi1 = latlon1.x;
+  float lambda1 = latlon1.y;
+  float phi2 = latlon2.x;
+  float lambda2 = latlon2.y;
 
-    float phi1 = latlon1.x; float lambda1 = latlon1.y;
-    float phi2 = latlon2.x; float lambda2 = latlon2.y;
-
-    float delta = greatCircleDistance(phi1, lambda1, phi2, lambda2) / RADII; 
+  float delta = greatCircleDistance(phi1, lambda1, phi2, lambda2) / RADII; 
     
-    float a = (sin(1-f)*delta) / sin(delta);
-    float b = sin(f*delta) / sin(delta);
+  float a = (sin(1.0 - f) * delta) / sin(delta);
+  float b = sin(f * delta) / sin(delta);
 
-    float x = a*cos(phi1)*cos(lambda1) +  b*cos(phi2)*cos(lambda2);
-    float y = a*cos(phi1)*sin(lambda1) +  b*cos(phi2)*sin(lambda2);
-    float z = a*sin(phi1) + b*sin(phi2);
+  float x = a * cos(phi1) * cos(lambda1) + b * cos(phi2) * cos(lambda2);
+  float y = a * cos(phi1) * sin(lambda1) + b * cos(phi2) * sin(lambda2);
+  float z = a * sin(phi1) + b * sin(phi2);
      
-    float phi3 = atan(z,sqrt(x*x+y*y));
-    float lambda3 = atan(y,x);
+  float phi3 = atan(z, sqrt(x*x + y*y));
+  float lambda3 = atan(y,x);
 
-    return vec2(phi3, lambda3);
+  return vec2(phi3, lambda3);
 }
 
+ void main() {
+  // Discard erronous positions
+  if (length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON) {
+    return;
+  }
 
- void main(){
-    
-    // Discard erronous positions
-    if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON) {
-            return;
+  float firstSeen = vs_vertexInfo[0].x;
+  float lastSeen = vs_vertexInfo[0].y;
+
+  if (firstSeen < float(time) && float(time) < lastSeen) {
+    // Start point
+    gl_Position = gl_in[0].gl_Position;
+    position = vs_position[0];
+    ge_position = vs_position[0];
+    vec4 startColor = vs_interpColor[0];
+    ge_interpColor = startColor;
+    EmitVertex();
+
+    // Calculate current position
+    float t = clamp((float(time) - firstSeen) / (lastSeen - firstSeen), 0.0, 1.0);
+    vec2 pointCurrent = findIntermediatePoint(vs_latlon[0], vs_latlon[1], t);
+        
+    // Interpolate color for current position
+    vec4 endColor = vs_interpColor[1];
+    endColor = vec4(startColor * (1.0-t) +  t * endColor);
+        
+    // Mid points
+    for (int i = 1; i < 20; ++i) {
+      vec2 point = findIntermediatePoint(vs_latlon[0], pointCurrent, float(i)/20.0);
+      position = geoToCartConversion(point.x, point.y, 0.0);
+      ge_position = modelViewProjection * position;
+      ge_interpColor = vec4(startColor * (1.0-float(i)/20.0) +  float(i)/20.0 * endColor);
+      ge_interpColor.w = 0.2 * opacity;
+      gl_Position = ge_position;
+      EmitVertex();
     }
 
-    float firstSeen = vs_vertexInfo[0].x;
-    float lastSeen = vs_vertexInfo[0].y;
+    // Point for current position
+    position = geoToCartConversion(pointCurrent.x, pointCurrent.y, 0.0);
+    ge_position = modelViewProjection * position;
+    ge_interpColor = vec4(1.0);
+    gl_Position = ge_position;
+    EmitVertex();
 
-    if(firstSeen < float(time) && float(time) < lastSeen) {
-        // Start point
-        gl_Position = gl_in[0].gl_Position;
-        position = vs_position[0];
-        ge_position = vs_position[0];
-        vec4 startColor = vs_interpColor[0];
-        ge_interpColor = startColor;
-        EmitVertex();
+    atomicAdd(nFlights, 1);
 
-        // Calculate current position
-        float t = clamp((float(time) - firstSeen) / (lastSeen - firstSeen), 0.0, 1.0);
-        vec2 pointCurrent = findIntermediatePoint(vs_latlon[0], vs_latlon[1], t);
-        
-        // Interpolate color for current position
-        vec4 endColor = vs_interpColor[1];
-        endColor = vec4(startColor * (1.0-t) +  t * endColor);
-        
-        // Mid points
-        for(int i = 1; i < 20; ++i) {
-            vec2 point = findIntermediatePoint(vs_latlon[0], pointCurrent, float(i)/20.0);
-            position = geoToCartConversion(point.x, point.y, 0.0);
-            ge_position = modelViewProjection * position;
-            ge_interpColor = vec4(startColor * (1.0-float(i)/20.0) +  float(i)/20.0 * endColor);
-            ge_interpColor.w = 0.2 * opacity;
-            gl_Position = ge_position;
-            EmitVertex();
-        }
-
-        // Point for current position
-        position = geoToCartConversion(pointCurrent.x, pointCurrent.y, 0.0);
-        ge_position = modelViewProjection * position;
-        ge_interpColor = vec4(1.0);
-        gl_Position = ge_position;
-        EmitVertex();
-
-        atomicAdd(nFlights, 1);
-
-        EndPrimitive();
-    }
-    else return;
+    EndPrimitive();
+  }
  }

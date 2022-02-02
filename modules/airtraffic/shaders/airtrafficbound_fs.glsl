@@ -34,18 +34,18 @@ uniform vec3 cameraPosition;
 uniform mat4 modelTransform;
 uniform bool clipping;
 
-
 Fragment getFragment() {
-    
-    Fragment frag;
+  Fragment frag;
 
-    frag.gPosition = ge_position;
-    frag.depth = ge_position.w;
-    frag.color = ge_interpColor;
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); 
+  frag.gPosition = ge_position;
+  frag.depth = ge_position.w;
+  frag.color = ge_interpColor;
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); 
     
-    // Discard lines hidden by Earth
-    if(clipping && !visible(position, modelTransform, cameraPosition)) {  discard;  }
+  // Discard lines hidden by Earth
+  if (clipping && !visible(position, modelTransform, cameraPosition)) {
+    discard;
+  }
 
-    return frag;
+  return frag;
 }

@@ -21,22 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #version __CONTEXT__
 #include "airtraffic_utilities.glsl"
 
 layout (lines) in;
 layout (line_strip, max_vertices = 2) out;
-/*
-layout(std430, binding = 5) buffer buf
-{
-    int nVertices;
-};
-*/
 
 const float distThreshold = 20000.0;
 
-
-//in float vs_vertexID[];
 in vec4 vs_position[];
 in vec4 vs_interpColor[];
 in vec2 vs_latlon[];
@@ -49,29 +42,34 @@ noperspective out vec2 ge_mathLine;
 
 uniform float trailSize;
 
- void main(){
-
-    float dist = greatCircleDistance(vs_latlon[0].x, vs_latlon[0].y, vs_latlon[1].x, vs_latlon[1].y);
-    vec4 color = vs_interpColor[0];
+void main() {
+  float dist = greatCircleDistance(
+    vs_latlon[0].x,
+    vs_latlon[0].y,
+    vs_latlon[1].x,
+    vs_latlon[1].y
+  );
+  vec4 color = vs_interpColor[0];
     
-    if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON || dist > distThreshold) {
-        return;
-    }
+  if (length(gl_in[0].gl_Position) < EPSILON ||
+      length(gl_in[1].gl_Position) < EPSILON ||
+      dist > distThreshold)
+  {
+    return;
+  }
 
-    //atomicAdd(nVertices, 1);
+  ge_position = vs_position[0];
+  ge_interpColor = vs_interpColor[0];
+  ge_mathLine = mathLine[0];
+  gl_Position = gl_in[0].gl_Position;
+  EmitVertex();
 
-    ge_position = vs_position[0];
-    ge_interpColor = vs_interpColor[0];
-    ge_mathLine = mathLine[0];
-    gl_Position = gl_in[0].gl_Position;
-    EmitVertex();
+  ge_position = vs_position[1];
+  ge_interpColor = vs_interpColor[1];
+  ge_mathLine = mathLine[1];
+  gl_Position = gl_in[1].gl_Position;
+  EmitVertex();
 
-    ge_position = vs_position[1];
-    ge_interpColor = vs_interpColor[1];
-    ge_mathLine = mathLine[1];
-    gl_Position = gl_in[1].gl_Position;
-    EmitVertex();
-
-    EndPrimitive();
- }
+  EndPrimitive();
+}
 

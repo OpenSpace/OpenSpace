@@ -26,14 +26,10 @@
 
 #include "airtraffic_utilities.glsl"
 
-// max_vertices seems toi be limited by hardware
+// max_vertices seems to be limited by hardware
 // more segments would be preffered for a smoother line
 layout (lines) in;
 layout (line_strip, max_vertices = 64) out;
-
-uniform mat4 modelViewProjection;
-uniform vec2 latitudeThreshold;
-uniform vec2 longitudeThreshold;
 
 in vec4 vs_interpColor[];
 in vec2 vs_latlon[];
@@ -43,38 +39,44 @@ out vec4 ge_position;
 out vec4 ge_interpColor;
 out vec4 position;
 
- void main(){
+uniform mat4 modelViewProjection;
+uniform vec2 latitudeThreshold;
+uniform vec2 longitudeThreshold;
 
-    // Remove seam
-    if(length(latitudeThreshold - vec2(-90.0, 90.0)) < EPSILON &&
-       length(longitudeThreshold - vec2(-180., 180.0)) < EPSILON) return;
+void main() {
+  // Remove seam
+  if (length(latitudeThreshold - vec2(-90.0, 90.0)) < EPSILON &&
+      length(longitudeThreshold - vec2(-180., 180.0)) < EPSILON)
+  {
+    return;
+  }
 
-    vec2 position1 = radians(vec2(latitudeThreshold.x, longitudeThreshold.x));
-    vec2 position2 = radians(vec2(latitudeThreshold.y, longitudeThreshold.x));
-    vec2 position3 = radians(vec2(latitudeThreshold.y, longitudeThreshold.y));
-    vec2 position4 = radians(vec2(latitudeThreshold.x, longitudeThreshold.y));
+  vec2 position1 = radians(vec2(latitudeThreshold.x, longitudeThreshold.x));
+  vec2 position2 = radians(vec2(latitudeThreshold.y, longitudeThreshold.x));
+  vec2 position3 = radians(vec2(latitudeThreshold.y, longitudeThreshold.y));
+  vec2 position4 = radians(vec2(latitudeThreshold.x, longitudeThreshold.y));
 
-    // Sets the number of points per line segment
-    float nPoints = 15; // Total #vertices is 4 * nPoints
-    float alt = 0.0; // zero altitude i.e on the surface
+  // Sets the number of points per line segment
+  float nPoints = 15; // Total #vertices is 4 * nPoints
+  float alt = 0.0; // zero altitude i.e on the surface
 
-    for(int i = 0; i <= nPoints; ++i) {
-        vec2 point = position1 + float(i)/nPoints*(position2-position1);
-        position = geoToCartConversion(point.x, point.y, alt);
-        ge_position = modelViewProjection * position;
-        ge_interpColor = vs_interpColor[0];
-        gl_Position = ge_position;
-        EmitVertex();
-    }
+  for (int i = 0; i <= nPoints; ++i) {
+    vec2 point = position1 + float(i)/nPoints*(position2-position1);
+    position = geoToCartConversion(point.x, point.y, alt);
+    ge_position = modelViewProjection * position;
+    ge_interpColor = vs_interpColor[0];
+    gl_Position = ge_position;
+    EmitVertex();
+  }
 
-    for(int i = 0; i <= nPoints; ++i) {
-        vec2 point = position2 + float(i)/nPoints*(position3-position2);
-        position = geoToCartConversion(point.x, point.y, alt);
-        ge_position = modelViewProjection * position;
-        ge_interpColor = vs_interpColor[0];
-        gl_Position = ge_position;
-        EmitVertex();
-    }
+  for (int i = 0; i <= nPoints; ++i) {
+    vec2 point = position2 + float(i)/nPoints*(position3-position2);
+    position = geoToCartConversion(point.x, point.y, alt);
+    ge_position = modelViewProjection * position;
+    ge_interpColor = vs_interpColor[0];
+    gl_Position = ge_position;
+    EmitVertex();
+  }
 
     for(int i = 0; i <= nPoints; ++i) {
         vec2 point = position3 + float(i)/nPoints*(position4-position3);

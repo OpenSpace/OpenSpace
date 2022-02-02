@@ -33,27 +33,24 @@ noperspective in vec2 ge_mathLine;
 uniform float lineWidth;
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    frag.gPosition = ge_position;
-    frag.depth = ge_position.w;
-    frag.color = ge_interpColor;
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-    //frag.blend = BLEND_MODE_ADDITIVE;
+  frag.gPosition = ge_position;
+  frag.depth = ge_position.w;
+  frag.color = ge_interpColor;
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  //frag.blend = BLEND_MODE_ADDITIVE;
 
-    double distanceCenter = length(ge_mathLine - vec2(gl_FragCoord.xy));
-    double dLineWidth = double(lineWidth);
-    float blendFactor = 20;
+  double distanceCenter = length(ge_mathLine - vec2(gl_FragCoord.xy));
+  double dLineWidth = double(lineWidth);
+  float blendFactor = 20;
    
-    if(distanceCenter > dLineWidth) {
-        frag.color.a = 0.0;
-        //frag.color = vec4(1.0,0.0,0.0, 1.0);
-    }
-    else {
-        frag.color.a *= pow(float((dLineWidth - distanceCenter) / dLineWidth), blendFactor);
-        //frag.color.a = 1.0; 
-        //frag.color = vec4(0.0,1.0,0.0, 1.0);
-    }
+  if (distanceCenter > dLineWidth) {
+    frag.color.a = 0.0;
+  }
+  else {
+    frag.color.a *= pow(float((dLineWidth - distanceCenter) / dLineWidth), blendFactor);
+  }
 
-    return frag;
+  return frag;
 }

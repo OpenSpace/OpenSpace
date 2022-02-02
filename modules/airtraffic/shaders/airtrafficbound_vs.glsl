@@ -26,19 +26,16 @@
 
 layout (location = 0) in vec2 vertexLatLong; // latlong
 
-uniform vec3 color;
-uniform float opacity;
-
 out vec4 vs_interpColor;
 out vec2 vs_latlon;
 out float vs_vertexID;
 
+uniform vec3 color;
+uniform float opacity;
+
 void main() {
-    vs_vertexID = float(gl_VertexID);
-    vs_interpColor = vec4(color, opacity);
-    vs_latlon = vertexLatLong;
-    gl_Position = vec4(0.f);
+  vs_vertexID = float(gl_VertexID);
+  vs_interpColor = vec4(color, opacity);
+  vs_latlon = vertexLatLong;
+  gl_Position = vec4(0.f);
 }
-
-
-
