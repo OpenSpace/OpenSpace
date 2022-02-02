@@ -39,9 +39,26 @@ int addScreenSpaceRenderable(lua_State* L) {
 
 int removeScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
-    const std::string name = ghoul::lua::value<std::string>(L);
+    std::variant v = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
 
-    global::renderEngine->removeScreenSpaceRenderable(name);
+    std::string identifier;
+    if (std::holds_alternative<std::string>(v)) {
+        identifier = std::get<std::string>(v);
+    }
+    else {
+        ghoul_assert(std::holds_alternative<ghoul::Dictionary>(v), "Missing case");
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(v);
+        if (!d.hasValue<std::string>("Identifier")) {
+            return ghoul::lua::luaError(
+                L,
+                "Table passed to removeScreenSpaceRenderable does not contain an "
+                "Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    global::renderEngine->removeScreenSpaceRenderable(identifier);
     return 0;
 }
 

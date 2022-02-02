@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local textures = asset.syncedResource({
   Name = "Tully Textures",
   Type = "HttpSynchronization",
@@ -110,16 +106,27 @@ local tullyImages = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { tullyPoints, tullyImages })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(tullyPoints)
+  openspace.addSceneGraphNode(tullyImages)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(tullyImages)
+  openspace.removeSceneGraphNode(tullyPoints)
+end)
+  
+asset.export(tullyPoints)
+asset.export(tullyImages)
+
 
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "3.0",
+  Version = "3.1",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images.]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"TullyGalaxies" , "TullyGalaxiesImages"}
+  License = "AMNH Digital Universe"
 }

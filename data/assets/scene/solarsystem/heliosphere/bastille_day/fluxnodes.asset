@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
 local rot = asset.require("./carringtonToHEEQRotation.asset")
@@ -41,11 +40,16 @@ local toggle_fluxnodes = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_fluxnodes)
+  openspace.addSceneGraphNode(fluxNodes)
 end)
+
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_fluxnodes.Identifier)
+  openspace.removeSceneGraphNode(fluxNodes)
+  openspace.action.removeAction(toggle_fluxnodes)
 end)
-assetHelper.registerSceneGraphNodesAndExport(asset, { fluxNodes })
+
+asset.export(fluxNodes)
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
@@ -53,6 +57,5 @@ asset.meta = {
   Description = [[Flux nodes for the bastille day CME event]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"MAS-MHD-FluxNodes-bastille-day-2000"}
+  License = "CC-BY"
 }

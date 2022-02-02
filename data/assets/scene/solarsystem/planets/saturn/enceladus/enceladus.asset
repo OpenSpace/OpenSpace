@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -52,15 +51,23 @@ local Enceladus = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Enceladus)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Enceladus)
+end)
+  
+asset.export(Enceladus)
+
 
 
 asset.meta = {
     Name = "Enceladus",
-    Version = "1.0",
+    Version = "1.1",
     Description = [[ Enceladus globe with labels and map layers]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Enceladus"}
+    License = "MIT license"
 }

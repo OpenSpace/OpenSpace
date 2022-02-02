@@ -17,22 +17,26 @@ local layer = {
     DEM where available as of 2018.]],
 }
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "HiRISE Local Set DEM",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[HiRISE DEM layer for corresponding Local Set imager. This map is
     hosted by ESRI.]],
   Author = "USGS",
   URL = "https://www.uahirise.org",
-  License = "Esri Master License Agreement",
-  Identifiers = {"HiRISE-LS-DEM"}
+  License = "Esri Master License Agreement"
 }
 
 

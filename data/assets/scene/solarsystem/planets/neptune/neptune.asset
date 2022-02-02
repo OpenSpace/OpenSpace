@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
@@ -53,15 +52,26 @@ local NeptuneLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Neptune)
+  openspace.addSceneGraphNode(NeptuneLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NeptuneLabel)
+  openspace.removeSceneGraphNode(Neptune)
+end)
+    
+asset.export(Neptune)
+asset.export(NeptuneLabel)
+
 
 
 asset.meta = {
   Name = "Neptune",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Neptune globe, and main planet label.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Neptune"}
+  License = "MIT license"
 }

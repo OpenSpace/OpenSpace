@@ -1,6 +1,5 @@
 -- This is a blank scene that that just sets up the default menus/dasboard/keys, etc.
 
-local assetHelper = asset.require("util/asset_helper")
 local propertyHelper = asset.require("util/property_helper")
 
 -- Specifying which other assets should be loaded in this scene
@@ -59,9 +58,9 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_trails.Identifier)
+  openspace.action.removeAction(toggle_trails)
   openspace.clearKey(toggle_trails.Key)
 
-  openspace.action.removeAction(toggle_planet_labels.Identifier)
+  openspace.action.removeAction(toggle_planet_labels)
   openspace.clearKey(toggle_planet_labels.Key)
 end)

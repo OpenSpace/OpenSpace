@@ -863,8 +863,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
-                "string",
-                "Removes the SceneGraphNode identified by name"
+                "(string, table)",
+                "Removes the SceneGraphNode identified by name or by extracting the "
+                "'Identifier' key if the parameter is a table"
             },
             {
                 "removeSceneGraphNodesFromRegex",

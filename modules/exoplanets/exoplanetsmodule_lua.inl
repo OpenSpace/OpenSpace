@@ -597,6 +597,12 @@ int removeExoplanetSystem(lua_State* L) {
 std::vector<std::string> hostStarsWithSufficientData() {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
+    if (!module->hasDataFiles()) {
+        // If no data file path has been configured at all, we just bail out early here
+        LINFO("No data path was configured for the exoplanets");
+        return {};
+    }
+
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {

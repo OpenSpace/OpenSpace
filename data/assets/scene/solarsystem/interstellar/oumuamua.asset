@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
@@ -25,7 +24,9 @@ local OumuamuaTrail = {
   },
   GUI = {
     Name = "'Oumuamua Trail",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[Trail of 'Oumuamua from 2014 JAN 01 00:00:00 to 2023 JAN 01 00:00:00.
+     Data from JPL Horizons']],
   }
 }
 
@@ -40,16 +41,30 @@ local OumuamuaPosition = {
   },
   GUI = {
     Name = "'Oumuamua",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Description = [[ Position of 'Oumuamua from 2014 JAN 01 00:00:00 to 2023 JAN 01 
+     00:00:00. Data from JPL Horizons']],
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OumuamuaPosition)
+  openspace.addSceneGraphNode(OumuamuaTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OumuamuaTrail)
+  openspace.removeSceneGraphNode(OumuamuaPosition)
+end)
+    
+asset.export(OumuamuaPosition)
+asset.export(OumuamuaTrail)
+
 
 
 asset.meta = {
   Name = "'Oumuamua",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ This asset contains the trail and position of 'Oumuamua from 2014
     JAN 01 00:00:00 to 2023 JAN 01 00:00:00. Data from JPL Horizons']],
   Author = "OpenSpace Team",

@@ -196,15 +196,23 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_habitableZoneOpacity);
 }
 
+bool ExoplanetsModule::hasDataFiles() const {
+    return !_exoplanetsDataFolder.value().empty();
+}
+
 std::string ExoplanetsModule::exoplanetsDataPath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
     ).string();
 }
 
 std::string ExoplanetsModule::lookUpTablePath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
 }
 

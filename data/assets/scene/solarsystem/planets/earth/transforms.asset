@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -73,21 +72,33 @@ local EarthIAU = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  EarthBarycenter,
-  EarthCenter,
-  EarthInertial,
-  EarthIAU
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthBarycenter)
+  openspace.addSceneGraphNode(EarthCenter)
+  openspace.addSceneGraphNode(EarthInertial)
+  openspace.addSceneGraphNode(EarthIAU)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthIAU)
+  openspace.removeSceneGraphNode(EarthInertial)
+  openspace.removeSceneGraphNode(EarthCenter)
+  openspace.removeSceneGraphNode(EarthBarycenter)
+end)
+    
+asset.export(EarthBarycenter)
+asset.export(EarthCenter)
+asset.export(EarthInertial)
+asset.export(EarthIAU)
+
 
 
 asset.meta = {
   Name = "Earth Transforms",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Earth transforms: Earth Barycenter, Earth Center, Earth Inertial, 
     Earth IAU. A scene graph node is created for each transform.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"EarthBarycenter", "EarthCenter", "EarthInertial", "EarthIAU"}
+  License = "MIT license"
 }

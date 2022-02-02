@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -85,4 +84,15 @@ local CeresTrail = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Ceres, CeresTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Ceres)
+  openspace.addSceneGraphNode(CeresTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(CeresTrail)
+  openspace.removeSceneGraphNode(Ceres)
+end)
+    
+asset.export(Ceres)
+asset.export(CeresTrail)

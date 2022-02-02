@@ -21,21 +21,25 @@ local layer = {
     URL). Data Reference: (See URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Mola Elevation [Sweden]",
-  Version = "1.0",
+  Version = "1.1",
   Author = "USGS",
   Description = [[ Global elevation layer for Mars. This layer is hosted on the
     OpenSpace server in Sweden.]],
   URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
     "Mars_MGS_MOLA_DEM_mosaic_global_463m",
-  License = "NASA/PDS",
-  Identifiers = {"Mola_Europe"}
+  License = "NASA/PDS"
 }

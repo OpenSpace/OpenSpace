@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
+#include <unordered_map>
 
 namespace {
     constexpr const char* _loggerCat = "HttpSynchronization";

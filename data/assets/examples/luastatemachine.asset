@@ -33,14 +33,14 @@ function previous()
   stateMachine.goToPreviousState()
 end
 
-asset.onInitialize(function ()
+asset.onInitialize(function()
   stateMachine = stateMachineHelper.createStateMachine(states)
   openspace.bindKey("RIGHT", "next()")
   openspace.bindKey("LEFT", "previous()")
 end)
 
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   stateMachine = nil
   openspace.clearKey("RIGHT")
   openspace.clearKey("LEFT")
