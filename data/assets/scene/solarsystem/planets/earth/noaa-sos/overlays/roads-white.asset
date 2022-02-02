@@ -25,11 +25,11 @@ local layer = {
 }
 
 asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
 end)
 
 asset.export(layer)

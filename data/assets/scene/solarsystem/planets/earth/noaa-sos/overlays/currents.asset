@@ -38,15 +38,15 @@ local layer_labels = {
 }
 
 asset.onInitialize(function() 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_combined)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_currents)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_labels)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_combined)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_currents)
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer_labels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_combined)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_currents)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_labels)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer_combined)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer_currents)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer_labels)
 end)
 
 asset.export(layer_combined)
