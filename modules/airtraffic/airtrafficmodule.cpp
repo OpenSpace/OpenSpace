@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,20 +23,15 @@
  ****************************************************************************************/
 
 #include <modules/airtraffic/airtrafficmodule.h>
+
 #include <modules/airtraffic/rendering/renderableairtrafficlive.h>
 #include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
 #include <modules/airtraffic/rendering/renderableairtrafficbound.h>
-
 #include <openspace/rendering/renderable.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
-
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
-
 
 AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
 
@@ -45,7 +40,9 @@ void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableAirTrafficLive>("RenderableAirTrafficLive");
-    fRenderable->registerClass<RenderableAirTrafficHistorical>("RenderableAirTrafficHistorical");
+    fRenderable->registerClass<RenderableAirTrafficHistorical>(
+        "RenderableAirTrafficHistorical"
+    );
     fRenderable->registerClass<RenderableAirTrafficBound>("RenderableAirTrafficBound");
 }
 
@@ -56,12 +53,5 @@ std::vector<documentation::Documentation> AirTrafficModule::documentations() con
         RenderableAirTrafficBound::Documentation()
     };
 }
-
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic";
-    return res;
-}
-
 
 } // namespace openspace

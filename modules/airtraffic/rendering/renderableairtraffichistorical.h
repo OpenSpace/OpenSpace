@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,21 @@
 #ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICHISTORICAL___H__
 #define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICHISTORICAL___H__
 
-#include <iomanip>
 #include <openspace/rendering/renderable.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/opengl/uniformcache.h>
+
 #include <openspace/util/time.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/optionproperty.h>
+#include <ghoul/misc/csvreader.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <future>
-
+#include <iomanip>
 
 namespace ghoul::filesystem { class File; }
+
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -48,10 +49,8 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-// Defines a date
-// with only year, month, and day.
-// Also defines operator==, operator!=
-// and operator=
+// Defines a date with only year, month, and day.
+//  Also defines operator==, operator!= and operator=
 struct Date {
     int year = 0;
     int month = 0;
@@ -60,7 +59,6 @@ struct Date {
     Date() = default;
 
     Date(double timeNow) {
-
         std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
         tm* tempTime = gmtime(&date);
 
@@ -71,7 +69,7 @@ struct Date {
 
     Date getTomorrow() {
         const int days[12] = {
-        31,28,31,30,31,30,31,31,30,31,30,31
+            31,28,31,30,31,30,31,31,30,31,30,31
         };
 
         // Just blindly add a day with no checks.
@@ -105,7 +103,7 @@ struct Date {
 
     Date getYesterday() {
         const int days[12] = {
-        31,28,31,30,31,30,31,31,30,31,30,31
+            31,28,31,30,31,30,31,31,30,31,30,31
         };
 
         // Just blindly add a day with no checks
@@ -171,8 +169,8 @@ public:
 
     bool fetchData(const Date& date); 
     
-    void updateBuffers(const Date& date, const bool async = false);
-    void updateBuffersReverse(const Date& date, const bool async = false);
+    void updateBuffers(const Date& date, bool async = false);
+    void updateBuffersReverse(const Date& date, bool async = false);
 
     static documentation::Documentation Documentation();
 
@@ -197,9 +195,7 @@ private:
         GLuint vertexArray;
         GLuint vertexBuffer;
 
-        Buffer(int idx)
-        :vertexArray(idx), vertexBuffer(idx)
-        {}
+        Buffer(int idx) : vertexArray(idx), vertexBuffer(idx) {}
     };
 
     void fillBuffer(Buffer& buffer);
@@ -209,7 +205,7 @@ private:
     properties::FloatProperty _opacity;
     properties::IntProperty _nRenderedFlights;
 
-    // Initilising backend storage for 
+    // Initializing backend storage for 
     // vertex buffer object containing all points
     Buffer _bufferA = Buffer(0);
     Buffer _bufferB = Buffer(1); 
@@ -217,7 +213,8 @@ private:
 
     // Initilize shader program an set Uniforms 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time, cameraPosition, modelTransform, clipping) _uniformCache;
+    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold,
+        time, cameraPosition, modelTransform, clipping) _uniformCache;
     
     // Date structs,
     // these will correspond to "today", "tomorrow",

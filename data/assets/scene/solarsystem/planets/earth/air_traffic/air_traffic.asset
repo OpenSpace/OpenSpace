@@ -2,47 +2,62 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local LiveAirTraffic = {
-    Identifier = "LiveAirTraffic",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderableAirTrafficLive",
-    },
-    GUI = {
-        Name = "Live Air Traffic",
-        Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = [[ Live air traffic.]],
-    }
+  Identifier = "LiveAirTraffic",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableAirTrafficLive",
+  },
+  GUI = {
+    Name = "Live Air Traffic",
+    Path = "/Solar System/Planets/Earth/Air Traffic",
+    Description = [[ Live air traffic.]],
+  }
 }
 
 local HistoricalAirTraffic = {
-    Identifier = "HistoricalAirTraffic",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderableAirTrafficHistorical",
-    },
-    TimeFrame = {
-        Type = "TimeFrameInterval",
-        Start = "2019-01-01",
-        End = "2021-01-31"
-    },
-    GUI = {
-        Name = "Historical Air Traffic",
-        Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = [[ Daily accumulated flights.]],
-    }
+  Identifier = "HistoricalAirTraffic",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableAirTrafficHistorical",
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2019-01-01",
+    End = "2021-01-31"
+  },
+  GUI = {
+    Name = "Historical Air Traffic",
+    Path = "/Solar System/Planets/Earth/Air Traffic",
+    Description = [[ Daily accumulated flights.]],
+  }
 }
 
 local BoundAirTraffic = {
-    Identifier = "BoundAirTraffic",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderableAirTrafficBound",
-    },
-    GUI = {
-        Name = "Air Traffic Boundaries",
-        Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = [[ Spatial filtering for air traffic.]],
-    }
+  Identifier = "BoundAirTraffic",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableAirTrafficBound",
+  },
+  GUI = {
+    Name = "Air Traffic Boundaries",
+    Path = "/Solar System/Planets/Earth/Air Traffic",
+    Description = [[ Spatial filtering for air traffic.]],
+  }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { LiveAirTraffic, HistoricalAirTraffic, BoundAirTraffic })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(LiveAirTraffic)
+  openspace.addSceneGraphNode(HistoricalAirTraffic)
+  openspace.addSceneGraphNode(BoundAirTraffic)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BoundAirTraffic)
+  openspace.removeSceneGraphNode(HistoricalAirTraffic)
+  openspace.removeSceneGraphNode(LiveAirTraffic)
+
+end)
+
+asset.export(LiveAirTraffic)
+asset.export(HistoricalAirTraffic)
+asset.export(BoundAirTraffic)

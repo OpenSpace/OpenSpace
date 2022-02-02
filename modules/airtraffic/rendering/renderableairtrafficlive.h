@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,20 @@
 #define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <ghoul/opengl/uniformcache.h>
+
 #include <openspace/json.h>
-#include <openspace/util/httprequest.h>
-#include <openspace/util/time.h>
-#include <future>
-#include <list>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/util/httprequest.h>
+#include <openspace/util/time.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <future>
+#include <list>
 
 namespace ghoul::filesystem { class File; }
+
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -46,8 +48,6 @@ namespace ghoul::opengl {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-using json = nlohmann::json;
-using namespace std::chrono_literals;
 
 class RenderableAirTrafficLive : public Renderable {
 public:
@@ -57,9 +57,8 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    json fetchData();
+    nlohmann::json fetchData();
 
-    json parseData(SyncHttpMemoryDownload& response);
 
     bool isReady() const override;
 
@@ -70,7 +69,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
+    nlohmann::json parseData(std::string_view data);
+    
     static const int _TRAILSIZE = 10;
     static const int _THRESHOLD = -9999;
     properties::FloatProperty _lineWidth;
@@ -89,14 +89,15 @@ private:
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, trailSize, resolution, lineWidth, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
+    UniformCache(modelViewProjection, trailSize, resolution, lineWidth, color, opacity,
+        latitudeThreshold, longitudeThreshold) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
     
-    std::future<json> _future;
+    std::future<nlohmann::json> _future;
     bool _isDataLoading = false;
-    json _data = json({});
+    nlohmann::json _data = nlohmann::json();
 
     // For storing the trails of each aircraft
     std::unordered_map<std::string, std::list<AircraftVBOLayout>> _aircraftMap;

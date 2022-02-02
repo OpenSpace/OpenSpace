@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,16 @@
 #define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICBOUND___H__
 
 #include <openspace/rendering/renderable.h>
-#include <ghoul/opengl/uniformcache.h>
+
 #include <openspace/util/time.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
+
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -63,7 +65,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _color;
     properties::FloatProperty _opacity;
@@ -83,11 +84,11 @@ private:
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, color, opacity, latitudeThreshold, longitudeThreshold, cameraPosition, modelTransform, clipping) _uniformCache;
+    UniformCache(modelViewProjection, color, opacity, latitudeThreshold,
+        longitudeThreshold, cameraPosition, modelTransform, clipping) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-    
 };
 
 } // namespace openspace

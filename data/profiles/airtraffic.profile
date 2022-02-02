@@ -3,11 +3,6 @@
     "base",
     "scene/solarsystem/planets/earth/air_traffic/air_traffic",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/debris/debris_asat",
-    "scene/solarsystem/planets/earth/satellites/debris/debris_breezem",
-    "scene/solarsystem/planets/earth/satellites/debris/debris_fengyun",
-    "scene/solarsystem/planets/earth/satellites/debris/debris_iridium33",
-    "scene/solarsystem/planets/earth/satellites/debris/debris_kosmos2251",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "camera": {
@@ -39,39 +34,9 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "documentation": "Toggle trails on or off for satellites around Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "S",
-      "name": "Toggle satellite trails",
-      "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-    },
-    {
-      "documentation": "Refocuses the camera on the ISS",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "I",
-      "name": "Focus ISS",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'ISS');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    },
-    {
-      "documentation": "Retargets the camera on Earth",
-      "gui_path": "/Earth",
-      "is_local": false,
-      "key": "HOME",
-      "name": "Focus on Earth",
-      "script": "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
-    }
-  ],
+  "keybindings": [],
   "mark_nodes": [
-    "Earth",
-    "Mars",
-    "Moon",
-    "Sun",
-    "Venus",
-    "ISS"
+    "Earth"
   ],
   "meta": {
     "author": "OpenSpace Team",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,45 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/airtraffic/rendering/renderableairtrafficlive.h>
-#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
 
+#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/httprequest.h>
-#include <iostream>
-#include <future>
+#include <ghoul/filesystem/filesystem.h>
 #include <chrono>
-#include<fstream>
-
-#include <sstream>
-
 #include <iomanip>
-
+#include <iostream>
+#include <fstream>
+#include <future>
+#include <sstream>
 
 using namespace std::chrono;
 
 namespace ghoul::filesystem { class File; }
+
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
 
 namespace {
-    
     constexpr const std::array<const char*, 8> UniformNames = {
-        "modelViewProjection", 
-        "trailSize", 
-        "resolution", 
-        "lineWidth", 
-        "color",
-        "opacity",
-        "latitudeThreshold",
-        "longitudeThreshold"
+        "modelViewProjection", "trailSize", "resolution", "lineWidth", "color",
+        "opacity", "latitudeThreshold", "longitudeThreshold"
     };
 
     constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
@@ -90,10 +81,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderedAircraftsInfo = {
        "RenderedAircraft",
        "Rendered Aircraft",
-       "The number of aircraft in traffic right now. This value is not affected by filtering."
+       "The number of aircraft in traffic right now. This value is not affected by "
+       "filtering."
     };
 } // namespace
-
 
 namespace openspace {
 
@@ -137,246 +128,261 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _nRenderedAircraft(RenderedAircraftsInfo, 0, 0, 10000)
-    {
-        addProperty(_lineWidth);
-        addProperty(_color);
-        addProperty(_opacity);
-        _nRenderedAircraft.setReadOnly(true);
-        addProperty(_nRenderedAircraft);
+{
+    addProperty(_lineWidth);
+    addProperty(_color);
+    addProperty(_opacity);
+
+    _nRenderedAircraft.setReadOnly(true);
+    addProperty(_nRenderedAircraft);
  
-        setRenderBin(RenderBin::PostDeferredTransparent);
+    setRenderBin(RenderBin::PostDeferredTransparent);
+}
+
+void RenderableAirTrafficLive::initializeGL() {
+    glGenVertexArrays(1, &_vertexArray);
+    glGenBuffers(1, &_vertexBuffer);
+
+    // Setup shaders
+    _shader = global::renderEngine->buildRenderProgram(
+        "AirTrafficLiveProgram",
+        absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_vs.glsl"),
+        absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_fs.glsl"),
+        absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_ge.glsl")
+    );
+        
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        
+    // First data fetch 
+    _data = fetchData();
+    updateBuffers();
+};
+
+void RenderableAirTrafficLive::deinitializeGL() {
+    glDeleteBuffers(1, &_vertexBuffer);
+    glDeleteVertexArrays(1, &_vertexArray);
+        
+    global::renderEngine->removeRenderProgram(_shader.get());
+    _shader = nullptr;
+};
+
+bool RenderableAirTrafficLive::isReady() const {
+    return _shader != nullptr;
+};
+
+void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks&) {
+    // Return if data is empty or time is from more than 3 minutes ago
+    if (_data.empty() ||
+        std::abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3)
+    { 
+        _nRenderedAircraft = 0;
+        return;
     }
 
-    void RenderableAirTrafficLive::initializeGL() {
-        glGenVertexArrays(1, &_vertexArray);
-        glGenBuffers(1, &_vertexBuffer);
-
-        // Setup shaders
-        _shader = global::renderEngine->buildRenderProgram(
-            "AirTrafficLiveProgram",
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_vs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_fs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_ge.glsl")
+    // Trigger data update
+    if (std::abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
+        LINFOC("RenderableAirTrafficLive", "Data loading initialized");
+        _future = std::async(
+            std::launch::async,
+            &RenderableAirTrafficLive::fetchData,
+            this
         );
-        
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-        
-        // First data fetch 
-        _data = fetchData();
+        _isDataLoading = true;
+    }
+
+    // Check if new data finished loading. Update buffers ONLY if finished
+    if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { 
+        _data = _future.get();
         updateBuffers();
-    };
-
-    void RenderableAirTrafficLive::deinitializeGL() {
-        glDeleteBuffers(1, &_vertexBuffer);
-        glDeleteVertexArrays(1, &_vertexArray);
-        
-        global::renderEngine->removeRenderProgram(_shader.get());
-        _shader = nullptr;
-        
-        return;
-    };
-
-    bool RenderableAirTrafficLive::isReady() const {
-        return _shader != nullptr;
-    };
-
-    void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks& rendererTask) {
-
-        // Return if data is empty or time is from more than 3 minutes ago
-        if (_data.empty() || abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3) { 
-            _nRenderedAircraft = 0;
-            return;
-        }
-
-        // Trigger data update
-        if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
-            std::cout << "Data loading initialized... ";
-            _future = std::async(std::launch::async, &RenderableAirTrafficLive::fetchData, this);
-            _isDataLoading = true;
-        }
-
-        // Check if new data finished loading. Update buffers ONLY if finished
-        if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { 
-            _data = _future.get();
-            updateBuffers();
-            std::cout << "finished. Time since last update: " << abs(_deltaTime - data.time.j2000Seconds()) << " seconds." << std::endl;
-            _isDataLoading = false;
-            _deltaTime = data.time.j2000Seconds();
-        }
-
-        _shader->activate();
-        
-        glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-        glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
-        _shader->setUniform(
-            _uniformCache.modelViewProjection,
-            data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        LINFOC(
+            "RenderableAirTrafficLive",
+            fmt::format(
+                "Loading finished. Time since last update: {} seconds",
+                abs(_deltaTime - data.time.j2000Seconds())
+            )
         );
+        _isDataLoading = false;
+        _deltaTime = data.time.j2000Seconds();
+    }
 
-        _shader->setUniform(_uniformCache.color, _color);
-        _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.latitudeThreshold, RenderableAirTrafficBound::getLatBound());
-        _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
+    _shader->activate();
+        
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform(
+        _uniformCache.modelViewProjection,
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
+
+    _shader->setUniform(_uniformCache.color, _color);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(
+        _uniformCache.latitudeThreshold,
+        RenderableAirTrafficBound::getLatBound()
+    );
+    _shader->setUniform(
+        _uniformCache.longitudeThreshold,
+        RenderableAirTrafficBound::getLonBound()
+    );
   
-        const GLsizei nAircraft = static_cast<GLsizei>(_data["states"].size());
-        _shader->setUniform(
-            _uniformCache.trailSize,
-            static_cast<float>(_TRAILSIZE)
-        );
+    const GLsizei nAircraft = static_cast<GLsizei>(_data["states"].size());
+    _shader->setUniform(
+        _uniformCache.trailSize,
+        static_cast<float>(_TRAILSIZE)
+    );
 
 // Fix else statement
 //#if !defined(__APPLE__)
-        glm::ivec2 resolution = global::renderEngine->renderingResolution();
-        _shader->setUniform(_uniformCache.resolution, resolution);
-        _shader->setUniform(_uniformCache.lineWidth, _lineWidth);
+    glm::ivec2 resolution = global::renderEngine->renderingResolution();
+    _shader->setUniform(_uniformCache.resolution, resolution);
+    _shader->setUniform(_uniformCache.lineWidth, _lineWidth);
 //#endif
 
-        glBindVertexArray(_vertexArray);
-        glLineWidth(_lineWidth);
+    glBindVertexArray(_vertexArray);
+    glLineWidth(_lineWidth);
 
-        // Upper limit on number of aircraft
-        GLint firsts[10000];
-        GLsizei counts[10000];
+    // Upper limit on number of aircraft
+    GLint firsts[10000];
+    GLsizei counts[10000];
 
-        for (int i = 0; i < nAircraft; i++) {
-            firsts[i] = _TRAILSIZE * i;
-            counts[i] = _TRAILSIZE;
-        }
+    for (int i = 0; i < nAircraft; i++) {
+        firsts[i] = _TRAILSIZE * i;
+        counts[i] = _TRAILSIZE;
+    }
 
-        glMultiDrawArrays(GL_LINE_STRIP, firsts, counts, nAircraft);
+    glMultiDrawArrays(GL_LINE_STRIP, firsts, counts, nAircraft);
+    _nRenderedAircraft = nAircraft;
+    glBindVertexArray(0);
+    _shader->deactivate();
+};
 
-        _nRenderedAircraft = nAircraft;
-
-        glBindVertexArray(0);
-
-        _shader->deactivate();
-    };
-
-    json RenderableAirTrafficLive::parseData(SyncHttpMemoryDownload& response) {
-
-        // Callback to handle NULL data
-        json::parser_callback_t ReplaceNullCallBack = [this](int depth, json::parse_event_t event, json& parsed) {
-            if (event == json::parse_event_t::value and parsed == nullptr) parsed = _THRESHOLD;
+nlohmann::json RenderableAirTrafficLive::parseData(std::string_view data) {
+    using namespace nlohmann;
+    // Callback to handle NULL data
+    json::parser_callback_t ReplaceNullCallBack =
+        [this](int depth, json::parse_event_t event, json& parsed) {
+            if (event == json::parse_event_t::value && parsed == nullptr) {
+                parsed = _THRESHOLD;
+            }
             return true;
         };
 
-        return json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
+    return json::parse(data.begin(), data.end(), ReplaceNullCallBack);
 
-        // JSON structure:
-        // time: int,
-        // states: 
-        // [[    
-        //      (0: icao24)             string,
-        //      (1: callsign)           string, can be null
-        //      (2: origin_country)     string,
-        //      (3: time_position)      int,    can be null
-        //      (4: last_contact)       int,
-        //      (5: longitude)          float,  can be null
-        //      (6: latitude)           float,  can be null
-        //      (7: baro_altitude)      float,  can be null
-        //      (8: on_ground)          bool,
-        //      (9: velocity)           float,  can be null
-        //      (10: true_track)        float,  can be null
-        //      (11: vertical_rate)     float,  can be null
-        //      (12: sensors)           int[],  can be null 
-        //      (13: geo_altitude)      float,  can be null
-        //      (14: squawk)            string, can be null
-        //      (15: spi)               bool,
-        //      (16: position_source)   int,
-        //  ],
-        //  [
-        //      .
-        //      .
-        //      .
-        //  ],
-        //  .
-        //  .
-        //  .
-        // ]
-        // Example, get latitude for flight#: jsonData["states"][flight#][6]
+    // JSON structure:
+    // time: int,
+    // states: 
+    // [[    
+    //      (0: icao24)             string,
+    //      (1: callsign)           string, can be null
+    //      (2: origin_country)     string,
+    //      (3: time_position)      int,    can be null
+    //      (4: last_contact)       int,
+    //      (5: longitude)          float,  can be null
+    //      (6: latitude)           float,  can be null
+    //      (7: baro_altitude)      float,  can be null
+    //      (8: on_ground)          bool,
+    //      (9: velocity)           float,  can be null
+    //      (10: true_track)        float,  can be null
+    //      (11: vertical_rate)     float,  can be null
+    //      (12: sensors)           int[],  can be null 
+    //      (13: geo_altitude)      float,  can be null
+    //      (14: squawk)            string, can be null
+    //      (15: spi)               bool,
+    //      (16: position_source)   int,
+    //  ],
+    //  [
+    //      .
+    //      .
+    //      .
+    //  ],
+    //  .
+    //  .
+    //  .
+    // ]
+    // Example, get latitude for flight#: jsonData["states"][flight#][6]
+}
+
+nlohmann::json RenderableAirTrafficLive::fetchData() {
+    std::future<DownloadManager::MemoryFile> f = global::downloadManager->fetchFile(_url);
+
+    while (!DownloadManager::futureReady(f)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    json RenderableAirTrafficLive::fetchData() {
-
-        // Start timer
-        auto start = std::chrono::steady_clock::now();
-        
-        
-        SyncHttpMemoryDownload response(_url);
-        HttpRequest::RequestOptions timeout;
-        timeout.requestTimeoutSeconds = 0; // No timeout limit
-        
-        response.download(timeout);
-        
-        
-        if(response.hasSucceeded())
-            return parseData(response);
-
-        // If new data is inaccessible, return current data
-        return _data;
+    if (f.valid()) {
+        DownloadManager::MemoryFile mf = f.get();
+        if (!mf.corrupted) {
+            std::string_view data = std::string_view(mf.buffer, mf.size);
+            return parseData(data);
+        }
     }
 
-    void RenderableAirTrafficLive::updateBuffers() {
-        
-        _vertexBufferData.clear();
-        _vertexBufferData.resize(_TRAILSIZE * _data["states"].size());
+    // If new data is inaccessible, return current data
+    return _data;
+}
 
-        size_t vertexBufIdx = 0;
+void RenderableAirTrafficLive::updateBuffers() {
+    _vertexBufferData.clear();
+    _vertexBufferData.resize(_TRAILSIZE * _data["states"].size());
 
-        AircraftVBOLayout temp;
+    size_t vertexBufIdx = 0;
 
-        for (auto& aircraft : _data["states"]) {
-            // Extract data and add to vertex buffer
-            std::string icao24 = aircraft[0];
+    AircraftVBOLayout temp;
 
-            temp.latitude = static_cast<float>(aircraft[6]);  
-            temp.longitude = static_cast<float>(aircraft[5]);
-            temp.barometricAltitude = static_cast<float>(aircraft[7]);
+    for (const nlohmann::json& aircraft : _data["states"]) {
+        // Extract data and add to vertex buffer
+        std::string icao24 = aircraft[0];
 
-            while(_aircraftMap[icao24].size() < _TRAILSIZE) {
-                _aircraftMap[icao24].push_front(temp);
-            }
+        temp.latitude = static_cast<float>(aircraft[6]);  
+        temp.longitude = static_cast<float>(aircraft[5]);
+        temp.barometricAltitude = static_cast<float>(aircraft[7]);
 
-            if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD && temp.barometricAltitude > _THRESHOLD) {
-                _aircraftMap[icao24].pop_back();
-                _aircraftMap[icao24].push_front(temp);
-            }
-
-            for (auto& ac : _aircraftMap[icao24]) {
-                _vertexBufferData[vertexBufIdx] = ac;
-                vertexBufIdx++;
-            }
+        while (_aircraftMap[icao24].size() < _TRAILSIZE) {
+            _aircraftMap[icao24].push_front(temp);
         }
 
+        if (temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD &&
+            temp.barometricAltitude > _THRESHOLD)
+        {
+            _aircraftMap[icao24].pop_back();
+            _aircraftMap[icao24].push_front(temp);
+        }
 
-        glBindVertexArray(_vertexArray);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _vertexBufferData.size() * sizeof(AircraftVBOLayout),
-            _vertexBufferData.data(),
-            GL_STATIC_DRAW
-        );
-
-        // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0, 
-            3, 
-            GL_FLOAT, 
-            GL_FALSE, 
-            sizeof(AircraftVBOLayout),  
-            nullptr
-        );
-
-        glBindVertexArray(0);
+        for (const AircraftVBOLayout& ac : _aircraftMap[icao24]) {
+            _vertexBufferData[vertexBufIdx] = ac;
+            vertexBufIdx++;
+        }
     }
-} // namespace openspace
 
+
+    glBindVertexArray(_vertexArray);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexBufferData.size() * sizeof(AircraftVBOLayout),
+        _vertexBufferData.data(),
+        GL_STATIC_DRAW
+    );
+
+    // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0, 
+        3, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(AircraftVBOLayout),  
+        nullptr
+    );
+
+    glBindVertexArray(0);
+}
+
+} // namespace openspace
