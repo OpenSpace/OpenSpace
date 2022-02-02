@@ -309,18 +309,16 @@ nlohmann::json RenderableAirTrafficLive::parseData(std::string_view data) {
 }
 
 nlohmann::json RenderableAirTrafficLive::fetchData() {
-    std::future<DownloadManager::MemoryFile> f = global::downloadManager->fetchFile(_url);
+    HttpMemoryDownload download = HttpMemoryDownload(_url);
+    download.start();
+    download.wait();
 
-    while (!DownloadManager::futureReady(f)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-
-    if (f.valid()) {
-        DownloadManager::MemoryFile mf = f.get();
-        if (!mf.corrupted) {
-            std::string_view data = std::string_view(mf.buffer, mf.size);
-            return parseData(data);
-        }
+    if (download.hasSucceeded()) {
+        std::string_view data = std::string_view(
+            download.downloadedData().data(),
+            download.downloadedData().size()
+        );
+        return parseData(data);
     }
 
     // If new data is inaccessible, return current data
