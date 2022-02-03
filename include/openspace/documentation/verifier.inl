@@ -24,8 +24,387 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/misc/assert.h>
 #include <iterator>
 #include <sstream>
+
+template <>
+struct std::less<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x < b.x && a.x < b.y;
+    }
+};
+
+template <>
+struct std::less<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z;
+    }
+};
+
+template <>
+struct std::less<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z && a.w < b.w;
+    }
+};
+
+template <>
+struct std::less<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x < b.x && a.x < b.y;
+    }
+};
+
+template <>
+struct std::less<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z;
+    }
+};
+
+template <>
+struct std::less<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z && a.w < b.w;
+    }
+};
+
+template <>
+struct std::less<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x < b.x && a.x < b.y;
+    }
+};
+
+template <>
+struct std::less<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z;
+    }
+};
+
+template <>
+struct std::less<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x < b.x && a.x < b.y && a.z < b.z && a.w < b.w;
+    }
+};
+
+template <>
+struct std::less_equal<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x <= b.x && a.x <= b.y;
+    }
+};
+
+template <>
+struct std::less_equal<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z;
+    }
+};
+
+template <>
+struct std::less_equal<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z && a.w <= b.w;
+    }
+};
+
+template <>
+struct std::less_equal<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x <= b.x && a.x <= b.y;
+    }
+};
+
+template <>
+struct std::less_equal<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z;
+    }
+};
+
+template <>
+struct std::less_equal<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z && a.w <= b.w;
+    }
+};
+
+template <>
+struct std::less_equal<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x <= b.x && a.x <= b.y;
+    }
+};
+
+template <>
+struct std::less_equal<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z;
+    }
+};
+
+template <>
+struct std::less_equal<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x <= b.x && a.x <= b.y && a.z <= b.z && a.w <= b.w;
+    }
+};
+
+template <>
+struct std::greater<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x > b.x && a.x > b.y;
+    }
+};
+
+template <>
+struct std::greater<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z;
+    }
+};
+
+template <>
+struct std::greater<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z && a.w > b.w;
+    }
+};
+
+template <>
+struct std::greater<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x > b.x && a.x > b.y;
+    }
+};
+
+template <>
+struct std::greater<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z;
+    }
+};
+
+template <>
+struct std::greater<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z && a.w > b.w;
+    }
+};
+
+template <>
+struct std::greater<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x > b.x && a.x > b.y;
+    }
+};
+
+template <>
+struct std::greater<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z;
+    }
+};
+
+template <>
+struct std::greater<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x > b.x && a.x > b.y && a.z > b.z && a.w > b.w;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x >= b.x && a.x >= b.y;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z && a.w >= b.w;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x >= b.x && a.x >= b.y;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z && a.w >= b.w;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x >= b.x && a.x >= b.y;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z;
+    }
+};
+
+template <>
+struct std::greater_equal<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x >= b.x && a.x >= b.y && a.z >= b.z && a.w >= b.w;
+    }
+};
+
+template <>
+struct std::equal_to<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x == b.x && a.x == b.y;
+    }
+};
+
+template <>
+struct std::equal_to<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z;
+    }
+};
+
+template <>
+struct std::equal_to<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z && a.w == b.w;
+    }
+};
+
+template <>
+struct std::equal_to<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x == b.x && a.x == b.y;
+    }
+};
+
+template <>
+struct std::equal_to<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z;
+    }
+};
+
+template <>
+struct std::equal_to<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z && a.w == b.w;
+    }
+};
+
+template <>
+struct std::equal_to<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x == b.x && a.x == b.y;
+    }
+};
+
+template <>
+struct std::equal_to<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z;
+    }
+};
+
+template <>
+struct std::equal_to<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x == b.x && a.x == b.y && a.z == b.z && a.w == b.w;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::vec2> {
+    bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+        return a.x != b.x && a.x != b.y;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::vec3> {
+    bool operator()(const glm::vec3& a, const glm::vec3& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::vec4> {
+    bool operator()(const glm::vec4& a, const glm::vec4& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z && a.w != b.w;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::ivec2> {
+    bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
+        return a.x != b.x && a.x != b.y;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::ivec3> {
+    bool operator()(const glm::ivec3& a, const glm::ivec3& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::ivec4> {
+    bool operator()(const glm::ivec4& a, const glm::ivec4& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z && a.w != b.w;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::dvec2> {
+    bool operator()(const glm::dvec2& a, const glm::dvec2& b) const {
+        return a.x != b.x && a.x != b.y;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::dvec3> {
+    bool operator()(const glm::dvec3& a, const glm::dvec3& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z;
+    }
+};
+
+template <>
+struct std::not_equal_to<glm::dvec4> {
+    bool operator()(const glm::dvec4& a, const glm::dvec4& b) const {
+        return a.x != b.x && a.x != b.y && a.z != b.z && a.w != b.w;
+    }
+};
 
 namespace openspace::documentation {
 
@@ -145,7 +524,16 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
     TestResult res = T::operator()(dict, key);
     if (res.success) {
         typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, int>) {
+        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+            val = dict.value<glm::dvec2>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+            val = dict.value<glm::dvec3>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+            val = dict.value<glm::dvec4>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
             bool isInt = modf(d, &intPart) == 0.0;
@@ -165,6 +553,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
         else {
             val = dict.value<typename T::Type>(key);
         }
+
         if (Operator()(val, value)) {
             return { true, {}, {} };
         }
@@ -322,7 +711,30 @@ InRangeVerifier<T>::InRangeVerifier(typename T::Type l, typename T::Type u)
     : lower(std::move(l))
     , upper(std::move(u))
 {
-    ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+    if constexpr (std::is_same_v<IntVector2Verifier, T> ||
+                  std::is_same_v<DoubleVector2Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+    }
+    else if constexpr (std::is_same_v<IntVector3Verifier, T> ||
+                       std::is_same_v<DoubleVector3Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+    }
+    else if constexpr (std::is_same_v<IntVector4Verifier, T> ||
+                       std::is_same_v<DoubleVector4Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        ghoul_assert(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
+    }
+    else {
+        ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+    }
 }
 
 template <typename T>
@@ -332,7 +744,16 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
     TestResult res = T::operator()(dict, key);
     if (res.success) {
         typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, int>) {
+        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+            val = dict.value<glm::dvec2>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+            val = dict.value<glm::dvec3>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+            val = dict.value<glm::dvec4>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
             bool isInt = modf(d, &intPart) == 0.0;
@@ -353,7 +774,9 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             val = dict.value<typename T::Type>(key);
         }
 
-        if (val >= lower && val <= upper) {
+        if (std::greater_equal<typename T::Type>()(val, lower) &&
+            std::less_equal<typename T::Type>()(val, upper))
+        {
             return { true, {}, {} };
         }
         else {
@@ -382,7 +805,30 @@ NotInRangeVerifier<T>::NotInRangeVerifier(typename T::Type l, typename T::Type u
     : lower(std::move(l))
     , upper(std::move(u))
 {
-    ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+    if constexpr (std::is_same_v<IntVector2Verifier, T> ||
+                  std::is_same_v<DoubleVector2Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+    }
+    else if constexpr (std::is_same_v<IntVector3Verifier, T> ||
+                       std::is_same_v<DoubleVector3Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+    }
+    else if constexpr (std::is_same_v<IntVector4Verifier, T> ||
+                       std::is_same_v<DoubleVector4Verifier, T>)
+    {
+        ghoul_assert(lower.x <= upper.x, "lower must be smaller or equal to upper for x");
+        ghoul_assert(lower.y <= upper.y, "lower must be smaller or equal to upper for y");
+        ghoul_assert(lower.z <= upper.z, "lower must be smaller or equal to upper for z");
+        ghoul_assert(lower.w <= upper.w, "lower must be smaller or equal to upper for w");
+    }
+    else {
+        ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
+    }
 }
 
 template <typename T>
@@ -391,7 +837,16 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
     TestResult res = T::operator()(dict, key);
     if (res.success) {
         typename T::Type val;
-        if constexpr (std::is_same_v<typename T::Type, int>) {
+        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+            val = dict.value<glm::dvec2>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+            val = dict.value<glm::dvec3>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+            val = dict.value<glm::dvec4>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
             bool isInt = modf(d, &intPart) == 0.0;
@@ -412,7 +867,12 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             val = dict.value<typename T::Type>(key);
         }
 
-        if (val >= lower && val <= upper) {
+        if (std::less<typename T::Type>()(val, lower) ||
+            std::greater<typename T::Type>()(val, upper))
+        {
+            return { true, {}, {} };
+        }
+        else {
             TestResult r;
             r.success = false;
             TestResult::Offense o;
@@ -420,9 +880,6 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             o.reason = TestResult::Offense::Reason::Verification;
             r.offenses.push_back(o);
             return r;
-        }
-        else {
-            return { true, {}, {} };
         }
     }
     else {
