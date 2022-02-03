@@ -40,6 +40,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemParallelConnection::Documentation() {
     documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.name = "DashboardItemParallelConnection";
     doc.id = "base_dashboarditem_parallelconnection";
     return doc;
 }
