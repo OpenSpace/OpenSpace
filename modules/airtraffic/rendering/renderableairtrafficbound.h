@@ -67,7 +67,6 @@ public:
 private:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _color;
-    properties::FloatProperty _opacity;
     properties::Vec2Property _latitudeThreshold;
     properties::Vec2Property _longitudeThreshold;
 

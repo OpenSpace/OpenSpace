@@ -25,21 +25,12 @@
 #include <modules/airtraffic/rendering/renderableairtrafficlive.h>
 
 #include <modules/airtraffic/rendering/renderableairtrafficbound.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <future>
-#include <sstream>
-
-using namespace std::chrono;
 
 namespace ghoul::filesystem { class File; }
 
@@ -50,8 +41,8 @@ namespace ghoul::opengl {
 
 namespace {
     constexpr const std::array<const char*, 8> UniformNames = {
-        "modelViewProjection", "trailSize", "resolution", "lineWidth", "color",
-        "opacity", "latitudeThreshold", "longitudeThreshold"
+        "modelViewProjection", "trailSize", "resolution", "lineWidth", "color", "opacity",
+        "latitudeThreshold", "longitudeThreshold"
     };
 
     constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
@@ -84,54 +75,36 @@ namespace {
        "The number of aircraft in traffic right now. This value is not affected by "
        "filtering."
     };
+
+    struct [[codegen::Dictionary(RenderableAirTrafficLive)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth [[codegen::greaterequal(1.f)]];
+    };
+#include "renderableairtrafficlive_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableAirTrafficLive::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Air Traffic",
-        "renderableairtraffic",
-        {
-            {
-                URLPathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                URLPathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                ColorInfo.identifier,
-                new Vector3Verifier<double>,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                OpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                OpacityInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>("airtraffic_renderableairtrafficlive");
 }
 
 RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f) // default, min, max 
+    , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _nRenderedAircraft(RenderedAircraftsInfo, 0, 0, 10000)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _color = p.color.value_or(_color);
     addProperty(_color);
-    addProperty(_opacity);
 
     _nRenderedAircraft.setReadOnly(true);
     addProperty(_nRenderedAircraft);
@@ -143,7 +116,6 @@ void RenderableAirTrafficLive::initializeGL() {
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 
-    // Setup shaders
     _shader = global::renderEngine->buildRenderProgram(
         "AirTrafficLiveProgram",
         absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_vs.glsl"),
@@ -191,7 +163,9 @@ void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks&) {
     }
 
     // Check if new data finished loading. Update buffers ONLY if finished
-    if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { 
+    if (_future.valid() &&
+        _future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+    {
         _data = _future.get();
         updateBuffers();
         LINFOC(

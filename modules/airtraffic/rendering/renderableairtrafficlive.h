@@ -28,15 +28,12 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/json.h>
-#include <openspace/properties/optionproperty.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/util/time.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <future>
-#include <list>
 
 namespace ghoul::filesystem { class File; }
 
@@ -57,25 +54,21 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    nlohmann::json fetchData();
-
-
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-
-    void updateBuffers();
     
     static documentation::Documentation Documentation();
 
 private:
+    nlohmann::json fetchData();
     nlohmann::json parseData(std::string_view data);
-    
+    void updateBuffers();
+
     static const int _TRAILSIZE = 10;
     static const int _THRESHOLD = -9999;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _color;
-    properties::FloatProperty _opacity;
     properties::IntProperty _nRenderedAircraft;
 
     struct AircraftVBOLayout {

@@ -27,16 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/util/time.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/optionproperty.h>
-#include <ghoul/misc/csvreader.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <future>
-#include <iomanip>
 
 namespace ghoul::filesystem { class File; }
 
@@ -49,112 +43,6 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-// Defines a date with only year, month, and day.
-//  Also defines operator==, operator!= and operator=
-struct Date {
-    int year = 0;
-    int month = 0;
-    int day = 0;
-
-    Date() = default;
-
-    Date(double timeNow) {
-        std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
-        tm* tempTime = gmtime(&date);
-
-        year = tempTime->tm_year + 1900;
-        month = tempTime->tm_mon + 1;
-        day = tempTime->tm_mday;
-    }
-
-    Date getTomorrow() {
-        const int days[12] = {
-            31,28,31,30,31,30,31,31,30,31,30,31
-        };
-
-        // Just blindly add a day with no checks.
-        Date tomorrow;
-        tomorrow.year = year;
-        tomorrow.month = month;
-        tomorrow.day = day + 1;
-
-        // Allow Feb 29 in leap year if needed.
-        if (tomorrow.month == 2 && tomorrow.day == 29) {
-            if (tomorrow.year % 400 == 0)
-                return tomorrow;
-            if ((tomorrow.year % 4 == 0) && (tomorrow.year % 100 != 0))
-                return tomorrow;
-        }
-
-        // Catch rolling into new month.
-        if (tomorrow.day > days[tomorrow.month - 1]) {
-            tomorrow.day = 1;
-            tomorrow.month++;
-
-            // Catch rolling into new year.
-            if (tomorrow.month == 13) {
-                tomorrow.month = 1;
-                tomorrow.year++;
-            }
-        }
-
-        return tomorrow;
-    }
-
-    Date getYesterday() {
-        const int days[12] = {
-            31,28,31,30,31,30,31,31,30,31,30,31
-        };
-
-        // Just blindly add a day with no checks
-        Date yesterday;
-        yesterday.year = year;
-        yesterday.month = month;
-        yesterday.day = day - 1;
-
-        // Catch rolling into new month
-        if (yesterday.day == 0) {
-            yesterday.month--;
-            yesterday.day = days[yesterday.month];
-
-            // Allow Feb 29 in leap year if needed
-            if (yesterday.month == 2) {
-                if (yesterday.year % 400 == 0) {
-                    yesterday.day = 29;
-                    return yesterday;
-                }
-                if ((yesterday.year % 4 == 0) && (yesterday.year % 100 != 0)) {
-                    yesterday.day = 29;
-                    return yesterday;
-                }
-            }
-
-            // Catch rolling into new year
-            if (yesterday.month == 0) {
-                yesterday.month = 12;
-                yesterday.year--;
-            }
-        }
-
-        return yesterday;
-    }
-
-    bool operator==(const Date& d) const {
-        return (year == d.year && month == d.month && day == d.day);
-    }
-
-    bool operator!=(const Date& d) const {
-        return !(*this == d);
-    }
-
-    Date& operator=(const Date& d) {
-        year = d.year;
-        month = d.month;
-        day = d.day;
-        return *this;
-    }
-};
-
 class RenderableAirTrafficHistorical : public Renderable {
 public:
     explicit RenderableAirTrafficHistorical(const ghoul::Dictionary& dictionary);
@@ -166,15 +54,34 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-
-    bool fetchData(const Date& date); 
     
-    void updateBuffers(const Date& date, bool async = false);
-    void updateBuffersReverse(const Date& date, bool async = false);
-
     static documentation::Documentation Documentation();
 
 private:
+
+    // Defines a date with only year, month, and day.
+    //  Also defines operator==, operator!= and operator=
+    struct Date {
+        int year = 0;
+        int month = 0;
+        int day = 0;
+
+        Date() = default;
+        Date(double timeNow);
+        Date& operator=(const Date& d);
+
+        Date getTomorrow();
+        Date getYesterday();
+
+        bool operator==(const Date& d) const;
+        bool operator!=(const Date& d) const;
+    };
+
+
+    bool fetchData(const Date& date);
+    void updateBuffers(const Date& date, bool async = false);
+    void updateBuffersReverse(const Date& date, bool async = false);
+
     // Stores some number outside the latitude and longitude 
     // interval used for validation 
     static const int _THRESHOLD = -9999;
@@ -202,7 +109,6 @@ private:
     void sendToGLBuffer(Buffer& buffer);
     
     // GUI properties
-    properties::FloatProperty _opacity;
     properties::IntProperty _nRenderedFlights;
 
     // Initializing backend storage for 

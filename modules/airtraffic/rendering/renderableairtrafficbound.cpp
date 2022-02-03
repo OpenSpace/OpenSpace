@@ -30,13 +30,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/csvreader.h>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <time.h>
-
-using namespace std::chrono;
 
 namespace {
     constexpr const std::array<const char*, 8> UniformNames = {
@@ -47,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
        "Color",
        "Color",
-       "The color used to represent the lines"
+       "The color used to represent the lines."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -57,22 +50,39 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
-       "latitudeThreshold",
+       "LatitudeThreshold",
        "Latitude Threshold",
        "Minimum and maximum latitude for all aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
-       "longitudeThreshold",
+       "LongitudeThreshold",
        "Longitude Threshold",
        "Minimum and maximum longitude for all aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-       "lineWidth",
+       "LineWidth",
        "Line Width",
        "Controls the line width of the bounding box."
     };
+
+    struct [[codegen::Dictionary(RenderableAirTrafficBound)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.Description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth [[codegen::greaterequal(1.f)]];
+
+        // [[codegen::verbatim(LatitudeThresholdInfo.description)]]
+        std::optional<glm::vec2> latitudeThreshold
+            [[codegen::inrange(glm::vec2(-90.f), glm::vec2(90.f))]];
+
+        // [[codegen::verbatim(LongitudeThresholdInfo.description)]]
+        std::optional<glm::vec2> longitudeThreshold
+            [[codegen::inrange(glm::vec2(-180.f), glm::vec2(180.f))]];
+    };
+#include "renderableairtrafficbound_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -81,19 +91,12 @@ glm::vec2 RenderableAirTrafficBound::_lat;
 glm::vec2 RenderableAirTrafficBound::_lon;
 
 documentation::Documentation RenderableAirTrafficBound::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Air Traffic Bound",
-        "RenderableAirTrafficBound",
-        {
-        }
-    };
+    return codegen::doc<Parameters>("airtraffic_renderableairtrafficbound");
 }
 
 RenderableAirTrafficBound::RenderableAirTrafficBound(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 5.f)
     , _latitudeThreshold(
         LatitudeThresholdInfo,
@@ -108,10 +111,18 @@ RenderableAirTrafficBound::RenderableAirTrafficBound(const ghoul::Dictionary& di
         glm::vec2(180.f)
     )
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _color = p.color.value_or(_color);
     addProperty(_color);
-    addProperty(_opacity);
+
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _latitudeThreshold = p.latitudeThreshold.value_or(_latitudeThreshold);
     addProperty(_latitudeThreshold);
+
+    _longitudeThreshold = p.longitudeThreshold.value_or(_longitudeThreshold);
     addProperty(_longitudeThreshold);
 
     onEnabledChange([&](bool enabled) {
@@ -132,7 +143,6 @@ RenderableAirTrafficBound::RenderableAirTrafficBound(const ghoul::Dictionary& di
 };
 
 void RenderableAirTrafficBound::initializeGL() {
-        
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 
@@ -153,7 +163,9 @@ void RenderableAirTrafficBound::initializeGL() {
 
 void RenderableAirTrafficBound::deinitializeGL() {
     glDeleteBuffers(1, &_vertexBuffer);
+    _vertexBuffer = 0;
     glDeleteVertexArrays(1, &_vertexArray);
+    _vertexArray = 0;
 
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
@@ -249,4 +261,3 @@ void RenderableAirTrafficBound::updateBuffers() {
 }
 
 } // namespace openspace
-

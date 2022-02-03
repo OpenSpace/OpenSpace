@@ -25,23 +25,13 @@
 #include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
 
 #include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <iostream>
 #include <ghoul/misc/csvreader.h>
-#include <fstream>
-#include <string>
-#include <time.h>
-#include <charconv>
-#include <mutex>
-
-std::mutex mutexLock;
-
-using namespace std::chrono;
 
 namespace ghoul::filesystem { class File; }
 
@@ -56,40 +46,129 @@ namespace {
         "time", "cameraPosition", "modelTransform", "clipping"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-       "Opacity",
-       "Opacity",
-       "The opacity of the lines used to represent aircraft."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RenderedFlightsInfo = {
        "RenderedFlights",
        "Rendered Flights",
        "The rendered number of flights."
     };
-
 } // namespace
 
 namespace openspace {
 
+RenderableAirTrafficHistorical::Date::Date(double timeNow) {
+    std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
+    tm* tempTime = gmtime(&date);
+
+    year = tempTime->tm_year + 1900;
+    month = tempTime->tm_mon + 1;
+    day = tempTime->tm_mday;
+}
+
+RenderableAirTrafficHistorical::Date RenderableAirTrafficHistorical::Date::getTomorrow() {
+    const int days[12] = {
+        31,28,31,30,31,30,31,31,30,31,30,31
+    };
+
+    // Just blindly add a day with no checks.
+    Date tomorrow;
+    tomorrow.year = year;
+    tomorrow.month = month;
+    tomorrow.day = day + 1;
+
+    // Allow Feb 29 in leap year if needed.
+    if (tomorrow.month == 2 && tomorrow.day == 29) {
+        if (tomorrow.year % 400 == 0) {
+            return tomorrow;
+        }
+        if ((tomorrow.year % 4 == 0) && (tomorrow.year % 100 != 0)) {
+            return tomorrow;
+        }
+    }
+
+    // Catch rolling into new month.
+    if (tomorrow.day > days[tomorrow.month - 1]) {
+        tomorrow.day = 1;
+        tomorrow.month++;
+
+        // Catch rolling into new year.
+        if (tomorrow.month == 13) {
+            tomorrow.month = 1;
+            tomorrow.year++;
+        }
+    }
+
+    return tomorrow;
+}
+
+RenderableAirTrafficHistorical::Date RenderableAirTrafficHistorical::Date::getYesterday()
+{
+    const int days[12] = {
+        31,28,31,30,31,30,31,31,30,31,30,31
+    };
+
+    // Just blindly add a day with no checks
+    Date yesterday;
+    yesterday.year = year;
+    yesterday.month = month;
+    yesterday.day = day - 1;
+
+    // Catch rolling into new month
+    if (yesterday.day == 0) {
+        yesterday.month--;
+        yesterday.day = days[yesterday.month];
+
+        // Allow Feb 29 in leap year if needed
+        if (yesterday.month == 2) {
+            if (yesterday.year % 400 == 0) {
+                yesterday.day = 29;
+                return yesterday;
+            }
+            if ((yesterday.year % 4 == 0) && (yesterday.year % 100 != 0)) {
+                yesterday.day = 29;
+                return yesterday;
+            }
+        }
+
+        // Catch rolling into new year
+        if (yesterday.month == 0) {
+            yesterday.month = 12;
+            yesterday.year--;
+        }
+    }
+
+    return yesterday;
+}
+
+bool RenderableAirTrafficHistorical::Date::operator==(const Date& d) const {
+    return (year == d.year && month == d.month && day == d.day);
+}
+
+bool RenderableAirTrafficHistorical::Date::operator!=(const Date& d) const {
+    return !(*this == d);
+}
+
+RenderableAirTrafficHistorical::Date&
+RenderableAirTrafficHistorical::Date::operator=(const Date& d)
+{
+    year = d.year;
+    month = d.month;
+    day = d.day;
+    return *this;
+}
+
 documentation::Documentation RenderableAirTrafficHistorical::Documentation() {
-    using namespace documentation;
     return {
         "Renderable Air Traffic Historical",
-        "RenderableAirTrafficHistorical",
-        {
-        }
+        "airtraffic_renderableairtraffichistorical",
+        {}
     };
 }
 
 RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _opacity(OpacityInfo, 0.4f, 0.f, 1.f)
     , _nRenderedFlights(RenderedFlightsInfo, 0, 0, 10000)
 {
-    addProperty(_opacity);
-
     _nRenderedFlights.setReadOnly(true);
     addProperty(_nRenderedFlights);
 
@@ -121,15 +200,22 @@ void RenderableAirTrafficHistorical::initializeGL() {
 
 void RenderableAirTrafficHistorical::deinitializeGL() {
     glDeleteBuffers(1, &_bufferA.vertexBuffer);
+    _bufferA.vertexBuffer = 0;
     glDeleteVertexArrays(1, &_bufferA.vertexArray);
+    _bufferA.vertexArray = 0;
 
     glDeleteBuffers(1, &_bufferB.vertexBuffer);
+    _bufferB.vertexBuffer = 0;
     glDeleteVertexArrays(1, &_bufferB.vertexArray);
+    _bufferB.vertexArray = 0;
 
     glDeleteBuffers(1, &_bufferC.vertexBuffer);
+    _bufferC.vertexBuffer = 0;
     glDeleteVertexArrays(1, &_bufferC.vertexArray);
+    _bufferC.vertexArray = 0;
 
     glDeleteBuffers(1, &_ssbo);
+    _ssbo = 0;
 
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
@@ -146,7 +232,7 @@ void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTask
     double timeNow = data.time.j2000Seconds();
     Date inDate = Date(timeNow);
 
-    bool reverseTime = _lastUpdate > timeNow;
+    const bool reverseTime = _lastUpdate > timeNow;
 
     // SSBO
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssbo);
@@ -200,7 +286,9 @@ void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTask
     else if ((inDate != _currentDate && !_isDataLoading && !reverseTime) ||
              (inDate != _nextDate && !_isDataLoading && reverseTime))
     {
-        _bufferA.date = Date(); _bufferB.date = Date(); _bufferC.date = Date();
+        _bufferA.date = Date();
+        _bufferB.date = Date();
+        _bufferC.date = Date();
 
         if (!reverseTime) {
             _currentDate = inDate;
@@ -221,9 +309,12 @@ void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTask
     }
 
     // Check if new data finished loading. Update buffers ONLY if finished
-    if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) {
+    if (_future.valid() &&
+        _future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+    {
         _future.get();
-        // As the asynchronous stage is finished, send to glBindBuffer on the main thread and context
+        // As the asynchronous stage is finished, send to glBindBuffer on the main thread
+        // and context
         sendToGLBuffer(
             _bufferA.date == _nextNextDate ?
                 _bufferA :
@@ -289,7 +380,7 @@ void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTask
     glDepthFunc(GL_ALWAYS);
         
     // Draw the two buffers with dates that are either current or next
-    if (_bufferA.date ==_currentDate || _bufferA.date == _nextDate) {
+    if (_bufferA.date == _currentDate || _bufferA.date == _nextDate) {
         // Draw A
         glBindVertexArray(_bufferA.vertexArray);
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_bufferA.vertexBufferData.size()));
@@ -329,19 +420,25 @@ void RenderableAirTrafficHistorical::updateBuffersReverse(const Date& date, bool
     if (_bufferA.date != _nextDate && _bufferA.date != _nextNextDate) {
         // Fill A
         fillBuffer(_bufferA);
-        if (!async) sendToGLBuffer(_bufferA);
+        if (!async) {
+            sendToGLBuffer(_bufferA);
+        }
         _bufferA.date = date;
     }
     else if (_bufferB.date != _nextDate && _bufferB.date != _nextNextDate) {
         // Fill B
         fillBuffer(_bufferB);
-        if (!async) sendToGLBuffer(_bufferB);
+        if (!async) {
+            sendToGLBuffer(_bufferB);
+        }
         _bufferB.date = date;
     }
     else {
         // Fill C
         fillBuffer(_bufferC);
-        if (!async) sendToGLBuffer(_bufferC);
+        if (!async) {
+            sendToGLBuffer(_bufferC);
+        }
         _bufferC.date = date;
     }
 
@@ -363,19 +460,25 @@ void RenderableAirTrafficHistorical::updateBuffers(const Date& date, bool async)
     if (_bufferA.date != _currentDate && _bufferA.date != _nextDate) {
         // Fill A
         fillBuffer(_bufferA); 
-        if(!async) sendToGLBuffer(_bufferA);
+        if (!async) {
+            sendToGLBuffer(_bufferA);
+        }
         _bufferA.date = date;
     }
     else if (_bufferB.date != _currentDate && _bufferB.date != _nextDate) {
         // Fill B
         fillBuffer(_bufferB); 
-        if (!async) sendToGLBuffer(_bufferB);
+        if (!async) {
+            sendToGLBuffer(_bufferB);
+        }
         _bufferB.date = date;
     } 
     else {
         // Fill C
         fillBuffer(_bufferC); 
-        if (!async) sendToGLBuffer(_bufferC);
+        if (!async) {
+            sendToGLBuffer(_bufferC);
+        }
         _bufferC.date = date;
     }
 
@@ -460,7 +563,7 @@ void RenderableAirTrafficHistorical::sendToGLBuffer(Buffer& buffer) {
         2,
         GL_INT,
         sizeof(AircraftVBOLayout),
-        reinterpret_cast<GLvoid*>(2 * sizeof(GL_FLOAT))
+        reinterpret_cast<GLvoid*>(2 * sizeof(float))
     );
 
     glBindVertexArray(0);
