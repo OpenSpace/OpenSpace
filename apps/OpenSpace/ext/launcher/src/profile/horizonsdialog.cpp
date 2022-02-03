@@ -283,7 +283,7 @@ void HorizonsDialog::createWidgets() {
         layout->addWidget(generateLabel);
 
         QUrl website("https://ssd.jpl.nasa.gov/horizons/");
-        QLabel* infoLabel = new QLabel("<p>For more information about the Horizons system"
+        QLabel* infoLabel = new QLabel("<p>For more information about the Horizons system "
             "please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
             "https://ssd.jpl.nasa.gov/horizons/</a></p>",
             this
@@ -462,7 +462,22 @@ bool HorizonsDialog::handleRequest() {
     _chooseTargetCombo->clear();
     _chooseTargetCombo->hide();
 
-    HorizonsDialog::HorizonsResult result = sendRequest(url);
+    json answer = sendRequest(url);
+    if (answer.empty()) {
+        _errorMsg->setText("Connection error");
+        return false;
+    }
+
+    std::filesystem::path file = handleAnswer(answer);
+    if (!std::filesystem::is_regular_file(file)) {
+        return false;
+    }
+
+    _horizonsFile = file;
+    openspace::HorizonsFile horizonsFile(_horizonsFile);
+    openspace::HorizonsFile::HorizonsResult result =
+        horizonsFile.isValidHorizonsFile();
+
     return handleResult(result);
 }
 
@@ -612,7 +627,7 @@ std::string HorizonsDialog::constructUrl() {
 }
 
 // Send request synchronously, EventLoop waits until request has finished
-HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url) {
+json HorizonsDialog::sendRequest(const std::string url) {
     QNetworkRequest request;
     request.setHeader(QNetworkRequest::UserAgentHeader, "OpenSpace");
     request.setUrl(QUrl(url.c_str()));
@@ -625,7 +640,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
             "Could not connect to Horizons API",
             HorizonsDialog::LogLevel::Error
         );
-        return HorizonsDialog::HorizonsResult::ConnectionError;
+        return json();
     }
 
     loop.exec(QEventLoop::ExcludeUserInputEvents);
@@ -633,7 +648,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::sendRequest(const std::string url
     return handleReply(reply);
 }
 
-HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply) {
+json HorizonsDialog::handleReply(QNetworkReply* reply) {
     if (reply->error()) {
         QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
         if (!checkHttpStatus(statusCode)) {
@@ -644,7 +659,7 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
         }
 
         reply->deleteLater();
-        return HorizonsDialog::HorizonsResult::ConnectionError;
+        return false;
     }
 
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -663,38 +678,8 @@ HorizonsDialog::HorizonsResult HorizonsDialog::handleReply(QNetworkReply* reply)
     std::cout << answer.toStdString();
     std::cout << "'" << std::endl;
 
-    // Convert the answer to a json object and validate it
-    json jsonAnswer = json::parse(answer.toStdString());
-    HorizonsDialog::HorizonsResult isValid = isValidAnswer(jsonAnswer);
-    if (isValid != HorizonsDialog::HorizonsResult::Valid) {
-        return isValid;
-    }
-
-    // Create a text file and write reply to it
-    QString filePathQ = _directoryEdit->text();
-    filePathQ.append(QDir::separator());
-    filePathQ.append(_nameEdit->text());
-    std::string filePath = filePathQ.toStdString();
-    std::filesystem::path fullFilePath = std::filesystem::absolute(filePath);
-
-    auto result = jsonAnswer.find("result");
-    if (result == jsonAnswer.end()) {
-        return HorizonsDialog::HorizonsResult::UnknownError;
-    }
-
-    // Check if the file already exists
-    if (std::filesystem::is_regular_file(fullFilePath)) {
-        return HorizonsDialog::HorizonsResult::FileAlreadyExist;
-    }
-
-    // Write response into a new file
-    std::ofstream file(filePath);
-    file << replaceAll(*result, "\\n", "\n") << std::endl;
-    //file << *result << std::endl;
-    file.close();
-
-    _horizonsFile = fullFilePath;
-    return isValidHorizonsFile(filePath);
+    // Convert the answer to a json object and return it
+    return json::parse(answer.toStdString());
 }
 
 bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
@@ -732,172 +717,50 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
     return isKnown;
 }
 
-HorizonsDialog::HorizonsResult HorizonsDialog::isValidAnswer(const json& answer) {
-    auto it = answer.find("error");
-    if (it != answer.end()) {
-        // There was an error
-        std::string errorMessage = *it;
-
-        // Projected output length (~X) exceeds 90024 line max -- change step-size
-        if (errorMessage.find("Projected output length") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::ErrorSize;
-        }
-        // No ephemeris for target "X" after A.D. Y UT
-        else if (errorMessage.find("No ephemeris for target") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
-        }
-        // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help.
-        else if (errorMessage.find("No site matches") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::ErrorNoObserver;
-        }
-        // Observer table for X / Y->Y disallowed.
-        else if (errorMessage.find("disallowed") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::ErrorObserverTargetSame;
-        }
-        // Insufficient ephemeris data has been loaded to compute the state of X
-        // relative to Y at the ephemeris epoch Z;
-        else if (errorMessage.find("Insufficient ephemeris data") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::ErrorNoData;
-        }
-        // #   E. Lon    DXY      DZ    Observatory Name;
-        // -- - -------- ------ - ------ - ----------------;
-        // * Observer station *
-        // Multiple matching stations found.
-        else if (errorMessage.find("Multiple matching stations found") != std::string::npos) {
-            return HorizonsDialog::HorizonsResult::MultipleObserverStations;
-        }
-        // Unknown error
-        else {
-            appendLog(errorMessage, HorizonsDialog::LogLevel::Error);
-            return  HorizonsDialog::HorizonsResult::UnknownError;
-        }
+std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
+    openspace::HorizonsFile::HorizonsResult isValid = openspace::HorizonsFile::isValidAnswer(answer);
+    if (isValid != openspace::HorizonsFile::HorizonsResult::Valid) {
+        handleResult(isValid);
+        return std::filesystem::path();
     }
-    return HorizonsDialog::HorizonsResult::Valid;
+
+    // Create a text file and write reply to it
+    QString filePathQ = _directoryEdit->text();
+    filePathQ.append(QDir::separator());
+    filePathQ.append(_nameEdit->text());
+    std::string filePath = filePathQ.toStdString();
+    std::filesystem::path fullFilePath = std::filesystem::absolute(filePath);
+
+    auto result = answer.find("result");
+    if (result == answer.end()) {
+        _errorMsg->setText("Malformed answer recieved");
+        return std::filesystem::path();
+    }
+
+    // Check if the file already exists
+    if (std::filesystem::is_regular_file(fullFilePath)) {
+        _errorMsg->setText("File already exist, try another filename");
+        return std::filesystem::path();
+    }
+
+    // Write response into a new file
+    std::ofstream file(filePath);
+    file << replaceAll(*result, "\\n", "\n") << std::endl;
+    file.close();
+
+    return fullFilePath;
 }
 
-// Check whether the given Horizons file is valid or not
-// Return an error code with what is the problem if there was one
-HorizonsDialog::HorizonsResult HorizonsDialog::isValidHorizonsFile(const std::string& file) const {
-    std::ifstream fileStream(file);
-    if (!fileStream.good()) {
-        return HorizonsDialog::HorizonsResult::FileEmpty;
-    }
-
-    // The header of a Horizons file has a lot of information about the
-    // query that can tell us if the file is valid or not.
-    // The line $$SOE indicates start of data.
-    std::string line;
-    bool foundTarget = false;
-    while (fileStream.good() && line.find("$$SOE") == std::string::npos) {
-        // Valid Target?
-        if (line.find("Revised") != std::string::npos) {
-            // If the target is valid, the first line is the date it was last revised
-            foundTarget = true;
-        }
-
-        // Selected time range too big and step size too small?
-        if (line.find("change step-size") != std::string::npos) {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorSize;
-        }
-
-        // Outside valid time range?
-        if (line.find("No ephemeris for target") != std::string::npos) {
-            // Available time range is located several lines before this in the file
-            // The avalable time range is persed later
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorTimeRange;
-        }
-
-        // Valid Observer?
-        if (line.find("No site matches") != std::string::npos ||
-            line.find("Cannot find central body") != std::string::npos)
-        {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorNoObserver;
-        }
-
-        // Are observer and target the same?
-        if (line.find("disallowed") != std::string::npos)
-        {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorObserverTargetSame;
-        }
-
-        // Enough data?
-        if (line.find("Insufficient ephemeris data") != std::string::npos)
-        {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorNoData;
-        }
-
-        // Multiple Observer stations?
-        if (line.find("Multiple matching stations found") != std::string::npos) {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::MultipleObserverStations;
-        }
-
-        // Multiple matching major bodies?
-        if (line.find("Multiple major-bodies match string") != std::string::npos) {
-            // Target
-            if (!foundTarget) {
-                // If target was not found then it is the target that has multiple matches
-                fileStream.close();
-                return HorizonsDialog::HorizonsResult::MultipleTarget;
-            }
-            // Observer
-            else {
-                fileStream.close();
-                return HorizonsDialog::HorizonsResult::MultipleObserver;
-            }
-        }
-
-        // Multiple matching small bodies?
-        if (line.find("Small-body Index Search Results") != std::string::npos) {
-            // Small bodies can only be targets not observers
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::MultipleTarget;
-        }
-
-        // No Target?
-        if (line.find("No matches found") != std::string::npos) {
-            fileStream.close();
-            return HorizonsDialog::HorizonsResult::ErrorNoTarget;
-        }
-
-        std::getline(fileStream, line);
-    }
-
-    // If we reached end of file before we found the start of data then it is
-    // not a valid file
-    if (fileStream.good()) {
-        fileStream.close();
-        return HorizonsDialog::HorizonsResult::Valid;
-    }
-    else {
-        fileStream.close();
-        return HorizonsDialog::HorizonsResult::UnknownError;
-    }
-}
-
-bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
+bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& result) {
     switch (result) {
-        case HorizonsDialog::HorizonsResult::Valid:
+        case openspace::HorizonsFile::HorizonsResult::Valid:
             return true;
 
-        case HorizonsDialog::HorizonsResult::FileEmpty:
+        case openspace::HorizonsFile::HorizonsResult::Empty:
             _errorMsg->setText("The horizons file is empty");
             break;
 
-        case HorizonsDialog::HorizonsResult::FileAlreadyExist:
-            _errorMsg->setText("File already exist, try another filename");
-            break;
-
-        case HorizonsDialog::HorizonsResult::ConnectionError:
-            _errorMsg->setText("Connection error");
-            break;
-
-        case HorizonsDialog::HorizonsResult::ErrorSize: {
+        case openspace::HorizonsFile::HorizonsResult::ErrorSize: {
             std::string message = "Time range '" + _startTime + "' to '" + _endTime +
                 "' with step size '" + _stepEdit->text().toStdString() +
                 "' " + _timeTypeCombo->currentText().toStdString() +
@@ -907,7 +770,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             break;
         }
 
-        case HorizonsDialog::HorizonsResult::ErrorTimeRange: {
+        case openspace::HorizonsFile::HorizonsResult::ErrorTimeRange: {
             appendLog("Time range is outside the valid range for target '"
                 + _targetName + "'.", HorizonsDialog::LogLevel::Error);
 
@@ -926,21 +789,21 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             break;
         }
 
-        case HorizonsDialog::HorizonsResult::ErrorNoObserver:
+        case openspace::HorizonsFile::HorizonsResult::ErrorNoObserver:
             appendLog("No match was found for observer '" + _observerName + "'. "
                 "Use '@" + _observerName + "' as observer to list possible matches.",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case HorizonsDialog::HorizonsResult::ErrorObserverTargetSame:
+        case openspace::HorizonsFile::HorizonsResult::ErrorObserverTargetSame:
             appendLog("The observer '" + _observerName + "' and target '" + _targetName +
                 "' are the same. Please use another observer for the current target.",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case HorizonsDialog::HorizonsResult::ErrorNoData:
+        case openspace::HorizonsFile::HorizonsResult::ErrorNoData:
             appendLog("There is not enough data to compute the state of target '" +
                 _targetName + "' in relation to the observer '" + _observerName +
                 "' for the time range '" + _startTime + "' to '" + _endTime +
@@ -949,7 +812,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             );
             break;
 
-        case HorizonsDialog::HorizonsResult::MultipleObserverStations:
+        case openspace::HorizonsFile::HorizonsResult::MultipleObserverStations:
             appendLog("Multiple observer stations was found for observer '" +
                 _observerName + "'. ", HorizonsDialog::LogLevel::Warning
             );
@@ -959,7 +822,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             );
             break;
 
-        case HorizonsDialog::HorizonsResult::MultipleObserver: {
+        case openspace::HorizonsFile::HorizonsResult::MultipleObserver: {
             appendLog("Multiple matches were found for observer '" +
                 _observerName + "'",
                 HorizonsDialog::LogLevel::Warning
@@ -986,13 +849,13 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             break;
         }
 
-        case HorizonsDialog::HorizonsResult::ErrorNoTarget:
+        case openspace::HorizonsFile::HorizonsResult::ErrorNoTarget:
             appendLog("No match was found for target '" + _targetName + "'",
                 HorizonsDialog::LogLevel::Error
             );
             break;
 
-        case HorizonsDialog::HorizonsResult::MultipleTarget: {
+        case openspace::HorizonsFile::HorizonsResult::MultipleTarget: {
             // Case Small Bodies:
             // Line before data: Matching small-bodies
             // Format: Record #, Epoch-yr, >MATCH DESIG<, Primary Desig, Name
@@ -1028,7 +891,7 @@ bool HorizonsDialog::handleResult(HorizonsDialog::HorizonsResult& result) {
             break;
         }
 
-        case HorizonsDialog::HorizonsResult::UnknownError:
+        case openspace::HorizonsFile::HorizonsResult::UnknownError:
             _errorMsg->setText("An unknown error occured");
             break;
 

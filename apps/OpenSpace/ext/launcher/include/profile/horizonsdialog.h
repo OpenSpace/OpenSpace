@@ -26,6 +26,7 @@
 #define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 
 #include <openspace/json.h>
+#include <../modules/space/horizonsfile.h>
 #include <QDialog>
 #include <filesystem>
 #include <string>
@@ -55,28 +56,6 @@ private slots:
     void approved();
 
 private:
-    enum class HorizonsResult {
-        Valid,
-        FileEmpty,
-        FileAlreadyExist,
-        ConnectionError,
-
-        // Erros caught by the error field in the json output
-        ErrorSize,
-        ErrorTimeRange,
-        ErrorNoObserver,
-        ErrorObserverTargetSame,
-        ErrorNoData,
-        MultipleObserverStations,
-
-        // Erros/problems NOT caught by the error field in the json output
-        MultipleObserver,
-        ErrorNoTarget,
-        MultipleTarget,
-
-        UnknownError
-    };
-
     enum class LogLevel {
         Error,
         Warning,
@@ -96,12 +75,11 @@ private:
     bool handleRequest();
     bool isValidInput();
     std::string constructUrl();
-    HorizonsResult sendRequest(const std::string url);
-    HorizonsResult handleReply(QNetworkReply* reply);
+    json sendRequest(const std::string url);
+    json handleReply(QNetworkReply* reply);
     bool checkHttpStatus(const QVariant& statusCode);
-    HorizonsResult isValidAnswer(const json& answer);
-    HorizonsResult isValidHorizonsFile(const std::string& file) const;
-    bool handleResult(HorizonsDialog::HorizonsResult& result);
+    std::filesystem::path handleAnswer(json& answer);
+    bool handleResult(openspace::HorizonsFile::HorizonsResult& result);
     void appendLog(const std::string& message, const LogLevel level);
 
     std::filesystem::path _horizonsFile;
@@ -115,9 +93,9 @@ private:
     QLineEdit* _centerEdit = nullptr;
     QComboBox* _chooseObserverCombo = nullptr;
     std::string _observerName;
-    QDateTimeEdit* _startEdit;
+    QDateTimeEdit* _startEdit = nullptr;
     std::string _startTime;
-    QDateTimeEdit* _endEdit;
+    QDateTimeEdit* _endEdit = nullptr;
     std::string _endTime;
     QLineEdit* _stepEdit = nullptr;
     QComboBox* _timeTypeCombo = nullptr;
