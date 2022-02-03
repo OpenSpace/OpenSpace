@@ -94,8 +94,20 @@ template struct NotInListVerifier<StringVerifier>;
 
 template struct InRangeVerifier<IntVerifier>;
 template struct InRangeVerifier<DoubleVerifier>;
+template struct InRangeVerifier<DoubleVector2Verifier>;
+template struct InRangeVerifier<DoubleVector3Verifier>;
+template struct InRangeVerifier<DoubleVector4Verifier>;
+template struct InRangeVerifier<IntVector2Verifier>;
+template struct InRangeVerifier<IntVector3Verifier>;
+template struct InRangeVerifier<IntVector4Verifier>;
 template struct NotInRangeVerifier<IntVerifier>;
 template struct NotInRangeVerifier<DoubleVerifier>;
+template struct NotInRangeVerifier<DoubleVector2Verifier>;
+template struct NotInRangeVerifier<DoubleVector3Verifier>;
+template struct NotInRangeVerifier<DoubleVector4Verifier>;
+template struct NotInRangeVerifier<IntVector2Verifier>;
+template struct NotInRangeVerifier<IntVector3Verifier>;
+template struct NotInRangeVerifier<IntVector4Verifier>;
 
 
 template struct AnnotationVerifier<BoolVerifier>;
