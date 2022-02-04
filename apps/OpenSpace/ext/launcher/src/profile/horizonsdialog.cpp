@@ -40,6 +40,9 @@
 
 #include "profile/horizonsdialog.h"
 
+#include <../modules/space/spacemodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include "profile/line.h"
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -256,18 +259,6 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 
     setWindowTitle("Horizons");
     createWidgets();
-
-    QStringList timeTypes = {
-        TIMEVARYING,
-        MINUTES,
-        HOURS,
-        DAYS,
-        MONTHS,
-        YEARS,
-        UNITLESS
-    };
-    _timeTypeCombo->addItems(timeTypes);
-    _timeTypeCombo->setCurrentIndex(1);
 }
 
 std::filesystem::path HorizonsDialog::file() const {
@@ -275,6 +266,15 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::createWidgets() {
+    openspace::SpaceModule* spacemodule = openspace::global::moduleEngine->module<openspace::SpaceModule>();
+    if (!spacemodule) {
+        QBoxLayout* layout = new QVBoxLayout(this);
+        QLabel* lable = new QLabel("Cannot use Horizons Translation without the 'SpaceModule' loaded", this);
+        lable->setObjectName("error-message");
+        layout->addWidget(lable);
+        return;
+    }
+
     QBoxLayout* wholeLayout = new QHBoxLayout(this);
     QBoxLayout* layout = new QVBoxLayout(this);
     {
@@ -282,7 +282,6 @@ void HorizonsDialog::createWidgets() {
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
 
-        QUrl website("https://ssd.jpl.nasa.gov/horizons/");
         QLabel* infoLabel = new QLabel("<p>For more information about the Horizons system "
             "please visit: <a href=\"https://ssd.jpl.nasa.gov/horizons/\">"
             "https://ssd.jpl.nasa.gov/horizons/</a></p>",
@@ -392,6 +391,17 @@ void HorizonsDialog::createWidgets() {
 
         _timeTypeCombo = new QComboBox(this);
         _timeTypeCombo->setToolTip("Choose unit of the step size");
+        QStringList timeTypes = {
+            TIMEVARYING,
+            MINUTES,
+            HOURS,
+            DAYS,
+            MONTHS,
+            YEARS,
+            UNITLESS
+        };
+        _timeTypeCombo->addItems(timeTypes);
+        _timeTypeCombo->setCurrentIndex(1);
         container->addWidget(_timeTypeCombo);
 
         layout->addLayout(container);
