@@ -40,9 +40,6 @@
 
 #include "profile/horizonsdialog.h"
 
-#include <../modules/space/spacemodule.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include "profile/line.h"
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -266,15 +263,6 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::createWidgets() {
-    openspace::SpaceModule* spacemodule = openspace::global::moduleEngine->module<openspace::SpaceModule>();
-    if (!spacemodule) {
-        QBoxLayout* layout = new QVBoxLayout(this);
-        QLabel* lable = new QLabel("Cannot use Horizons Translation without the 'SpaceModule' loaded", this);
-        lable->setObjectName("error-message");
-        layout->addWidget(lable);
-        return;
-    }
-
     QBoxLayout* wholeLayout = new QHBoxLayout(this);
     QBoxLayout* layout = new QVBoxLayout(this);
     {
