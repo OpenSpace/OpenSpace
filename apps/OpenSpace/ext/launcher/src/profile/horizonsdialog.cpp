@@ -647,7 +647,7 @@ json HorizonsDialog::sendRequest(const std::string url) {
 }
 
 json HorizonsDialog::handleReply(QNetworkReply* reply) {
-    if (reply->error()) {
+    if (reply->error() != QNetworkReply::NoError) {
         QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
         if (!checkHttpStatus(statusCode)) {
             appendLog(
@@ -657,11 +657,15 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
         }
 
         reply->deleteLater();
-        return false;
+        return json();
     }
 
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (redirect.isValid() && reply->url() != redirect) {
+        if (redirect.isRelative()) {
+            redirect = reply->url().resolved(redirect);
+        }
+
         appendLog(
             "Redirecting request to: " + redirect.toString().toStdString(),
             HorizonsDialog::LogLevel::Info
@@ -671,6 +675,14 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
 
     QString answer = reply->readAll();
     reply->deleteLater();
+
+    if (answer.isEmpty()) {
+        appendLog(
+            "Connection Error: " + reply->errorString().toStdString(),
+            HorizonsDialog::LogLevel::Error
+        );
+        return json();
+    }
 
     std::cout << "Reply: '" << std::endl;
     std::cout << answer.toStdString();
@@ -712,6 +724,10 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
 
         appendLog(message, HorizonsDialog::LogLevel::Error);
     }
+    else if (!statusCode.isValid()) {
+        appendLog("HTTP status code is not valid", HorizonsDialog::LogLevel::Error);
+        isKnown = false;
+    }
     return isKnown;
 }
 
@@ -731,7 +747,7 @@ std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
 
     auto result = answer.find("result");
     if (result == answer.end()) {
-        _errorMsg->setText("Malformed answer recieved");
+        appendLog("Malformed answer recieved: " + answer.dump(), HorizonsDialog::LogLevel::Error);
         return std::filesystem::path();
     }
 
