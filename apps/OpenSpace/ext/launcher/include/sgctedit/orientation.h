@@ -25,31 +25,21 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
 #define __OPENSPACE_UI_LAUNCHER___ORIENTATION___H__
 
-#include <QCheckBox>
-#include <QFrame>
-#include <QIntValidator>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPoint>
-#include <QPushButton>
-#include <QVector>
 #include <QWidget>
 
-#include <vector>
-#include <iostream>
 #include <sgctedit/orientationdialog.h>
 #include <sgct/config.h>
 #include <sgct/math.h>
+#include <QCheckBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
-
-class Orientation : public QWidget
-{
+class Orientation : public QWidget {
 Q_OBJECT
 public:
-    explicit Orientation();
+    Orientation();
     ~Orientation();
     void addButtonToLayout(QVBoxLayout* parentLayout);
     sgct::quat orientationValue();
@@ -59,8 +49,8 @@ private slots:
     void orientationDialog();
 
 private:
-    sgct::quat _orientationValue = {0.0, 0.0, 0.0, 0.0};
-    OrientationDialog* _orientationDialog = nullptr;
+    sgct::quat _orientationValue = {0.f, 0.f, 0.f, 0.f};
+    OrientationDialog _orientationDialog;
     QHBoxLayout* _layoutOrientationFull = nullptr;
     QCheckBox* _checkBoxVsync = nullptr;
 };

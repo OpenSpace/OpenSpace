@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "sgctedit/display.h"
 #include "sgctedit/orientationdialog.h"
+
+#include "sgctedit/display.h"
 
 OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     : QDialog(parent)
@@ -52,21 +53,21 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     {
         QLabel* labelPitch = new QLabel(this);
         labelPitch->setText("Pitch: ");
-        QHBoxLayout* layoutPitch = new QHBoxLayout();
+        QHBoxLayout* layoutPitch = new QHBoxLayout;
         layoutPitch->addStretch(1);
         layoutPitch->addWidget(labelPitch);
         layoutPitch->addWidget(_linePitch);
         layoutWindow->addLayout(layoutPitch);
         QLabel* labelRoll = new QLabel(this);
         labelRoll ->setText("Roll: ");
-        QHBoxLayout* layoutRoll = new QHBoxLayout();
+        QHBoxLayout* layoutRoll = new QHBoxLayout;
         layoutRoll->addStretch(1);
         layoutRoll->addWidget(labelRoll);
         layoutRoll->addWidget(_lineRoll);
         layoutWindow->addLayout(layoutRoll);
         QLabel* labelYaw = new QLabel(this);
         labelYaw ->setText("Yaw: ");
-        QHBoxLayout* layoutYaw = new QHBoxLayout();
+        QHBoxLayout* layoutYaw = new QHBoxLayout;
         layoutYaw->addStretch(1);
         layoutYaw->addWidget(labelYaw);
         layoutYaw->addWidget(_lineYaw);

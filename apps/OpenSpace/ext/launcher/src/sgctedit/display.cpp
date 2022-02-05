@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "sgctedit/display.h"
+
+#include "sgctedit/monitorbox.h"
+#include "sgctedit/windowcontrol.h"
 #include <QApplication>
 #include <QMainWindow>
 #include <QScreen>
 #include <string>
-#include "sgctedit/monitorbox.h"
-#include "sgctedit/windowcontrol.h"
-#include "sgctedit/display.h"
 
 Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
                                  const unsigned int nMaxWindows, const QString* winColors)
@@ -54,20 +55,19 @@ Display::~Display() {
     for (auto w : _windowControl) {
         delete w;
     }
-    delete _layout;
 }
 
 void Display::initializeLayout() {
-    _layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
     {
-        QHBoxLayout* layoutMonButton = new QHBoxLayout();
+        QHBoxLayout* layoutMonButton = new QHBoxLayout;
         layoutMonButton->addWidget(_removeWindowButton);
         layoutMonButton->addStretch(1);
         layoutMonButton->addWidget(_addWindowButton);
-        _layout->addLayout(layoutMonButton);
+        layout->addLayout(layoutMonButton);
     }
-    QHBoxLayout* layoutWindows = new QHBoxLayout();
-    _layout->addStretch();
+    QHBoxLayout* layoutWindows = new QHBoxLayout;
+    layout->addStretch();
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout());
@@ -82,10 +82,10 @@ void Display::initializeLayout() {
     }
     _nWindowsDisplayed = 1;
     showWindows();
-    _layout->addLayout(layoutWindows);
+    layout->addLayout(layoutWindows);
 }
 
-std::vector<WindowControl*> Display::windowControls() {
+std::vector<WindowControl*> Display::windowControls() const {
     return _windowControl;
 }
 
@@ -108,10 +108,10 @@ void Display::removeWindow() {
 }
 
 void Display::showWindows() {
-    for (unsigned int i = 0; i < _layoutWindowWrappers.size(); ++i) {
+    for (size_t i = 0; i < _layoutWindowWrappers.size(); ++i) {
         _layoutWindowWrappers[i]->setVisible(i < _nWindowsDisplayed);
     }
-    for (unsigned int i = 0; i < _frameBorderLines.size(); ++i) {
+    for (size_t i = 0; i < _frameBorderLines.size(); ++i) {
         _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);

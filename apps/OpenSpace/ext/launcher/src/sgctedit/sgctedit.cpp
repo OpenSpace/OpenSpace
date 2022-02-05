@@ -56,7 +56,6 @@ void SgctEdit::createWidgets() {
     QVBoxLayout* layoutMainV = new QVBoxLayout(this);
     QHBoxLayout* layoutMainH = new QHBoxLayout;
     _orientationWidget = new Orientation();
-
     {
         _monBox = new MonitorBox(
             _monitorWidgetSize,
@@ -64,7 +63,7 @@ void SgctEdit::createWidgets() {
             _nMaxWindows,
             _colorsForWindows
         );
-        QHBoxLayout* layoutMonBox = new QHBoxLayout();
+        QHBoxLayout* layoutMonBox = new QHBoxLayout;
         layoutMonBox->addStretch(1);
         layoutMonBox->addWidget(_monBox);
         layoutMonBox->addStretch(1);
@@ -98,7 +97,7 @@ void SgctEdit::createWidgets() {
 
 void SgctEdit::addDisplayLayout(MonitorBox* monBox, QHBoxLayout* layout)
 {
-    _displayLayout = new QVBoxLayout();
+    _displayLayout = new QVBoxLayout;
     _displayWidget = new Display(
         monBox,
         _monitorSizeList,

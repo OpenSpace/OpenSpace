@@ -22,16 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "sgctedit/display.h"
 #include "sgctedit/orientation.h"
+
+#include "sgctedit/display.h"
 #include "sgctedit/orientationdialog.h"
 
 Orientation::Orientation()
+    : _orientationDialog(_orientationValue, this)
 {
-    _orientationDialog = new OrientationDialog(_orientationValue, this);
-    _layoutOrientationFull = new QHBoxLayout();
+    _layoutOrientationFull = new QHBoxLayout;
     {
-        QVBoxLayout* layoutOrientationControls = new QVBoxLayout();
+        QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
         QPushButton* orientationButton = new QPushButton("Global Orientation");
         _checkBoxVsync = new QCheckBox("VSync All Windows", this);
         layoutOrientationControls->addWidget(_checkBoxVsync);
@@ -39,8 +40,12 @@ Orientation::Orientation()
         _layoutOrientationFull->addStretch(1);
         _layoutOrientationFull->addLayout(layoutOrientationControls);
         _layoutOrientationFull->addStretch(1);
-        connect(orientationButton, SIGNAL(released()), this,
-                SLOT(orientationDialog()));
+        connect(
+            orientationButton,
+            &QPushButton::released,
+            this,
+            &Orientation::orientationDialog
+        );
     }
 }
 
@@ -49,7 +54,7 @@ void Orientation::addButtonToLayout(QVBoxLayout* parentLayout) {
 }
 
 void Orientation::orientationDialog() {
-    _orientationDialog->exec();
+    _orientationDialog.exec();
 }
 
 sgct::quat Orientation::orientationValue() {
@@ -62,6 +67,5 @@ bool Orientation::vsyncValue() {
 
 Orientation::~Orientation()
 {
-    delete _orientationDialog;
     delete _layoutOrientationFull;
 }

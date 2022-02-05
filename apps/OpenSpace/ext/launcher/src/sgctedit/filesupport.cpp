@@ -35,12 +35,12 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     , _windowList(windowList)
     , _finishedCallback(cb)
 {
-    QVBoxLayout* layoutFullVertical = new QVBoxLayout();
-    _lineFilename = new QLineEdit();
+    QVBoxLayout* layoutFullVertical = new QVBoxLayout;
+    _lineFilename = new QLineEdit;
     _lineFilename->setFixedWidth(190);
     {
-        QHBoxLayout* layoutFilename = new QHBoxLayout();
-        QLabel* labelFilename = new QLabel();
+        QHBoxLayout* layoutFilename = new QHBoxLayout;
+        QLabel* labelFilename = new QLabel;
         labelFilename->setText("Filename: ");
         layoutFilename->addStretch(1);
         layoutFilename->addWidget(labelFilename);
@@ -50,11 +50,11 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     }
     _saveButton = new QPushButton("Save");
     _saveButton->setToolTip("Save global orientation changes");
-    connect(_saveButton, SIGNAL(released()), this, SLOT(save()));
+    connect(_saveButton, &QPushButton::released, this, &FileSupport::save);
     _saveButton->setEnabled(false);
     _cancelButton = new QPushButton("Cancel");
     _cancelButton->setToolTip("Cancel global orientation changes");
-    connect(_cancelButton, SIGNAL(released()), this, SLOT(cancel()));
+    connect(_cancelButton, &QPushButton::released, this, &FileSupport::cancel);
     {
         QHBoxLayout* layoutButtonBox = new QHBoxLayout;
         layoutButtonBox->addStretch(1);
@@ -63,8 +63,7 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
         layoutFullVertical->addLayout(layoutButtonBox);
     }
     parentLayout->addLayout(layoutFullVertical);
-    connect(_lineFilename, SIGNAL(textEdited(const QString&)), this,
-        SLOT(filenameEdited(const QString&)));
+    connect(_lineFilename, &QLineEdit::textEdited, this, &FileSupport::filenameEdited);
 }
 
 void FileSupport::saveCluster() {
@@ -85,15 +84,15 @@ void FileSupport::saveCluster() {
 void FileSupport::saveUser() {
     if (_orientationWidget) {
         sgct::config::User user;
-        user.eyeSeparation = 0.065;
-        user.position = {0.0, 0.0, 4.0};
+        user.eyeSeparation = 0.065f;
+        user.position = {0.0f, 0.0f, 4.0f};
         _cluster.users.push_back(user);
     }
 }
 
 bool FileSupport::isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims) {
-    sgct::ivec2 mDims = {_monitors[monitorIdx].width(), _monitors[monitorIdx].height()};
-    return ((mDims.x == wDims.x) && (mDims.y == wDims.y));
+    return (_monitors[monitorIdx].width() == wDims.x &&
+            _monitors[monitorIdx].height() == wDims.y);
 }
 
 bool FileSupport::findGuiWindow(unsigned int& foundWindowIndex) {
@@ -132,10 +131,11 @@ void FileSupport::saveWindows() {
 }
 
 void FileSupport::saveWindowsViewports() {
-    _windowList.back().viewports.push_back(sgct::config::Viewport());
-    _windowList.back().viewports.back().isTracked = true;
-    _windowList.back().viewports.back().position = {0.0, 0.0};
-    _windowList.back().viewports.back().size = {1.0, 1.0};
+    sgct::config::Viewport vp;
+    vp.isTracked = true;
+    vp.position = {0.f, 0.f};
+    vp.size = {1.f, 1.f};
+    _windowList.back().viewports.push_back(std::move(vp));
 }
 
 void FileSupport::saveWindowsDimensions(WindowControl* wCtrl) {
@@ -147,8 +147,6 @@ void FileSupport::saveWindowsDimensions(WindowControl* wCtrl) {
 }
 
 void FileSupport::saveWindowsWebGui(unsigned int wIdx) {
-    _windowList.back().draw2D = true;
-    _windowList.back().draw3D = true;
     _windowList.back().viewports.back().isTracked = true;
     unsigned int webGuiWindowIndex;
     bool isOneOfWindowsSetAsWebGui = findGuiWindow(webGuiWindowIndex);

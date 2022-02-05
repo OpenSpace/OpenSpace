@@ -49,7 +49,7 @@ class OrientationDialog : public QDialog
 {
 Q_OBJECT
 public:
-    explicit OrientationDialog(sgct::quat& orientation, QWidget* parent);
+    OrientationDialog(sgct::quat& orientation, QWidget* parent);
 
 private slots:
     void cancel();

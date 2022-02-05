@@ -1208,7 +1208,6 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
         LauncherWindow win(
-            app,
             !hasProfile,
             *global::configuration,
             !hasSGCTConfig,

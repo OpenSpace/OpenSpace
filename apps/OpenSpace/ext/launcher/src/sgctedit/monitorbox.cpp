@@ -24,8 +24,10 @@
 
 #include "sgctedit/monitorbox.h"
 
+constexpr float MarginFractionOfWidgetSize = 0.025;
+
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                         unsigned int nWindows, QString* winColors)
+                       unsigned int nWindows, QString* winColors)
     : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
     , _nWindows(nWindows)
@@ -36,12 +38,7 @@ MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
     mapMonitorResolutionToWidgetCoordinates();
 }
 
-MonitorBox::~MonitorBox()
-{
-}
-
-void MonitorBox::paintEvent(QPaintEvent *event)
-{
+void MonitorBox::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
     QPainter painter(this);
     QPen pen = painter.pen();
@@ -60,8 +57,9 @@ void MonitorBox::paintEvent(QPaintEvent *event)
 }
 
 void MonitorBox::paintWidgetBorder(QPainter& painter, const int width, const int height) {
+    constexpr int Radius = 10;
     painter.setPen(QPen(Qt::gray, 4));
-    painter.drawRoundedRect(0, 0, width - 1, height - 1, 10, 10);
+    painter.drawRoundedRect(0, 0, width - 1, height - 1, Radius, Radius);
 }
 
 void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
@@ -75,8 +73,10 @@ void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
             brush.setStyle(Qt::SolidPattern);
             painter.fillRect(_monitorDimensionsScaled[i], brush);
             if (_showLabel) {
-                QPointF textPos = QPointF(_monitorDimensionsScaled[i].left() + 5,
-                    _monitorDimensionsScaled[i].top() + 18);
+                QPointF textPos = QPointF(
+                    _monitorDimensionsScaled[i].left() + 5,
+                    _monitorDimensionsScaled[i].top() + 18
+                );
                 painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
             }
         }
@@ -93,7 +93,7 @@ void MonitorBox::paintWindowBeyondBounds(QPainter& painter, const unsigned int w
     painter.setBrush(Qt::NoBrush);
 }
 
-void MonitorBox::paintWindow(QPainter& painter, const unsigned int winIdx) {
+void MonitorBox::paintWindow(QPainter& painter, const size_t winIdx) {
     setPenSpecificToWindow(painter, winIdx, true);
     if (winIdx <= _windowRendering.size()) {
         painter.drawRect(_windowRendering[winIdx]);
@@ -129,9 +129,9 @@ void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int w
 
 void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
     QSize virtualDesktopResolution;
-    float maxWidth = 0.0;
-    float maxHeight = 0.0;
-    for (auto m : _monitorResolution) {
+    float maxWidth = 0.f;
+    float maxHeight = 0.f;
+    for (const QRect& m : _monitorResolution) {
         if ((m.x() + m.width()) > maxWidth) {
             maxWidth = m.x() + m.width();
         }
@@ -154,15 +154,15 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
             _monitorResolution[m].height() * _monitorScaleFactor,
         });
     }
-    this->update();
+    update();
 }
 
 void MonitorBox::computeScaledResolution_landscape(const float aspectRatio,
                                                                     const float maxWidth)
 {
-    _marginWidget = _monitorWidgetSize.width() * _marginFractionOfWidgetSize;
+    _marginWidget = _monitorWidgetSize.width() * MarginFractionOfWidgetSize;
     float virtualWidth = _monitorWidgetSize.width()
-        * (1.0 - _marginFractionOfWidgetSize * 2.0);
+        * (1.0 - MarginFractionOfWidgetSize * 2.0);
     _monitorScaleFactor = virtualWidth / maxWidth;
     float newHeight = virtualWidth / aspectRatio;
     for (size_t m = 0; m < _monitorResolution.size(); ++m) {
@@ -177,9 +177,9 @@ void MonitorBox::computeScaledResolution_landscape(const float aspectRatio,
 void MonitorBox::computeScaledResolution_portrait(const float aspectRatio,
                                                                     const float maxHeight)
 {
-    _marginWidget = _monitorWidgetSize.height() * _marginFractionOfWidgetSize;
+    _marginWidget = _monitorWidgetSize.height() * MarginFractionOfWidgetSize;
     float virtualHeight = _monitorWidgetSize.height()
-        * (1.0 - _marginFractionOfWidgetSize * 2.0);
+        * (1.0 - MarginFractionOfWidgetSize * 2.0);
     _monitorScaleFactor = virtualHeight / maxHeight;
     float newWidth = virtualHeight * aspectRatio;
     for (size_t m = 0; m < _monitorResolution.size(); ++m) {
@@ -194,7 +194,7 @@ void MonitorBox::computeScaledResolution_portrait(const float aspectRatio,
 void MonitorBox::setNumWindowsDisplayed(unsigned int nWindows) {
     if (_nWindows != nWindows) {
         _nWindows = nWindows;
-        this->update();
+        update();
     }
 }
 
@@ -212,5 +212,5 @@ void MonitorBox::mapWindowResolutionToWidgetCoordinates(unsigned int mIdx,
         wF.width() * _monitorScaleFactor,
         wF.height() * _monitorScaleFactor
     };
-    this->update();
+    update();
 }

@@ -25,25 +25,22 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___FILESUPPORT___H__
 #define __OPENSPACE_UI_LAUNCHER___FILESUPPORT___H__
 
+#include <QWidget>
+
+#include <sgctedit/display.h>
+#include <sgctedit/orientation.h>
+#include <sgct/config.h>
 #include <QFrame>
 #include <QLabel>
 #include <QLayout>
 #include <QPushButton>
 #include <QVector>
-#include <QWidget>
-
 #include <vector>
-#include <iostream>
-#include <sgctedit/display.h>
-#include <sgctedit/orientation.h>
-#include <sgct/config.h>
 
-
-class FileSupport : public QWidget
-{
+class FileSupport : public QWidget {
 Q_OBJECT
 public:
-    explicit FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
+    FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
         Display* display, Orientation* orientation,
         std::vector<sgct::config::Window>& windowList, sgct::config::Cluster& cluster,
         std::function<void(bool)> cb);
@@ -70,6 +67,7 @@ private:
     void saveWindowsDimensions(WindowControl* wCtrl);
     void saveWindowsWebGui(unsigned int wIdx);
     void saveWindowsFullScreen(WindowControl* wCtrl);
+
     QHBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;

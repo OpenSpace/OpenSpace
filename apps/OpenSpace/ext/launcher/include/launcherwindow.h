@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
 #define __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
 
-#include <QApplication>
 #include <QMainWindow>
 
-#include <openspace/scene/profile.h>
 #include "sgctedit/sgctedit.h"
+#include <openspace/scene/profile.h>
+#include <QApplication>
 #include <optional>
 
 namespace openspace::configuration { struct Configuration; }
@@ -51,7 +51,7 @@ public:
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure.
      */
-    LauncherWindow(QApplication& qtApp, bool profileEnabled,
+    LauncherWindow(bool profileEnabled,
         const openspace::configuration::Configuration& globalConfig,
         bool sgctConfigEnabled,  std::string sgctConfigName, QWidget* parent);
 
@@ -89,7 +89,6 @@ private:
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
 
-    QApplication& _qApp;
     const std::string _assetPath;
     const std::string _userAssetPath;
     const std::string _configPath;

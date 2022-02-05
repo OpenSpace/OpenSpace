@@ -25,6 +25,10 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
 #define __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
 
+#include <QWidget>
+
+#include "windowcontrol.h"
+#include "monitorbox.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QIntValidator>
@@ -37,26 +41,17 @@
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QVector>
-#include <QWidget>
-
 #include <vector>
-#include <iostream>
 
-#include "windowcontrol.h"
-#include "monitorbox.h"
-
-
-class Display : public QWidget
-{
+class Display : public QWidget {
 Q_OBJECT
 public:
-    explicit Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
+    Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
         const unsigned int nMaxWindows, const QString* winColors);
     ~Display();
-    std::vector<WindowControl*> windowControls();
+    std::vector<WindowControl*> windowControls() const;
     unsigned int nWindows() const;
     void uncheckWebGuiOptions();
-    void setindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
 
 private slots:
     void addWindow();
@@ -64,10 +59,8 @@ private slots:
 
 private:
     void initializeWindowControl();
-    void removeWindowControl();
     void initializeLayout();
     void showWindows();
-    void addDisplayLayout(unsigned int column, MonitorBox* monBox, QVBoxLayout* layout);
     MonitorBox* _monBox;
     std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
@@ -80,7 +73,6 @@ private:
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
-    QVBoxLayout* _layout = nullptr;
     std::vector<QVBoxLayout*> _winCtrlLayouts;
     std::vector<QWidget*> _layoutWindowWrappers;
     std::vector<QFrame*> _frameBorderLines;

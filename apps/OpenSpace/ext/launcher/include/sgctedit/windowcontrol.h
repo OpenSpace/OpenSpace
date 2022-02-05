@@ -50,7 +50,7 @@ class WindowControl : public QWidget
 {
 Q_OBJECT
 public:
-    explicit WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
+    WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
         unsigned int windowIndex, std::vector<QRect>& monitorDims,
         const QString* winColors, QWidget *parent = nullptr);
     ~WindowControl();

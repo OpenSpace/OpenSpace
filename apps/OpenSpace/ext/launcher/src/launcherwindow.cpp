@@ -164,13 +164,11 @@ namespace {
 
 using namespace openspace;
 
-LauncherWindow::LauncherWindow(QApplication& qtApp,
-                               bool profileEnabled,
+LauncherWindow::LauncherWindow(bool profileEnabled,
                                const configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
-    , _qApp(qtApp)
     , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")).string() + '/')
     , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")).string() + '/')
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")).string() + '/')
@@ -551,7 +549,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
 }
 
 void LauncherWindow::openWindowEditor() {
-    QList<QScreen*> screenList = _qApp.screens();
+    QList<QScreen*> screenList = qApp->screens();
     if (screenList.length() == 0) {
         LERRORC(
             "LauncherWindow",
