@@ -70,8 +70,13 @@ local colorbar = {
 
 asset.onInitialize(function() 
   if not openspace.directoryExists(fieldDestination) then
-    openspace.printInfo("Extracting " .. Name .. " Field")
-    openspace.unzipFile(syncedDirectory .. "field.zip", fieldDestination, true)
+    openspace.printError([[This layer includes files too large to be extracted by
+OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the field.zip file such that
+the ']] .. fieldDestination .. [[' folder exists and contains many images]])
+]])
+
+    -- openspace.printInfo("Extracting " .. Name)
+    -- openspace.unzipFile(syncedDirectory .. "field.zip", fieldDestination, true)
   end
 
   if not openspace.directoryExists(obsDestination) then

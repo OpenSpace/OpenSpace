@@ -7,7 +7,7 @@ local Description = [[ ETOPO1 is a 1 arc-minute global relief model of Earth's s
 that integrates land topography and ocean bathymetry. It was built from numerous global 
 and regional data sets, and is available in "Ice Surface" (top of Antarctic and Greenland 
 ice sheets) and "Bedrock" (base of the ice sheets) versions. The "Ice Surface" version is 
-available for Science On a Sphere®. This dataset is a higher resolution version of 
+available for Science On a Sphere. This dataset is a higher resolution version of 
 ETOPO2, which is a 2 arc-minute global relief model of Earth's surface. An arc-minute is 
 1/60 of a degree. Scientists use high resolution maps like ETOPO1 to improve accuracy in 
 tsunami forecasting, modeling, and warnings, and also to enhance ocean circulation 

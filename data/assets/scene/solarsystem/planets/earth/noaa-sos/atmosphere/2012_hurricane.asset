@@ -57,8 +57,13 @@ asset.onInitialize(function()
   end
 
   if not openspace.directoryExists(satDestination) then
-    openspace.printInfo("Extracting " .. Name .. "Sat")
-    openspace.unzipFile(syncedDirectory .. "sat.zip", satDestination, true)
+    openspace.printError([[This layer includes files too large to be extracted by
+OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the sat.zip file such that
+the ']] .. satDestination .. [[' folder exists and contains many images]])
+]])  
+
+    -- openspace.printInfo("Extracting " .. Name)
+    -- openspace.unzipFile(syncedDirectory .. "sat.zip", satDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_names)

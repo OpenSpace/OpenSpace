@@ -6,7 +6,7 @@ local Identifier = "noaa-sos-atmosphere-nccs_models-winds"
 local Description = [[ Models create a dynamic portrait of the Earth through numerical 
 experiments that simulate our current knowledge of the dynamical and physical processes 
 governing weather and climate variability. The simulation visualized here captures the 
-speed of winds at the tropopause, about 6-9 miles above the Earth’s surface during the 
+speed of winds at the tropopause, about 6-9 miles above the Earth's surface during the 
 period September 1, 2006 to March 17, 2007. Such simulations allow scientists to view the 
 intensity and turbulence of the polar and sub-tropic jet streams, which carry weather 
 around the globe. Red, orange and yellow are used for the fastest moving air.   ]]
@@ -38,8 +38,13 @@ local layer = {
 
 asset.onInitialize(function() 
   if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
+    openspace.printError([[This layer includes files too large to be extracted by
+OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the 4000.zip file such that
+the ']] .. imagesDestination .. [[' folder exists and contains many images]])
+]])
+
+    -- openspace.printInfo("Extracting " .. Name)
+    -- openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

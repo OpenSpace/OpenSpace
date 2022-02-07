@@ -47,8 +47,13 @@ local legend = {
 
 asset.onInitialize(function() 
   if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
+    openspace.printError([[This layer includes files too large to be extracted by
+OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the 4000.zip file such that
+the ']] .. imagesDestination .. [[' folder exists and contains many images]])
+]])
+
+    -- openspace.printInfo("Extracting " .. Name)
+    -- openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

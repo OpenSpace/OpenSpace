@@ -4,8 +4,8 @@ local globeIdentifier = asset.require("../../earth").Earth.Identifier
 local Name = "Solar Rainfall - Monthly (NASA)"
 local Identifier = "noaa-sos-atmosphere-globe-rainfall"
 local Description = [[ Globally, rain is the main source of fresh water for plants and 
-animals rainfall is essential for life across Earth’s landscapes. In addition to moving 
-tremendous amounts of water through Earth’s atmosphere, rain clouds also move tremendous 
+animals rainfall is essential for life across Earth's landscapes. In addition to moving 
+tremendous amounts of water through Earth's atmosphere, rain clouds also move tremendous 
 amounts of energy. When water evaporates from the surface and rises as vapor into the 
 atmosphere, it carries heat from the sun-warmed surface with it. Later, when the water 
 vapor condenses to form cloud droplets and rain, the heat is released into the 
