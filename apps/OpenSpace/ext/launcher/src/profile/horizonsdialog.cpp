@@ -531,11 +531,29 @@ bool HorizonsDialog::isValidInput() {
         isValid = false;
         message = "Step size not selected";
     }
-    // In the case of arcseconds, first option
-    else if (_timeTypeCombo->currentIndex() == 0) {
-        if (60 > _stepEdit->text().toInt() || _stepEdit->text().toInt() > 3600) {
+    // Check if input is numerical
+    bool couldConvert = false;
+    int32_t step = _stepEdit->text().toInt(&couldConvert);
+    if (!couldConvert) {
+        isValid = false;
+        message = "Step size needs to be a number in range 1 to " +
+            std::to_string(std::numeric_limits<int32_t>::max());
+    }
+    else {
+        // In the case of arcseconds (first option) range is different
+        if (_timeTypeCombo->currentIndex() == 0) {
+            if (60 > step || step > 3600) {
+                isValid = false;
+                message = "Angular step size needs to be in range 60 to 3600";
+            }
+        }
+        // Numbers only and in range 1 to 2147483647 (max of 32 bit int)
+        // Horizons read the step size into a 32 bit int, but verifies the input on their
+        // website as a uint32_t. If step size over 32 bit int is sent, this error
+        // message is recived: Cannot read numeric value -- re-enter
+        else if (1 > step || step > std::numeric_limits<int32_t>::max()) {
             isValid = false;
-            message = "Angular step size need to be in range 60 to 3600";
+            message = "Step size is outside valid range 1 to " + std::to_string(std::numeric_limits<int32_t>::max());
         }
     }
 
@@ -783,6 +801,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
             appendLog(message, HorizonsDialog::LogLevel::Error);
             break;
         }
+
+        case openspace::HorizonsFile::HorizonsResult::ErrorSpan:
+            appendLog(
+                "Step size is too big, exceeds available time span for target",
+                HorizonsDialog::LogLevel::Error
+            );
+            break;
 
         case openspace::HorizonsFile::HorizonsResult::ErrorTimeRange: {
             appendLog("Time range is outside the valid range for target '"

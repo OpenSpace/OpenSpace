@@ -66,6 +66,10 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidAnswer(const json& answer) {
         if (errorMessage.find("Projected output length") != std::string::npos) {
             return HorizonsFile::HorizonsResult::ErrorSize;
         }
+        // STEP_SIZE too big, exceeds available span.
+        else if (errorMessage.find("STEP_SIZE too big") != std::string::npos) {
+            return HorizonsFile::HorizonsResult::ErrorSpan;
+        }
         // No ephemeris for target "X" after A.D. Y UT
         else if (errorMessage.find("No ephemeris for target") != std::string::npos) {
             return HorizonsFile::HorizonsResult::ErrorTimeRange;
@@ -123,6 +127,12 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidHorizonsFile() const {
         if (line.find("change step-size") != std::string::npos) {
             fileStream.close();
             return HorizonsFile::HorizonsResult::ErrorSize;
+        }
+
+        // Selected time range too big for avalable time span?
+        if (line.find("STEP_SIZE too big") != std::string::npos) {
+            fileStream.close();
+            return HorizonsFile::HorizonsResult::ErrorSpan;
         }
 
         // Outside valid time range?

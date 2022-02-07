@@ -55,6 +55,7 @@ public:
 
         // Erros caught by the error field in the json output
         ErrorSize,
+        ErrorSpan,
         ErrorTimeRange,
         ErrorNoObserver,
         ErrorObserverTargetSame,
