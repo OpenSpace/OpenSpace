@@ -25,7 +25,7 @@
 #include "sgctedit/filesupport.h"
 
 FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
-                         Display* display, Orientation* orientation,
+                         std::shared_ptr<Display> display, Orientation* orientation,
                          std::vector<sgct::config::Window>& windowList,
                          sgct::config::Cluster& cluster, std::function<void(bool)> cb)
     : _displayWidget(display)

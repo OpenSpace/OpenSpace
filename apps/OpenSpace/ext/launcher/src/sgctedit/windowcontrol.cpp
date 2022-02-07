@@ -27,8 +27,9 @@
 #include "sgctedit/windowcontrol.h"
 
 WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
-                          const unsigned int windowIndex, std::vector<QRect>& monitorDims,
-                                                const QString* winColors, QWidget *parent)
+                             const unsigned int windowIndex,
+                             std::vector<QRect>& monitorDims,
+                             const std::array<QString, 4> winColors, QWidget *parent)
     : QWidget(parent)
     , _nMonitors(nMonitors)
     , _monIndex(monitorIndex)
@@ -150,9 +151,7 @@ QVBoxLayout* WindowControl::initializeLayout() {
 
     _labelWinNum = new QLabel();
     _labelWinNum->setText("Window " + QString::number(_index + 1));
-    QString colorStr = "QLabel { color : ";
-    colorStr += _colorsForWindows ? _colorsForWindows[_index] : "#FFFFFF";
-    colorStr += "; }";
+    QString colorStr = "QLabel { color : " + _colorsForWindows[_index] + "; }";
     _labelWinNum->setStyleSheet(colorStr);
 
     QHBoxLayout* layoutWinNum = new QHBoxLayout();

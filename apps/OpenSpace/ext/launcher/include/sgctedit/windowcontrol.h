@@ -21,30 +21,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
 #ifndef __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__
 #define __OPENSPACE_UI_LAUNCHER___WINDOWCONTROL___H__
 
+#include <QWidget>
+
+#include <sgct/config.h>
 #include <QCheckBox>
-#include <QColor>
 #include <QComboBox>
-#include <QFrame>
-#include <QIntValidator>
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
 #include <QPainter>
-#include <QPainterPath>
-#include <QPoint>
 #include <QPushButton>
-#include <QStandardItemModel>
-#include <QVector>
-#include <QWidget>
-
 #include <vector>
-#include <iostream>
-#include <sgct/config.h>
-
 
 class WindowControl : public QWidget
 {
@@ -52,7 +42,7 @@ Q_OBJECT
 public:
     WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
         unsigned int windowIndex, std::vector<QRect>& monitorDims,
-        const QString* winColors, QWidget *parent = nullptr);
+        const std::array<QString, 4> winColors, QWidget *parent = nullptr);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
@@ -148,7 +138,7 @@ private:
     unsigned int _index = 0;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
-    const QString* _colorsForWindows = nullptr;
+    const std::array<QString, 4> _colorsForWindows;
     QVBoxLayout* _layoutFullWindow = nullptr;
     QLabel* _labelWinNum = nullptr;
     QLineEdit* _size_x = nullptr;

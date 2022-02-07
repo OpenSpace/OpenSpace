@@ -83,8 +83,8 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         buttonCancel->setToolTip("Cancel global orientation changes");
         layoutButtonBox->addWidget(buttonCancel);
         layoutButtonBox->addStretch(1);
-        connect(buttonSave, SIGNAL(released()), this, SLOT(ok()));
-        connect(buttonCancel, SIGNAL(released()), this, SLOT(cancel()));
+        connect(buttonSave, &QPushButton::released, this, &OrientationDialog::ok);
+        connect(buttonCancel, &QPushButton::released, this, &OrientationDialog::cancel);
         layoutWindow->addLayout(layoutButtonBox);
     }
 }

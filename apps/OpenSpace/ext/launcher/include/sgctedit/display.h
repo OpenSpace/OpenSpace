@@ -21,7 +21,6 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
 #ifndef __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
 #define __OPENSPACE_UI_LAUNCHER___DISPLAY___H__
 
@@ -46,8 +45,9 @@
 class Display : public QWidget {
 Q_OBJECT
 public:
-    Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
-        const unsigned int nMaxWindows, const QString* winColors);
+    Display(std::shared_ptr<MonitorBox> monitorRenderBox,
+        std::vector<QRect>& monitorSizeList, const unsigned int nMaxWindows,
+        const std::array<QString, 4> winColors);
     ~Display();
     std::vector<WindowControl*> windowControls() const;
     unsigned int nWindows() const;
@@ -61,14 +61,14 @@ private:
     void initializeWindowControl();
     void initializeLayout();
     void showWindows();
-    MonitorBox* _monBox;
+    std::shared_ptr<MonitorBox> _monBox;
     std::vector<QRect>& _monitorResolutions;
     QRect _widgetDims = {0, 0, 400, 400};
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     unsigned int _nMaxWindows = 3;
     unsigned int _nMonitors = 1;
-    const QString* _winColors;
+    const std::array<QString, 4> _winColors;
     std::vector<WindowControl*> _windowControl;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;

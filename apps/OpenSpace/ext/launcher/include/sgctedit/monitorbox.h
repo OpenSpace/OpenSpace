@@ -43,7 +43,7 @@ class MonitorBox : public QWidget {
 Q_OBJECT
 public:
     MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-        unsigned int nWindows, QString* winColors);
+        unsigned int nWindows, std::array<QString, 4> winColors);
     void mapMonitorResolutionToWidgetCoordinates();
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
         const QRectF& w);
@@ -79,7 +79,7 @@ private:
         {0.f, 0.f, 0.f, 0.f}
     };
     unsigned int _nWindows = 1;
-    QString* _colorsForWindows;
+    const std::array<QString, 4> _colorsForWindows;
     int _alphaWindowOpacity = 170;
     float _monitorScaleFactor = 1.0;
     bool _showLabel = false;

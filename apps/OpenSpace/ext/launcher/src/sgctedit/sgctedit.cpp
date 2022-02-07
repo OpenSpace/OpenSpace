@@ -57,7 +57,7 @@ void SgctEdit::createWidgets() {
     QHBoxLayout* layoutMainH = new QHBoxLayout;
     _orientationWidget = new Orientation();
     {
-        _monBox = new MonitorBox(
+        _monBox = std::make_shared<MonitorBox>(
             _monitorWidgetSize,
             _monitorSizeList,
             _nMaxWindows,
@@ -65,12 +65,12 @@ void SgctEdit::createWidgets() {
         );
         QHBoxLayout* layoutMonBox = new QHBoxLayout;
         layoutMonBox->addStretch(1);
-        layoutMonBox->addWidget(_monBox);
+        layoutMonBox->addWidget(_monBox.get());
         layoutMonBox->addStretch(1);
         layoutMainV->addLayout(layoutMonBox);
         _monBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         _monBox->setFixedSize(_monitorWidgetSize.width(), _monitorWidgetSize.height());
-        addDisplayLayout(_monBox, layoutMainH);
+        addDisplayLayout(layoutMainH);
     }
     {
         layoutMainV->addLayout(layoutMainH);
@@ -95,17 +95,16 @@ void SgctEdit::createWidgets() {
     }
 }
 
-void SgctEdit::addDisplayLayout(MonitorBox* monBox, QHBoxLayout* layout)
-{
+void SgctEdit::addDisplayLayout(QHBoxLayout* layout) {
     _displayLayout = new QVBoxLayout;
-    _displayWidget = new Display(
-        monBox,
+    _displayWidget = std::make_shared<Display>(
+        _monBox,
         _monitorSizeList,
         _nMaxWindows,
         _colorsForWindows
     );
     _displayFrame = new QFrame;
-    _displayLayout->addWidget(_displayWidget);
+    _displayLayout->addWidget(_displayWidget.get());
     _displayFrame->setLayout(_displayLayout);
     _displayFrame->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     layout->addWidget(_displayFrame);
@@ -126,13 +125,7 @@ SgctEdit::~SgctEdit() {
     if (_fileSupportWidget) {
         delete _fileSupportWidget;
     }
-    if (_displayWidget) {
-        delete _displayWidget;
-    }
     if (_displayLayout) {
         delete _displayLayout;
-    }
-    if (_displayFrame) {
-        delete _displayFrame;
     }
 }

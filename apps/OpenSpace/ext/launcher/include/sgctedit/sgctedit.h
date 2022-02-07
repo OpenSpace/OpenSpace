@@ -25,9 +25,14 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
 #define __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__
 
+#include <QDialog>
+
+#include <sgctedit/display.h>
+#include <sgctedit/filesupport.h>
+#include <sgctedit/monitorbox.h>
+#include <sgctedit/orientation.h>
 #include <QApplication>
 #include <QColor>
-#include <QDialog>
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
@@ -38,12 +43,9 @@
 #include <QTextBrowser>
 #include <QWidget>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <sgctedit/display.h>
-#include <sgctedit/filesupport.h>
-#include <sgctedit/monitorbox.h>
-#include <sgctedit/orientation.h>
 
 class SgctEdit final : public QDialog
 {
@@ -52,18 +54,18 @@ public:
     SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
         sgct::config::Cluster& cluster, const QList<QScreen*> screenList);
     ~SgctEdit();
-    void addDisplayLayout(MonitorBox* monBox, QHBoxLayout* layout);
+    void addDisplayLayout(QHBoxLayout* layout);
     void createWidgets();
     bool wasSaved() const;
     std::string saveFilename();
 
 private:
     void systemMonitorConfiguration(const QList<QScreen*> screenList);
-    MonitorBox* _monBox = nullptr;
+    std::shared_ptr<MonitorBox> _monBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;
     QFrame* _displayFrame = nullptr;
-    Display* _displayWidget = nullptr;
+    std::shared_ptr<Display> _displayWidget = nullptr;
     QRect _monitorWidgetSize = {0, 0, 500, 500};
     FileSupport* _fileSupportWidget = nullptr;
     Orientation* _orientationWidget = nullptr;
@@ -71,7 +73,7 @@ private:
     std::vector<sgct::config::Window>& _windowList;
     bool _saveSelected = false;
     unsigned int _nMaxWindows = 3;
-    QString _colorsForWindows[4] = {
+    const std::array<QString, 4> _colorsForWindows = {
         "#2B9EC3",
         "#FCAB10",
         "#44AF69",

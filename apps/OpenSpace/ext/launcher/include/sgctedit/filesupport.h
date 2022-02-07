@@ -35,13 +35,14 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QVector>
+#include <memory>
 #include <vector>
 
 class FileSupport : public QWidget {
 Q_OBJECT
 public:
     FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorList,
-        Display* display, Orientation* orientation,
+        std::shared_ptr<Display> display, Orientation* orientation,
         std::vector<sgct::config::Window>& windowList, sgct::config::Cluster& cluster,
         std::function<void(bool)> cb);
     std::string saveFilename();
@@ -71,7 +72,7 @@ private:
     QHBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
-    Display* _displayWidget;
+    std::shared_ptr<Display> _displayWidget;
     Orientation* _orientationWidget;
     std::vector<QRect>& _monitors;
     sgct::config::Cluster& _cluster;

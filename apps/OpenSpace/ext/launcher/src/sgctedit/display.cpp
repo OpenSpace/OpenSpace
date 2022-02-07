@@ -31,8 +31,9 @@
 #include <QScreen>
 #include <string>
 
-Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeList,
-                                 const unsigned int nMaxWindows, const QString* winColors)
+Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
+                 std::vector<QRect>& monitorSizeList, const unsigned int nMaxWindows,
+                 const std::array<QString, 4> winColors)
     : _monBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
     , _nMaxWindows(nMaxWindows)
@@ -45,14 +46,13 @@ Display::Display(MonitorBox* monitorRenderBox, std::vector<QRect>& monitorSizeLi
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
-    connect(_addWindowButton, SIGNAL(released()), this, SLOT(addWindow()));
-    connect(_removeWindowButton, SIGNAL(released()), this, SLOT(removeWindow()));
+    connect(_addWindowButton, &QPushButton::released, this, &Display::addWindow);
+    connect(_removeWindowButton, &QPushButton::released, this, &Display::removeWindow);
     initializeLayout();
 }
 
 Display::~Display() {
-    delete _monBox;
-    for (auto w : _windowControl) {
+    for (WindowControl* w : _windowControl) {
         delete w;
     }
 }
@@ -116,7 +116,7 @@ void Display::showWindows() {
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
     _addWindowButton->setEnabled(_nWindowsDisplayed != _nMaxWindows);
-    for (auto w : _windowControl) {
+    for (WindowControl* w : _windowControl) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
     _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);

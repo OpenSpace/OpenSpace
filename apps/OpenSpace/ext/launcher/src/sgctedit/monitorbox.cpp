@@ -27,7 +27,7 @@
 constexpr float MarginFractionOfWidgetSize = 0.025;
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                       unsigned int nWindows, QString* winColors)
+                       unsigned int nWindows, std::array<QString, 4> winColors)
     : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
     , _nWindows(nWindows)
