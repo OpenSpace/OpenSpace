@@ -33,7 +33,7 @@ local layer_radar = {
     Folder = radarDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
-    Format = "%Y%j%H%M.png"
+    Format = "%y%j%H%M.png"
   },   
   Description = Description
 }

@@ -274,7 +274,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     );
                 }
                 else {
-                    std::string date = fmt::format(
+                    date = fmt::format(
                         "{}-{}-{} {}:{}:{}",
                         tm.tm_year + 1900,
                         tm.tm_mon + 1,
@@ -299,6 +299,14 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 return lhs.first < rhs.first;
             }
         );
+
+        if (_folder.files.empty()) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading layer '{}'. Folder {} does not contain any files that "
+                "matched the time format",
+                _identifier, _folder.folder
+            ));
+        }
     }
     
     _isInterpolating = p.interpolation.value_or(_isInterpolating);

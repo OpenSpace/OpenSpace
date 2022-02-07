@@ -33,7 +33,7 @@ local layer = {
     Folder = imagesDestination,
     -- See https://en.cppreference.com/w/cpp/io/manip/get_time for an explanation of the
     -- time formatting string
-    Format = "cyl_%Y_%m_%D.jpg"
+    Format = "cyl_%Y_%m_%d.jpg"
   },
   Description = Description
 }

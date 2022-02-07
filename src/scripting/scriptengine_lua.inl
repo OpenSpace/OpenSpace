@@ -304,8 +304,22 @@ int unzipFile(lua_State* L) {
         return luaL_error(L, "Source file was not found");
     }
 
-    int arg = 2;
-    zip_extract(source.c_str(), dest.c_str(), [](const char*, void*) { return 0; }, &arg);
+    struct zip_t* z = zip_open(source.c_str(), 0, 'r');
+    const bool is64 = zip_is64(z);
+    zip_close(z);
+
+    if (is64) {
+        std::string err = fmt::format(
+            "Error while unzipping {}: Zip64 archives are not supported", source
+        );
+        return luaL_error(L, err.c_str());
+    }
+
+    const int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
+    if (ret != 0) {
+        std::string err = fmt::format("Error {} while unzipping {}", ret, source);
+        return luaL_error(L, err.c_str());
+    }
 
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);
