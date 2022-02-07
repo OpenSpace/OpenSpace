@@ -57,6 +57,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemMission::Documentation() {
     documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.name = "DashboardItemMission";
     doc.id = "base_dashboarditem_mission";
     return doc;
 }

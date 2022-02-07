@@ -150,16 +150,6 @@ public:
     */
     void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
 
-    /**
-    * Sets the mode for scripts being run from playback
-    */
-    void triggerPlaybackStart();
-
-    /**
-    * Sets the flag for scripts no longer being run from playback
-    */
-    void stopPlayback();
-
     static LuaLibrary luaLibrary();
     void setModeApplicationTime();
     void setModeRecordedTime();
@@ -174,7 +164,6 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
-    bool _playbackModeEnabled = false;
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
         = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;

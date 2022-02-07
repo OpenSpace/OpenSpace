@@ -27,7 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -174,13 +174,6 @@ void PathNavigator::updateCamera(double deltaTime) {
         deltaTime = 0.01;
     }
 
-    // If for some reason the time is no longer paused, pause it again
-    // TODO: Before we get here, one time tick happens. Should move this check to engine
-    if (!global::timeManager->isPaused()) {
-        global::timeManager->setPause(true);
-        LINFO("Cannot start simulation time during camera motion");
-    }
-
     CameraPose newPose = _currentPath->traversePath(deltaTime, _speedScale);
     const std::string newAnchor = _currentPath->currentAnchor();
 
@@ -195,8 +188,7 @@ void PathNavigator::updateCamera(double deltaTime) {
         removeRollRotation(newPose, deltaTime);
     }
 
-    camera()->setPositionVec3(newPose.position);
-    camera()->setRotation(newPose.rotation);
+    camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached end of path");
@@ -223,13 +215,15 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     // We want the user to be able to choose easily
     const int pathType = _defaultPathType;
 
-    // Ignore paths that are created during session recording, as the camera
-    // position should have been recorded
-    if (global::sessionRecording->isPlayingBack()) {
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
+        // Silently ignore any paths that are being created during a session recording
+        // playback. The camera path should already have been recorded
         return;
     }
 
     clearPath();
+
     try {
         _currentPath = std::make_unique<Path>(
             createPathFromDictionary(dictionary, Path::Type(pathType))
@@ -253,7 +247,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
 }
 
 void PathNavigator::clearPath() {
-    LINFO("Clearing path");
+    LDEBUG("Clearing path");
     _currentPath = nullptr;
 }
 
@@ -263,11 +257,20 @@ void PathNavigator::startPath() {
         return;
     }
 
+    if (!global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath)) {
+        LERROR("Could not start camera path");
+        return; // couldn't switch to camera path mode
+    }
+
     // Always pause the simulation time when flying, to aovid problem with objects
     // moving. However, keep track of whether the time was running before the path
     // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        global::timeManager->setPause(true);
+        openspace::global::scriptEngine->queueScript(
+            "openspace.time.setPause(true)",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
         _startSimulationTimeOnFinish = true;
         LINFO(
             "Pausing time simulation during path traversal. "
@@ -337,10 +340,14 @@ void PathNavigator::handlePathEnd() {
     _isPlaying = false;
 
     if (_startSimulationTimeOnFinish) {
-        global::timeManager->setPause(false);
+        openspace::global::scriptEngine->queueScript(
+            "openspace.time.setPause(false)",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
     _startSimulationTimeOnFinish = false;
     clearPath();
+    global::openSpaceEngine->resetMode();
 }
 
 void PathNavigator::findRelevantNodes() {

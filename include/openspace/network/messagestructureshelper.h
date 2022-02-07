@@ -22,70 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemtext.h>
+#ifndef __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
+#define __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/profiling.h>
-#include <optional>
+#include <openspace/network/messagestructures.h>
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
-        "Text",
-        "Text",
-        "The text to be displayed"
-    };
+namespace openspace::datamessagestructures {
 
-    struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
-        // [[codegen::verbatim(TextInfo.description)]]
-        std::optional<std::string> text;
-    };
-#include "dashboarditemtext_codegen.cpp"
-} // namespace
+/**
+ * Method that creates a CameraKeyframe object and populates
+ * it with the current properties of the camera from the navigation handler.
+ * \returns CameraKeyframe with current state from NavigationHandler
+*/
+CameraKeyframe generateCameraKeyframe();
 
-namespace openspace {
+/**
+ * Method that creates a TimeKeyframe object and populates
+ * it with the current time values from the application time manager.
+ * \returns TimeKeyframe The time keyframe
+ */
+TimeKeyframe generateTimeKeyframe();
 
-documentation::Documentation DashboardItemText::Documentation() {
-    documentation::Documentation doc =
-        codegen::doc<Parameters>("base_dashboarditem_text");
+/**
+ * Method that creates a ScriptMessage object from a given script
+ * string, and populates the ScriptMessage with the script and timestamp
+ * of the current application time.
+ * \param script The script to execute in std::string form
+ * \returns ScriptMessage The ScriptMessage data structure with script
+ */
+ScriptMessage generateScriptMessage(std::string script);
 
-    // @TODO cleanup
-    // Insert the parent's documentation entries until we have a verifier that can deal
-    // with class hierarchy
-    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
-    doc.entries.insert(
-        doc.entries.end(),
-        parentDoc.entries.begin(),
-        parentDoc.entries.end()
-    );
+} // namespace openspace::datamessagestructures
 
-    return doc;
-}
-
-DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
-    : DashboardTextItem(dictionary)
-    , _text(TextInfo, "")
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _text = p.text.value_or(_text);
-    addProperty(_text);
-}
-
-void DashboardItemText::render(glm::vec2& penPosition) {
-    ZoneScoped
-
-    RenderFont(*_font, penPosition, _text.value());
-    penPosition.y -= _font->height();
-}
-
-glm::vec2 DashboardItemText::size() const {
-    ZoneScoped
-
-    return _font->boundingBox(_text.value());
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__

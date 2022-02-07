@@ -108,7 +108,10 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
 }
 
 documentation::Documentation MilkywayConversionTask::Documentation() {
-    return documentation::Documentation();
+    return documentation::Documentation(
+        "MilkywayConversionTask",
+        "galaxy_milkywayconversiontask"
+    );
 }
 
 } // namespace openspace

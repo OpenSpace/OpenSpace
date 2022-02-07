@@ -25,16 +25,13 @@
 #ifndef __OPENSPACE_CORE___PARALLELPEER___H__
 #define __OPENSPACE_CORE___PARALLELPEER___H__
 
-#include <openspace/network/parallelconnection.h>
-#include <openspace/interaction/externinteraction.h>
-#include <openspace/network/messagestructures.h>
-#include <openspace/util/timemanager.h>
-
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/network/messagestructures.h>
 #include <openspace/network/parallelconnection.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/designpattern/event.h>
 #include <atomic>
 #include <deque>
@@ -132,8 +129,6 @@ private:
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
-
-    ExternInteraction _externInteract;
 
     ParallelConnection _connection;
 

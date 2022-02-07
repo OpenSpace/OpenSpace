@@ -49,8 +49,6 @@ public:
 
     static documentation::Documentation Documentation();
 
-    bool storyStyleActive();
-
 private:
     struct Component {
         properties::OptionProperty type;
