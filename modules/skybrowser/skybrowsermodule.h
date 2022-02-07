@@ -74,6 +74,7 @@ public:
     RenderableSkyBrowser* get3dBrowser(const std::string& id);
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler();
     std::string selectedBrowserId();
+    std::string selectedTargetId();
 
     // Setters
     void set3dBrowser(const std::string& id);
@@ -92,6 +93,8 @@ public:
    
     // Boolean functions
     bool isCameraInSolarSystem();
+    bool isSelectedPairFacingCamera();
+    bool isSelectedPairUsingRae();
 
     // Managing the target browser pairs 
     void removeTargetBrowserPair(const std::string& browserId);

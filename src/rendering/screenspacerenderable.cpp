@@ -464,6 +464,10 @@ bool ScreenSpaceRenderable::isUsingRaeCoords() const
 {
     return _useRadiusAzimuthElevation;
 }
+bool ScreenSpaceRenderable::isFacingCamera() const
+{
+    return _faceCamera;
+}
 void ScreenSpaceRenderable::setEnabled(bool isEnabled)
 {
     _enabled = isEnabled;

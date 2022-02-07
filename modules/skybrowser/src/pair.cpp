@@ -337,6 +337,16 @@ namespace openspace {
         return isTargetFadeFinished(goalState) && isBrowserFadeFinished(goalState);
     }
 
+    bool Pair::isFacingCamera() const
+    {
+        return _browser->isFacingCamera() || _target->isFacingCamera();
+    }
+
+    bool Pair::isUsingRadiusAzimuthElevation() const
+    {
+        return _browser->isUsingRaeCoords() || _target->isUsingRaeCoords();
+    }
+
     ScreenSpaceSkyTarget* Pair::getTarget() {
         return _target;
     }

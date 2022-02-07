@@ -777,8 +777,38 @@ std::string SkyBrowserModule::selectedBrowserId() {
     return _selectedBrowser;
 }
 
+std::string SkyBrowserModule::selectedTargetId()
+{
+    if (getPair(_selectedBrowser)) {
+        return getPair(_selectedBrowser)->targetId();
+    }
+    else {
+        return "";
+    }
+}
+
 bool SkyBrowserModule::isCameraInSolarSystem() {
     return _isCameraInSolarSystem;
+}
+
+bool SkyBrowserModule::isSelectedPairUsingRae()
+{
+    if (getPair(_selectedBrowser)) {
+        return getPair(_selectedBrowser)->isUsingRadiusAzimuthElevation();
+    }
+    else {
+        return false;
+    }
+}
+
+bool SkyBrowserModule::isSelectedPairFacingCamera()
+{
+    if (getPair(_selectedBrowser)) {
+        return getPair(_selectedBrowser)->isFacingCamera();
+    }
+    else {
+        return false;
+    }
 }
 
 //std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {

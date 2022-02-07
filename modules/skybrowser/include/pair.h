@@ -75,7 +75,8 @@ public:
 
     // Boolean functions
     bool hasFinishedFading(float goalState) const;
-    
+    bool isFacingCamera() const;
+    bool isUsingRadiusAzimuthElevation() const;
     bool isEnabled() const;
     bool isLocked() const;
 

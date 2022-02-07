@@ -70,6 +70,7 @@ public:
     virtual bool isReady() const;
     bool isEnabled() const;
     bool isUsingRaeCoords() const;
+    bool isFacingCamera() const;
     void setEnabled(bool isEnabled);
     float depth();
 

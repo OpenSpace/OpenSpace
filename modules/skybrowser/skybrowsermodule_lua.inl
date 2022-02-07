@@ -332,6 +332,12 @@ int getTargetData(lua_State* L) {
     lua_settable(L, -3);
     ghoul::lua::push(L, "selectedBrowserId", module->selectedBrowserId());
     lua_settable(L, -3);
+    ghoul::lua::push(L, "selectedTargetId", module->selectedTargetId());
+    lua_settable(L, -3);
+    ghoul::lua::push(L, "isFacingCamera", module->isSelectedPairFacingCamera());
+    lua_settable(L, -3);
+    ghoul::lua::push(L, "isUsingRadiusAzimuthElevation", module->isSelectedPairUsingRae());
+    lua_settable(L, -3);
     ghoul::lua::push(L, "cameraInSolarSystem", module->isCameraInSolarSystem());
     lua_settable(L, -3);
     // Set table for the current ImageData
