@@ -1,5 +1,4 @@
 local transforms = asset.require("./transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 asset.require("./trail")
 
@@ -81,7 +80,19 @@ local SaturnLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Saturn)
+  openspace.addSceneGraphNode(SaturnLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnLabel)
+  openspace.removeSceneGraphNode(Saturn)
+end)
+    
+asset.export(Saturn)
+asset.export(SaturnLabel)
+
 
 
 asset.meta = {

@@ -362,13 +362,13 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            "string, string",
+            "string, string, (string, table)",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
             "The renderable of the specified scene graph node needs to be a "
             "renderable globe. The second argument is the layer group which can be "
-            "any of " + listLayerGroups + ". The third argument is the dictionary"
-            "defining the layer."
+            "any of " + listLayerGroups + ". The third argument is either the identifier "
+            "for the layer or a dictionary with the 'Identifier' key that is used instead"
         },
         {
             "getLayers",

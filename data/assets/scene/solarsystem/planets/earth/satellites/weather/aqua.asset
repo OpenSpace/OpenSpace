@@ -95,7 +95,6 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-
 end)
 
 asset.onDeinitialize(function ()
@@ -104,6 +103,9 @@ asset.onDeinitialize(function ()
   end  
 end)
 
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 asset.meta = {
   Name = "Aqua",

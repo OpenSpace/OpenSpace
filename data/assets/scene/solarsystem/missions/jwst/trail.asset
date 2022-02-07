@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
@@ -115,11 +114,22 @@ local JWSTSunTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTTrailLaunch,
-  JWSTTrailOrbit,
-  JWSTSunTrail
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTTrailLaunch)
+  openspace.addSceneGraphNode(JWSTTrailOrbit)
+  openspace.addSceneGraphNode(JWSTSunTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTSunTrail)
+  openspace.removeSceneGraphNode(JWSTTrailOrbit)
+  openspace.removeSceneGraphNode(JWSTTrailLaunch)
+end)
+    
+asset.export(JWSTTrailLaunch)
+asset.export(JWSTTrailOrbit)
+asset.export(JWSTSunTrail)
+
 
 asset.meta = {
   Name = "James Webb Space Telescope Trails",

@@ -9,8 +9,10 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item)
 end)
+
+asset.export(item)
 
 
 asset.meta = {

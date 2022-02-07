@@ -22,68 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
+#define __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 
-namespace openspace::luascriptfunctions {
+#include <openspace/network/messagestructures.h>
 
-/**
- * \ingroup LuaScripts
- * addDashboardItem(table):
- */
-int addDashboardItem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
-    ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-    try {
-        global::dashboard->addDashboardItem(
-            DashboardItem::createFromDictionary(std::move(d))
-        );
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERRORC("addDashboardItem", e.what());
-        return ghoul::lua::luaError(L, "Error adding dashboard item");
-    }
-
-    return 0;
-}
+namespace openspace::datamessagestructures {
 
 /**
- * \ingroup LuaScripts
- * removeDashboardItem(string):
- */
-int removeDashboardItem(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
-    std::variant v = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
-
-    std::string identifier;
-    if (std::holds_alternative<std::string>(v)) {
-        identifier = std::get<std::string>(v);
-    }
-    else {
-        ghoul_assert(std::holds_alternative<ghoul::Dictionary>(v), "Missing case");
-        ghoul::Dictionary d = std::get<ghoul::Dictionary>(v);
-        if (!d.hasValue<std::string>("Identifier")) {
-            return ghoul::lua::luaError(
-                L,
-                "Table passed to removeDashbordItem does not contain an Identifier"
-            );
-        }
-        identifier = d.value<std::string>("Identifier");
-    }
-
-    global::dashboard->removeDashboardItem(identifier);
-    return 0;
-}
+ * Method that creates a CameraKeyframe object and populates
+ * it with the current properties of the camera from the navigation handler.
+ * \returns CameraKeyframe with current state from NavigationHandler
+*/
+CameraKeyframe generateCameraKeyframe();
 
 /**
- * \ingroup LuaScripts
- * removeDashboardItems():
+ * Method that creates a TimeKeyframe object and populates
+ * it with the current time values from the application time manager.
+ * \returns TimeKeyframe The time keyframe
  */
-int clearDashboardItems(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
-    global::dashboard->clearDashboardItems();
-    return 0;
-}
+TimeKeyframe generateTimeKeyframe();
 
-}// namespace openspace::luascriptfunctions
+/**
+ * Method that creates a ScriptMessage object from a given script
+ * string, and populates the ScriptMessage with the script and timestamp
+ * of the current application time.
+ * \param script The script to execute in std::string form
+ * \returns ScriptMessage The ScriptMessage data structure with script
+ */
+ScriptMessage generateScriptMessage(std::string script);
+
+} // namespace openspace::datamessagestructures
+
+#endif // __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__

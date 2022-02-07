@@ -138,7 +138,6 @@ local hide_zodiac_art = {
 asset.export("HideZodiacArt", hide_zodiac_art)
 
 local nodes = {}
-local assetRef = asset
 
 asset.onInitialize(function ()
   local constellationsCSV = images .. "constellation_data.csv"
@@ -146,7 +145,6 @@ asset.onInitialize(function ()
   nodes = createConstellations("ConstellationArt", "Constellation Art", constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
-    assetRef.registerIdentifierWithMeta(n.Identifier)
   end
 
   openspace.action.registerAction(show_art)
@@ -159,11 +157,14 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 
-  openspace.action.removeAction(show_art.Identifier)
-  openspace.action.removeAction(hide_art.Identifier)
-  openspace.action.removeAction(disable_art.Identifier)
+  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(hide_art)
+  openspace.action.removeAction(disable_art)
 end)
 
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end
 
 asset.meta = {
   Name = "Constellation Images",

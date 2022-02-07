@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("../transforms")
 asset.require("spice/base")
 
@@ -25,7 +24,16 @@ local MoonTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MoonTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoonTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoonTrail)
+end)
+  
+asset.export(MoonTrail)
+
 
 
 asset.meta = {

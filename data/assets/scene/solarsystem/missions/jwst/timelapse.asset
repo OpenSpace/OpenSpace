@@ -1,5 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
 -- JWST timelapse timeline
 local timelapse = [[
   openspace.scriptScheduler.loadScheduledScript(
@@ -398,30 +396,32 @@ local togglePlayDirection = {
   IsLocal = false
 }
 
+local text = {
+  Type = "DashboardItemText",
+  Identifier = "JWSTStateText",
+  GuiName = "JWST State Dashboard Text",
+  Text = ""
+}
+
 asset.onInitialize(function()
   openspace.action.registerAction(playForwards)
   openspace.action.registerAction(playBackwards)
   openspace.action.registerAction(clearPlay)
   openspace.action.registerAction(togglePlayDirection)
+  openspace.dashboard.addDashboardItem(text)
 end)
 
 asset.onDeinitialize(function ()
   openspace.scriptScheduler.clear()
 
-  openspace.action.removeAction(playForwards.Identifier)
-  openspace.action.removeAction(playBackwards.Identifier)
-  openspace.action.removeAction(clearPlay.Identifier)
-  openspace.action.removeAction(togglePlayDirection.Identifier)
+  openspace.dashboard.removeDashboardItem(text)
+  openspace.action.removeAction(playForwards)
+  openspace.action.removeAction(playBackwards)
+  openspace.action.removeAction(clearPlay)
+  openspace.action.removeAction(togglePlayDirection)
 end)
 
-assetHelper.registerDashboardItems(asset, {
-  {
-    Type = "DashboardItemText",
-    Identifier = "JWSTStateText",
-    GuiName = "JWST State Dashboard Text",
-    Text = ""
-  }
-})
+
 
 asset.meta = {
   Name = "James Webb Space Telescope Timelapse",

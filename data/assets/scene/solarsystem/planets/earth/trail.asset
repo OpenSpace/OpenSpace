@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 
@@ -25,7 +24,16 @@ local EarthTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EarthTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthTrail)
+end)
+  
+asset.export(EarthTrail)
+
 
 
 asset.meta = {

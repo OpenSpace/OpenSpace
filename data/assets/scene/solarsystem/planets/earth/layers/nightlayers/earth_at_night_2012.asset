@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local globeIdentifier = asset.require("../../earth").Earth.Identifier
 
 local fallBackLayer = asset.require("./fallbacks/earth_night_texture").layer
@@ -12,7 +11,16 @@ local layer = {
     in this global view. ]],
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "NightLayers")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

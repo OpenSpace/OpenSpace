@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
 
@@ -91,8 +90,18 @@ local PerseveranceTrailMars = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  PerseveranceNode,
-  PerseveranceTrailSun,
-  PerseveranceTrailMars
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PerseveranceNode)
+  openspace.addSceneGraphNode(PerseveranceTrailSun)
+  openspace.addSceneGraphNode(PerseveranceTrailMars)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PerseveranceTrailMars)
+  openspace.removeSceneGraphNode(PerseveranceTrailSun)
+  openspace.removeSceneGraphNode(PerseveranceNode)
+end)
+    
+asset.export(PerseveranceNode)
+asset.export(PerseveranceTrailSun)
+asset.export(PerseveranceTrailMars)

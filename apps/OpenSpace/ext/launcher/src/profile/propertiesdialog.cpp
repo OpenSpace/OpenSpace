@@ -29,6 +29,7 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QEvent>
+#include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>

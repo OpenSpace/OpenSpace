@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local speck = asset.syncedResource({
   Name = "Background Radiation Speck Files",
   Type = "HttpSynchronization",
@@ -123,9 +119,25 @@ local Halpha = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  wmap, cbe, planck, Halpha
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(wmap)
+  openspace.addSceneGraphNode(cbe)
+  openspace.addSceneGraphNode(planck)
+  openspace.addSceneGraphNode(Halpha)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Halpha)
+  openspace.removeSceneGraphNode(planck)
+  openspace.removeSceneGraphNode(cbe)
+  openspace.removeSceneGraphNode(wmap)
+end)
+  
+asset.export(wmap)
+asset.export(cbe)
+asset.export(planck)
+asset.export(Halpha)
+
 
 
 asset.meta = {

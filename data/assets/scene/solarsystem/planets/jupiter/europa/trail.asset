@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 asset.require("spice/base")
 local kernel = asset.require("../kernels").jup310
 
@@ -25,7 +24,16 @@ local EuropaTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { EuropaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EuropaTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EuropaTrail)
+end)
+  
+asset.export(EuropaTrail)
+
 
 
 asset.meta = {

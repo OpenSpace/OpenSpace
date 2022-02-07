@@ -91,7 +91,10 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 }
 
 documentation::Documentation MilkywayPointsConversionTask::Documentation() {
-    return documentation::Documentation();
+    return documentation::Documentation(
+        "MilkywayPointsConversionTask",
+        "galaxy_milkywaypointsconversiontask"
+    );
 }
 
 } // namespace openspace

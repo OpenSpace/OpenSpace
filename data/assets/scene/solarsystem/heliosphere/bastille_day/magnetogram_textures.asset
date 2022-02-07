@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sun = asset.require("scene/solarsystem/sun/sun")
 
 -- synced directories
@@ -52,11 +51,9 @@ end)
 
 asset.onDeinitialize(function ()
   for i, imagename in ipairs(magnetograms) do
-    openspace.globebrowsing.deleteLayer(
-      "Sun", "ColorLayers", "magnetogram-" .. i
-    )
+    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "magnetogram-" .. i)
   end
-  openspace.action.removeAction(switch_color_layer.Identifier)
+  openspace.action.removeAction(switch_color_layer)
 end)
 
 

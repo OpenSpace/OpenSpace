@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local earthAsset = asset.require("../../earth").Earth
 local globeIdentifier = earthAsset.Identifier
 
@@ -9,7 +8,16 @@ local layer ={
   Radii = earthAsset.Renderable.Radii
 }
 
-assetHelper.registerLayerAndExport(asset, layer, globeIdentifier, "Overlays")
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
+asset.export("layer", layer)
+
 
 
 asset.meta = {

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 asset.require("./trail")
@@ -72,7 +71,19 @@ local MercuryLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mercury)
+  openspace.addSceneGraphNode(MercuryLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MercuryLabel)
+  openspace.removeSceneGraphNode(Mercury)
+end)
+    
+asset.export(Mercury)
+asset.export(MercuryLabel)
+
 
 
 asset.meta = {

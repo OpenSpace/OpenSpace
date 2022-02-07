@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local propertyHelper = asset.require("util/property_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -56,11 +55,16 @@ local toggle_volume = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_volume)
+  openspace.addSceneGraphNode(densityVolume)
 end)
+
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_volume.Identifier)
+  openspace.removeSceneGraphNode(densityVolume)
+  openspace.action.removeAction(toggle_volume)
 end)
-assetHelper.registerSceneGraphNodesAndExport(asset, { densityVolume })
+
+asset.export(densityVolume)
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",

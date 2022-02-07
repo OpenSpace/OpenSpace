@@ -123,8 +123,10 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "removeAction",
                 &luascriptfunctions::removeAction,
-                "string",
-                "Removes an existing action from the list of possible actions"
+                "(string, table)",
+                "Removes an existing action from the list of possible actions. The "
+                "action is identifies either by the passed name, or if it is a table, "
+                "the value behind the 'Identifier' key is extract and used instead"
             },
             {
                 "registerAction",

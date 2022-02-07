@@ -1,5 +1,4 @@
 asset.require("spice/base")
-local assetHelper = asset.require("util/asset_helper")
 
 local TexturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
@@ -46,9 +45,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function ()
-  openspace.removeScreenSpaceRenderable(legend.Identifier)
-  openspace.action.removeAction(show_legend.Identifier)
-  openspace.action.removeAction(hide_legend.Identifier)
+  openspace.removeScreenSpaceRenderable(legend)
+  openspace.action.removeAction(show_legend)
+  openspace.action.removeAction(hide_legend)
 end)
 
 asset.meta = {

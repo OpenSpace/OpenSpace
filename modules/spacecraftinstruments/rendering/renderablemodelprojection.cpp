@@ -67,13 +67,13 @@ namespace {
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. The file can
         // contain filesystem tokens or can be specified relatively to the
-        // location of the .mod file.
+        // location of the .asset file.
         // This specifies the model that is rendered by the Renderable.
         std::filesystem::path geometryFile;
 
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
-            [[codegen::reference("newhorizons_projectioncomponent")]];
+            [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
@@ -74,10 +73,19 @@ asset.onInitialize(function()
   )
 end)
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTPosition,
-  JWSTRotation
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTPosition)
+  openspace.addSceneGraphNode(JWSTRotation)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTRotation)
+  openspace.removeSceneGraphNode(JWSTPosition)
+end)
+    
+asset.export(JWSTPosition)
+asset.export(JWSTRotation)
+
 
 asset.meta = {
   Name = "James Webb Space Telescope Transforms",
