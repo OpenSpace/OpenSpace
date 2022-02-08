@@ -33,26 +33,20 @@
 #include <sgctedit/orientation.h>
 #include <QApplication>
 #include <QColor>
-#include <QLabel>
 #include <QLayout>
-#include <QLineEdit>
-#include <QMainWindow>
-#include <QComboBox>
-#include <QPushButton>
 #include <QScreen>
-#include <QTextBrowser>
-#include <QWidget>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+
+class QWidget;
 
 class SgctEdit final : public QDialog
 {
 Q_OBJECT
 public:
     SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-        sgct::config::Cluster& cluster, const QList<QScreen*> screenList);
+        sgct::config::Cluster& cluster, const QList<QScreen*>& screenList);
     ~SgctEdit();
     void addDisplayLayout(QHBoxLayout* layout);
     void createWidgets();
@@ -60,7 +54,8 @@ public:
     std::string saveFilename();
 
 private:
-    void systemMonitorConfiguration(const QList<QScreen*> screenList);
+    void systemMonitorConfiguration(const QList<QScreen*>& screenList);
+
     std::shared_ptr<MonitorBox> _monBox = nullptr;
     std::vector<QRect> _monitorSizeList;
     QVBoxLayout* _displayLayout = nullptr;

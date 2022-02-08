@@ -26,17 +26,16 @@
 #include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
 
-WindowControl::WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
-                             const unsigned int windowIndex,
+WindowControl::WindowControl(unsigned int monitorIndex, const unsigned int windowIndex,
                              std::vector<QRect>& monitorDims,
                              const std::array<QString, 4> winColors, QWidget *parent)
     : QWidget(parent)
-    , _nMonitors(nMonitors)
     , _monIndex(monitorIndex)
     , _index(windowIndex)
     , _monitorResolutions(monitorDims)
     , _colorsForWindows(winColors)
 {
+    _nMonitors = _monitorResolutions.size();
     createWidgets(parent);
 }
 
@@ -374,15 +373,6 @@ void WindowControl::onSpoutSelection(int selectionState) {
     }
 }
 
-template <typename T>
-void WindowControl::enableProjectionOption(T* comboModel, int selectionIndex, bool enable)
-{
-    auto* item = comboModel->item(selectionIndex);
-    if (item) {
-        item->setEnabled(enable);
-    }
-}
-
 void WindowControl::onMonitorChanged(int newSelection) {
     _monIndex = newSelection;
     if (_windowChangeCallback) {
@@ -408,15 +398,14 @@ void WindowControl::setDimensions(const QRectF& dimensions) {
 }
 
 void WindowControl::setWindowChangeCallback(
-                        std::function<void(int, int, const QRectF&)> cb)
+                                          std::function<void(int, int, const QRectF&)> cb)
 {
-    _windowChangeCallback = cb;
+    _windowChangeCallback = std::move(cb);
 }
 
-void WindowControl::setWebGuiChangeCallback(
-                        std::function<void(unsigned int)> cb)
+void WindowControl::setWebGuiChangeCallback(std::function<void(unsigned int)> cb)
 {
-    _windowGuiCheckCallback = cb;
+    _windowGuiCheckCallback = std::move(cb);
 }
 
 void WindowControl::uncheckWebGuiOption() {

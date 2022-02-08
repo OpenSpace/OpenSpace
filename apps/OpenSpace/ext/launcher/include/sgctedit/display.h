@@ -67,7 +67,6 @@ private:
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     unsigned int _nMaxWindows = 3;
-    unsigned int _nMonitors = 1;
     const std::array<QString, 4> _winColors;
     std::vector<WindowControl*> _windowControl;
     QPushButton* _addWindowButton = nullptr;

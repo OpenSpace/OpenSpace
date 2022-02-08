@@ -70,12 +70,12 @@ void FileSupport::saveCluster() {
     if (_orientationWidget) {
         sgct::config::Scene initScene;
         initScene.orientation = _orientationWidget->orientationValue();
-        if (_cluster.nodes.size() == 0) {
-            _cluster.nodes.push_back(sgct::config::Node());
-        }
+        _cluster.nodes.clear();
+        sgct::config::Node tmpNode;
+        tmpNode.address = "localhost";
+        tmpNode.port = 20401;
+        _cluster.nodes.push_back(tmpNode);
         _cluster.masterAddress = "localhost";
-        _cluster.nodes.back().address = "localhost";
-        _cluster.nodes.back().port = 20401;
         _cluster.scene = std::move(initScene);
         _cluster.firmSync = _orientationWidget->vsyncValue();
     }

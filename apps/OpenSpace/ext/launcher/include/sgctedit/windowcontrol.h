@@ -32,17 +32,15 @@
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
-#include <QPainter>
 #include <QPushButton>
 #include <vector>
 
-class WindowControl : public QWidget
-{
+class WindowControl : public QWidget {
 Q_OBJECT
 public:
-    WindowControl(unsigned int nMonitors, unsigned int monitorIndex,
-        unsigned int windowIndex, std::vector<QRect>& monitorDims,
-        const std::array<QString, 4> winColors, QWidget *parent = nullptr);
+    WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
+        std::vector<QRect>& monitorDims, const std::array<QString, 4> winColors,
+        QWidget *parent);
     ~WindowControl();
     void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
@@ -100,8 +98,6 @@ private slots:
 
 private:
     void createWidgets(QWidget* parent);
-    template <typename T>
-    void enableProjectionOption(T* comboModel, int selectionIndex, bool enable);
     void updateScaledWindowDimensions();
     std::function<void(int, int, const QRectF&)> _windowChangeCallback;
     std::function<void(unsigned int)> _windowGuiCheckCallback;

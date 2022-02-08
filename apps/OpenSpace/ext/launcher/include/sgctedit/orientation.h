@@ -31,19 +31,16 @@
 #include <sgct/config.h>
 #include <sgct/math.h>
 #include <QCheckBox>
-#include <QLabel>
 #include <QLayout>
-#include <QLineEdit>
 #include <QPushButton>
 
 class Orientation : public QWidget {
 Q_OBJECT
 public:
     Orientation();
-    ~Orientation();
     void addButtonToLayout(QVBoxLayout* parentLayout);
-    sgct::quat orientationValue();
-    bool vsyncValue();
+    sgct::quat orientationValue() const;
+    bool vsyncValue() const;
 
 private slots:
     void orientationDialog();

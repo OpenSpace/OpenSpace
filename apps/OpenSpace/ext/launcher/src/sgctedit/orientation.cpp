@@ -24,7 +24,6 @@
 
 #include "sgctedit/orientation.h"
 
-#include "sgctedit/display.h"
 #include "sgctedit/orientationdialog.h"
 
 Orientation::Orientation()
@@ -57,15 +56,10 @@ void Orientation::orientationDialog() {
     _orientationDialog.exec();
 }
 
-sgct::quat Orientation::orientationValue() {
+sgct::quat Orientation::orientationValue() const {
     return _orientationValue;
 }
 
-bool Orientation::vsyncValue() {
+bool Orientation::vsyncValue() const {
     return (_checkBoxVsync->checkState() == Qt::Checked);
-}
-
-Orientation::~Orientation()
-{
-    delete _layoutOrientationFull;
 }

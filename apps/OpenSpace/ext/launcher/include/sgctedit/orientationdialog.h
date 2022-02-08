@@ -25,28 +25,15 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
 #define __OPENSPACE_UI_LAUNCHER___ORIENTATIONDIALOG___H__
 
-#include <QCheckBox>
 #include <QDialog>
-#include <QFrame>
-#include <QIntValidator>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPoint>
-#include <QPushButton>
-#include <QVector>
-#include <QWidget>
 
-#include <glm/gtc/constants.hpp>
-#include <iostream>
-#include <vector>
 #include <sgct/config.h>
+#include <QLineEdit>
+#include <glm/gtc/constants.hpp>
 
+class QWidget;
 
-class OrientationDialog : public QDialog
-{
+class OrientationDialog : public QDialog {
 Q_OBJECT
 public:
     OrientationDialog(sgct::quat& orientation, QWidget* parent);

@@ -25,7 +25,7 @@
 #include "sgctedit/sgctedit.h"
 
 SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowList,
-                   sgct::config::Cluster& cluster, const QList<QScreen*> screenList)
+                   sgct::config::Cluster& cluster, const QList<QScreen*>& screenList)
     : QDialog(parent)
     , _cluster(cluster)
     , _windowList(windowList)
@@ -35,13 +35,17 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
     createWidgets();
 }
 
-void SgctEdit::systemMonitorConfiguration(const QList<QScreen*> screenList) {
+void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
     size_t nScreensManaged = std::min(screenList.length(), 2);
     for (size_t s = 0; s < nScreensManaged; ++s) {
-        int actualWidth = std::max(screenList[s]->size().width(),
-            screenList[s]->availableGeometry().width());
-        int actualHeight = std::max(screenList[s]->size().height(),
-            screenList[s]->availableGeometry().height());
+        int actualWidth = std::max(
+            screenList[s]->size().width(),
+            screenList[s]->availableGeometry().width()
+        );
+        int actualHeight = std::max(
+            screenList[s]->size().height(),
+            screenList[s]->availableGeometry().height()
+        );
         _monitorSizeList.push_back({
             screenList[s]->availableGeometry().x(),
             screenList[s]->availableGeometry().y(),
@@ -119,13 +123,7 @@ std::string SgctEdit::saveFilename() {
 }
 
 SgctEdit::~SgctEdit() {
-    if (_orientationWidget) {
-        delete _orientationWidget;
-    }
-    if (_fileSupportWidget) {
-        delete _fileSupportWidget;
-    }
-    if (_displayLayout) {
-        delete _displayLayout;
-    }
+    delete _orientationWidget;
+    delete _fileSupportWidget;
+    delete _displayLayout;
 }

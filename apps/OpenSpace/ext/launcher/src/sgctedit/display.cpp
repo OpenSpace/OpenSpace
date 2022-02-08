@@ -41,7 +41,6 @@ Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
 {
     _addWindowButton = new QPushButton("Add Window", this);
     _removeWindowButton = new QPushButton("Remove Window", this);
-    _nMonitors = _monitorResolutions.size();
     //Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
@@ -70,14 +69,17 @@ void Display::initializeLayout() {
     layout->addStretch();
 
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
-        _winCtrlLayouts.push_back(_windowControl[i]->initializeLayout());
-        _layoutWindowWrappers.push_back(new QWidget());
-        _layoutWindowWrappers.back()->setLayout(_winCtrlLayouts.back());
-        layoutWindows->addWidget(_layoutWindowWrappers.back());
+        QVBoxLayout* layoutForNextWindow = _windowControl[i]->initializeLayout();
+        _winCtrlLayouts.push_back(layoutForNextWindow);
+        QWidget* layoutWrapper = new QWidget();
+        layoutWrapper->setLayout(layoutForNextWindow);
+        _layoutWindowWrappers.push_back(layoutWrapper);
+        layoutWindows->addWidget(layoutWrapper);
         if (i < (_nMaxWindows - 1)) {
-            _frameBorderLines.push_back(new QFrame());
-            _frameBorderLines.back()->setFrameShape(QFrame::VLine);
-            layoutWindows->addWidget(_frameBorderLines.back());
+            QFrame* frameForNextWindow = new QFrame();
+            frameForNextWindow->setFrameShape(QFrame::VLine);
+            _frameBorderLines.push_back(frameForNextWindow);
+            layoutWindows->addWidget(frameForNextWindow);
         }
     }
     _nWindowsDisplayed = 1;
@@ -127,7 +129,6 @@ void Display::initializeWindowControl() {
         unsigned int monitorNumForThisWindow = (_nWindowsAllocated >= 3) ? 1 : 0;
         _windowControl.push_back(
             new WindowControl(
-                _nMonitors,
                 monitorNumForThisWindow,
                 _nWindowsAllocated,
                 _monitorResolutions,

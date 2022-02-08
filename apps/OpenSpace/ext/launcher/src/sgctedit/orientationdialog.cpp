@@ -33,9 +33,9 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
     setWindowTitle("Global Orientation");
     QVBoxLayout* layoutWindow = new QVBoxLayout(this);
 
-    _linePitch = new QLineEdit(this);
-    _lineRoll = new QLineEdit(this);
-    _lineYaw = new QLineEdit(this);
+    _linePitch = new QLineEdit;
+    _lineRoll = new QLineEdit;
+    _lineYaw = new QLineEdit;
     _linePitch->setText(QString::number(_orientationValue.x));
     _lineRoll->setText(QString::number(_orientationValue.z));
     _lineYaw->setText(QString::number(_orientationValue.y));
@@ -51,21 +51,21 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         _lineYaw->setValidator(validatorYaw);
     }
     {
-        QLabel* labelPitch = new QLabel(this);
+        QLabel* labelPitch = new QLabel;
         labelPitch->setText("Pitch: ");
         QHBoxLayout* layoutPitch = new QHBoxLayout;
         layoutPitch->addStretch(1);
         layoutPitch->addWidget(labelPitch);
         layoutPitch->addWidget(_linePitch);
         layoutWindow->addLayout(layoutPitch);
-        QLabel* labelRoll = new QLabel(this);
+        QLabel* labelRoll = new QLabel;
         labelRoll ->setText("Roll: ");
         QHBoxLayout* layoutRoll = new QHBoxLayout;
         layoutRoll->addStretch(1);
         layoutRoll->addWidget(labelRoll);
         layoutRoll->addWidget(_lineRoll);
         layoutWindow->addLayout(layoutRoll);
-        QLabel* labelYaw = new QLabel(this);
+        QLabel* labelYaw = new QLabel;
         labelYaw ->setText("Yaw: ");
         QHBoxLayout* layoutYaw = new QHBoxLayout;
         layoutYaw->addStretch(1);
