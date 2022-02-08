@@ -61,6 +61,101 @@ namespace {
         );
         return content;
     }
+
+    bool operator==(const openspace::Profile::Version& lhs,
+                    const openspace::Profile::Version& rhs)
+    {
+        return lhs.major == rhs.major && lhs.minor == rhs.minor;
+    }
+
+    bool operator==(const openspace::Profile::Module& lhs,
+                    const openspace::Profile::Module& rhs)
+    {
+        return lhs.name == rhs.name &&
+               lhs.loadedInstruction == rhs.loadedInstruction &&
+               lhs.notLoadedInstruction == rhs.notLoadedInstruction;
+    }
+
+    bool operator==(const openspace::Profile::Meta& lhs,
+                    const openspace::Profile::Meta& rhs)
+    {
+        return lhs.name == rhs.name &&
+               lhs.version == rhs.version &&
+               lhs.description == rhs.description &&
+               lhs.author == rhs.author &&
+               lhs.url == rhs.url &&
+               lhs.license == rhs.license;
+    }
+
+    bool operator==(const openspace::Profile::Property& lhs,
+                    const openspace::Profile::Property& rhs)
+    {
+        return lhs.setType == rhs.setType &&
+               lhs.name == rhs.name &&
+               lhs.value == rhs.value;
+    }
+    
+    bool operator==(const openspace::Profile::Action& lhs,
+                    const openspace::Profile::Action& rhs)
+    {
+        return lhs.identifier == rhs.identifier &&
+               lhs.documentation == rhs.documentation &&
+               lhs.name == rhs.name &&
+               lhs.guiPath == rhs.guiPath &&
+               lhs.isLocal == rhs.isLocal &&
+               lhs.script == rhs.script;
+    }
+
+    bool operator==(const openspace::Profile::Keybinding& lhs,
+                    const openspace::Profile::Keybinding& rhs)
+    {
+        return lhs.key == rhs.key && lhs.action == rhs.action;
+    }
+
+    bool operator==(const openspace::Profile::Time& lhs,
+                    const openspace::Profile::Time& rhs)
+    {
+        return lhs.type == rhs.type && lhs.value == rhs.value;
+    }
+
+    bool operator==(const openspace::Profile::CameraNavState& lhs,
+                    const openspace::Profile::CameraNavState& rhs)
+    {
+        return lhs.anchor == rhs.anchor &&
+               lhs.aim == rhs.aim &&
+               lhs.referenceFrame == rhs.referenceFrame &&
+               lhs.position == rhs.position &&
+               lhs.up == rhs.up &&
+               lhs.yaw == rhs.yaw &&
+               lhs.pitch == rhs.pitch;
+    }
+
+    bool operator==(const openspace::Profile::CameraGoToGeo& lhs,
+                    const openspace::Profile::CameraGoToGeo& rhs)
+    {
+        return lhs.anchor == rhs.anchor &&
+               lhs.latitude == rhs.latitude &&
+               lhs.longitude == rhs.longitude &&
+               lhs.altitude == rhs.altitude;
+    }
+
+    bool operator==(const openspace::Profile& lhs,
+                    const openspace::Profile& rhs)
+    {
+        return lhs.version == rhs.version &&
+               lhs.modules == rhs.modules &&
+               lhs.meta == rhs.meta &&
+               lhs.assets == rhs.assets &&
+               lhs.properties == rhs.properties &&
+               lhs.actions == rhs.actions &&
+               lhs.keybindings == rhs.keybindings &&
+               lhs.time == rhs.time &&
+               lhs.deltaTimes == rhs.deltaTimes &&
+               lhs.camera == rhs.camera &&
+               lhs.markNodes == rhs.markNodes &&
+               lhs.additionalScripts == rhs.additionalScripts &&
+               lhs.ignoreUpdates == rhs.ignoreUpdates;
+    }
 } // namespace
 
 //
@@ -74,7 +169,7 @@ TEST_CASE("Minimal", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
@@ -87,7 +182,7 @@ TEST_CASE("Basic Meta (full)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (empty)", "[profile]") {
@@ -97,7 +192,7 @@ TEST_CASE("Basic Meta (empty)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no name)", "[profile]") {
@@ -107,7 +202,7 @@ TEST_CASE("Basic Meta (no name)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no version)", "[profile]") {
@@ -117,7 +212,7 @@ TEST_CASE("Basic Meta (no version)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no description)", "[profile]") {
@@ -127,7 +222,7 @@ TEST_CASE("Basic Meta (no description)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no author)", "[profile]") {
@@ -137,7 +232,7 @@ TEST_CASE("Basic Meta (no author)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no url)", "[profile]") {
@@ -147,7 +242,7 @@ TEST_CASE("Basic Meta (no url)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Meta (no license)", "[profile]") {
@@ -157,7 +252,7 @@ TEST_CASE("Basic Meta (no license)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Module", "[profile]") {
@@ -167,7 +262,7 @@ TEST_CASE("Basic Module", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Assets", "[profile]") {
@@ -177,7 +272,7 @@ TEST_CASE("Basic Assets", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Properties", "[profile]") {
@@ -187,7 +282,7 @@ TEST_CASE("Basic Properties", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Keybindings", "[profile]") {
@@ -197,7 +292,7 @@ TEST_CASE("Basic Keybindings", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Time Relative", "[profile]") {
@@ -207,7 +302,7 @@ TEST_CASE("Basic Time Relative", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Time Absolute", "[profile]") {
@@ -217,7 +312,7 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Delta Times", "[profile]") {
@@ -227,7 +322,7 @@ TEST_CASE("Basic Delta Times", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState (full)", "[profile]") {
@@ -237,7 +332,7 @@ TEST_CASE("Basic Camera NavState (full)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
@@ -248,7 +343,7 @@ TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
@@ -259,7 +354,7 @@ TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
@@ -269,7 +364,7 @@ TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
@@ -280,7 +375,7 @@ TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
@@ -290,7 +385,7 @@ TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
@@ -301,7 +396,7 @@ TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Mark Nodes", "[profile]") {
@@ -311,7 +406,7 @@ TEST_CASE("Basic Mark Nodes", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 TEST_CASE("Basic Additional Scripts", "[profile]") {
@@ -322,7 +417,7 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
@@ -335,7 +430,7 @@ TEST_CASE("Integration Full Test", "[profile]") {
     std::string serialized = p.serialize();
     std::string contents = loadFile(File);
 
-    REQUIRE(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
 }
 
 //
@@ -356,7 +451,7 @@ TEST_CASE("Add asset to empty Profile", "[profile]") {
     target["assets"].push_back("new-asset");
     std::string targetSerialized(Profile(target.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
@@ -372,7 +467,7 @@ TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
 
     std::string targetSerialized(Profile(source.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to not-empty Profile", "[profile]") {
@@ -391,7 +486,7 @@ TEST_CASE("Add asset to not-empty Profile", "[profile]") {
     target["assets"].push_back("new-asset");
     std::string targetSerialized(Profile(target.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
@@ -409,7 +504,7 @@ TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
 
     std::string targetSerialized(Profile(source.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Add duplicate asset", "[profile]") {
@@ -429,7 +524,7 @@ TEST_CASE("Add duplicate asset", "[profile]") {
     targetSource["assets"].push_back("new-asset");
     std::string targetSerialized(Profile(targetSource.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 //
@@ -452,7 +547,7 @@ TEST_CASE("Remove asset", "[profile]") {
 
     std::string targetSerialized(Profile(target.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Remove asset (ignored)", "[profile]") {
@@ -474,7 +569,7 @@ TEST_CASE("Remove asset (ignored)", "[profile]") {
 
     std::string targetSerialized(Profile(source.dump()).serialize());
 
-    REQUIRE(originalSerialized == targetSerialized);
+    CHECK(originalSerialized == targetSerialized);
 }
 
 TEST_CASE("Removing non-exisiting asset", "[profile]") {
@@ -487,7 +582,7 @@ TEST_CASE("Removing non-exisiting asset", "[profile]") {
     source["assets"].push_back("asset3");
 
     Profile p(source.dump());
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         p.removeAsset("unknown-asset"),
         Catch::Matchers::Contains("Tried to remove non-existing asset 'unknown-asset'")
     );
@@ -504,7 +599,7 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 
     Profile p(source.dump());
     p.ignoreUpdates = true;
-    REQUIRE_NOTHROW(p.removeAsset("unknown-asset"));
+    CHECK_NOTHROW(p.removeAsset("unknown-asset"));
 }
 
 //
@@ -570,7 +665,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
 
     std::string targetSerialized = Profile(target.dump()).serialize();
 
-    REQUIRE(serialized == targetSerialized);
+    CHECK(serialized == targetSerialized);
 }
 
 //
@@ -582,7 +677,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
 TEST_CASE("(Error) Version: Missing value 'major'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/version/missing_major.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'version.major' field is missing")
     );
@@ -591,7 +686,7 @@ TEST_CASE("(Error) Version: Missing value 'major'", "[profile]") {
 TEST_CASE("(Error) Version: Missing value 'minor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/version/missing_minor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'version.minor' field is missing")
     );
@@ -600,7 +695,7 @@ TEST_CASE("(Error) Version: Missing value 'minor'", "[profile]") {
 TEST_CASE("(Error) Version: Wrong type 'major'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_major.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'version.major' must be a number")
     );
@@ -609,7 +704,7 @@ TEST_CASE("(Error) Version: Wrong type 'major'", "[profile]") {
 TEST_CASE("(Error) Version: Wrong type 'minor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_minor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'version.minor' must be a number")
     );
@@ -618,7 +713,7 @@ TEST_CASE("(Error) Version: Wrong type 'minor'", "[profile]") {
 TEST_CASE("(Error) Version: Wrong type 'major' and 'minor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/version/wrongtype_major_minor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'version.major' must be a number")
     );
@@ -632,7 +727,7 @@ TEST_CASE("(Error) Version: Wrong type 'major' and 'minor'", "[profile]") {
 TEST_CASE("(Error) Module: Missing value 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/module/missing_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'module.name' field is missing")
     );
@@ -641,7 +736,7 @@ TEST_CASE("(Error) Module: Missing value 'name'", "[profile]") {
 TEST_CASE("(Error) Module: Wrong type 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'module.name' must be a string")
     );
@@ -650,7 +745,7 @@ TEST_CASE("(Error) Module: Wrong type 'name'", "[profile]") {
 TEST_CASE("(Error) Module: Wrong type 'loadedInstruction'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_loadedInstruction.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'module.loadedInstruction' must be a string")
     );
@@ -659,7 +754,7 @@ TEST_CASE("(Error) Module: Wrong type 'loadedInstruction'", "[profile]") {
 TEST_CASE("(Error) Module: Wrong type 'notLoadedInstruction'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/module/wrongtype_notLoadedInstruction.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'module.notLoadedInstruction' must be a string")
     );
@@ -672,7 +767,7 @@ TEST_CASE("(Error) Module: Wrong type 'notLoadedInstruction'", "[profile]") {
 TEST_CASE("(Error) Property: Missing value 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/missing_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'property.name' field is missing")
     );
@@ -681,7 +776,7 @@ TEST_CASE("(Error) Property: Missing value 'name'", "[profile]") {
 TEST_CASE("(Error) Property: Missing value 'value'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/missing_value.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'property.value' field is missing")
     );
@@ -690,7 +785,7 @@ TEST_CASE("(Error) Property: Missing value 'value'", "[profile]") {
 TEST_CASE("(Error) Property: Missing value 'name' and 'value'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/missing_name_value.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'property.name' field is missing")
     );
@@ -699,7 +794,7 @@ TEST_CASE("(Error) Property: Missing value 'name' and 'value'", "[profile]") {
 TEST_CASE("(Error) Property: Wrong value 'type'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/wrongvalue_type.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Unknown property set type")
     );
@@ -708,7 +803,7 @@ TEST_CASE("(Error) Property: Wrong value 'type'", "[profile]") {
 TEST_CASE("(Error) Property: Wrong type 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/wrongtype_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'property.name' must be a string")
     );
@@ -717,7 +812,7 @@ TEST_CASE("(Error) Property: Wrong type 'name'", "[profile]") {
 TEST_CASE("(Error) Property: Wrong type 'value'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/property/wrongtype_value.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'property.value' must be a string")
     );
@@ -730,7 +825,7 @@ TEST_CASE("(Error) Property: Wrong type 'value'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Missing value 'key'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_key.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.key' field is missing")
     );
@@ -739,7 +834,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'key'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Missing value 'documentation'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_documentation.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.documentation' field is missing")
     );
@@ -748,7 +843,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'documentation'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Missing value 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.name' field is missing")
     );
@@ -757,7 +852,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'name'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Missing value 'gui_path'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_guipath.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.gui_path' field is missing")
     );
@@ -766,7 +861,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'gui_path'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Missing value 'is_local'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/missing_islocal.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.is_local' field is missing")
     );
@@ -775,7 +870,7 @@ TEST_CASE("(Error) Keybinding: Missing value 'is_local'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong value 'key'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongvalue_key.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Could not find key for 'F50'")
     );
@@ -784,7 +879,7 @@ TEST_CASE("(Error) Keybinding: Wrong value 'key'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong value 'key, modifier'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongvalue_modifier.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Unknown modifier key 'KEYKEY'")
     );
@@ -793,7 +888,7 @@ TEST_CASE("(Error) Keybinding: Wrong value 'key, modifier'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong type 'documentation'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_documentation.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.documentation' must be a string")
     );
@@ -802,7 +897,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'documentation'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong type 'gui_path'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_guipath.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.gui_path' must be a string")
     );
@@ -811,7 +906,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'gui_path'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong type 'is_local'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_islocal.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.is_local' must be a boolean")
     );
@@ -820,7 +915,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'is_local'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong type 'name'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_name.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.name' must be a string")
     );
@@ -829,7 +924,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'name'", "[profile]") {
 TEST_CASE("(Error) Keybinding: Wrong type 'script'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/keybinding/wrongtype_script.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'keybinding.script' must be a string")
     );
@@ -842,7 +937,7 @@ TEST_CASE("(Error) Keybinding: Wrong type 'script'", "[profile]") {
 TEST_CASE("(Error) Time: Wrong value 'type'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/time/wrongvalue_type.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Unknown time type")
     );
@@ -851,7 +946,7 @@ TEST_CASE("(Error) Time: Wrong value 'type'", "[profile]") {
 TEST_CASE("(Error) Time (absolute): Missing value 'type'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/time/missing_type.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'time.type' field is missing")
     );
@@ -860,7 +955,7 @@ TEST_CASE("(Error) Time (absolute): Missing value 'type'", "[profile]") {
 TEST_CASE("(Error) Time (relative): Missing value 'value'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/time/relative_missing_value.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'time.value' field is missing")
     );
@@ -872,7 +967,7 @@ TEST_CASE("(Error) Time (relative): Missing value 'value'", "[profile]") {
 TEST_CASE("(Error) Deltatimes: Wrong type", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/deltatimes/wrongtype_value.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("type must be number, but is string")
     );
@@ -884,7 +979,7 @@ TEST_CASE("(Error) Deltatimes: Wrong type", "[profile]") {
 TEST_CASE("(Error) Camera: Wrong value 'type'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/wrongvalue_type.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("Unknown camera type")
     );
@@ -893,7 +988,7 @@ TEST_CASE("(Error) Camera: Wrong value 'type'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'anchor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_anchor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.anchor' field is missing")
     );
@@ -902,7 +997,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'anchor'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'frame'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_frame.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.frame' field is missing")
     );
@@ -911,7 +1006,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'frame'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'position'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position' field is missing")
     );
@@ -920,7 +1015,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'anchor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_anchor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.anchor' must be a string")
     );
@@ -929,7 +1024,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'anchor'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'aim'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_aim.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.aim' must be a string")
     );
@@ -938,7 +1033,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'aim'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'frame'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_frame.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.frame' must be a string")
     );
@@ -947,7 +1042,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'frame'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position' must be an object")
     );
@@ -956,7 +1051,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.x'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_x.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.x' field is missing")
     );
@@ -965,7 +1060,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.x'", "[profile]") 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.x'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_x.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.x' must be a number")
     );
@@ -974,7 +1069,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.x'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.y'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_y.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.y' field is missing")
     );
@@ -983,7 +1078,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.y'", "[profile]") 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.y'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_y.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.y' must be a number")
     );
@@ -992,7 +1087,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.y'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'position.z'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_position_z.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.z' field is missing")
     );
@@ -1001,7 +1096,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'position.z'", "[profile]") 
 TEST_CASE("(Error) Camera (NavState): Wrong type 'position.z'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_position_z.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.position.z' must be a number")
     );
@@ -1010,7 +1105,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'position.z'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up' must be an object")
     );
@@ -1019,7 +1114,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.x'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_x.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.x' field is missing")
     );
@@ -1028,7 +1123,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.x'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.x'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_x.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.x' must be a number")
     );
@@ -1037,7 +1132,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.x'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.y'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_y.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.y' field is missing")
     );
@@ -1046,7 +1141,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.y'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.y'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_y.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.y' must be a number")
     );
@@ -1055,7 +1150,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.y'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Missing value 'up.z'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_missing_up_z.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.z' field is missing")
     );
@@ -1064,7 +1159,7 @@ TEST_CASE("(Error) Camera (NavState): Missing value 'up.z'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'up.z'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_up_z.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.up.z' must be a number")
     );
@@ -1073,7 +1168,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'up.z'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'yaw'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_yaw.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.yaw' must be a number")
     );
@@ -1082,7 +1177,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'yaw'", "[profile]") {
 TEST_CASE("(Error) Camera (NavState): Wrong type 'pitch'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/navstate_wrongtype_pitch.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("camera.pitch' must be a number")
     );
@@ -1091,7 +1186,7 @@ TEST_CASE("(Error) Camera (NavState): Wrong type 'pitch'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'anchor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_anchor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.anchor' field is missing")
     );
@@ -1100,7 +1195,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'anchor'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'latitude'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_latitude.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.latitude' field is missing")
     );
@@ -1109,7 +1204,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'latitude'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Missing value 'longitude'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_missing_longitude.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.longitude' field is missing")
     );
@@ -1118,7 +1213,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Missing value 'longitude'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'anchor'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_anchor.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.anchor' must be a string")
     );
@@ -1127,7 +1222,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'anchor'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'latitude'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_latitude.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.latitude' must be a number")
     );
@@ -1136,7 +1231,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'latitude'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'longitude'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_longitude.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.longitude' must be a number")
     );
@@ -1145,7 +1240,7 @@ TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'longitude'", "[profile]") {
 TEST_CASE("(Error) Camera (GoToGeo): Wrong type 'altitude'", "[profile]") {
     constexpr const char* TestFile =
         "${TESTDIR}/profile/error/camera/gotogeo_wrongtype_altitude.profile";
-    REQUIRE_THROWS_WITH(
+    CHECK_THROWS_WITH(
         loadProfile(TestFile),
         Catch::Matchers::Contains("'camera.altitude' must be a number")
     );

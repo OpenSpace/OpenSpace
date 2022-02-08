@@ -613,10 +613,38 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        typename T::Type value = dict.value<typename T::Type>(key);
+        typename T::Type val;
+        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+            val = dict.value<glm::dvec2>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+            val = dict.value<glm::dvec3>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+            val = dict.value<glm::dvec4>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, int>) {
+            const double d = dict.value<double>(key);
+            double intPart;
+            bool isInt = modf(d, &intPart) == 0.0;
+            if (isInt) {
+                val = static_cast<int>(d);
+            }
+            else {
+                TestResult r;
+                r.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                r.offenses.push_back(o);
+                return r;
+            }
+        }
+        else {
+            val = dict.value<typename T::Type>(key);
+        }
 
-        auto it = std::find(values.begin(), values.end(), value);
-
+        auto it = std::find(values.begin(), values.end(), val);
         if (it != values.end()) {
             return { true, {}, {} };
         }
@@ -665,10 +693,38 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        typename T::Type value = dict.value<typename T::Type>(key);
+        typename T::Type val;
+        if constexpr (std::is_same_v<typename T::Type, glm::ivec2>) {
+            val = dict.value<glm::dvec2>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec3>) {
+            val = dict.value<glm::dvec3>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, glm::ivec4>) {
+            val = dict.value<glm::dvec4>(key);
+        }
+        else if constexpr (std::is_same_v<typename T::Type, int>) {
+            const double d = dict.value<double>(key);
+            double intPart;
+            bool isInt = modf(d, &intPart) == 0.0;
+            if (isInt) {
+                val = static_cast<int>(d);
+            }
+            else {
+                TestResult r;
+                r.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                r.offenses.push_back(o);
+                return r;
+            }
+        }
+        else {
+            val = dict.value<typename T::Type>(key);
+        }
 
-        auto it = std::find(values.begin(), values.end(), value);
-
+        auto it = std::find(values.begin(), values.end(), val);
         if (it == values.end()) {
             return { true, {}, {} };
         }

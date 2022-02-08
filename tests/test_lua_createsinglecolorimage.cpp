@@ -157,7 +157,7 @@ TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage
 
     ppmFile >> version >> width >> height;
 
-    REQUIRE(width == 1);
-    REQUIRE(height == 1);
+    CHECK(width == 1);
+    CHECK(height == 1);
 }
 
