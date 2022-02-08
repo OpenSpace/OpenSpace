@@ -34,6 +34,103 @@
 #include <fstream>
 #include <json/json.hpp>
 
+namespace openspace {
+        bool operator==(const openspace::Profile::Version& lhs,
+                    const openspace::Profile::Version& rhs) noexcept
+    {
+        return lhs.major == rhs.major && lhs.minor == rhs.minor;
+    }
+
+    bool operator==(const openspace::Profile::Module& lhs,
+                    const openspace::Profile::Module& rhs) noexcept
+    {
+        return lhs.name == rhs.name &&
+               lhs.loadedInstruction == rhs.loadedInstruction &&
+               lhs.notLoadedInstruction == rhs.notLoadedInstruction;
+    }
+
+    bool operator==(const openspace::Profile::Meta& lhs,
+                    const openspace::Profile::Meta& rhs) noexcept
+    {
+        return lhs.name == rhs.name &&
+               lhs.version == rhs.version &&
+               lhs.description == rhs.description &&
+               lhs.author == rhs.author &&
+               lhs.url == rhs.url &&
+               lhs.license == rhs.license;
+    }
+
+    bool operator==(const openspace::Profile::Property& lhs,
+                    const openspace::Profile::Property& rhs) noexcept
+    {
+        return lhs.setType == rhs.setType &&
+               lhs.name == rhs.name &&
+               lhs.value == rhs.value;
+    }
+    
+    bool operator==(const openspace::Profile::Action& lhs,
+                    const openspace::Profile::Action& rhs) noexcept
+    {
+        return lhs.identifier == rhs.identifier &&
+               lhs.documentation == rhs.documentation &&
+               lhs.name == rhs.name &&
+               lhs.guiPath == rhs.guiPath &&
+               lhs.isLocal == rhs.isLocal &&
+               lhs.script == rhs.script;
+    }
+
+    bool operator==(const openspace::Profile::Keybinding& lhs,
+                    const openspace::Profile::Keybinding& rhs) noexcept
+    {
+        return lhs.key == rhs.key && lhs.action == rhs.action;
+    }
+
+    bool operator==(const openspace::Profile::Time& lhs,
+                    const openspace::Profile::Time& rhs) noexcept
+    {
+        return lhs.type == rhs.type && lhs.value == rhs.value;
+    }
+
+    bool operator==(const openspace::Profile::CameraNavState& lhs,
+                    const openspace::Profile::CameraNavState& rhs) noexcept
+    {
+        return lhs.anchor == rhs.anchor &&
+               lhs.aim == rhs.aim &&
+               lhs.referenceFrame == rhs.referenceFrame &&
+               lhs.position == rhs.position &&
+               lhs.up == rhs.up &&
+               lhs.yaw == rhs.yaw &&
+               lhs.pitch == rhs.pitch;
+    }
+
+    bool operator==(const openspace::Profile::CameraGoToGeo& lhs,
+                    const openspace::Profile::CameraGoToGeo& rhs) noexcept
+    {
+        return lhs.anchor == rhs.anchor &&
+               lhs.latitude == rhs.latitude &&
+               lhs.longitude == rhs.longitude &&
+               lhs.altitude == rhs.altitude;
+    }
+
+    bool operator==(const openspace::Profile& lhs,
+                    const openspace::Profile& rhs) noexcept
+    {
+        return lhs.version == rhs.version &&
+               lhs.modules == rhs.modules &&
+               lhs.meta == rhs.meta &&
+               lhs.assets == rhs.assets &&
+               lhs.properties == rhs.properties &&
+               lhs.actions == rhs.actions &&
+               lhs.keybindings == rhs.keybindings &&
+               lhs.time == rhs.time &&
+               lhs.deltaTimes == rhs.deltaTimes &&
+               lhs.camera == rhs.camera &&
+               lhs.markNodes == rhs.markNodes &&
+               lhs.additionalScripts == rhs.additionalScripts &&
+               lhs.ignoreUpdates == rhs.ignoreUpdates;
+    }
+} // namespace openspace
+
 using namespace openspace;
 
 namespace {
@@ -62,100 +159,7 @@ namespace {
         return content;
     }
 
-    bool operator==(const openspace::Profile::Version& lhs,
-                    const openspace::Profile::Version& rhs)
-    {
-        return lhs.major == rhs.major && lhs.minor == rhs.minor;
-    }
 
-    bool operator==(const openspace::Profile::Module& lhs,
-                    const openspace::Profile::Module& rhs)
-    {
-        return lhs.name == rhs.name &&
-               lhs.loadedInstruction == rhs.loadedInstruction &&
-               lhs.notLoadedInstruction == rhs.notLoadedInstruction;
-    }
-
-    bool operator==(const openspace::Profile::Meta& lhs,
-                    const openspace::Profile::Meta& rhs)
-    {
-        return lhs.name == rhs.name &&
-               lhs.version == rhs.version &&
-               lhs.description == rhs.description &&
-               lhs.author == rhs.author &&
-               lhs.url == rhs.url &&
-               lhs.license == rhs.license;
-    }
-
-    bool operator==(const openspace::Profile::Property& lhs,
-                    const openspace::Profile::Property& rhs)
-    {
-        return lhs.setType == rhs.setType &&
-               lhs.name == rhs.name &&
-               lhs.value == rhs.value;
-    }
-    
-    bool operator==(const openspace::Profile::Action& lhs,
-                    const openspace::Profile::Action& rhs)
-    {
-        return lhs.identifier == rhs.identifier &&
-               lhs.documentation == rhs.documentation &&
-               lhs.name == rhs.name &&
-               lhs.guiPath == rhs.guiPath &&
-               lhs.isLocal == rhs.isLocal &&
-               lhs.script == rhs.script;
-    }
-
-    bool operator==(const openspace::Profile::Keybinding& lhs,
-                    const openspace::Profile::Keybinding& rhs)
-    {
-        return lhs.key == rhs.key && lhs.action == rhs.action;
-    }
-
-    bool operator==(const openspace::Profile::Time& lhs,
-                    const openspace::Profile::Time& rhs)
-    {
-        return lhs.type == rhs.type && lhs.value == rhs.value;
-    }
-
-    bool operator==(const openspace::Profile::CameraNavState& lhs,
-                    const openspace::Profile::CameraNavState& rhs)
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.aim == rhs.aim &&
-               lhs.referenceFrame == rhs.referenceFrame &&
-               lhs.position == rhs.position &&
-               lhs.up == rhs.up &&
-               lhs.yaw == rhs.yaw &&
-               lhs.pitch == rhs.pitch;
-    }
-
-    bool operator==(const openspace::Profile::CameraGoToGeo& lhs,
-                    const openspace::Profile::CameraGoToGeo& rhs)
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.latitude == rhs.latitude &&
-               lhs.longitude == rhs.longitude &&
-               lhs.altitude == rhs.altitude;
-    }
-
-    bool operator==(const openspace::Profile& lhs,
-                    const openspace::Profile& rhs)
-    {
-        return lhs.version == rhs.version &&
-               lhs.modules == rhs.modules &&
-               lhs.meta == rhs.meta &&
-               lhs.assets == rhs.assets &&
-               lhs.properties == rhs.properties &&
-               lhs.actions == rhs.actions &&
-               lhs.keybindings == rhs.keybindings &&
-               lhs.time == rhs.time &&
-               lhs.deltaTimes == rhs.deltaTimes &&
-               lhs.camera == rhs.camera &&
-               lhs.markNodes == rhs.markNodes &&
-               lhs.additionalScripts == rhs.additionalScripts &&
-               lhs.ignoreUpdates == rhs.ignoreUpdates;
-    }
 } // namespace
 
 //
@@ -164,12 +168,12 @@ namespace {
 //
 TEST_CASE("Minimal", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/minimal.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
-
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
+    CHECK(profile == ref);
 }
 
 //
@@ -177,162 +181,382 @@ TEST_CASE("Minimal", "[profile]") {
 //
 TEST_CASE("Basic Meta (full)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_full.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
+    
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.description = "description";
+    meta.author = "author";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (empty)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_empty.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no name)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_name.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.version = "version";
+    meta.description = "description";
+    meta.author = "author";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no version)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_version.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.description = "description";
+    meta.author = "author";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no description)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_description.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.author = "author";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no author)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_author.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.description = "description";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no url)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_url.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.description = "description";
+    meta.author = "author";
+    meta.license = "license";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Meta (no license)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/meta_no_license.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.description = "description";
+    meta.author = "author";
+    meta.url = "url";
+    ref.meta = meta;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Module", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/modules.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    {
+        Profile::Module m;
+        m.name = "abs-module";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "def-module";
+        m.loadedInstruction = "instr";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "ghi-module";
+        m.notLoadedInstruction = "not_instr";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "jkl-module";
+        m.loadedInstruction = "instr";
+        m.notLoadedInstruction = "not_instr";
+        ref.modules.push_back(m);
+    }
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Assets", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/assets.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    ref.assets.push_back("folder1/folder2/asset");
+    ref.assets.push_back("folder3/folder4/asset2");
+    ref.assets.push_back("folder5/folder6/asset3");
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Properties", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/properties.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_1";
+        p.value = "property_value_1";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_2";
+        p.value = "property_value_2";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_3";
+        p.value = "property_value_3";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_4";
+        p.value = "property_value_4";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_5";
+        p.value = "property_value_5";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_6";
+        p.value = "property_value_6";
+        ref.properties.push_back(p);
+    }
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Keybindings", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/keybindings.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 1;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.0";
+        a.documentation = "T documentation";
+        a.name = "T name";
+        a.guiPath = "T Gui-Path";
+        a.isLocal = true;
+        a.script = "T script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.0";
+        k.key = { Key::T, KeyModifier::None };
+        ref.keybindings.push_back(k);
+    }
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.1";
+        a.documentation = "U documentation";
+        a.name = "U name";
+        a.guiPath = "U Gui-Path";
+        a.isLocal = false;
+        a.script = "U script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.1";
+        k.key = { Key::U, KeyModifier::None };
+        ref.keybindings.push_back(k);
+    }
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.2";
+        a.documentation = "CTRL+V documentation";
+        a.name = "CTRL+V name";
+        a.guiPath = "CTRL+V Gui-Path";
+        a.isLocal = false;
+        a.script = "CTRL+V script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.2";
+        k.key = { Key::V, KeyModifier::Control };
+        ref.keybindings.push_back(k);
+    }
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Time Relative", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/time_relative.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Time time;
+    time.type = Profile::Time::Type::Relative;
+    time.value = "-1d";
+    ref.time = time;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Time Absolute", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/time_absolute.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Time time;
+    time.type = Profile::Time::Type::Absolute;
+    time.value = "2020-06-01T12:00:00";
+    ref.time = time;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Delta Times", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/deltatimes.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    ref.deltaTimes.push_back(1.0);
+    ref.deltaTimes.push_back(30.0);
+    ref.deltaTimes.push_back(60.0);
+    ref.deltaTimes.push_back(1000.0);
+    ref.deltaTimes.push_back(36000.0);
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera NavState (full)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/camera_navstate_full.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version.major = 1;
+    ref.version.minor = 0;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraNavState camera;
+    camera.anchor = "none";
+    camera.aim = "aim";
+    camera.referenceFrame = "root";
+    camera.position = glm::dvec3(1.0, 2.0, 3.0);
+    camera.up = glm::dvec3(4.0, 5.0, 6.0);
+    camera.yaw = 10.0;
+    camera.pitch = -10.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
