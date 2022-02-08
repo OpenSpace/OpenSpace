@@ -36,6 +36,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
@@ -450,7 +451,7 @@ RenderableClimateModel::RenderableClimateModel(const ghoul::Dictionary& dictiona
         _filePath = *p.filePath;
         if (filePath != "null") {
             std::cout << "loading: " << *p.filePath << std::endl;
-            graphTexture = ghoul::io::TextureReader::ref().loadTexture(*p.filePath);
+            graphTexture = ghoul::io::TextureReader::ref().loadTexture(*p.filePath, 2);
         }
     }
 

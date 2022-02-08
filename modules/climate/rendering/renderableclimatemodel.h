@@ -24,7 +24,7 @@
 
 #ifndef __OPENSPACE_MODULE_CLIMATE___RENDERABLEMODEL___H__
 #define __OPENSPACE_MODULE_CLIMATE___RENDERABLEMODEL___H__
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
