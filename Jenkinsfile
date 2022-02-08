@@ -114,8 +114,8 @@ linux_gcc_make: {
           compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
       stage('linux-gcc-make/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -135,8 +135,8 @@ linux_gcc_ninja: {
           compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
       }
       stage('linux-gcc-ninja/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -157,8 +157,8 @@ linux_clang_make: {
           compileHelper.recordCompileIssues(compileHelper.Clang());
       }
       stage('linux-clang-make/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -178,8 +178,8 @@ linux_clang_ninja: {
           compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
       }
       stage('linux-clang-ninja/test') {
-        // testHelper.runUnitTests('build/OpenSpaceTest');
-        // testHelper.runUnitTests('bin/codegentest')
+        testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -197,8 +197,7 @@ windows_msvc: {
         compileHelper.recordCompileIssues(compileHelper.VisualStudio());
       }
       stage('windows-msvc/test') {
-        // Currently, the unit tests are failing on Windows
-        // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
         testHelper.runUnitTests('bin\\Debug\\codegentest')
       }
       cleanWs()
@@ -236,8 +235,8 @@ macos_make: {
           compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
       }
       stage('macos-make/test') {
-        // Currently, the unit tests are crashing on OS X
-        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('build/Debug/codegentest')
       }
       cleanWs()
     } // node('macos')
@@ -254,8 +253,8 @@ macos_xcode: {
           compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
       }
       stage('macos-xcode/test') {
-        // Currently, the unit tests are crashing on OS X
-        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+        testHelper.runUnitTests('build/Debug/codegentest')
       }
       cleanWs()
     } // node('macos')
