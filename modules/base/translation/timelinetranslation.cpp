@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
         "Should Interpolate",
-        "If this value is set to 'true', an interpolation is applied between the given keyframes. "
-        "If this value is set to 'false', the interpolation is not applied."
+        "If this value is set to 'true', an interpolation is applied between the given "
+        "keyframes. If this value is set to 'false', the interpolation is not applied."
     };
 
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {

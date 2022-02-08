@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -24,7 +23,7 @@ local Example_Fixed_Height = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"
@@ -46,14 +45,22 @@ local Example_Adaptive_Height = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+    GeometryFile = models .. "NewHorizonsCleanModel.obj"
   },
   GUI = {
     Path = "/Example"
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Example_Fixed_Height,
-  Example_Adaptive_Height
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Example_Fixed_Height)
+  openspace.addSceneGraphNode(Example_Adaptive_Height)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Example_Adaptive_Height)
+  openspace.removeSceneGraphNode(Example_Fixed_Height)
+end)
+
+asset.export(Example_Fixed_Height)
+asset.export(Example_Adaptive_Height)

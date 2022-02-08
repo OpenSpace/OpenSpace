@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local travelSpeedIndicator = {
   Identifier = "TravelSpeedIndicator-2000",
@@ -27,7 +26,16 @@ local travelSpeedIndicator = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { travelSpeedIndicator })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(travelSpeedIndicator)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(travelSpeedIndicator)
+end)
+  
+asset.export(travelSpeedIndicator)
+
 
 asset.meta = {
   Name = "Light travel from sun to earth",
@@ -35,6 +43,5 @@ asset.meta = {
   Description = [[Speed of light indicator from sun to earth]],
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",
-  License = "MIT",
-  Identifier = {"TravelSpeedIndicator-2000"}
+  License = "MIT"
 }

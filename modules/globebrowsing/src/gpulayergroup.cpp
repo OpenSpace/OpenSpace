@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,6 +68,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
             case layergroupid::TypeID::TileIndexTileLayer:
@@ -103,7 +104,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                 program.setUniform(galuc.color, al.solidColor());
                 break;
             default:
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {
@@ -148,6 +149,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
             // Intentional fall through. Same for all tile layers
             case layergroupid::TypeID::DefaultTileLayer:
             case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::ImageSequenceTileLayer:
             case layergroupid::TypeID::SizeReferenceTileLayer:
             case layergroupid::TypeID::TemporalTileLayer:
             case layergroupid::TypeID::TileIndexTileLayer:
@@ -177,7 +179,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
                 galuc.color = p.uniformLocation(name + "color");
                 break;
             default:
-                break;
+                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {

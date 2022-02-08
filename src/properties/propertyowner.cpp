@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -399,11 +399,11 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 void PropertyOwner::setIdentifier(std::string identifier) {
     ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any whitespaces"
     );
     ghoul_precondition(
         _identifier.find_first_of('.') == std::string::npos,
-        "Identifier must contain any whitespaces"
+        "Identifier must not contain any dots"
     );
 
     _identifier = std::move(identifier);

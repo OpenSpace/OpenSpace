@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,8 @@ struct WindowDelegate {
 
     bool (*isFisheyeRendering)() = []() { return false; };
 
-    unsigned int (*takeScreenshot)(bool applyWarping) = [](bool) { return 0u; };
+    unsigned int (*takeScreenshot)(bool applyWarping, std::vector<int> windowIds) =
+        [](bool, std::vector<int>) { return 0u; };
 
     void (*swapBuffer)() = []() {};
 

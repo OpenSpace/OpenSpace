@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local modelFolder = asset.syncedResource({
   Name = "Pioneer 10/11 Models",
@@ -10,10 +9,20 @@ local modelFolder = asset.syncedResource({
 
 local ModelRenderable = {
   Type = "RenderableModel",
-  GeometryFile = modelFolder .. "/pioneer.fbx",
-  LightSources = assetHelper.getDefaultLightSources(
-    sunTransforms.SolarSystemBarycenter.Identifier
-  )
+  GeometryFile = modelFolder .. "pioneer.fbx",
+  LightSources = {
+    {
+      Type = "SceneGraphLightSource",
+      Identifier = "Sun",
+      Node = sunTransforms.SolarSystemBarycenter.Identifier,
+      Intensity = 1.0
+    },
+    {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 0.5
+    }
+  }
 }
 
 asset.export("PioneerModel", ModelRenderable)

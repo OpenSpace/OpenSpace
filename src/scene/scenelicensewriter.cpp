@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,7 @@ std::string SceneLicenseWriter::generateJson() const {
     json << "[";
 
     std::vector<const Asset*> assets =
-        global::openSpaceEngine->assetManager().rootAsset().subTreeAssets();
+        global::openSpaceEngine->assetManager().allAssets();
 
     int metaTotal = 0;
     int metaCount = 0;
@@ -121,7 +121,7 @@ std::string SceneLicenseWriter::generateJson() const {
         //json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
         json << fmt::format(replStr, "license", escapedJson(meta->license));
         json << fmt::format(replStr, "identifiers", escapedJson(meta->identifiers));
-        json << fmt::format(replStr2, "path", escapedJson(asset->assetFilePath()));
+        json << fmt::format(replStr2, "path", escapedJson(asset->path().string()));
         json << "}";
 
         metaCount++;

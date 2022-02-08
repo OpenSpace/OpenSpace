@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@
 namespace {
     constexpr const char* ProgramName = "Plane";
 
-    enum class BlendMode {
+    enum BlendMode {
         Normal = 0,
         Additive
     };
@@ -95,7 +95,7 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
 
-        enum class BlendMode {
+        enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
         };
@@ -155,12 +155,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
 
     if (p.blendMode.has_value()) {
-        if (*p.blendMode == Parameters::BlendMode::Normal) {
-            _blendMode = static_cast<int>(BlendMode::Normal);
-        }
-        else if (*p.blendMode == Parameters::BlendMode::Additive) {
-            _blendMode = static_cast<int>(BlendMode::Additive);
-        }
+        _blendMode = codegen::map<BlendMode>(*p.blendMode);
     }
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);

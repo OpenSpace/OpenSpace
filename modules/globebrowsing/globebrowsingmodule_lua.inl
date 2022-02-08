@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,8 +83,9 @@ int addLayer(lua_State* L) {
  */
 int deleteLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::deleteLayer");
-    auto [globeName, layerGroupName, layerName] =
-        ghoul::lua::values<std::string, std::string, std::string>(L);
+    auto [globeName, layerGroupName, layerOrName] = ghoul::lua::values<
+        std::string, std::string, std::variant<std::string, ghoul::Dictionary>
+    >(L);
 
     // Get the node and make sure it exists
     SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(globeName);
@@ -104,6 +105,26 @@ int deleteLayer(lua_State* L) {
     );
     if (groupID == layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
+    }
+
+    std::string layerName;
+    if (std::holds_alternative<std::string>(layerOrName)) {
+        layerName = std::get<std::string>(layerOrName);
+    }
+    else {
+        ghoul_assert(
+            std::holds_alternative<ghoul::Dictionary>(layerOrName),
+            "Missing case"
+        );
+
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(layerOrName);
+        if (!d.hasValue<std::string>("Identifier")) {
+            return ghoul::lua::luaError(
+                L,
+                "Table passed to deleteLayer does not contain an Identifier"
+            );
+        }
+        layerName = d.value<std::string>("Identifier");
     }
 
     globe->layerManager().deleteLayer(groupID, layerName);
@@ -169,7 +190,7 @@ int moveLayer(lua_State* L) {
     }
 
     globebrowsing::LayerGroup& lg = globe->layerManager().layerGroup(group);
-    lg.moveLayers(oldPosition, newPosition);
+    lg.moveLayer(oldPosition, newPosition);
     return 0;
 }
 

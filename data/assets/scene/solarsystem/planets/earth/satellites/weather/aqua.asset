@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local satelliteHelper = asset.require('util/tle_helper')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local satelliteHelper = asset.require("util/tle_helper")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local url = "http://celestrak.com/satcat/tle.php?CATNR=27424"
 local identifier = "Aqua"
@@ -96,7 +95,6 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-
 end)
 
 asset.onDeinitialize(function ()
@@ -105,6 +103,9 @@ asset.onDeinitialize(function ()
   end  
 end)
 
+for _, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 asset.meta = {
   Name = "Aqua",

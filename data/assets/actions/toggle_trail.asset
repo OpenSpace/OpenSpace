@@ -99,7 +99,17 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(toggle_trail.Identifier)
-  openspace.action.removeAction(show_trail.Identifier)
-  openspace.action.removeAction(hide_trail.Identifier)
+  openspace.action.removeAction(toggle_trail)
+  openspace.action.removeAction(show_trail)
+  openspace.action.removeAction(hide_trail)
 end)
+
+
+asset.meta = {
+  Name = "Actions - Toggle current Trails",
+  Version = "1.0",
+  Description = [[ Asset providing actions to toggle trails]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

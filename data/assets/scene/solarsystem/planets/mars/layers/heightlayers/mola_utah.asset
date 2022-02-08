@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "Mola_Utah",
   Name = "Mola Elevation [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
+  FilePath = asset.localResource("mola_utah.wms"),
   TilePixelSize = 90,
   Description = [[ This digital elevation model (DEM) is based on data from the Mars
     Orbiter Laser Altimeter (MOLA; Smith et al., 2001), an instrument on NASA's Mars
@@ -22,21 +21,25 @@ local layer = {
     URL). Data Reference: (See URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Mola Elevation [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Global elevation layer for Mars. This layer is hosted on the
     OpenSpace server in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
     "Mars_MGS_MOLA_DEM_mosaic_global_463m",
-  License = "NASA/PDS",
-  Identifiers = {"Mola_Utah"}
+  License = "NASA/PDS"
 }

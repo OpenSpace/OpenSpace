@@ -1,5 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local sampleInterval = 24*60*60
 
 local voyager1 = {
@@ -102,7 +100,25 @@ local pioneer11 ={
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { voyager1, voyager2, pioneer10, pioneer11 })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(voyager1)
+  openspace.addSceneGraphNode(voyager2)
+  openspace.addSceneGraphNode(pioneer10)
+  openspace.addSceneGraphNode(pioneer11)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(pioneer11)
+  openspace.removeSceneGraphNode(pioneer10)
+  openspace.removeSceneGraphNode(voyager2)
+  openspace.removeSceneGraphNode(voyager1)
+end)
+    
+asset.export(voyager1)
+asset.export(voyager2)
+asset.export(pioneer10)
+asset.export(pioneer11)
+
 
 
 asset.meta = {

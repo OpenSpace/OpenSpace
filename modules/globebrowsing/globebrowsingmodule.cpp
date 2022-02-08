@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,15 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -236,7 +244,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
-        tileprovider::initializeDefaultTile();
+        TileProvider::initializeDefaultTile();
 
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -249,9 +257,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        tileprovider::deinitializeDefaultTile();
+        TileProvider::deinitializeDefaultTile();
     });
-
 
     // Render
     global::callback::render->emplace_back([&]() {
@@ -279,41 +286,45 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    auto fTileProvider =
-        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
+    fTileProvider->registerClass<DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::DefaultTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::SingleImageProvider>(
+    fTileProvider->registerClass<SingleImageProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
+    fTileProvider->registerClass<ImageSequenceTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
+            layergroupid::TypeID::ImageSequenceTileLayer
+        )]
+    );
+    fTileProvider->registerClass<TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
+    fTileProvider->registerClass<TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
+    fTileProvider->registerClass<SizeReferenceTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SizeReferenceTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
+    fTileProvider->registerClass<TileProviderByLevel>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByLevelTileLayer
         )]
     );
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
+    fTileProvider->registerClass<TileProviderByIndex>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByIndexTileLayer
         )]
@@ -340,7 +351,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "addLayer",
             &globebrowsing::luascriptfunctions::addLayer,
-            {},
             "string, string, table",
             "Adds a layer to the specified globe. The first argument specifies the "
             "name of the scene graph node of which to add the layer. The renderable "
@@ -352,19 +362,17 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "deleteLayer",
             &globebrowsing::luascriptfunctions::deleteLayer,
-            {},
-            "string, string",
+            "string, string, (string, table)",
             "Removes a layer from the specified globe. The first argument specifies "
             "the name of the scene graph node of which to remove the layer. "
             "The renderable of the specified scene graph node needs to be a "
             "renderable globe. The second argument is the layer group which can be "
-            "any of " + listLayerGroups + ". The third argument is the dictionary"
-            "defining the layer."
+            "any of " + listLayerGroups + ". The third argument is either the identifier "
+            "for the layer or a dictionary with the 'Identifier' key that is used instead"
         },
         {
             "getLayers",
             &globebrowsing::luascriptfunctions::getLayers,
-            {},
             "string, string",
             "Returns the list of layers for the scene graph node specified in the first "
             "parameter. The second parameter specifies which layer type should be "
@@ -373,26 +381,25 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "moveLayer",
             &globebrowsing::luascriptfunctions::moveLayer,
-            {},
             "string, string, number, number",
-            "Rearranges the order of a single layer in a scene graph node. The first "
-            "parameter specifies the scene graph node, the second parameter specifies "
+            "Rearranges the order of a single layer on a globe. The first parameter"
+            "is the identifier of the globe, the second parameter specifies "
             "the name of the layer group, the third parameter is the original position "
             "of the layer that should be moved and the last parameter is the new "
-            "position. The new position may be -1 to place the layer at the top or any "
-            "large number bigger than the number of layers to place it at the bottom."
+            "position in the list. The first position in the list has index 0, and the "
+            "last position is given by the number of layers minus one. The new position "
+            "may be -1 to place the layer at the top or any number bigger than the "
+            "number of layers to place it at the bottom."
         },
         {
             "goToChunk",
             &globebrowsing::luascriptfunctions::goToChunk,
-            {},
             "void",
             "Go to chunk with given index x, y, level"
         },
         {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
-            {},
             "[string], number, number, [number]",
             "Go to geographic coordinates of a globe. The first (optional) argument is "
             "the identifier of a scene graph node that has a RenderableGlobe attached. "
@@ -408,7 +415,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             // paths work really well close to surfaces
             "flyToGeo",
             &globebrowsing::luascriptfunctions::flyToGeo,
-            {},
             "[string], number, number, number [, bool, number]",
             "Fly the camera to geographic coordinates of a globe, using the path "
             "navigation system. The first (optional) argument is the identifier of a "
@@ -422,7 +428,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getLocalPositionFromGeo",
             &globebrowsing::luascriptfunctions::getLocalPositionFromGeo,
-            {},
             "string, number, number, number",
             "Returns a position in the local Cartesian coordinate system of the globe "
             "identified by the first argument, that corresponds to the given geographic "
@@ -433,7 +438,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "getGeoPositionForCamera",
             &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
-            {},
             "void",
             "Get geographic coordinates of the camera position in latitude, "
             "longitude, and altitude (degrees and meters)."
@@ -441,7 +445,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-            {},
             "string, string, string",
             "Loads and parses the WMS capabilities xml file from a remote server. "
             "The first argument is the name of the capabilities that can be used to "
@@ -452,7 +455,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "removeWMSServer",
             &globebrowsing::luascriptfunctions::removeWMSServer,
-            {},
             "string",
             "Removes the WMS server identified by the first argument from the list "
             "of available servers. The parameter corrsponds to the first argument in "
@@ -461,7 +463,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
         {
             "capabilitiesWMS",
             &globebrowsing::luascriptfunctions::capabilities,
-            {},
             "string",
             "Returns an array of tables that describe the available layers that are "
             "supported by the WMS server identified by the provided name. The 'URL'"
@@ -482,7 +483,15 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
+        globebrowsing::DefaultTileProvider::Documentation(),
+        globebrowsing::ImageSequenceTileProvider::Documentation(),
+        globebrowsing::SingleImageProvider::Documentation(),
+        globebrowsing::SizeReferenceTileProvider::Documentation(),
+        globebrowsing::TemporalTileProvider::Documentation(),
+        globebrowsing::TileProviderByIndex::Documentation(),
+        globebrowsing::TileProviderByLevel::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()

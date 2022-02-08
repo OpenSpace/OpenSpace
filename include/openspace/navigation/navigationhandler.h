@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,9 @@
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/keyboardinputstate.h>
+#include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationstate.h>
@@ -67,21 +68,18 @@ public:
 
     // Mutators
     void setFocusNode(SceneGraphNode* node);
-    void resetCameraDirection();
-
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
     void updateCamera(double deltaTime);
-    void setEnableKeyFrameInteraction();
-    void setDisableKeyFrameInteraction();
-    void triggerPlaybackStart();
-    void stopPlayback();
+
+    void resetNavigationUpdateVariables();
 
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
-    const InputState& inputState() const;
+    const MouseInputState& mouseInputState() const;
+    const KeyboardInputState& keyboardInputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
@@ -96,24 +94,36 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
+    void setJoystickAxisMapping(std::string joystickName,
+        int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::AxisNormalize shouldNormalize =
-            JoystickCameraStates::AxisNormalize::No,
+        JoystickCameraStates::JoystickType joystickType =
+            JoystickCameraStates::JoystickType::JoystickLike,
         bool isSticky = false, double sensitivity = 0.0
     );
 
-    JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
+    void setJoystickAxisMappingProperty(std::string joystickName,
+        int axis, std::string propertyUri,
+        float min = 0.f, float max = 1.f,
+        JoystickCameraStates::AxisInvert shouldInvert =
+        JoystickCameraStates::AxisInvert::No, bool isRemote = true
+    );
 
-    void setJoystickAxisDeadzone(int axis, float deadzone);
-    float joystickAxisDeadzone(int axis) const;
+    JoystickCameraStates::AxisInformation joystickAxisMapping(
+        const std::string& joystickName, int axis) const;
 
-    void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
+    void setJoystickAxisDeadzone(const std::string& joystickName, int axis,
+        float deadzone);
+    float joystickAxisDeadzone(const std::string& joystickName, int axis) const;
+
+    void bindJoystickButtonCommand(const std::string& joystickName, int button,
+        std::string command, JoystickAction action,
         JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
 
-    void clearJoystickButtonCommand(int button);
-    std::vector<std::string> joystickButtonCommand(int button) const;
+    void clearJoystickButtonCommand(const std::string& joystickName, int button);
+    std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
+        int button) const;
 
     // Websockets
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
@@ -141,10 +151,10 @@ public:
 private:
     void applyNavigationState(const NavigationState& ns);
     void updateCameraTransitions();
+    void clearGlobalJoystickStates();
 
-    bool _playbackModeEnabled = false;
-
-    InputState _inputState;
+    MouseInputState _mouseInputState;
+    KeyboardInputState _keyboardInputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 

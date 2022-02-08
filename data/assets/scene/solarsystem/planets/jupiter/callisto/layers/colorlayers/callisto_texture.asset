@@ -1,16 +1,27 @@
-local texturesPath = asset.require("./../../callisto_textures").TexturesPath
-local globeIdentifier = asset.require("./../../callisto").Callisto.Identifier
+local globeIdentifier = asset.require("../../callisto").Callisto.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Callisto Textures",
+  Type = "HttpSynchronization",
+  Identifier = "callisto_textures",
+  Version = 2
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/callisto_os.tif",
+  FilePath = texturesPath .. "callisto_os.tif",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {

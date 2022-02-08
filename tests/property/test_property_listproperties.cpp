@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,7 +110,7 @@ TEST_CASE("StringListProperty: Get Lua Value", "[stringlistproperty]") {
     p.getLuaValue(L);
 
     REQUIRE(ghoul::lua::luaValueToString(L, 1) ==
-        "{ 1.000000 = a, 2.000000 = b, 3.000000 = c }"
+        "{ [1] = \"a\", [2] = \"b\", [3] = \"c\" }"
     );
 }
 
@@ -221,7 +221,7 @@ TEST_CASE("IntListProperty: Get Lua Value", "[intlistproperty]") {
     p.getLuaValue(L);
 
     REQUIRE(ghoul::lua::luaValueToString(L, 1) ==
-        "{ 1.000000 = 1.000000, 2.000000 = 2.000000, 3.000000 = 3.000000 }"
+        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
     );
 }
 
@@ -332,7 +332,7 @@ TEST_CASE("DoubleListProperty: Get Lua Value", "[doublelistproperty]") {
     p.getLuaValue(L);
 
     REQUIRE(ghoul::lua::luaValueToString(L, 1) ==
-        "{ 1.000000 = 1.000000, 2.000000 = 2.000000, 3.000000 = 3.000000 }"
+        "{ [1] = 1.000000, [2] = 2.000000, [3] = 3.000000 }"
     );
 }
 

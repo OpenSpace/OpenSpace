@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,8 +94,20 @@ template struct NotInListVerifier<StringVerifier>;
 
 template struct InRangeVerifier<IntVerifier>;
 template struct InRangeVerifier<DoubleVerifier>;
+template struct InRangeVerifier<DoubleVector2Verifier>;
+template struct InRangeVerifier<DoubleVector3Verifier>;
+template struct InRangeVerifier<DoubleVector4Verifier>;
+template struct InRangeVerifier<IntVector2Verifier>;
+template struct InRangeVerifier<IntVector3Verifier>;
+template struct InRangeVerifier<IntVector4Verifier>;
 template struct NotInRangeVerifier<IntVerifier>;
 template struct NotInRangeVerifier<DoubleVerifier>;
+template struct NotInRangeVerifier<DoubleVector2Verifier>;
+template struct NotInRangeVerifier<DoubleVector3Verifier>;
+template struct NotInRangeVerifier<DoubleVector4Verifier>;
+template struct NotInRangeVerifier<IntVector2Verifier>;
+template struct NotInRangeVerifier<IntVector3Verifier>;
+template struct NotInRangeVerifier<IntVector4Verifier>;
 
 
 template struct AnnotationVerifier<BoolVerifier>;

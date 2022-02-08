@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,20 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemInstruments::Documentation() {
-    return codegen::doc<Parameters>("spacecraftinstruments_dashboarditem_instuments");
+    documentation::Documentation doc =
+        codegen::doc<Parameters>("spacecraftinstruments_dashboarditem_instuments");
+
+    // @TODO cleanup
+    // Insert the parent's documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
+    return doc;
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)

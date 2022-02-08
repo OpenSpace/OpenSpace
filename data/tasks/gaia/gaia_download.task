@@ -1,6 +1,0 @@
-return {
-  {
-    Type = "SyncAssetTask",
-    Asset = "scene/milkyway/gaia/gaia_dr2_download_stars"
-  }
-}

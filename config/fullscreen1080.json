@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "masteraddress": "localhost",
+  "externalcontrolport": 20500,
+  "settings": {
+    "display": {
+      "swapinterval": 0
+    }
+  },
+  "nodes": [
+    {
+      "address": "localhost",
+      "port": 20401,
+      "windows": [
+        {
+          "fullscreen": true,
+          "name": "OpenSpace",
+          "msaa": 4,
+          "stereo": "none",
+          "pos": { "x": 0, "y": 0 },
+          "size": { "x": 1920, "y": 1080 },
+          "viewports": [
+            {
+              "tracked": true,
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 },
+              "projection": {
+                "type": "PlanarProjection",
+                "fov": {
+                  "hfov": 80.0,
+                  "vfov": 50.534015846724
+                },
+                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "eyeseparation": 0.065,
+      "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    }
+  ]
+}

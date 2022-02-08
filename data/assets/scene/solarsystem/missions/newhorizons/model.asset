@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("./transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
   Name = "New Horizons Model",
@@ -15,7 +14,7 @@ local NewHorizons = {
   Renderable = {
     Type = "RenderableModel",
     Body = "NEW HORIZONS",
-    GeometryFile = models .. "/NewHorizonsCleanModel.obj",
+    GeometryFile = models .. "NewHorizonsCleanModel.obj",
     AmbientIntensity = 0.2,
     DiffuseIntensity = 1.0,
     SpecularIntensity = 1.0,
@@ -34,5 +33,12 @@ local NewHorizons = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { NewHorizons })
-asset.export("NewHorizonsModels", models)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NewHorizons)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NewHorizons)
+end)
+  
+asset.export(NewHorizons)

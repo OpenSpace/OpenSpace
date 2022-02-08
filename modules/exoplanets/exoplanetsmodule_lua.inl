@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -596,6 +596,12 @@ int removeExoplanetSystem(lua_State* L) {
 
 std::vector<std::string> hostStarsWithSufficientData() {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+
+    if (!module->hasDataFiles()) {
+        // If no data file path has been configured at all, we just bail out early here
+        LINFO("No data path was configured for the exoplanets");
+        return {};
+    }
 
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));

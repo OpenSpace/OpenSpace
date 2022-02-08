@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,6 @@ struct LuaLibrary {
         std::string name;
         /// The function pointer that is executed if the function is called
         lua_CFunction function;
-        /// A vector of light userdata to be passed into the function
-        std::vector<void*> userdata;
         /// A text describing the arguments to this function
         std::string argumentText;
         /// A help text describing what the function does/

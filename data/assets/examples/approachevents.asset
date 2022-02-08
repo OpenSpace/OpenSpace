@@ -1,6 +1,5 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local generic_action = {
   Identifier = "os.example.generic",
@@ -32,7 +31,7 @@ local obj = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = model .. "/BoxAnimated.glb",
+    GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 1.0,
     LightSources = {
       {
@@ -63,6 +62,6 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(obj.Identifier)
-  openspace.action.removeAction(generic_action.Identifier)
+  openspace.removeSceneGraphNode(obj)
+  openspace.action.removeAction(generic_action)
 end)

@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local trajectory = asset.syncedResource({
   Name = "5 Astraea Trajectory",
@@ -15,7 +14,7 @@ local AstraeaTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2014 JAN 01 00:00:00",
@@ -35,7 +34,7 @@ local AstraeaPosition = {
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+      HorizonsTextFile = trajectory .. "horizons_astraea.dat"
     }
   },
   GUI = {
@@ -44,12 +43,24 @@ local AstraeaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { AstraeaPosition, AstraeaTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AstraeaPosition)
+  openspace.addSceneGraphNode(AstraeaTrail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AstraeaTrail)
+  openspace.removeSceneGraphNode(AstraeaPosition)
+end)
+    
+asset.export(AstraeaPosition)
+asset.export(AstraeaTrail)
+
 
 
 asset.meta = {
   Name = "5 Astraea",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ This asset contains the trail
     and position of 5 Astraea from 2014 JAN 01 00:00:00
     to 2023 JAN 01 00:00:00. Data from JPL Horizons']],

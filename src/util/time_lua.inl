@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -228,7 +229,8 @@ int time_interpolateTogglePause(lua_State* L) {
 int time_pauseToggleViaKeyboard(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_pauseToggleViaKeyboard");
 
-    if (global::sessionRecording->isPlayingBack()) {
+    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
         global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
     }
@@ -251,7 +253,6 @@ int time_pauseToggleViaKeyboard(lua_State* L) {
 int time_setPause(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setPause");
     bool pause = ghoul::lua::value<bool>(L);
-
     global::timeManager->setPause(pause);
     return 0;
 }
