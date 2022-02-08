@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -819,7 +819,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
             continue;
         }
 
-        std::ifstream seedFile(spFile);
+        std::ifstream seedFile(spFile.path());
         if (!seedFile.good()) {
             LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();

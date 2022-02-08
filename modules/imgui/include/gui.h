@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <modules/imgui/include/guicomponent.h>
 
 #include <modules/imgui/include/guiactioncomponent.h>
-#include <modules/imgui/include/guiassetcomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
@@ -64,7 +63,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 17;
+        const int nRegularComponents = 16;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -105,7 +104,6 @@ public:
 //protected:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
-    GuiAssetComponent _asset;
     GuiGIBSComponent _gibs;
     GuiGlobeBrowsingComponent _globeBrowsing;
 
@@ -152,7 +150,6 @@ private:
         &_iswa,
 #endif
 
-        &_asset,
         &_actions,
         &_joystick,
         &_filePath,

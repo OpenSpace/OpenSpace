@@ -1,26 +1,24 @@
-local assetHelper = asset.require('util/asset_helper')
-
 local getBookmarks = function (guiPath, bookmarkfile)
   local genBookmarks = {};
   local notFirstLine = false;
   local PARSEC_CONSTANT = 3.0856776E16;
   for line in io.lines(openspace.absPath(bookmarkfile)) do
     if (notFirstLine) then
-      local matchstring = '(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$'
+      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
       local group, name, globe, lat, lon, altitude, x, y, z, scale, linewidth = line:match(matchstring)
 
-      scale = (scale == '' and 75000 or scale)
-      linewidth = (linewidth == '' and 2.0 or tonumber(linewidth))
-      group = (group == '' and globe or group)
+      scale = (scale == "" and 75000 or scale)
+      linewidth = (linewidth == "" and 2.0 or tonumber(linewidth))
+      group = (group == "" and globe or group)
 
-      local parent = (globe == '' and 'Root' or globe)
+      local parent = (globe == "" and "Root" or globe)
 
       local sgn = {
-        Identifier = guiPath .. '-' .. name,
+        Identifier = guiPath .. "-" .. name,
         Parent = parent,
         Transform = {
           Scale = {
-            Type = 'StaticScale',
+            Type = "StaticScale",
             Scale = tonumber(scale);
           }, 
           Rotation = {
@@ -33,7 +31,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
           }
         },
         Renderable = {
-          Type = 'RenderableSphericalGrid',
+          Type = "RenderableSphericalGrid",
           Enabled = false,
           Opacity = 0.3,
           Color = { 0.3, 0.84, 1.0},
@@ -41,17 +39,17 @@ local getBookmarks = function (guiPath, bookmarkfile)
         },
         GUI = {
           Name = name,
-          Path = '/' .. guiPath
+          Path = "/" .. guiPath
         }
       }
 
-      if (group ~= '') then
-        sgn.GUI.Path  = sgn.GUI.Path .. '/' .. group
+      if (group ~= "") then
+        sgn.GUI.Path  = sgn.GUI.Path .. "/" .. group
       end
 
-      if (globe == '') then
+      if (globe == "") then
         sgn.Transform.Translation = {
-          Type = 'StaticTranslation',
+          Type = "StaticTranslation",
           Position = {
             tonumber(x) * PARSEC_CONSTANT,
             tonumber(y) * PARSEC_CONSTANT,
@@ -60,7 +58,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
         }
       else
         sgn.Transform.Translation = {
-          Type = 'GlobeTranslation',
+          Type = "GlobeTranslation",
           Globe = globe,
           Latitude = tonumber(lat),
           Longitude = tonumber(lon)
@@ -81,4 +79,4 @@ local getBookmarks = function (guiPath, bookmarkfile)
   return genBookmarks
 end
 
-asset.export('getBookmarks', getBookmarks)
+asset.export("getBookmarks", getBookmarks)

@@ -1,9 +1,7 @@
---perseverance/model.asset
-local assetHelper = asset.require('util/asset_helper')
-local trail = asset.require('./trail')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
--- asset.require('./fov')
+local trail = asset.require("./trail")
+local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+-- asset.require("./fov")
 
 local LightSources = {
   {
@@ -54,7 +52,7 @@ local Body = {
   Renderable = {
     Type = "RenderableModel",
     Body = "MARS SCIENCE LABORATORY",
-    GeometryFile = models .. "/Perseverance.obj",
+    GeometryFile = models .. "Perseverance.obj",
     LightSources = LightSources,
     PerformShading = false,
     RotationVector = {65.940000,201.389999,263.980011}
@@ -67,8 +65,18 @@ local Body = {
 }
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { 
-  Perseverance,
-  PerseveranceModel,
-  Body
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Perseverance)
+  openspace.addSceneGraphNode(PerseveranceModel)
+  openspace.addSceneGraphNode(Body)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Body)
+  openspace.removeSceneGraphNode(PerseveranceModel)
+  openspace.removeSceneGraphNode(Perseverance)
+end)
+    
+asset.export(Perseverance)
+asset.export(PerseveranceModel)
+asset.export(Body)

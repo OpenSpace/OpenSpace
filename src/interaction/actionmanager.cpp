@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,21 +117,20 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "hasAction",
                 &luascriptfunctions::hasAction,
-                {},
                 "string",
                 "Checks if the passed identifier corresponds to an action"
             },
             {
                 "removeAction",
                 &luascriptfunctions::removeAction,
-                {},
-                "string",
-                "Removes an existing action from the list of possible actions"
+                "(string, table)",
+                "Removes an existing action from the list of possible actions. The "
+                "action is identifies either by the passed name, or if it is a table, "
+                "the value behind the 'Identifier' key is extract and used instead"
             },
             {
                 "registerAction",
                 &luascriptfunctions::registerAction,
-                {},
                 "table",
                 "Registers a new action. The table must at least contain the keys "
                 "'Identifier' and 'Command' represeting the unique identifier and the "
@@ -145,7 +144,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "action",
                 &luascriptfunctions::action,
-                {},
                 "string",
                 "Returns information about the action as a table with the keys "
                 "'Identifier', 'Command', 'Name', 'Documentation', 'GuiPath', and "
@@ -154,7 +152,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "actions",
                 &luascriptfunctions::actions,
-                {},
                 "",
                 "Returns all registered actions in the system as a table of tables each "
                 "containing the keys 'Identifier', 'Command', 'Name', 'Documentation', "
@@ -163,7 +160,6 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
             {
                 "triggerAction",
                 &luascriptfunctions::triggerAction,
-                {},
                 "string",
                 "Triggers the action given by the specified identifier"
             }

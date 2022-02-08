@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local speck = asset.syncedResource({
   Name = "Alternate Star Labels Speck Files",
   Type = "HttpSynchronization",
@@ -16,7 +12,7 @@ local object = {
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    LabelFile = speck .. "/stars-altlbl.label",
+    LabelFile = speck .. "stars-altlbl.label",
     Unit = "pc",
     TextColor = { 0.4, 0.4, 0.4 },
     DrawLabels = true,
@@ -37,14 +33,23 @@ local object = {
 }
 
 
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
+
+
 asset.meta = {
   Name = "Stars Labels - Alternate",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Digital Universe asset for alternate start labels]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"StarLabelsAlternate"}
+  License = "AMNH Digital Universe"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })

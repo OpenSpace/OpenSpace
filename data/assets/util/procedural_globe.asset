@@ -1,4 +1,4 @@
-asset.require('spice/base')
+asset.require("spice/base")
 
 local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spiceName,
     radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels)

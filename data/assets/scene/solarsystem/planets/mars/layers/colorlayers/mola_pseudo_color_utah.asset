@@ -1,10 +1,9 @@
-local mapServiceConfigs = asset.localResource("./../../map_service_configs")
-local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+local globeIdentifier = asset.require("../../mars").Mars.Identifier
 
 local layer = {
   Identifier = "MOLA_Pseudo_Color_Utah",
   Name = "MOLA Pseudo Color [Utah]",
-  FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms",
+  FilePath = asset.localResource("mola_pseudo_color_utah.wms"),
   Description = [[This map is based on data from the Mars Orbiter Laser Altimeter (MOLA)
     (Smith, et al., 2001), an instrument on NASA’s Mars Global Surveyor (MGS)
     spacecraft (Albee, et al., 2001). The image used for the base of this map
@@ -21,21 +20,25 @@ local layer = {
     is 463 meters per pixel (m). (Description from URL). Data Reference: (See URL)]],
 }
 
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "MOLA Pseudo Color [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Colorzied elevation data for Mars (with shading). This map is hosted
     on the OpenSpace server in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
     "Mars_MGS_MOLA_ClrShade_merge_global_463m",
-  License = "NASA/PDS",
-  Identifiers = {"MOLA_Pseudo_Color_Utah"}
+  License = "NASA/PDS"
 }

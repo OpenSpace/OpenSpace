@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -132,24 +134,33 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo FollowAnchorNodeInfo = {
+        "FollowAnchorNodeRotation",
+        "Follow Anchor Node Rotation",
+        "If true, the camera will rotate with the current achor node if within a "
+        "certain distance from it. When this happens, the object will appear fixed in "
+        "relation to the camera. The distance at which the change happens is controlled "
+        "through another property."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        FollowAnchorNodeDistanceInfo = {
         "FollowAnchorNodeRotationDistance",
-        "Follow anchor node rotation distance",
+        "Follow Anchor Node Rotation Distance",
         "A factor used to determine the distance at which the camera starts rotating "
-        "with the anchor node. When this happends, a the object will appear fixed in "
-        "relation to the camera. The actual distance will be computed by multiplying "
+        "with the anchor node. The actual distance will be computed by multiplying "
         "this factor with the approximate radius of the node."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
-        "Minimum allowed distance",
+        "Minimum Allowed Distance",
         "Limits how close the camera can get to an object. The distance is given in "
         "meters above the surface."
     };
 
     constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
         "VelocityZoomControl",
-        "Velocity zoom control",
+        "Velocity Zoom Control",
         "Controls the velocity of the camera motion when zooming in to the focus node "
         "on a linear flight. The higher the value the faster the camera will move "
         "towards the focus."
@@ -178,7 +189,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
             "StereoInterpolationTime",
-            "Stereo interpolation time",
+            "Stereo Interpolation Time",
             "The time to interpolate to a new stereoscopic depth "
             "when the anchor node is changed, in seconds."
     };
@@ -186,7 +197,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         RetargetInterpolationTimeInfo = {
             "RetargetAnchorInterpolationTime",
-            "Retarget interpolation time",
+            "Retarget Interpolation Time",
             "The time to interpolate the camera rotation "
             "when the anchor or aim node is changed, in seconds."
     };
@@ -194,13 +205,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         FollowRotationInterpTimeInfo = {
             "FollowRotationInterpolationTime",
-            "Follow rotation interpolation time",
+            "Follow Rotation Interpolation Time",
             "The interpolation time when toggling following focus node rotation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
         "InvertMouseButtons",
-        "Invert left and right mouse buttons",
+        "Invert Left and Right Mouse Buttons",
         "If this value is 'false', the left mouse button causes the camera to rotate "
         "around the object and the right mouse button causes the zooming motion. If this "
         "value is 'true', these two functionalities are reversed."
@@ -227,7 +238,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         StereoscopicDepthOfFocusSurfaceInfo = {
             "StereoscopicDepthOfFocusSurface",
-            "Stereoscopic depth of the surface in focus",
+            "Stereoscopic Depth of the Surface in Focus",
             "Set the stereoscopically perceived distance (in meters) to the closest "
             "point out of the surface of the anchor and the center of the aim node. "
             "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
@@ -329,7 +340,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
     , _retargetAim(RetargetAimInfo)
-    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
+    , _followAnchorNodeRotation(FollowAnchorNodeInfo, true)
+    , _followAnchorNodeRotationDistance(FollowAnchorNodeDistanceInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
@@ -489,6 +501,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_aim);
     addProperty(_retargetAnchor);
     addProperty(_retargetAim);
+    addProperty(_followAnchorNodeRotation);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
 
@@ -543,13 +556,14 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
+void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
+                                             const KeyboardInputState& keyboardInputState,
                                              double deltaTime)
 {
-    _mouseStates.updateStateFromInput(inputState, deltaTime);
-    _joystickStates.updateStateFromInput(inputState, deltaTime);
-    _websocketStates.updateStateFromInput(inputState, deltaTime);
-    _scriptStates.updateStateFromInput(inputState, deltaTime);
+    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
+    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
+    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
+    _scriptStates.updateStateFromInput(deltaTime);
 
     bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||
@@ -727,9 +741,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Update the camera state
-    _camera->setPositionVec3(pose.position);
-    _camera->setRotation(composeCameraRotation(camRot));
+    pose.rotation = composeCameraRotation(camRot);
+
+    _camera->setPose(pose);
 }
 
 void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
@@ -845,34 +859,22 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
         resetVelocities();
     }
 
-    // Mark a changed anchor node as a camera interaction
     if (changedAnchor) {
-        updateOnCameraInteraction();
-    }
-
-    if (_anchorNode) {
-        _previousAnchorNodePosition = _anchorNode->worldPosition();
-        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
-    }
-    else {
-        _previousAnchorNodePosition.reset();
-        _previousAnchorNodeRotation.reset();
+        updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
+        updatePreviousAnchorState();
     }
 }
 
 void OrbitalNavigator::clearPreviousState() {
-    _previousAnchorNodePosition.reset();
-    _previousAnchorNodeRotation.reset();
-    _previousAimNodePosition.reset();
+    _previousAnchorNodePosition = std::nullopt;
+    _previousAnchorNodeRotation = std::nullopt;
+    _previousAimNodePosition = std::nullopt;
 }
 
 void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
-
-    if (_aimNode) {
-        _previousAimNodePosition = _aimNode->worldPosition();
-    }
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
@@ -883,17 +885,29 @@ void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
 }
 
-void OrbitalNavigator::resetNodeMovements() {
+void OrbitalNavigator::updatePreviousAnchorState() {
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();
         _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
     }
     else {
-        _previousAnchorNodePosition = glm::dvec3(0.0);
-        _previousAnchorNodeRotation = glm::dquat();
+        _previousAnchorNodePosition = std::nullopt;
+        _previousAnchorNodeRotation = std::nullopt;
     }
+}
 
-    _previousAimNodePosition = _aimNode ? _aimNode->worldPosition() : glm::dvec3(0.0);
+void OrbitalNavigator::updatePreviousAimState() {
+    if (_aimNode) {
+        _previousAimNodePosition = _aimNode->worldPosition();
+    }
+    else {
+        _previousAimNodePosition = std::nullopt;
+    }
+}
+
+void OrbitalNavigator::updatePreviousStateVariables() {
+    updatePreviousAnchorState();
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -940,7 +954,6 @@ void OrbitalNavigator::startRetargetAim() {
     _cameraToSurfaceDistanceInterpolator.start();
 }
 
-
 float OrbitalNavigator::retargetInterpolationTime() const {
     return _retargetInterpolationTime;
 }
@@ -951,7 +964,7 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
 
 bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const
 {
-    if (!_anchorNode) {
+    if (!_anchorNode || !_followAnchorNodeRotation) {
         return false;
     }
 
@@ -1318,7 +1331,7 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
     _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _cameraToSurfaceDistanceInterpolator.step();
 
-    // Interpolate distance logarithmically.
+    // Interpolate distance logarithmically
     double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),

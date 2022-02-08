@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "OB Associations Textures",
   Type = "HttpSynchronization",
@@ -22,16 +18,16 @@ local object = {
     Type = "RenderableBillboardsCloud",
     Enabled = false,
     Color = { 1.0, 1.0, 1.0 },
-    ColorMap = speck .. "/ob.cmap",
+    ColorMap = speck .. "ob.cmap",
     ColorOption = { "arm" },
     SizeOption = { "diameter" },
     ExactColorMap = true,
     Opacity = 0.7,
-    File = speck .. "/ob.speck",
+    File = speck .. "ob.speck",
     Unit = "pc",
-    Texture = textures .. "/point4.png",
+    Texture = textures .. "point4.png",
     PolygonSides = 7,
-    LabelFile = speck .. "/ob.label",
+    LabelFile = speck .. "ob.label",
     TextColor = { 0.4, 0.5, 1.0 },
     ScaleFactor = 390.0,
     TextSize = 16.24,
@@ -56,15 +52,23 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset for OB Associations]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OBAssociations"}
+  License = "AMNH Digital Universe"
 }

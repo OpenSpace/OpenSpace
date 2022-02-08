@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -100,20 +100,17 @@ void LayerGroup::deinitialize() {
     }
 }
 
-int LayerGroup::update() {
+void LayerGroup::update() {
     ZoneScoped
 
-    int res = 0;
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
-            res += layer->update();
+            layer->update();
             _activeLayers.push_back(layer.get());
         }
     }
-
-    return res;
 }
 
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
@@ -151,14 +148,29 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 
     properties::PropertyOwner* layerGroup = ptr->owner();
     properties::PropertyOwner* layerManager = layerGroup->owner();
-    properties::PropertyOwner* globe = layerManager->owner();
-    properties::PropertyOwner* sceneGraphNode = globe->owner();
 
-    global::eventEngine->publishEvent<events::EventLayerAdded>(
-        sceneGraphNode->identifier(),
-        layerGroup->identifier(),
-        ptr->identifier()
-    );
+    // @TODO (emmbr, 2021-11-03) If the layer is added as part of the globe's
+    // dictionary during construction this function is called in the LayerManager's
+    // initialize function. This means that the layerManager does not exists yet, and
+    // we cannot find which SGN it belongs to... Want to avoid doing this check, so
+    // this should be fixed (probably as part of a cleanup/rewite of the LayerManager)
+    if (!layerManager) {
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            "", // we don't know this yet
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+    else {
+        properties::PropertyOwner* globe = layerManager->owner();
+        properties::PropertyOwner* sceneGraphNode = globe->owner();
+        global::eventEngine->publishEvent<events::EventLayerAdded>(
+            sceneGraphNode->identifier(),
+            layerGroup->identifier(),
+            ptr->identifier()
+        );
+    }
+
     return ptr;
 }
 
@@ -173,7 +185,6 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
-            _layers.erase(it);
             properties::PropertyOwner* layerGroup = it->get()->owner();
             properties::PropertyOwner* layerManager = layerGroup->owner();
             properties::PropertyOwner* globe = layerManager->owner();
@@ -183,6 +194,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
                 layerGroup->identifier(),
                 it->get()->identifier()
             );
+            _layers.erase(it);
             update();
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
@@ -200,16 +212,9 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
     LERROR("Could not find layer " + layerName);
 }
 
-void LayerGroup::moveLayers(int oldPosition, int newPosition) {
+void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     oldPosition = std::max(0, oldPosition);
-    newPosition = std::min(newPosition, static_cast<int>(_layers.size()));
-
-    // We need to adjust the new position as we first delete the old position, if this
-    // position is before the new position we have reduced the size of the vector by 1 and
-    // need to adapt where we want to put the value in
-    if (oldPosition < newPosition) {
-        newPosition -= 1;
-    }
+    newPosition = std::min(newPosition, static_cast<int>(_layers.size() - 1));
 
     // There are two synchronous vectors that we have to update here.  The _layers vector
     // is used to determine the order while rendering, the _subowners is the order in

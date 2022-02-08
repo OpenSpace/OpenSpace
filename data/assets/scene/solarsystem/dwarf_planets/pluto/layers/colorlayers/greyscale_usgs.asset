@@ -1,4 +1,4 @@
-local globeIdentifier = asset.require("./../../pluto").Pluto.Identifier
+local globeIdentifier = asset.require("../../pluto").Pluto.Identifier
 
 local layer = {
   Identifier = "Greyscale_USGS",
@@ -8,6 +8,10 @@ local layer = {
 
 asset.onInitialize(function () 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
@@ -20,10 +24,10 @@ asset.meta = {
     nearly all of the highest-resolution images obtained by the Long-Range
     Reconnaissance Imager (LORRI) and the Multispectral Visible Imaging Camera (MVIC)
     on New Horizons.The mosaic is the most detailed and comprehensive global view yet
-    of Pluto’s surface using New Horizons data. It includes topography data of the
-    hemisphere visible to New Horizons during the spacecraft’s closest approach. The
+    of Pluto's surface using New Horizons data. It includes topography data of the
+    hemisphere visible to New Horizons during the spacecraft's closest approach. The
     topography is derived from digital stereo-image mapping tools that measure the
-    parallax – or the difference in the apparent relative positions – of features on
+    parallax - or the difference in the apparent relative positions - of features on
     the surface obtained at different viewing angles during the encounter. Scientists
     use these parallax displacements of high and low terrain to estimate landform
     heights.The mosaic is available in Equirectangular projection at an equatorial 

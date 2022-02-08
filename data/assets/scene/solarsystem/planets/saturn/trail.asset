@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -25,15 +24,23 @@ local SaturnTrail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SaturnTrail })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SaturnTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SaturnTrail)
+end)
+  
+asset.export(SaturnTrail)
+
 
 
 asset.meta = {
   Name = "Saturn Trail",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Main trail of Saturn. Data from NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SaturnTrail"}
+  License = "MIT license"
 }

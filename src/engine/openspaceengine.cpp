@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,8 +51,8 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
-#include <openspace/scene/assetloader.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -77,6 +77,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
@@ -104,6 +105,16 @@ namespace {
     template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
+
+    constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
+        using Mode = openspace::OpenSpaceEngine::Mode;
+        switch (m) {
+            case Mode::UserControl: return "UserControl";
+            case Mode::CameraPath: return "CameraPath";
+            case Mode::SessionRecordingPlayback: return "SessionRecording";
+            default: throw ghoul::MissingCaseException();
+        }
+    }
 
     openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
@@ -387,8 +398,6 @@ void OpenSpaceEngine::initialize() {
 
         func();
     }
-
-    global::openSpaceEngine->_assetManager->initialize();
 
     LTRACE("OpenSpaceEngine::initialize(end)");
 }
@@ -693,12 +702,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(end)");
 }
 
-void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
-    _hasScheduledAssetLoading = true;
-    _scheduledAssetPathToLoad = std::move(assetPath);
-}
-
-void OpenSpaceEngine::loadAsset(const std::string& assetName) {
+void OpenSpaceEngine::loadAssets() {
     ZoneScoped
 
     LTRACE("OpenSpaceEngine::loadAsset(begin)");
@@ -757,10 +761,6 @@ void OpenSpaceEngine::loadAsset(const std::string& assetName) {
         );
     }
 
-    _assetManager->removeAll();
-    if (!assetName.empty()) {
-        _assetManager->add(assetName);
-    }
     for (const std::string& a : global::profile->assets) {
         _assetManager->add(a);
     }
@@ -768,51 +768,84 @@ void OpenSpaceEngine::loadAsset(const std::string& assetName) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    _assetManager->update();
+    bool loading = true;
+    while (true) {
+        _loadingScreen->render();
+        _assetManager->update();
 
-    _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
-    _loadingScreen->postMessage("Synchronizing assets");
+        std::vector<const Asset*> allAssets = _assetManager->allAssets();
 
-    std::vector<const Asset*> allAssets = _assetManager->rootAsset().subTreeAssets();
+        std::vector<const ResourceSynchronization*> allSyncs =
+            _assetManager->allSynchronizations();
 
-    std::unordered_set<ResourceSynchronization*> resourceSyncs;
-    for (const Asset* a : allAssets) {
-        std::vector<ResourceSynchronization*> syncs = a->ownSynchronizations();
-
-        for (ResourceSynchronization* s : syncs) {
+        for (const ResourceSynchronization* sync : allSyncs) {
             ZoneScopedN("Update resource synchronization")
 
-            if (s->state() == ResourceSynchronization::State::Syncing) {
+            if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = s->progress();
 
-                resourceSyncs.insert(s);
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                }(sync);
+
                 _loadingScreen->updateItem(
-                    s->name(),
-                    s->name(),
+                    sync->identifier(),
+                    sync->name(),
                     LoadingScreen::ItemStatus::Started,
                     progressInfo
                 );
             }
-        }
-    }
-    _loadingScreen->setItemNumber(static_cast<int>(resourceSyncs.size()));
 
-    bool loading = true;
-    while (loading) {
+            if (sync->isRejected()) {
+                _loadingScreen->updateItem(
+                    sync->identifier(), sync->name(), LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
+                );
+            }
+        }
+
+        _loadingScreen->setItemNumber(static_cast<int>(allSyncs.size()));
+
         if (_shouldAbortLoading) {
             global::windowDelegate->terminate();
             break;
         }
-        _loadingScreen->render();
-        _assetManager->update();
+
+        bool finishedLoading = std::all_of(
+            allAssets.begin(),
+            allAssets.end(),
+            [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
+        );
+
+        if (finishedLoading) {
+            break;
+        }
 
         loading = false;
-        auto it = resourceSyncs.begin();
-        while (it != resourceSyncs.end()) {
-            if ((*it)->state() == ResourceSynchronization::State::Syncing) {
+        auto it = allSyncs.begin();
+        while (it != allSyncs.end()) {
+            if ((*it)->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
-                progressInfo.progress = (*it)->progress();
+
+                progressInfo.progress = [](const ResourceSynchronization* sync) {
+                    if (!sync->nTotalBytesIsKnown()) {
+                        return 0.f;
+                    }
+                    if (sync->nTotalBytes() == 0) {
+                        return 1.f;
+                    }
+                    return
+                        static_cast<float>(sync->nSynchronizedBytes()) /
+                        static_cast<float>(sync->nTotalBytes());
+                }(*it);
 
                 if ((*it)->nTotalBytesIsKnown()) {
                     progressInfo.currentSize = (*it)->nSynchronizedBytes();
@@ -821,10 +854,17 @@ void OpenSpaceEngine::loadAsset(const std::string& assetName) {
 
                 loading = true;
                 _loadingScreen->updateItem(
-                    (*it)->name(),
+                    (*it)->identifier(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     progressInfo
+                );
+                ++it;
+            }
+            else if ((*it)->isRejected()) {
+                _loadingScreen->updateItem(
+                    (*it)->identifier(), (*it)->name(), LoadingScreen::ItemStatus::Failed,
+                    LoadingScreen::ProgressInfo()
                 );
                 ++it;
             }
@@ -834,12 +874,12 @@ void OpenSpaceEngine::loadAsset(const std::string& assetName) {
 
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
-                    (*it)->name(),
+                    (*it)->identifier(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     progressInfo
                 );
-                it = resourceSyncs.erase(it);
+                it = allSyncs.erase(it);
             }
         }
     }
@@ -1110,19 +1150,9 @@ void OpenSpaceEngine::preSynchronization() {
     // Reset the temporary, frame-based storage
     global::memoryManager->TemporaryMemory.reset();
 
-    if (_hasScheduledAssetLoading) {
-        LINFO(fmt::format("Loading asset: {}", absPath(_scheduledAssetPathToLoad)));
+    if (_isRenderingFirstFrame) {
         global::profile->ignoreUpdates = true;
-        loadAsset(_scheduledAssetPathToLoad);
-        global::profile->ignoreUpdates = false;
-        resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
-        _hasScheduledAssetLoading = false;
-        _scheduledAssetPathToLoad.clear();
-        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>();
-    }
-    else if (_isRenderingFirstFrame) {
-        global::profile->ignoreUpdates = true;
-        loadAsset("");
+        loadAssets();
         global::renderEngine->scene()->setPropertiesFromProfile(*global::profile);
         global::timeManager->setTimeFromProfile(*global::profile);
         global::timeManager->setDeltaTimeSteps(global::profile->deltaTimes);
@@ -1212,17 +1242,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdown.timer -= static_cast<float>(global::windowDelegate->averageDeltaTime());
     }
 
-    const bool updated = _assetManager->update();
-    if (updated) {
-        if (_writeDocumentationTask.valid()) {
-            // If there still is a documentation creation task the previous frame, we need
-            // to wait for it to finish first, or else we might write to the same file
-            _writeDocumentationTask.wait();
-        }
-        _writeDocumentationTask = std::async(
-            &OpenSpaceEngine::writeSceneDocumentation, this
-        );
-    }
+    _assetManager->update();
 
     global::renderEngine->updateScene();
     global::renderEngine->updateRenderer();
@@ -1595,6 +1615,39 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
 }
 
+OpenSpaceEngine::Mode OpenSpaceEngine::currentMode() const {
+    return _currentMode;
+}
+
+bool OpenSpaceEngine::setMode(Mode newMode) {
+    if (_currentMode == Mode::CameraPath && newMode == Mode::CameraPath) {
+        // Special case: It is okay to trigger another camera path while one is
+        // already playing. So just return that we were successful
+        return true;
+    }
+    else if (newMode == _currentMode) {
+        LERROR("Cannot switch to the currectly active mode");
+        return false;
+    }
+    else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {
+        LERROR(fmt::format(
+            "Cannot switch to mode '{}' when in '{}' mode",
+            stringify(newMode), stringify(_currentMode)
+        ));
+        return false;
+    }
+
+    LDEBUG(fmt::format("Mode: {}", stringify(newMode)));
+
+    _currentMode = newMode;
+    return true;
+}
+
+void OpenSpaceEngine::resetMode() {
+    _currentMode = Mode::UserControl;
+    LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
@@ -1742,7 +1795,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
-                {},
                 "",
                 "Toggles the shutdown mode that will close the application after the "
                 "count down timer is reached"
@@ -1750,21 +1802,18 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "writeDocumentation",
                 &luascriptfunctions::writeDocumentation,
-                {},
                 "",
                 "Writes out documentation files"
             },
             {
                 "downloadFile",
                 &luascriptfunctions::downloadFile,
-                {},
                 "",
                 "Downloads a file from Lua scope"
             },
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
-                {},
                 "type, name, identifier,"
                 "[description, value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
@@ -1772,42 +1821,36 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "removeVirtualProperty",
                 &luascriptfunctions::removeVirtualProperty,
-                {},
                 "string",
                 "Removes a previously added virtual property"
             },
             {
                 "removeAllVirtualProperties",
                 &luascriptfunctions::removeAllVirtualProperties,
-                {},
                 "",
                 "Remove all registered virtual properties"
             },
             {
                 "setScreenshotFolder",
                 &luascriptfunctions::setScreenshotFolder,
-                {},
                 "string",
                 "Sets the folder used for storing screenshots or session recording frames"
             },
             {
                 "addTag",
                 &luascriptfunctions::addTag,
-                {},
                 "string, string",
                 "Adds a tag (second argument) to a scene graph node (first argument)"
             },
             {
                 "removeTag",
                 &luascriptfunctions::removeTag,
-                {},
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             },
             {
                 "createSingleColorImage",
                 &luascriptfunctions::createSingleColorImage,
-                {},
                 "string, vec3",
                 "Creates a 1 pixel image with a certain color in the cache folder and "
                 "returns the path to the file. If a cached file with the given name "
@@ -1818,7 +1861,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "isMaster",
                 &luascriptfunctions::isMaster,
-                {},
                 "",
                 "Returns whether the current OpenSpace instance is the master node of a "
                 "cluster configuration. If this instance is not part of a cluster, this "

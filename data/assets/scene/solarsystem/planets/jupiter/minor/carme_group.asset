@@ -1,7 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
-local proceduralGlobes = asset.require('util/procedural_globe')
-local transforms = asset.require('../transforms')
-local kernel = asset.require('../kernels').jup341
+local proceduralGlobes = asset.require("util/procedural_globe")
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").jup341
 
 
 
@@ -276,10 +275,23 @@ local carmeGroup = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(
-  asset,
-  proceduralGlobes.createGlobes(carmeGroup)
-)
+local nodes = proceduralGlobes.createGlobes(carmeGroup)
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+  
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end
 
 
 asset.meta = {

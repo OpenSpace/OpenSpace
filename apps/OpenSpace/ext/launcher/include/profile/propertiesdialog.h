@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,6 +65,8 @@ private slots:
     void transitionToEditMode();
     void parseSelections();
 
+    void selectLineFromScriptLog();
+
 private:
     void createWidgets();
 
@@ -81,6 +83,8 @@ private:
     QListWidget* _list = nullptr;
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+
+    QPushButton* _fillFromScriptLog = nullptr;
     QLabel* _commandLabel = nullptr;
     QComboBox* _commandCombo = nullptr;
     QLabel* _propertyLabel = nullptr;

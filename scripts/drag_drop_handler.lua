@@ -33,6 +33,7 @@ local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') t
 
 if is_image_file(extension) then
   identifier = basename_without_extension:gsub(" ", "_")
+  identifier = identifier:gsub("%p", "_") -- replace all punctuation characters with '_'
   return [[openspace.addScreenSpaceRenderable({
     Identifier = "]] .. identifier .. [[",
     Type = "ScreenSpaceImageLocal",

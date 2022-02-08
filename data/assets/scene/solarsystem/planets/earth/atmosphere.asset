@@ -1,5 +1,4 @@
-local transforms = asset.require('./earth')
-local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require("./earth")
 
 
 
@@ -89,15 +88,23 @@ local Atmosphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Atmosphere)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Atmosphere)
+end)
+  
+asset.export(Atmosphere)
+
 
 
 asset.meta = {
   Name = "Earth Atmosphere",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableAtmosphere for Earth.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = { "EarthAtmosphere" }
+  License = "MIT license"
 }

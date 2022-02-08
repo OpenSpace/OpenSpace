@@ -1,4 +1,4 @@
-local marsAsset = asset.require("./../../mars").Mars
+local marsAsset = asset.require("../../mars").Mars
 local globeIdentifier = marsAsset.Identifier
 
 local layer ={
@@ -8,8 +8,23 @@ local layer ={
   Radii = marsAsset.Renderable.Radii
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "Overlays", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "Overlays", layer)
+end)
+
 asset.export("layer", layer)
+
+
+
+asset.meta = {
+  Name = "Mars Size Reference",
+  Version = "1.0",
+  Description = [[ This asset supplies a size reference layer for the Mars globe.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
