@@ -34,7 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
-
+#include <ghoul/filesystem/filesystem.h>
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
@@ -122,7 +122,7 @@ bool ScreenSpaceBrowser::initializeGL() {
     createShaders();
 
     _browserInstance->initialize();
-    _browserInstance->loadUrl(_url);
+    _browserInstance->loadUrl(absPath(_url).string());
     return isReady();
 }
 
@@ -164,7 +164,7 @@ void ScreenSpaceBrowser::update() {
     _objectSize = _texture->dimensions();
 
     if (_isUrlDirty) {
-        _browserInstance->loadUrl(_url);
+        _browserInstance->loadUrl(absPath(_url).string());
         _isUrlDirty = false;
     }
 
