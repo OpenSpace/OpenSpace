@@ -110,7 +110,7 @@ linux_gcc_make: {
           cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-DGLM_ENABLE_EXPERIMENTAL"';
           cmakeCompileOptions += ' -DOpenGL_GL_PREFERENCE:STRING=GLVND -DASSIMP_BUILD_MINIZIP=1';
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
       stage('linux-gcc-make/test') {
@@ -132,7 +132,7 @@ linux_gcc_ninja: {
           def cmakeCompileOptions = moduleCMakeFlags();
           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-gcc-ninja/test') {
         testHelper.runUnitTests('bin/OpenSpaceTest');
@@ -153,7 +153,7 @@ linux_clang_make: {
           def cmakeCompileOptions = moduleCMakeFlags()
           cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Clang());
       }
       stage('linux-clang-make/test') {
@@ -175,7 +175,7 @@ linux_clang_ninja: {
           def cmakeCompileOptions = moduleCMakeFlags()
           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
       }
       stage('linux-clang-ninja/test') {
         testHelper.runUnitTests('bin/OpenSpaceTest');
