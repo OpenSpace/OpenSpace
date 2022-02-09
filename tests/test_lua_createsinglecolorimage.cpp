@@ -49,7 +49,7 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
     std::string path = ghoul::lua::value<std::string>(L, 1);
     CHECK_THAT(
         path,
-        Catch::Matchers::Contains("cache\\colorFile.ppm")
+        Catch::Matchers::Contains("colorFile.ppm")
     );
 }
 
