@@ -35,7 +35,7 @@
 #include <json/json.hpp>
 
 namespace openspace {
-        bool operator==(const openspace::Profile::Version& lhs,
+    bool operator==(const openspace::Profile::Version& lhs,
                     const openspace::Profile::Version& rhs) noexcept
     {
         return lhs.major == rhs.major && lhs.minor == rhs.minor;
@@ -129,6 +129,11 @@ namespace openspace {
                lhs.additionalScripts == rhs.additionalScripts &&
                lhs.ignoreUpdates == rhs.ignoreUpdates;
     }
+
+    std::ostream& operator<<(std::ostream& os, const openspace::Profile& profile) {
+        os << profile.serialize();
+        return os;
+    }
 } // namespace openspace
 
 using namespace openspace;
@@ -158,8 +163,6 @@ namespace {
         );
         return content;
     }
-
-
 } // namespace
 
 //
@@ -172,7 +175,7 @@ TEST_CASE("Minimal", "[profile]") {
 
     Profile ref;
     ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version.minor = 1;
     CHECK(profile == ref);
 }
 
@@ -184,8 +187,7 @@ TEST_CASE("Basic Meta (full)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
     
     Profile::Meta meta;
     meta.name = "name";
@@ -204,8 +206,7 @@ TEST_CASE("Basic Meta (empty)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     ref.meta = meta;
@@ -218,8 +219,7 @@ TEST_CASE("Basic Meta (no name)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.version = "version";
@@ -237,8 +237,7 @@ TEST_CASE("Basic Meta (no version)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.name = "name";
@@ -256,8 +255,7 @@ TEST_CASE("Basic Meta (no description)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.name = "name";
@@ -275,8 +273,7 @@ TEST_CASE("Basic Meta (no author)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.name = "name";
@@ -294,8 +291,7 @@ TEST_CASE("Basic Meta (no url)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.name = "name";
@@ -313,8 +309,7 @@ TEST_CASE("Basic Meta (no license)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Meta meta;
     meta.name = "name";
@@ -332,8 +327,7 @@ TEST_CASE("Basic Module", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     {
         Profile::Module m;
@@ -368,8 +362,7 @@ TEST_CASE("Basic Assets", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     ref.assets.push_back("folder1/folder2/asset");
     ref.assets.push_back("folder3/folder4/asset2");
@@ -383,8 +376,7 @@ TEST_CASE("Basic Properties", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     {
         Profile::Property p;
@@ -437,8 +429,7 @@ TEST_CASE("Basic Keybindings", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 1;
+    ref.version = Profile::CurrentVersion;
 
     {
         Profile::Action a;
@@ -494,8 +485,7 @@ TEST_CASE("Basic Time Relative", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Time time;
     time.type = Profile::Time::Type::Relative;
@@ -510,8 +500,7 @@ TEST_CASE("Basic Time Absolute", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::Time time;
     time.type = Profile::Time::Type::Absolute;
@@ -526,8 +515,7 @@ TEST_CASE("Basic Delta Times", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     ref.deltaTimes.push_back(1.0);
     ref.deltaTimes.push_back(30.0);
@@ -543,8 +531,7 @@ TEST_CASE("Basic Camera NavState (full)", "[profile]") {
     Profile profile = loadProfile(File);
 
     Profile ref;
-    ref.version.major = 1;
-    ref.version.minor = 0;
+    ref.version = Profile::CurrentVersion;
 
     Profile::CameraNavState camera;
     camera.anchor = "none";
@@ -562,86 +549,143 @@ TEST_CASE("Basic Camera NavState (full)", "[profile]") {
 TEST_CASE("Basic Camera NavState (no aim)", "[profile]") {
     constexpr const char* File =
         "${TESTDIR}/profile/basic/camera_navstate_no_aim.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraNavState camera;
+    camera.anchor = "none";
+    camera.referenceFrame = "root";
+    camera.position = glm::dvec3(1.0, 2.0, 3.0);
+    camera.up = glm::dvec3(4.0, 5.0, 6.0);
+    camera.yaw = 10.0;
+    camera.pitch = -10.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera NavState (no pitch)", "[profile]") {
     constexpr const char* File =
         "${TESTDIR}/profile/basic/camera_navstate_no_pitch.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraNavState camera;
+    camera.anchor = "none";
+    camera.aim = "aim";
+    camera.referenceFrame = "root";
+    camera.position = glm::dvec3(1.0, 2.0, 3.0);
+    camera.up = glm::dvec3(4.0, 5.0, 6.0);
+    camera.yaw = 10.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera NavState (no up)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/camera_navstate_no_up.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraNavState camera;
+    camera.anchor = "none";
+    camera.aim = "aim";
+    camera.referenceFrame = "root";
+    camera.position = glm::dvec3(1.0, 2.0, 3.0);
+    camera.yaw = 10.0;
+    camera.pitch = -10.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera NavState (no yaw)", "[profile]") {
     constexpr const char* File =
         "${TESTDIR}/profile/basic/camera_navstate_no_yaw.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraNavState camera;
+    camera.anchor = "none";
+    camera.aim = "aim";
+    camera.referenceFrame = "root";
+    camera.position = glm::dvec3(1.0, 2.0, 3.0);
+    camera.up = glm::dvec3(4.0, 5.0, 6.0);
+    camera.pitch = -10.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera GoToGeo (full)", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/camera_gotogeo.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraGoToGeo camera;
+    camera.anchor = "anchor";
+    camera.latitude = 1.0;
+    camera.longitude = 2.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Camera GoToGeo (with altitude)", "[profile]") {
     constexpr const char* File =
         "${TESTDIR}/profile/basic/camera_gotogeo_altitude.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::CameraGoToGeo camera;
+    camera.anchor = "anchor";
+    camera.latitude = 1.0;
+    camera.longitude = 2.0;
+    camera.altitude = 4.0;
+    ref.camera = camera;
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Mark Nodes", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/basic/mark_nodes.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    ref.markNodes.push_back("node-1");
+    ref.markNodes.push_back("node-2");
+    ref.markNodes.push_back("node-3");
+
+    CHECK(profile == ref);
 }
 
 TEST_CASE("Basic Additional Scripts", "[profile]") {
     constexpr const char* File =
         "${TESTDIR}/profile/basic/additional_scripts.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    ref.additionalScripts.push_back("script-1");
+    ref.additionalScripts.push_back("script-2");
+    ref.additionalScripts.push_back("script-3");
+
+    CHECK(profile == ref);
 }
 
 //
@@ -649,181 +693,289 @@ TEST_CASE("Basic Additional Scripts", "[profile]") {
 //
 TEST_CASE("Integration Full Test", "[profile]") {
     constexpr const char* File = "${TESTDIR}/profile/integration/full_test.profile";
-    Profile p = loadProfile(File);
+    Profile profile = loadProfile(File);
 
-    std::string serialized = p.serialize();
-    std::string contents = loadFile(File);
+    Profile ref;
+    ref.version = Profile::CurrentVersion;
 
-    CHECK(nlohmann::json::parse(serialized) == nlohmann::json::parse(contents));
+    Profile::Meta meta;
+    meta.name = "name";
+    meta.version = "version";
+    meta.description = "description";
+    meta.author = "author";
+    meta.url = "url";
+    meta.license = "license";
+    ref.meta = meta;
+
+    {
+        Profile::Module m;
+        m.name = "abs-module";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "def-module";
+        m.loadedInstruction = "instr";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "ghi-module";
+        m.notLoadedInstruction = "not_instr";
+        ref.modules.push_back(m);
+    }
+    {
+        Profile::Module m;
+        m.name = "jkl-module";
+        m.loadedInstruction = "instr";
+        m.notLoadedInstruction = "not_instr";
+        ref.modules.push_back(m);
+    }
+
+    ref.assets.push_back("scene/solarsystem/planets/earth/earth");
+    ref.assets.push_back("scene/solarsystem/planets/earth/satellites/satellites");
+    ref.assets.push_back("folder1/folder2/asset");
+    ref.assets.push_back("folder3/folder4/asset2");
+    ref.assets.push_back("folder5/folder6/asset3");
+
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "{earth_satellites}.Renderable.Enabled";
+        p.value = "false";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_1";
+        p.value = "property_value_1";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_2";
+        p.value = "property_value_2";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValue;
+        p.name = "property_name_3";
+        p.value = "property_value_3";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_4";
+        p.value = "property_value_4";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_5";
+        p.value = "property_value_5";
+        ref.properties.push_back(p);
+    }
+    {
+        Profile::Property p;
+        p.setType = Profile::Property::SetType::SetPropertyValueSingle;
+        p.name = "property_name_6";
+        p.value = "property_value_6";
+        ref.properties.push_back(p);
+    }
+
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.0";
+        a.documentation = "T documentation";
+        a.name = "T name";
+        a.guiPath = "T Gui-Path";
+        a.isLocal = true;
+        a.script = "T script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.0";
+        k.key = { Key::T, KeyModifier::None };
+        ref.keybindings.push_back(k);
+    }
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.1";
+        a.documentation = "U documentation";
+        a.name = "U name";
+        a.guiPath = "U Gui-Path";
+        a.isLocal = false;
+        a.script = "U script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.1";
+        k.key = { Key::U, KeyModifier::None };
+        ref.keybindings.push_back(k);
+    }
+    {
+        Profile::Action a;
+        a.identifier = "profile.keybind.2";
+        a.documentation = "CTRL+V documentation";
+        a.name = "CTRL+V name";
+        a.guiPath = "CTRL+V Gui-Path";
+        a.isLocal = false;
+        a.script = "CTRL+V script";
+        ref.actions.push_back(a);
+
+        Profile::Keybinding k;
+        k.action = "profile.keybind.2";
+        k.key = { Key::V, KeyModifier::Control };
+        ref.keybindings.push_back(k);
+    }
+
+    Profile::Time time;
+    time.type = Profile::Time::Type::Relative;
+    time.value = "-1d";
+    ref.time = time;
+
+    Profile::CameraGoToGeo camera;
+    camera.anchor = "Earth";
+    camera.latitude = 58.5877;
+    camera.longitude = 16.1924;
+    camera.altitude = 2.0e+07;
+    ref.camera = camera;
+
+    ref.markNodes.push_back("Earth");
+    ref.markNodes.push_back("Mars");
+    ref.markNodes.push_back("Moon");
+    ref.markNodes.push_back("Sun");
+
+    ref.additionalScripts.push_back("script-1");
+    ref.additionalScripts.push_back("script-2");
+    ref.additionalScripts.push_back("script-3");
+
+    CHECK(profile == ref);
 }
 
 //
 // Adding assets
 //
 TEST_CASE("Add asset to empty Profile", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 10;
-    source["version"]["minor"] = 11;
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    Profile p(source.dump());
-    p.addAsset("new-asset");
-    std::string originalSerialized = p.serialize();
+    profile.addAsset("new-asset");
 
-    nlohmann::json target = source;
-    target["assets"] = nlohmann::json::array();
-    target["assets"].push_back("new-asset");
-    std::string targetSerialized(Profile(target.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "new-asset");
 }
 
 TEST_CASE("Add asset to empty Profile (ignored)", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 10;
-    source["version"]["minor"] = 11;
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    Profile p(source.dump());
-    p.ignoreUpdates = true;
-    p.addAsset("new-asset");
-    std::string originalSerialized = p.serialize();
+    profile.ignoreUpdates = true;
+    profile.addAsset("new-asset");
 
-    std::string targetSerialized(Profile(source.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    CHECK(profile.assets.size() == 0);
 }
 
 TEST_CASE("Add asset to not-empty Profile", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 10;
-    source["version"]["minor"] = 11;
-    source["assets"] = nlohmann::json::array();
-    source["assets"].push_back("old-asset");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
+    profile.assets.push_back("old-asset");
 
-    Profile p(source.dump());
-    p.addAsset("new-asset");
-    std::string originalSerialized = p.serialize();
+    profile.addAsset("new-asset");
 
-    nlohmann::json target = source;
-    target["assets"].push_back("new-asset");
-    std::string targetSerialized(Profile(target.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    REQUIRE(profile.assets.size() == 2);
+    CHECK(profile.assets[0] == "old-asset");
+    CHECK(profile.assets[1] == "new-asset");
 }
 
 TEST_CASE("Add asset to not-empty Profile (ignored)", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 10;
-    source["version"]["minor"] = 11;
-    source["assets"] = nlohmann::json::array();
-    source["assets"].push_back("old-asset");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
+    profile.assets.push_back("old-asset");
 
-    Profile p(source.dump());
-    p.ignoreUpdates = true;
-    p.addAsset("new-asset");
-    std::string originalSerialized = p.serialize();
+    profile.ignoreUpdates = true;
+    profile.addAsset("new-asset");
 
-    std::string targetSerialized(Profile(source.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "old-asset");
 }
 
 TEST_CASE("Add duplicate asset", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 10;
-    source["version"]["minor"] = 11;
-    source["assets"] = nlohmann::json::array();
-    source["assets"].push_back("old-asset");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    Profile p(source.dump());
-    p.addAsset("new-asset");
-    p.addAsset("new-asset");
-    std::string originalSerialized = p.serialize();
+    profile.addAsset("new-asset");
+    profile.addAsset("new-asset");
 
-    nlohmann::json targetSource = source;
-    targetSource["assets"].push_back("new-asset");
-    std::string targetSerialized(Profile(targetSource.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "new-asset");
 }
 
 //
 // Removing assets
 //
 TEST_CASE("Remove asset", "[profile]") {
-    nlohmann::json target;
-    target["version"] = nlohmann::json::object();
-    target["version"]["major"] = 99;
-    target["version"]["minor"] = 88;
-    target["assets"] = nlohmann::json::array();
-    target["assets"].push_back("asset1");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    nlohmann::json source = target;
-    source["assets"].push_back("asset2");
+    profile.addAsset("asset1");
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "asset1");
 
-    Profile p(source.dump());
-    p.removeAsset("asset2");
-    std::string originalSerialized = p.serialize();
+    profile.addAsset("asset2");
+    REQUIRE(profile.assets.size() == 2);
+    CHECK(profile.assets[0] == "asset1");
+    CHECK(profile.assets[1] == "asset2");
 
-    std::string targetSerialized(Profile(target.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    profile.removeAsset("asset2");
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "asset1");
 }
 
 TEST_CASE("Remove asset (ignored)", "[profile]") {
-    nlohmann::json target;
-    target["version"] = nlohmann::json::object();
-    target["version"]["major"] = 99;
-    target["version"]["minor"] = 88;
-    target["assets"] = nlohmann::json::array();
-    target["assets"].push_back("asset1");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    nlohmann::json source = target;
-    source["assets"].push_back("asset2");
+    profile.addAsset("asset1");
+    REQUIRE(profile.assets.size() == 1);
+    CHECK(profile.assets[0] == "asset1");
 
+    profile.addAsset("asset2");
+    REQUIRE(profile.assets.size() == 2);
+    CHECK(profile.assets[0] == "asset1");
+    CHECK(profile.assets[1] == "asset2");
 
-    Profile p(source.dump());
-    p.ignoreUpdates = true;
-    p.removeAsset("asset2");
-    std::string originalSerialized = p.serialize();
-
-    std::string targetSerialized(Profile(source.dump()).serialize());
-
-    CHECK(originalSerialized == targetSerialized);
+    profile.ignoreUpdates = true;
+    profile.removeAsset("asset2");
+    REQUIRE(profile.assets.size() == 2);
+    CHECK(profile.assets[0] == "asset1");
+    CHECK(profile.assets[1] == "asset2");
 }
 
 TEST_CASE("Removing non-exisiting asset", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 66;
-    source["version"]["minor"] = 67;
-    source["assets"] = nlohmann::json::array();
-    source["assets"].push_back("asset1");
-    source["assets"].push_back("asset3");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    Profile p(source.dump());
-    CHECK_THROWS_WITH(
-        p.removeAsset("unknown-asset"),
-        Catch::Matchers::Contains("Tried to remove non-existing asset 'unknown-asset'")
-    );
+    profile.assets.push_back("asset1");
+    profile.assets.push_back("asset3");
+
+    CHECK_NOTHROW(profile.removeAsset("unknown-asset"));
 }
 
 TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 66;
-    source["version"]["minor"] = 67;
-    source["assets"] = nlohmann::json::array();
-    source["assets"].push_back("asset1");
-    source["assets"].push_back("asset3");
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
 
-    Profile p(source.dump());
-    p.ignoreUpdates = true;
-    CHECK_NOTHROW(p.removeAsset("unknown-asset"));
+    profile.assets.push_back("asset1");
+    profile.assets.push_back("asset3");
+
+    profile.ignoreUpdates = true;
+    CHECK_NOTHROW(profile.removeAsset("unknown-asset"));
 }
 
 //
@@ -848,48 +1000,38 @@ TEST_CASE("Save settings to profile", "[profile]") {
     state.yaw = -1.0;
     state.pitch = -2.0;
 
-    nlohmann::json source;
-    source["version"] = nlohmann::json::object();
-    source["version"]["major"] = 1;
-    source["version"]["minor"] = 0;
-    Profile p(source.dump());
-    p.saveCurrentSettingsToProfile(owner, "current-time", state);
-    std::string serialized = p.serialize();
+    Profile profile;
+    profile.version = Profile::CurrentVersion;
+    profile.saveCurrentSettingsToProfile(owner, "current-time", state);
 
-    nlohmann::json properties = nlohmann::json::array();
-    properties.push_back({
-        { "type", "setPropertyValueSingle" },
-        { "name", "base.p1" },
-        { "value", "2.000000" }
-    });
-    properties.push_back({
-        { "type", "setPropertyValueSingle" },
-        { "name", "base.p2" },
-        { "value", "\"test-string\"" }
-    });
+    REQUIRE(profile.properties.size() == 2);
+    CHECK(
+        profile.properties[0].setType ==
+        Profile::Property::SetType::SetPropertyValueSingle
+    );
+    CHECK(profile.properties[0].name == "base.p1");
+    CHECK(profile.properties[0].value == "2.000000");
+    CHECK(
+        profile.properties[1].setType ==
+        Profile::Property::SetType::SetPropertyValueSingle
+    );
+    CHECK(profile.properties[1].name == "base.p2");
+    CHECK(profile.properties[1].value == "\"test-string\"");
 
-    const nlohmann::json camera = {
-        { "type", "setNavigationState" },
-        { "anchor", "anchor" },
-        { "aim", "aim" },
-        { "frame", "refFrame" },
-        { "position", { { "x", 1.0 }, { "y", 2.0 }, { "z", 3.0 } } },
-        { "up", { { "x", 4.0 }, { "y", 5.0 }, { "z", 6.0 } } },
-        { "yaw", -1.0 },
-        { "pitch", -2.0 }
-    };
-    const nlohmann::json time = {
-        { "type", "absolute" } ,
-        { "value", "current-time" }
-    };
-    nlohmann::json target = source;
-    target["properties"] = properties;
-    target["camera"] = camera;
-    target["time"] = time;
+    REQUIRE(profile.camera.has_value());
+    REQUIRE(std::holds_alternative<Profile::CameraNavState>(*profile.camera));
+    Profile::CameraNavState camera = std::get<Profile::CameraNavState>(*profile.camera);
+    CHECK(camera.anchor == "anchor");
+    CHECK(camera.aim == "aim");
+    CHECK(camera.referenceFrame == "refFrame");
+    CHECK(camera.position == glm::dvec3(1.0, 2.0, 3.0));
+    CHECK(camera.up == glm::dvec3(4.0, 5.0, 6.0));
+    CHECK(camera.yaw == -1.0);
+    CHECK(camera.pitch == -2.0);
 
-    std::string targetSerialized = Profile(target.dump()).serialize();
-
-    CHECK(serialized == targetSerialized);
+    REQUIRE(profile.time.has_value());
+    CHECK(profile.time->type == Profile::Time::Type::Absolute);
+    CHECK(profile.time->value == "current-time");
 }
 
 //

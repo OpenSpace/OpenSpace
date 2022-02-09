@@ -63,14 +63,6 @@ TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]")
     CHECK(p.value() == std::set<std::string>{ "a" });
 }
 
-TEST_CASE("SelectionProperty: Set Value - No Options", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
-
-    p.setValue({ "a" });
-
-    CHECK(p.value() == std::set<std::string>());
-}
-
 TEST_CASE("SelectionProperty: Set Value - Duplicates", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
