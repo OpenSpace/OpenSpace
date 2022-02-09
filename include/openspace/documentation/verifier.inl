@@ -452,139 +452,160 @@ std::string TemplateVerifier<T>::documentation() const {
     return "Value of type '" + type() + "'";
 }
 
-template <>
-std::string Vector2Verifier<int>::type() const {
-    return "Vector2<int>";
-}
-
-template <>
-std::string Vector2Verifier<double>::type() const {
-    return "Vector2<double>";
-}
-
 template <typename T>
 std::string Vector2Verifier<T>::type() const {
-    return std::string("Vector2<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Vector3Verifier<int>::type() const {
-    return "Vector3<int>";
-}
-
-template <>
-std::string Vector3Verifier<double>::type() const {
-    return "Vector3<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Vector2<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Vector2<double>";
+    }
+    else {
+        return std::string("Vector2<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Vector3Verifier<T>::type() const {
-    return std::string("Vector3<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Vector4Verifier<int>::type() const {
-    return "Vector4<int>";
-}
-
-template <>
-std::string Vector4Verifier<double>::type() const {
-    return "Vector4<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Vector3<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Vector3<double>";
+    }
+    else {
+        return std::string("Vector3<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Vector4Verifier<T>::type() const {
-    return std::string("Vector4<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix2x2Verifier<double>::type() const {
-    return "Matrix2x2<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Vector4<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Vector4<double>";
+    }
+    else {
+        return std::string("Vector4<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix2x2Verifier<T>::type() const {
-    return std::string("Matrix2x2<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix2x3Verifier<double>::type() const {
-    return "Matrix2x3<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix2x2<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix2x2<double>";
+    }
+    else {
+        return std::string("Matrix2x2<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix2x3Verifier<T>::type() const {
-    return std::string("Matrix2x3<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix2x4Verifier<double>::type() const {
-    return "Matrix2x4<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix2x3<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix2x3<double>";
+    }
+    else {
+        return std::string("Matrix2x3<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix2x4Verifier<T>::type() const {
-    return std::string("Matrix2x4<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix3x2Verifier<double>::type() const {
-    return "Matrix3x2<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix2x4<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix2x4<double>";
+    }
+    else {
+        return std::string("Matrix2x4<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix3x2Verifier<T>::type() const {
-    return std::string("Matrix3x2<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix3x3Verifier<double>::type() const {
-    return "Matrix3x3<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix3x2<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix3x2<double>";
+    }
+    else {
+        return std::string("Matrix3x2<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix3x3Verifier<T>::type() const {
-    return std::string("Matrix3x3<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix3x4Verifier<double>::type() const {
-    return "Matrix3x4<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix3x3<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix3x3<double>";
+    }
+    else {
+        return std::string("Matrix3x3<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix3x4Verifier<T>::type() const {
-    return std::string("Matrix3x4<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix4x2Verifier<double>::type() const {
-    return "Matrix4x2<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix3x4<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix3x4<double>";
+    }
+    else {
+        return std::string("Matrix3x4<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix4x2Verifier<T>::type() const {
-    return std::string("Matrix4x2<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix4x3Verifier<double>::type() const {
-    return "Matrix4x3<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix4x2<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix4x2<double>";
+    }
+    else {
+        return std::string("Matrix4x2<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix4x3Verifier<T>::type() const {
-    return std::string("Matrix4x3<") + typeid(T).name() + ">";
-}
-
-template <>
-std::string Matrix4x4Verifier<double>::type() const {
-    return "Matrix4x4<double>";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix4x3<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix4x3<double>";
+    }
+    else {
+        return std::string("Matrix4x3<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T>
 std::string Matrix4x4Verifier<T>::type() const {
-    return std::string("Matrix4x4<") + typeid(T).name() + ">";
+    if constexpr (std::is_same_v<T, int>) {
+        return "Matrix4x4<int>";
+    }
+    else if constexpr (std::is_same_v<T, double>) {
+        return "Matrix4x4<double>";
+    }
+    else {
+        return std::string("Matrix4x4<") + typeid(T).name() + ">";
+    }
 }
 
 template <typename T, typename Operator>
