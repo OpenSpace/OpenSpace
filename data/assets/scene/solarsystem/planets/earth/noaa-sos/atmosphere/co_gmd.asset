@@ -53,13 +53,13 @@ local colorbar = {
 
 asset.onInitialize(function() 
   if not openspace.directoryExists(imagesDestination) then
-    openspace.printError([[This layer includes files too large to be extracted by
-OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the 3600.zip file such that
-the ']] .. imagesDestination .. [[' folder exists and contains many images]])
-]])
-
-    -- openspace.printInfo("Extracting " .. Name)
-    -- openspace.unzipFile(syncedDirectory .. "3600.zip", imagesDestination, true)
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "3600-1.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "3600-2.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "3600-3.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "3600-4.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "3600-5.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "3600-6.zip", imagesDestination, true)
   end
   
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

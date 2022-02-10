@@ -65,8 +65,8 @@ local label = {
 }
 
 local label1 = {
-  Identifier = Identifier .. "-1",
-  Name = Name .. "(1)",
+  Identifier = Identifier .. "-alt",
+  Name = Name .. " (alt)",
   Type = "ScreenSpaceImageLocal",
   Enabled = false,
   TexturePath = syncedDirectory .. "forest_label1.png",

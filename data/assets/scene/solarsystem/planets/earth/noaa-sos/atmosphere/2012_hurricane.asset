@@ -30,7 +30,7 @@ local satDestination = syncedDirectory .. "sat"
 
 local layer_names = {
   Identifier = Identifier .. "-names",
-  Name = Name .. "(Names)",
+  Name = Name .. " (Names)",
   Type = "ImageSequenceTileLayer",
   FolderPath = namesDestination,
   Description = Description
@@ -38,7 +38,7 @@ local layer_names = {
 
 local layer_sat = {
   Identifier = Identifier .. "-sat",
-  Name = Name .. "(Sat)",
+  Name = Name .. " (Satellites)",
   Type = "TemporalTileLayer",
   Mode = "Folder",
   Folder = {
@@ -57,13 +57,11 @@ asset.onInitialize(function()
   end
 
   if not openspace.directoryExists(satDestination) then
-    openspace.printError([[This layer includes files too large to be extracted by
-OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the sat.zip file such that
-the ']] .. satDestination .. [[' folder exists and contains many images]])
-]])  
-
-    -- openspace.printInfo("Extracting " .. Name)
-    -- openspace.unzipFile(syncedDirectory .. "sat.zip", satDestination, true)
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "sat-1.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-2.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-3.zip", satDestination, true)
+    openspace.unzipFile(syncedDirectory .. "sat-4.zip", satDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_names)

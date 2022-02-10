@@ -38,13 +38,33 @@ local layer = {
 
 asset.onInitialize(function() 
   if not openspace.directoryExists(imagesDestination) then
-    openspace.printError([[This layer includes files too large to be extracted by
-OpenSpace. Go to ']] .. syncedDirectory .. [[' and extract the 4000.zip file such that
-the ']] .. imagesDestination .. [[' folder exists and contains many images]])
-]])
-
-    -- openspace.printInfo("Extracting " .. Name)
-    -- openspace.unzipFile(syncedDirectory .. "4000.zip", imagesDestination, true)
+    openspace.printInfo("Extracting " .. Name)
+    openspace.unzipFile(syncedDirectory .. "4000-1.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-2.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-3.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-4.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-5.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-6.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-7.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-8.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-9.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-10.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-11.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-12.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-13.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-14.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-15.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-16.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-17.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-18.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-19.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-20.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-21.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-22.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-23.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-24.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-25.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4000-26.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

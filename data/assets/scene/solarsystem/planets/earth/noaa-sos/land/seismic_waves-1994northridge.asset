@@ -21,8 +21,8 @@ local syncedDirectory = asset.syncedResource({
   Version = 1
 })
 
-local imagesDestination = syncedDirectory .. "images/"
-local pipsDestination = syncedDirectory .. "pips/"
+local imagesDestination = syncedDirectory .. "images"
+local pipsDestination = syncedDirectory .. "pips"
 
 local layer_base = {
   Identifier = Identifier,
@@ -51,7 +51,7 @@ local pips = {
   Name = Name,
   Type = "ScreenSpaceImageLocal",
   -- @TODO:  We need a temporal provider for ScreenSpaceImages to handle this
-  TexturePath = pipsDestination .. "0002.png",
+  TexturePath = pipsDestination .. "/0002.png",
   Enabled = false,
   FaceCamera = false,
   CartesianPosition = { 0.75, 0.0, -2.0 }

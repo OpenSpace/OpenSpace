@@ -286,10 +286,9 @@ int directoryForPath(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
- * This function extracts the contents of a zip file. The first
- * argument is the path to the zip file. The second argument is the
- * directory where to put the extracted files. If the third argument is
- * true, the compressed file will be deleted after the decompression
+ * This function extracts the contents of a zip file. The first argument is the path to
+ * the zip file. The second argument is the directory where to put the extracted files. If
+ * the third argument is true, the compressed file will be deleted after the decompression
  * is finished.
  */
 int unzipFile(lua_State* L) {

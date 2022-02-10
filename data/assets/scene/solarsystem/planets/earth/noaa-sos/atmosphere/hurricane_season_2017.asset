@@ -42,7 +42,10 @@ local layer = {
 asset.onInitialize(function() 
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "4096.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4096-1.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4096-2.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4096-3.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "4096-4.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

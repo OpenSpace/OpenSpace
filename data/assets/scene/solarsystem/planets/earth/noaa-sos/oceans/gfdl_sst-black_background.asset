@@ -48,7 +48,8 @@ local colorbar = {
 asset.onInitialize(function()
   if not openspace.directoryExists(imagesDestination) then
     openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "2048_png.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "2048_png-1.zip", imagesDestination, true)
+    openspace.unzipFile(syncedDirectory .. "2048_png-2.zip", imagesDestination, true)
   end
 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)

@@ -38,8 +38,8 @@ local legend = {
 }
 
 local legend1 = {
-  Identifier = Identifier .. "-1",
-  Name = Name .. "(1)",
+  Identifier = Identifier .. "-alt",
+  Name = Name .. " (alt)",
   Type = "ScreenSpaceImageLocal",
   TexturePath = syncedDirectory .. "legend2.png",
   FaceCamera = false,

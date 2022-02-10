@@ -36,7 +36,7 @@ local layer_base = {
 
 local layer_all = {
   Identifier = Identifier .. "-all",
-  Name = Name .. "(All)",
+  Name = Name .. " (All)",
   FilePath = syncedDirectory .. "all_earthquakes.png",
   Description = Description
 }
