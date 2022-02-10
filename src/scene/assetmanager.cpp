@@ -619,7 +619,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 exportName = identifier;
                 targetLocation = 1;
             }
-            
+
             if (n == 2) {
                 exportName = ghoul::lua::value<std::string>(
                     L,
