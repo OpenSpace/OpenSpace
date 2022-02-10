@@ -310,11 +310,6 @@ void GUI::initializeGL() {
     for (GuiComponent* comp : _components) {
         comp->initialize();
     }
-    _sceneProperty.setHasRegularProperties(true);
-    _screenSpaceProperty.setHasRegularProperties(true);
-    _globalProperty.setHasRegularProperties(true);
-    _moduleProperty.setHasRegularProperties(true);
-    _featuredProperties.setHasRegularProperties(true);
 
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",

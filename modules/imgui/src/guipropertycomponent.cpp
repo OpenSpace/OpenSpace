@@ -202,10 +202,6 @@ void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibi
     _visibility = visibility;
 }
 
-void GuiPropertyComponent::setHasRegularProperties(bool hasOnlyRegularProperties) {
-    _hasOnlyRegularProperties = hasOnlyRegularProperties;
-}
-
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     using namespace properties;
 
@@ -472,8 +468,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                                           properties::PropertyOwner* owner)
 {
     using Func = std::function<
-        void(properties::Property*, const std::string&, IsRegularProperty, ShowToolTip,
-             double)
+        void(properties::Property*, const std::string&, ShowToolTip, double)
     >;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
@@ -512,7 +507,6 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                 it->second(
                     prop,
                     owner->identifier(),
-                    IsRegularProperty(_hasOnlyRegularProperties),
                     ShowToolTip(_showHelpTooltip),
                     _tooltipDelay
                 );
@@ -521,7 +515,6 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
                 it->second(
                     prop,
                     "",
-                    IsRegularProperty(_hasOnlyRegularProperties),
                     ShowToolTip(_showHelpTooltip),
                     _tooltipDelay
                 );
