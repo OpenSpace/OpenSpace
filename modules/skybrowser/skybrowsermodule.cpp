@@ -445,7 +445,8 @@ void SkyBrowserModule::setSelectedObject()
     // Find and save what mouse is currently hovering on
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
         [&] (const std::unique_ptr<TargetBrowserPair> &pair) {      
-            return pair->checkMouseIntersection(_mousePosition);
+            return pair->checkMouseIntersection(_mousePosition) && 
+                   !pair->isUsingRadiusAzimuthElevation();
         });
 
     if (it == std::end(_targetsBrowsers)) {
