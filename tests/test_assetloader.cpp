@@ -57,8 +57,8 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("passassertion"));
-    REQUIRE_NOTHROW(assetLoader.add("failassertion"));
+    CHECK_NOTHROW(assetLoader.add("passassertion"));
+    CHECK_NOTHROW(assetLoader.add("failassertion"));
 }
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
@@ -69,7 +69,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("require"));
+    CHECK_NOTHROW(assetLoader.add("require"));
 }
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
@@ -80,7 +80,7 @@ TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
         absPath("${TESTDIR}/AssetLoaderTest/").string()
     );
 
-    REQUIRE_NOTHROW(assetLoader.add("assetfunctionsexist"));
+    CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));
 }
 
 //TEST_CASE("AssetLoader: Asset Initialization", "[assetloader]") {

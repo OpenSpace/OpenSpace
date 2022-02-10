@@ -37,5 +37,5 @@ TEST_CASE("Regression: 527", "[regression]") {
 
 
     p = -1;
-    REQUIRE(p.option().description == "a");
+    CHECK(p.option().description == "a");
 }
