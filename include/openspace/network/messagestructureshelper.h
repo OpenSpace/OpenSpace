@@ -22,47 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#ifndef __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
+#define __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 
-#include <openspace/json.h>
-#include <openspace/util/json_helper.h>
-#include <vector>
+#include <openspace/network/messagestructures.h>
 
-// Note: Dictionary formatting is tested in Ghoul
+namespace openspace::datamessagestructures {
 
-TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
-    glm::vec4, glm::dvec2, glm::dvec3, glm::dvec4, glm::ivec2, glm::ivec3, glm::ivec4,
-    glm::uvec2, glm::uvec3, glm::uvec4, glm::mat2x2, glm::mat2x3, glm::mat2x4,
-    glm::mat3x2, glm::mat3x3, glm::mat3x4, glm::mat4x2, glm::mat4x3, glm::mat4x4,
-    glm::dmat2x2, glm::dmat2x3, glm::dmat2x4, glm::dmat3x2, glm::dmat3x3, glm::dmat3x4,
-    glm::dmat4x2, glm::dmat4x3, glm::dmat4x4)
-{
-    using T = TestType;
+/**
+ * Method that creates a CameraKeyframe object and populates
+ * it with the current properties of the camera from the navigation handler.
+ * \returns CameraKeyframe with current state from NavigationHandler
+*/
+CameraKeyframe generateCameraKeyframe();
 
-    const T val(1);
+/**
+ * Method that creates a TimeKeyframe object and populates
+ * it with the current time values from the application time manager.
+ * \returns TimeKeyframe The time keyframe
+ */
+TimeKeyframe generateTimeKeyframe();
 
-    std::string json = openspace::formatJson(val);
+/**
+ * Method that creates a ScriptMessage object from a given script
+ * string, and populates the ScriptMessage with the script and timestamp
+ * of the current application time.
+ * \param script The script to execute in std::string form
+ * \returns ScriptMessage The ScriptMessage data structure with script
+ */
+ScriptMessage generateScriptMessage(std::string script);
 
-    // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
-    // while we here expect '[' for all glm types
-    std::string luaValue = ghoul::to_string(val);
-    luaValue.replace(0, 1, "[");
-    luaValue.replace(luaValue.size() - 1, 1, "]");
+} // namespace openspace::datamessagestructures
 
-    CHECK(json == luaValue);
-}
-
-TEST_CASE("FormatJson - Bool", "[formatjson]") {
-    bool trueVal = true;
-    bool falseVal = false;
-
-    CHECK(openspace::formatJson(trueVal) == "true");
-    CHECK(openspace::formatJson(falseVal) == "false");
-}
-
-TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
-    CHECK(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
-    CHECK(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
-}
-
-// @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary
+#endif // __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__

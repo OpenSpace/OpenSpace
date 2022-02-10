@@ -54,11 +54,11 @@ TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -91,15 +91,15 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript2");
+    CHECK(res[0] == "ForwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -133,12 +133,12 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.size() == 2);
-    REQUIRE(res[0] == "ForwardScript1");
-    REQUIRE(res[1] == "ForwardScript2");
+    CHECK(res[0] == "ForwardScript1");
+    CHECK(res[1] == "ForwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -166,11 +166,11 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -204,15 +204,15 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
     scheduler.loadScripts(scripts);
 
     auto res =  scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript2");
+    CHECK(res[0] == "BackwardScript2");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -246,12 +246,12 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 2);
-    REQUIRE(res[0] == "BackwardScript2");
-    REQUIRE(res[1] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript2");
+    CHECK(res[1] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -273,14 +273,14 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     for (double t : TestTimes) {
         ScriptScheduler scheduler;
         auto res = scheduler.progressTo(t);
-        REQUIRE(res.empty());
+        CHECK(res.empty());
     }
 
     // Then test the same thing but keeping the same ScriptScheduler
     ScriptScheduler scheduler;
     for (double t : TestTimes) {
         auto res = scheduler.progressTo(t);
-        REQUIRE(res.empty());
+        CHECK(res.empty());
     }
 
     openspace::SpiceManager::deinitialize();
@@ -316,18 +316,18 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     REQUIRE(res.size() == 2);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript2");
+    CHECK(res[0] == "BackwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -367,7 +367,7 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -388,7 +388,7 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
     for (double t : TestValues) {
         ScriptScheduler scheduler;
         scheduler.progressTo(t);
-        REQUIRE(t == scheduler.currentTime());
+        CHECK(t == scheduler.currentTime());
     }
 
     openspace::SpiceManager::deinitialize();
@@ -430,8 +430,8 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);
 
-    REQUIRE(allScripts[0].time < allScripts[1].time);
-    REQUIRE(allScripts[1].time < allScripts[2].time);
+    CHECK(allScripts[0].time < allScripts[1].time);
+    CHECK(allScripts[1].time < allScripts[2].time);
 
     openspace::SpiceManager::deinitialize();
 }
@@ -458,18 +458,18 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 11:00:00"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:01:00"));
     REQUIRE(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -497,10 +497,10 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     openspace::SpiceManager::deinitialize();
 }
@@ -527,17 +527,17 @@ TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
     scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 10:00:00"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 11:00:00"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 13:00:00"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:30:00"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     openspace::SpiceManager::deinitialize();
 }
@@ -571,15 +571,15 @@ TEST_CASE(
     scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript2");
+    CHECK(res[0] == "ForwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -610,12 +610,12 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptsch
     scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.size() == 2);
-    REQUIRE(res[0] == "ForwardScript1");
-    REQUIRE(res[1] == "ForwardScript2");
+    CHECK(res[0] == "ForwardScript1");
+    CHECK(res[1] == "ForwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -648,15 +648,15 @@ TEST_CASE(
     scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript2");
+    CHECK(res[0] == "BackwardScript2");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -691,12 +691,12 @@ TEST_CASE(
 
     std::vector<std::string> res =
         scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
-    REQUIRE(res.empty());
+    CHECK(res.empty());
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 2);
-    REQUIRE(res[0] == "BackwardScript2");
-    REQUIRE(res[1] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript2");
+    CHECK(res[1] == "BackwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -727,18 +727,18 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript1");
+    CHECK(res[0] == "BackwardScript1");
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     REQUIRE(res.size() == 2);
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "BackwardScript2");
+    CHECK(res[0] == "BackwardScript2");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -774,7 +774,7 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
 
     res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.size() == 1);
-    REQUIRE(res[0] == "ForwardScript1");
+    CHECK(res[0] == "ForwardScript1");
 
     openspace::SpiceManager::deinitialize();
 }
@@ -811,8 +811,8 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);
 
-    REQUIRE(allScripts[0].time < allScripts[1].time);
-    REQUIRE(allScripts[1].time < allScripts[2].time);
+    CHECK(allScripts[0].time < allScripts[1].time);
+    CHECK(allScripts[1].time < allScripts[2].time);
 
     openspace::SpiceManager::deinitialize();
 }
@@ -825,8 +825,6 @@ TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
 
     using namespace openspace::scripting;
     using namespace std::string_literals;
-
-
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = openspace::Time::convertTime("2000 JAN 03");
@@ -850,8 +848,8 @@ TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);
 
-    REQUIRE(allScripts[0].time < allScripts[1].time);
-    REQUIRE(allScripts[1].time < allScripts[2].time);
+    CHECK(allScripts[0].time < allScripts[1].time);
+    CHECK(allScripts[1].time < allScripts[2].time);
 
     openspace::SpiceManager::deinitialize();
 }

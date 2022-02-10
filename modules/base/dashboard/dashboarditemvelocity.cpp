@@ -82,7 +82,20 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    return codegen::doc<Parameters>("base_dashboarditem_velocity");
+    documentation::Documentation doc =
+        codegen::doc<Parameters>("base_dashboarditem_velocity");
+
+    // @TODO cleanup
+    // Insert the parent's documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = DashboardTextItem::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
+    return doc;
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)

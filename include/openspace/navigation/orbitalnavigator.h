@@ -86,7 +86,7 @@ public:
     void startRetargetAim();
     float retargetInterpolationTime() const;
     void setRetargetInterpolationTime(float durationInSeconds);
-    void resetNodeMovements();
+    void updatePreviousStateVariables();
 
     JoystickCameraStates& joystickStates();
     const JoystickCameraStates& joystickStates() const;
@@ -130,6 +130,9 @@ private:
     void setAnchorNode(const SceneGraphNode* anchorNode,
         bool resetVelocitiesOnChange = true);
     void setAimNode(const SceneGraphNode* aimNode);
+
+    void updatePreviousAnchorState();
+    void updatePreviousAimState();
 
     Camera* _camera;
 

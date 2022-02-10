@@ -34,7 +34,7 @@
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
-        "EnabledInfo",
+        "Enabled",
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
@@ -42,7 +42,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
-        "ShouldRunAllTimeJumpInfo",
+        "ShouldRunAllTimeJump",
         "Should Run All Time Jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
@@ -229,6 +229,10 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
                 iter->backwardScript :
                 iter->universalScript + "; " + iter->backwardScript;
             result.push_back(script);
+
+            if (iter == _scripts.begin()) {
+                break;
+            }
         }
 
         return result;
@@ -237,14 +241,6 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
 
 void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType) {
     _timeframeMode = refType;
-}
-
-void ScriptScheduler::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void ScriptScheduler::stopPlayback() {
-    _playbackModeEnabled = false;
 }
 
 double ScriptScheduler::currentTime() const {
