@@ -108,8 +108,10 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
             const glm::uvec3& coords = volume->indexToCoords(i);
             glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 
-            size_t newIndex = volume->coordsToIndex(newcoords);
-            size_t oldIndex = volume->coordsToIndex(coords);
+            // @TODO (emmbr, 2022-02-10) Not sure why they are here, but commented them
+            // out for now as they aren't used
+            //size_t newIndex = volume->coordsToIndex(newcoords);
+            //size_t oldIndex = volume->coordsToIndex(coords);
 
             newVolume->set(newcoords, volume->get(coords));
         }

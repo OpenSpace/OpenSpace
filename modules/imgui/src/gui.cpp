@@ -150,7 +150,6 @@ GUI::GUI()
     )
     , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
     , _moduleProperty("ModuleProperties", "Module Properties")
-    , _virtualProperty("VirtualProperties", "Virtual Properties")
     , _featuredProperties(
         "FeaturedProperties",
         "Featured Properties",
@@ -311,11 +310,6 @@ void GUI::initializeGL() {
     for (GuiComponent* comp : _components) {
         comp->initialize();
     }
-    _sceneProperty.setHasRegularProperties(true);
-    _screenSpaceProperty.setHasRegularProperties(true);
-    _globalProperty.setHasRegularProperties(true);
-    _moduleProperty.setHasRegularProperties(true);
-    _featuredProperties.setHasRegularProperties(true);
 
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
@@ -796,7 +790,6 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _moduleProperty.setVisibility(_currentVisibility);
     _sceneProperty.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
-    _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);
 }
 

@@ -26,7 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -88,16 +87,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     nodes.begin(),
                     nodes.end()
                 );
-            }
-        );
-
-        gui._virtualProperty.setSource(
-            []() {
-                std::vector<properties::PropertyOwner*> res = {
-                    global::virtualPropertyManager
-                };
-
-                return res;
             }
         );
 
