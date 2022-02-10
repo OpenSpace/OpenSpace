@@ -351,6 +351,16 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
         meta.url = p.url.value_or("");
         meta.license = p.license.value_or("");
         meta.identifiers = p.identifiers.value_or(std::vector<std::string>());
+
+        // We need to do this as the asset might have 'export'ed identifiers before
+        // defining the meta table.  Therefore the meta information already contains some
+        // identifiers that we don't want to throw away
+        if (asset->metaInformation().has_value() &&
+            !asset->metaInformation()->identifiers.empty())
+        {
+            std::vector<std::string> ids = asset->metaInformation()->identifiers;
+            meta.identifiers.insert(meta.identifiers.end(), ids.begin(), ids.end());
+        }
         asset->setMetaInformation(std::move(meta));
     }
 
