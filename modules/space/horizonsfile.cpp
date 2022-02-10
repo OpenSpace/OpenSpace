@@ -108,7 +108,9 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidAnswer(const json& answer) {
             return HorizonsFile::HorizonsResult::ErrorTimeRange;
         }
         // No site matches. Use "*@body" to list, "c@body" to enter coords, ?! for help.
-        else if (errorMessage.find("No site matches") != std::string::npos) {
+        else if (errorMessage.find("No site matches") != std::string::npos ||
+                 errorMessage.find("Cannot find central body") != std::string::npos)
+        {
             return HorizonsFile::HorizonsResult::ErrorNoObserver;
         }
         // Observer table for X / Y->Y disallowed.
@@ -149,13 +151,18 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidHorizonsFile() const {
     // The line $$SOE indicates start of data.
     std::string line;
     bool foundTarget = false;
-    while (fileStream.good() && line.find("$$SOE") == std::string::npos) {
-        // Valid Target?
-        if (line.find("Revised") != std::string::npos) {
-            // If the target is valid, the first line is the date it was last revised
-            foundTarget = true;
-        }
+    std::getline(fileStream, line);
+    std::getline(fileStream, line); // First line is just stars (*) no information, skip
 
+    // Valid Target?
+    if (fileStream.good() && (line.find("Revised") != std::string::npos || line.find("JPL") != std::string::npos)) {
+        // If the target is valid, the first line is the date it was last revised
+        // In case of comets it says the Source in the top
+        foundTarget = true;
+    }
+
+    HorizonsFile::HorizonsResult result = HorizonsFile::HorizonsResult::UnknownError;
+    while (fileStream.good() && line.find("$$SOE") == std::string::npos) {
         // Selected time range too big and step size too small?
         if (line.find("change step-size") != std::string::npos) {
             fileStream.close();
@@ -200,8 +207,7 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidHorizonsFile() const {
 
         // Multiple Observer stations?
         if (line.find("Multiple matching stations found") != std::string::npos) {
-            fileStream.close();
-            return HorizonsFile::HorizonsResult::MultipleObserverStations;
+            result = HorizonsFile::HorizonsResult::MultipleObserverStations;
         }
 
         // Multiple matching major bodies?
@@ -209,21 +215,18 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidHorizonsFile() const {
             // Target
             if (!foundTarget) {
                 // If target was not found then it is the target that has multiple matches
-                fileStream.close();
-                return HorizonsFile::HorizonsResult::MultipleTarget;
+                result = HorizonsFile::HorizonsResult::MultipleTarget;
             }
             // Observer
             else {
-                fileStream.close();
-                return HorizonsFile::HorizonsResult::MultipleObserver;
+                result = HorizonsFile::HorizonsResult::MultipleObserver;
             }
         }
 
         // Multiple matching small bodies?
         if (line.find("Small-body Index Search Results") != std::string::npos) {
             // Small bodies can only be targets not observers
-            fileStream.close();
-            return HorizonsFile::HorizonsResult::MultipleTarget;
+            result = HorizonsFile::HorizonsResult::MultipleTarget;
         }
 
         // No Target?
@@ -233,6 +236,11 @@ HorizonsFile::HorizonsResult HorizonsFile::isValidHorizonsFile() const {
         }
 
         std::getline(fileStream, line);
+    }
+
+    if (result != HorizonsFile::HorizonsResult::UnknownError) {
+        fileStream.close();
+        return result;
     }
 
     // If we reached end of file before we found the start of data then it is
