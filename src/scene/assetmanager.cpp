@@ -480,7 +480,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 std::unique_ptr<ResourceSynchronization> s =
                     ResourceSynchronization::createFromDictionary(d);
 
-                std::unique_ptr<SyncItem> si = std::make_unique<SyncItem>();
+                auto si = std::make_unique<SyncItem>();
                 si->synchronization = std::move(s);
                 si->assets.push_back(asset);
                 syncItem = si.get();
@@ -746,9 +746,8 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path) {
     if (!std::filesystem::is_regular_file(path)) {
         throw ghoul::RuntimeError(fmt::format("Could not find asset file {}", path));
     }
-    std::unique_ptr<Asset> asset = std::make_unique<Asset>(*this, path);
+    auto asset = std::make_unique<Asset>(*this, path);
     Asset* res = asset.get();
-
     setUpAssetLuaTable(res);
     _assets.push_back(std::move(asset));
     return res;

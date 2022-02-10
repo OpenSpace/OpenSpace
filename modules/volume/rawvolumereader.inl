@@ -80,9 +80,7 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
-    std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
-        dims
-    );
+    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
 
     std::ifstream file(_path, std::ios::binary);
     char* buffer = reinterpret_cast<char*>(volume->data());

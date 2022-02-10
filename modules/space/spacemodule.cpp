@@ -78,7 +78,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         "PlanetGeometry"
     );
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableConstellationBounds>(
@@ -92,7 +93,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul::TemplateFactory<Translation>* fTranslation =
+        FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
@@ -100,16 +102,14 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<TLETranslation>("TLETranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
-    /*auto fTasks = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTasks, "No task factory existed");
-    fTasks->registerClass<volume::GenerateDebrisVolumeTask>("GenerateDebrisVolumeTask");*/
-
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul::TemplateFactory<Rotation>* fRotation =
+        FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
+    ghoul::TemplateFactory<planetgeometry::PlanetGeometry>* fGeometry =
+        FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 
