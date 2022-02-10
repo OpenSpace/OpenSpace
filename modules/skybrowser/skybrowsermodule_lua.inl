@@ -608,9 +608,9 @@ int place3dSkyBrowser(lua_State* L) {
 
 int removeSelectedImageInBrowser(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::removeSelectedImageInBrowser");
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
     // Image index
     const int i = ghoul::lua::value<int>(L, 1);
-    const std::string id = ghoul::lua::value<std::string>(L, 1);
     // Get browser
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const ImageData& image = module->getWwtDataHandler()->getImage(i);
