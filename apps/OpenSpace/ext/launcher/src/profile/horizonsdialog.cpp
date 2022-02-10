@@ -765,7 +765,10 @@ std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
 
     auto result = answer.find("result");
     if (result == answer.end()) {
-        appendLog("Malformed answer recieved: " + answer.dump(), HorizonsDialog::LogLevel::Error);
+        appendLog(
+            "Malformed answer recieved: " + answer.dump(),
+            HorizonsDialog::LogLevel::Error
+        );
         return std::filesystem::path();
     }
 
@@ -790,6 +793,16 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
 
         case openspace::HorizonsFile::HorizonsResult::Empty:
             _errorMsg->setText("The horizons file is empty");
+            break;
+
+        case openspace::HorizonsFile::HorizonsResult::ErrorVersion:
+            appendLog(
+                "The recieved data has a different version than what is supported",
+                HorizonsDialog::LogLevel::Warning
+            );
+            break;
+        case openspace::HorizonsFile::HorizonsResult::ErrorSource:
+            appendLog("The API source is unkown", HorizonsDialog::LogLevel::Warning);
             break;
 
         case openspace::HorizonsFile::HorizonsResult::ErrorSize: {

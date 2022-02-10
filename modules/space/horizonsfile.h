@@ -52,6 +52,8 @@ public:
     enum class HorizonsResult {
         Valid,
         Empty,
+        ErrorVersion,
+        ErrorSource,
 
         // Erros caught by the error field in the json output
         ErrorSize,

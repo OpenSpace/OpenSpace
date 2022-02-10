@@ -32,6 +32,8 @@
 
 namespace {
     constexpr const char* _loggerCat = "HorizonsFile";
+    constexpr const char* ApiSource = "NASA/JPL Horizons API";
+    constexpr const char* CurrentVersion = "1.1";
 } // namespace
 
 namespace openspace {
@@ -57,6 +59,37 @@ std::filesystem::path& HorizonsFile::file() {
 }
 
 HorizonsFile::HorizonsResult HorizonsFile::isValidAnswer(const json& answer) {
+    // Signature and version
+    auto signatureIt = answer.find("signature");
+    if (signatureIt != answer.end()) {
+        json signature = *signatureIt;
+
+        auto sourceIt = signature.find("source");
+        if (sourceIt != signature.end()) {
+            if (*sourceIt != ApiSource) {
+                LWARNING(fmt::format("Horizons answer from unkown source '{}'", *sourceIt));
+            }
+        }
+        else {
+            LWARNING("Could not find source information, source might not be acceptable");
+        }
+
+        auto versionIt = signature.find("version");
+        if (versionIt != signature.end()) {
+            if (*versionIt != CurrentVersion) {
+                LWARNING(fmt::format("Unknown Horizons version '{}' found. The "
+                    "currently supported version is {}", *versionIt, CurrentVersion));
+            }
+        }
+        else {
+            LWARNING("Could not find version information, version might not be supported");
+        }
+    }
+    else {
+        LWARNING("Could not find signature information");
+    }
+
+    // Errors
     auto it = answer.find("error");
     if (it != answer.end()) {
         // There was an error
