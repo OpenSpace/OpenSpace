@@ -150,7 +150,6 @@ GUI::GUI()
     )
     , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
     , _moduleProperty("ModuleProperties", "Module Properties")
-    , _virtualProperty("VirtualProperties", "Virtual Properties")
     , _featuredProperties(
         "FeaturedProperties",
         "Featured Properties",
@@ -796,7 +795,6 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _moduleProperty.setVisibility(_currentVisibility);
     _sceneProperty.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
-    _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);
 }
 

@@ -34,7 +34,6 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
@@ -1810,25 +1809,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::downloadFile,
                 "",
                 "Downloads a file from Lua scope"
-            },
-            {
-                "addVirtualProperty",
-                &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier,"
-                "[description, value, minimumValue, maximumValue]",
-                "Adds a virtual property that will set a group of properties"
-            },
-            {
-                "removeVirtualProperty",
-                &luascriptfunctions::removeVirtualProperty,
-                "string",
-                "Removes a previously added virtual property"
-            },
-            {
-                "removeAllVirtualProperties",
-                &luascriptfunctions::removeAllVirtualProperties,
-                "",
-                "Remove all registered virtual properties"
             },
             {
                 "setScreenshotFolder",
