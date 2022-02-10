@@ -27,7 +27,7 @@
 
 #include <modules/skybrowser/include/renderableskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/pair.h>
+#include <modules/skybrowser/include/targetbrowserpair.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
@@ -394,7 +394,7 @@ SkyBrowserModule::SkyBrowserModule()
         }
         if (_isCameraInSolarSystem) {
             std::for_each(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-                [&](const std::unique_ptr<Pair>& pair) {
+                [&](const std::unique_ptr<TargetBrowserPair>& pair) {
                     pair->synchronizeAim();
                 });
             incrementallyAnimateTargets(deltaTime);
@@ -440,11 +440,11 @@ void SkyBrowserModule::setSelectedObject()
         return;
     }
     // Save old selection for removing highlight
-    Pair* previousPair = _mouseOnPair;
+    TargetBrowserPair* previousPair = _mouseOnPair;
 
     // Find and save what mouse is currently hovering on
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-        [&] (const std::unique_ptr<Pair> &pair) {      
+        [&] (const std::unique_ptr<TargetBrowserPair> &pair) {      
             return pair->checkMouseIntersection(_mousePosition);
         });
 
@@ -480,19 +480,19 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const s
     
     // Assert pair to have both target and browser
     if (browser && target) {
-        _targetsBrowsers.push_back(std::make_unique<Pair>(browser, target));
+        _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(browser, target));
     }
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
 
-    Pair* found = getPair(id);
+    TargetBrowserPair* found = getPair(id);
     if (!found) {
         return;
     }
 
     auto it = std::remove_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-        [&](const std::unique_ptr<Pair>& pair) {
+        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             return *found == *(pair.get());
         });
 
@@ -512,7 +512,7 @@ void SkyBrowserModule::set3dBrowser(const std::string& id)
 
 void SkyBrowserModule::lookAtTarget(std::string id)
 {
-    Pair* pair = getPair(id);
+    TargetBrowserPair* pair = getPair(id);
     if (pair) {
         startRotatingCamera(pair->targetDirectionGalactic());
     }
@@ -567,7 +567,7 @@ int SkyBrowserModule::nLoadedImages()
 
 void SkyBrowserModule::add2dSelectedImagesTo3d(const std::string& pairId)
 {
-    Pair* pair = getPair(pairId);
+    TargetBrowserPair* pair = getPair(pairId);
 
     if (pair && get3dBrowser()) {
 
@@ -612,7 +612,7 @@ const std::unique_ptr<WwtDataHandler>& SkyBrowserModule::getWwtDataHandler() {
     return _dataHandler;
 }
 
-std::vector<std::unique_ptr<Pair>>& SkyBrowserModule::getPairs()
+std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::getPairs()
 {
     return _targetsBrowsers;
 }
@@ -622,10 +622,10 @@ int SkyBrowserModule::nPairs()
     return static_cast<int>(_targetsBrowsers.size());
 }
 
-Pair* SkyBrowserModule::getPair(const std::string& id)
+TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id)
 {
     auto it = std::find_if(std::begin(_targetsBrowsers), std::end(_targetsBrowsers),
-        [&](const std::unique_ptr<Pair>& pair) {
+        [&](const std::unique_ptr<TargetBrowserPair>& pair) {
             bool foundBrowser = pair->browserId() == id;
             bool foundTarget = pair->targetId() == id;
             return foundBrowser || foundTarget;
@@ -739,7 +739,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
     }(goal);
     
      bool isAllFinished{ false };
-     for (std::unique_ptr<Pair>& pair : _targetsBrowsers) {
+     for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
          if (pair->isEnabled()) {
              bool isPairFinished = pair->hasFinishedFading(transparency);
              if (!isPairFinished) {
@@ -760,7 +760,7 @@ void SkyBrowserModule::incrementallyFadeBrowserTargets(Transparency goal, float 
 
 void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 {
-    for (std::unique_ptr<Pair>& pair : _targetsBrowsers) {
+    for (std::unique_ptr<TargetBrowserPair>& pair : _targetsBrowsers) {
         if (pair->isEnabled()) {
             pair->incrementallyAnimateToCoordinate(deltaTime);
         }

@@ -22,7 +22,7 @@ int selectImage(lua_State* L) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
     if (module->isCameraInSolarSystem()) {
-        Pair* selected = module->getPair(module->selectedBrowserId());
+        TargetBrowserPair* selected = module->getPair(module->selectedBrowserId());
         if (selected) {
 
             const ImageData& image = module->getWwtDataHandler()->getImage(i);
@@ -168,8 +168,8 @@ int sendOutIdsToBrowsers(lua_State* L) {
 
     // Send out ID's to the browsers
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    std::vector<std::unique_ptr<Pair>>& pairs = module->getPairs();
-    for (std::unique_ptr<Pair>& pair : pairs) {
+    std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+    for (std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->sendIdToBrowser();
     }
     if(module->get3dBrowser()) {
@@ -345,9 +345,9 @@ int getTargetData(lua_State* L) {
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
-        std::vector<std::unique_ptr<Pair>>& pairs = module->getPairs();
+        std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
 
-        for (std::unique_ptr<Pair>& pair : pairs) {
+        for (std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
             // Convert deque to vector so ghoul can read it
             std::vector<int> selectedImagesVector;
@@ -494,7 +494,7 @@ int centerTargetOnScreen(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::centerTargetOnScreen");
     const std::string id = ghoul::lua::value<std::string>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->centerTargetOnScreen();
     }
@@ -570,7 +570,7 @@ int removeTargetBrowserPair(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeTargetBrowserPair");
     std::string id = ghoul::lua::value<std::string>(L, 1);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    Pair* found = module->getPair(id);
+    TargetBrowserPair* found = module->getPair(id);
     if (found) {
         std::string browser = found->browserId();
         std::string target = found->targetId();
@@ -615,7 +615,7 @@ int removeSelectedImageInBrowser(lua_State* L) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const ImageData& image = module->getWwtDataHandler()->getImage(i);
         
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->removeSelectedImage(i);
     }
@@ -635,7 +635,7 @@ int setEquatorialAim(lua_State* L) {
     // Get module
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->setEquatorialAim(glm::dvec2(ra, dec));
     }
@@ -655,7 +655,7 @@ int setVerticalFov(lua_State* L) {
     // Get module
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->setVerticalFov(vfov);
     }
@@ -677,7 +677,7 @@ int setBorderColor(lua_State* L) {
     // Get module
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->setBorderColor(color);
     }
@@ -698,7 +698,7 @@ int setScreenSpaceSize(lua_State* L) {
     // Get module
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-    Pair* pair = module->getPair(id);
+    TargetBrowserPair* pair = module->getPair(id);
     if (pair) {
         pair->setScreenSpaceSize(glm::vec2(sizeX, sizeY));
     }

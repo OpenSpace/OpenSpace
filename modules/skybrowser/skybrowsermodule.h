@@ -37,7 +37,7 @@ namespace openspace {
 class RenderableSkyBrowser;
 class ScreenSpaceImageLocal;
 class WwtDataHandler;
-class Pair;
+class TargetBrowserPair;
 class SceneGraphNode;
 class ImageData;
 
@@ -66,9 +66,9 @@ public:
     virtual ~SkyBrowserModule();
 
     // Getters
-    std::vector<std::unique_ptr<Pair>>& getPairs();
+    std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
     int nPairs();
-    Pair* getPair(const std::string& id);
+    TargetBrowserPair* getPair(const std::string& id);
     SceneGraphNode* get3dBrowserNode();
     RenderableSkyBrowser* get3dBrowser();
     RenderableSkyBrowser* get3dBrowser(const std::string& id);
@@ -126,8 +126,8 @@ private:
     glm::ivec3 _highlightAddition{ 35 }; // Highlight object when mouse hovers
 
     // The browsers and targets
-    std::vector<std::unique_ptr<Pair>> _targetsBrowsers;
-    Pair* _mouseOnPair{ nullptr };
+    std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
+    TargetBrowserPair* _mouseOnPair{ nullptr };
     ScreenSpaceImageLocal* _hoverCircle{ nullptr };
     SceneGraphNode* _browser3dNode{ nullptr }; // Scene graph node is used for positioning
     RenderableSkyBrowser* _browser3d{ nullptr };

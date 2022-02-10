@@ -30,7 +30,7 @@ set(HEADER_FILES
     include/screenspaceskytarget.h
     include/wwtdatahandler.h
     include/utility.h
-    include/pair.h
+    include/targetbrowserpair.h
     include/wwtcommunicator.h
     include/browser.h
     include/screenspaceskybrowser.h
@@ -48,7 +48,7 @@ set(SOURCE_FILES
     src/wwtdatahandler.cpp
     src/utility.cpp
     src/renderableskybrowser.cpp
-    src/pair.cpp
+    src/targetbrowserpair.cpp
     src/wwtcommunicator.cpp
     src/browser.cpp
     src/screenspaceskybrowser.cpp
