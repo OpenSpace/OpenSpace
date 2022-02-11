@@ -128,7 +128,7 @@ glm::vec3 lerp(glm::vec3 current, glm::vec3 next, float time) {
 }
 
 RenderableMovingFieldlines::RenderableMovingFieldlines(
-                                                      const ghoul::Dictionary& dictionary) 
+                                                      const ghoul::Dictionary& dictionary)
     :Renderable(dictionary)
     , _colorGroup({ "Color" })
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)

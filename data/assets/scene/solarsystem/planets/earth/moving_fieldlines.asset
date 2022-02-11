@@ -1,4 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
 
 --local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
@@ -15,7 +14,7 @@ local movingLines = {
     SeedPointFile = seedPointFile,
     TracingVariable = "u_perp_b",
     NumberOfPointsOnPathLine = 200,
-    NumberOfPointsOnFieldlines = 100,
+    NumberOfPointsOnFieldlines = 200,
     LineWidth = 3,
     RenderFlowLine = true
   },
@@ -26,7 +25,15 @@ local movingLines = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { movingLines })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(movingLines)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(movingLines)
+end)
+
+asset.export(movingLines)
 
 asset.meta = {
   Name = "M",
