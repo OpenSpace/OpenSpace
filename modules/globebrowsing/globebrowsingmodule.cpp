@@ -289,10 +289,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fRotation, "Rotation factory was not created");
     fRotation->registerClass<globebrowsing::GlobeRotation>("GlobeRotation");
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TileProvider>>(),
-        _factoryName
-    );
+    FactoryManager::ref().addFactory<TileProvider>(_factoryName);
 
     ghoul::TemplateFactory<TileProvider>* fTileProvider =
         FactoryManager::ref().factory<TileProvider>();

@@ -88,10 +88,7 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
-        "ScreenSpaceRenderable"
-    );
+    FactoryManager::ref().addFactory<ScreenSpaceRenderable>("ScreenSpaceRenderable");
 
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();

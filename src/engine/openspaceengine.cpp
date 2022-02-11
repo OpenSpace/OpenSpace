@@ -131,42 +131,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
-        "TimeFrame"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
-        "LightSource"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
+    FactoryManager::ref().addFactory<Renderable>("Renderable");
+    FactoryManager::ref().addFactory<Translation>("Translation");
+    FactoryManager::ref().addFactory<Rotation>("Rotation");
+    FactoryManager::ref().addFactory<Scale>("Scale");
+    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
+    FactoryManager::ref().addFactory<LightSource>("LightSource");
+    FactoryManager::ref().addFactory<Task>("Task");
+    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
+    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
 
     SpiceManager::initialize();
     TransformationManager::initialize();

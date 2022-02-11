@@ -73,10 +73,7 @@ SpaceModule::SpaceModule()
 }
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
-        "PlanetGeometry"
-    );
+    FactoryManager::ref().addFactory<planetgeometry::PlanetGeometry>("PlanetGeometry");
 
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();

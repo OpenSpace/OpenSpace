@@ -48,10 +48,7 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
 
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
-        "Decoder"
-    );
+    FactoryManager::ref().addFactory<Decoder>("Decoder");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
         FactoryManager::ref().factory<DashboardItem>();
