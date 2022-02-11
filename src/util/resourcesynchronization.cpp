@@ -63,7 +63,6 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
     ResourceSynchronization* sync = factory->create(p.type, dictionary);
-    sync->_identifier = p.identifier;
     sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);
 }

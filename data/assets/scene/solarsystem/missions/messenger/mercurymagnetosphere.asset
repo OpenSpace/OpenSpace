@@ -1,5 +1,4 @@
 -- mercurymagnetosphere.asset
-local assetHelper = asset.require("util/asset_helper")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 
 local localFolder = asset.syncedResource({
@@ -54,4 +53,12 @@ local Magnetosphere = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Magnetosphere })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Magnetosphere)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Magnetosphere)
+end)
+  
+asset.export(Magnetosphere)

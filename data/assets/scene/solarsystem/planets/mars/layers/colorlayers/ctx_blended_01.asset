@@ -26,20 +26,24 @@ local layer = {
     to prevent misinterpretation. (Description from URL)]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "CTX Blended beta01",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
     hosted by ESRI.]],
   Author = "Caltech Murray Lab",
   URL = "http://murray-lab.caltech.edu/CTX/",
-  License = "Esri Master License Agreement",
-  Identifiers = {"CTX_blended_01"}
+  License = "Esri Master License Agreement"
 }

@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 local propertyHelper = asset.require("util/property_helper")
 local rot = asset.require("./carringtonToHEEQRotation.asset")
@@ -59,11 +58,16 @@ local toggle_fieldlines = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_fieldlines)
+  openspace.addSceneGraphNode(fieldlines)
 end)
+
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_fieldlines.Identifier)
+  openspace.removeSceneGraphNode(fieldlines)
+  openspace.action.removeAction(toggle_fieldlines)
 end)
-assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
+
+asset.export(fieldlines)
+
 
 asset.meta = {
   Name = "Predictive Science Inc. Fieldlines Bastille Day",
@@ -71,6 +75,5 @@ asset.meta = {
   Description = [[Magnetic fieldlines for the bastille day CME event]],
   Author = "CCMC, Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"MAS-MHD-Fieldlines-bastille-day-2000"}
+  License = "CC-BY"
 }

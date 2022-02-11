@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 asset.require("spice/base")
 
@@ -29,15 +28,23 @@ local SunMarker = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SunMarker)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SunMarker)
+end)
+  
+asset.export(SunMarker)
+
 
 
 asset.meta = {
   Name = "Sun marker",
-  Version = "1.0",
-  Description = [[ Marker for the sun, with a stick and label.]],
+  Version = "1.1",
+  Description = [[ Marker for the Sun, with a stick and label.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"SunMarker"}
+  License = "MIT license"
 }

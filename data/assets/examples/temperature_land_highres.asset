@@ -40,9 +40,14 @@ local layer_folder = {
   Description = [[ Temporal coverage: 01 Jan 1981 - 31 Dec 2020.]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function() 
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_prototype)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_folder)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_folder)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_prototype)
 end)
 
 asset.export("layer", layer_prototype)

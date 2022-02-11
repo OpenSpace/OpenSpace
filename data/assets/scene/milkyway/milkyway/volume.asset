@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -46,21 +45,30 @@ local MilkyWayVolumeGalaxy = {
   },
   GUI = {
     Path = "/Milky Way",
-    Name = "Milky Way Volume"
+    Name = "Milky Way Volume",
+    Description = [[Volumetric rendering of Milky Way galaxy based on simulation from
+    NAOJ.]]
   }
 }
 
-local objects = { MilkyWayVolumeGalaxy }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MilkyWayVolumeGalaxy)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MilkyWayVolumeGalaxy)
+end)
+  
+asset.export(MilkyWayVolumeGalaxy)
+
 
 
 asset.meta = {
   Name = "Milky Way Volume",
-  Version = "1.0",
-  Description = [[Volumetric rendering of Milky Way galaxy based on simulation from
+  Version = "1.1",
+  Description = [[Volumetric rendering of Milky Way galaxy based on simulations from
     NAOJ.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT License",
-  Identifiers = {"MilkyWayVolume"}
+  License = "MIT License"
 }

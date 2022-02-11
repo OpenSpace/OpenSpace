@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local models = asset.syncedResource({
@@ -220,7 +219,7 @@ local VoyagerTrailCruiseSaturnInf = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Voyager1,
   Voyager1Main,
   Voyager1Antenna,
@@ -229,4 +228,20 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   VoyagerTrailCruiseJupiterSaturn,
   VoyagerTrailEncounterSaturn,
   VoyagerTrailCruiseSaturnInf
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    openspace.removeSceneGraphNode(nodes[i])
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

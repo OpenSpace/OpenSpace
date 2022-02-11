@@ -65,7 +65,8 @@ local createConstellations = function (baseIdentifier, guiPath, constellationfil
         Tag = { "ConstellationArtImage", group },
         GUI = {
           Name = name .. " Image",
-          Path = "/Milky Way/" .. guiPath
+          Path = "/Milky Way/" .. guiPath,
+          Description = name .. " Constellation Image"
         }
       }
       table.insert(genConstellations, aconstellation);
@@ -156,15 +157,18 @@ asset.onDeinitialize(function ()
     openspace.removeSceneGraphNode(n.Identifier);
   end
 
-  openspace.action.removeAction(show_art.Identifier)
-  openspace.action.removeAction(hide_art.Identifier)
-  openspace.action.removeAction(disable_art.Identifier)
+  openspace.action.removeAction(show_art)
+  openspace.action.removeAction(hide_art)
+  openspace.action.removeAction(disable_art)
 end)
 
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end
 
 asset.meta = {
   Name = "Constellation Images",
-  Version = "1.0",
+  Version = "1.1",
   Description = "Artistic images depicting the constellations",
   Author = "James Hedberg",
   URL = "http://jameshedberg.com",

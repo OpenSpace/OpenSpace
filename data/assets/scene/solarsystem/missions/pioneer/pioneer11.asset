@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
@@ -62,7 +61,19 @@ local Pioneer11Trail = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Pioneer11, Pioneer11Trail, })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Pioneer11)
+  openspace.addSceneGraphNode(Pioneer11Trail)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Pioneer11Trail)
+  openspace.removeSceneGraphNode(Pioneer11)
+end)
+    
+asset.export(Pioneer11)
+asset.export(Pioneer11Trail)
+
 
 
 asset.meta = {
