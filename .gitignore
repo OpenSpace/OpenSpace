@@ -40,3 +40,6 @@ customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
 *_codegen.cpp
+
+# REMOVE AFTER THESIS IS DONE
+*moving_fieldlines.asset

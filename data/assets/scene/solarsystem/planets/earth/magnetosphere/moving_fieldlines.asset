@@ -1,10 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere')
 
---local fieldlinesDirectory = 'C:/Users/elono/Documents/OpenSpace/data/Chris/Cdf'
-local fieldlinesDirectory = 'D:/data/2000_01_01_event/cdf'
---local seedPointFile = 'C:/Users/elono/Documents/OpenSpace/data/Chris/seedpoints/lines.txt'
-local seedPointFile = 'D:/data/2000_01_01_event/cdf/GM_CDF/sw_fieldline_seeds_test.txt'
+-- Change to location on your machine
+local fieldlinesDirectory = 'C:/Users/mozza/Desktop/OpenSpaceData'
+local seedPointFile = 'C:/Users/mozza/Desktop/OpenSpaceData/sw_fieldline_seeds_test.txt'
 
 local movingLines = {
   Identifier = "MovingFieldlines",

@@ -32,7 +32,7 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/magnetosphere/magnetosphere",
     "scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere",
-    "scene/solarsystem/planets/earth/moving_fieldlines",
+    "scene/solarsystem/planets/earth/magnetosphere/moving_fieldlines",
     "scene/solarsystem/sun/transforms_heliosphere"
   ],
   "camera": {
