@@ -32,8 +32,8 @@
 #include <string>
 
 Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
-                 std::vector<QRect>& monitorSizeList, const unsigned int nMaxWindows,
-                 const std::array<QString, 4> winColors)
+                 std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
+                 const std::array<QColor, 4>& winColors)
     : _monBox(monitorRenderBox)
     , _monitorResolutions(monitorSizeList)
     , _nMaxWindows(nMaxWindows)
@@ -48,12 +48,6 @@ Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
     connect(_addWindowButton, &QPushButton::released, this, &Display::addWindow);
     connect(_removeWindowButton, &QPushButton::released, this, &Display::removeWindow);
     initializeLayout();
-}
-
-Display::~Display() {
-    for (WindowControl* w : _windowControl) {
-        delete w;
-    }
 }
 
 void Display::initializeLayout() {
@@ -87,7 +81,7 @@ void Display::initializeLayout() {
     layout->addLayout(layoutWindows);
 }
 
-std::vector<WindowControl*> Display::windowControls() const {
+std::vector<std::shared_ptr<WindowControl>> Display::windowControls() const {
     return _windowControl;
 }
 
@@ -118,7 +112,7 @@ void Display::showWindows() {
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);
     _addWindowButton->setEnabled(_nWindowsDisplayed != _nMaxWindows);
-    for (WindowControl* w : _windowControl) {
+    for (std::shared_ptr<WindowControl> w : _windowControl) {
         w->showWindowLabel(_nWindowsDisplayed > 1);
     }
     _monBox->setNumWindowsDisplayed(_nWindowsDisplayed);
@@ -128,11 +122,11 @@ void Display::initializeWindowControl() {
     if (_nWindowsAllocated < _nMaxWindows) {
         unsigned int monitorNumForThisWindow = (_nWindowsAllocated >= 3) ? 1 : 0;
         _windowControl.push_back(
-            new WindowControl(
+            std::make_shared<WindowControl>(
                 monitorNumForThisWindow,
                 _nWindowsAllocated,
                 _monitorResolutions,
-                _winColors,
+                _winColors[_nWindowsAllocated],
                 this
             )
         );
@@ -160,7 +154,7 @@ void Display::initializeWindowControl() {
 }
 
 void Display::uncheckWebGuiOptions() {
-    for (WindowControl* w : _windowControl) {
+    for (std::shared_ptr<WindowControl> w : _windowControl) {
         w->uncheckWebGuiOption();
     }
 }

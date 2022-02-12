@@ -43,7 +43,7 @@ class MonitorBox : public QWidget {
 Q_OBJECT
 public:
     MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-        unsigned int nWindows, std::array<QString, 4> winColors);
+        unsigned int nWindows, const std::array<QColor, 4>& winColors);
     void mapMonitorResolutionToWidgetCoordinates();
     void mapWindowResolutionToWidgetCoordinates(unsigned int mIdx, unsigned int wIdx,
         const QRectF& w);
@@ -55,15 +55,15 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void paintWidgetBorder(QPainter& painter, const int width, const int height);
+    void paintWidgetBorder(QPainter& painter, int width, int height);
     void paintMonitorBackgrounds(QPainter& painter);
-    void paintWindow(QPainter& painter, const size_t winIdx);
-    void paintWindowBeyondBounds(QPainter& painter, const unsigned int winIdx);
-    void paintWindowNumber(QPainter& painter, const unsigned int winIdx);
-    void setPenSpecificToWindow(QPainter& painter, const unsigned int windowIdx,
+    void paintWindow(QPainter& painter, size_t winIdx);
+    void paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx);
+    void paintWindowNumber(QPainter& painter, unsigned int winIdx);
+    void setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
         bool visibleBorder);
-    void computeScaledResolution_landscape(const float aspectRatio, const float maxWidth);
-    void computeScaledResolution_portrait(const float aspectRatio, const float maxHeight);
+    void computeScaledResolutionLandscape(float aspectRatio, float maxWidth);
+    void computeScaledResolutionPortrait(float aspectRatio, float maxHeight);
 
     unsigned int _maxNumMonitors = 2;
     QRectF _monitorWidgetSize;
@@ -79,7 +79,7 @@ private:
         {0.f, 0.f, 0.f, 0.f}
     };
     unsigned int _nWindows = 1;
-    const std::array<QString, 4> _colorsForWindows;
+    const std::array<QColor, 4> _colorsForWindows;
     int _alphaWindowOpacity = 170;
     float _monitorScaleFactor = 1.0;
     bool _showLabel = false;

@@ -68,11 +68,11 @@ private:
     std::vector<sgct::config::Window>& _windowList;
     bool _saveSelected = false;
     unsigned int _nMaxWindows = 3;
-    const std::array<QString, 4> _colorsForWindows = {
-        "#2B9EC3",
-        "#FCAB10",
-        "#44AF69",
-        "#F8333C"
+    const std::array<QColor, 4> _colorsForWindows = {
+        QColor(0x2B, 0x9E, 0xC3),
+        QColor(0xFC, 0xAB, 0x10),
+        QColor(0x44, 0xAF, 0x69),
+        QColor(0xF8, 0x33, 0x3C)
     };
 };
 

@@ -39,49 +39,37 @@ class WindowControl : public QWidget {
 Q_OBJECT
 public:
     WindowControl(unsigned int monitorIndex, unsigned int windowIndex,
-        std::vector<QRect>& monitorDims, const std::array<QString, 4> winColors,
+        std::vector<QRect>& monitorDims, const QColor& winColor,
         QWidget *parent);
     ~WindowControl();
-    void setDimensions(const QRectF& dimensions);
     void setWindowChangeCallback(std::function<void(int, int, const QRectF&)> cb);
     void setWebGuiChangeCallback(std::function<void(unsigned int)> cb);
-    void showWindowLabel(const bool show);
+    void showWindowLabel(bool show);
     QVBoxLayout* initializeLayout();
     QRectF& dimensions();
-    QLineEdit* lineEditSizeWidth();
-    QLineEdit* lineEditSizeHeight();
-    QLineEdit* lineEditSizeOffsetX();
-    QLineEdit* lineEditSizeOffsetY();
     QCheckBox* checkBoxWindowDecor();
     QCheckBox* checkBoxWebGui();
     QCheckBox* checkBoxSpoutOutput();
-    std::string windowName();
-    sgct::ivec2 windowSize();
-    sgct::ivec2 windowPos();
-    bool isDecorated();
-    bool isSpoutSelected();
-    bool isGuiWindow();
-    void enableGuiWindowSelection(bool enabled);
+    std::string windowName() const;
+    sgct::ivec2 windowSize() const;
+    sgct::ivec2 windowPos() const;
+    bool isDecorated() const;
+    bool isSpoutSelected() const;
+    bool isGuiWindow() const;
     void uncheckWebGuiOption();
-    int projectionSelectedIndex();
-    int qualitySelectedIndex();
-    int qualitySelectedValue();
-    unsigned int monitorNum();
-    float fovH();
-    float fovV();
-    float heightOffset();
-    enum ProjectionIndeces : unsigned int {
+    int qualitySelectedValue() const;
+    unsigned int monitorNum() const;
+    float fovH() const;
+    float fovV() const;
+    float heightOffset() const;
+    enum class ProjectionIndeces {
         Planar = 0,
         Fisheye,
-        Spherical_Mirror,
+        SphericalMirror,
         Cylindrical,
         Equirectangular
     };
-    std::string ProjectionTypeNames[5] = {"Planar", "Fisheye", "Spherical Mirror",
-        "Cylindrical", "Equirectangular"};
-    std::string QualityTypeNames[10] = {"Low (256)", "Medium (512)", "High (1K)",
-        "1.5K (1536)", "2K (2048)", "4K (4096)", "8K (8192)", "16K (16384)",
-        "32K (32768)", "64K (65536)"};
+    ProjectionIndeces projectionSelectedIndex() const;
     int QualityValues[10] = {256, 512, 1024, 1536, 2048, 4096, 8192, 16384,
         32768, 65536};
 
@@ -107,25 +95,6 @@ private:
         {1200.0, 340.0, 1280.0, 720.0},
         {50.0, 50.0, 1280.0, 720.0}
     };
-    QList<QString> _projectionTypes = {
-        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Planar]),
-        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Fisheye]),
-        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Spherical_Mirror]),
-        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Cylindrical]),
-        QString::fromStdString(ProjectionTypeNames[ProjectionIndeces::Equirectangular]),
-    };
-    QList<QString> _qualityTypes = {
-        QString::fromStdString(QualityTypeNames[0]),
-        QString::fromStdString(QualityTypeNames[1]),
-        QString::fromStdString(QualityTypeNames[2]),
-        QString::fromStdString(QualityTypeNames[3]),
-        QString::fromStdString(QualityTypeNames[4]),
-        QString::fromStdString(QualityTypeNames[5]),
-        QString::fromStdString(QualityTypeNames[6]),
-        QString::fromStdString(QualityTypeNames[7]),
-        QString::fromStdString(QualityTypeNames[8]),
-        QString::fromStdString(QualityTypeNames[9]),
-    };
     QList<QString> _monitorNames = { "Monitor 1", "Monitor 2" };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
@@ -134,13 +103,13 @@ private:
     unsigned int _index = 0;
     std::vector<QRect>& _monitorResolutions;
     int _maxWindowSizePixels = 10000;
-    const std::array<QString, 4> _colorsForWindows;
+    const QColor& _colorForWindow;
     QVBoxLayout* _layoutFullWindow = nullptr;
     QLabel* _labelWinNum = nullptr;
-    QLineEdit* _size_x = nullptr;
-    QLineEdit* _size_y = nullptr;
-    QLineEdit* _offset_x = nullptr;
-    QLineEdit* _offset_y = nullptr;
+    QLineEdit* _sizeX = nullptr;
+    QLineEdit* _sizeY = nullptr;
+    QLineEdit* _offsetX = nullptr;
+    QLineEdit* _offsetY = nullptr;
     QRectF _windowDims;
     QPushButton* _fullscreenButton = nullptr;
     QCheckBox* _checkBoxWindowDecor = nullptr;

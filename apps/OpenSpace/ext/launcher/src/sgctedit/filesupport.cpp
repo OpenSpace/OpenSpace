@@ -95,97 +95,88 @@ bool FileSupport::isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims)
             _monitors[monitorIdx].height() == wDims.y);
 }
 
-bool FileSupport::findGuiWindow(unsigned int& foundWindowIndex) {
+std::optional<unsigned int> FileSupport::findGuiWindow() {
     unsigned int windowIndex = 0;
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
         if (_displayWidget->windowControls()[w]->isGuiWindow()) {
-            foundWindowIndex = windowIndex;
-            return true;
+            return std::optional<unsigned int>(windowIndex);
         }
         windowIndex++;
     }
-    return false;
+    return std::nullopt;
 }
 
 void FileSupport::saveWindows() {
     unsigned int windowIndex = 0;
     for (unsigned int w = 0; w < _displayWidget->nWindows(); ++w) {
-        WindowControl* wCtrl = _displayWidget->windowControls()[w];
-        _windowList.push_back(sgct::config::Window());
-        saveWindowsViewports();
-        saveProjectionInformation(
-            wCtrl->isSpoutSelected(),
-            wCtrl->projectionSelectedIndex(),
-            wCtrl,
-            _windowList.back().viewports.back()
+        std::shared_ptr<WindowControl> wCtrl = _displayWidget->windowControls()[w];
+        sgct::config::Window tmpWindow = saveWindowsDimensions(wCtrl);
+        tmpWindow.viewports.push_back(generateViewport());
+        tmpWindow.viewports.back().projection = saveProjectionInformation(wCtrl);
+        tmpWindow.isDecorated = wCtrl->isDecorated();
+        tmpWindow.isFullScreen = isWindowFullscreen(
+            wCtrl->monitorNum(),
+            wCtrl->windowSize()
         );
-        saveWindowsDimensions(wCtrl);
-        _windowList.back().isDecorated = wCtrl->isDecorated();
-        saveWindowsFullScreen(wCtrl);
-        saveWindowsWebGui(windowIndex);
+        saveWindowsWebGui(windowIndex, tmpWindow);
         if (!wCtrl->windowName().empty()) {
-            _windowList.back().name = wCtrl->windowName();
+            tmpWindow.name = wCtrl->windowName();
         }
-        _windowList.back().id = windowIndex++;
+        tmpWindow.id = windowIndex++;
+        _windowList.push_back(tmpWindow);
     }
 }
 
-void FileSupport::saveWindowsViewports() {
+sgct::config::Viewport FileSupport::generateViewport() {
     sgct::config::Viewport vp;
     vp.isTracked = true;
     vp.position = {0.f, 0.f};
     vp.size = {1.f, 1.f};
-    _windowList.back().viewports.push_back(std::move(vp));
+    return vp;
 }
 
-void FileSupport::saveWindowsDimensions(WindowControl* wCtrl) {
-    _windowList.back().size = wCtrl->windowSize();
-    _windowList.back().pos = {
+sgct::config::Window FileSupport::saveWindowsDimensions(
+                                                     std::shared_ptr<WindowControl> wCtrl)
+{
+    sgct::config::Window tmpWindow;
+    tmpWindow.size = wCtrl->windowSize();
+    tmpWindow.pos = {
         _monitors[wCtrl->monitorNum()].x() + wCtrl->windowPos().x,
         _monitors[wCtrl->monitorNum()].y() + wCtrl->windowPos().y,
     };
+    return tmpWindow;
 }
 
-void FileSupport::saveWindowsWebGui(unsigned int wIdx) {
-    _windowList.back().viewports.back().isTracked = true;
-    unsigned int webGuiWindowIndex;
-    bool isOneOfWindowsSetAsWebGui = findGuiWindow(webGuiWindowIndex);
+void FileSupport::saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win) {
+    win.viewports.back().isTracked = true;
+    std::optional<unsigned int> webGuiWindowIndex = findGuiWindow();
+    bool isOneOfWindowsSetAsWebGui = webGuiWindowIndex.has_value();
     if (isOneOfWindowsSetAsWebGui) {
-        if (wIdx == webGuiWindowIndex) {
-            _windowList.back().viewports.back().isTracked = false;
-            _windowList.back().tags.push_back("GUI");
+        if (wIdx == webGuiWindowIndex.value()) {
+            win.viewports.back().isTracked = false;
+            win.tags.push_back("GUI");
         }
-        _windowList.back().draw2D = (wIdx == webGuiWindowIndex);
-        _windowList.back().draw3D = !(_windowList.back().draw2D.value());
+        win.draw2D = (wIdx == webGuiWindowIndex.value());
+        win.draw3D = !(win.draw2D.value());
     }
 }
 
-void FileSupport::saveWindowsFullScreen(WindowControl* wCtrl) {
-    bool isFullScreen = isWindowFullscreen(
-        wCtrl->monitorNum(),
-        wCtrl->windowSize()
-    );
-    if (isFullScreen) {
-        _windowList.back().isFullScreen = true;
-    }
-}
-
-void FileSupport::saveProjectionInformation(bool isSpoutSelected, int projectionIndex,
-                             WindowControl* winControl, sgct::config::Viewport& viewport)
+ProjectionOptions FileSupport::saveProjectionInformation(
+                                                std::shared_ptr<WindowControl> winControl)
 {
-    if (isSpoutSelected) {
-        saveProjection_Spout(projectionIndex, winControl, viewport);
+    if (winControl->isSpoutSelected()) {
+        return saveProjectionSpout(winControl);
     }
     else {
-        saveProjection_NonSpout(projectionIndex, winControl, viewport);
+        return saveProjectionNoSpout(winControl);
     }
 }
 
-void FileSupport::saveProjection_Spout(int projectionIndex, WindowControl* winControl,
-                                                         sgct::config::Viewport& viewport)
+ProjectionOptions FileSupport::saveProjectionSpout(
+                                                std::shared_ptr<WindowControl> winControl)
 {
     sgct::config::SpoutOutputProjection projection;
-    switch(projectionIndex) {
+    switch(winControl->projectionSelectedIndex()) {
         case WindowControl::ProjectionIndeces::Fisheye:
             projection.mapping
                 = sgct::config::SpoutOutputProjection::Mapping::Fisheye;
@@ -199,28 +190,28 @@ void FileSupport::saveProjection_Spout(int projectionIndex, WindowControl* winCo
     }
     projection.quality = winControl->qualitySelectedValue();
     projection.mappingSpoutName = "OpenSpace";
-    viewport.projection = std::move(projection);
+    return projection;
 }
 
-void FileSupport::saveProjection_NonSpout(int projectionIndex, WindowControl* winControl,
-                                                         sgct::config::Viewport& viewport)
+ProjectionOptions FileSupport::saveProjectionNoSpout(
+                                                std::shared_ptr<WindowControl> winControl)
 {
-    switch(projectionIndex) {
+    switch(winControl->projectionSelectedIndex()) {
         case WindowControl::ProjectionIndeces::Fisheye:
             {
                 sgct::config::FisheyeProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
-                projection.fov = 180.0;
-                projection.tilt = 0.0;
-                viewport.projection = std::move(projection);
+                projection.fov = 180.f;
+                projection.tilt = 0.f;
+                return projection;
             }
             break;
 
-        case WindowControl::ProjectionIndeces::Spherical_Mirror:
+        case WindowControl::ProjectionIndeces::SphericalMirror:
             {
                 sgct::config::SphericalMirrorProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
-                viewport.projection = std::move(projection);
+                return projection;
             }
             break;
 
@@ -229,7 +220,7 @@ void FileSupport::saveProjection_NonSpout(int projectionIndex, WindowControl* wi
                 sgct::config::CylindricalProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
                 projection.heightOffset = winControl->heightOffset();
-                viewport.projection = std::move(projection);
+                return projection;
             }
             break;
 
@@ -237,7 +228,7 @@ void FileSupport::saveProjection_NonSpout(int projectionIndex, WindowControl* wi
             {
                 sgct::config::EquirectangularProjection projection;
                 projection.quality = winControl->qualitySelectedValue();
-                viewport.projection = std::move(projection);
+                return projection;
             }
             break;
 
@@ -250,7 +241,7 @@ void FileSupport::saveProjection_NonSpout(int projectionIndex, WindowControl* wi
                 projection.fov.left = -projection.fov.right;
                 projection.fov.up = winControl->fovV() / 2.0;
                 projection.fov.down = -projection.fov.up;
-                viewport.projection = std::move(projection);
+                return projection;
             }
             break;
     }

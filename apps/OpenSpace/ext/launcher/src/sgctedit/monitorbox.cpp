@@ -27,7 +27,7 @@
 constexpr float MarginFractionOfWidgetSize = 0.025;
 
 MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
-                       unsigned int nWindows, std::array<QString, 4> winColors)
+                       unsigned int nWindows, const std::array<QColor, 4>& winColors)
     : _monitorWidgetSize(widgetDims)
     , _monitorResolution(monitorResolution)
     , _nWindows(nWindows)
@@ -39,7 +39,6 @@ MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
 }
 
 void MonitorBox::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event);
     QPainter painter(this);
     QPen pen = painter.pen();
     painter.setPen(pen);
@@ -56,7 +55,7 @@ void MonitorBox::paintEvent(QPaintEvent* event) {
     }
 }
 
-void MonitorBox::paintWidgetBorder(QPainter& painter, const int width, const int height) {
+void MonitorBox::paintWidgetBorder(QPainter& painter, int width, int height) {
     constexpr int Radius = 10;
     painter.setPen(QPen(Qt::gray, 4));
     painter.drawRoundedRect(0, 0, width - 1, height - 1, Radius, Radius);
@@ -83,7 +82,7 @@ void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
     }
 }
 
-void MonitorBox::paintWindowBeyondBounds(QPainter& painter, const unsigned int winIdx) {
+void MonitorBox::paintWindowBeyondBounds(QPainter& painter, unsigned int winIdx) {
     painter.setBrush(Qt::BDiagPattern);
     setPenSpecificToWindow(painter, winIdx, false);
     if (winIdx <= _windowRendering.size()) {
@@ -93,11 +92,11 @@ void MonitorBox::paintWindowBeyondBounds(QPainter& painter, const unsigned int w
     painter.setBrush(Qt::NoBrush);
 }
 
-void MonitorBox::paintWindow(QPainter& painter, const size_t winIdx) {
+void MonitorBox::paintWindow(QPainter& painter, size_t winIdx) {
     setPenSpecificToWindow(painter, winIdx, true);
     if (winIdx <= _windowRendering.size()) {
         painter.drawRect(_windowRendering[winIdx]);
-        QColor fillColor = QColor(_colorsForWindows[winIdx]);
+        QColor fillColor = _colorsForWindows[winIdx];
         fillColor.setAlpha(_alphaWindowOpacity);
         QBrush brush(fillColor);
         brush.setStyle(Qt::SolidPattern);
@@ -106,7 +105,7 @@ void MonitorBox::paintWindow(QPainter& painter, const size_t winIdx) {
     }
 }
 
-void MonitorBox::paintWindowNumber(QPainter& painter, const unsigned int winIdx) {
+void MonitorBox::paintWindowNumber(QPainter& painter, unsigned int winIdx) {
     QPointF textPos = QPointF(_windowRendering[winIdx].left() + 5,
         _windowRendering[winIdx].bottom() - 5);
     textPos.setX(std::clamp(textPos.x(), 0.0, _monitorWidgetSize.width() - 10));
@@ -114,11 +113,11 @@ void MonitorBox::paintWindowNumber(QPainter& painter, const unsigned int winIdx)
     painter.drawText(textPos, QString::fromStdString(std::to_string(winIdx + 1)));
 }
 
-void MonitorBox::setPenSpecificToWindow(QPainter& painter, const unsigned int windowIdx,
+void MonitorBox::setPenSpecificToWindow(QPainter& painter, unsigned int windowIdx,
                                                                        bool visibleBorder)
 {
     int penWidth = (visibleBorder) ? 1 : -1;
-    painter.setPen(QPen(QColor(_colorsForWindows[windowIdx]), penWidth));
+    painter.setPen(QPen(_colorsForWindows[windowIdx], penWidth));
 }
 
 void MonitorBox::windowDimensionsChanged(unsigned int monitorIdx, unsigned int windowIdx,
@@ -141,10 +140,10 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
     }
     float aspectRatio = maxWidth / maxHeight;
     if (aspectRatio >= 1.0) {
-        computeScaledResolution_landscape(aspectRatio, maxWidth);
+        computeScaledResolutionLandscape(aspectRatio, maxWidth);
     }
     else {
-        computeScaledResolution_portrait(aspectRatio, maxHeight);
+        computeScaledResolutionPortrait(aspectRatio, maxHeight);
     }
     for (size_t m = 0; m < _monitorResolution.size(); ++m) {
         _monitorDimensionsScaled.push_back({
@@ -157,9 +156,7 @@ void MonitorBox::mapMonitorResolutionToWidgetCoordinates() {
     update();
 }
 
-void MonitorBox::computeScaledResolution_landscape(const float aspectRatio,
-                                                                    const float maxWidth)
-{
+void MonitorBox::computeScaledResolutionLandscape(float aspectRatio, float maxWidth) {
     _marginWidget = _monitorWidgetSize.width() * MarginFractionOfWidgetSize;
     float virtualWidth = _monitorWidgetSize.width()
         * (1.0 - MarginFractionOfWidgetSize * 2.0);
@@ -174,9 +171,7 @@ void MonitorBox::computeScaledResolution_landscape(const float aspectRatio,
     }
 }
 
-void MonitorBox::computeScaledResolution_portrait(const float aspectRatio,
-                                                                    const float maxHeight)
-{
+void MonitorBox::computeScaledResolutionPortrait(float aspectRatio, float maxHeight) {
     _marginWidget = _monitorWidgetSize.height() * MarginFractionOfWidgetSize;
     float virtualHeight = _monitorWidgetSize.height()
         * (1.0 - MarginFractionOfWidgetSize * 2.0);

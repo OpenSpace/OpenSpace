@@ -38,6 +38,17 @@
 #include <memory>
 #include <vector>
 
+using ProjectionOptions = std::variant<
+    sgct::config::NoProjection,
+    sgct::config::CylindricalProjection,
+    sgct::config::EquirectangularProjection,
+    sgct::config::FisheyeProjection,
+    sgct::config::PlanarProjection,
+    sgct::config::ProjectionPlane,
+    sgct::config::SphericalMirrorProjection,
+    sgct::config::SpoutOutputProjection
+>;
+
 class FileSupport : public QWidget {
 Q_OBJECT
 public:
@@ -54,20 +65,17 @@ private slots:
 
 private:
     bool isWindowFullscreen(unsigned int monitorIdx, sgct::ivec2 wDims);
-    bool findGuiWindow(unsigned int& foundWindowIndex);
+    std::optional<unsigned int> findGuiWindow();
     void saveCluster();
     void saveWindows();
     void saveUser();
-    void saveProjectionInformation(bool isSpoutSelected, int projectionIndex,
-        WindowControl* winControl, sgct::config::Viewport& viewport);
-    void saveProjection_Spout(int projectionIndex, WindowControl* winControl,
-        sgct::config::Viewport& viewport);
-    void saveProjection_NonSpout(int projectionIndex, WindowControl* winControl,
-        sgct::config::Viewport& viewport);
-    void saveWindowsViewports();
-    void saveWindowsDimensions(WindowControl* wCtrl);
-    void saveWindowsWebGui(unsigned int wIdx);
-    void saveWindowsFullScreen(WindowControl* wCtrl);
+    ProjectionOptions saveProjectionInformation(
+        std::shared_ptr<WindowControl> winControl);
+    ProjectionOptions saveProjectionSpout(std::shared_ptr<WindowControl> winControl);
+    ProjectionOptions saveProjectionNoSpout(std::shared_ptr<WindowControl> winControl);
+    sgct::config::Viewport generateViewport();
+    sgct::config::Window saveWindowsDimensions(std::shared_ptr<WindowControl> wCtrl);
+    void saveWindowsWebGui(unsigned int wIdx, sgct::config::Window& win);
 
     QHBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

@@ -46,10 +46,9 @@ class Display : public QWidget {
 Q_OBJECT
 public:
     Display(std::shared_ptr<MonitorBox> monitorRenderBox,
-        std::vector<QRect>& monitorSizeList, const unsigned int nMaxWindows,
-        const std::array<QString, 4> winColors);
-    ~Display();
-    std::vector<WindowControl*> windowControls() const;
+        std::vector<QRect>& monitorSizeList, unsigned int nMaxWindows,
+        const std::array<QColor, 4>& winColors);
+    std::vector<std::shared_ptr<WindowControl>> windowControls() const;
     unsigned int nWindows() const;
     void uncheckWebGuiOptions();
 
@@ -67,8 +66,8 @@ private:
     unsigned int _nWindowsAllocated = 0;
     unsigned int _nWindowsDisplayed = 0;
     unsigned int _nMaxWindows = 3;
-    const std::array<QString, 4> _winColors;
-    std::vector<WindowControl*> _windowControl;
+    const std::array<QColor, 4>& _winColors;
+    std::vector<std::shared_ptr<WindowControl>> _windowControl;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     unsigned int _monitorIdx = 0;
