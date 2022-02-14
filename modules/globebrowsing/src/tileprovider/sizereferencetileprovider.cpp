@@ -104,7 +104,7 @@ Tile SizeReferenceTileProvider::tile(const TileIndex& tileIndex) {
     return TextTileProvider::renderTile(tileIndex, text, textPosition, glm::vec4(1.f));
 }
 
-Tile::Status SizeReferenceTileProvider::tileStatus(const TileIndex& index) {
+Tile::Status SizeReferenceTileProvider::tileStatus(const TileIndex&) {
     return Tile::Status::OK;
 }
 

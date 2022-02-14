@@ -528,10 +528,6 @@ bool RenderableFluxNodes::isReady() const {
 }
 
 void RenderableFluxNodes::populateStartTimes() {
-    // number of  characters in UTC ISO8601 format (without additional Z)
-    // 'YYYY-MM-DDTHH-MM-SS-XXX'
-    constexpr const int timeFormatSize = 23;
-
     std::string timeFile;
     std::string fileType;
     for (const std::string& filePath : _binarySourceFiles) {

@@ -419,15 +419,15 @@ void PropertiesDialog::selectLineFromScriptLog() {
         // openspace.setPropertyValue('prop', value);
 
         if (text.startsWith("openspace.setPropertyValueSingle")) {
-            using namespace std::string_view_literals;
             _commandCombo->setCurrentIndex(0);
-            text = text.mid("openspace.setPropertyValueSingle"sv.size() + 1); // +1 for (
+            std::string_view prefix = "openspace.setPropertyValueSingle";
+            text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
         }
         else {
             // command == "openspace.setPropertyValue"
-            using namespace std::string_view_literals;
             _commandCombo->setCurrentIndex(1);
-            text = text.mid("openspace.setPropertyValue"sv.size() + 1); // +1 for (
+            std::string_view prefix = "openspace.setPropertyValue";
+            text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
         }
 
         // Remove everything past the closing brace
