@@ -19,11 +19,11 @@ local JWSTPosition = {
       Keyframes = {
         ["2021 DEC 25 12:50:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_launch.dat",
+          HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_launch.dat",
         },
         ["2022 JAN 25 00:00:00"] = {
           Type = "HorizonsTranslation",
-          HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_orbit.dat",
+          HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_orbit.dat",
         }
       }
     },
@@ -76,12 +76,12 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTPosition)
   openspace.addSceneGraphNode(JWSTRotation)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTRotation)
   openspace.removeSceneGraphNode(JWSTPosition)
 end)
-    
+
 asset.export(JWSTPosition)
 asset.export(JWSTRotation)
 

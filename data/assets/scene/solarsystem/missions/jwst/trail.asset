@@ -31,7 +31,7 @@ local JWSTTrailLaunch = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_launch.dat",
+      HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_launch.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2021 DEC 25 12:50:00",
@@ -61,7 +61,7 @@ local JWSTTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_orbit.dat",
+      HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_orbit.dat",
     },
     Color = { 0.9, 0.9, 0.0 },
     Period = 182.621099, -- About 6 months
@@ -88,7 +88,7 @@ local JWSTSunTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "HorizonsTranslation",
-      HorizonsTextFile = "C:/Users/ElmQPC/Desktop/Malin/develop/Data/JWST_horizons/horizons_jwst_sun.dat",
+      HorizonsTextFile = "C:/Users/malej60/Documents/Data/jwst_horizons/horizons_jwst_sun.dat",
     },
     Color = { 0.0, 0.9, 0.9 },
     Period = 365.242,
