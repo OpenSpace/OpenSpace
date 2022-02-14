@@ -207,7 +207,7 @@ asset.onDeinitialize(function ()
   openspace.clearKey("PRINT_SCREEN")
 
   for _, action in ipairs(Actions) do
-    openspace.action.removeAction(action.Identifier)
+    openspace.action.removeAction(action)
     openspace.clearKey(action.Key)
   end
 end)

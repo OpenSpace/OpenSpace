@@ -741,9 +741,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         posHandle
     );
 
-    // Update the camera state
-    _camera->setPositionVec3(pose.position);
-    _camera->setRotation(composeCameraRotation(camRot));
+    pose.rotation = composeCameraRotation(camRot);
+
+    _camera->setPose(pose);
 }
 
 void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
@@ -859,34 +859,22 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
         resetVelocities();
     }
 
-    // Mark a changed anchor node as a camera interaction
     if (changedAnchor) {
-        updateOnCameraInteraction();
-    }
-
-    if (_anchorNode) {
-        _previousAnchorNodePosition = _anchorNode->worldPosition();
-        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
-    }
-    else {
-        _previousAnchorNodePosition.reset();
-        _previousAnchorNodeRotation.reset();
+        updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
+        updatePreviousAnchorState();
     }
 }
 
 void OrbitalNavigator::clearPreviousState() {
-    _previousAnchorNodePosition.reset();
-    _previousAnchorNodeRotation.reset();
-    _previousAimNodePosition.reset();
+    _previousAnchorNodePosition = std::nullopt;
+    _previousAnchorNodeRotation = std::nullopt;
+    _previousAimNodePosition = std::nullopt;
 }
 
 void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
-
-    if (_aimNode) {
-        _previousAimNodePosition = _aimNode->worldPosition();
-    }
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
@@ -897,17 +885,29 @@ void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
 }
 
-void OrbitalNavigator::resetNodeMovements() {
+void OrbitalNavigator::updatePreviousAnchorState() {
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();
         _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
     }
     else {
-        _previousAnchorNodePosition = glm::dvec3(0.0);
-        _previousAnchorNodeRotation = glm::dquat();
+        _previousAnchorNodePosition = std::nullopt;
+        _previousAnchorNodeRotation = std::nullopt;
     }
+}
 
-    _previousAimNodePosition = _aimNode ? _aimNode->worldPosition() : glm::dvec3(0.0);
+void OrbitalNavigator::updatePreviousAimState() {
+    if (_aimNode) {
+        _previousAimNodePosition = _aimNode->worldPosition();
+    }
+    else {
+        _previousAimNodePosition = std::nullopt;
+    }
+}
+
+void OrbitalNavigator::updatePreviousStateVariables() {
+    updatePreviousAnchorState();
+    updatePreviousAimState();
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
@@ -953,7 +953,6 @@ void OrbitalNavigator::startRetargetAim() {
     _cameraToSurfaceDistanceInterpolator.setInterpolationTime(_stereoInterpolationTime);
     _cameraToSurfaceDistanceInterpolator.start();
 }
-
 
 float OrbitalNavigator::retargetInterpolationTime() const {
     return _retargetInterpolationTime;
@@ -1332,7 +1331,7 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
     _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _cameraToSurfaceDistanceInterpolator.step();
 
-    // Interpolate distance logarithmically.
+    // Interpolate distance logarithmically
     double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),

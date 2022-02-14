@@ -71,7 +71,7 @@ void ParallelServer::handleNewPeers() {
         s->startStreams();
 
         const size_t id = _nextConnectionId++;
-        std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
+        auto p = std::make_shared<Peer>(Peer{
             id,
             "",
             ParallelConnection(std::move(s)),

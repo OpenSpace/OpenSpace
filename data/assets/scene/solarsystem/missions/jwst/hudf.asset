@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local jwstTransforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
@@ -74,14 +73,24 @@ local HUDFJWSTLine = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFImage, HUDFJWSTLine })
-
 asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HUDFImage)
+
+  openspace.addSceneGraphNode(HUDFPosition)
+  openspace.addSceneGraphNode(HUDFImage)
+  openspace.addSceneGraphNode(HUDFJWSTLine)
 end)
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
+  openspace.removeSceneGraphNode(HUDFPosition)
+  openspace.removeSceneGraphNode(HUDFImage)
+  openspace.removeSceneGraphNode(HUDFJWSTLine)
+
+  openspace.removeScreenSpaceRenderable(HUDFImage)
 end)
+
+asset.export(HUDFJWSTLine)
+asset.export(HUDFImage)
+asset.export(HUDFPosition)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",

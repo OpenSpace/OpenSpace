@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local planeTextures = asset.syncedResource({
   Name = "Milky Way Plane Textures",
   Type = "HttpSynchronization",
@@ -47,16 +43,24 @@ local plane = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(plane)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(plane)
+end)
+  
+asset.export(plane)
+
 
 
 asset.meta = {
   Name = "MilkyWay Galaxy",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
     extragalactic viewing]],
   Author = "Brian Abbott, Carter Emmart (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"MilkyWayGalaxyImage"}
+  License = "AMNH Digital Universe"
 }

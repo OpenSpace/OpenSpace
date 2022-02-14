@@ -122,8 +122,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
 
-    std::unique_ptr<volume::RawVolume<float>> volume =
-        std::make_unique<volume::RawVolume<float>>(dimensions);
+    auto volume = std::make_unique<volume::RawVolume<float>>(dimensions);
 
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;

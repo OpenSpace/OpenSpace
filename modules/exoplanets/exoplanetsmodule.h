@@ -41,6 +41,7 @@ public:
     ExoplanetsModule();
     virtual ~ExoplanetsModule() = default;
 
+    bool hasDataFiles() const;
     std::string exoplanetsDataPath() const;
     std::string lookUpTablePath() const;
     std::string bvColormapPath() const;

@@ -36,8 +36,10 @@ namespace openspace {
 AtmosphereModule::AtmosphereModule() : OpenSpaceModule(Name) {}
 
 void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
+
     fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 

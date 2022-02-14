@@ -18,21 +18,25 @@ local layer = {
     URL).]],
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Themis IR Night [Utah]",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Themis Night layer for Mars. This map is hosted on the OpenSpace
     server in Utah.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
     "Mars_MO_THEMIS-IR-Night_mosaic_60N60S_100m_v14",
-  License = "NASA/PDS",
-  Identifiers = {"Themis_IR_Night_Utah"}
+  License = "NASA/PDS"
 }

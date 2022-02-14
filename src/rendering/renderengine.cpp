@@ -512,7 +512,7 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }
@@ -1080,9 +1080,10 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             {
                 "removeScreenSpaceRenderable",
                 &luascriptfunctions::removeScreenSpaceRenderable,
-                "string",
+                "(string, table)",
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
-                "renderengine"
+                "renderengine. The parameter can also be a table in which case the "
+                "'Identifier' key is used to look up the name from the table"
             },
             {
                 "takeScreenshot",

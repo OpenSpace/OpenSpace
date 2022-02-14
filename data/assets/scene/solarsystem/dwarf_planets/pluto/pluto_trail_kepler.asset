@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 asset.require("spice/base")
 local kernels = asset.require("./kernels").PlutoKernels
@@ -33,7 +32,17 @@ local PlutoKeplerianTrail = {
     Description = "Keplerian trail of Pluto. Contains full orbit."
   }
 }
-assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoKeplerianTrail })
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PlutoKeplerianTrail)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PlutoKeplerianTrail)
+end)
+  
+asset.export(PlutoKeplerianTrail)
+
 
 
 asset.meta = {
@@ -43,8 +52,7 @@ asset.meta = {
     JPL Horizons.]],
   Author = "OpenSpace Team",
   URL = "https://ssd.jpl.nasa.gov/sbdb.cgi?sstr=pluto",
-  License = "JPL/NASA",
-  Identifiers = {"PlutoKeplerianTrail"}
+  License = "JPL/NASA"
 }
 
 

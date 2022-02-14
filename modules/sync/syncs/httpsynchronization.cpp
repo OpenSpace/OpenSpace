@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
+#include <unordered_map>
 
 namespace {
     constexpr const char* _loggerCat = "HttpSynchronization";
@@ -169,12 +170,11 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        std::unique_ptr<HttpFileDownload> download =
-            std::make_unique<HttpFileDownload>(
-                line,
-                destination,
-                HttpFileDownload::Overwrite::Yes
-            );
+        auto download = std::make_unique<HttpFileDownload>(
+            line,
+            destination,
+            HttpFileDownload::Overwrite::Yes
+        );
         HttpFileDownload* dl = download.get();
         downloads.push_back(std::move(download));
 

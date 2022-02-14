@@ -1,4 +1,3 @@
-local asset_helper = asset.require("util/asset_helper")
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
@@ -68,7 +67,19 @@ local Apollo11Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "Apollo_CSM_shrunk_rotated_xy_double_size.obj",
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 CSM",
@@ -185,7 +196,19 @@ local Apollo11LemDescentModel = {
     GeometryFile = lem_model .. "lmremoved.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Descent Lem",
@@ -211,7 +234,19 @@ local Apollo11LemLandedModel = {
     GeometryFile = lem_model .. "LM-2_ver2clean.obj",
     SpecularIntensity = 0.0,
     RotationVector = { 273.750,28.0,309.85 },
-    LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
   },
   GUI = {
     Name = "Apollo 11 Landed Lem",
@@ -219,7 +254,7 @@ local Apollo11LemLandedModel = {
   }
 }
 
-local exportList = {
+local nodes = {
   Apollo11Position,
   Apollo11LemPosition,
   Apollo11Model,
@@ -229,4 +264,19 @@ local exportList = {
   Apollo11LemTrail,
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, exportList)
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

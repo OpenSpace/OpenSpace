@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
@@ -24,4 +23,12 @@ local GaiaPosition = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaPosition })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GaiaPosition)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GaiaPosition)
+end)
+  
+asset.export(GaiaPosition)

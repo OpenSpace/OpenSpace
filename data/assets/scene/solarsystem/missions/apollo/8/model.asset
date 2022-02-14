@@ -1,4 +1,3 @@
-local asset_helper = asset.require("util/asset_helper")
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels").kernels
@@ -99,6 +98,18 @@ local Apollo8Pivot = {
   }
 }
 
-local list = { Apollo8, Apollo8Model, Apollo8Pivot }
-
-asset_helper.registerSceneGraphNodesAndExport(asset, list)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Apollo8)
+  openspace.addSceneGraphNode(Apollo8Model)
+  openspace.addSceneGraphNode(Apollo8Pivot)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Apollo8Pivot)
+  openspace.removeSceneGraphNode(Apollo8Model)
+  openspace.removeSceneGraphNode(Apollo8)
+end)
+    
+asset.export(Apollo8)
+asset.export(Apollo8Model)
+asset.export(Apollo8Pivot)

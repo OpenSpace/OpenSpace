@@ -32,5 +32,5 @@ TEST_CASE("ConcurrentQueue: Basic", "[concurrentqueue]") {
     ConcurrentQueue<int> q1;
     q1.push(4);
     int val = q1.pop();
-    REQUIRE(val == 4);
+    CHECK(val == 4);
 }

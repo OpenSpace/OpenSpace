@@ -1,5 +1,4 @@
 local transforms = asset.require("../transforms")
-local assetHelper = asset.require("util/asset_helper")
 local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
 
@@ -51,15 +50,23 @@ local Hyperion = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Hyperion })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Hyperion)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Hyperion)
+end)
+  
+asset.export(Hyperion)
+
 
 
 asset.meta = {
   Name = "Hyperion",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Hyperion globe with labels]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"Hyperion"}
+  License = "MIT license"
 }

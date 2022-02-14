@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 asset.require("spice/base")
@@ -29,16 +28,24 @@ local MarsTrailEarth = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrailEarth })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MarsTrailEarth)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsTrailEarth)
+end)
+  
+asset.export(MarsTrailEarth)
+
 
 
 asset.meta = {
   Name = "Mars Trail from Earth",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Trail of Mars, parented to Earth with Earth as the SPICE observer.
     Data from NASA SPICE (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
-  Identifiers = {"MarsTrailEarth"}
+  License = "MIT license"
 }

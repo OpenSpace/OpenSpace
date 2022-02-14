@@ -1,5 +1,4 @@
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
-local asset_helper = asset.require("util/asset_helper")
 local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local models = asset.syncedResource({
@@ -149,8 +148,25 @@ local Station2Boulder3Model = {
   }
 }
 
-asset_helper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Station2Boulder1Holder, Station2Boulder1Model,
   Station2Boulder2Holder, Station2Boulder2Model,
   Station2Boulder3Holder, Station2Boulder3Model
-})
+}
+
+asset.onInitialize(function()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

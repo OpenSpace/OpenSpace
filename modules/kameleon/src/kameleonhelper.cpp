@@ -48,7 +48,7 @@ namespace {
 namespace openspace::kameleonHelper {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
-    std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
+    auto kameleon = std::make_unique<ccmc::Kameleon>();
     LDEBUG(fmt::format("\tOpening the cdf file: {}", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
 

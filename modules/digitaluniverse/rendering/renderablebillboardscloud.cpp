@@ -1026,7 +1026,8 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             case DistanceUnit::Gigalightyear:
                 unitValue = 6;
                 break;
-            default: ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
 
         glm::vec4 position(transformedPos, unitValue);
@@ -1057,7 +1058,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_isColorMapExact) {
-                int colorIndex = variableColor + cmin;
+                int colorIndex = static_cast<int>(variableColor + cmin);
                 for (int j = 0; j < 4; ++j) {
                     result.push_back(_colorMap.entries[colorIndex][j]);
                 }
@@ -1090,11 +1091,14 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                 }
                 else {
                     float ncmap = static_cast<float>(_colorMap.entries.size());
-                    float normalization = ((cmax != cmin) && (ncmap > 2)) ?
-                        (ncmap - 2) / (cmax - cmin) : 0;
-                    int colorIndex = (variableColor - cmin) * normalization + 1;
+                    float normalization = ((cmax != cmin) && (ncmap > 2.f)) ?
+                        (ncmap - 2.f) / (cmax - cmin) : 0;
+                    int colorIndex = static_cast<int>(
+                        (variableColor - cmin) * normalization + 1.f
+                    );
                     colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                    colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+                    colorIndex = colorIndex >= ncmap ?
+                        static_cast<int>(ncmap - 1.f) : colorIndex;
 
                     for (int j = 0; j < 4; ++j) {
                         result.push_back(_colorMap.entries[colorIndex][j]);

@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
@@ -122,10 +123,6 @@ void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     _camera->setPositionVec3(anchorNode()->worldPosition());
 }
 
-void NavigationHandler::resetCameraDirection() {
-    _orbitalNavigator.startRetargetAnchor();
-}
-
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
     _orbitalNavigator.setCamera(camera);
@@ -166,55 +163,52 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
+    // If there is a navigation state to set, do so immediately and then return
     if (_pendingNavigationState.has_value()) {
         applyNavigationState(*_pendingNavigationState);
-        _orbitalNavigator.resetVelocities();
-        _pendingNavigationState.reset();
-    }
-    else if (!_playbackModeEnabled && _camera) {
-        if (_useKeyFrameInteraction) {
-            _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
-        }
-        else if (_pathNavigator.isPlayingPath()) {
-            _pathNavigator.updateCamera(deltaTime);
-            updateCameraTransitions();
-        }
-        else {
-            if (_disableJoystickInputs) {
-                std::fill(
-                    global::joystickInputStates->begin(),
-                    global::joystickInputStates->end(),
-                    JoystickInputState()
-                );
-            }
-            _orbitalNavigator.updateStatesFromInput(
-                _mouseInputState,
-                _keyboardInputState,
-                deltaTime
-            );
-            _orbitalNavigator.updateCameraStateFromStates(deltaTime);
-            updateCameraTransitions();
-        }
-
-        _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
+        return;
     }
 
-    // If session recording (playback mode) was started in the midst of a camera path,
-    // abort the path
-    if (_playbackModeEnabled && _pathNavigator.isPlayingPath()) {
-        _pathNavigator.abortPath();
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
+
+    // If we're in session recording payback mode, the session recording is responsible
+    // for navigation. So don't do anything more here
+    if (playbackMode || !_camera) {
+        return;
     }
+
+    // Handle navigation, based on what navigator is active
+    if (_useKeyFrameInteraction) {
+        _keyframeNavigator.updateCamera(*_camera, playbackMode);
+    }
+    else if (mode == OpenSpaceEngine::Mode::CameraPath) {
+        _pathNavigator.updateCamera(deltaTime);
+        updateCameraTransitions();
+    }
+    else { // orbital navigator
+        if (_disableJoystickInputs) {
+            clearGlobalJoystickStates();
+        }
+        _orbitalNavigator.updateStatesFromInput(
+            _mouseInputState,
+            _keyboardInputState,
+            deltaTime
+        );
+        _orbitalNavigator.updateCameraStateFromStates(deltaTime);
+        updateCameraTransitions();
+    }
+
+    _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
 void NavigationHandler::applyNavigationState(const NavigationState& ns) {
     _orbitalNavigator.setAnchorNode(ns.anchor);
     _orbitalNavigator.setAimNode(ns.aim);
+    _camera->setPose(ns.cameraPose());
 
-    CameraPose pose = ns.cameraPose();
-    _camera->setPositionVec3(pose.position);
-    _camera->setRotation(pose.rotation);
-    _orbitalNavigator.clearPreviousState();
-    _orbitalNavigator.resetNodeMovements();
+    resetNavigationUpdateVariables();
+    _pendingNavigationState.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -328,23 +322,9 @@ void NavigationHandler::updateCameraTransitions() {
     }
 }
 
-
-void NavigationHandler::setEnableKeyFrameInteraction() {
-    _useKeyFrameInteraction = true;
-}
-
-void NavigationHandler::setDisableKeyFrameInteraction() {
-    _useKeyFrameInteraction = false;
-}
-
-void NavigationHandler::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void NavigationHandler::stopPlayback() {
+void NavigationHandler::resetNavigationUpdateVariables() {
     _orbitalNavigator.resetVelocities();
-    _orbitalNavigator.resetNodeMovements();
-    _playbackModeEnabled = false;
+    _orbitalNavigator.updatePreviousStateVariables();
 }
 
 const SceneGraphNode* NavigationHandler::anchorNode() const {
@@ -591,6 +571,14 @@ std::vector<std::string> NavigationHandler::joystickButtonCommand(
                                         const std::string& joystickName, int button) const
 {
     return _orbitalNavigator.joystickStates().buttonCommand(joystickName, button);
+}
+
+void NavigationHandler::clearGlobalJoystickStates() {
+    std::fill(
+        global::joystickInputStates->begin(),
+        global::joystickInputStates->end(),
+        JoystickInputState()
+    );
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

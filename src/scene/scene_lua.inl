@@ -627,13 +627,29 @@ int addSceneGraphNode(lua_State* L) {
 
 int removeSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
-    const std::string name = ghoul::lua::value<std::string>(L);
+    std::variant v = ghoul::lua::value<std::variant<std::string, ghoul::Dictionary>>(L);
 
-    SceneGraphNode* foundNode = sceneGraphNode(name);
+    std::string identifier;
+    if (std::holds_alternative<std::string>(v)) {
+        identifier = std::get<std::string>(v);
+    }
+    else {
+        ghoul_assert(std::holds_alternative<ghoul::Dictionary>(v), "Missing case");
+        ghoul::Dictionary d = std::get<ghoul::Dictionary>(v);
+        if (!d.hasValue<std::string>("Identifier")) {
+            return ghoul::lua::luaError(
+                L,
+                "Table passed to removeSceneGraphNode does not contain an Identifier"
+            );
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+
+    SceneGraphNode* foundNode = sceneGraphNode(identifier);
     if (!foundNode) {
         LERRORC(
             "removeSceneGraphNode",
-            fmt::format("Did not find a match for identifier: {} ", name)
+            fmt::format("Did not find a match for identifier: {} ", identifier)
         );
         return 0;
     }
