@@ -425,7 +425,6 @@ asset.onDeinitialize(function ()
 end)
 
 
-
 asset.meta = {
   Name = "James Webb Space Telescope Timelapse",
   Version = "1.0",

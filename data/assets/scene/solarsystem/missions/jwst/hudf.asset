@@ -53,7 +53,7 @@ local HUDFJWSTLine = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2021 DEC 25 12:50:00",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
@@ -91,6 +91,7 @@ end)
 asset.export(HUDFJWSTLine)
 asset.export(HUDFImage)
 asset.export(HUDFPosition)
+
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",

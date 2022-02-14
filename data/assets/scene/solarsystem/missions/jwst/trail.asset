@@ -36,7 +36,7 @@ local JWSTTrailLaunch = {
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2021 DEC 25 12:50:00",
     EndTime = "2022 JAN 25",
-    SampleInterval = 60
+    SampleInterval = 60 -- Sample rate of once per minute
   },
   GUI = {
     Name = "JWST Launch Trail",
@@ -55,7 +55,7 @@ local JWSTTrailOrbit = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2022 JAN 25",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
@@ -82,7 +82,7 @@ local JWSTSunTrail = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2022 JAN 25",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
@@ -108,13 +108,13 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTTrailOrbit)
   openspace.addSceneGraphNode(JWSTSunTrail)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTSunTrail)
   openspace.removeSceneGraphNode(JWSTTrailOrbit)
   openspace.removeSceneGraphNode(JWSTTrailLaunch)
 end)
-    
+
 asset.export(JWSTTrailLaunch)
 asset.export(JWSTTrailOrbit)
 asset.export(JWSTSunTrail)

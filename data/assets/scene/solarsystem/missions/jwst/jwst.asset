@@ -22,7 +22,7 @@ local JWSTBand = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2021 DEC 25 12:50:00",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Transform = {
     Rotation = {
@@ -59,7 +59,7 @@ local JWSTModel = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2021 DEC 25 12:50:00",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Renderable = {
     Type = "RenderableModel",
@@ -96,7 +96,7 @@ local JWSTFov = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2021 DEC 25 12:50:00",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Renderable = {
     Type = "RenderablePrism",
@@ -129,7 +129,7 @@ local JWSTLabel = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "2021 DEC 25 12:50:00",
-    End = "2024 JAN 23"
+    End = "2024 JAN 22"
   },
   Renderable = {
     Enabled = true,
@@ -155,14 +155,14 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTFov)
   openspace.addSceneGraphNode(JWSTLabel)
 end)
-    
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTLabel)
   openspace.removeSceneGraphNode(JWSTFov)
   openspace.removeSceneGraphNode(JWSTModel)
   openspace.removeSceneGraphNode(JWSTBand)
 end)
-    
+
 asset.export(JWSTBand)
 asset.export(JWSTModel)
 asset.export(JWSTFov)
