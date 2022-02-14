@@ -108,7 +108,7 @@ int renderCameraPath(lua_State* L) {
         return fmt::format("Point_{}", i);
     };
 
-    auto addPoint = [pointIdentifier] (const std::string& id, glm::dvec3 p) {
+    auto addPoint = [](const std::string& id, glm::dvec3 p) {
         const std::string pointNode = "{"
             "Identifier = '" + id + "',"
             "Parent = '" + RenderedPathIdentifier + "',"
@@ -126,10 +126,8 @@ int renderCameraPath(lua_State* L) {
         );
     };
 
-    auto addLineBetweenPoints = [pointIdentifier] (const std::string& id1,
-                                                   const std::string& id2,
-                                                   const glm::vec3& color,
-                                                   float lineWidth)
+    auto addLineBetweenPoints = [](const std::string& id1, const std::string& id2,
+                                   const glm::vec3& color, float lineWidth)
     {
         const std::string lineNode = "{"
             "Identifier = '" + fmt::format("Line{}", id1) + "',"

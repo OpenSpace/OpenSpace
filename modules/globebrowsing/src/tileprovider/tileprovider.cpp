@@ -65,8 +65,6 @@ namespace {
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
 Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 
-constexpr const char* KeyFilePath = "FilePath";
-
 } // namespace
 
 unsigned int TileProvider::NumTileProviders = 0;

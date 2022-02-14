@@ -112,7 +112,7 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
 
 void TextureComponent::update() {
     if (_fileIsDirty) {
-        loadFromFile(_textureFile->path()), _nDimensions;
+        loadFromFile(_textureFile->path());
     }
 
     if (_textureIsDirty) {

@@ -100,8 +100,7 @@ private:
         nodeSkipFluxThreshold, nodeSkipRadiusThreshold, fluxColorAlpha,
         earthPos, distanceThreshold, time, maxNodeDistanceSize, usingCameraPerspective,
         drawCircles, drawHollow, useGaussian, perspectiveDistanceFactor, minMaxNodeSize, 
-        usingPulse, usingGaussianPulse)
-        _uniformCache;
+        usingPulse, usingGaussianPulse) _uniformCache;
 
     std::filesystem::path _binarySourceFolderPath;
 
@@ -121,8 +120,6 @@ private:
     GLuint _vertexColorBuffer = 0;
     // OpenGL Vertex Buffer Object containing the positions to filter the nodes
     GLuint _vertexFilteringBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the index of nodes
-    GLuint _vertexindexBuffer = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
