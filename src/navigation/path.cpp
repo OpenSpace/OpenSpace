@@ -42,7 +42,7 @@
 
 namespace {
     constexpr const char _loggerCat[] = "Path";
-    constexpr const float Epsilon = 1e-5f;
+    constexpr const float LengthEpsilon = 1e-5f;
 
     constexpr const char SunIdentifier[] = "Sun";
 
@@ -121,9 +121,7 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         _speedFactorFromDuration = _progressedTime / *duration;
     }
 
-    // Reset playback variables
-    _traveledDistance = 0.0;
-    _progressedTime = 0.0;
+    LINFO(fmt::format("Path length: {}", pathLength()));
 }
 
 Waypoint Path::startPoint() const { return _start; }
@@ -141,8 +139,17 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     speed *= static_cast<double>(speedScale);
     const double displacement =  dt * speed;
 
+    double prevDistance = _traveledDistance;
+
     _progressedTime += dt;
     _traveledDistance += displacement;
+
+    if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
+        // The distaces are too large, so we are not making progress because of
+        // insufficient precision
+        _forceQuit = true;
+        LWARNING("Quit camera path prematurely due to insufficient precision");
+    }
 
     return interpolatedPose(_traveledDistance);
 }
@@ -153,6 +160,10 @@ std::string Path::currentAnchor() const {
 }
 
 bool Path::hasReachedEnd() const {
+    if (_forceQuit) {
+        return true;
+    }
+
     return (_traveledDistance / pathLength()) >= 1.0;
 }
 
@@ -252,7 +263,7 @@ double Path::speedAlongPath(double traveledDistance) const {
 
     // Dampen speed in beginning of path
     double startUpDistance = 2.0 * _start.node()->boundingSphere();
-    if (startUpDistance < Epsilon) { // zero bounding sphere
+    if (startUpDistance < LengthEpsilon) { // zero bounding sphere
         startUpDistance = glm::distance(_start.position(), startNodePos);
     }
 
@@ -263,7 +274,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     // Dampen speed in end of path
     // Note: this leads to problems when the full length of the path is really big
     double closeUpDistance = 2.0 * _end.node()->boundingSphere();
-    if (closeUpDistance < Epsilon) { // zero bounding sphere
+    if (closeUpDistance < LengthEpsilon) { // zero bounding sphere
         closeUpDistance = glm::distance(_end.position(), endNodePos);
     }
 
@@ -297,7 +308,7 @@ SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) {
         bool isSame = (n->identifier() == node->identifier());
         // If the nodes are in the very same position, they are probably representing
         // the same object
-        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < Epsilon;
+        isSame |= glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
 
         if (isSame) {
             continue;
