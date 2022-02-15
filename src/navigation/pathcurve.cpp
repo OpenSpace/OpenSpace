@@ -265,7 +265,6 @@ glm::dvec3 PathCurve::interpolate(double u) const {
     double segmentStart = _curveParameterSteps[index];
     double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     double uSegment = (u - segmentStart) / segmentDuration;
-    // TODO make sure scaling is correct
 
     return ghoul::interpolateCatmullRom(
         uSegment,

@@ -158,13 +158,8 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
     if (_type == Type::Linear) {
         // TODO: OBS! Could probably do this only for defaulted linear (when length over a certain size)
-        //LINFO("Linear path: special case");
         const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
         const double remainingDistance = glm::length(prevPosToEnd);
-
-        //LINFO(fmt::format("displacement: {}", displacement));
-        //LINFO(fmt::format("remaining distance: {}", glm::length(prevPosToEnd)));
-        //LINFO(fmt::format("prevPosToEnd: {}", ghoul::to_string(prevPosToEnd)));
 
         // TODO: do some extra damping at the end
 
