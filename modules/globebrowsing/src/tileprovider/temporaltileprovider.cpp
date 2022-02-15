@@ -441,8 +441,8 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                     _folder.files.cbegin(),
                     _folder.files.cend(),
                     time,
-                    [](const std::pair<double, std::string>& p, double time) {
-                        return p.first < time;
+                    [](const std::pair<double, std::string>& p, double sec) {
+                        return p.first < sec;
                     }
                 );
                 return std::string_view(it->second);

@@ -628,10 +628,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
     const glm::dmat4 modelMat =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotMat *
-        glm::dmat4(glm::scale(
-            glm::dmat4(1.0), data.modelTransform.scale
-        ));
+        rotMat * glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
     const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
     _shaderProgram->setUniform("modelViewProjection",
@@ -799,7 +796,7 @@ void RenderableFluxNodes::updatePositionBuffer() {
 
     glEnableVertexAttribArray(0);
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -817,7 +814,7 @@ void RenderableFluxNodes::updateVertexColorBuffer() {
     );
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -835,7 +832,7 @@ void RenderableFluxNodes::updateVertexFilteringBuffer() {
     );
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

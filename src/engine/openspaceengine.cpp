@@ -740,7 +740,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    bool loading = true;
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -756,16 +755,16 @@ void OpenSpaceEngine::loadAssets() {
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
+                progressInfo.progress = [](const ResourceSynchronization* s) {
+                    if (!s->nTotalBytesIsKnown()) {
                         return 0.f;
                     }
-                    if (sync->nTotalBytes() == 0) {
+                    if (s->nTotalBytes() == 0) {
                         return 1.f;
                     }
                     return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
+                        static_cast<float>(s->nSynchronizedBytes()) /
+                        static_cast<float>(s->nTotalBytes());
                 }(sync);
 
                 _loadingScreen->updateItem(
@@ -801,7 +800,6 @@ void OpenSpaceEngine::loadAssets() {
             break;
         }
 
-        loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
@@ -824,7 +822,6 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
-                loading = true;
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),

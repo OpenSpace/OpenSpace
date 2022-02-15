@@ -55,4 +55,3 @@ std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictio
 }
 
 } // namespace openspace
-\
