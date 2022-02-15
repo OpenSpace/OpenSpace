@@ -71,6 +71,7 @@ public:
     void pausePath();
     void continuePath();
 
+    Path::Type defaultPathType() const;
     double minValidBoundingSphere() const;
     const std::vector<SceneGraphNode*>& relevantNodes();
 

@@ -82,6 +82,15 @@ namespace {
         // A navigation state that determines the start state for the camera path
         std::optional<ghoul::Dictionary> startState
             [[codegen::reference("core_navigation_state")]];
+
+        enum class [[codegen::map(openspace::interaction::Path::Type)]] PathType {
+            AvoidCollision,
+            ZoomOutOverview,
+            Linear,
+            AvoidCollisionWithLookAt
+        };
+        // The type of the created path. Affects the shape of the resulting path
+        std::optional<PathType> pathType;
     };
 #include "path_codegen.cpp"
 } // namespace
@@ -482,10 +491,23 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
     return Waypoint(targetPos, targetRot, info.identifier);
 }
 
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type) {
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
+                              std::optional<Path::Type> forceType)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     const std::optional<float> duration = p.duration;
+
+    Path::Type type;
+    if (forceType.has_value()) {
+        type = *forceType;
+    }
+    else if (p.pathType.has_value()) {
+        type = codegen::map<Path::Type>(*p.pathType);
+    }
+    else {
+        type = global::navigationHandler->pathNavigator().defaultPathType();
+    }
 
     bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?

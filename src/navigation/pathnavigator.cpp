@@ -211,10 +211,6 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    // @TODO (2021-08.16, emmbr): Improve how curve types are handled.
-    // We want the user to be able to choose easily
-    const int pathType = _defaultPathType;
-
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
@@ -225,9 +221,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
     clearPath();
 
     try {
-        _currentPath = std::make_unique<Path>(
-            createPathFromDictionary(dictionary, Path::Type(pathType))
-        );
+        _currentPath = std::make_unique<Path>(createPathFromDictionary(dictionary));
     }
     catch (const documentation::SpecificationError& e) {
         LERROR("Could not create camera path");
@@ -321,6 +315,11 @@ void PathNavigator::continuePath() {
 
     LINFO("Continuing path");
     _isPlaying = true;
+}
+
+Path::Type PathNavigator::defaultPathType() const {
+    const int pathType = _defaultPathType;
+    return Path::Type(pathType);
 }
 
 double PathNavigator::minValidBoundingSphere() const {
@@ -453,7 +452,7 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "camera is set based on the target node. Either of the optional "
                 "parameters can be left out."
             },
-             {
+            {
                 "flyToNavigationState",
                 &luascriptfunctions::flyToNavigationState,
                 "table, [double]",
@@ -461,6 +460,33 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
                 "The optional double specifies the target duration of the motion. Note "
                 "that roll must be included for the target up direction to be taken "
                 "into account."
+            },
+            {
+                "zoomToFocus",
+                &luascriptfunctions::zoomToFocus,
+                "[duration]",
+                "Zoom linearly to the current focus node, using the default distance."
+                "The optional input parameter specifies the duration for the motion."
+            },
+            {
+                "zoomToDistance",
+                &luascriptfunctions::zoomToDistance,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given in meters above the bounding sphere of the "
+                "current focus node."
+                "The optional input parameter specifies the duration for the motion."
+            },
+            {
+                "zoomToDistanceRelative",
+                &luascriptfunctions::zoomToDistanceRelative,
+                "distance, [duration]",
+                "Fly linearly to a specific distance in relation to the focus node. "
+                "The distance is given as a multiple of the bounding sphere of the "
+                "current focus node. That is, a value of 1 will result in a position "
+                "at a distance of one times the size of the bounding sphere away from "
+                "the object."
+                "The optional input parameter specifies the duration for the motion."
             },
             {
                 "createPath",

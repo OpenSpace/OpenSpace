@@ -140,11 +140,17 @@ private:
     CameraPose _prevPose;
 };
 
-
-// Create a path of the given type based on an instruction given as a dictionary.
-// See top of cpp file for documentation on keys and values for the dictionary.
-// Returns the created path.
-Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type type);
+/**
+ * Create a path based on an instruction given as a dictionary. (See top of cpp file
+ * for documentation on keys and values for the dictionary.)
+ * If /p forceType is specified, that type will primarily be used as the type for the
+ * created path. Secondly, the type will be read from the dictionary, and lastly it will
+ * use the default from PathNavigator.
+ *
+ * Returns the created path.
+ */
+Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
+    std::optional<Path::Type> forceType = std::nullopt);
 
 } // namespace openspace::interaction
 
