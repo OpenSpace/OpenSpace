@@ -120,6 +120,7 @@ void PathCurve::initializeParameterData() {
     }
 
     // TODO: check that we have at least one sample at the end and if not, throw an error
+    // OBS! Must also handle the error on creation
     if (!(_parameterSamples.back().u > (max - 1.0))) {
         // TODO: throw
     }
@@ -278,10 +279,25 @@ glm::dvec3 PathCurve::interpolate(double u) const {
 
 LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
-    _points.push_back(start.position());
     _points.push_back(end.position());
-    _points.push_back(end.position());
-    initializeParameterData();
+
+    _totalLength = glm::distance(start.position(), end.position());
+    _nSegments = 1;
+}
+
+glm::dvec3 LinearCurve::positionAt(double relativeDistance) const {
+    return interpolate(relativeDistance);
+}
+
+glm::dvec3 LinearCurve::interpolate(double u) const {
+    if (u <= 0.0) {
+        return _points.front();
+    }
+    if (u >= 1.0) {
+        return _points.back();
+    }
+
+    return ghoul::interpolateLinear(u, _points.front(), _points.back());
 }
 
 } // namespace openspace::interaction

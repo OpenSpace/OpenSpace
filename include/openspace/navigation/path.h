@@ -132,6 +132,7 @@ private:
     double _traveledDistance = 0.0;
     double _progressedTime = 0.0; // Time since playback started
     bool _forceQuit = false;
+    CameraPose _prevPose;
 };
 
 

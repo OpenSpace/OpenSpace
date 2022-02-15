@@ -41,14 +41,20 @@ public:
     /**
      * Compute and return the position along the path at the specified relative
      * distance. The input parameter should be in range [0, 1], where 1 correspond to
-     * the full length of the path
+     * the full length of the path.
+     *
+     * Can be overridden by subclasses that want more control over the position
+     * interpolation
      */
-    glm::dvec3 positionAt(double relativeDistance) const;
+    virtual glm::dvec3 positionAt(double relativeDistance) const;
 
     /**
      * Get the intorlatied position along the spline, based on the given curve parameter
      * u in range [0, 1]. A curve parameter of 0 returns the start position and 1 the end
      * position. Note that u does not correspond to the relatively traveled distance.
+     *
+     * Can be overridden by subclasses that want more control over the position
+     * interpolation
      */
     virtual glm::dvec3 interpolate(double u) const;
 
@@ -94,6 +100,9 @@ protected:
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
+
+    glm::dvec3 positionAt(double relativeDistance) const override;
+    glm::dvec3 interpolate(double u) const override;
 };
 
 } // namespace openspace::interaction

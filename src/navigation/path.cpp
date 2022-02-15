@@ -108,6 +108,8 @@ Path::Path(Waypoint start, Waypoint end, Type type,
             throw ghoul::MissingCaseException();
     }
 
+    _prevPose = _start.pose();
+
     // Compute speed factor to match any given duration, by traversing the path and
     // computing how much faster/slower it should be
     _speedFactorFromDuration = 1.0;
@@ -119,6 +121,12 @@ Path::Path(Waypoint start, Waypoint end, Type type,
 
         // We now know how long it took to traverse the path. Use that
         _speedFactorFromDuration = _progressedTime / *duration;
+
+        // Reset playback variables
+        _prevPose = _start.pose();
+        _traveledDistance = 0.0;
+        _progressedTime = 0.0;
+        _forceQuit = false;
     }
 
     LINFO(fmt::format("Path length: {}", pathLength()));
@@ -137,12 +145,42 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 CameraPose Path::traversePath(double dt, float speedScale) {
     double speed = speedAlongPath(_traveledDistance);
     speed *= static_cast<double>(speedScale);
-    const double displacement =  dt * speed;
+    double displacement =  dt * speed;
 
-    double prevDistance = _traveledDistance;
+    const double prevDistance = _traveledDistance;
 
     _progressedTime += dt;
     _traveledDistance += displacement;
+
+    //LINFO(fmt::format("_traveledDistance: {}", _traveledDistance));
+
+    CameraPose newPose;
+
+    if (_type == Type::Linear) {
+        // TODO: OBS! Could probably do this only for defaulted linear (when length over a certain size)
+        //LINFO("Linear path: special case");
+        const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
+        const double remainingDistance = glm::length(prevPosToEnd);
+
+        //LINFO(fmt::format("displacement: {}", displacement));
+        //LINFO(fmt::format("remaining distance: {}", glm::length(prevPosToEnd)));
+        //LINFO(fmt::format("prevPosToEnd: {}", ghoul::to_string(prevPosToEnd)));
+
+        // Actual displacement may not be bigger than remaining distance
+        if (displacement > remainingDistance) {
+            displacement = remainingDistance;
+            _traveledDistance = pathLength();
+            _forceQuit = true;
+        }
+
+        // Just move along the line from the current position to the target
+        newPose.position = _prevPose.position -
+            displacement * glm::normalize(prevPosToEnd);
+        newPose.rotation = interpolateRotation(_traveledDistance / pathLength());
+        //newPose.rotation = interpolateRotation(_progressedTime / 3.0); // TODO: TESTING TIME BASED INTERPOLATION
+        _prevPose = newPose;
+        return newPose;
+    }
 
     if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
         // The distaces are too large, so we are not making progress because of
@@ -151,7 +189,10 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         LWARNING("Quit camera path prematurely due to insufficient precision");
     }
 
-    return interpolatedPose(_traveledDistance);
+    newPose = interpolatedPose(_traveledDistance);
+    _prevPose = newPose;
+    return newPose;
+
 }
 
 std::string Path::currentAnchor() const {
@@ -245,9 +286,8 @@ double Path::speedAlongPath(double traveledDistance) const {
     const glm::dvec3 endNodePos = _end.node()->worldPosition();
     const glm::dvec3 startNodePos = _start.node()->worldPosition();
 
-    const CameraPose prevPose = interpolatedPose(traveledDistance);
-    const double distanceToEndNode = glm::distance(prevPose.position, endNodePos);
-    const double distanceToStartNode = glm::distance(prevPose.position, startNodePos);
+    const double distanceToEndNode = glm::distance(_prevPose.position, endNodePos);
+    const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
 
     // Decide which is the closest node
     SceneGraphNode* closestNode = _start.node();
@@ -258,7 +298,7 @@ double Path::speedAlongPath(double traveledDistance) const {
         closestNode = _end.node();
     }
 
-    const double distanceToClosestNode = glm::distance(closestPos, prevPose.position);
+    const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
     double speed = distanceToClosestNode;
 
     // Dampen speed in beginning of path
@@ -279,7 +319,7 @@ double Path::speedAlongPath(double traveledDistance) const {
     }
 
     if (traveledDistance > (pathLength() - closeUpDistance)) {
-        const double remainingDistance = pathLength() - traveledDistance;
+        const double remainingDistance = pathLength() - traveledDistance; // TODO: see if I can use prevpose for this instead somehow
         speed *= remainingDistance / closeUpDistance + 0.01;
     }
 
@@ -387,7 +427,9 @@ struct NodeInfo {
     bool useTargetUpDirection;
 };
 
-Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& startPoint) {
+Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& startPoint,
+                                     Path::Type type)
+{
     const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
     if (!targetNode) {
         LERROR(fmt::format("Could not find target node '{}'", info.identifier));
@@ -408,7 +450,16 @@ Waypoint computeWaypointFromNodeInfo(const NodeInfo& info, const Waypoint& start
         const double height = info.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 
-        const glm::dvec3 stepDir = computeGoodStepDirection(targetNode, startPoint);
+        glm::dvec3 stepDir = glm::dvec3(0.0);
+        if (type == Path::Type::Linear) {
+            // If linear path, compute position along line form start to end point
+            glm::dvec3 endNodePos = targetNode->worldPosition();
+            stepDir = glm::normalize(startPoint.position() - endNodePos);
+        }
+        else {
+            stepDir = computeGoodStepDirection(targetNode, startPoint);
+        }
+
         targetPos = targetNode->worldPosition() + stepDir * distanceFromNodeCenter;
     }
 
@@ -473,7 +524,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
                 p.useTargetUpDirection.value_or(false)
             };
 
-            waypoints = { computeWaypointFromNodeInfo(info, startPoint) };
+            waypoints = { computeWaypointFromNodeInfo(info, startPoint, type) };
             break;
         }
         default: {
