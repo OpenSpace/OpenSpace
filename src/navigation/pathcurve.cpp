@@ -43,6 +43,10 @@ namespace {
 
 namespace openspace::interaction {
 
+PathCurve::InsufficientPrecisionError::InsufficientPrecisionError(std::string error)
+    : ghoul::RuntimeError(std::move(error), "PathCurve")
+{}
+
 PathCurve::~PathCurve() {}
 
 double PathCurve::length() const {
@@ -112,18 +116,14 @@ void PathCurve::initializeParameterData() {
     }
 
     if (problematic) {
-        LWARNING(
-            "Insufficient precision to represent entire path. "
-            "Might lead to unexpected behavior behavior."
-        );
-        // TODO: If this happens, maybe switch to a linear path type?
+        throw InsufficientPrecisionError("Insufficient precision due to path length");
     }
 
-    // TODO: check that we have at least one sample at the end and if not, throw an error
-    // OBS! Must also handle the error on creation
-    if (!(_parameterSamples.back().u > (max - 1.0))) {
-        // TODO: throw
-    }
+    // OBS! Should no longer be needed with the check above
+    // Check that we have at least one sample at the end and if not, throw an error
+    //if (!(_parameterSamples.back().u > (max - 1.0))) {
+    //    // TODO: throw
+    //}
 
     // Remove the very last sample if indistinguishable from the final one
     const double diff = std::abs(_totalLength - _parameterSamples.back().s);

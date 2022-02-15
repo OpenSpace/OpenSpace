@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PATHCURVE___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/exception.h>
 #include <vector>
 
 namespace openspace::interaction {
@@ -34,6 +35,10 @@ class Waypoint;
 
 class PathCurve {
 public:
+    struct InsufficientPrecisionError : public ghoul::RuntimeError {
+        explicit InsufficientPrecisionError(std::string msg);
+    };
+
     virtual ~PathCurve() = 0;
 
     double length() const;

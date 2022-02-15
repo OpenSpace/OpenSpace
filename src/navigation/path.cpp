@@ -166,6 +166,8 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         //LINFO(fmt::format("remaining distance: {}", glm::length(prevPosToEnd)));
         //LINFO(fmt::format("prevPosToEnd: {}", ghoul::to_string(prevPosToEnd)));
 
+        // TODO: do some extra damping at the end
+
         // Actual displacement may not be bigger than remaining distance
         if (displacement > remainingDistance) {
             displacement = remainingDistance;
@@ -176,6 +178,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
         // Just move along the line from the current position to the target
         newPose.position = _prevPose.position -
             displacement * glm::normalize(prevPosToEnd);
+
         newPose.rotation = interpolateRotation(_traveledDistance / pathLength());
         //newPose.rotation = interpolateRotation(_progressedTime / 3.0); // TODO: TESTING TIME BASED INTERPOLATION
         _prevPose = newPose;
@@ -535,7 +538,26 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
     const Waypoint waypointToAdd = waypoints[0];
 
-    return Path(startPoint, waypointToAdd, type, duration);
+    try {
+        return Path(startPoint, waypointToAdd, type, duration);
+    }
+    catch (const PathCurve::InsufficientPrecisionError& e) {
+        // There wasn't enough precision to represent the full curve in world
+        // coordinates. For now, use a linear path instead. It uses another
+        // method of interpolation that isn't as sensitive to these kinds of problems
+
+        LINFO(
+            "Insufficient precision to represent entire path, due to very large "
+            "path length. Switching to a linear path."
+        );
+
+        return createPathFromDictionary(dictionary, Path::Type::Linear);
+
+        // @TODO (emmbr26, 2022-02-15): later on we want to improve this case, so that
+        // interpolation is not a problem. One suggestion to solve this would be using
+        // two identical paths and switch the direction of interpolation halfway through.
+        // That should give us sufficient precision at both ends of the path
+    }
 }
 
 } // namespace openspace::interaction
