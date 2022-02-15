@@ -122,14 +122,8 @@ Path::Path(Waypoint start, Waypoint end, Type type,
         // We now know how long it took to traverse the path. Use that
         _speedFactorFromDuration = _progressedTime / *duration;
 
-        // Reset playback variables
-        _prevPose = _start.pose();
-        _traveledDistance = 0.0;
-        _progressedTime = 0.0;
-        _forceQuit = false;
+        resetPlaybackVariables();
     }
-
-    LINFO(fmt::format("Path length: {}", pathLength()));
 }
 
 Waypoint Path::startPoint() const { return _start; }
@@ -152,45 +146,41 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     _progressedTime += dt;
     _traveledDistance += displacement;
 
-    //LINFO(fmt::format("_traveledDistance: {}", _traveledDistance));
-
     CameraPose newPose;
 
-    if (_type == Type::Linear) {
-        // TODO: OBS! Could probably do this only for defaulted linear (when length over a certain size)
+    if (_type == Type::Linear) { // TODO: this case is really only needed for very long linear paths
         const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
         const double remainingDistance = glm::length(prevPosToEnd);
-
-        // TODO: do some extra damping at the end
 
         // Actual displacement may not be bigger than remaining distance
         if (displacement > remainingDistance) {
             displacement = remainingDistance;
             _traveledDistance = pathLength();
             _forceQuit = true;
+            return _end.pose();
         }
 
         // Just move along the line from the current position to the target
         newPose.position = _prevPose.position -
             displacement * glm::normalize(prevPosToEnd);
 
-        newPose.rotation = interpolateRotation(_traveledDistance / pathLength());
+        const double relativeDistance = _traveledDistance / pathLength();
+        newPose.rotation = interpolateRotation(relativeDistance);
         //newPose.rotation = interpolateRotation(_progressedTime / 3.0); // TODO: TESTING TIME BASED INTERPOLATION
-        _prevPose = newPose;
-        return newPose;
+    }
+    else {
+        if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
+            // The distaces are too large, so we are not making progress because of
+            // insufficient precision
+            _forceQuit = true;
+            LWARNING("Quit camera path prematurely due to insufficient precision");
+        }
+
+        newPose = interpolatedPose(_traveledDistance);
     }
 
-    if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
-        // The distaces are too large, so we are not making progress because of
-        // insufficient precision
-        _forceQuit = true;
-        LWARNING("Quit camera path prematurely due to insufficient precision");
-    }
-
-    newPose = interpolatedPose(_traveledDistance);
     _prevPose = newPose;
     return newPose;
-
 }
 
 std::string Path::currentAnchor() const {
@@ -204,6 +194,13 @@ bool Path::hasReachedEnd() const {
     }
 
     return (_traveledDistance / pathLength()) >= 1.0;
+}
+
+void Path::resetPlaybackVariables() {
+    _prevPose = _start.pose();
+    _traveledDistance = 0.0;
+    _progressedTime = 0.0;
+    _forceQuit = false;
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
@@ -299,8 +296,11 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
     double speed = distanceToClosestNode;
 
+    constexpr const double closeUpDistanceFactor = 3.0;
+    constexpr const double startUpDistanceFactor = 2.0;
+
     // Dampen speed in beginning of path
-    double startUpDistance = 2.0 * _start.node()->boundingSphere();
+    double startUpDistance = startUpDistanceFactor * _start.node()->boundingSphere();
     if (startUpDistance < LengthEpsilon) { // zero bounding sphere
         startUpDistance = glm::distance(_start.position(), startNodePos);
     }
@@ -310,14 +310,20 @@ double Path::speedAlongPath(double traveledDistance) const {
     }
 
     // Dampen speed in end of path
-    // Note: this leads to problems when the full length of the path is really big
-    double closeUpDistance = 2.0 * _end.node()->boundingSphere();
+    double closeUpDistance = closeUpDistanceFactor * _end.node()->boundingSphere();
     if (closeUpDistance < LengthEpsilon) { // zero bounding sphere
         closeUpDistance = glm::distance(_end.position(), endNodePos);
     }
 
     if (traveledDistance > (pathLength() - closeUpDistance)) {
-        const double remainingDistance = pathLength() - traveledDistance; // TODO: see if I can use prevpose for this instead somehow
+        double remainingDistance = 0.0;
+        if (_type == Type::Linear) {
+            remainingDistance = glm::distance(_prevPose.position,_end.position());
+        }
+        else {
+            remainingDistance = pathLength() - traveledDistance;
+        }
+
         speed *= remainingDistance / closeUpDistance + 0.01;
     }
 
@@ -542,8 +548,8 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary, Path::Type ty
         // method of interpolation that isn't as sensitive to these kinds of problems
 
         LINFO(
-            "Insufficient precision to represent entire path, due to very large "
-            "path length. Switching to a linear path."
+            "Switching to a linear path, to avoid problems with precision due to "
+            "immense path length."
         );
 
         return createPathFromDictionary(dictionary, Path::Type::Linear);

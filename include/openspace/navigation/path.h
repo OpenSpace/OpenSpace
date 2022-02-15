@@ -92,6 +92,11 @@ public:
      */
     CameraPose interpolatedPose(double distance) const;
 
+    /*
+     * Reset variables used to play back path
+     */
+    void resetPlaybackVariables();
+
 private:
     /**
      * Interpolate between the paths start and end rotation using the approach that
