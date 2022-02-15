@@ -74,6 +74,7 @@ void ParallelServer::handleNewPeers() {
         std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
             id,
             "",
+            "",
             ParallelConnection(std::move(s)),
             ParallelConnection::Status::Connecting,
             ParallelConnection::ViewStatus::HostView,
@@ -203,8 +204,9 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
     }
 
     setName(*peer, name);
+    assignViewerModel(*peer);
 
-    LINFO(fmt::format("Connection established with {} ('{}')", peer->id, name));
+    LINFO(fmt::format("Connection established with {} ('{}', {})", peer->id, name, peer->model));
 
     std::string defaultHostAddress;
     {
@@ -214,7 +216,7 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
     if (_hostPeerId == 0 &&
         peer->parallelConnection.socket()->address() == defaultHostAddress)
     {
-        // Directly promote the conenction to host (initialize) if there is no host, and
+        // Directly promote the connection to host (initialize) if there is no host, and
         // ip matches default host ip.
         LINFO(fmt::format("Connection {} directly promoted to host", peer->id));
         assignHost(peer);
@@ -235,7 +237,7 @@ void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
         sendMessageToClients(ParallelConnection::MessageType::Data, data);
     }
     else if (peer.viewStatus == ParallelConnection::ViewStatus::IndependentView) {
-        sendMessageToAll(ParallelConnection::MessageType::Data, data); // Send to all, so host can also use the info
+        sendMessageToAll(ParallelConnection::MessageType::Data, data);
     }
     else {
         LINFO(fmt::format(
@@ -286,16 +288,14 @@ void ParallelServer::handleHostshipResignation(Peer& peer) {
 void ParallelServer::handleViewRequest(Peer& peer) {
     if (_independentViewAllowed) {
         setViewStatus(peer, ParallelConnection::ViewStatus::IndependentView);
-        LINFO(fmt::format("{} is now using host-independent viewpoint", peer.id));
-
+        LINFO(fmt::format("{} is now using host-independent viewpoint", peer.name));
         sendViewStatusChange(peer);
     }
 }
 
 void ParallelServer::handleViewResignation(Peer& peer) {
     setViewStatus(peer, ParallelConnection::ViewStatus::HostView);
-    LINFO(fmt::format("{} is now using the host's viewpoint", peer.id));
-
+    LINFO(fmt::format("{} is now using the host's viewpoint", peer.name));
     sendViewStatusChange(peer);
 }
 
@@ -362,6 +362,8 @@ void ParallelServer::disconnect(Peer& peer) {
     if (peer.id == hostPeerId) {
         setToClient(peer);
     }
+
+    removeViewerModel(peer);
 
     peer.parallelConnection.disconnect();
     peer.thread.join();
@@ -491,7 +493,7 @@ void ParallelServer::sendIndependentSessionOff() {
     sendMessageToAll(ParallelConnection::MessageType::IndependentSessionOff, data);
 }
 
-// Sends ViewStatus information about the given peer to all clients.
+// Sends ViewStatus and model information about the given peer to all clients.
 void ParallelServer::sendViewStatusChange(Peer& peer) {
     std::vector<char> data;
     const uint32_t outViewStatus = static_cast<uint32_t>(peer.viewStatus);
@@ -514,11 +516,57 @@ void ParallelServer::sendViewStatusChange(Peer& peer) {
         peer.name.data() + outPeerNameSize
     );
 
+    const uint32_t outPeerModelSize = static_cast<uint32_t>(peer.model.size());
+    data.insert(
+        data.end(),
+        reinterpret_cast<const char*>(&outPeerModelSize),
+        reinterpret_cast<const char*>(&outPeerModelSize) + sizeof(uint32_t)
+    );
+
+    data.insert(
+        data.end(),
+        peer.model.data(),
+        peer.model.data() + outPeerModelSize
+    );
+
     sendMessageToAll(ParallelConnection::MessageType::ViewStatusChange, data);
 }
 
-std::string getViewerModel() {
-    return ""; // use std::pair
+// Assign a model name to peer.
+void ParallelServer::assignViewerModel(Peer& peer) {
+    // Check if peer already has an assigned model.
+    if (peer.model != "") {
+        LERROR(fmt::format("User '{}' already has an assigned model.", peer.name));
+        return;
+    }
+
+    // Assign first available model to peer.
+    for (int i = 0; i < sizeof(modelList) / sizeof(modelList[0]); ++i)
+    {
+        if (modelList[i].second == false) {
+            modelList[i].second = true;
+            peer.model = modelList[i].first;
+            LINFO(fmt::format("Set '{}'s model to '{}'.", peer.name, peer.model));
+            return;
+        }
+    }
+
+    LERROR(fmt::format("Ran out of available models. None assigned to '{}'.", peer.name));
+}
+
+// Remove the model assigned to peer.
+void ParallelServer::removeViewerModel(Peer& peer) {
+    for (int i = 0; i < sizeof(modelList) / sizeof(modelList[0]); ++i)
+    {
+        if (modelList[i].first == peer.model) {
+            peer.model = "";
+            modelList[i].second = false;
+            LINFO(fmt::format("Removed model from '{}'.", peer.name));
+            return;
+        }
+    }
+
+    LERROR(fmt::format("Could not remove '{}'s model because they had none assigned.", peer.name));
 }
 
 size_t ParallelServer::nConnections() const {

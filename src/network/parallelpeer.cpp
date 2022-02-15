@@ -38,6 +38,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>
@@ -206,9 +207,6 @@ void ParallelPeer::disconnect() {
     setStatus(ParallelConnection::Status::Disconnected);
 
     _isConnected = false;
-
-    _independentView.setReadOnly(true);
-    reloadUI();
 }
 
 void ParallelPeer::sendAuthentication() {
@@ -358,12 +356,12 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
                 pose
             );
         }
-        // If you are independent, update position of host's node.
+        // If you are independent, update position of node.
         else {
             std::string script;
             script = fmt::format(
                 "openspace.setPropertyValueSingle("
-                "'Scene.Viewer_{}.Translation.Position', {})",
+                "'Scene.Viewer_{}.Translation.Position', {}, 0.1)",
                 name,
                 pose.position
             );
@@ -374,17 +372,19 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
             // Reparent
             SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode("Viewer_" + name);
-            if (node->parent() == nullptr || node->parent()->identifier() != pose.focusNode) {
-
-                script = fmt::format(
-                    "openspace.setParent('Viewer_{}', '{}')",
-                    name,
-                    pose.focusNode
-                );
-                global::scriptEngine->queueScript(
-                    script,
-                    scripting::ScriptEngine::RemoteScripting(false)
-                );
+            if (node != nullptr) {
+                if (node->parent() == nullptr || node->parent()->identifier() != pose.focusNode) {
+                    script = fmt::format(
+                        "openspace.setParent('Viewer_{}', '{}')",
+                        name,
+                        pose.focusNode
+                    );
+                    global::scriptEngine->queueScript(
+                        script,
+                        scripting::ScriptEngine::RemoteScripting(false)
+                    );
+                    LINFO(fmt::format("Set parent of {} to {}", name, pose.focusNode));
+                }
             }
         }
 
@@ -405,22 +405,24 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         pose.followFocusNodeRotation = kf._followNodeRotation;
         std::string name = kf._name; // Sender's name
 
-        if (name != std::string(_name)) {
-            std::string script;
-            script = fmt::format(
-                "openspace.setPropertyValueSingle("
-                "'Scene.Viewer_{}.Translation.Position', {})",
-                name,
-                pose.position
-            );
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::RemoteScripting(false)
-            );
+        // Set node position
+        std::string script;
+        script = fmt::format(
+            "openspace.setPropertyValueSingle("
+            "'Scene.Viewer_{}.Translation.Position', {}, 0.1)",
+            name,
+            pose.position
+        );
+        global::scriptEngine->queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting(false)
+        );
 
-            // Reparent
-            SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode("Viewer_" + name);
+        // Reparent
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode("Viewer_" + name);
+        if (node != nullptr) {
             if (node->parent() == nullptr || node->parent()->identifier() != pose.focusNode) {
+                LINFO(fmt::format("Set {}'s parent to {}.", name, pose.focusNode));
                 script = fmt::format(
                     "openspace.setParent('Viewer_{}', '{}')",
                     name,
@@ -481,13 +483,16 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
         break;
     }
     case datamessagestructures::Type::ScriptData: {
-        datamessagestructures::ScriptMessage sm;
-        sm.deserialize(buffer);
+        // If you're independent, don't execute scripts received from host
+        if (_viewStatus != ParallelConnection::ViewStatus::IndependentView) {
+            datamessagestructures::ScriptMessage sm;
+            sm.deserialize(buffer);
 
-        global::scriptEngine->queueScript(
-            sm._script,
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+            global::scriptEngine->queueScript(
+                sm._script,
+                scripting::ScriptEngine::RemoteScripting::No
+            );
+        }
         break;
     }
     default: {
@@ -581,7 +586,6 @@ void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
         LERROR("Faulty view status in viewStatusMessageReceived().");
         return; // Should never happen.
     }
-
     pointer += sizeof(uint32_t);
 
     const size_t nameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
@@ -592,41 +596,42 @@ void ParallelPeer::viewStatusMessageReceived(const std::vector<char>& message) {
         name = std::string(&message[pointer], nameSize);
     }
     pointer += nameSize;
+
+    const size_t modelSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    pointer += sizeof(uint32_t);
+
+    std::string model;
+    if (modelSize > 0) {
+        model = std::string(&message[pointer], modelSize);
+    }
+    pointer += modelSize;
     
     if (viewStatus == ParallelConnection::ViewStatus::HostView) {
-        std::string script;
 
         if (name == std::string(_name)) {
-            // Delete host node since you are now sharing the host's view.
-            LINFO(fmt::format("1a"));
-            if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + _hostName) != nullptr) {
-                LINFO(fmt::format("1b"));
-                script = "openspace.removeSceneGraphNode('Viewer_" + _hostName + "')"; // TODO: not properly deleting node
-            }
+            // Delete host node and your own node since you are now sharing the host's view
+            removeViewerNode(_hostName);
         }
-        else {
-            // Delete [name]'s node since they are now sharing the host's view.
-            LINFO(fmt::format("2a"));
-            if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name) != nullptr) {
-                LINFO(fmt::format("2b"));
-                script = "openspace.removeSceneGraphNode('Viewer_" + name + "')";
-            }
-        }
-        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+
+        // Delete [name]'s node since they are now sharing the host's view
+        removeViewerNode(name);
     }
-    else { // viewStatus == IndependentView
-        std::string dictionary;
+    else { // if (viewStatus == IndependentView)
 
         if (name == std::string(_name)) {
-            // Create host node since you now have your own view.
-            dictionary = ghoul::formatLua(viewerDictionary(_hostName));
+            // Create host node since you now have your own view
+            createViewerNode(_hostName, _hostModel);
         }
         else {
-            // Create node for [name] since they now have their own view.
-            dictionary = ghoul::formatLua(viewerDictionary(name));
+            // Create node for [name] since they now have their own view
+            createViewerNode(name, model);
         }
-        std::string script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
-        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+
+        // If you are independent or host, make sure you have a
+        // modelless node for youself for parenting purposes
+        if (_viewStatus != ParallelConnection::ViewStatus::HostView) {
+            createViewerNode(_name, "");
+        }
     }
 }
 
@@ -1017,7 +1022,7 @@ void ParallelPeer::sendTimeTimeline() {
     ));
 }
 
-void ParallelPeer::reloadUI() {
+void ParallelPeer::reloadGUI() {
     std::string script = "if openspace.hasProperty('Modules.CefWebGui.Reload')"
         " then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end";
 
@@ -1031,35 +1036,105 @@ ghoul::Event<>& ParallelPeer::connectionEvent() {
     return *_connectionEvent;
 }
 
+void ParallelPeer::createViewerNode(std::string name, std::string model) {
+    if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name) == nullptr) {
+        std::string dictionary = ghoul::formatLua(viewerDictionary(name, model));
+        std::string script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+
+        LINFO(fmt::format("Created node: Viewer_{} with model {}", _hostName, _hostModel));
+    }
+
+    if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name + "_Label") == nullptr) {
+        std::string dictionary = ghoul::formatLua(viewerLabelDictionary(name));
+        std::string script = fmt::format("openspace.addSceneGraphNode({})", dictionary);
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+    }
+
+    reloadGUI();
+}
+
+void ParallelPeer::removeViewerNode(std::string name) {
+    if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name + "_Label") != nullptr) {
+        std::string script = "openspace.removeSceneGraphNode('Viewer_" + name + "_Label')";
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+    }
+
+    if (global::renderEngine->scene()->sceneGraphNode("Viewer_" + name) != nullptr) {
+        std::string script = "openspace.removeSceneGraphNode('Viewer_" + name + "')";
+        global::scriptEngine->queueScript(script, scripting::ScriptEngine::RemoteScripting(false));
+
+        LINFO(fmt::format("Deleted node: Viewer_{}", name));
+    }
+
+    reloadGUI();
+}
+
 // Dictionary with identifier tied to the name of the peer belonging to the node
-ghoul::Dictionary ParallelPeer::viewerDictionary(std::string name) {
+ghoul::Dictionary ParallelPeer::viewerDictionary(std::string name, std::string model) {
     ghoul::Dictionary Node;
     ghoul::Dictionary GUI;
     ghoul::Dictionary Translation;
-    ghoul::Dictionary Renderable;
     ghoul::Dictionary Transform;
+    ghoul::Dictionary LightSource;
+    ghoul::Dictionary LightSources;
+    ghoul::Dictionary Renderable;
 
     std::string identifier = "Viewer_" + name;
-    std::string modelPath = "src/network/avatarmodels/";
-    std::string modelName = "diamond";
+    std::filesystem::path modelPath = absPath("${BASE}/src/network/avatarmodels/");
 
-    GUI.setValue<std::string>("Name", "");
-    GUI.setValue<std::string>("Path", "/Collab" + identifier);
-    GUI.setValue<std::string>("Description", "");
+    GUI.setValue<std::string>("Name", identifier);
+    GUI.setValue<std::string>("Path", "/Collab");
 
     Translation.setValue<std::string>("Type", "StaticTranslation");
-    Translation.setValue<std::string>("Body", identifier);
     Translation.setValue<glm::dvec3>("Position", { 0.0, 0.0, 0.0 });
 
-    Renderable.setValue<std::string>("Type", "RenderableModel");
-    Renderable.setValue<std::string>("GeometryFile", modelPath + modelName + ".fpx");
-
     Transform.setValue<ghoul::Dictionary>("Translation", Translation);
-    Transform.setValue<ghoul::Dictionary>("Renderable", Renderable);
+
+    if (model != "") {
+        /*LightSource.setValue<std::string>("Type", "SceneGraphLightSource");
+        LightSource.setValue<std::string>("Identifier", "Sun");
+        LightSource.setValue<std::string>("Node", "SunCenter");
+
+        LightSources.setValue<ghoul::Dictionary>("1", LightSource);*/
+
+        Renderable.setValue<double>("ModelScale", 10000.0);
+        Renderable.setValue<std::string>("Type", "RenderableModel");
+        Renderable.setValue<std::string>("GeometryFile", modelPath.string() + model + ".fbx");
+        LINFO("Model path used: " + modelPath.string() + model + ".fbx");
+        //Renderable.setValue<bool>("PerformShading", true);
+        //Renderable.setValue<ghoul::Dictionary>("LightSources", LightSources);
+
+        Node.setValue<ghoul::Dictionary>("Renderable", Renderable);
+    }
 
     Node.setValue<std::string>("Identifier", identifier);
     Node.setValue<ghoul::Dictionary>("GUI", GUI);
     Node.setValue<ghoul::Dictionary>("Transform", Transform);
+
+    return Node;
+}
+
+ghoul::Dictionary ParallelPeer::viewerLabelDictionary(std::string name) {
+    ghoul::Dictionary Node;
+    ghoul::Dictionary Renderable;
+    ghoul::Dictionary GUI;
+
+    std::string identifier = "Viewer_" + name + "_Label";
+
+    Renderable.setValue<std::string>("Type", "RenderableLabels");
+    Renderable.setValue<std::string>("Text", name);
+    Renderable.setValue<double>("FontSize", 70.0);
+    Renderable.setValue<double>("Size", 5.0);
+    Renderable.setValue<std::string>("OrientationOption", "Camera View Direction");
+    Renderable.setValue<bool>("EnableFading", false);
+
+    GUI.setValue<std::string>("Name", identifier);
+    GUI.setValue<std::string>("Path", "/Collab");
+
+    Node.setValue<std::string>("Identifier", identifier);
+    Node.setValue<std::string>("Parent", "Viewer_" + name);
+    Node.setValue<ghoul::Dictionary>("Renderable", Renderable);
 
     return Node;
 }

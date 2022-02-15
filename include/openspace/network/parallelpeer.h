@@ -93,11 +93,16 @@ private:
     void independentOnMessageReceived();
     void independentOffMessageReceived();
     void viewStatusMessageReceived(const std::vector<char>& message);
-    ghoul::Dictionary viewerDictionary(std::string name);
+
+    ghoul::Dictionary viewerDictionary(std::string name, std::string model);
+    ghoul::Dictionary viewerLabelDictionary(std::string name);
+
+    void createViewerNode(std::string name, std::string model);
+    void removeViewerNode(std::string name);
 
     void sendCameraKeyframe();
     void sendTimeTimeline();
-    void reloadUI();
+    void reloadGUI();
 
     void setStatus(ParallelConnection::Status status);
     void setSessionStatus();
@@ -137,6 +142,7 @@ private:
         ParallelConnection::ViewStatus::HostView;
 
     std::string _hostName;
+    std::string _hostModel = "diamond"; // Hardcoded, should get peer.model upon host connecting
 
     std::deque<ParallelConnection::Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;

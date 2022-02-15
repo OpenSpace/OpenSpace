@@ -52,6 +52,7 @@ private:
     struct Peer {
         size_t id;
         std::string name;
+        std::string model;
         ParallelConnection parallelConnection;
         ParallelConnection::Status status;
         ParallelConnection::ViewStatus viewStatus;
@@ -102,7 +103,16 @@ private:
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
 
-    std::string getViewerModel();
+    std::pair<std::string, bool> modelList[6] = {
+        {"diamond", false},
+        {"cube", false},
+        {"ball", false},
+        {"cylinder", false},
+        {"prism", false},
+        {"star", false}
+    };
+    void assignViewerModel(Peer& peer);
+    void removeViewerModel(Peer& peer);
 
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
