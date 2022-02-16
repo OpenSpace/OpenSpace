@@ -39,6 +39,7 @@ MonitorBox::MonitorBox(QRect widgetDims, std::vector<QRect> monitorResolution,
 }
 
 void MonitorBox::paintEvent(QPaintEvent* event) {
+    Q_UNUSED(event)
     QPainter painter(this);
     QPen pen = painter.pen();
     painter.setPen(pen);
@@ -49,7 +50,11 @@ void MonitorBox::paintEvent(QPaintEvent* event) {
     }
     //Draw & fill monitors over the out-of-bounds regions
     paintMonitorBackgrounds(painter);
-    //Draw window(s) over both out-of-bounds and monitors
+    //Draw window number(s) first for darker contrast, then window(s) over both
+    //out-of-bounds and monitors
+    for (unsigned int i = 0; i < _nWindows; ++i) {
+        paintWindowNumber(painter, i);
+    }
     for (unsigned int i = 0; i < _nWindows; ++i) {
         paintWindow(painter, i);
     }
@@ -101,7 +106,6 @@ void MonitorBox::paintWindow(QPainter& painter, size_t winIdx) {
         QBrush brush(fillColor);
         brush.setStyle(Qt::SolidPattern);
         painter.fillRect(_windowRendering[winIdx], brush);
-        paintWindowNumber(painter, winIdx);
     }
 }
 
