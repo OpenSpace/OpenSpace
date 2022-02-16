@@ -484,15 +484,13 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     }
     case datamessagestructures::Type::ScriptData: {
         // If you're independent, don't execute scripts received from host
-        if (_viewStatus != ParallelConnection::ViewStatus::IndependentView) {
-            datamessagestructures::ScriptMessage sm;
-            sm.deserialize(buffer);
+        datamessagestructures::ScriptMessage sm;
+        sm.deserialize(buffer);
 
-            global::scriptEngine->queueScript(
-                sm._script,
-                scripting::ScriptEngine::RemoteScripting::No
-            );
-        }
+        global::scriptEngine->queueScript(
+            sm._script,
+            scripting::ScriptEngine::RemoteScripting::No
+        );
         break;
     }
     default: {
