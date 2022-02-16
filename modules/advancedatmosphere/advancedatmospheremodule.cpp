@@ -22,23 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
-#define __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
+#include <modules/atmosphere/advancedatmospheremodule.h>
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/atmosphere/rendering/renderableadvancedatmosphere.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-class AtmosphereModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Atmosphere";
+AdvancedAtmosphereModule::AdvancedAtmosphereModule() : OpenSpaceModule(Name) {}
 
-    AtmosphereModule();
-
-private:
-    void internalInitialize(const ghoul::Dictionary&) override;
-};
+void AdvancedAtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableAdvancedAtmosphere>(
+        "RenderableAdvancedAtmosphere"
+    );
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
