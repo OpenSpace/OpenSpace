@@ -1,8 +1,13 @@
-local transforms = asset.require('../transforms')
-local assetHelper = asset.require('util/asset_helper')
-local kernel = asset.require('../kernels').sat375
-asset.require('./trail')
-local labelsPath = asset.require('../saturn_globelabels').LabelsPath
+local transforms = asset.require("../transforms")
+local kernel = asset.require("../kernels").sat375
+asset.require("./trail")
+
+local labelsPath = asset.syncedResource({
+  Name = "Saturn Labels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_labels",
+  Version = 1
+})
 
 local Rhea = {
   Identifier = "Rhea",
@@ -27,7 +32,7 @@ local Rhea = {
     Layers = {},
     Labels = {
       Enabled = false,
-      FileName = labelsPath .. "/rhea.labels",
+      FileName = labelsPath .. "rhea.labels",
       AlignmentOption = "Horizontally", -- or Circularly
       FontSize = 20.0,
       Size = 9.0,
@@ -46,7 +51,16 @@ local Rhea = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Rhea)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Rhea)
+end)
+  
+asset.export(Rhea)
+
 
 
 asset.meta = {

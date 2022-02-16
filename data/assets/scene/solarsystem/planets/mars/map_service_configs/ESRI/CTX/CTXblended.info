@@ -1,5 +1,0 @@
-Name = "CTX Blended beta01"
-Identifier = "CTXblended"
-Description = "Seam-corrected and seam-mapped mosaic of Mars CTX created by Jay Dixon at The Murray Lab"
-HeightFile = nil
-ColorFile = "CTXblended.vrt"

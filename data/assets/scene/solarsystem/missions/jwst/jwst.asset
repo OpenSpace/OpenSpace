@@ -1,8 +1,13 @@
-local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
-local models = asset.require('./model').models
-asset.require('spice/base')
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+asset.require("spice/base")
+
+local models = asset.syncedResource({
+  Name = "JWST Model",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_model",
+  Version = 3
+})
 
 local band = asset.syncedResource({
   Name = "JWST band texture",
@@ -31,7 +36,7 @@ local JWSTBand = {
   Renderable = {
     Enabled = false,
     Type = "RenderableSphere",
-    Texture = band .. "/JWST-band.png",
+    Texture = band .. "JWST-band.png",
     Size = 9.2E15,
     Segments = 50,
     DisableFadeInOut = true,
@@ -59,7 +64,7 @@ local JWSTModel = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/jwst_anim74_2fps_2018_nb.osmodel",
+    GeometryFile = models .. "jwst_anim74_2fps_2018_nb.osmodel",
     ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
     EnableAnimation = true,
     AnimationStartTime = "2018 10 01 14:06:03",
@@ -146,12 +151,24 @@ local JWSTLabel = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  JWSTBand,
-  JWSTModel,
-  JWSTFov,
-  JWSTLabel
-})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTBand)
+  openspace.addSceneGraphNode(JWSTModel)
+  openspace.addSceneGraphNode(JWSTFov)
+  openspace.addSceneGraphNode(JWSTLabel)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTLabel)
+  openspace.removeSceneGraphNode(JWSTFov)
+  openspace.removeSceneGraphNode(JWSTModel)
+  openspace.removeSceneGraphNode(JWSTBand)
+end)
+    
+asset.export(JWSTBand)
+asset.export(JWSTModel)
+asset.export(JWSTFov)
+asset.export(JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",

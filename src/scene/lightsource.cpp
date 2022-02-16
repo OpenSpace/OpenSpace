@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,8 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<LightSource>();
+    ghoul::TemplateFactory<LightSource>* factory =
+        FactoryManager::ref().factory<LightSource>();
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -493,6 +493,7 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
 
 void convertVersion10to11(nlohmann::json& profile) {
     // Version 1.1 introduced actions and remove Lua function calling from keybindings
+    profile["version"] = Profile::Version{ 1, 1 };
 
     if (profile.find("keybindings") == profile.end()) {
         // We didn't find any keybindings, so there is nothing to do
@@ -525,8 +526,6 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     profile["actions"] = actions;
     profile["keybindings"] = keybindings;
-
-    profile["version"] = Profile::Version{ 1, 1 };
 }
 
 } // namespace version10

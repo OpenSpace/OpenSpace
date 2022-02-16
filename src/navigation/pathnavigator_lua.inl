@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
-using namespace std::string_literals;
-
 namespace {
     constexpr const double Epsilon = 1e-5;
 } // namespace
@@ -70,8 +68,8 @@ int stopPath(lua_State* L) {
     return 0;
 }
 
-int goTo(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::goTo");
+int flyTo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::flyTo");
     auto [nodeIdentifier, useUpFromTargetOrDuration, duration] = ghoul::lua::values<
         std::string, std::optional<std::variant<bool, double>>, std::optional<double>
     >(L);
@@ -89,7 +87,7 @@ int goTo(lua_State* L) {
     }
 
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", "Node"s);
+    insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     if (useUpFromTargetOrDuration.has_value()) {
         if (std::holds_alternative<bool>(*useUpFromTargetOrDuration)) {
@@ -122,8 +120,8 @@ int goTo(lua_State* L) {
     return 0;
 }
 
-int goToHeight(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToHeight");
+int flyToHeight(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::flyToHeight");
     auto [nodeIdentifier, height, useUpFromTargetOrDuration, duration] =
         ghoul::lua::values<
             std::string, double, std::optional<std::variant<bool, double>>,
@@ -136,7 +134,7 @@ int goToHeight(lua_State* L) {
     }
 
     ghoul::Dictionary insDict;
-    insDict.setValue("TargetType", "Node"s);
+    insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
     if (useUpFromTargetOrDuration.has_value()) {
@@ -171,8 +169,8 @@ int goToHeight(lua_State* L) {
     return 0;
 }
 
-int goToNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::goToNavigationState");
+int flyToNavigationState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::flyToNavigationState");
     auto [navigationState, duration] =
         ghoul::lua::values<ghoul::Dictionary, std::optional<double>>(L);
 
@@ -184,14 +182,14 @@ int goToNavigationState(lua_State* L) {
         );
     }
     catch (documentation::SpecificationError& e) {
-        LERRORC("goToNavigationState", ghoul::to_string(e.result));
+        LERRORC("flyToNavigationState", ghoul::to_string(e.result));
         return ghoul::lua::luaError(
             L, fmt::format("Unable to create a path: {}", e.what())
         );
     }
 
     ghoul::Dictionary instruction;
-    instruction.setValue("TargetType", "NavigationState"s);
+    instruction.setValue("TargetType", std::string("NavigationState"));
     instruction.setValue("NavigationState", navigationState);
 
     if (duration.has_value()) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,

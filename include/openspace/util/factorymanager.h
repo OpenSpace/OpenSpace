@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,12 +88,14 @@ public:
 
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
-     * \param factory The ghoul::TemplateFactory to add to this FactoryManager
      * \param name A user-readable name for the registered factory.
-     * \pre \p factory must not be nullptr
+     *
+     * \tparam Factory The type for which a factory should be created and added
+     *
+     * \pre \p name must not be empty
      */
-    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory,
-        std::string name = "");
+    template <typename T>
+    void addFactory(std::string name);
 
     /**
      * This method provides access to all registered ghoul::TemplateFactory%s through
@@ -108,8 +110,8 @@ public:
     ghoul::TemplateFactory<T>* factory() const;
 
     std::string generateJson() const override;
-private:
 
+private:
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 

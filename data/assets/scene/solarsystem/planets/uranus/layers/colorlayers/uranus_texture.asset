@@ -1,16 +1,27 @@
-local texturesPath = asset.require("./../../uranus_textures").TexturesPath
-local globeIdentifier = asset.require("./../../uranus").Uranus.Identifier
+local globeIdentifier = asset.require("../../uranus").Uranus.Identifier
+
+local texturesPath = asset.syncedResource({
+  Name = "Uranus Textures",
+  Type = "HttpSynchronization",
+  Identifier = "uranus_textures",
+  Version = 1
+})
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/uranus.jpg",
+  FilePath = texturesPath .. "uranus.jpg",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,7 +94,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
                                                           const ghoul::Dictionary& config)
 {
     // TODO: Use documentation to verify dictionary
-    std::unique_ptr<ServerInterface> si = std::make_unique<ServerInterface>(config);
+    auto si = std::make_unique<ServerInterface>(config);
     return si;
 }
 

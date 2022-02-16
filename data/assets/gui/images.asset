@@ -1,7 +1,5 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
 
-local assetHelper = asset.require("util/asset_helper")
-
 asset.syncedResource({
   Type = "UrlSynchronization",
   Name = "Icons",

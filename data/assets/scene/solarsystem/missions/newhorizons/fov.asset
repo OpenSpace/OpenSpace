@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
 
 
 
@@ -355,7 +354,7 @@ local Rex = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {-3.141502/2, 0, -3.141502/2}
+      Rotation = { -math.pi/2, 0.0, -math.pi/2 }
     },
     Translation = {
       Type = "StaticTranslation",
@@ -368,7 +367,7 @@ local Rex = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
+local nodes = {
   Lorri,
   RalphLeisa,
   RalphMvicPan1,
@@ -381,4 +380,21 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
   AliceAirglow,
   AliceSoc,
   Rex
-})
+}
+
+asset.onInitialize(function ()
+  for i, node in ipairs(nodes) do
+    openspace.addSceneGraphNode(node)
+  end
+end)
+
+asset.onDeinitialize(function ()
+  for i = #nodes, 1, -1 do
+    local node = nodes[i]
+    openspace.removeSceneGraphNode(node)
+  end
+end)
+
+for i, node in ipairs(nodes) do
+  asset.export(node)
+end

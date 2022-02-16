@@ -1,5 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('util/tle_helper')
+local shared = asset.require("util/tle_helper")
 
 local group = {
   Title = "Space & Earth Science",
@@ -9,3 +8,14 @@ local group = {
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
 shared.registerSatelliteGroupObjects(asset, group, tle, true)
+
+
+asset.meta = {
+  Name = "Satellites Science Space & Earth Science",
+  Version = "1.0",
+  Description = [[ Satellites asset for Science Space & Earth Science. Data from 
+  Celestrak]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/NORAD/elements/",
+  License = "Celestrak"
+}

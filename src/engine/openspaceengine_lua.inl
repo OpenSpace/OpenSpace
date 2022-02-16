@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,108 +56,6 @@ int writeDocumentation(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
     global::openSpaceEngine->writeStaticDocumentation();
     global::openSpaceEngine->writeSceneDocumentation();
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * addVirtualProperty():
- * Adds a virtual property that will set a group of properties
- */
-int addVirtualProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, { 5, 7 }, "lua::addVirtualProperty");
-    auto [type, name, identifier, description] =
-        ghoul::lua::values<std::string, std::string, std::string, std::string>(L);
-
-    std::unique_ptr<properties::Property> prop;
-    if (type == "BoolProperty") {
-        const bool v = ghoul::lua::value<bool>(L);
-        prop = std::make_unique<properties::BoolProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v
-        );
-    }
-    else if (type == "IntProperty") {
-        auto [v, min, max] = ghoul::lua::values<int, int, int>(L);
-        prop = std::make_unique<properties::IntProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v,
-            min,
-            max
-        );
-    }
-    else if (type == "FloatProperty") {
-        auto [v, min, max] = ghoul::lua::values<float, float, float>(L);
-        prop = std::make_unique<properties::FloatProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            },
-            v,
-            min,
-            max
-        );
-    }
-    else if (type == "TriggerProperty") {
-        prop = std::make_unique<properties::TriggerProperty>(
-            properties::Property::PropertyInfo {
-                identifier.c_str(),
-                name.c_str(),
-                description.c_str()
-            }
-        );
-    }
-    else {
-        return ghoul::lua::luaError(L, fmt::format("Unknown property type '{}'", type));
-    }
-
-    global::virtualPropertyManager->addProperty(std::move(prop));
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * removeVirtualProperty():
- * Removes a previously added virtual property
- */
-int removeVirtualProperty(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
-    const std::string name = ghoul::lua::value<std::string>(L);
-
-    properties::Property* p = global::virtualPropertyManager->property(name);
-    if (p) {
-        global::virtualPropertyManager->removeProperty(p);
-    }
-    else {
-        LWARNINGC(
-            "removeVirtualProperty",
-            fmt::format("Virtual Property with name '{}' did not exist", name)
-        );
-    }
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * removeAllVirtualProperties():
- * Remove all registered virtual properties
- */
-int removeAllVirtualProperties(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
-
-    for (properties::Property* p : global::virtualPropertyManager->properties()) {
-        global::virtualPropertyManager->removeProperty(p);
-        delete p;
-    }
     return 0;
 }
 

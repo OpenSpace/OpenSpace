@@ -1,4 +1,4 @@
-local transforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 function downloadSssbDatabaseFile(sceneAsset, name, identifier)
   assert(sceneAsset, "'asset' needs to be provided")
@@ -20,11 +20,11 @@ local createSssbGroupObject = function(filename, guiName, sssbFolder, trailColor
 
   local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
   return {
-    Identifier = 'sssb_'..filenameSansExt,
+    Identifier = "sssb_" .. filenameSansExt,
     Parent = transforms.SunECLIPJ2000.Identifier,
     Renderable = {
       Type = "RenderableSmallBody",
-      Path = sssbFolder.."/"..filename,
+      Path = sssbFolder .. filename,
       Segments = 200,
       Color = trailColor,
       TrailFade = 0.5,
@@ -38,3 +38,13 @@ end
 
 asset.export("downloadSssbDatabaseFile", downloadSssbDatabaseFile)
 asset.export("createSssbGroupObject", createSssbGroupObject)
+
+
+asset.meta = {
+  Name = "SSSB shared",
+  Version = "1.0",
+  Description = [[ UTILITY ASSET; This asset is for builders and coders.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

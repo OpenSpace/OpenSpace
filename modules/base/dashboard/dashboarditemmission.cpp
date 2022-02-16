@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,6 +55,13 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation DashboardItemMission::Documentation() {
+    documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.name = "DashboardItemMission";
+    doc.id = "base_dashboarditem_mission";
+    return doc;
+}
+
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary, 15.f)
 {}
@@ -85,8 +92,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         ghoul::fontrendering::CrDirection::Down
     );
 
-    auto phaseTrace = mission.phaseTrace(currentTime);
-
+    MissionPhase::Trace phaseTrace = mission.phaseTrace(currentTime);
     if (!phaseTrace.empty()) {
         const MissionPhase& phase = phaseTrace.back().get();
         const std::string title = "Current Mission Phase: " + phase.name();

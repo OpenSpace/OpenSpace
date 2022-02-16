@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,8 +89,11 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
     glm::dvec3 interpolatedPos = glm::dvec3(0.0);
 
-    auto lastBefore = _timeline.lastKeyframeBefore(data.time.j2000Seconds(), true);
-    auto firstAfter = _timeline.firstKeyframeAfter(data.time.j2000Seconds(), false);
+    const Keyframe<glm::dvec3>* lastBefore =
+        _timeline.lastKeyframeBefore(data.time.j2000Seconds(), true);
+    const Keyframe<glm::dvec3>* firstAfter =
+        _timeline.firstKeyframeAfter(data.time.j2000Seconds(), false);
+
     if (lastBefore && firstAfter) {
         // We're inbetween first and last value.
         double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -128,6 +128,14 @@ namespace {
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camrea state is "
         "shown on the screen"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotWindowIdsInfo = {
+        "ScreenshotWindowId",
+        "Screenshow Window Ids",
+        "The list of window identifiers whose screenshot will be taken the next time "
+        "anyone triggers a screenshot. If this list is empty (the default), all windows "
+        "will have their screenshot taken. Id's that do not exist are silently ignored."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
@@ -277,6 +285,7 @@ RenderEngine::RenderEngine()
     , _verticalLogOffset(VerticalLogOffsetInfo, 0.f, 0.f, 1.f)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
+    , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
@@ -342,6 +351,7 @@ RenderEngine::RenderEngine()
     addProperty(_value);
 
     addProperty(_globalBlackOutFactor);
+    addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
     _screenshotUseDate.onChange([this]() {
@@ -502,7 +512,7 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        auto log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }
@@ -1046,7 +1056,10 @@ void RenderEngine::takeScreenshot() {
         std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
-    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(
+        _applyWarping,
+        _screenshotWindowIds
+    );
 }
 
 unsigned int RenderEngine::latestScreenshotNumber() const {
@@ -1067,9 +1080,10 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             {
                 "removeScreenSpaceRenderable",
                 &luascriptfunctions::removeScreenSpaceRenderable,
-                "string",
+                "(string, table)",
                 "Given a ScreenSpaceRenderable name this script will remove it from the "
-                "renderengine"
+                "renderengine. The parameter can also be a table in which case the "
+                "'Identifier' key is used to look up the name from the table"
             },
             {
                 "takeScreenshot",

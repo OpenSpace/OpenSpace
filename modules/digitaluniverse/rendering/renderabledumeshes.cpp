@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -132,14 +132,14 @@ namespace {
         // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        enum class Unit {
+        enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
             Kilometer [[codegen::key("Km")]],
             Parsec [[codegen::key("pc")]],
             Kiloparsec [[codegen::key("Kpc")]],
-            MegaParsec [[codegen::key("Mpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
             Gigaparsec [[codegen::key("Gpc")]],
-            Gigalightyears [[codegen::key("Gly")]]
+            Gigalightyear [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 
@@ -212,33 +212,10 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 
     if (p.unit.has_value()) {
-        switch (*p.unit) {
-            case Parameters::Unit::Meter:
-                _unit = Meter;
-                break;
-            case Parameters::Unit::Kilometer:
-                _unit = Kilometer;
-                break;
-            case Parameters::Unit::Parsec:
-                _unit = Parsec;
-                break;
-            case Parameters::Unit::Kiloparsec:
-                _unit = Kiloparsec;
-                break;
-            case Parameters::Unit::MegaParsec:
-                _unit = Megaparsec;
-                break;
-            case Parameters::Unit::Gigaparsec:
-                _unit = Gigaparsec;
-                break;
-            case Parameters::Unit::Gigalightyears:
-                _unit = GigalightYears;
-                break;
-        }
+        _unit = codegen::map<DistanceUnit>(*p.unit);
     }
     else {
-        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
-        _unit = Meter;
+        _unit = DistanceUnit::Meter;
     }
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -381,30 +358,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
+    float scale = static_cast<float>(toMeter(_unit));
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -627,30 +581,7 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        float scale = 0.f;
-        switch (_unit) {
-            case Meter:
-                scale = 1.f;
-                break;
-            case Kilometer:
-                scale = 1e3f;
-                break;
-            case Parsec:
-                scale = static_cast<float>(PARSEC);
-                break;
-            case Kiloparsec:
-                scale = static_cast<float>(1e3 * PARSEC);
-                break;
-            case Megaparsec:
-                scale = static_cast<float>(1e6 * PARSEC);
-                break;
-            case Gigaparsec:
-                scale = static_cast<float>(1e9 * PARSEC);
-                break;
-            case GigalightYears:
-                scale = static_cast<float>(306391534.73091 * PARSEC);
-                break;
-        }
+        float scale = static_cast<float>(toMeter(_unit));
 
         for (GLfloat& v : p.second.vertices) {
             v *= scale;

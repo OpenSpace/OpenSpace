@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local textures = asset.syncedResource({
   Name = "Globular Clusters Textures",
   Type = "HttpSynchronization",
@@ -23,10 +19,10 @@ local object = {
     Enabled = false,
     Color = { 0.8, 0.8, 0.0 },
     Opacity = 0.4,
-    File = speck .. "/gc.speck",
-    Texture = textures .. "/point4.png",
+    File = speck .. "gc.speck",
+    Texture = textures .. "point4.png",
     PolygonSides = 5,
-    LabelFile = speck .. "/gc.label",
+    LabelFile = speck .. "gc.label",
     Unit = "pc",
     TextColor = { 0.5, 0.5, 0.0 },
     ScaleFactor = 431.0,
@@ -54,12 +50,21 @@ local object = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Globular Clusters",
-  Version = "2.0",
+  Version = "2.1",
   Description = [[Census: 157 globular clusters. DU Version 2.6. Globular star clusters
   are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
   spherical “balls” of stars with very high stellar densities in their centers (stars
@@ -73,6 +78,5 @@ asset.meta = {
   Properties of Galactic Globular Clusters, C. Francis+ (U Cambridge)]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"GlobularClusters"}
+  License = "AMNH Digital Universe"
 }

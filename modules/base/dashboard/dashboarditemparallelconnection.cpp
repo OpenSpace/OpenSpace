@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,13 @@
 #include <ghoul/misc/profiling.h>
 
 namespace openspace {
+
+documentation::Documentation DashboardItemParallelConnection::Documentation() {
+    documentation::Documentation doc = DashboardTextItem::Documentation();
+    doc.name = "DashboardItemParallelConnection";
+    doc.id = "base_dashboarditem_parallelconnection";
+    return doc;
+}
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                       const ghoul::Dictionary& dictionary)

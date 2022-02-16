@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
@@ -122,10 +123,6 @@ void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     _camera->setPositionVec3(anchorNode()->worldPosition());
 }
 
-void NavigationHandler::resetCameraDirection() {
-    _orbitalNavigator.startRetargetAnchor();
-}
-
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
     _orbitalNavigator.setCamera(camera);
@@ -166,51 +163,52 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
+    // If there is a navigation state to set, do so immediately and then return
     if (_pendingNavigationState.has_value()) {
         applyNavigationState(*_pendingNavigationState);
-        _orbitalNavigator.resetVelocities();
-        _pendingNavigationState.reset();
-    }
-    else if (!_playbackModeEnabled && _camera) {
-        if (_useKeyFrameInteraction) {
-            _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
-        }
-        else if (_pathNavigator.isPlayingPath()) {
-            _pathNavigator.updateCamera(deltaTime);
-            updateCameraTransitions();
-        }
-        else {
-            if (_disableJoystickInputs) {
-                std::fill(
-                    global::joystickInputStates->begin(),
-                    global::joystickInputStates->end(),
-                    JoystickInputState()
-                );
-            }
-            _orbitalNavigator.updateStatesFromInput(_inputState, deltaTime);
-            _orbitalNavigator.updateCameraStateFromStates(deltaTime);
-            updateCameraTransitions();
-        }
-
-        _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
+        return;
     }
 
-    // If session recording (playback mode) was started in the midst of a camera path,
-    // abort the path
-    if (_playbackModeEnabled && _pathNavigator.isPlayingPath()) {
-        _pathNavigator.abortPath();
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
+
+    // If we're in session recording payback mode, the session recording is responsible
+    // for navigation. So don't do anything more here
+    if (playbackMode || !_camera) {
+        return;
     }
+
+    // Handle navigation, based on what navigator is active
+    if (_useKeyFrameInteraction) {
+        _keyframeNavigator.updateCamera(*_camera, playbackMode);
+    }
+    else if (mode == OpenSpaceEngine::Mode::CameraPath) {
+        _pathNavigator.updateCamera(deltaTime);
+        updateCameraTransitions();
+    }
+    else { // orbital navigator
+        if (_disableJoystickInputs) {
+            clearGlobalJoystickStates();
+        }
+        _orbitalNavigator.updateStatesFromInput(
+            _mouseInputState,
+            _keyboardInputState,
+            deltaTime
+        );
+        _orbitalNavigator.updateCameraStateFromStates(deltaTime);
+        updateCameraTransitions();
+    }
+
+    _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
 void NavigationHandler::applyNavigationState(const NavigationState& ns) {
     _orbitalNavigator.setAnchorNode(ns.anchor);
     _orbitalNavigator.setAimNode(ns.aim);
+    _camera->setPose(ns.cameraPose());
 
-    CameraPose pose = ns.cameraPose();
-    _camera->setPositionVec3(pose.position);
-    _camera->setRotation(pose.rotation);
-    _orbitalNavigator.clearPreviousState();
-    _orbitalNavigator.resetNodeMovements();
+    resetNavigationUpdateVariables();
+    _pendingNavigationState.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -324,23 +322,9 @@ void NavigationHandler::updateCameraTransitions() {
     }
 }
 
-
-void NavigationHandler::setEnableKeyFrameInteraction() {
-    _useKeyFrameInteraction = true;
-}
-
-void NavigationHandler::setDisableKeyFrameInteraction() {
-    _useKeyFrameInteraction = false;
-}
-
-void NavigationHandler::triggerPlaybackStart() {
-    _playbackModeEnabled = true;
-}
-
-void NavigationHandler::stopPlayback() {
+void NavigationHandler::resetNavigationUpdateVariables() {
     _orbitalNavigator.resetVelocities();
-    _orbitalNavigator.resetNodeMovements();
-    _playbackModeEnabled = false;
+    _orbitalNavigator.updatePreviousStateVariables();
 }
 
 const SceneGraphNode* NavigationHandler::anchorNode() const {
@@ -351,25 +335,29 @@ Camera* NavigationHandler::camera() const {
     return _camera;
 }
 
-const InputState& NavigationHandler::inputState() const {
-    return _inputState;
+const MouseInputState& NavigationHandler::mouseInputState() const {
+    return _mouseInputState;
+}
+
+const KeyboardInputState& NavigationHandler::keyboardInputState() const {
+    return _keyboardInputState;
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (!_disableMouseInputs) {
-        _inputState.mouseButtonCallback(button, action);
+        _mouseInputState.mouseButtonCallback(button, action);
     }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
     if (!_disableMouseInputs) {
-        _inputState.mousePositionCallback(x, y);
+        _mouseInputState.mousePositionCallback(x, y);
     }
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
     if (!_disableMouseInputs) {
-        _inputState.mouseScrollWheelCallback(pos);
+        _mouseInputState.mouseScrollWheelCallback(pos);
     }
 }
 
@@ -377,7 +365,7 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 {
     // There is no need to disable the keyboard callback based on a property as the vast
     // majority of input is coming through Lua scripts anyway which are not blocked here
-    _inputState.keyboardCallback(key, modifier, action);
+    _keyboardInputState.keyboardCallback(key, modifier, action);
 }
 
 NavigationState NavigationHandler::navigationState() const {
@@ -489,20 +477,39 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
     }
 }
 
-void NavigationHandler::setJoystickAxisMapping(int axis,
+void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                          JoystickCameraStates::JoystickType joystickType,
                                                bool isSticky,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
+        std::move(joystickName),
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize,
+        joystickType,
         isSticky,
         sensitivity
+    );
+}
+
+void NavigationHandler::setJoystickAxisMappingProperty(std::string joystickName,
+                                                       int axis,
+                                                       std::string propertyUri,
+                                                       float min, float max,
+                                            JoystickCameraStates::AxisInvert shouldInvert,
+                                                       bool isRemote)
+{
+    _orbitalNavigator.joystickStates().setAxisMappingProperty(
+        std::move(joystickName),
+        axis,
+        std::move(propertyUri),
+        min,
+        max,
+        shouldInvert,
+        isRemote
     );
 }
 
@@ -521,25 +528,31 @@ void NavigationHandler::setWebsocketAxisMapping(int axis,
 
 
 JoystickCameraStates::AxisInformation
-NavigationHandler::joystickAxisMapping(int axis) const
+NavigationHandler::joystickAxisMapping(const std::string& joystickName, int axis) const
 {
-    return _orbitalNavigator.joystickStates().axisMapping(axis);
+    return _orbitalNavigator.joystickStates().axisMapping(joystickName, axis);
 }
 
-void NavigationHandler::setJoystickAxisDeadzone(int axis, float deadzone) {
-    _orbitalNavigator.joystickStates().setDeadzone(axis, deadzone);
+void NavigationHandler::setJoystickAxisDeadzone(const std::string& joystickName, int axis,
+                                                float deadzone)
+{
+    _orbitalNavigator.joystickStates().setDeadzone(joystickName, axis, deadzone);
 }
 
-float NavigationHandler::joystickAxisDeadzone(int axis) const {
-    return _orbitalNavigator.joystickStates().deadzone(axis);
+float NavigationHandler::joystickAxisDeadzone(const std::string& joystickName,
+                                              int axis) const
+{
+    return _orbitalNavigator.joystickStates().deadzone(joystickName, axis);
 }
 
-void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
+void NavigationHandler::bindJoystickButtonCommand(const std::string& joystickName,
+                                                  int button, std::string command,
                                                   JoystickAction action,
                                          JoystickCameraStates::ButtonCommandRemote remote,
                                                                 std::string documentation)
 {
     _orbitalNavigator.joystickStates().bindButtonCommand(
+        joystickName,
         button,
         std::move(command),
         action,
@@ -548,12 +561,24 @@ void NavigationHandler::bindJoystickButtonCommand(int button, std::string comman
     );
 }
 
-void NavigationHandler::clearJoystickButtonCommand(int button) {
-    _orbitalNavigator.joystickStates().clearButtonCommand(button);
+void NavigationHandler::clearJoystickButtonCommand(const std::string& joystickName,
+                                                   int button)
+{
+    _orbitalNavigator.joystickStates().clearButtonCommand(joystickName, button);
 }
 
-std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
-    return _orbitalNavigator.joystickStates().buttonCommand(button);
+std::vector<std::string> NavigationHandler::joystickButtonCommand(
+                                        const std::string& joystickName, int button) const
+{
+    return _orbitalNavigator.joystickStates().buttonCommand(joystickName, button);
+}
+
+void NavigationHandler::clearGlobalJoystickStates() {
+    std::fill(
+        global::joystickInputStates->begin(),
+        global::joystickInputStates->end(),
+        JoystickInputState()
+    );
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
@@ -611,52 +636,79 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             {
                 "bindJoystickAxis",
                 &luascriptfunctions::bindJoystickAxis,
-                "int, axisType [, isInverted, isNormalized]",
-                "Binds the axis identified by the first argument to be used as the type "
-                "identified by the second argument. If 'isInverted' is 'true', the axis "
-                "value is inverted, if 'isNormalized' is true the axis value is "
-                "normalized from [-1, 1] to [0,1]."
+                "name, axis, axisType [, isInverted, joystickType, isSticky, sensitivity]",
+                "Finds the input joystick with the given 'name' and binds the axis "
+                "identified by the second argument to be used as the type identified by "
+                "the third argument. If 'isInverted' is 'true', the axis value is "
+                "inverted. 'joystickType' is if the joystick behaves more like a "
+                "joystick or a trigger, where the first is the default. If 'isSticky' is "
+                "'true', the value is calculated relative to the previous value. If "
+                "'sensitivity' is given then that value will affect the sensitivity of "
+                "the axis together with the global sensitivity."
+            },
+            {
+                "bindJoystickAxisProperty",
+                &luascriptfunctions::bindJoystickAxisProperty,
+                "name, axis, propertyUri [, min, max, isInverted, isSticky, sensitivity, "
+                "isRemote]",
+                "Finds the input joystick with the given 'name' and binds the axis "
+                "identified by the second argument to be bound to the property "
+                "identified by the third argument. 'min' and 'max' is the minimum and "
+                "the maximum allowed value for the given property and the axis value is "
+                "rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' "
+                "is 'true', the axis value is inverted. The last argument determines "
+                "whether the property change is going to be executed locally or "
+                "remotely, where the latter is the default."
             },
             {
                 "joystickAxis",
                 &luascriptfunctions::joystickAxis,
-                "int",
-                "Returns the joystick axis information for the passed axis. The "
-                "information that is returned is the current axis binding as a string, "
-                "whether the values are inverted as bool, and whether the value are "
-                "normalized as a bool"
+                "name, axis",
+                "Finds the input joystick with the given 'name' and returns the joystick "
+                "axis information for the passed axis. The information that is returned "
+                "is the current axis binding as a string, whether the values are "
+                "inverted as bool, the joystick type as a string, whether the axis is "
+                "sticky as bool, the sensitivity as number, the property uri bound to "
+                "the axis as string (empty is type is not Property), the min and max "
+                "values for the property as numbers and whether the property change will "
+                "be executed remotly as bool."
             },
             {
                 "setAxisDeadZone",
                 &luascriptfunctions::setJoystickAxisDeadzone,
-                "int, float",
-                "Sets the deadzone for a particular joystick axis which means that any "
-                "input less than this value is completely ignored."
+                "name, axis, float",
+                "Finds the input joystick with the given 'name' and sets the deadzone "
+                "for a particular joystick axis, which means that any input less than "
+                "this value is completely ignored."
             },
             {
                 "bindJoystickButton",
                 &luascriptfunctions::bindJoystickButton,
-                "int, string [, string, bool]",
-                "Binds a Lua script to be executed when the joystick button identified "
-                "by the first argument is triggered. The third argument determines when "
-                "the script should be executed, this defaults to 'pressed', which means "
-                "that the script is run when the user presses the button. The last "
-                "argument determines whether the command is going to be executable "
-                "locally or remotely. The latter being the default."
+                "name, button, string [, string, string, bool]",
+                "Finds the input joystick with the given 'name' and binds a Lua script "
+                "given by the third argument to be executed when the joystick button "
+                "identified by the second argument is triggered. The fifth argument "
+                "determines when the script should be executed, this defaults to "
+                "'Press', which means that the script is run when the user presses the "
+                "button. The fourth arguemnt is the documentation of the script in the "
+                "third argument. The sixth argument determines whether the command is "
+                "going to be executable locally or remotely, where the latter is the "
+                "default."
             },
             {
                 "clearJoystickButton",
                 &luascriptfunctions::clearJoystickButton,
-                "int",
-                "Removes all commands that are currently bound to the button identified "
-                "by the first argument"
+                "name, button",
+                "Finds the input joystick with the given 'name' and removes all commands "
+                "that are currently bound to the button identified by the second argument."
             },
             {
                 "joystickButton",
                 &luascriptfunctions::joystickButton,
-                "int",
-                "Returns the script that is currently bound to be executed when the "
-                "provided button is pressed"
+                "name, button",
+                "Finds the input joystick with the given 'name' and returns the script "
+                "that is currently bound to be executed when the provided button is "
+                "pressed."
             },
             {
                 "addGlobalRotation",

@@ -17,6 +17,5 @@ asset.meta = {
   Description = [[Magnetograms of the sun as texture color layers]],
   Author = "Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"Sun"}
+  License = "CC-BY"
 }

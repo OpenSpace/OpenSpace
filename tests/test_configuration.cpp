@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,16 @@
 using namespace openspace::configuration;
 
 namespace {
+    // The absolute minimal configuration that is still expected to be loaded
     std::string MinimalConfig = R"(
 Paths = {}
+FontSize = {
+  FrameInfo = 1.0,
+  Shutdown = 2.0,
+  Log = 3.0,
+  CameraInfo = 4.0,
+  VersionInfo = 5.0
+}
 )";
 
     void writeConfig(const std::string& filename, const std::string& content) {
@@ -47,10 +55,15 @@ Paths = {}
         std::filesystem::path path = std::filesystem::temp_directory_path();
         std::string configFile = (path / filename).string();
         writeConfig(configFile, content);
-        Configuration conf = loadConfigurationFromFile(configFile, content);
-        std::filesystem::remove(configFile);
-        return conf;
-
+        try {
+            Configuration conf = loadConfigurationFromFile(configFile, content);
+            std::filesystem::remove(configFile);
+            return conf;
+        }
+        catch (...) {
+            std::filesystem::remove(configFile);
+            throw;
+        }
     }
 } // namespace
 
@@ -61,32 +74,32 @@ TEST_CASE("Configuration: minimal", "[configuration]") {
 TEST_CASE("Configuration: windowConfiguration", "[configuration]") {
     constexpr const char Extra[] = R"(SGCTConfig = "foobar")";
     const Configuration c = loadConfiguration("windowConfiguration", Extra);
-    REQUIRE(c.windowConfiguration == "foobar");
+    CHECK(c.windowConfiguration == "foobar");
 }
 
 TEST_CASE("Configuration: asset", "[configuration]") {
     constexpr const char Extra[] = R"(Asset = "foobar")";
     const Configuration c = loadConfiguration("asset", Extra);
-    REQUIRE(c.asset == "foobar");
+    CHECK(c.asset == "foobar");
 }
 
 TEST_CASE("Configuration: profile", "[configuration]") {
     constexpr const char Extra[] = R"(Profile = "foobar")";
     const Configuration c = loadConfiguration("profile", Extra);
-    REQUIRE(c.profile == "foobar");
+    CHECK(c.profile == "foobar");
 }
 
 TEST_CASE("Configuration: globalCustomizationScripts", "[configuration]") {
     constexpr const char Extra[] = R"(GlobalCustomizationScripts = { "foo", "bar" })";
     const Configuration c = loadConfiguration("globalCustomization", Extra);
-    REQUIRE(c.globalCustomizationScripts.size() == 2);
+    CHECK(c.globalCustomizationScripts.size() == 2);
     CHECK(c.globalCustomizationScripts == std::vector<std::string>{ "foo", "bar" });
 }
 
 TEST_CASE("Configuration: paths", "[configuration]") {
     constexpr const char Extra[] = R"(Paths = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("paths", Extra);
-    REQUIRE(c.pathTokens.size() == 2);
+    CHECK(c.pathTokens.size() == 2);
     CHECK(
         c.pathTokens ==
         std::map<std::string, std::string>{ { "foo", "1" }, { "bar", "2" } }
@@ -96,7 +109,7 @@ TEST_CASE("Configuration: paths", "[configuration]") {
 TEST_CASE("Configuration: fonts", "[configuration]") {
     constexpr const char Extra[] = R"(Fonts = { foo = "1", bar = "2" })";
     const Configuration c = loadConfiguration("fonts", Extra);
-    REQUIRE(c.fonts.size() == 2);
+    CHECK(c.fonts.size() == 2);
     CHECK(
         c.fonts ==
         std::map<std::string, std::string>{ { "foo", "1" }, { "bar", "2" } }

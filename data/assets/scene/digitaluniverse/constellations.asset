@@ -1,7 +1,3 @@
-local assetHelper = asset.require('util/asset_helper')
-
-
-
 local speck = asset.syncedResource({
   Name = "Constellation Speck Files",
   Type = "HttpSynchronization",
@@ -15,8 +11,8 @@ local constellationsExtragalactic = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.4,
-    File = speck .. "/constellationsEXGAL.speck",
-    LabelFile = speck .. "/constellationsEXGAL.label",
+    File = speck .. "constellationsEXGAL.speck",
+    LabelFile = speck .. "constellationsEXGAL.label",
     TextColor = { 0.8, 0.8, 0.8 },
     TextOpacity = 0.4,
     TextSize = 20.0,
@@ -36,8 +32,8 @@ local constellations = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 0.3,
-    File = speck .. "/constellations.speck",
-    LabelFile = speck .. "/constellations.label",
+    File = speck .. "constellations.speck",
+    LabelFile = speck .. "constellations.label",
     TextColor = { 0.8, 0.8, 0.8 },
     TextOpacity = 0.3,
     TextSize = 14.5,
@@ -60,15 +56,26 @@ local constellations = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(constellationsExtragalactic)
+  openspace.addSceneGraphNode(constellations)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(constellations)
+  openspace.removeSceneGraphNode(constellationsExtragalactic)
+end)
+  
+asset.export(constellationsExtragalactic)
+asset.export(constellations)
+
 
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Digital Universe asset for constellation lines]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"Constellations", "ConstellationsExtragalactic"}
+  License = "AMNH Digital Universe"
 }

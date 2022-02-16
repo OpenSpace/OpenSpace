@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<openspace::TransferFunction> transferFunction);
+    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
 
     void setStepSize(float stepSize);
     float opacity() const;

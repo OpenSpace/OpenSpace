@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -122,8 +122,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
 
-    std::unique_ptr<volume::RawVolume<float>> volume =
-        std::make_unique<volume::RawVolume<float>>(dimensions);
+    auto volume = std::make_unique<volume::RawVolume<float>>(dimensions);
 
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;

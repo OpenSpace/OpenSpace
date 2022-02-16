@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -336,8 +336,7 @@ std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
 }
 
 std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id) {
-    std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-
+    auto metaFuture = std::make_shared<MetadataFuture>();
     metaFuture->id = id;
     global::downloadManager->fetchFile(
         _baseUrl + std::to_string(-id),
@@ -672,7 +671,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
                                         // ,"listOfStaleCygnets", "listOfInactiveCygnets",
                                         };
 
-        for (auto list : lists) {
+        for (const std::string& list : lists) {
             json jsonList = j[list];
             for (size_t i = 0; i < jsonList.size(); ++i) {
                 json jCygnet = jsonList.at(i);

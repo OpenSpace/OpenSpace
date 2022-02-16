@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,9 +80,7 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
     glm::uvec3 dims = dimensions();
-    std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
-        dims
-    );
+    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
 
     std::ifstream file(_path, std::ios::binary);
     char* buffer = reinterpret_cast<char*>(volume->data());
@@ -103,15 +101,17 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
     }
 
     if (invertZ) {
-        std::unique_ptr<RawVolume<VoxelType>> newVolume = 
+        std::unique_ptr<RawVolume<VoxelType>> newVolume =
             std::make_unique<RawVolume<VoxelType>>(dims);
 
         for (int i = 0; i < volume->nCells(); ++i) {
             const glm::uvec3& coords = volume->indexToCoords(i);
             glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 
-            size_t newIndex = volume->coordsToIndex(newcoords);
-            size_t oldIndex = volume->coordsToIndex(coords);
+            // @TODO (emmbr, 2022-02-10) Not sure why they are here, but commented them
+            // out for now as they aren't used
+            //size_t newIndex = volume->coordsToIndex(newcoords);
+            //size_t oldIndex = volume->coordsToIndex(coords);
 
             newVolume->set(newcoords, volume->get(coords));
         }

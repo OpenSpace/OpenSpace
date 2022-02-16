@@ -1,11 +1,11 @@
-asset.require('./minor/ananke_group')
-asset.require('./minor/carme_group')
-asset.require('./minor/carpo_group')
-asset.require('./minor/himalia_group')
-asset.require('./minor/inner_group')
-asset.require('./minor/other_groups')
-asset.require('./minor/pasiphae_group')
-asset.require('./minor/themisto_group')
+asset.require("./minor/ananke_group")
+asset.require("./minor/carme_group")
+asset.require("./minor/carpo_group")
+asset.require("./minor/himalia_group")
+asset.require("./minor/inner_group")
+asset.require("./minor/other_groups")
+asset.require("./minor/pasiphae_group")
+asset.require("./minor/themisto_group")
 
 
 asset.meta = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <functional>
@@ -69,16 +70,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Unit {
-        Meter = 0,
-        Kilometer = 1,
-        Parsec = 2,
-        Kiloparsec = 3,
-        Megaparsec = 4,
-        Gigaparsec = 5,
-        GigalightYears = 6
-    };
-    double unitToMeter(Unit unit) const;
 
     std::vector<float> createDataSlice();
     void createPolygonTexture();
@@ -148,7 +139,7 @@ private:
     std::string _colorOptionString;
     std::string _datavarSizeOptionString;
 
-    Unit _unit = Parsec;
+    DistanceUnit _unit = DistanceUnit::Parsec;
 
     speck::Dataset _dataset;
     speck::Labelset _labelset;

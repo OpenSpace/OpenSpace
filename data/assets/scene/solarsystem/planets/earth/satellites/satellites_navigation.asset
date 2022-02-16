@@ -1,10 +1,10 @@
-asset.require('./navigation/beidou')
-asset.require('./navigation/galileo')
-asset.require('./navigation/glosnass')
-asset.require('./navigation/gps')
-asset.require('./navigation/musson')
-asset.require('./navigation/nnss')
-asset.require('./navigation/sbas')
+asset.require("./navigation/beidou")
+asset.require("./navigation/galileo")
+asset.require("./navigation/glosnass")
+asset.require("./navigation/gps")
+asset.require("./navigation/musson")
+asset.require("./navigation/nnss")
+asset.require("./navigation/sbas")
 
 
 asset.meta = {

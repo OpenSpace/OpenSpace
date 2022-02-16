@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2021                                                                #
+# Copyright (c) 2014-2022                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -143,8 +143,8 @@ if (UNIX)
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLM_ENABLE_EXPERIMENTAL" CACHE STRING "" FORCE)
     set(OpenGL_GL_PREFERENCE "GLVND" CACHE STRING "OpenGL Preference setting necessary for linux" FORCE)
-    set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
   endif ()
+  set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Set to have assimp build minizip" FORCE)
 endif ()
 
 add_subdirectory(ext)

@@ -1,6 +1,4 @@
-local colorLayersPath = "./layers/colorlayers"
-
-local colorLayer = asset.require(colorLayersPath .. "/rhea_texture")
+local colorLayer = asset.require("./layers/colorlayers/rhea_texture")
 
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 

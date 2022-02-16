@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -138,7 +138,8 @@ public:
     *
     * \returns a vector of all scripts that has been loaded
     */
-    std::vector<ScheduledScript> allScripts(std::optional<int> group = std::nullopt) const;
+    std::vector<ScheduledScript> allScripts(
+        std::optional<int> group = std::nullopt) const;
 
     /**
     * Sets the mode for how each scheduled script's timestamp will be interpreted.
@@ -148,16 +149,6 @@ public:
     * or according to the absolute simulation time in seconds from J2000 epoch.
     */
     void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
-
-    /**
-    * Sets the mode for scripts being run from playback
-    */
-    void triggerPlaybackStart();
-
-    /**
-    * Sets the flag for scripts no longer being run from playback
-    */
-    void stopPlayback();
 
     static LuaLibrary luaLibrary();
     void setModeApplicationTime();
@@ -173,7 +164,6 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
-    bool _playbackModeEnabled = false;
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
         = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;

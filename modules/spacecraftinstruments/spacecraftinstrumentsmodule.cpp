@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,27 +48,26 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
 
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
-        "Decoder"
-    );
+    FactoryManager::ref().addFactory<Decoder>("Decoder");
 
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul::TemplateFactory<DashboardItem>* fDashboard =
+        FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
     fRenderable->registerClass<RenderableCrawlingLine>("RenderableCrawlingLine");
     fRenderable->registerClass<RenderableFov>("RenderableFov");
+    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
     fRenderable->registerClass<RenderablePlaneProjection>("RenderablePlaneProjection");
     fRenderable->registerClass<RenderablePlanetProjection>("RenderablePlanetProjection");
-    fRenderable->registerClass<RenderableModelProjection>("RenderableModelProjection");
+    fRenderable->registerClass<RenderableShadowCylinder>("RenderableShadowCylinder");
 
-    auto fDecoder = FactoryManager::ref().factory<Decoder>();
+    ghoul::TemplateFactory<Decoder>* fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
 }
@@ -85,9 +84,12 @@ std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
     return {
+        RenderableCrawlingLine::Documentation(),
         RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),
+        RenderablePlaneProjection::Documentation(),
         RenderablePlanetProjection::Documentation(),
+        RenderableShadowCylinder::Documentation(),
         ProjectionComponent::Documentation()
     };
 }

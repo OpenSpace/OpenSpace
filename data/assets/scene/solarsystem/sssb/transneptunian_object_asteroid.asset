@@ -1,12 +1,11 @@
-local assetHelper = asset.require('util/asset_helper')
-local sharedSssb = asset.require('./sssb_shared')
+local sharedSssb = asset.require("./sssb_shared")
 
 local filepath = sharedSssb.downloadSssbDatabaseFile(asset,
-  'transneptunian_object_asteroid',
-  'sssb_data_transneptunian_object_asteroid'
+  "transneptunian_object_asteroid",
+  "sssb_data_transneptunian_object_asteroid"
 )
 local object = sharedSssb.createSssbGroupObject(
-  'sssb_data_transneptunian_object_asteroid.csv',
+  "sssb_data_transneptunian_object_asteroid.csv",
   "Transneptunian Object Asteroids",
   filepath,
   { 0.56, 0.64, 0.95 }
@@ -19,12 +18,21 @@ object.GUI.Description = [[ Any minor or dwarf planets in the solar system that 
   the Sun at a greater average distance than Neptune (semi-major axis of 30.1 AU). ]]
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(object)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(object)
+end)
+  
+asset.export(object)
+
 
 
 asset.meta = {
   Name = "Trans-Neptunian Asteroids",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ RenderableSmallBody asset with data from from JPL Horizons
     contiaining Trans-Neptunian group. ]],
   Author = [[JPL Small-Body Database hosted by California Institute of
@@ -32,6 +40,5 @@ asset.meta = {
   URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
   License = [[ JPL-authored documents are sponsored by NASA under Contract
     NAS7-030010. All documents available from this server may be protected
-    under the U.S. and Foreign Copyright Laws."]],
-  Identifiers = {"sssb_sssb_data_transneptunian_object_asteroid"}
+    under the U.S. and Foreign Copyright Laws."]]
 }

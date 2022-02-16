@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2021                                                               *
+ * Copyright (c) 2014-2022                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -195,6 +195,7 @@ void TransferFunction::setTextureFromTxt() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
         transferFunction,
         glm::size3_t(width, 1, 1),
+        GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,
         GL_FLOAT,
@@ -204,7 +205,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string());
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string(), 1);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 }
 

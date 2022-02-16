@@ -1,8 +1,0 @@
-local textures = asset.syncedResource({
-  Name = "Background Radiation Textures",
-  Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_backgroundradiation_textures",
-  Version = 2
-})
-
-asset.export('textures', textures)
