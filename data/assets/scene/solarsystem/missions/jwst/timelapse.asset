@@ -17,33 +17,254 @@ end
 local launchTime = "2021-12-25T12:50:00.000"
 local actionsList = {}
 
--- JWST timelapse timeline
-local function createTimelapse()
+-- JWST timelapse timeline, forwards
+local function createForwardTimelapse()
   local timelapse = [[
-    -- Setup 1 sec before
+    -- Mission start, setup 1 sec after
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 0, 0, 1) .. [[",
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
+    )
+    -- Mission start, GO 2 sec after
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 0, 0, 2) .. [[",
+      "openspace.time.interpolateDeltaTime(120)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 minutes/second\")"
+    )
+
+    -- array deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 0, 30 - 1, 20) .. [[", -- 1 min pre delay so time to interpolate
+      "openspace.time.interpolateDeltaTime(1)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 second/second\")"
+    )
+
+    -- array complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 0, 30, 42) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- antenna deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+    advance(launchTime, 0, 18, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- antenna complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 0, 23, 39, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(18000)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 hours/second\")"
+    )
+
+    -- fw palette deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 2, 18 - 2, 20, 35) .. [[", -- 2h pre delay so time to interpolate
+      "openspace.time.interpolateDeltaTime(3600)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")"
+    )
+
+    -- fw palette complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 3, 6, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- r palette deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 3, 8, 51, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- r palette complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 3, 12, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(120)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 minutes/second\")"
+    )
+
+    -- base rise deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 3, 12, 22, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- base rise complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 4, 17, 35, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- aft flap deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 4, 21, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(600)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 10 minutes/second\")"
+    )
+
+    -- aft flap complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 1, 37, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(3600)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")"
+    )
+
+    -- mid booms extend
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 11, 29, 43) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- first boom stop
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 12, 16, 16) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- right boom complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 17, 42, 5) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- left booms complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 22, 6, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(30)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 seconds/second\")"
+    )
+
+    -- tension sun shield membranes
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 22, 9, 14) .. [[",
+      "openspace.time.interpolateDeltaTime(60)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 minute/second\")"
+    )
+
+    -- membrane tension complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 5, 22, 20, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- membranes separate
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 6, 12, 36, 49) .. [[",
+      "openspace.time.interpolateDeltaTime(3600)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")"
+    )
+
+    -- secondary mirror deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 7, 0, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(18000)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 hours/second\")"
+    )
+
+    -- secondary mirror complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 11, 10, 33, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 20 minutes/second\")"
+    )
+
+    -- aft radiator deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 11, 12, 20, 48) .. [[",
+      "openspace.time.interpolateDeltaTime(1800)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")"
+    )
+
+    -- aft radiator complete, forward
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 11, 16, 5, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- rt cord fold wings deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 12, 9, 30, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- rt cord fold wings complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 13, 12, 40, 48) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- lft cord fold wings deploy
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 13, 23, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(7200)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
+    )
+
+    -- lft cord fold wings complete
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 14, 19, 0, 0) .. [[",
+      "openspace.time.interpolateDeltaTime(1)" ..
+      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
+      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
+      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
+    )
+
+    -- Finished, slow down, 1 sec after end
+    openspace.scriptScheduler.loadScheduledScript("]] ..
+      advance(launchTime, 14, 19, 0, 2) .. [[",
+      "openspace.scriptScheduler.clear(0)"
+    )
+  ]]
+
+  return timelapse
+end
+
+
+
+
+
+-- JWST timelapse timeline, backwards
+local function createBackwardTimelapse()
+  local timelapse = [[
+    -- Finished, slow down, 1 sec before start
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 0, -1) .. [[",
       "",
       "openspace.scriptScheduler.clear(0)"
     )
+
     -- Mission start, setup 1 sec after
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 0, 1) .. [[",
-      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
-      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)",
+      "",
       "openspace.time.interpolateDeltaTime(-1)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)"
     )
+    -- Mission start GO, 2 sec after
     openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 0, 2) .. [[", -- 2 sec delay
-      "openspace.time.interpolateDeltaTime(120)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 minutes/second\")",
+      advance(launchTime, 0, 0, 0, 2) .. [[",
+      "",
       "openspace.time.interpolateDeltaTime(-1)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")"
     )
-    -- backwards, slow down in the end
+    -- Slow down in the end
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 4, 0) .. [[", -- 4 min pre delay
       "",
@@ -51,13 +272,7 @@ local function createTimelapse()
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")"
     )
 
-    -- array deploy, forwards
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 30 - 1, 20) .. [[", -- 1 min pre delay so time to interpolate
-      "openspace.time.interpolateDeltaTime(1)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 second/second\")"
-    )
-    -- array deploy, backwards
+    -- array deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 30, 20) .. [[",
       "",
@@ -65,20 +280,14 @@ local function createTimelapse()
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 minutes/second\")"
     )
 
-    -- array complete, forwards
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 0, 30, 42) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
-    )
-    -- array complete, backwards
+    -- array complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0, 30 + 1, 42 + 10) .. [[", -- 1 min 10 sec pre delay so time to interpolate
       "",
       "openspace.time.interpolateDeltaTime(-1)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -1 second/second\")"
     )
-    -- array complete, backwards prepare
+    -- array complete, prepare
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 0 + 1, 30 + 10, 42) .. [[", -- 1h 10 min delay for interpolation
       "",
@@ -89,19 +298,12 @@ local function createTimelapse()
     -- antenna deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
     advance(launchTime, 0, 18, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
 
-    -- antenna complete, forwards
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 0, 23, 39, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(18000)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 hours/second\")"
-    )
-    -- antenna complete, backwards
+    -- antenna complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 0, 23 + 1, 39, 0) .. [[", -- 1h pre delay so time to interpolate
       "",
@@ -109,13 +311,7 @@ local function createTimelapse()
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
 
-    -- fw palette deploy, forwards
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 2, 18 - 2, 20, 35) .. [[", -- 2h pre delay so time to interpolate
-      "openspace.time.interpolateDeltaTime(3600)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")"
-    )
-    -- fw palette deploy, backwards
+    -- fw palette deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 2, 18, 20, 35) .. [[",
       "",
@@ -126,8 +322,7 @@ local function createTimelapse()
     -- fw palette complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 3, 6, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-3600)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -1 hour/second\")"
     )
@@ -135,8 +330,7 @@ local function createTimelapse()
     -- r palette deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 3, 8, 51, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
@@ -144,8 +338,7 @@ local function createTimelapse()
     -- r palette complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 3, 12, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(120)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
@@ -153,8 +346,7 @@ local function createTimelapse()
     -- base rise deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 3, 12, 22, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-120)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 minutes/second\")"
     )
@@ -162,8 +354,7 @@ local function createTimelapse()
     -- base rise complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 4, 17, 35, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
@@ -171,19 +362,12 @@ local function createTimelapse()
     -- aft flap deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 4, 21, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(600)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 10 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
 
-    -- aft flap complete, forwards
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 5, 1, 37, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(3600)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")"
-    )
-    -- aft flap complete, backwards
+    -- aft flap complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 1, 37 + 30, 0) .. [[", -- 30 min pre delay so time to interpolate
       "",
@@ -194,8 +378,7 @@ local function createTimelapse()
     -- mid booms extend
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 11, 29, 43) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-3600)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -1 hour/second\")"
     )
@@ -203,8 +386,7 @@ local function createTimelapse()
     -- first boom stop
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 12, 16, 16) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
@@ -212,8 +394,7 @@ local function createTimelapse()
     -- right boom complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 17, 42, 5) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
@@ -221,8 +402,7 @@ local function createTimelapse()
     -- left booms complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 22, 6, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(30)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 seconds/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1800)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 minutes/second\")"
     )
@@ -230,8 +410,7 @@ local function createTimelapse()
     -- tension sun shield membranes
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 22, 9, 14) .. [[",
-      "openspace.time.interpolateDeltaTime(60)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 minute/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-30)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -30 seconds/second\")"
     )
@@ -239,8 +418,7 @@ local function createTimelapse()
     -- membrane tension complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 5, 22, 20, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-60)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -1 minute/second\")"
     )
@@ -248,8 +426,7 @@ local function createTimelapse()
     -- membranes separate
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 6, 12, 36, 49) .. [[",
-      "openspace.time.interpolateDeltaTime(3600)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 1 hour/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
@@ -257,8 +434,7 @@ local function createTimelapse()
     -- secondary mirror deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 7, 0, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(18000)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 5 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-3600)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -1 hour/second\")"
     )
@@ -266,8 +442,7 @@ local function createTimelapse()
     -- secondary mirror complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 11, 10, 33, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 20 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-18000)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -5 hours/second\")"
     )
@@ -275,19 +450,12 @@ local function createTimelapse()
     -- aft radiator deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 11, 12, 20, 48) .. [[",
-      "openspace.time.interpolateDeltaTime(1800)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 30 minutes/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-1200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -20 minutes/second\")"
     )
 
-    -- aft radiator complete, forward
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 11, 16, 5, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")"
-    )
-    -- aft radiator complete, backward
+    -- aft radiator complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 11, 16 + 1, 5, 0) .. [[", -- 1h pre delay so time to interpolate
       "",
@@ -298,8 +466,7 @@ local function createTimelapse()
     -- rt cord fold wings deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 12, 9, 30, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
@@ -307,8 +474,7 @@ local function createTimelapse()
     -- rt cord fold wings complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 13, 12, 40, 48) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
@@ -316,8 +482,7 @@ local function createTimelapse()
     -- lft cord fold wings deploy
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 13, 23, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(7200)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: 2 hours/second\")",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")"
     )
@@ -325,24 +490,20 @@ local function createTimelapse()
     -- lft cord fold wings complete
     openspace.scriptScheduler.loadScheduledScript("]] ..
       advance(launchTime, 14, 19, 0, 0) .. [[",
-      "openspace.time.interpolateDeltaTime(1)" ..
-      "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"\")" ..
-      "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 1.0)" ..
-      "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", true)",
+      "",
       "openspace.time.interpolateDeltaTime(-7200)" ..
       "openspace.setPropertyValueSingle(\"Dashboard.JWSTStateText.Text\", \"Time speed: -2 hours/second\")" ..
       "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Settings.Gamma\", 0.7)" ..
       "openspace.setPropertyValueSingle(\"Scene.EarthAtmosphere.Renderable.Enabled\", false)"
     )
-
-    openspace.scriptScheduler.loadScheduledScript("]] ..
-      advance(launchTime, 14, 19, 0, 2) .. [[",
-      "openspace.scriptScheduler.clear(0)"
-    )
   ]]
 
   return timelapse
 end
+
+
+
+
 
 local function createActions()
   local playForwards = {
@@ -353,7 +514,7 @@ local function createActions()
       openspace.time.setDeltaTime(1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
       openspace.time.setTime("]] .. launchTime .. [[")
-      ]] .. createTimelapse() .. [[
+      ]] .. createForwardTimelapse() .. [[
       openspace.time.setDeltaTime(1)
     ]],
     Documentation = "Jump to the JWST launch time and play the timelapse of deployment forward",
@@ -369,7 +530,7 @@ local function createActions()
       openspace.time.setDeltaTime(-1)
       openspace.setPropertyValueSingle("Dashboard.JWSTStateText.Text", "")
       openspace.time.setTime("2022 JAN 09 07:50:01")
-      ]] .. createTimelapse() .. [[
+      ]] .. createBackwardTimelapse() .. [[
       openspace.time.setDeltaTime(-1)
     ]],
     Documentation = "Jump to the end of JWST deployment time and play the timelapse of deployment in reverse",
@@ -399,11 +560,22 @@ local function createActions()
 
   local togglePlayDirection = {
     Identifier = "jwst.toggle.direction",
-    Name = "Toggle forwards/ backwards",
+    Name = "Toggle forwards / backwards",
     Command = [[
       -- Flip deltatime
       local deltaTime = openspace.time.deltaTime()
       openspace.time.setDeltaTime(-deltaTime)
+
+      -- Switch timelapse script
+      if (deltaTime < 0) then
+        -- Going backwards and switching to forwards
+        openspace.scriptScheduler.clear(0)
+        ]] .. createForwardTimelapse() .. [[
+      else
+        -- Going forwards and switching to backwards
+        openspace.scriptScheduler.clear(0)
+        ]] .. createBackwardTimelapse() .. [[
+      end
 
       -- Update the dashboard text
       local text = openspace.getPropertyValue("Dashboard.JWSTStateText.Text")
