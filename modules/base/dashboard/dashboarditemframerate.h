@@ -30,15 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
-#define __PERFORMANCE_MEASUREMENTS__
-
-#ifdef __PERFORMANCE_MEASUREMENTS__
-//JCC: Temp property to save the fps to a file
-#include <thread>
-#endif
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
@@ -65,30 +57,11 @@ public:
     glm::vec2 size() const override;
     static documentation::Documentation Documentation();
 
-    //JCC: Temp property to save the fps to a file
-#ifdef __PERFORMANCE_MEASUREMENTS__
-    ~DashboardItemFramerate();
-    void threadFunction();
-#endif
-
 private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
     properties::OptionProperty _frametimeType;
     properties::TriggerProperty _clearCache;
-
-    //JCC: Temp property to save the fps to a file
-#ifdef __PERFORMANCE_MEASUREMENTS__
-    properties::BoolProperty _enableFPSRecording;
-    properties::BoolProperty _markTimeRecording;
-    int   _markRecordings[100] = { -1 };
-    float _fpsRecordings[1200] = { -1.f };
-    float _deltaTRecordings[1200] = { -1.f };
-    std::size_t _currentFrameRecording = 0;
-    int _numberMarkedItems = 0;
-    std::thread _dataCollectingThread;
-    bool _runThread = false;
-#endif
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

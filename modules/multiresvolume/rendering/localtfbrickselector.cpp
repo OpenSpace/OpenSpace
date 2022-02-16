@@ -28,7 +28,6 @@
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/misc/assert.h>
-#include <algorithm>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,
