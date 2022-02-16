@@ -698,10 +698,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    std::filesystem::path cdf = absPath(cdfpath);
-    if (std::filesystem::is_regular_file(cdf)) {
+    std::filesystem::path cdfFile = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdfFile)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdf);
+        std::ifstream jsonFile(cdfFile);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -740,7 +740,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdfFile));
     }
 }
 

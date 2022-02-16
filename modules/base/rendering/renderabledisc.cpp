@@ -39,8 +39,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderableDisc";
-
     constexpr const std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "colorTexture"
     };

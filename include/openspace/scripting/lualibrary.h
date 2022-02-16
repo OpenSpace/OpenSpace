@@ -59,7 +59,7 @@ struct LuaLibrary {
     /// A list of script files that are executed for each Lua state
     std::vector<std::filesystem::path> scripts = std::vector<std::filesystem::path>();
     /// A list of all libraries that are children for this library
-    std::vector<LuaLibrary> subLibraries;
+    std::vector<LuaLibrary> subLibraries = std::vector<LuaLibrary>();
 
     /// This struct contains information about a function or constant that is defined in
     /// a Lua script

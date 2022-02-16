@@ -44,10 +44,6 @@
 #include "syncmodule_lua.inl"
 
 namespace {
-    constexpr const char* KeyHttpSynchronizationRepositories =
-        "HttpSynchronizationRepositories";
-    constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
-
     struct [[codegen::Dictionary(SyncModule)]] Parameters {
         // The list of all repository URLs that are used to fetch data from for
         // HTTPSynchronizations

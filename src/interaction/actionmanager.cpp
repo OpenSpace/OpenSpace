@@ -33,10 +33,6 @@
 
 #include "actionmanager_lua.inl"
 
-namespace {
-    constexpr const char* _loggerCat = "ActionManager";
-} // namespace
-
 namespace openspace::interaction {
 
 bool ActionManager::hasAction(const std::string& identifier) const {
@@ -76,7 +72,7 @@ const Action& ActionManager::action(const std::string& identifier) const {
 std::vector<Action> ActionManager::actions() const {
     std::vector<Action> result;
     result.reserve(_actions.size());
-    for (const std::pair<unsigned int, Action>& p : _actions) {
+    for (const std::pair<const unsigned int, Action>& p : _actions) {
         result.push_back(p.second);
     }
     return result;

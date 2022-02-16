@@ -35,9 +35,6 @@ namespace {
 
     constexpr const char* TempSuffix = ".tmp";
 
-    constexpr const char* QueryKeyIdentifier = "identifier";
-    constexpr const char* QueryKeyFileVersion = "file_version";
-    constexpr const char* QueryKeyApplicationVersion = "application_version";
     constexpr const int ApplicationVersion = 1;
 
     struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
