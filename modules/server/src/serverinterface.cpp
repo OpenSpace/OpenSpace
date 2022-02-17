@@ -94,7 +94,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
                                                           const ghoul::Dictionary& config)
 {
     // TODO: Use documentation to verify dictionary
-    std::unique_ptr<ServerInterface> si = std::make_unique<ServerInterface>(config);
+    auto si = std::make_unique<ServerInterface>(config);
     return si;
 }
 

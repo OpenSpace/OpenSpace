@@ -71,20 +71,6 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
-        { "Background", openspace::Renderable::RenderBin::Background },
-        { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        {
-            "PreDeferredTransparent",
-            openspace::Renderable::RenderBin::PreDeferredTransparent
-        },
-        {
-            "PostDeferredTransparent",
-            openspace::Renderable::RenderBin::PostDeferredTransparent
-        }
-    };
-
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         AppearanceInfo = {
             "Appearance",
@@ -137,13 +123,6 @@ namespace {
         "Determines how the trail should be rendered to the screen.If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
-        "RenderBinMode",
-        "RenderBin Mode",
-        "Determines if the trails will be rendered after all other elements, including"
-        "atmospheres if needed."
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
@@ -251,12 +230,6 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_appearance);
 
-    if (dictionary.hasValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
-            dictionary.value<std::string>(RenderBinModeInfo.identifier)
-        );
-        setRenderBin(cfgRenderBin);
-    }
 }
 
 void RenderableTrail::initializeGL() {

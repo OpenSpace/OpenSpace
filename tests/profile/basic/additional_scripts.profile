@@ -1,5 +1,5 @@
 {
-  "version": { "major": 12, "minor": 13 },
+  "version": { "major": 1, "minor": 0 },
   "additional_scripts": [
     "script-1",
     "script-2",

@@ -357,21 +357,6 @@ end
 
 
 
-function normalizeArg(arg)
-  arg = arg or {}
-
-  check("number", arg, 1)
-  check("number", arg, 2)
-
-  if type(arg[1]) == "number" and type(arg[2]) == "number" then
-    arg["size"] = { arg[1], arg[2] }
-    arg[1] = nil
-    arg[2] = nil
-  end
-end
-
-
-
 function sgct.makeConfig(config)
   local configFile = os.tmpname() .. ".json"
   local file = io.open(configFile, "w+")
@@ -383,7 +368,21 @@ end
 
 
 function sgct.config.single(arg)
-  normalizeArg(arg)
+  arg = arg or {}
+
+  if type(arg[1]) == "number" and type(arg[2]) == "number" then
+    arg["size"] = { arg[1], arg[2] }
+    arg[1] = nil
+    arg[2] = nil
+  else
+    -- No numbers specified, therefore we want to use the screen resolution of the primary
+    -- monitor to derive the resolution
+    -- ScreenResolution is a variable that got injected into the openspace.cfg by the
+    -- OpenSpace code prior to loading this file
+
+    local scale_factor = 2.0/3.0;
+    arg["size"] = { ScreenResolution.x * scale_factor, ScreenResolution.y * scale_factor }
+  end
 
   check("table", arg, "size", "number")
   check("table", arg, "fov", "number")
@@ -429,7 +428,24 @@ end
 
 
 function sgct.config.fisheye(arg)
-  normalizeArg(arg)
+  arg = arg or {}
+
+  check("number", arg, 1)
+  check("number", arg, 2)
+
+  if type(arg[1]) == "number" and type(arg[2]) == "number" then
+    arg["size"] = { arg[1], arg[2] }
+    arg[1] = nil
+    arg[2] = nil
+  else
+    -- No numbers specified, therefore we want to use the screen resolution of the primary
+    -- monitor to derive the resolution
+    -- ScreenResolution is a variable that got injected into the openspace.cfg by the
+    -- OpenSpace code prior to loading this file
+
+    local scale_factor = 2.0/3.0;
+    arg["size"] = { ScreenResolution.x * scale_factor, ScreenResolution.y * scale_factor }    
+  end
 
   check("number", arg, "fov")
   check("number", arg, "tilt")

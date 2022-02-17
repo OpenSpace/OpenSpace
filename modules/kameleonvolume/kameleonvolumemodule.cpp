@@ -40,11 +40,12 @@ KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
 void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     using namespace kameleonvolume;
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableKameleonVolume>("RenderableKameleonVolume");
 
-    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<KameleonMetadataToJsonTask>("KameleonMetadataToJsonTask");
     fTask->registerClass<KameleonDocumentationTask>("KameleonDocumentationTask");

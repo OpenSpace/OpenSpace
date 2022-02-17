@@ -99,7 +99,7 @@ SessionRecording::SessionRecording(bool isGlobal)
     , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
 {
     if (isGlobal) {
-        auto fTask = FactoryManager::ref().factory<Task>();
+        ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
         ghoul_assert(fTask, "No task factory existed");
         fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
         fTask->registerClass<ConvertRecFileVersionTask>("ConvertRecFileVersionTask");

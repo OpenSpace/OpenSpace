@@ -71,7 +71,8 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    auto factory = FactoryManager::ref().factory<LightSource>();
+    ghoul::TemplateFactory<LightSource>* factory =
+        FactoryManager::ref().factory<LightSource>();
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 

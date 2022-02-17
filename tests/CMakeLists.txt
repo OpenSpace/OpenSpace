@@ -26,7 +26,6 @@ add_executable(
   OpenSpaceTest
   main.cpp
   test_assetloader.cpp
-  test_concurrentjobmanager.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
   test_configuration.cpp
