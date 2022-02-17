@@ -57,6 +57,29 @@ struct ShadowRenderingStruct {
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
+    struct AdvancedATMModeData {
+        glm::vec3 nRealRayleigh;
+        glm::vec3 nComplexRayleigh;
+        glm::vec3 nRealMie;
+        glm::vec3 nComplexMie;
+        glm::vec3 lambdaArray;
+        glm::vec3 Kappa;
+        glm::vec3 g1;
+        glm::vec3 g2;
+        glm::vec3 alpha;
+        float deltaPolarizability;
+        float NRayleigh;
+        float NMie;
+        float NRayleighAbsMolecule;
+        float radiusAbsMoleculeRayleigh;
+        float meanRadiusParticleMie;
+        float turbidity;
+        float jungeExponent;
+        bool useOnlyAdvancedMie;
+        bool useCornettePhaseFunction;
+        bool usePenndorfPhaseFunction;
+    };
+
     AtmosphereDeferredcaster(float textureScale,
         std::vector<ShadowConfiguration> shadowConfigArray, bool saveCalculatedTextures);
     virtual ~AtmosphereDeferredcaster() = default;
@@ -82,11 +105,21 @@ public:
 
     void setParameters(float atmosphereRadius, float planetRadius,
         float averageGroundReflectance, float groundRadianceEmission,
-        float rayleighHeightScale, bool enableOzone, float ozoneHeightScale,
-        float mieHeightScale, float miePhaseConstant, float sunRadiance,
-        glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
+        float rayleighHeightScale, bool enableOzone, float mieHeightScale,
+        float miePhaseConstant, float sunRadiance, glm::vec3 rayScatteringCoefficients,
         glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
         bool sunFollowing);
+
+    void enableAdvancedMode(bool enableAdvanced);
+
+    void setAdvancedParameters(bool enableOxygen, float oxygenHeightScale,
+        glm::vec3 rayleighScatteringCoefficients, glm::vec3 oxygenAbsorptionCrosssections,
+        glm::vec3 ozoneAbsorptionCrosssections, glm::vec3 mieScatteringCoefficients,
+        glm::vec3 mieAbsorptionCoefficients, glm::vec3 mieExtinctionCoefficients,
+        AdvancedATMModeData advancedParameters);
+
+    void setEllipsoidRadii(glm::dvec3 radii);
+
 
     void setHardShadows(bool enabled);
 
@@ -113,37 +146,58 @@ private:
 
 
     UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
-        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
-        SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, inverseModelTransformMatrix,
-        modelTransformMatrix, projectionToModelTransform, viewToWorldMatrix,
-        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
-        inscatterTexture) _uniformCache;
+        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, oxygenAbsLayerEnabled,
+        HO, betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
+        advancedModeEnabled, inverseModelTransformMatrix, modelTransformMatrix,
+        projectionToModelTransform, viewToWorldMatrix, camPosObj, sunDirectionObj,
+        hardShadows, transmittanceTexture, irradianceTexture, inscatterTexture,
+        inscatterRayleighTexture, inscatterMieTexture) _uniformCache;
+    UniformCache(useOnlyAdvancedMie, useCornettePhaseFunction, usePenndorfPhaseFunction,
+        deltaPolarizability, nRealRayleigh, nComplexRayleigh, nRealMie, nComplexMie,
+        lambdaArray, nRayleigh, nMie, nRayleighAbsMolecule, radiusAbsMoleculeRayleigh,
+        meanRadiusParticleMie, turbidity, jungeExponent, kappa, g1, g2,
+        alpha) _uniformCacheAdvancedMode;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
+    ghoul::opengl::TextureUnit _inScatteringRayleighTableTextureUnit;
+    ghoul::opengl::TextureUnit _inScatteringMieTableTextureUnit;
 
     GLuint _transmittanceTableTexture = 0;
     GLuint _irradianceTableTexture = 0;
     GLuint _inScatteringTableTexture = 0;
+    GLuint _deltaSMieTableTexture = 0;
+
+    GLuint _inScatteringRayleighTableTexture = 0;
+    GLuint _inScatteringMieTableTexture = 0;
 
     // Atmosphere Data
-    bool _ozoneEnabled = false;
+    bool _ozoneEnabled = true;
+    bool _oxygenEnabled = true;
     bool _sunFollowingCameraEnabled = false;
+    bool _advancedMode = false;
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;
     float _averageGroundReflectance = 0.f;
     float _groundRadianceEmission = 0.f;
     float _rayleighHeightScale = 0.f;
-    float _ozoneHeightScale = 0.f;
+    float _oxygenHeightScale = 0.f;
+    //float _ozoneHeightScale = 0.f;
     float _mieHeightScale = 0.f;
     float _miePhaseConstant = 0.f;
     float _sunRadianceIntensity = 5.f;
 
+    AdvancedATMModeData _advModeData;
+
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
+    glm::vec3 _oxygenAbsCrossSection = glm::vec3(0.f);
+    glm::vec3 _ozoneAbsCrossSection = glm::vec3(0.f);
+    //glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
     glm::vec3 _mieScatteringCoeff = glm::vec3(0.f);
+    glm::vec3 _mieAbsorptionCoeff = glm::vec3(0.f);
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    glm::dvec3 _ellipsoidRadii = glm::dvec3(0.0);
 
     // Atmosphere Textures Dimmensions
     const glm::ivec2 _transmittanceTableSize;

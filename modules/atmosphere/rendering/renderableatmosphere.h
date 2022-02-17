@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/textureunit.h>
 #include <memory>
@@ -47,6 +48,7 @@ namespace openspace {
 
 class AtmosphereDeferredcaster;
 
+struct AdvancedATMModeData;
 struct TransformData;
 
 // Shadow structure
@@ -74,6 +76,7 @@ public:
 private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
     void updateAtmosphereParameters();
+    void setDeferredCasterParameters(bool executePreCalculations);
 
     properties::FloatProperty _atmosphereHeight;
     properties::FloatProperty _groundAverageReflectance;
@@ -81,20 +84,48 @@ private:
     properties::FloatProperty _rayleighHeightScale;
     properties::Vec3Property _rayleighScatteringCoeff;
     properties::BoolProperty _ozoneEnabled;
-    properties::FloatProperty _ozoneHeightScale;
-    properties::Vec3Property _ozoneCoeff;
+    properties::BoolProperty _oxygenEnabled;
+    properties::Vec3Property _ozoneAbsorptionCrossSection;
+    properties::FloatProperty _oxygenHeightScale;
+    properties::Vec3Property _oxygenAbsorptionCrossSection;
     properties::FloatProperty _mieHeightScale;
     properties::Vec3Property _mieScatteringCoeff;
+    properties::Vec3Property _mieAbsorptionCoeff;
+    properties::Vec3Property _mieExtinctionCoeff;
     properties::FloatProperty _mieScatteringExtinctionPropCoeff;
-    properties::FloatProperty _miePhaseConstant;
+    properties::FloatProperty _mieAsymmetricFactorG;
     properties::FloatProperty _sunIntensity;
     properties::BoolProperty _sunFollowingCameraEnabled;
     properties::BoolProperty _hardShadowsEnabled;
+    properties::BoolProperty _enableAdvancedMode;
+
+    // Advanced Mode Parameters
+    properties::PropertyOwner _advancedModeOwner;
+    properties::BoolProperty _useOnlyAdvancedMie;
+    properties::BoolProperty _useCornettePhaseFunction;
+    properties::BoolProperty _usePenndorfPhaseFunction;
+    properties::Vec3Property _nRealRayleigh;
+    properties::Vec3Property _nComplexRayleigh;
+    properties::Vec3Property _nRealMie;
+    properties::Vec3Property _nComplexMie;
+    properties::Vec3Property _lambdaArray;
+    properties::Vec3Property _kappa;
+    properties::Vec3Property _g1;
+    properties::Vec3Property _g2;
+    properties::Vec3Property _alpha;
+    properties::FloatProperty _deltaPolarizability;
+    properties::FloatProperty _NRayleigh;
+    properties::FloatProperty _NMie;
+    properties::FloatProperty _NRayleighAbsMolecule;
+    properties::FloatProperty _radiusAbsMoleculeRayleigh;
+    properties::FloatProperty _meanRadiusParticleMie;
+    properties::FloatProperty _turbidity;
+    properties::FloatProperty _jungeExponent;
 
     float _planetRadius = 0.f;
     float _mieScattExtPropCoefProp = 1.f;
 
-    glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
+    //glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture = false;
