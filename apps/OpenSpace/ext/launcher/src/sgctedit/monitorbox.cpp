@@ -68,7 +68,9 @@ void MonitorBox::paintWidgetBorder(QPainter& painter, int width, int height) {
 
 void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
     painter.setPen(QPen(Qt::black, 2));
-    painter.setFont(QFont("Arial", 14));
+    QFont f("Arial");
+    f.setPixelSize(24);
+    painter.setFont(f);
     for (unsigned int i = 0; i < _nMonitors; ++i) {
         if (i <= _monitorDimensionsScaled.size()) {
             painter.drawRect(_monitorDimensionsScaled[i]);
@@ -78,10 +80,12 @@ void MonitorBox::paintMonitorBackgrounds(QPainter& painter) {
             painter.fillRect(_monitorDimensionsScaled[i], brush);
             if (_showLabel) {
                 QPointF textPos = QPointF(
-                    _monitorDimensionsScaled[i].left() + 5,
-                    _monitorDimensionsScaled[i].top() + 18
+                    _monitorDimensionsScaled[i].left() + 4,
+                    _monitorDimensionsScaled[i].top() + 24
                 );
-                painter.drawText(textPos, QString::fromStdString(std::to_string(i + 1)));
+                if (i == 0) {
+                    painter.drawText(textPos, "Primary");
+                }
             }
         }
     }

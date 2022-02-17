@@ -24,6 +24,7 @@
 
 #include "sgctedit/display.h"
 
+#include <ghoul/fmt.h>
 #include "sgctedit/monitorbox.h"
 #include "sgctedit/windowcontrol.h"
 #include <QApplication>
@@ -39,14 +40,14 @@ Display::Display(std::shared_ptr<MonitorBox> monitorRenderBox,
     , _nMaxWindows(nMaxWindows)
     , _winColors(winColors)
 {
-    _addWindowButton = new QPushButton("Add Window", this);
-    _removeWindowButton = new QPushButton("Remove Window", this);
+    _addWindowButton = new QPushButton("Add Window");
+    _removeWindowButton = new QPushButton("Remove Window");
     //Add all window controls (some will be hidden from GUI initially)
     for (unsigned int i = 0; i < _nMaxWindows; ++i) {
         initializeWindowControl();
     }
-    connect(_addWindowButton, &QPushButton::released, this, &Display::addWindow);
-    connect(_removeWindowButton, &QPushButton::released, this, &Display::removeWindow);
+    connect(_addWindowButton, &QPushButton::clicked, this, &Display::addWindow);
+    connect(_removeWindowButton, &QPushButton::clicked, this, &Display::removeWindow);
     initializeLayout();
 }
 
@@ -54,6 +55,13 @@ void Display::initializeLayout() {
     QVBoxLayout* layout = new QVBoxLayout(this);
     {
         QHBoxLayout* layoutMonButton = new QHBoxLayout;
+        _removeWindowButton->setToolTip(
+            "Remove window from the configuration (at least one window is required)"
+        );
+        std::string addTip = fmt::format(
+            "Add a window to the configuration (up to {} windows allowed)", _nMaxWindows
+        );
+        _addWindowButton->setToolTip(QString::fromStdString(addTip));
         layoutMonButton->addWidget(_removeWindowButton);
         layoutMonButton->addStretch(1);
         layoutMonButton->addWidget(_addWindowButton);

@@ -31,7 +31,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::vector<sgct::config::Window>& windowLis
     , _windowList(windowList)
 {
     systemMonitorConfiguration(screenList);
-    setWindowTitle("Display/Window Configuration Editor");
+    setWindowTitle("Window Configuration Editor");
     createWidgets();
 }
 
@@ -52,6 +52,8 @@ void SgctEdit::systemMonitorConfiguration(const QList<QScreen*>& screenList) {
             actualWidth,
             actualHeight
         });
+std::cout << _monitorSizeList.back().width() << "x" << _monitorSizeList.back().height() << " @ "
+<< _monitorSizeList.back().x() << "," << _monitorSizeList.back().y() << std::endl;
     }
     _nMaxWindows = (_monitorSizeList.size() == 1) ? 3 : 4;
 }

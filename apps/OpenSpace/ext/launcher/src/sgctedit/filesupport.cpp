@@ -41,6 +41,10 @@ FileSupport::FileSupport(QVBoxLayout* parentLayout, std::vector<QRect>& monitorL
     {
         QHBoxLayout* layoutFilename = new QHBoxLayout;
         QLabel* labelFilename = new QLabel;
+        QString fileTip = "Enter a filename for this custom configuration to be saved "
+            "as a .json file in the user/config/ directory";
+        labelFilename->setToolTip(fileTip);
+        _lineFilename->setToolTip(fileTip);
         labelFilename->setText("Filename: ");
         layoutFilename->addStretch(1);
         layoutFilename->addWidget(labelFilename);

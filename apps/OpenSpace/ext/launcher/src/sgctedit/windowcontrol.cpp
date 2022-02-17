@@ -179,10 +179,13 @@ QVBoxLayout* WindowControl::initializeLayout() {
 
     {
         QHBoxLayout* layoutName = new QHBoxLayout;
+        QString tip("Enter a name for the window (displayed in title bar)");
         QLabel* labelName = new QLabel(this);
         labelName->setText("Name: ");
+        labelName->setToolTip(tip);
         _windowName = new QLineEdit(this);
         _windowName->setFixedWidth(160);
+        _windowName->setToolTip(tip);
         layoutName->addWidget(labelName);
         layoutName->addWidget(_windowName);
         layoutName->addStretch(1);
@@ -191,6 +194,12 @@ QVBoxLayout* WindowControl::initializeLayout() {
 
     if (_nMonitors > 1) {
         QHBoxLayout* layoutMonitorNum = new QHBoxLayout;
+        QLabel* labelLocation = new QLabel(this);
+        labelLocation->setText("Monitor: ");
+        QString tip("Select monitor where this window is located");
+        labelLocation->setToolTip(tip);
+        _comboMonitorSelect->setToolTip(tip);
+        layoutMonitorNum->addWidget(labelLocation);
         layoutMonitorNum->addWidget(_comboMonitorSelect);
         layoutMonitorNum->addStretch(1);
         layoutWindowCtrl->addLayout(layoutMonitorNum);
@@ -200,16 +209,22 @@ QVBoxLayout* WindowControl::initializeLayout() {
     {
         QLabel* labelSize = new QLabel(this);
         QLabel* labelDelim = new QLabel(this);
+        QLabel* labelUnit = new QLabel(this);
         QHBoxLayout* layoutSize = new QHBoxLayout;
+        labelSize->setToolTip("Enter window width & height in pixels");
+        _sizeX->setToolTip("Enter window width (pixels)");
+        _sizeY->setToolTip("Enter window height (pixels)");
         layoutSize->addWidget(labelSize);
         labelSize->setText("Size:");
         labelSize->setFixedWidth(55);
         layoutSize->addWidget(_sizeX);
         layoutSize->addWidget(labelDelim);
         layoutSize->addWidget(_sizeY);
+        layoutSize->addWidget(labelUnit);
         layoutSize->addStretch(1);
         labelDelim->setText("x");
         labelDelim->setFixedWidth(9);
+        labelUnit->setText(" px");
         layoutWindowCtrl->addLayout(layoutSize);
     }
 
@@ -218,35 +233,56 @@ QVBoxLayout* WindowControl::initializeLayout() {
     {
         QLabel* labelOffset = new QLabel(this);
         QLabel* labelComma = new QLabel(this);
+        QLabel* labelUnit = new QLabel(this);
         QHBoxLayout* layoutOffset = new QHBoxLayout;
+        std::string baseTip = "Enter {} location of window's upper left "
+            "corner from monitor's {} (pixels)";
+        labelOffset->setToolTip(QString::fromStdString(fmt::format(
+            baseTip, "x,y", "upper-left corner origin")));
+        _offsetX->setToolTip(QString::fromStdString(fmt::format(
+            baseTip, "x", "left side")));
+        _offsetY->setToolTip(QString::fromStdString(fmt::format(
+            baseTip, "y", "top edge")));
         layoutOffset->addWidget(labelOffset);
         labelOffset->setText("Offset:");
         labelOffset->setFixedWidth(55);
         layoutOffset->addWidget(_offsetX);
         layoutOffset->addWidget(labelComma);
         layoutOffset->addWidget(_offsetY);
+        layoutOffset->addWidget(labelUnit);
         layoutOffset->addStretch(1);
         labelComma->setText(",");
         labelComma->setFixedWidth(9);
+        labelUnit->setText(" px");
         layoutWindowCtrl->addLayout(layoutOffset);
     }
     {
         QHBoxLayout* layoutCheckboxesFull1 = new QHBoxLayout;
         QVBoxLayout* layoutCheckboxesFull2 = new QVBoxLayout;
         QHBoxLayout* layoutFullscreenButton = new QHBoxLayout;
+        _fullscreenButton->setToolTip("If enabled, the window will be created in an "
+            "exclusive fullscreen mode. The size of this\nwindow will be set to the "
+            "screen resolution, and the window decoration automatically disabled.");
         layoutFullscreenButton->addWidget(_fullscreenButton);
         layoutFullscreenButton->addStretch(1);
         layoutCheckboxesFull2->addLayout(layoutFullscreenButton);
         QHBoxLayout* layoutCBoxWindowDecor = new QHBoxLayout;
+        _checkBoxWindowDecor->setToolTip("If enabled, the window will not have a border "
+            "frame or title bar, and no\n controls for minimizing/maximizing, "
+            "resizing, or closing the window.");
         layoutCBoxWindowDecor->addWidget(_checkBoxWindowDecor);
         layoutCBoxWindowDecor->addStretch(1);
         layoutCheckboxesFull2->addLayout(layoutCBoxWindowDecor);
         QHBoxLayout* _layoutCBoxWebGui= new QHBoxLayout;
+        _checkBoxWebGui->setToolTip("If enabled, the window will be dedicated solely to "
+            "displaying the GUI controls, and will not\nrender any 3D content. All other "
+            "window(s) will render in 3D but will not have GUI controls.");
         _layoutCBoxWebGui->addWidget(_checkBoxWebGui);
         _layoutCBoxWebGui->addStretch(1);
         layoutCheckboxesFull2->addLayout(_layoutCBoxWebGui);
         QVBoxLayout* layoutProjectionGroup = new QVBoxLayout;
         QHBoxLayout* layoutComboProjection = new QHBoxLayout;
+        _comboProjection->setToolTip("Select from the supported window projection types");
         layoutComboProjection->addWidget(_comboProjection);
         layoutComboProjection->addStretch(1);
         layoutProjectionGroup->addLayout(layoutComboProjection);
@@ -255,12 +291,24 @@ QVBoxLayout* WindowControl::initializeLayout() {
         borderProjectionGroup->setLayout(layoutProjectionGroup);
         borderProjectionGroup->setVisible(true);
         QHBoxLayout* layoutCBoxSpoutOutput= new QHBoxLayout;
+        QString spoutTip = "This projection method provides the ability to share the "
+            "reprojected image using the Spout library.\nThis library only supports the "
+            "Windows operating system. Spout makes it possible to make the rendered\n"
+            "images available to other real-time applications on the same machine for "
+            "further processing.\nThe SpoutOutputProjection option can work with either "
+            "Fisheye or Equirectangular projection.";
+        _checkBoxSpoutOutput->setToolTip(spoutTip);
         layoutCBoxSpoutOutput->addWidget(_checkBoxSpoutOutput);
         layoutCBoxSpoutOutput->addStretch(1);
         layoutProjectionGroup->addLayout(layoutCBoxSpoutOutput);
         QHBoxLayout* layoutComboQuality = new QHBoxLayout;
         _labelQuality = new QLabel;
         _labelQuality->setText("Quality:");
+        QString qualityTip = "Determines the pixel resolution of the projection "
+            "rendering. The higher resolution,\nthe better the rendering quality, but at "
+            "the expense of increased rendering times.";
+        _labelQuality->setToolTip(qualityTip);
+        _comboQuality->setToolTip(qualityTip);
         layoutComboQuality->addWidget(_labelQuality);
         layoutComboQuality->addWidget(_comboQuality);
         layoutComboQuality->addStretch(1);
@@ -268,20 +316,34 @@ QVBoxLayout* WindowControl::initializeLayout() {
         QHBoxLayout* layoutFovH = new QHBoxLayout;
         _labelFovH = new QLabel;
         _labelFovH->setText("Horizontal FOV:");
+        QString hfovTip = "The total horizontal field of view of the viewport (degrees). "
+            "Internally,\nthe values for 'left' & 'right' will each be half this value.";
+        _labelFovH->setToolTip(hfovTip);
+        _lineFovH->setToolTip(hfovTip);
         layoutFovH->addWidget(_labelFovH);
-        layoutFovH->addWidget(_lineFovH);
         layoutFovH->addStretch(1);
+        layoutFovH->addWidget(_lineFovH);
         QHBoxLayout* layoutFovV = new QHBoxLayout;
         _labelFovV = new QLabel;
         _labelFovV->setText("Vertical FOV:");
+        QString vfovTip = "The total vertical field of view of the viewport (degrees). "
+            "Internally,\nthe values for 'up' & 'down' will each be half this value.";
+        _labelFovV->setToolTip(vfovTip);
+        _lineFovV->setToolTip(vfovTip);
         layoutFovV->addWidget(_labelFovV);
-        layoutFovV->addWidget(_lineFovV);
         layoutFovV->addStretch(1);
+        layoutFovV->addWidget(_lineFovV);
         layoutProjectionGroup->addLayout(layoutFovH);
         layoutProjectionGroup->addLayout(layoutFovV);
         QHBoxLayout* layoutHeightOffset = new QHBoxLayout;
         _labelHeightOffset = new QLabel;
         _labelHeightOffset->setText("Height Offset:");
+        QString heightTip = "Offsets the height from which the cylindrical projection "
+            "is generated.\nThis is, in general, only necessary if the user position is "
+            "offset and\ncountering that offset is desired in order to continue producing"
+            "\na 'standard' cylindrical projection.";
+        _labelHeightOffset->setToolTip(heightTip);
+        _lineHeightOffset->setToolTip(heightTip);
         layoutHeightOffset->addWidget(_labelHeightOffset);
         layoutHeightOffset->addWidget(_lineHeightOffset);
         layoutHeightOffset->addStretch(1);

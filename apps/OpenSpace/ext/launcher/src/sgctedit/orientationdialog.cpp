@@ -55,6 +55,11 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         labelPitch->setText("Pitch: ");
         QHBoxLayout* layoutPitch = new QHBoxLayout;
         layoutPitch->addStretch(1);
+        QString pitchTip = "Pitch or elevation: negative numbers tilt the camera "
+            "downwards; positive numbers tilt upwards.\nThe allowed range is [-90, 90]. "
+            "Internally, this corresponds to the x value in the quaternion.";
+        labelPitch->setToolTip(pitchTip);
+        _linePitch->setToolTip(pitchTip);
         layoutPitch->addWidget(labelPitch);
         layoutPitch->addWidget(_linePitch);
         layoutWindow->addLayout(layoutPitch);
@@ -62,6 +67,11 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         labelRoll ->setText("Roll: ");
         QHBoxLayout* layoutRoll = new QHBoxLayout;
         layoutRoll->addStretch(1);
+        QString rollTip = "Roll or bank: negative numbers rotate the camera counter-"
+            "clockwise; positive numbers clockwise.\nThe allowed range is [-180, 180]. "
+            "Internally, this corresponds to the z value in the quaternion.";
+        labelRoll->setToolTip(rollTip);
+        _lineRoll->setToolTip(rollTip);
         layoutRoll->addWidget(labelRoll);
         layoutRoll->addWidget(_lineRoll);
         layoutWindow->addLayout(layoutRoll);
@@ -69,6 +79,11 @@ OrientationDialog::OrientationDialog(sgct::quat& orientation, QWidget* parent)
         labelYaw ->setText("Yaw: ");
         QHBoxLayout* layoutYaw = new QHBoxLayout;
         layoutYaw->addStretch(1);
+        QString yawTip = "Yaw, heading, or azimuth: negative numbers pan the camera "
+            "to the left; positive numbers pan to the\nright. The allowed range is "
+            "[-360, 360]. Internally, this corresponds to the y value in the quaternion.";
+        labelYaw->setToolTip(yawTip);
+        _lineYaw->setToolTip(yawTip);
         layoutYaw->addWidget(labelYaw);
         layoutYaw->addWidget(_lineYaw);
         layoutWindow->addLayout(layoutYaw);

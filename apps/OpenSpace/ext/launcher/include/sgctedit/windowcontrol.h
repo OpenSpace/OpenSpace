@@ -95,7 +95,7 @@ private:
         {1200.0, 340.0, 1280.0, 720.0},
         {50.0, 50.0, 1280.0, 720.0}
     };
-    QList<QString> _monitorNames = { "Monitor 1", "Monitor 2" };
+    QList<QString> _monitorNames = { "Primary", "Secondary" };
     int _lineEditWidthFixed = 50;
     float _marginFractionOfWidgetSize = 0.025;
     unsigned int _nMonitors = 1;

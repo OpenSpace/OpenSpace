@@ -34,7 +34,14 @@ Orientation::Orientation()
         QVBoxLayout* layoutOrientationControls = new QVBoxLayout;
         QPushButton* orientationButton = new QPushButton("Global Orientation");
         _checkBoxVsync = new QCheckBox("VSync All Windows", this);
+        _checkBoxVsync->setToolTip(
+            "If enabled, the server will frame lock and wait for all client nodes"
+        );
         layoutOrientationControls->addWidget(_checkBoxVsync);
+        orientationButton->setToolTip(
+            "Opens a separate dialog for setting the pitch, "
+            "yaw, and roll of the camera\n(the orientation applies to all viewports)"
+        );
         layoutOrientationControls->addWidget(orientationButton);
         _layoutOrientationFull->addStretch(1);
         _layoutOrientationFull->addLayout(layoutOrientationControls);
