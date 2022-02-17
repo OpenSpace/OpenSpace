@@ -594,6 +594,20 @@ int removeTargetBrowserPair(lua_State* L) {
     return 0;
 }
 
+int translateScreenSpaceRenderable(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 5, "lua::translateScreenSpaceRenderable");
+    const std::string id = ghoul::lua::value<std::string>(L, 1);
+    float startX = ghoul::lua::value<float>(L, 1);
+    float startY = ghoul::lua::value<float>(L, 1);
+    float transX = ghoul::lua::value<float>(L, 1);
+    float transY = ghoul::lua::value<float>(L, 1);
+    
+    ScreenSpaceRenderable* renderable = global::renderEngine->screenSpaceRenderable(id);
+    renderable->translate(glm::vec2(transX, transY), glm::vec2(startX, startY));
+
+    return 0;
+}
+
 int place3dSkyBrowser(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::place3dSkyBrowser");
     // Image index to place in 3D
@@ -689,7 +703,7 @@ int setBorderColor(lua_State* L) {
 }
 
 int setScreenSpaceSize(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setBorderColor");
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setScreenSpaceSize");
     // Browser id
     const std::string id = ghoul::lua::value<std::string>(L, 1);
     float sizeX = ghoul::lua::value<float>(L, 1);

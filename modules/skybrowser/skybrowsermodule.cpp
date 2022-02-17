@@ -81,199 +81,204 @@ namespace openspace {
             {
                 "getListOfImages",
                 &skybrowser::luascriptfunctions::getListOfImages,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Returns a list of all the loaded AAS WorldWide Telescope images that "
+                "has been loaded."
             }, 
             {
                 "setHoverCircle",
                 &skybrowser::luascriptfunctions::setHoverCircle,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a screen space renderable and adds it to the "
+                "module."
             },
             {
                 "moveCircleToHoverImage",
                 &skybrowser::luascriptfunctions::moveCircleToHoverImage,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "int",
+                "Moves the hover circle to the coordinate specified by the image index."
             },
             {
                 "disableHoverCircle",
                 &skybrowser::luascriptfunctions::disableHoverCircle,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Disables the hover circle, if there is one added to the sky browser "
+                "module. "
             },
             {
                 "loadImagesToWWT",
                 &skybrowser::luascriptfunctions::loadImagesToWWT,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser or target and loads the WWT image "
+                "collection to that browser."
             },
             {
                 "selectImage",
                 &skybrowser::luascriptfunctions::selectImage,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "int",
+                "Takes an index to an image and selects that image in the currently "
+                "selected sky browser."
             }, 
             {
                 "removeSelectedImageInBrowser",
                 &skybrowser::luascriptfunctions::removeSelectedImageInBrowser,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, int",
+                "Takes an identifier to a sky browser or target and an index to an "
+                "image. Removes that image from that sky browser."
             },
             {
                 "adjustCamera",
                 & skybrowser::luascriptfunctions::adjustCamera,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser or sky target. Rotates the camera "
+                "so that the target is placed in the center of the view."
             },
             {
                 "setSelectedBrowser",
                 & skybrowser::luascriptfunctions::setSelectedBrowser,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser or target. Sets that sky browser " 
+                "currently selected."
             },
             {
                 "getTargetData",
                 &skybrowser::luascriptfunctions::getTargetData,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Returns a table of data regarding the current view and the sky browsers "
+                "and targets."
             },
             {
                 "lockTarget",
                 &skybrowser::luascriptfunctions::lockTarget,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser or target. Locks the target " 
+                "to its current position."
             },
             {
                 "unlockTarget",
                 &skybrowser::luascriptfunctions::unlockTarget,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser or target. Unlocks the target."
             },
             {
                 "createTargetBrowserPair",
                 &skybrowser::luascriptfunctions::createTargetBrowserPair,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Creates a sky browser and a target."
             }, 
              {
                 "removeTargetBrowserPair",
                 &skybrowser::luascriptfunctions::removeTargetBrowserPair,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes in identifier to a sky browser or target and removes them."
             },
             {
                 "place3dSkyBrowser",
                 &skybrowser::luascriptfunctions::place3dSkyBrowser,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "int",
+                "Takes an index to an image and places the 3D sky browser in that place. "
             }, 
             {
                 "setOpacityOfImageLayer",
                 &skybrowser::luascriptfunctions::setOpacityOfImageLayer,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, int, double",
+                "Takes an identifier to a sky browser or sky target, an index to an image"
+                "and a value for the opacity."
             },   
             {
                 "sendOutIdsToBrowsers",
                 &skybrowser::luascriptfunctions::sendOutIdsToBrowsers,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Sends all sky browsers' identifiers to their respective CEF browser. "
             },
             {
                 "initializeBrowser",
                 &skybrowser::luascriptfunctions::initializeBrowser,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser and starts the initialization "
+                "for that browser. That means that the browser starts to try to connect "
+                "to the AAS WorldWide Telescope application by sending it messages. And "
+                "that the target matches its appearance to its corresponding browser."
             },  
            {
                 "add3dBrowserToSkyBrowserModule",
                 &skybrowser::luascriptfunctions::add3dBrowserToSkyBrowserModule,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes the identifier to the 3D sky browser and adds it to the sky "
+                "browser module."
             },  
             {
                 "set3dSelectedImagesAs2dSelection",
                 &skybrowser::luascriptfunctions::set3dSelectedImagesAs2dSelection,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser and adds the selected images in "
+                "that browser to the 3D sky browser."
             },   
             {
                 "centerTargetOnScreen",
                 &skybrowser::luascriptfunctions::centerTargetOnScreen,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string",
+                "Takes an identifier to a sky browser and animates its corresponding "
+                "target to the center of the current view."
             }, 
             {
                 "setImageLayerOrder",
                 &skybrowser::luascriptfunctions::setImageLayerOrder,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, int, int",
+                "Takes an identifier to a sky browser or a sky target, an image index "
+                "and the order which it should have in the selected image list. The "
+                "image is then changed to have this order."
             }, 
             {
                 "addPairToSkyBrowserModule",
                 &skybrowser::luascriptfunctions::addPairToSkyBrowserModule,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, string",
+                "Takes the identifier of the sky target and a sky browser and adds them "
+                "to the sky browser module."
             },
             {
                 "setEquatorialAim",
                 &skybrowser::luascriptfunctions::setEquatorialAim,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, double, double",
+                "Takes the identifier of a sky browser or a sky target and equatorial "
+                "coordinates Right Ascension and Declination. The target will animate to "
+                "this coordinate and the browser will display the coordinate."
             },
             {
                 "setVerticalFov",
                 &skybrowser::luascriptfunctions::setVerticalFov,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, float",
+                "Takes an identifier to a sky browser or a sky target and a vertical "
+                "field of view. Changes the field of view as specified by the input."
             },
             {
                 "setBorderColor",
                 &skybrowser::luascriptfunctions::setBorderColor,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, int, int, int",
+                "Takes an identifier to a sky browser or a sky target and a rgb color "
+                "in the ranges [0, 255]."
             },
             {
                 "setScreenSpaceSize",
                 &skybrowser::luascriptfunctions::setScreenSpaceSize,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "string, float, float",
+                "Sets the screen space size of the sky browser to the numbers specified "
+                "by the input [x, y]."
             },
             {
                 "startSetup",
                 &skybrowser::luascriptfunctions::startSetup,
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
+                "",
+                "Starts the setup process of the sky browers. This function calls "
+                "the lua function 'sendOutIdsToBrowsers' in all nodes in the cluster."
             },
+            {
+                "translateScreenSpaceRenderable",
+                &skybrowser::luascriptfunctions::translateScreenSpaceRenderable,
+                "string, float, float, float, float",
+                "Takes an identifier to a sky browser or sky target and the [x, y] "
+                "starting position and the [x, y] translation vector."
+             },
         };
 
         return res;
@@ -479,7 +484,7 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId, const s
         global::renderEngine->screenSpaceRenderable(browserId)
         );
     
-    // Assert pair to have both target and browser
+    // Ensure pair has both target and browser
     if (browser && target) {
         _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(browser, target));
     }
