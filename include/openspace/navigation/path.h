@@ -147,7 +147,7 @@ private:
  * created path. Secondly, the type will be read from the dictionary, and lastly it will
  * use the default from PathNavigator.
  *
- * Returns the created path.
+ * \return the created path
  */
 Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     std::optional<Path::Type> forceType = std::nullopt);
