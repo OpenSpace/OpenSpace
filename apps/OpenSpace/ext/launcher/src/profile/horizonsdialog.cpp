@@ -175,7 +175,9 @@ namespace {
         return id;
     }
 
-    std::pair<std::string, std::string> parseValidTimeRange(std::filesystem::path& file) {
+    std::pair<std::string, std::string> parseValidTimeRange(std::filesystem::path& file,
+        std::string startPhrase, std::string endPhrase)
+    {
         std::ifstream fileStream(file);
 
         if (!fileStream.good()) {
@@ -183,11 +185,10 @@ namespace {
             return std::pair<std::string, std::string>();
         }
 
-        // The beginning of a Horizons file has a header with a lot of information about the
-        // query that we do not care about. Ignore everything until head of time range list
-        std::map<int, std::string> matchingBodies;
+        // Ignore everything until head of time range list
         std::string line;
-        while (fileStream.good() && line.find("Trajectory files") == std::string::npos) {
+        std::getline(fileStream, line);
+        while (fileStream.good() && line.find(startPhrase) == std::string::npos) {
             std::getline(fileStream, line);
         }
 
@@ -198,55 +199,55 @@ namespace {
 
         // There will be one empty line before the list of time rnages, skip
         std::getline(fileStream, line);
-        std::getline(fileStream, line);
         std::string startTime, endTime;
 
         // From the first line get the start time
+        std::getline(fileStream, line);
         if (fileStream.good()) {
-            std::cout << "First time range: " << line << std::endl;
             std::stringstream str(line);
-            std::string temp;
-            while (str.good()) {
-                size_t idx = temp.find('-');
-                if (idx != std::string::npos && temp.find('-', idx) != std::string::npos) {
-                    startTime = temp; // temp has to be the start date
-                    str >> temp;
-                    startTime += " T " + temp; // Add the start time
-                    break;
-                }
-                str >> temp;
+
+            // Read and save each word.
+            std::vector<std::string> words;
+            std::string word;
+            while (str >> word)
+                words.push_back(word);
+
+            if (words.empty()) {
+                return std::pair<std::string, std::string>();
             }
+
+            // Parse time stamps backwards
+            // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
+            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+            startTime = words[words.size() - 4] + " T " + words[words.size() - 3];
         }
-        if (startTime.empty()) {
+        if (startTime.empty() || endTime.empty()) {
             fileStream.close();
             return std::pair<std::string, std::string>();
         }
 
         // Get the end time from the last trajectery
         while (fileStream.good()) {
-            if (line.find("****") != std::string::npos || line.empty() || line == " ") {
+            if (line.find(endPhrase) != std::string::npos || line.empty() || line == " ") {
                 fileStream.close();
                 return std::pair<std::string, std::string>(startTime, endTime);
             }
 
-            std::cout << "Time range: " << line << std::endl;
-            // Time rnage format: Trajectory file name, start, end
-
+            // Read and save each word.
             std::stringstream str(line);
-            std::string temp;
-            while (str.good()) {
-                size_t idx = temp.find('-');
-                if (idx != std::string::npos && temp.find('-', idx) != std::string::npos) {
-                    // Have found start date, we want end date
-                    // start time, end date
-                    str >> temp >> temp;
-                    endTime = temp;
-                    str >> temp;
-                    endTime += " T " + temp; // Add the end time
-                    break;
-                }
-                str >> temp;
+            std::vector<std::string> words;
+            std::string word;
+            while (str >> word)
+                words.push_back(word);
+
+            if (words.empty()) {
+                return std::pair<std::string, std::string>();
             }
+
+            // Parse time stamps backwards
+            // Format: Trajectory file Name, Start, End (yyyy-mon-dd hh:mm)
+            endTime = words[words.size() - 2] + " T " + words[words.size() - 1];
+
             std::getline(fileStream, line);
         }
 
@@ -760,10 +761,13 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
 std::filesystem::path HorizonsDialog::handleAnswer(json& answer) {
     openspace::HorizonsFile::HorizonsResult isValid = openspace::HorizonsFile::isValidAnswer(answer);
     if (isValid != openspace::HorizonsFile::HorizonsResult::Valid &&
-        isValid != openspace::HorizonsFile::HorizonsResult::MultipleObserverStations)
+        isValid != openspace::HorizonsFile::HorizonsResult::MultipleObserverStations &&
+        isValid != openspace::HorizonsFile::HorizonsResult::ErrorTimeRange)
     {
         // Special case with MultipleObserverStations since it is detected as an error
         // but could be fixed by parsing the matches and let user choose
+        // Special case with ErrorTimeRange since it is detected as an error
+        // but could be nice to display the avalable itme range of target to the user
         handleResult(isValid);
         return std::filesystem::path();
     }
@@ -839,7 +843,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsFile::HorizonsResult& resul
                 + _targetName + "'.", HorizonsDialog::LogLevel::Error);
 
             std::pair<std::string, std::string> validTimeRange =
-                parseValidTimeRange(_horizonsFile);
+                parseValidTimeRange(_horizonsFile, "Trajectory files", "************");
             if (validTimeRange.first.empty()) {
                 appendLog(
                     "Could not parse the valid time range from file",
