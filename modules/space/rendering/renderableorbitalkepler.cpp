@@ -47,20 +47,6 @@
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
 
-    // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
-        { "Background", openspace::Renderable::RenderBin::Background },
-        { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        {
-            "PreDeferredTransparent",
-            openspace::Renderable::RenderBin::PreDeferredTransparent
-        },
-        {
-            "PostDeferredTransparent",
-            openspace::Renderable::RenderBin::PostDeferredTransparent
-        }
-    };
-
     constexpr const std::array<int, 36> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
@@ -223,12 +209,6 @@ namespace {
         "Contiguous Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
     };
-    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
-        "RenderBinMode",
-        "RenderBin Mode",
-        "Determines if the trails will be rendered after all other elements, including"
-        "atmospheres if needed."
-    };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
         // [[codegen::verbatim(PathInfo.description)]]
@@ -251,9 +231,6 @@ namespace {
 
         // [[codegen::verbatim(RenderSizeInfo.description)]]
         std::optional<int> renderSize;
-
-        // [[codegen::verbatim(RenderBinModeInfo.description)]]
-        std::optional<std::string> renderBinMode;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -390,62 +367,25 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
     , _path(PathInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dict,
-        "RenderableOrbitalKepler"
-    );
-    _path = dict.value<std::string>(PathInfo.identifier);
-    _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
-
-    if (dict.hasValue<glm::dvec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dict.value<glm::dvec3>(LineColorInfo.identifier);
-    }
-
-    _appearance.lineFade =
-        dict.hasValue<double>(TrailFadeInfo.identifier) ?
-        static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
-        20.f;
-
-    if (dict.hasValue<double>(StartRenderIdxInfo.identifier)) {
-        _startRenderIdx = static_cast<unsigned int>(
-            dict.value<double>(StartRenderIdxInfo.identifier));
-    }
-    else {
-        _startRenderIdx = 0u;
-    }
-
-    if (dict.hasValue<double>(RenderSizeInfo.identifier)) {
-        _sizeRender = static_cast<unsigned int>(
-            dict.value<double>(RenderSizeInfo.identifier));
-    }
-    else {
-        _sizeRender = 0u;
-    }
-
-    _appearance.lineWidth =
-        dict.hasValue<double>(LineWidthInfo.identifier) ?
-        static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
-        2.f;
-
     _reinitializeTrailBuffers = std::function<void()>([this] { initializeGL(); });
+
+    const Parameters p = codegen::bake<Parameters>(dict);
+
+    _path = p.path;
     _path.onChange(_reinitializeTrailBuffers);
+
+    _segmentQuality = p.segmentQuality;
     _segmentQuality.onChange(_reinitializeTrailBuffers);
 
+    _appearance.lineColor = p.color;
+    _appearance.lineFade = p.trailFade.value_or(20.f);
+    _appearance.lineWidth = p.lineWidth.value_or(2.f);
     addPropertySubOwner(_appearance);
-    addProperty(_path);
-    addProperty(_segmentQuality);
-    addProperty(_opacity);
 
-    if (dict.hasValue<std::string>(RenderBinModeInfo.identifier)) {
-        Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
-            dict.value<std::string>(RenderBinModeInfo.identifier)
-        );
-        setRenderBin(cfgRenderBin);
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-    }
+    _startRenderIdx = p.startRenderIdx.value_or(0);
+
+    _sizeRender = p.renderSize.value_or(0u);
+
 }
 
 void RenderableOrbitalKepler::initializeGL() {

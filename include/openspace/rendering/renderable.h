@@ -117,6 +117,7 @@ protected:
     double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
+    RenderBin _renderBin = RenderBin::Opaque;
 
 private:
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
@@ -124,8 +125,6 @@ private:
     // parentage and that's no bueno
     friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         const ghoul::Dictionary&);
-
-    RenderBin _renderBin = RenderBin::Opaque;
 };
 
 } // namespace openspace
