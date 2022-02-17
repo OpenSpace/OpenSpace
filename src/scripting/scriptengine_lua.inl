@@ -286,10 +286,9 @@ int directoryForPath(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
- * This function extracts the contents of a zip file. The first
- * argument is the path to the zip file. The second argument is the
- * directory where to put the extracted files. If the third argument is
- * true, the compressed file will be deleted after the decompression
+ * This function extracts the contents of a zip file. The first argument is the path to
+ * the zip file. The second argument is the directory where to put the extracted files. If
+ * the third argument is true, the compressed file will be deleted after the decompression
  * is finished.
  */
 int unzipFile(lua_State* L) {
@@ -300,8 +299,26 @@ int unzipFile(lua_State* L) {
     dest = absPath(dest).string();
     deleteSource = deleteSource.value_or(false);
 
-    int arg = 2;
-    zip_extract(source.c_str(), dest.c_str(), [](const char*, void*) { return 0; }, &arg);
+    if (!std::filesystem::exists(source)) {
+        return luaL_error(L, "Source file was not found");
+    }
+
+    struct zip_t* z = zip_open(source.c_str(), 0, 'r');
+    const bool is64 = zip_is64(z);
+    zip_close(z);
+
+    if (is64) {
+        std::string err = fmt::format(
+            "Error while unzipping {}: Zip64 archives are not supported", source
+        );
+        return luaL_error(L, err.c_str());
+    }
+
+    const int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
+    if (ret != 0) {
+        std::string err = fmt::format("Error {} while unzipping {}", ret, source);
+        return luaL_error(L, err.c_str());
+    }
 
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);

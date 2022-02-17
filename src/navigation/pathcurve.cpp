@@ -35,7 +35,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "PathCurve";
     constexpr const int NrSamplesPerSegment = 100;
 } // namespace
 

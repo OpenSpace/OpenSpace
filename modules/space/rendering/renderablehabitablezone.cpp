@@ -40,8 +40,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableHabitableZone";
-
     constexpr const std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
         "conservativeBounds", "showOptimistic"

@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+namespace openspace { struct Documentation; }
+
 namespace openspace::globebrowsing {
 
 class SingleImageProvider : public TileProvider {
@@ -40,6 +42,8 @@ public:
     void reset() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _filePath;

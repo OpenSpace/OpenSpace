@@ -16,19 +16,23 @@ local layer = {
     ~1:280 scale. (Description from URL)]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "ESRI World Imagery",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Main web loaded map layer for Earth. This layer is hosted by ESRI.]],
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
-  License = "Esri Master License Agreement",
-  Identifiers = {"ESRI_World_Imagery"}
+  License = "Esri Master License Agreement"
 }

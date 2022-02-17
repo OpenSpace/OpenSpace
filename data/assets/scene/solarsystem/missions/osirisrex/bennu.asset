@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
@@ -43,4 +42,12 @@ local Bennu = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {Bennu})
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Bennu)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Bennu)
+end)
+  
+asset.export(Bennu)

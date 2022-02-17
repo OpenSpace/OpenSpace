@@ -196,15 +196,23 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_habitableZoneOpacity);
 }
 
+bool ExoplanetsModule::hasDataFiles() const {
+    return !_exoplanetsDataFolder.value().empty();
+}
+
 std::string ExoplanetsModule::exoplanetsDataPath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
     ).string();
 }
 
 std::string ExoplanetsModule::lookUpTablePath() const {
+    ghoul_assert(hasDataFiles(), "Data files not loaded");
+    
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
 }
 
@@ -320,8 +328,9 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");

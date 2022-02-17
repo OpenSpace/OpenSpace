@@ -500,11 +500,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
 #ifdef __APPLE__
         switch (_shaderOption) {
-            case gaia::ShaderOption::Point_SSBO:
-            case gaia::ShaderOption::Billboard_SSBO:
-            case gaia::ShaderOption::Billboard_SSBO_noFBO:
+            case gaia::ShaderOption::PointSSBO:
+            case gaia::ShaderOption::BillboardSSBO:
+            case gaia::ShaderOption::BillboardSSBONoFBO:
                 LWARNING("Shader option unsupported, changing to Point VBO");
-                _shaderOption = gaia::ShaderOption::Point_VBO;
+                _shaderOption = gaia::ShaderOption::PointVBO;
         }
 #endif // __APPLE__
     }

@@ -35,6 +35,8 @@ public:
 
     GalaxyModule();
 
+    std::vector<documentation::Documentation> documentations() const override;
+
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
 };

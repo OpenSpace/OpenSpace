@@ -1,7 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
-
-
-
 local syncedDirectory = asset.syncedResource({
   Name = "General SPK Kernels",
   Type = "HttpSynchronization",
@@ -16,7 +12,17 @@ local kernels = {
   syncedDirectory .. "de430_1850-2150.bsp"
 }
 
-assetHelper.registerSpiceKernels(asset, kernels)
+asset.onInitialize(function()
+  for _, kernel in ipairs(kernels) do
+    openspace.spice.loadKernel(kernel)
+  end
+end)
+  
+asset.onDeinitialize(function()
+  for i = #kernels, 1, -1 do
+    openspace.spice.unloadKernel(kernels[i]) 
+  end
+end)
 
 
 asset.meta = {

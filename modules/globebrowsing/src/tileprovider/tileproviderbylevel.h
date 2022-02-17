@@ -41,6 +41,8 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
+    static documentation::Documentation Documentation();
+
 private:
     std::vector<int> _providerIndices;
     std::vector<std::unique_ptr<TileProvider>> _levelTileProviders;

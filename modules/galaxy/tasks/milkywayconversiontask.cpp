@@ -107,8 +107,11 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     rawWriter.write(sampleFunction, onProgress);
 }
 
-documentation::Documentation MilkywayConversionTask::documentation() {
-    return documentation::Documentation();
+documentation::Documentation MilkywayConversionTask::Documentation() {
+    return documentation::Documentation(
+        "MilkywayConversionTask",
+        "galaxy_milkywayconversiontask"
+    );
 }
 
 } // namespace openspace

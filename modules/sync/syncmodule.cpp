@@ -44,10 +44,6 @@
 #include "syncmodule_lua.inl"
 
 namespace {
-    constexpr const char* KeyHttpSynchronizationRepositories =
-        "HttpSynchronizationRepositories";
-    constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
-
     struct [[codegen::Dictionary(SyncModule)]] Parameters {
         // The list of all repository URLs that are used to fetch data from for
         // HTTPSynchronizations
@@ -72,7 +68,8 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     _synchronizationRoot = absPath(p.synchronizationRoot);
 
-    auto fSynchronization = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul::TemplateFactory<ResourceSynchronization>* fSynchronization =
+        FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(fSynchronization, "ResourceSynchronization factory was not created");
 
     fSynchronization->registerClass(

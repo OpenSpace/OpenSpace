@@ -41,6 +41,8 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
+    static documentation::Documentation Documentation();
+
 private:
     std::unordered_map<TileIndex::TileHashKey, std::unique_ptr<TileProvider>> _providers;
     std::unique_ptr<TileProvider> _defaultTileProvider;

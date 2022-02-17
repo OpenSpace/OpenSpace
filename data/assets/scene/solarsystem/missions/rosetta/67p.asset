@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
@@ -140,11 +139,20 @@ end)
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-  Barycenter,
-  Comet67P,
-  Trail67P
-})
-
-asset.export("Barycenter", Barycenter)
-asset.export("Comet67P", Comet67P)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Barycenter)
+  openspace.addSceneGraphNode(Comet67P)
+  openspace.addSceneGraphNode(Trail67P)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail67P)
+  openspace.removeSceneGraphNode(Comet67P)
+  openspace.removeSceneGraphNode(Barycenter)
+end)
+    
+asset.export("Barycenter", Barycenter) -- @TODO: This double export should disappear
+asset.export(Barycenter)
+asset.export("Comet67P", Comet67P)  -- @TODO: This double export should disappear
+asset.export(Comet67P)
+asset.export(Trail67P)

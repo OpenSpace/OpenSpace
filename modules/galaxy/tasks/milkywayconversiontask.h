@@ -45,7 +45,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
 
-    static documentation::Documentation documentation();
+    static documentation::Documentation Documentation();
 
 private:
     std::string _inFilenamePrefix;

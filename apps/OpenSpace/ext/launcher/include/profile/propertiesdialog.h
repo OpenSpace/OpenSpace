@@ -65,6 +65,8 @@ private slots:
     void transitionToEditMode();
     void parseSelections();
 
+    void selectLineFromScriptLog();
+
 private:
     void createWidgets();
 
@@ -81,6 +83,8 @@ private:
     QListWidget* _list = nullptr;
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+
+    QPushButton* _fillFromScriptLog = nullptr;
     QLabel* _commandLabel = nullptr;
     QComboBox* _commandCombo = nullptr;
     QLabel* _propertyLabel = nullptr;

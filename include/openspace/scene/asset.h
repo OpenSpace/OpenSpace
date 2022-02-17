@@ -117,6 +117,13 @@ public:
      */
     void setSynchronizationStateRejected();
 
+
+    /**
+     * Register a SceneGraphNodeIdentifier with the asset
+     * (used to associate Nodes with asset meta)
+     */
+    void addIdentifier(std::string identifier);
+
     /**
      * If the asset has not yet been loaded, this function loads the asset and returns the
      * success state. If the loading succeeded, the Asset transitions into the \c Loaded

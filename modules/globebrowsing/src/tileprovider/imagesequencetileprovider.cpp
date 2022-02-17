@@ -61,6 +61,10 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+documentation::Documentation ImageSequenceTileProvider::Documentation() {
+    return codegen::doc<Parameters>("globebrowsing_imagesequencetileprovider");
+}
+
 ImageSequenceTileProvider::ImageSequenceTileProvider(const ghoul::Dictionary& dictionary)
     : _index(IndexInfo, 0)
     , _currentImage(CurrentImageInfo)
@@ -108,7 +112,7 @@ TileDepthTransform ImageSequenceTileProvider::depthTransform() {
 
 void ImageSequenceTileProvider::update() {
     if (_isImageDirty && !_imagePaths.empty() &&
-        _index >= 0 && _index < _imagePaths.size())
+        _index >= 0 && _index < static_cast<int>(_imagePaths.size()))
     {
         if (_currentTileProvider) {
             _currentTileProvider->deinitialize();

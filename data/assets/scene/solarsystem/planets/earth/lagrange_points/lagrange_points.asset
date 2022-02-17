@@ -1,4 +1,14 @@
-asset.require("scene/solarsystem/planets/earth/lagrange_points/L1")
-asset.require("scene/solarsystem/planets/earth/lagrange_points/L2")
-asset.require("scene/solarsystem/planets/earth/lagrange_points/L4")
-asset.require("scene/solarsystem/planets/earth/lagrange_points/L5")
+asset.require("./L1")
+asset.require("./L2")
+asset.require("./L4")
+asset.require("./L5")
+
+
+asset.meta = {
+  Name = "Earth Lagrange Points",
+  Version = "1.0",
+  Description = [[ Meta asset to include all the Earth Lagrange points. Includes L1, L2, L4 and L5.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

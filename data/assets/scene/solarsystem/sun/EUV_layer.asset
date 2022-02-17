@@ -1,5 +1,4 @@
 asset.require("spice/base")
-local assetHelper = asset.require("util/asset_helper")
 local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("./transforms")
 
@@ -39,19 +38,23 @@ local toggle_EUV_layer = {
 
 asset.onInitialize(function ()
   openspace.action.registerAction(toggle_EUV_layer)
+  openspace.addSceneGraphNode(EUVLayer)
 end)
+
 asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_EUV_layer.Identifier)
+  openspace.removeSceneGraphNode(EUVLayer)
+  openspace.action.removeAction(toggle_EUV_layer)
 end)
-assetHelper.registerSceneGraphNodesAndExport(asset, { EUVLayer })
+
+asset.export(EUVLayer)
+
 
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during, 
     the CME]],
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-  License = "CC-BY",
-  Identifier = {"EUV-Layer-bastille-day-2000"}
+  License = "CC-BY"
 }

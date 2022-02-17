@@ -55,7 +55,7 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* _loggerCat = "Renderable Galaxy";
+    constexpr const char* _loggerCat = "RenderableGalaxy";
 
     enum StarRenderingMethod {
         Points,
@@ -75,37 +75,45 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
         "Volume Rendering",
-        "" // @TODO Missing documentation
+        "If this value is enabled, the volume rendering component of the galaxy "
+        "rendering is turned on. Otherwise, the volume rendering is skipped"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star Rendering",
-        "" // @TODO Missing documentation
+        "If this value is enabled, the point-based star rendering component of the "
+        "galaxy rendering is turned on. Otherwise, the volume rendering is skipped"
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "" // @TODO Missing documentation
+        "Determines the distance between steps taken in the volume rendering. The lower "
+        "the number is, the better the rendering looks, but also takes more "
+        "computational resources to render"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
         "AbsorptionMultiply",
         "Absorption Multiplier",
-        "" // @TODO Missing documentation
+        "A unit-less scale factor for the probability of dust absorbing a light "
+        "particle. The amount of absorption determines the spectrum of the light that is "
+        "emitted from the galaxy"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
         "Emission Multiplier",
-        "" // @TODO Missing documentation
+        "A unit-less scale factor for the amount of light being emitted by dust in the "
+        "galaxy."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
-        "" // @TODO Missing documentation
+        "The internal rotation of the volume rendering in Euler angles",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
@@ -118,15 +126,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "EnabledPointsRatio",
         "Enabled points",
-        "" // @TODO Missing documentation
+        "The ratio of point-like stars that are rendered to produce the overall galaxy "
+        "image. At a value of 0, no stars are rendered, at a value of 1 all points "
+        "contained in the dataset are rendered. The specific value chosen is a "
+        "compromise between image fidelity and rendering performance."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor"
-        " when rendering the current volume."
+        "This value sets the downscaling factor when rendering the current volume."
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
@@ -229,13 +239,17 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation RenderableGalaxy::Documentation() {
+    return codegen::doc<Parameters>("galaxy_renderablegalaxy");
+}
+
 RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
     , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
-    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
-    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.f, 200.0f)
+    , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.f, 1000.0f)
     , _starRenderingMethod(
         StarRenderingMethodInfo,
         properties::OptionProperty::DisplayType::Dropdown

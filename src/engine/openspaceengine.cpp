@@ -34,7 +34,6 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
@@ -77,6 +76,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
@@ -105,6 +105,16 @@ namespace {
 
     constexpr const char* _loggerCat = "OpenSpaceEngine";
 
+    constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
+        using Mode = openspace::OpenSpaceEngine::Mode;
+        switch (m) {
+            case Mode::UserControl: return "UserControl";
+            case Mode::CameraPath: return "CameraPath";
+            case Mode::SessionRecordingPlayback: return "SessionRecording";
+            default: throw ghoul::MissingCaseException();
+        }
+    }
+
     openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print Events",
@@ -121,42 +131,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
-        "TimeFrame"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
-        "LightSource"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
+    FactoryManager::ref().addFactory<Renderable>("Renderable");
+    FactoryManager::ref().addFactory<Translation>("Translation");
+    FactoryManager::ref().addFactory<Rotation>("Rotation");
+    FactoryManager::ref().addFactory<Scale>("Scale");
+    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
+    FactoryManager::ref().addFactory<LightSource>("LightSource");
+    FactoryManager::ref().addFactory<Task>("Task");
+    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
+    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
 
     SpiceManager::initialize();
     TransformationManager::initialize();
@@ -757,7 +740,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    bool loading = true;
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -773,18 +755,18 @@ void OpenSpaceEngine::loadAssets() {
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
+                progressInfo.progress = [](const ResourceSynchronization* s) {
+                    if (!s->nTotalBytesIsKnown()) {
                         return 0.f;
                     }
-                    if (sync->nTotalBytes() == 0) {
+                    if (s->nTotalBytes() == 0) {
                         return 1.f;
                     }
                     return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
+                        static_cast<float>(s->nSynchronizedBytes()) /
+                        static_cast<float>(s->nTotalBytes());
                 }(sync);
-                
+
                 _loadingScreen->updateItem(
                     sync->identifier(),
                     sync->name(),
@@ -813,12 +795,11 @@ void OpenSpaceEngine::loadAssets() {
             allAssets.end(),
             [](const Asset* asset) { return asset->isInitialized() || asset->isFailed(); }
         );
-        
+
         if (finishedLoading) {
             break;
         }
 
-        loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
@@ -841,7 +822,6 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
-                loading = true;
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),
@@ -1604,6 +1584,39 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
 }
 
+OpenSpaceEngine::Mode OpenSpaceEngine::currentMode() const {
+    return _currentMode;
+}
+
+bool OpenSpaceEngine::setMode(Mode newMode) {
+    if (_currentMode == Mode::CameraPath && newMode == Mode::CameraPath) {
+        // Special case: It is okay to trigger another camera path while one is
+        // already playing. So just return that we were successful
+        return true;
+    }
+    else if (newMode == _currentMode) {
+        LERROR("Cannot switch to the currectly active mode");
+        return false;
+    }
+    else if (_currentMode != Mode::UserControl && newMode != Mode::UserControl) {
+        LERROR(fmt::format(
+            "Cannot switch to mode '{}' when in '{}' mode",
+            stringify(newMode), stringify(_currentMode)
+        ));
+        return false;
+    }
+
+    LDEBUG(fmt::format("Mode: {}", stringify(newMode)));
+
+    _currentMode = newMode;
+    return true;
+}
+
+void OpenSpaceEngine::resetMode() {
+    _currentMode = Mode::UserControl;
+    LDEBUG(fmt::format("Reset engine mode to {}", stringify(_currentMode)));
+}
+
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         throw ghoul::RuntimeError("No 'camera' entry exists in the startup profile");
@@ -1766,25 +1779,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::downloadFile,
                 "",
                 "Downloads a file from Lua scope"
-            },
-            {
-                "addVirtualProperty",
-                &luascriptfunctions::addVirtualProperty,
-                "type, name, identifier,"
-                "[description, value, minimumValue, maximumValue]",
-                "Adds a virtual property that will set a group of properties"
-            },
-            {
-                "removeVirtualProperty",
-                &luascriptfunctions::removeVirtualProperty,
-                "string",
-                "Removes a previously added virtual property"
-            },
-            {
-                "removeAllVirtualProperties",
-                &luascriptfunctions::removeAllVirtualProperties,
-                "",
-                "Remove all registered virtual properties"
             },
             {
                 "setScreenshotFolder",

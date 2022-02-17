@@ -652,17 +652,17 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     ProfilePropertyLua elem = propertyProcessValue(L, value);
     if (!_valueIsTable) {
         std::visit(overloaded{
-            [&L](const bool value) {
-                ghoul::lua::push(L, value);
+            [&L](bool v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const float value) {
-                ghoul::lua::push(L, value);
+            [&L](float v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const std::string value) {
-                ghoul::lua::push(L, value);
+            [&L](const std::string& v) {
+                ghoul::lua::push(L, v);
             },
-            [&L](const ghoul::lua::nil_t nilValue) {
-                ghoul::lua::push(L, nilValue);
+            [&L](ghoul::lua::nil_t v) {
+                ghoul::lua::push(L, v);
             }
         }, elem);
     }
@@ -863,8 +863,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
-                "string",
-                "Removes the SceneGraphNode identified by name"
+                "(string, table)",
+                "Removes the SceneGraphNode identified by name or by extracting the "
+                "'Identifier' key if the parameter is a table"
             },
             {
                 "removeSceneGraphNodesFromRegex",

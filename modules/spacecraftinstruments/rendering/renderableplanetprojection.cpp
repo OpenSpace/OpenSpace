@@ -136,7 +136,7 @@ namespace {
 
         // Contains information about projecting onto this planet
         ghoul::Dictionary projection
-            [[codegen::reference("newhorizons_projectioncomponent")]];
+            [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 
         // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
         std::vector<std::string> colorTexturePaths;
@@ -162,7 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlanetProjection::Documentation() {
-    return codegen::doc<Parameters>("newhorizons_renderable_planetprojection");
+    return codegen::doc<Parameters>("spacecraftinstruments_renderableplanetprojection");
 }
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)

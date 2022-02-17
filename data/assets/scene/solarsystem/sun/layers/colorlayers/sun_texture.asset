@@ -1,6 +1,5 @@
 local globeIdentifier = asset.require("../../sun").Sun.Identifier
 
-
 local texturesPath = asset.syncedResource({
   Type = "HttpSynchronization",
   Name = "Sun textures",
@@ -13,11 +12,16 @@ local layer = {
   FilePath = texturesPath .. "sun.jpg",
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
 asset.export("layer", layer)
+
 
 
 asset.meta = {

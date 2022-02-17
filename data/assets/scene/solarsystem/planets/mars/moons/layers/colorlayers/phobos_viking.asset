@@ -8,18 +8,22 @@ local layer = {
   Description = [[ Viking-base Phobos shaded relief created by USGS.]]
 }
 
-asset.onInitialize(function () 
+asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
+
 asset.meta = {
   Name = "Phobos Global Shaded Relief [USGS]",
-  Version = "1.0",
+  Version = "1.1",
   Author = "USGS/NASA",
   URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
-  License = "NASA/PDS",
-  Identifiers = {'Phobos_Global_Shaded_Relief_USGS'}
+  License = "NASA/PDS"
 }

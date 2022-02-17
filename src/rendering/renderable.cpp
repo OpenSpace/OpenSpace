@@ -114,7 +114,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     Renderable* result = factory->create(
         renderableType,

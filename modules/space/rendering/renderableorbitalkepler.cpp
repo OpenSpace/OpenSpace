@@ -45,7 +45,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "OrbitalKepler";
     constexpr const char* ProgramName = "OrbitalKepler";
 
     constexpr const std::array<int, 36> LeapYears = {

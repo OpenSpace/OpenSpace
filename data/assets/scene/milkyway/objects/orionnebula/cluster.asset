@@ -1,4 +1,3 @@
-local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 
 
@@ -51,16 +50,24 @@ local OrionClusterStars = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OrionClusterStars })
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(OrionClusterStars)
+end)
+  
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(OrionClusterStars)
+end)
+  
+asset.export(OrionClusterStars)
+
 
 
 asset.meta = {
   Name = "Orion Nebula Star Cluster",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[ Digital Universe asset for the Orion star cluster. To be used in
     conjunction with nebula model. Use orionnebula.asset to include both.]],
   Author = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = "AMNH Digital Universe",
-  Identifiers = {"OrionClusterStars"}
+  License = "AMNH Digital Universe"
 }
