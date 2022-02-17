@@ -322,6 +322,16 @@ int flyToGeo(lua_State* L) {
         altitude
     );
 
+    const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 currentPosModelCoords =
+        glm::inverse(globe->modelTransform()) * glm::dvec4(currentPosW, 1.0);
+
+    constexpr const double LengthEpsilon = 10.0; // meters
+    if (glm::distance(currentPosModelCoords, positionModelCoords) < LengthEpsilon) {
+        LINFOC("GlobeBrowsing", "flyToGeo: Already at the requested position");
+        return 0;
+    }
+
     ghoul::Dictionary instruction;
     instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());

@@ -554,8 +554,6 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
         Waypoint(NavigationState(p.startState.value())) :
         waypointFromCamera();
 
-    // TODO: also handle curve type here
-
     std::vector<Waypoint> waypoints;
     switch (p.targetType) {
         case Parameters::TargetType::NavigationState: {
@@ -600,6 +598,11 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
 
     // @TODO (emmbr) Allow for an instruction to represent a list of multiple waypoints
     const Waypoint waypointToAdd = waypoints[0];
+
+    if (glm::distance(startPoint.position(), waypointToAdd.position()) < LengthEpsilon) {
+        LINFO("Already at the requested target");
+        throw PathCurve::TooShortPathError("Path too short!");
+    }
 
     try {
         return Path(startPoint, waypointToAdd, type, duration);
