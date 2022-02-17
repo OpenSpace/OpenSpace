@@ -604,6 +604,11 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     try {
         return Path(startPoint, waypointToAdd, type, duration);
     }
+    catch (const PathCurve::TooShortPathError& e) {
+        LINFO("Already at the requested target");
+        // Rethrow e, so the pathnavigoar can handle it as well
+        throw e;
+    }
     catch (const PathCurve::InsufficientPrecisionError&) {
         // There wasn't enough precision to represent the full curve in world
         // coordinates. For now, use a linear path instead. It uses another

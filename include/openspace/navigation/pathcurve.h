@@ -39,6 +39,10 @@ public:
         explicit InsufficientPrecisionError(std::string msg);
     };
 
+    struct TooShortPathError : public ghoul::RuntimeError {
+        explicit TooShortPathError(std::string msg);
+    };
+
     virtual ~PathCurve() = 0;
 
     double length() const;

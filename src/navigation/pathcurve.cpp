@@ -47,6 +47,10 @@ PathCurve::InsufficientPrecisionError::InsufficientPrecisionError(std::string er
     : ghoul::RuntimeError(std::move(error), "PathCurve")
 {}
 
+PathCurve::TooShortPathError::TooShortPathError(std::string error)
+    : ghoul::RuntimeError(std::move(error), "PathCurve")
+{}
+
 PathCurve::~PathCurve() {}
 
 double PathCurve::length() const {
@@ -89,6 +93,10 @@ void PathCurve::initializeParameterData() {
         _lengthSums.push_back(_lengthSums[i - 1] + length);
     }
     _totalLength = _lengthSums.back();
+
+    if (_totalLength < LengthEpsilon) {
+        throw TooShortPathError("Path too short!");
+    }
 
     // Compute a map of arc lengths s and curve parameters u, for reparameterization
     constexpr const int steps = 100;

@@ -232,6 +232,9 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
     }
+    catch (const PathCurve::TooShortPathError&) {
+        // Do nothing
+    }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Could not create path. Reason: ", e.message));
         return;
