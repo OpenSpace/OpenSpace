@@ -279,6 +279,7 @@ void PathNavigator::startPath() {
     _isPlaying = true;
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+    global::navigationHandler->orbitalNavigator().resetVelocities();
 }
 
 void PathNavigator::abortPath() {
