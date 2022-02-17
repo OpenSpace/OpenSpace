@@ -259,18 +259,7 @@ void Renderable::setRenderBinFromOpacity() {
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
-    _opacity.onChange([this](){
-        if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
-            (_renderBin != Renderable::RenderBin::Overlay))
-        {
-            if (_opacity >= 0.f && _opacity < 1.f) {
-                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-            }
-            else {
-                setRenderBin(Renderable::RenderBin::Opaque);
-            }
-        }
-    });
+    _opacity.onChange([this]() { setRenderBinFromOpacity(); });
 }
 
 }  // namespace openspace
