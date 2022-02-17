@@ -1138,10 +1138,21 @@ int main(int argc, char* argv[]) {
         std::filesystem::path base = configurationFilePath.parent_path();
         FileSys.registerPathToken("${BASE}", base);
 
+        // For now, we just initialize glfw since we can't execute anything meaningfully
+        // after SGCT initializes glfw. There is a bit of startup delay because of this,
+        // but it shouldn't be too bad
+        glfwInit();
+        GLFWmonitor* m = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(m);
+        glm::ivec2 size = glm::ivec2(mode->width, mode->height);
+        glfwTerminate();
+
+
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath.string(),
+            size,
             commandlineArguments.configurationOverride
         );
 
