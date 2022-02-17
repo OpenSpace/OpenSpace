@@ -115,7 +115,6 @@ void PathCurve::initializeParameterData() {
             double s = sStart + arcLength(uStart, u);
             // Ignore samples that are indistinguishable due to precision limitations
             if (std::abs(s - _parameterSamples.back().s) < LengthEpsilon) {
-                //LINFO(fmt::format("Ignoring sample (s, u) = ({}, {})", s, u));
                 problematic = true;
                 continue;
             }
@@ -126,12 +125,6 @@ void PathCurve::initializeParameterData() {
     if (problematic) {
         throw InsufficientPrecisionError("Insufficient precision due to path length");
     }
-
-    // OBS! Should no longer be needed with the check above
-    // Check that we have at least one sample at the end and if not, throw an error
-    //if (!(_parameterSamples.back().u > (max - 1.0))) {
-    //    // TODO: throw
-    //}
 
     // Remove the very last sample if indistinguishable from the final one
     const double diff = std::abs(_totalLength - _parameterSamples.back().s);

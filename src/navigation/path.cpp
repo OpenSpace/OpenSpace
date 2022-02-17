@@ -157,7 +157,9 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
     CameraPose newPose;
 
-    if (_type == Type::Linear) { // TODO: this case is really only needed for very long linear paths
+    if (_type == Type::Linear) {
+        // Special handling of linear paths, so that it can be used when we are
+        // traversing very large distances without introducing precision problems
         const glm::dvec3 prevPosToEnd = _prevPose.position - _end.position();
         const double remainingDistance = glm::length(prevPosToEnd);
 
@@ -175,7 +177,6 @@ CameraPose Path::traversePath(double dt, float speedScale) {
 
         const double relativeDistance = _traveledDistance / pathLength();
         newPose.rotation = interpolateRotation(relativeDistance);
-        //newPose.rotation = interpolateRotation(_progressedTime / 3.0); // TODO: TESTING TIME BASED INTERPOLATION
     }
     else {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
@@ -609,7 +610,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     }
     catch (const PathCurve::TooShortPathError& e) {
         LINFO("Already at the requested target");
-        // Rethrow e, so the pathnavigoar can handle it as well
+        // Rethrow e, so the pathnavigator can handle it as well
         throw e;
     }
     catch (const PathCurve::InsufficientPrecisionError&) {
