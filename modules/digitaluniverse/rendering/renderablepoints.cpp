@@ -55,8 +55,6 @@ namespace {
         "spriteTexture", "hasColorMap"
     };
 
-    constexpr double PARSEC = 0.308567756E17;
-
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",

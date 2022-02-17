@@ -131,7 +131,7 @@ namespace {
         }
         else {
             // We don't have a child, so we must generate it
-            std::unique_ptr<TreeNode> newNode = std::make_unique<TreeNode>(*path.begin());
+            auto newNode = std::make_unique<TreeNode>(*path.begin());
             n = newNode.get();
             node.children.push_back(std::move(newNode));
         }

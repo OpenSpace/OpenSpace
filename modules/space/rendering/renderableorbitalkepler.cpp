@@ -45,7 +45,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* _loggerCat = "OrbitalKepler";
     constexpr const char* ProgramName = "OrbitalKepler";
 
     // Fragile! Keep in sync with documentation

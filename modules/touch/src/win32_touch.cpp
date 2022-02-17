@@ -119,18 +119,14 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
 
             if (info.pointerFlags & POINTER_FLAG_DOWN) {
 #ifdef ENABLE_DIRECTMSG
-                std::unique_ptr<TouchInputHolder> points =
-                    std::make_unique<TouchInputHolder>(touchInput);
+                auto points = std::make_unique<TouchInputHolder>(touchInput);
                 gTouchInputsMap.emplace(info.pointerId, std::move(points));
                 global::openSpaceEngine->touchDetectionCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle new touchpoint
                 gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
-                gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(
-                    xPos,
-                    yPos
-                );
+                gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(xPos, yPos);
                 gTuioServer->commitFrame();
 #endif
             }

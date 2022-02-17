@@ -131,42 +131,15 @@ OpenSpaceEngine::OpenSpaceEngine()
     : _printEvents(PrintEventsInfo, false)
 {
     FactoryManager::initialize();
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
-        "Renderable"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Translation>>(),
-        "Translation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
-        "Rotation"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Scale>>(),
-        "Scale"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
-        "TimeFrame"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
-        "LightSource"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Task>>(),
-        "Task"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ResourceSynchronization>>(),
-        "ResourceSynchronization"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<DashboardItem>>(),
-        "DashboardItem"
-    );
+    FactoryManager::ref().addFactory<Renderable>("Renderable");
+    FactoryManager::ref().addFactory<Translation>("Translation");
+    FactoryManager::ref().addFactory<Rotation>("Rotation");
+    FactoryManager::ref().addFactory<Scale>("Scale");
+    FactoryManager::ref().addFactory<TimeFrame>("TimeFrame");
+    FactoryManager::ref().addFactory<LightSource>("LightSource");
+    FactoryManager::ref().addFactory<Task>("Task");
+    FactoryManager::ref().addFactory<ResourceSynchronization>("ResourceSynchronization");
+    FactoryManager::ref().addFactory<DashboardItem>("DashboardItem");
 
     SpiceManager::initialize();
     TransformationManager::initialize();
@@ -767,7 +740,6 @@ void OpenSpaceEngine::loadAssets() {
     _loadingScreen->setPhase(LoadingScreen::Phase::Construction);
     _loadingScreen->postMessage("Loading assets");
 
-    bool loading = true;
     while (true) {
         _loadingScreen->render();
         _assetManager->update();
@@ -783,16 +755,16 @@ void OpenSpaceEngine::loadAssets() {
             if (sync->isSyncing()) {
                 LoadingScreen::ProgressInfo progressInfo;
 
-                progressInfo.progress = [](const ResourceSynchronization* sync) {
-                    if (!sync->nTotalBytesIsKnown()) {
+                progressInfo.progress = [](const ResourceSynchronization* s) {
+                    if (!s->nTotalBytesIsKnown()) {
                         return 0.f;
                     }
-                    if (sync->nTotalBytes() == 0) {
+                    if (s->nTotalBytes() == 0) {
                         return 1.f;
                     }
                     return
-                        static_cast<float>(sync->nSynchronizedBytes()) /
-                        static_cast<float>(sync->nTotalBytes());
+                        static_cast<float>(s->nSynchronizedBytes()) /
+                        static_cast<float>(s->nTotalBytes());
                 }(sync);
 
                 _loadingScreen->updateItem(
@@ -828,7 +800,6 @@ void OpenSpaceEngine::loadAssets() {
             break;
         }
 
-        loading = false;
         auto it = allSyncs.begin();
         while (it != allSyncs.end()) {
             if ((*it)->isSyncing()) {
@@ -851,7 +822,6 @@ void OpenSpaceEngine::loadAssets() {
                     progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
-                loading = true;
                 _loadingScreen->updateItem(
                     (*it)->identifier(),
                     (*it)->name(),

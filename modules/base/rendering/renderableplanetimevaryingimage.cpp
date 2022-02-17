@@ -291,7 +291,7 @@ void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
         const double lastTriggerTime = _startTimes[_sourceFiles.size() - 1];
         const double sequenceDuration = lastTriggerTime - _startTimes[0];
         const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_sourceFiles.size() - 1.0));
+            static_cast<double>(_sourceFiles.size() - 1);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
 }
