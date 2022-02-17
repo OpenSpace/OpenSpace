@@ -1,0 +1,35 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+local PdbTest = {
+  Identifier = "PdbTest",
+  Renderable = {
+    Type = "RenderableMolecule",
+    PdbId = "1AON",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      },
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Path = "/Microcosmos/PDB/1AON"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(PdbTest)
+end)
+    
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(PdbTest)
+end)
+    
+asset.export(PdbTest)

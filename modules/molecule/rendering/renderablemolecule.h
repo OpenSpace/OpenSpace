@@ -30,17 +30,24 @@
 //#include <openspace/properties/scalar/floatproperty.h>
 //#include <openspace/properties/vector/vec3property.h>
 //#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 //#include <ghoul/opengl/uniformcache.h>
+
+
+#include <md_gl.h>
+#include <md_molecule.h>
+#include <md_trajectory.h>
 
 namespace openspace {
 
 struct RenderData;
+class HttpMemoryDownload;
 
 class RenderableMolecule : public Renderable {
 public:
     explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableMolecule() = default;
+    virtual ~RenderableMolecule();
 
     void initialize() override;
     void initializeGL() override;
@@ -52,16 +59,37 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct Result {
-        bool success;
+    enum class MoleculeType {
+        Unknown,
+        Pdb,
+        Gro,
     };
-    Result loadMoleculeFile();
-    Result loadTrajectoryFile();
 
-    std::string _moleculeFilename;
-    std::string _trajectoryFilename;
+    bool loadProteinPDB(std::string_view pdb_id);
+    bool loadMoleculeFile(std::string_view filename);
+    bool loadTrajectoryFile(std::string_view filename);
+
+    void initMolecule(std::string_view data, MoleculeType type);
+    void freeMolecule();
+
+    void initTrajectory(std::string_view filename);
+    void freeTrajectory();
+
+    std::unique_ptr<HttpMemoryDownload> _pdb_download;
+    double _pdb_download_progress;
+    double _frame;
+    md_gl_shaders_t _shaders;
+    md_gl_representation_t _draw_rep;
+    md_gl_molecule_t _draw_mol;
+
+    md_molecule_t   _molecule;
+    md_trajectory_i _trajectory;
+    MoleculeType _molecule_type;
+
+
+    properties::StringProperty _pdb_id;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
+#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
