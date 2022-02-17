@@ -112,6 +112,12 @@ private:
     glm::dquat easedSlerpRotation(double t) const;
 
     /**
+     * Compute the interpolated rotation quaternion using a method that is
+     * customized to look good for linear paths
+     */
+    glm::dquat linearPathRotation(double t) const;
+
+    /**
      * Compute the interpolated rotation quaternion using an approach that first
      * interpolates to look at the start node, and then the end node, before
      * interpolating to the end rotation

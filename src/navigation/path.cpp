@@ -223,8 +223,9 @@ CameraPose Path::interpolatedPose(double distance) const {
 glm::dquat Path::interpolateRotation(double t) const {
     switch (_type) {
         case Type::AvoidCollision:
-        case Type::Linear:
             return easedSlerpRotation(t);
+        case Type::Linear:
+            return linearPathRotation(t);
         case Type::ZoomOutOverview:
         case Type::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
@@ -237,6 +238,45 @@ glm::dquat Path::easedSlerpRotation(double t) const {
     double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);
     tScaled = ghoul::sineEaseInOut(tScaled);
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
+}
+
+glm::dquat Path::linearPathRotation(double t) const {
+    const double tHalf = 0.5;
+
+    const glm::dvec3 endNodePos = _end.node()->worldPosition();
+    const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+
+    if (t < tHalf) {
+        // Interpolate to look at target
+        const glm::dvec3 halfWayPosition = _curve->positionAt(tHalf);
+        const glm::dquat q = ghoul::lookAtQuaternion(halfWayPosition, endNodePos, endUp);
+
+        const double tScaled = ghoul::sineEaseInOut(t / tHalf);
+        return glm::slerp(_start.rotation(), q, tScaled);
+    }
+
+    // This distance is guaranteed to be strictly decreasing for linear paths
+    const double distanceToEnd = glm::distance(_prevPose.position, _end.position());
+
+    double closingUpDistance = 10.0 * _end.validBoundingSphere();
+    if (pathLength() < 2.0 * closingUpDistance) {
+        closingUpDistance = 0.2 * pathLength();
+    }
+
+    if (distanceToEnd < closingUpDistance) {
+        // Interpolate to target rotation
+        const double tScaled = ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
+
+        // Compute a position in front of the camera at the end orientation
+        const double inFrontDistance = glm::distance(_end.position(), endNodePos);
+        const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
+        const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
+        const glm::dvec3 lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
+        return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
+    }
+
+    // Keep looking at the end node
+    return ghoul::lookAtQuaternion(_prevPose.position, endNodePos, endUp);
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {
@@ -564,7 +604,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     try {
         return Path(startPoint, waypointToAdd, type, duration);
     }
-    catch (const PathCurve::InsufficientPrecisionError& e) {
+    catch (const PathCurve::InsufficientPrecisionError&) {
         // There wasn't enough precision to represent the full curve in world
         // coordinates. For now, use a linear path instead. It uses another
         // method of interpolation that isn't as sensitive to these kinds of problems
