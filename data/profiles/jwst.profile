@@ -69,7 +69,7 @@
       "gui_path": "/JWST",
       "identifier": "profile.toggle.jwst_trails",
       "is_local": false,
-      "name": "Toggle JWST trails",
+      "name": "Toggle JWST trail",
       "script": "local list = {'Scene.JWSTTrailLaunch.Renderable.Enabled', 'Scene.JWSTTrailOrbit.Renderable.Enabled'}; for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)); end"
     }
   ],
@@ -85,6 +85,7 @@
     "scene/solarsystem/missions/jwst/trail",
     "scene/solarsystem/missions/jwst/hudf",
     "scene/solarsystem/missions/jwst/timelapse",
+    "scene/solarsystem/missions/jwst/toggle_trail",
     "scene/digitaluniverse/hdf"
   ],
   "camera": {
@@ -292,6 +293,11 @@
       "name": "Scene.JWSTFov.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "false"
+    },
+    {
+      "name": "Scene.JWSTModel.ApproachFactor",
+      "type": "setPropertyValueSingle",
+      "value": "900"
     }
   ],
   "time": {

@@ -693,6 +693,8 @@ void RenderableModel::update(const UpdateData& data) {
         glm::compMax(data.modelTransform.scale)
     );
 
+    setInteractionSphere(_boundingSphere);
+
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
         double now = data.time.j2000Seconds();
