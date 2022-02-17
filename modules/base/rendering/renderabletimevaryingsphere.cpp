@@ -349,14 +349,14 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDisable(GL_CULL_FACE);
     }
 
-    if (renderBin() == Renderable::RenderBin::PreDeferredTransparent) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
     }
 
     _sphere->render();
 
-    if (renderBin() == Renderable::RenderBin::PreDeferredTransparent) {
+    if (_renderBin == Renderable::RenderBin::PreDeferredTransparent) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(true);
     }

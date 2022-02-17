@@ -61,9 +61,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo = {
         "RenderBinMode",
         "Render Bin Mode",
-        "This value specifies if the plane should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step..",
-        openspace::properties::Property::Visibility::Hidden
+        "This value specifies if the renderable should be rendered in the Background,"
+        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {
@@ -90,9 +90,7 @@ namespace {
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
-        std::optional<RenderBinMode> renderBinMode [[codegen::key("RenderBinMode")]];
-
-
+        std::optional<RenderBinMode> renderBinMode;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -164,11 +162,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
 
-    //only used by a few classes such as RenderableTrail and RenderableSphere
+    // only used by a few classes such as RenderableTrail and RenderableSphere
     if (p.renderBinMode.has_value()) {
         setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
     }
-
 }
 
 void Renderable::initialize() {}

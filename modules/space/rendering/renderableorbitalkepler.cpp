@@ -382,7 +382,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.lineWidth = p.lineWidth.value_or(2.f);
     addPropertySubOwner(_appearance);
 
-    _startRenderIdx = p.startRenderIdx.value_or(0u);
+    _startRenderIdx = p.startRenderIdx.value_or(0);
 
     _sizeRender = p.renderSize.value_or(0u);
 
