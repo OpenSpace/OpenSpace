@@ -40,6 +40,14 @@
 #include <md_frame_cache.h>
 #include <core/md_allocator.h>
 
+constexpr const char* shader_output_snippet = R"(
+layout(location = 0) out vec4 out_color;
+
+void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
+   out_color  = color;
+}
+)";
+
 namespace {
     openspace::properties::Property::PropertyInfo pdb_id_info = {
         "pdb_id",
@@ -80,7 +88,7 @@ void RenderableMolecule::initialize() {
 void RenderableMolecule::initializeGL() {
     ZoneScoped
     md_gl_initialize();
-    md_gl_shaders_init(&_shaders, nullptr);
+    md_gl_shaders_init(&_shaders, shader_output_snippet);
 }
 
 void RenderableMolecule::deinitializeGL() {
@@ -110,7 +118,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks& tasks) {
         double extra_scale = 1000;
 
         glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation - glm::dvec3(_center)) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale) * extra_scale);
         glm::mat4 model_matrix = glm::mat4(modelTransform);
@@ -146,8 +154,8 @@ void RenderableMolecule::initMolecule(std::string_view data, MoleculeType type) 
     md_pdb_molecule_api()->init_from_str(&_molecule, { data.data(), static_cast<int64_t>(data.size()) }, default_allocator);
 
     if (_molecule.atom.count > 0) {
-        glm::vec3 min_aabb{ FLT_MAX };
-        glm::vec3 max_aabb{ FLT_MIN };
+        glm::vec3 min_aabb {FLT_MAX};
+        glm::vec3 max_aabb {-FLT_MAX};
 
         for (int64_t i = 0; i < _molecule.atom.count; ++i) {
             glm::vec3 p {_molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i]};
@@ -155,8 +163,9 @@ void RenderableMolecule::initMolecule(std::string_view data, MoleculeType type) 
             max_aabb = glm::max(max_aabb, p);
         }
 
-        glm::vec3 ext = glm::max(glm::abs(min_aabb), glm::abs(max_aabb));
-        float radius = glm::compMax(ext);
+        _extent = max_aabb - min_aabb;
+        _center = (min_aabb + max_aabb) * 0.5f;
+        float radius = glm::compMax(_extent) * 0.5f;
     
         setBoundingSphere(radius);
         setInteractionSphere(radius);

@@ -86,6 +86,8 @@ private:
     md_trajectory_i _trajectory;
     MoleculeType _molecule_type;
 
+    glm::vec3 _center;
+    glm::vec3 _extent;
 
     properties::StringProperty _pdb_id;
 };
