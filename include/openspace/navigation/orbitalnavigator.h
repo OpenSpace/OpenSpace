@@ -155,16 +155,6 @@ private:
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
 
-    struct LinearFlight : public properties::PropertyOwner {
-        LinearFlight();
-
-        properties::BoolProperty apply;
-        properties::FloatProperty destinationDistance;
-        properties::DoubleProperty destinationFactor;
-        properties::FloatProperty velocitySensitivity;
-    };
-    LinearFlight _linearFlight;
-
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
@@ -290,20 +280,6 @@ private:
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
         const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
-
-    /**
-    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the
-    * focusLimit. The velocity of the zooming depend on distFromCameraToFocus and the
-    * final frame where the camera stops moving depends on the distance set in the
-    * variable focusLimit. The bool determines whether to move/fly towards the focus node
-    * or away from it.
-    *
-    * \return a new position of the camera, closer to the focusLimit than the previous
-    *         position
-    */
-    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
-        double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
-        double destination, double deltaTime) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor
