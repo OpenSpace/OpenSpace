@@ -326,6 +326,7 @@ int flyToGeo(lua_State* L) {
     instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
+    instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     // Handle the two optional arguments: duration and use target's up direction argument
     // The user can either provide both, or one of them
