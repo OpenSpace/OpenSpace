@@ -81,9 +81,12 @@ int flyTo(lua_State* L) {
         return ghoul::lua::luaError(L, "Duration cannot be specified twice");
     }
 
-
     if (!sceneGraphNode(nodeIdentifier)) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
+    }
+
+    if (nodeIdentifier == global::navigationHandler->anchorNode()->identifier()) {
+        return ghoul::lua::luaError(L, "Already at the specified target");
     }
 
     ghoul::Dictionary insDict;
