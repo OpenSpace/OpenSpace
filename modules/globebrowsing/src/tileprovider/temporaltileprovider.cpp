@@ -44,17 +44,8 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* KeyBasePath = "BasePath";
-
     constexpr const char* TimePlaceholder = "${OpenSpaceTimeId}";
     
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
-        "FilePath",
-        "File Path",
-        "This is the path to the XML configuration file that describes the temporal tile "
-        "information."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use Fixed Time",
@@ -450,8 +441,8 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
                     _folder.files.cbegin(),
                     _folder.files.cend(),
                     time,
-                    [](const std::pair<double, std::string>& p, double time) {
-                        return p.first < time;
+                    [](const std::pair<double, std::string>& p, double sec) {
+                        return p.first < sec;
                     }
                 );
                 return std::string_view(it->second);
@@ -721,9 +712,10 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile prev = t1->tile(tileIndex);
     Tile next = t2->tile(tileIndex);
     // the tile before and the tile after the interpolation interval are loaded so the
-    // interpolation goes smoother
-    Tile prevprev = before->tile(tileIndex);
-    Tile nextnext = future->tile(tileIndex);
+    // interpolation goes smoother. It is on purpose that we are not actually storing the
+    // return tile here, we just want to trigger the load already
+    before->tile(tileIndex);
+    future->tile(tileIndex);
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {

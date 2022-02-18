@@ -38,8 +38,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModelProjection";
-
     constexpr const char* DestinationFrame = "GALACTIC";
 
     constexpr const std::array<const char*, 7> MainUniformNames = {

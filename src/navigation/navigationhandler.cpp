@@ -55,8 +55,6 @@ namespace {
 
     constexpr const char* _loggerCat = "NavigationHandler";
 
-    const double Epsilon = 1E-7;
-
     using namespace openspace;
     constexpr const properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
         "DisableMouseInputs",

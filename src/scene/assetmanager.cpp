@@ -629,8 +629,7 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 exportName = identifier;
                 targetLocation = 1;
             }
-
-            if (n == 2) {
+            else if (n == 2) {
                 exportName = ghoul::lua::value<std::string>(
                     L,
                     1,
@@ -653,6 +652,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                         identifier = d.value<std::string>("Identifier");
                     }
                 }
+            }
+            else {
+                throw ghoul::MissingCaseException();
             }
 
 

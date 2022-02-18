@@ -36,8 +36,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderablePrism";
-
     constexpr const std::array<const char*, 2> UniformNames = {
         "modelViewProjectionTransform", "vs_color"
     };

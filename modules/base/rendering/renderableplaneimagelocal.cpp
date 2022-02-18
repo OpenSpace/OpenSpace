@@ -45,27 +45,9 @@ namespace {
         "that is applied to this plane. This image has to be square."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-        "RenderableType",
-        "RenderableType",
-        "This value specifies if the plane should be rendered in the Background,"
-        "Opaque, Transparent, or Overlay rendering step."
-    };
-
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
-
-        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
-            Background,
-            Opaque,
-            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
-            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
-            Overlay
-        };
-
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<RenderType> renderType [[codegen::key("RenderableType")]];
 
         // If this value is set to 'true', the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
@@ -108,13 +90,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback([this]() { _textureIsDirty = true; });
-
-    if (p.renderType.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Opaque);
-    }
 
     _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
     if (_isLoadingLazily) {

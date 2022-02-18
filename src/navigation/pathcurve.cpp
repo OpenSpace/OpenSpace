@@ -39,6 +39,7 @@ namespace {
 
     constexpr const double LengthEpsilon =
         100.0 * std::numeric_limits<double>::epsilon();
+
 } // namespace
 
 namespace openspace::interaction {
