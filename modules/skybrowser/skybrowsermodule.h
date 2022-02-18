@@ -75,6 +75,7 @@ public:
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler();
     std::string selectedBrowserId();
     std::string selectedTargetId();
+    glm::ivec3 highlight();
 
     // Setters
     void set3dBrowser(const std::string& id);

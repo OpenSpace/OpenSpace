@@ -322,52 +322,54 @@ SkyBrowserModule::SkyBrowserModule()
         }
     );
 
-    global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {    
-            
-            if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
+    if (global::windowDelegate->isMaster()) {
+        global::callback::mousePosition->emplace_back(
+            [&](double x, double y) {
+
+                if (!_isCameraInSolarSystem || !_allowMouseInteraction) {
+                    return false;
+                }
+
+                glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
+                _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
+                glm::vec2 translation = _mousePosition - _startMousePosition;
+
+                switch (_interactionMode) {
+                case MouseInteraction::Hover:
+                    setSelectedObject();
+
+                    break;
+
+                case MouseInteraction::Drag:
+                    _mouseOnPair->translateSelected(_startDragPosition, translation);
+                    break;
+
+                case MouseInteraction::FineTune:
+                    _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
+                    break;
+
+                default:
+                    setSelectedObject();
+                    break;
+                }
                 return false;
             }
+        );
 
-            glm::vec2 pixel{ static_cast<float>(x), static_cast<float>(y) };
-            _mousePosition = skybrowser::pixelToScreenSpace2d(pixel);
-            glm::vec2 translation = _mousePosition - _startMousePosition;
+        global::callback::mouseScrollWheel->emplace_back(
+            [&](double, double scroll) -> bool {
 
-            switch (_interactionMode) {
-            case MouseInteraction::Hover:
-                setSelectedObject();
-                break;
-
-            case MouseInteraction::Drag:
-                _mouseOnPair->translateSelected(_startDragPosition, translation);
-                break;
-
-            case MouseInteraction::FineTune:
-                _mouseOnPair->fineTuneTarget(_startDragPosition, translation);
-                break;
-
-            default:
-                setSelectedObject();
-                break;
+                if (!_isCameraInSolarSystem || !_mouseOnPair || !_allowMouseInteraction) {
+                    return false;
+                }
+                // If mouse is on browser or target, apply zoom
+                _mouseOnPair->setVerticalFovWithScroll(
+                    static_cast<float>(scroll)
+                );
+                return true;
             }
-            return false;
-        }
-    );
-
-    global::callback::mouseScrollWheel->emplace_back(
-        [&](double, double scroll) -> bool {
-            
-            if (!_isCameraInSolarSystem || !_mouseOnPair || !_allowMouseInteraction) {
-                return false;
-            }
-            // If mouse is on browser or target, apply zoom
-            _mouseOnPair->setVerticalFovWithScroll(
-                static_cast<float>(scroll)
-            );
-            return true;
-        }
-    );
-
+        );
+    }
 
     global::callback::preSync->emplace_back([this]() {
 
@@ -650,6 +652,10 @@ SceneGraphNode* SkyBrowserModule::get3dBrowserNode() {
 
 RenderableSkyBrowser* SkyBrowserModule::get3dBrowser(const std::string& id)
 {  
+    if (!_browser3dNode || !_browser3d) {
+        return nullptr;
+    }
+        
     if (_browser3dNode->identifier() == id || _browser3d->identifier() == id) {
         return _browser3d;
     }
@@ -791,6 +797,11 @@ std::string SkyBrowserModule::selectedTargetId()
     else {
         return "";
     }
+}
+
+glm::ivec3 SkyBrowserModule::highlight()
+{
+    return _highlightAddition;
 }
 
 bool SkyBrowserModule::isCameraInSolarSystem() {

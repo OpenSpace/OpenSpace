@@ -45,16 +45,23 @@ namespace {
 #include "ScreenSpaceSkyBrowser_codegen.cpp"
 } // namespace
 
-glm::ivec3 randomBorderColor() {
+glm::ivec3 randomBorderColor(glm::ivec3 highlight) {
     // Generate a random border color with sufficient lightness and a n
     std::random_device rd;
     // Hue is in the unit degrees [0, 360]
     std::uniform_real_distribution<float> hue(0.f, 360.f);
+   
     // Value in saturation are in the unit percent [0,1]
-    float value = 0.95f; // Brightness
+    float value = 0.9f; // Brightness
     float saturation = 0.5f;
-    glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-    glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+    glm::ivec3 rgbColor;
+    glm::ivec3 highlighted;
+    do {
+        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
+        rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+        highlighted = rgbColor + highlight;
+    } while (highlighted.x < 255 && highlighted.y < 255 && highlighted.z < 255);
+   
     return rgbColor;
 }
 
@@ -95,7 +102,11 @@ namespace openspace {
         glm::vec2 screenPosition = _cartesianPosition.value();
         _cartesianPosition.setValue(glm::vec3(screenPosition, skybrowser::ScreenSpaceZ)); 
 
-        _borderColor = randomBorderColor();
+        if (global::windowDelegate->isMaster()) {
+            SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+            _borderColor = randomBorderColor(module->highlight());
+
+        } 
     }
 
     ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {

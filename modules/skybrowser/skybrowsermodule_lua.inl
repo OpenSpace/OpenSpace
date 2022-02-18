@@ -4,8 +4,9 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -152,6 +153,24 @@ int startSetup(lua_State* L) {
     // This is called when the sky_browser website is connected to OpenSpace
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::startSetup");
 
+    // Set all border colors to the border color in the master node
+    if (global::windowDelegate->isMaster()) {
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->getPairs();
+        for (std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+            std::string id = pair->browserId();
+            glm::ivec3 color = pair->borderColor();
+            openspace::global::scriptEngine->queueScript(
+                "openspace.skybrowser.setBorderColor('" + id + "'," +
+                std::to_string(color.r) + "," +
+                std::to_string(color.g) + "," +
+                std::to_string(color.b) + "" +
+                ");",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+    }
+   
     // To ensure each node in a cluster calls its own instance of the wwt application
     // Do not send this script to the other nodes
     openspace::global::scriptEngine->queueScript(
