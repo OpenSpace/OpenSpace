@@ -85,10 +85,6 @@ int flyTo(lua_State* L) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
 
-    if (nodeIdentifier == global::navigationHandler->anchorNode()->identifier()) {
-        return ghoul::lua::luaError(L, "Already at the specified target");
-    }
-
     ghoul::Dictionary insDict;
     insDict.setValue("TargetType", std::string("Node"));
     insDict.setValue("Target", nodeIdentifier);
