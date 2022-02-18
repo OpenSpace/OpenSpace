@@ -34,7 +34,6 @@ set(HEADER_FILES
     include/wwtcommunicator.h
     include/browser.h
     include/screenspaceskybrowser.h
-    include/renderableskybrowser.h
     ext/tinyxml2/tinyxml2.h
     
 )
@@ -47,7 +46,6 @@ set(SOURCE_FILES
     src/screenspaceskytarget.cpp
     src/wwtdatahandler.cpp
     src/utility.cpp
-    src/renderableskybrowser.cpp
     src/targetbrowserpair.cpp
     src/wwtcommunicator.cpp
     src/browser.cpp

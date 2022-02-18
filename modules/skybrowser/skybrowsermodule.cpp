@@ -25,7 +25,6 @@
 
 #include <modules/skybrowser/skybrowsermodule.h>
 
-#include <modules/skybrowser/include/renderableskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
@@ -173,12 +172,6 @@ namespace openspace {
                 "Takes in identifier to a sky browser or target and removes them."
             },
             {
-                "place3dSkyBrowser",
-                &skybrowser::luascriptfunctions::place3dSkyBrowser,
-                "int",
-                "Takes an index to an image and places the 3D sky browser in that place. "
-            }, 
-            {
                 "setOpacityOfImageLayer",
                 &skybrowser::luascriptfunctions::setOpacityOfImageLayer,
                 "string, int, double",
@@ -200,20 +193,6 @@ namespace openspace {
                 "to the AAS WorldWide Telescope application by sending it messages. And "
                 "that the target matches its appearance to its corresponding browser."
             },  
-           {
-                "add3dBrowserToSkyBrowserModule",
-                &skybrowser::luascriptfunctions::add3dBrowserToSkyBrowserModule,
-                "string",
-                "Takes the identifier to the 3D sky browser and adds it to the sky "
-                "browser module."
-            },  
-            {
-                "set3dSelectedImagesAs2dSelection",
-                &skybrowser::luascriptfunctions::set3dSelectedImagesAs2dSelection,
-                "string",
-                "Takes an identifier to a sky browser and adds the selected images in "
-                "that browser to the 3D sky browser."
-            },   
             {
                 "centerTargetOnScreen",
                 &skybrowser::luascriptfunctions::centerTargetOnScreen,
@@ -385,10 +364,6 @@ SkyBrowserModule::SkyBrowserModule()
             // Camera moved into the solar system
             if (!_isCameraInSolarSystem) {
                 _goal = Transparency::Transparent;
-                // Select the 3D browser when moving out of the solar system
-                if (_browser3dNode) {
-                    _selectedBrowser = _browser3dNode->renderable()->identifier();
-                }
             }
             else {
                 _goal = Transparency::Opaque;
@@ -422,20 +397,16 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    // register ScreenSpaceBrowser
+    // Register ScreenSpaceRenderable
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
 
-    // register ScreenSpaceTarget
+    // Register ScreenSpaceSkyTarget
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
 
-    // register ScreenSpaceTarget
+    // Register ScreenSpaceSkyBrowser
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 
-    // Register Renderable Skybrowser
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-    fRenderable->registerClass<RenderableSkyBrowser>("RenderableSkyBrowser");
     // Create data handler dynamically to avoid the linking error that
     // came up when including the include file in the module header file
     _dataHandler = std::make_unique<WwtDataHandler>();
@@ -508,16 +479,6 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     _mouseOnPair = nullptr;
 }
 
-void SkyBrowserModule::set3dBrowser(const std::string& id)
-{
-    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(id);
-    if (node) {
-        // Add to module
-        _browser3dNode = node;
-        _browser3d = dynamic_cast<RenderableSkyBrowser*>(_browser3dNode->renderable());
-    }
-}
-
 void SkyBrowserModule::lookAtTarget(std::string id)
 {
     TargetBrowserPair* pair = getPair(id);
@@ -562,30 +523,14 @@ void SkyBrowserModule::disableHoverCircle()
     }
 }
 
-void SkyBrowserModule::loadImages(const std::string& root, const std::string& directory, 
-                                 std::vector<std::filesystem::path>& speckFiles)
+void SkyBrowserModule::loadImages(const std::string& root, const std::string& directory)
 {
-    _dataHandler->loadImages(root, directory, speckFiles);
+    _dataHandler->loadImages(root, directory);
 }
 
 int SkyBrowserModule::nLoadedImages()
 {
     return _dataHandler->nLoadedImages();
-}
-
-void SkyBrowserModule::add2dSelectedImagesTo3d(const std::string& pairId)
-{
-    TargetBrowserPair* pair = getPair(pairId);
-
-    if (pair && get3dBrowser()) {
-
-        // Copy 2D selection of images to 3D browser
-        const std::deque<int> images = pair->getSelectedImages();
-        std::for_each(std::begin(images), std::end(images), [&](const int i) {
-            const ImageData& image = _dataHandler->getImage(i);
-            get3dBrowser()->displayImage(image.imageUrl, i);
-            });
-    }
 }
 
 void SkyBrowserModule::handleMouseClick(const MouseButton& button)
@@ -643,66 +588,6 @@ TargetBrowserPair* SkyBrowserModule::getPair(const std::string& id)
     }
     else {
         return it->get();
-    }
-}
-
-SceneGraphNode* SkyBrowserModule::get3dBrowserNode() {
-    return _browser3dNode;
-}
-
-RenderableSkyBrowser* SkyBrowserModule::get3dBrowser(const std::string& id)
-{  
-    if (!_browser3dNode || !_browser3d) {
-        return nullptr;
-    }
-        
-    if (_browser3dNode->identifier() == id || _browser3d->identifier() == id) {
-        return _browser3d;
-    }
-    else {
-        return nullptr;
-    }
-    
-}
-
-RenderableSkyBrowser* SkyBrowserModule::get3dBrowser()
-{
-    return _browser3d;
-}
-
-void SkyBrowserModule::lookAt3dBrowser() {
-    if (!_browser3dNode) {
-        return;
-    }
-    std::string id = _browser3dNode->identifier();
-    // Target camera on the 3D sky browser
-    openspace::global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator."
-        "RetargetAnchor\", nil)",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    openspace::global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator."
-        "Anchor\", '" + id + "')",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    openspace::global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator."
-        "Aim\", '')",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-}
-
-void SkyBrowserModule::place3dBrowser(const ImageData& image, const int i)
-{
-    // If the image has a 3D position, add it to the scene graph
-    if (image.has3dCoords && _browser3d) {
-        _browser3d->displayImage(image.imageUrl, i);
-        _browser3d->placeAt3dPosition(image.position3d, image.fov, 
-            _browser3dNode->identifier());
-    }
-    else {
-        LINFO("Image has no 3D coordinate!");
     }
 }
 
@@ -780,7 +665,7 @@ void SkyBrowserModule::incrementallyAnimateTargets(double deltaTime)
 }
 
 void SkyBrowserModule::setSelectedBrowser(const std::string& id) {
-    if (getPair(id) || (_browser3dNode && _browser3dNode->identifier() == id)) {
+    if (getPair(id)) {
         _selectedBrowser = id;
     }
 }

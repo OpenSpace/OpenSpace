@@ -77,20 +77,6 @@ namespace openspace {
         return str;
     }
 
-    std::unordered_map<std::string, glm::dvec3> 
-    loadSpeckData(const speck::Dataset& dataset) {
-        // Create map
-        std::unordered_map<std::string, glm::dvec3> positions3d;
-
-        for (speck::Dataset::Entry entry : dataset.entries) {
-            if (entry.comment.has_value()) {
-                std::string name = createSearchableString(entry.comment.value());
-                positions3d[name] = std::move(entry.position);
-            }
-        }
-        return positions3d;
-    }
-
     tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, 
                                              const std::string& name) {
         while (node && node->Name() != name) {
@@ -228,16 +214,8 @@ namespace openspace {
         _xmls.clear();
     }
 
-    void WwtDataHandler::loadImages(const std::string& root, const std::string& directory,
-                                    std::vector<std::filesystem::path>& speckFiles) {
-
-        // Load 3D data from speck files
-        for (std::filesystem::path& path : speckFiles) {
-            speck::Dataset speck = speck::data::loadFileWithCache(path);
-            _3dPositions = loadSpeckData(speck);
-            LINFO("Loaded speck file with " + std::to_string(_3dPositions.size()) +
-                  " entries!");
-        }
+    void WwtDataHandler::loadImages(const std::string& root, 
+                                    const std::string& directory) {
 
         // Collect the wtml files, either by reading from disc or from a url
         if (directoryExists(directory)) {
@@ -271,9 +249,6 @@ namespace openspace {
 
         LINFO("Loaded " + std::to_string(_images.size()) + " WorldWide Telescope "
               "images.");
-
-        LINFO(std::to_string(_nMatched3dPositions) + " 3D positions were matched in "
-            "the speck files!");
     }
 
     int WwtDataHandler::nLoadedImages() const
@@ -325,7 +300,7 @@ namespace openspace {
 
         // Collect equatorial coordinates. All-sky surveys do not have this kind of 
         // coordinate
-        const bool hasCelestialCoords = hasAttribute(node, wwt::RA) &&
+        bool hasCelestialCoords = hasAttribute(node, wwt::RA) &&
             hasAttribute(node, wwt::Dec);
         glm::dvec2 equatorialSpherical{ 0.0 };
         glm::dvec3 equatorialCartesian{ 0.0 };
@@ -347,17 +322,6 @@ namespace openspace {
             fov = std::stof(attribute(node, wwt::ZoomLevel)) / 6.0;
         }
 
-        // Find 3D position by matching with speck file
-        bool has3dCoords{ false };
-        glm::dvec3 position3d{ 0.0 };
-        auto it = _3dPositions.find(createSearchableString(name));
-        if (it != _3dPositions.end()) {
-            position3d = it->second;
-            has3dCoords = true;
-            _nMatched3dPositions++;
-            LINFO("3d position was found for " + name);
-        }
-
         ImageData image = {
             name,
             thumbnailUrl,
@@ -366,11 +330,9 @@ namespace openspace {
             creditsUrl,
             collection,
             hasCelestialCoords,
-            has3dCoords,
             fov,
             equatorialSpherical,
             equatorialCartesian,
-            position3d
         };
 
         _images.push_back(image);

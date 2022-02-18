@@ -34,7 +34,6 @@
 
 namespace openspace {
 
-class RenderableSkyBrowser;
 class ScreenSpaceImageLocal;
 class WwtDataHandler;
 class TargetBrowserPair;
@@ -69,16 +68,12 @@ public:
     std::vector<std::unique_ptr<TargetBrowserPair>>& getPairs();
     int nPairs();
     TargetBrowserPair* getPair(const std::string& id);
-    SceneGraphNode* get3dBrowserNode();
-    RenderableSkyBrowser* get3dBrowser();
-    RenderableSkyBrowser* get3dBrowser(const std::string& id);
     const std::unique_ptr<WwtDataHandler>& getWwtDataHandler();
     std::string selectedBrowserId();
     std::string selectedTargetId();
     glm::ivec3 highlight();
 
     // Setters
-    void set3dBrowser(const std::string& id);
     void setSelectedBrowser(const std::string& id);
     void setSelectedObject(); // Manage mouse interactions
     void setHoverCircle(ScreenSpaceImageLocal* circle);
@@ -89,8 +84,6 @@ public:
     void incrementallyRotateCamera(double deltaTime);
     void incrementallyFadeBrowserTargets(Transparency goal, float deltaTime);
     void incrementallyAnimateTargets(double deltaTime);
-    void lookAt3dBrowser();
-    void place3dBrowser(const ImageData& image, const int i);
    
     // Boolean functions
     bool isCameraInSolarSystem();
@@ -106,10 +99,8 @@ public:
     void disableHoverCircle();
     
     // Image collection handling
-    void loadImages(const std::string& root, const std::string& directory, 
-                   std::vector<std::filesystem::path>& speckFiles);
+    void loadImages(const std::string& root, const std::string& directory);
     int nLoadedImages();
-    void add2dSelectedImagesTo3d(const std::string& pairId);
 
     // Mouse interaction
     void handleMouseClick(const MouseButton& button);
@@ -130,9 +121,7 @@ private:
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
     TargetBrowserPair* _mouseOnPair{ nullptr };
     ScreenSpaceImageLocal* _hoverCircle{ nullptr };
-    SceneGraphNode* _browser3dNode{ nullptr }; // Scene graph node is used for positioning
-    RenderableSkyBrowser* _browser3d{ nullptr };
-    std::string _selectedBrowser{ "" }; // Currently selected browser (2D or 3D)
+    std::string _selectedBrowser{ "" }; // Currently selected browser
 
     // Fading
     Transparency _goal;

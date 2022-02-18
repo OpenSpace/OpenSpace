@@ -36,11 +36,9 @@ namespace openspace {
         std::string creditsUrl{ wwt::Undefined };
         std::string collection{ wwt::Undefined };
         bool hasCelestialCoords{ false };
-        bool has3dCoords{ false };
         float fov{ 0.f };
         glm::dvec2 equatorialSpherical{ 0.0 };
         glm::dvec3 equatorialCartesian{ 0.0 };
-        glm::dvec3 position3d{ 0.0 };
 	};
 
 	class WwtDataHandler {
@@ -49,8 +47,7 @@ namespace openspace {
 		WwtDataHandler() = default;
 		~WwtDataHandler();
 
-        void loadImages(const std::string& root, const std::string& directory, 
-                       std::vector<std::filesystem::path>& speckFiles);
+        void loadImages(const std::string& root, const std::string& directory);
         int nLoadedImages() const;
         const ImageData& getImage(int i) const;
 
@@ -61,10 +58,7 @@ namespace openspace {
         // Images
 		std::vector<ImageData> _images;
 		std::vector<tinyxml2::XMLDocument*> _xmls;
-        int _nMatched3dPositions = 0;
 
-		// 3D position data loaded from speck files
-		std::unordered_map<std::string, glm::dvec3> _3dPositions;
 	};
 }
 
