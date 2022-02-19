@@ -36,7 +36,6 @@ uniform vec3 betaRayleigh;
 uniform float HO;
 uniform float HM;
 uniform vec3 betaMieScattering;
-uniform bool ozoneLayerEnabled;
 uniform int SAMPLES_MU;
 uniform int SAMPLES_MU_S;
 uniform int SAMPLES_NU;
