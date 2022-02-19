@@ -128,7 +128,7 @@ private:
 
     void calculateTransmittance();
     GLuint calculateDeltaE();
-    std::pair<GLuint, GLuint> calculateDeltaS();
+    GLuint calculateDeltaS();
     void calculateIrradiance();
     void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie);
     void calculateDeltaJ(int scatteringOrder,

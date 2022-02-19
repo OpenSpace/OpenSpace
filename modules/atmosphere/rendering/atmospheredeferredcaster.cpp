@@ -309,16 +309,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         prg.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
         prg.setUniform(_uniformCache.Rt, _atmosphereRadius);
         prg.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
-        //prg.setUniform(_uniformCache.HR, _rayleighHeightScale);
-        //prg.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
-        //prg.setUniform(_uniformCache.HM, _mieHeightScale);
-        //prg.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
         prg.setUniform(_uniformCache.mieG, _miePhaseConstant);
         prg.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
-        //prg.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
-        //prg.setUniform(_uniformCache.oxygenAbsLayerEnabled, _oxygenEnabled);
-        //prg.setUniform(_uniformCache.HO, _oxygenHeightScale);
-        //prg.setUniform(_uniformCache.betaOzoneExtinction, _ozoneAbsCrossSection);
         prg.setUniform(_uniformCache.SAMPLES_R, _rSamples);
         prg.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
         prg.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
@@ -676,13 +668,12 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     return deltaE;
 }
 
-std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
+GLuint AtmosphereDeferredcaster::calculateDeltaS() {
     ZoneScoped
 
     GLuint deltaSRayleigh = createTexture(_textureSize, "DeltaS Rayleigh", 3);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, deltaSRayleigh, 0);
-    GLuint deltaSMie = createTexture(_textureSize, "DeltaS Mie", 3);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, deltaSMie, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _deltaSMieTableTexture, 0);
     GLenum colorBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, colorBuffers);
     glViewport(0, 0, _textureSize.x, _textureSize.y);
@@ -732,7 +723,7 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     glDrawBuffers(1, drawBuffers);
 
     program->deactivate();
-    return { deltaSRayleigh, deltaSMie };
+    return deltaSRayleigh;
 }
 
 void AtmosphereDeferredcaster::calculateIrradiance() {
@@ -1122,13 +1113,13 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     GLuint deltaETable = calculateDeltaE();
 
     // line 3 in algorithm 4.1
-    auto [deltaSRayleighTable, deltaSMieTable] = calculateDeltaS();
+    GLuint deltaSRayleighTable = calculateDeltaS();
 
     // line 4 in algorithm 4.1
     calculateIrradiance();
 
     // line 5 in algorithm 4.1
-    calculateInscattering(deltaSRayleighTable, deltaSMieTable);
+    calculateInscattering(deltaSRayleighTable, _deltaSMieTableTexture);
 
     GLuint deltaJTable = createTexture(_textureSize, "DeltaJ", 3);
 
@@ -1141,7 +1132,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             deltaJTable,
             deltaETable,
             deltaSRayleighTable,
-            deltaSMieTable
+            _deltaSMieTableTexture
         );
 
         // line 8 in algorithm 4.1
@@ -1150,7 +1141,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             *irradianceSupTermsProgram,
             deltaETable,
             deltaSRayleighTable,
-            deltaSMieTable
+            _deltaSMieTableTexture
         );
 
         // line 9 in algorithm 4.1
@@ -1187,7 +1178,6 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
     glDeleteTextures(1, &deltaETable);
     glDeleteTextures(1, &deltaSRayleighTable);
-    glDeleteTextures(1, &deltaSMieTable);
     glDeleteTextures(1, &deltaJTable);
 
     // Restores system state
